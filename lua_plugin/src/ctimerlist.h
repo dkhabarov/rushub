@@ -21,9 +21,11 @@
 #define CTIMERLIST_H
 
 #include "clist.h"
+#include <string>
 
 class cLua;
 
+using namespace std;
 namespace nLua {
 
 class cLuaInterpreter;
@@ -33,7 +35,7 @@ class cTimer {
 private:
 
   int miTime, miInterval;
-  const char * msFunc;
+  string msFunc;
 
 public:
 

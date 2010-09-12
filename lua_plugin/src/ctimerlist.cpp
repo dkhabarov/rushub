@@ -42,7 +42,7 @@ cTimer::~cTimer() {
 
 void cTimer::Check(int iTime) {
   if(abs(iTime - miTime) >= miInterval) {
-    mScript->Timer(miId, msFunc);
+    mScript->Timer(miId, msFunc.c_str());
     miTime = iTime;
   }
 }
