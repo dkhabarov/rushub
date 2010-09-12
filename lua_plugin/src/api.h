@@ -56,11 +56,16 @@ typedef enum
   eUV_bIpList
 } tUserValue; /** tUserValue */
 
+typedef struct {
+  short isExist;
+} cConfig;
   
 
-int UserTostring(lua_State *L);
+int Tostring(lua_State *L);
 int UserIndex(lua_State *L);
 int UserNewindex(lua_State *L);
+int ConfigIndex(lua_State *L);
+int ConfigNewindex(lua_State *L);
 
 void LogError(const char *sMsg = NULL);
 void CopyValue(lua_State *From, lua_State *To, int iPos);

@@ -101,6 +101,13 @@ int cLuaInterpreter::Start()
 
   lua_setglobal(mL, "Core");
 
+  CreateConfigMT();
+  cConfig * Config = (cConfig*)lua_newuserdata(mL, sizeof(cConfig));
+  Config->isExist = 1;
+  luaL_getmetatable(mL, MT_CONFIG);
+  lua_setmetatable(mL, -2);
+  lua_setglobal(mL, "Config");
+
   cLuaInterpreter * Old = cLua::mCurLua->mCurScript;
   cLua::mCurLua->mCurScript = this;
   #ifdef HAVE_LUA_5_1
@@ -280,7 +287,32 @@ void cLuaInterpreter::CreateUserMT() {
 
   lua_pushliteral(mL, "__tostring");
   lua_pushstring(mL, MT_USER_CONN);
-  lua_pushcclosure(mL, UserTostring, 1);
+  lua_pushcclosure(mL, Tostring, 1);
+  lua_settable(mL, -3);
+
+  lua_pushliteral(mL, "__metatable");
+  lua_pushliteral(mL, "You're not allowed to get this metatable");
+  lua_settable(mL, -3);
+
+  lua_settop(mL, 0);
+}
+
+void cLuaInterpreter::CreateConfigMT() {
+  if(!luaL_newmetatable(mL, MT_CONFIG)) return;
+
+  lua_pushliteral(mL, "__index");
+  lua_pushstring(mL, "ConfigIndex");
+  lua_pushcclosure(mL, ConfigIndex, 1);
+  lua_settable(mL, -3);
+
+  lua_pushliteral(mL, "__newindex");
+  lua_pushstring(mL, "ConfigNewindex");
+  lua_pushcclosure(mL, ConfigNewindex, 1);
+  lua_settable(mL, -3);
+
+  lua_pushliteral(mL, "__tostring");
+  lua_pushstring(mL, MT_CONFIG);
+  lua_pushcclosure(mL, Tostring, 1);
   lua_settable(mL, -3);
 
   lua_pushliteral(mL, "__metatable");

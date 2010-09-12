@@ -35,6 +35,7 @@ using namespace std;
 namespace nLua {
 
 #define MT_USER_CONN "User object"
+#define MT_CONFIG "Config object"
 
 class cLuaInterpreter
 {
@@ -62,6 +63,7 @@ private:
   tvCallParams mCallParams;
 
   void CreateUserMT();
+  void CreateConfigMT();
 
   cTimerList mTimerList;
 

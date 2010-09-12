@@ -63,7 +63,7 @@ if(!LIP || !LIP->mL) ERR("script was not found");
 namespace nLua
 {
 
-int UserTostring(lua_State *L) {
+int Tostring(lua_State *L) {
   char buf[9];
   sprintf(buf, "%p", lua_touserdata(L, 1));
   lua_pushfstring(L, "%s (%s)", lua_tostring(L, lua_upvalueindex(1)), buf);
@@ -111,6 +111,7 @@ typedef enum { /** Param's hash */
   ePH_SUPPORTS   = 195, //< "sSupports"
   ePH_VERSION    = 58,  //< "sVersion"
   ePH_DATA       = 88,  //< "sData"
+  ePH_ENTERTIME  = 31,  //< "iEnterTime"
   ePH_UID        = 111  //< "UID"
 } tParamHash;
 
@@ -149,6 +150,7 @@ int UserIndex(lua_State *L) {
     case ePH_SUPPORTS:   lua_pushstring(L, Conn->GetSupports().c_str()); break;
     case ePH_VERSION:    lua_pushstring(L, Conn->GetVersion().c_str()); break;
     case ePH_DATA:       lua_pushstring(L, Conn->GetData().c_str()); break;
+    case ePH_ENTERTIME:  lua_pushnumber(L, (lua_Number)Conn->GetEnterTime()); break;
     case ePH_UID:        lua_pushlightuserdata(L, (void*)Conn); break; // for compatibility 
     default:             lua_pushnil(L); break;
   }
@@ -166,6 +168,33 @@ int UserNewindex(lua_State *L) {
     case ePH_DATA:      Conn->SetData(luaL_checkstring(L, 3)); break;
     default:            break;
   }
+  lua_settop(L, 0);
+  return 0;
+}
+
+int ConfigIndex(lua_State *L) {
+  cConfig * Config = (cConfig *)lua_touserdata(L, 1);
+  if(Config->isExist != 1) {
+    lua_settop(L, 0);
+    lua_pushnil(L);
+    return 1;
+  }
+  const char * sConfig = cLua::mCurServer->GetConfig(luaL_checkstring(L, 2));
+  lua_settop(L, 0);
+  if(!sConfig) lua_pushnil(L);
+  else lua_pushstring(L, sConfig);
+  return 1;
+}
+
+int ConfigNewindex(lua_State *L) {
+  cConfig * Config = (cConfig *)lua_touserdata(L, 1);
+  if(Config->isExist != 1) {
+    lua_settop(L, 0);
+    return 0;
+  }
+  char * sVal = (char *)lua_tostring(L, 3);
+  if(!sVal) sVal = (char *)lua_toboolean(L, 3);
+  cLua::mCurServer->SetConfig(luaL_checkstring(L, 2), sVal);
   lua_settop(L, 0);
   return 0;
 }
