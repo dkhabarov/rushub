@@ -71,9 +71,11 @@ public:
     {
       #ifdef _WIN32
         fd_count = set.fd_count;
-        ::memcpy(&fd_array, &(set.fd_array), sizeof(fd_array));
+        static size_t fd_array_size = sizeof(fd_array);
+        ::memcpy(&fd_array, &(set.fd_array), fd_array_size);
       #else
-        memcpy(&fds_bits, &(set.fds_bits), sizeof(fds_bits));
+        static size_t fds_bits_size = sizeof(fds_bits);
+        memcpy(&fds_bits, &(set.fds_bits), fds_bits_size);
       #endif
       return *this;
     }

@@ -166,6 +166,7 @@ public:
   virtual unsigned long GetNetIp() const { return miNetIp; }       //< Get numeric IP
   virtual void SetProfile(int iProfile){ miProfile = iProfile; }
   virtual void SetData(const string & sData){ msData = sData; }
+  virtual long GetEnterTime() const { return mTimes.mKey.Sec(); }
 
   /** Sending RAW command to the client */
   virtual int Send(const string & sData, bool bAddSep = false, bool bFlush = true);

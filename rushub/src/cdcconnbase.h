@@ -50,6 +50,7 @@ public:
   virtual void SetProfile(int) = 0;
   virtual void SetData(const string &) = 0;
   virtual void Disconnect() = 0;
+  virtual long GetEnterTime() const = 0; //< Get enter time
 
 }; // cDCConnBase
 

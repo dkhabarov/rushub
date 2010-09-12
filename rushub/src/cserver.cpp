@@ -239,7 +239,7 @@ void cServer::Step()
     ret = mConnChooser.Choose(tmout);
     if(!ret && miNumCloseConn <= 0) { 
       #ifdef _WIN32
-        Sleep(0);
+        //Sleep(0);
       #else
         usleep(50); // 50 мксек
       #endif

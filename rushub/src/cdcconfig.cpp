@@ -52,7 +52,7 @@ void cDCConfig::AddVars()
 
   Add("iWebStrSizeMax",       miWebStrSizeMax,              10240);
   Add("iStrSizeMax",          mDCServer->miStrSizeMax,      10240);
-  Add("iStepDelay",           mDCServer->mStepDelay,        5);
+  Add("iStepDelay",           mDCServer->mStepDelay,        0);
   Add("iTimerServPeriod",     mDCServer->miTimerServPeriod, 100);
   Add("iTimerConnPeriod",     mDCServer->miTimerConnPeriod, 4000);
   Add("iStartPing",           miStartPing,                  300);

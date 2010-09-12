@@ -29,12 +29,24 @@
 #ifdef _WIN32
   
   #ifndef FD_SETSIZE // For select
-    #define FD_SETSIZE      32768//10240
+    #define FD_SETSIZE      10240//32768
   #endif /* FD_SETSIZE */
   
   #include <winsock2.h>
   #define socklen_t int /** unix type for socket (size_t) */
   #define sockoptval_t char /** for setsockopt */
+  #ifdef ECONNRESET
+    #undef ECONNRESET
+  #endif
+  #ifdef ETIMEDOUT
+    #undef ETIMEDOUT
+  #endif
+  #ifdef EHOSTUNREACH
+    #undef EHOSTUNREACH
+  #endif
+  #ifdef EWOULDBLOCK
+    #undef EWOULDBLOCK
+  #endif
   #define ECONNRESET WSAECONNRESET
   #define ETIMEDOUT WSAETIMEDOUT
   #define EHOSTUNREACH WSAEHOSTUNREACH

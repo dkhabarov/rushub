@@ -84,12 +84,12 @@ public:
 
     iterator() : i(0), end(0), mData((tDataType*)NULL){}
     iterator(tDataType *Data, unsigned _i, unsigned _end) : i(_i), end(_end), mData(Data){}
-    iterator & operator = (const iterator &it){ i = it.i; end=it.end; mData = it.mData; return *this; }
+    iterator & operator = (const iterator &it){ i = it.i; end = it.end; mData = it.mData; return *this; }
     iterator(const iterator &it){ (*this) = it; }
     bool operator == (const iterator &it){ return i == it.i; }
     bool operator != (const iterator &it){ return i != it.i; }
     iterator & operator ++(){ while((++i != end) && (mData[i] == (tDataType)NULL)){}; return *this; }
-    tDataType operator *(){ if(!IsEnd() && mData) return mData[i]; else return NULL; }
+    tDataType operator *(){ if(i < end && mData) return mData[i]; return NULL; }
     inline bool IsEnd() const { return i >= end; }
   };
 

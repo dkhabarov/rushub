@@ -46,7 +46,7 @@
 #endif // REG_PLUGIN
 
 #ifndef INTERNAL_PLUGIN_VERSION
-#  define INTERNAL_PLUGIN_VERSION 10004
+#  define INTERNAL_PLUGIN_VERSION 10005
 #endif
 
 using ::std::string;
@@ -66,7 +66,10 @@ public:
 
 public:
 
-  cPluginBase() : mbIsAlive(true), miVersion(0), mPluginList(NULL) { miVersion = INTERNAL_PLUGIN_VERSION; }
+  cPluginBase() : mbIsAlive(true), miVersion(0), mPluginList(NULL)
+  {
+    miVersion = INTERNAL_PLUGIN_VERSION;
+  }
   virtual ~cPluginBase(){}
 
   const string &Name(){ return msName; } /** Get name of the plugin */
