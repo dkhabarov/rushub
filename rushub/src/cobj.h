@@ -68,7 +68,8 @@ public:
   static int miMaxErrLevel;
 
   static ofstream mOfs;
-  static ofstream mErrOfs;
+
+  static char * msPath;
 
 public:
 

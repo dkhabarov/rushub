@@ -169,13 +169,13 @@ void cDCConfig::AddVars()
 
 bool cDCConfig::Load()
 {
-  string sFile(mDCServer->msMainDir + string("config.xml"));
+  string sFile(mDCServer->mMainPath.msConfPath + string("config.xml"));
   return mDCServer->mConfigLoader.Load(this, sFile.c_str());
 }
 
 bool cDCConfig::Save()
 {
-  string sFile(mDCServer->msMainDir + string("config.xml"));
+  string sFile(mDCServer->mMainPath.msConfPath + string("config.xml"));
   return mDCServer->mConfigLoader.Save(this, sFile.c_str());
 }
 

@@ -36,7 +36,7 @@ bool cConnChoose::AddConn(cConnBase *conn)
   tSocket s = (tSocket)(*conn);
 
   if(mConnBaseList.Contain(s)) return false;
-  if(s > mMaxSocket) mMaxSocket = s;
+  if(s > mMaxSocket) mMaxSocket = s + 1;
 
   bool ret = mConnBaseList.Add(s, conn);
   return ret;
@@ -66,7 +66,7 @@ bool cConnChoose::AddConn(cConnBase *conn)
   // don't add twice  
    if(mConnBaseList[s] != NULL) return false;
   
-  if(s > mMaxSocket) mMaxSocket = s;
+  if(s > mMaxSocket) mMaxSocket = s + 1;
   
   mConnBaseList[s] = conn;
   return true;

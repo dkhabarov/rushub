@@ -105,16 +105,16 @@ tSocket cConn::SocketCreate(bool bUDP) {
   tSocket sock;
   if(!bUDP) { /* Create socket TCP */
     if((sock = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
-      return INVALID_SOCKET;
+      return SOCKET_ERROR;
     sockoptval_t yes = 1;
 
     /* TIME_WAIT after close conn. Reuse address after disconn */
     if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(sockoptval_t)) == INVALID_SOCKET)
-      return INVALID_SOCKET;
+      return SOCKET_ERROR;
   }
   else /* Create socket UDP */
     if((sock = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET)
-      return INVALID_SOCKET;
+      return SOCKET_ERROR;
 
   ++iConnCounter;
   if(Log(3)) LogStream() << "Created new socket: " << sock << endl;
@@ -129,7 +129,7 @@ tSocket cConn::SocketCreate(bool bUDP) {
   mAddrIN.sin_zero = 0x00000000;
 */
 tSocket cConn::SocketBind(tSocket sock, int iPort, const char *sIp) {
-  if(sock < 0) return SOCKET_ERROR;
+  if(sock == SOCKET_ERROR) return SOCKET_ERROR;
   string sIP(sIp);
   memset(&mAddrIN, 0, sizeof(struct sockaddr_in));
   mAddrIN.sin_family = AF_INET;
@@ -159,7 +159,7 @@ tSocket cConn::SocketBind(tSocket sock, int iPort, const char *sIp) {
 
 /** Listen TCP socket */
 tSocket cConn::SocketListen(tSocket sock) {
-  if(sock < 0) return SOCKET_ERROR;
+  if(sock == SOCKET_ERROR) return SOCKET_ERROR;
   if(listen(sock, SOCK_BACKLOG) == SOCKET_ERROR) {
     SOCK_CLOSE(sock);
     if(ErrLog(1)) LogStream() << "Error listening" << endl;
@@ -170,7 +170,7 @@ tSocket cConn::SocketListen(tSocket sock) {
 
 /** Set non-block socket */
 tSocket cConn::SocketNonBlock(tSocket sock) {
-  if(sock < 0) return SOCKET_ERROR;
+  if(sock == SOCKET_ERROR) return SOCKET_ERROR;
   SOCK_NON_BLOCK(sock);
   return sock;
 }
@@ -219,9 +219,11 @@ void cConn::CloseNice(int imsec) {
 void cConn::CloseNow() {
   mbWritable = mbOk = false;
   if(mServer) {
-    mServer->mConnChooser.cConnChoose::OptIn((cConnBase*)this, cConnChoose::eEF_CLOSE);
-    mServer->mConnChooser.cConnChoose::OptOut((cConnBase*)this, cConnChoose::eEF_ALL);
-    mServer->miNumCloseConn ++;
+    if(!(mServer->mConnChooser.cConnChoose::OptGet((cConnBase*)this) & cConnChoose::eEF_CLOSE)) {
+      mServer->miNumCloseConn ++;
+      mServer->mConnChooser.cConnChoose::OptIn((cConnBase*)this, cConnChoose::eEF_CLOSE);
+      mServer->mConnChooser.cConnChoose::OptOut((cConnBase*)this, cConnChoose::eEF_ALL);
+    }
   }
 }
 

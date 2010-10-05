@@ -38,12 +38,12 @@
 #include "cconfigloader.h"
 #include "cantiflood.h"
 #include "cdciplist.h"
+#include "cmainpath.h"
 
 namespace nConfig{class cConfigLoader;};
 using namespace nConfig;
 
-namespace nDCServer
-{
+namespace nDCServer {
 
 using namespace nServer; /** for cServer */
 using namespace nProtocol;
@@ -107,9 +107,9 @@ public:
 
   static cDCServer * sCurrentServer; /** Current server */
   tSysLoading mSysLoading; /** Indicator of the system overloading */
-  string msMainDir; /** Main dir of config files */
   string msSysVersion; /** Verion of OS System */
 
+  cMainPath mMainPath;
   cTime mStartTime; /** Start time of the hub */
   cDCProtocol mDCProtocol; /** DC Protocol */
   cDCParser mDCParser; /** Parser for checking syntax of commands */
@@ -136,10 +136,10 @@ public:
   cDCIPList * mIPListConn; /** IP list of connections */
 
 public:
-  cDCServer(string sCfgDir = "", const string &sExec = "");
+  cDCServer(const string & sConfPath, const string &sExPath);
   virtual ~cDCServer();
 
-  const string & GetMainDir() const { return msMainDir; }
+  const string & GetMainDir() const { return mMainPath.msConfPath; }
   const string & GetTime(){ stringstream oss; oss << mTime.AsDate(); mTimeBuf = oss.str(); return mTimeBuf;}
   const string & GetHubInfo() const { return msHubName; }
   const string & GetLocale() const { return mDCConfig.msLocale; };

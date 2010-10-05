@@ -118,7 +118,7 @@ int cConnSelect::Select(cTime &tmout)
   mResExceptFS = mExceptFS;
 
   /** select */
-  int ret = ::select(mMaxSocket + 1/*mResList.size()*/, &mResReadFS, &mResWriteFS, &mResExceptFS, (timeval *)(&tmout));
+  int ret = ::select(mMaxSocket, &mResReadFS, &mResWriteFS, &mResExceptFS, (timeval *)(&tmout));
   if(ret == SOCKET_ERROR) return -1;
 
   ClearRevents();

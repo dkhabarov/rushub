@@ -144,7 +144,7 @@ public:
     iterator() : mMax(0), mChoose(0){};
 
     iterator & operator ++() {
-      while( (++mRes.mFd <= *mMax) && !(mChoose->RevTest(mRes.mFd)) ){}
+      while( (++mRes.mFd < *mMax) && !(mChoose->RevTest(mRes.mFd)) ){}
       return *this;
     };
 
@@ -180,7 +180,7 @@ public:
 
   iterator &end() {
     static iterator sEnd(this, &mMaxSocket);
-    sEnd.mRes.mFd = mMaxSocket + 1;
+    sEnd.mRes.mFd = mMaxSocket;
     return sEnd;
   }
 

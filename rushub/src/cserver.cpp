@@ -59,7 +59,7 @@ cServer::cServer(const string sSep, int iPort) :
 
 #ifdef _WIN32
   /** WS for windows */
-  if(!this->WSinit) {
+  if(!WSinit) {
     WSADATA lpWSAData;
     //WORD wVersionRequested = MAKEWORD(2, 2);
 
@@ -76,7 +76,7 @@ cServer::cServer(const string sSep, int iPort) :
     }
 
     /** WinSock DLL was found */
-    this->WSinit = true;
+    WSinit = true;
   }
 #endif
 }
@@ -88,12 +88,8 @@ cServer::~cServer() {
 #ifdef _WIN32
   /** Close WS DLL lib */
   ::WSACleanup();
+  WSinit = false;
 #endif
-  if(Log(1)) {
-    LogStream() << endl <<
-    "Allocated objects: " << cObj::GetCount() - 1 << endl <<
-    "Unclosed sockets: " << cConn::iConnCounter << endl;
-  }
 }
 
 /** Set and Listen port */
@@ -237,12 +233,16 @@ void cServer::Step()
   try {
     /** Checking the arrival data in listen sockets */
     ret = mConnChooser.Choose(tmout);
-    if(!ret && miNumCloseConn <= 0) { 
+    if(!ret && !miNumCloseConn) { 
       #ifdef _WIN32
         //Sleep(0);
       #else
         usleep(50); // 50 мксек
       #endif
+      return;
+    } else if(ret == -1) {
+      if(ErrLog(0)) LogStream() << "Error in Choose function: " << SockErr << endl;
+      mbRun = false;
       return;
     }
   }catch(const char *str){
@@ -252,20 +252,20 @@ void cServer::Step()
     if(ErrLog(0)) LogStream() << "Exception in Choose" << endl;
     throw "Exception in Choose";
   }
-  
-  if(Log(5)) LogStream() << "<new actions>: " << ret << endl;
 
-  static tChIt it, it_e;
+  static tChIt it, it_e = mConnChooser.end(); // end iterator optimization
   static cConnChoose::sChooseRes res;
   static int activity;
 
-  for(it = mConnChooser.begin(), it_e = mConnChooser.end(); it != it_e;) {
+  if(Log(5)) LogStream() << "<new actions>: " << ret << " [" << miNumCloseConn << "]" << endl;
+
+  for(it = mConnChooser.begin(); it != it_e;) {
     res = (*it);
     ++it;
-    mNowConn = (cConn* )res.mConnBase;
-    if(!mNowConn) continue;
-    activity = res.mRevents;
+    if(res.mRevents == 0) continue; // optimization cycle
+    if((mNowConn = (cConn* )res.mConnBase) == NULL) continue;
     bool &bOk = mNowConn->mbOk;
+    activity = res.mRevents;
 
     if(bOk && (activity & cConnChoose::eEF_INPUT) && (mNowConn->GetConnType() == eCT_LISTEN)) {
 
@@ -281,56 +281,74 @@ void cServer::Step()
           mNowConn->mListenFactory->OnNewConn(new_conn);
       }
       if(mNowConn->Log(5)) mNowConn->LogStream() << "::(e)NewConn. Number connections: " << mConnChooser.mConnBaseList.Size() << endl;
-    }
 
-    if(bOk && (activity & cConnChoose::eEF_INPUT) && ((mNowConn->GetConnType() == eCT_CLIENTTCP) || (mNowConn->GetConnType() == eCT_CLIENTUDP))) {
-      try {
-        if(mNowConn->Log(5)) mNowConn->LogStream() << "::(s)InputData" << endl;
+    } else { // not listening socket (optimization)
 
-        if(InputData(mNowConn) <= 0) bOk = false;
+      if(bOk && (activity & cConnChoose::eEF_INPUT) && ((mNowConn->GetConnType() == eCT_CLIENTTCP) || (mNowConn->GetConnType() == eCT_CLIENTUDP))) {
+        try {
+          if(mNowConn->Log(5)) mNowConn->LogStream() << "::(s)InputData" << endl;
 
-        if(mNowConn->Log(5)) mNowConn->LogStream() << "::(e)InputData" << endl;
-      }catch(const char *str){
-        if(ErrLog(0)) LogStream() << "Exception in InputData: " << str << endl;
-      }catch(...){
-        if(ErrLog(0)) LogStream() << "Exception in InputData" << endl;
-        throw "Exception in InputData";
+          if(InputData(mNowConn) <= 0) bOk = false;
+
+          if(mNowConn->Log(5)) mNowConn->LogStream() << "::(e)InputData" << endl;
+        }catch(const char *str){
+          if(ErrLog(0)) LogStream() << "Exception in InputData: " << str << endl;
+          throw "Exception in InputData";
+        }catch(...){
+          if(ErrLog(0)) LogStream() << "Exception in InputData" << endl;
+          throw "Exception in InputData";
+        }
+      }
+
+      if(bOk && (activity & cConnChoose::eEF_OUTPUT)) {
+        try {
+          if(mNowConn->Log(5)) mNowConn->LogStream() << "::(s)OutputData" << endl;
+
+          OutputData(mNowConn);
+
+          if(mNowConn->Log(5)) mNowConn->LogStream() << "::(e)OutputData" << endl;
+        }catch(const char *str){
+          if(ErrLog(0)) LogStream() << "Exception in OutputData: " << str << endl;
+          throw "Exception in OutputData";
+        }catch(...){
+          if(ErrLog(0)) LogStream() << "Exception in OutputData" << endl;
+          throw "Exception in OutputData";
+        }
+      }
+
+      if(!bOk || (activity & (cConnChoose::eEF_ERROR | cConnChoose::eEF_CLOSE))) {
+
+        if(mConnChooser.cConnChoose::OptGet(mNowConn) & cConnChoose::eEF_CLOSE) // check close flag
+          --miNumCloseConn;
+
+        cConn *conn = mNowConn;
+        mNowConn = NULL;
+        try {
+          if(Log(5)) LogStream() << "::(s)DelConnection" << endl;
+
+          DelConnection(conn);
+
+          if(Log(5)) LogStream() << "::(e)DelConnection. Number connections: " << mConnChooser.mConnBaseList.Size() << endl;
+        }catch(const char *str){
+          if(ErrLog(0)) LogStream() << "Exception in DelConnection: " << str << endl;
+          throw "Exception in DelConnection";
+        }catch(...){
+          if(ErrLog(0)) LogStream() << "Exception in DelConnection" << endl;
+          throw "Exception in DelConnection";
+        }
       }
     }
 
-    if(bOk && (activity & cConnChoose::eEF_OUTPUT)) {
-      try {
-        if(mNowConn->Log(5)) mNowConn->LogStream() << "::(s)OutputData" << endl;
+    if(activity - cConnChoose::eEF_CLOSE)
+      --ret;
 
-        OutputData(mNowConn);
-
-        if(mNowConn->Log(5)) mNowConn->LogStream() << "::(e)OutputData" << endl;
-      }catch(const char *str){
-        if(ErrLog(0)) LogStream() << "Exception in OutputData: " << str << endl;
-      }catch(...){
-        if(ErrLog(0)) LogStream() << "Exception in OutputData" << endl;
-        throw "Exception in OutputData";
-      }
+    if(ret < 0) { // this will not happen, but we must be reinsure
+      if(ErrLog(0)) LogStream() << "Faild error in return value" << endl;
+      break;
     }
-
-    if(!bOk || (activity & (cConnChoose::eEF_ERROR | cConnChoose::eEF_CLOSE))) {
-      cConn *conn = mNowConn;
-      mNowConn = NULL; 
-      try {
-        if(Log(5)) LogStream() << "::(s)DelConnection" << endl;
-
-        DelConnection(conn);
-
-        if(Log(5)) LogStream() << "::(e)DelConnection. Number connections: " << mConnChooser.mConnBaseList.Size() << endl;
-      }catch(const char *str){
-        if(ErrLog(0)) LogStream() << "Exception in DelConnection: " << str << endl;
-      }catch(...){
-        if(ErrLog(0)) LogStream() << "Exception in DelConnection" << endl;
-        throw "Exception in DelConnection";
-      }
-    }
-    else mNowConn = NULL;
-  }
+    if(!(ret + miNumCloseConn))
+      break;
+  }  
 }
 
 ///////////////////////////////////add_connection/del_connection///////////////////////////////////
@@ -406,7 +424,6 @@ int cServer::DelConnection(cConn *old_conn)
   if(old_conn->mConnFactory != NULL) 
     old_conn->mConnFactory->DelConn(old_conn); 
   else delete old_conn; 
-  if(--miNumCloseConn < 0) miNumCloseConn = 0;
 
   //if(Log(4)) LogStream() << "Num clients after del: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.Size() << endl;
   return 1;

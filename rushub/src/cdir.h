@@ -24,12 +24,14 @@
   Functions for work with dirs like unix systems
 */
 
+#include <string>
+using namespace std;
+
 #ifdef _WIN32
 
   #include <errno.h>
   #include <io.h> /* _findfirst and _findnext set errno iff they return -1 */
   #include <stdlib.h>
-  #include <string.h>
 
   #include <windows.h>
 
@@ -62,5 +64,8 @@
 bool DirExists(const char* sName);
 
 bool FileExists(const char * sName);
+
+void ExecPath(string &);
+void CheckEndSlash(string &);
 
 #endif // CDIR_H

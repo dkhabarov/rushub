@@ -99,6 +99,7 @@ public:
   const cTime &AsDate() const {mPrintType = 1; return *this;}
   const cTime &AsPeriod() const {mPrintType = 2; return *this;}
   const cTime &AsFullPeriod() const {mPrintType = 3; return *this;}
+  const cTime &AsDateMS() const {mPrintType = 4; return *this;}
 
 }; // cTime
 

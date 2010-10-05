@@ -33,76 +33,78 @@
   #pragma comment(lib, "tinyxml.lib")
 #endif
 
+using nDCServer::cDCServer;
+using namespace nServer;
+
 void SigHandler(int iSig) {
   switch(iSig) {
     case SIGINT:
     case SIGTERM:
     case SIGQUIT:
     case SIGHUP:
+
+      if(cDCServer::sCurrentServer->Log(0))
+        cDCServer::sCurrentServer->LogStream() << "Received a " << iSig << " signal, quiting" << endl;
+
       cout << "Received a " << iSig << " signal, quiting" << endl;
+      cDCServer::sCurrentServer->Stop(0);
       cDCServer::sCurrentServer->~cDCServer();
       cDCServer::sCurrentServer = NULL;
       exit(0);
       break;
     default:
+
+      if(cDCServer::sCurrentServer->Log(0))
+        cDCServer::sCurrentServer->LogStream() << "Received a " << iSig << " signal, ignoring it" << endl;
+
       cout << "Received a " << iSig << " signal, ignoring it" << endl;
       signal(iSig, SigHandler);
       break;
   }
 }
 
-using nDCServer::cDCServer;
+int runHub(int argc, char **argv, bool bService) {
 
-using namespace nServer;
+  string sConfPath, sExPath;
+  ExecPath(sConfPath);
+  sExPath = sConfPath;
 
-int main(int, char**) {
-
-  string sMainDir; /** Main dir of config files */
-  char * sPath = NULL;
-
-  /** Define main dir */
   #ifdef _WIN32
-    char sBuf[MAX_PATH+1];
-    ::GetModuleFileName(NULL, sBuf, MAX_PATH);
-    sPath = sBuf;
-    char * sSlash = strrchr(sPath, '\\');
-    if(sSlash) sMainDir = string(sPath, sSlash - sPath);
-    else sMainDir = sPath;
-    size_t iPos = sMainDir.find("\\");
-    while(iPos != sMainDir.npos) {
-      sMainDir.replace(iPos, 1, "/");
-      iPos = sMainDir.find("\\", iPos);
-    }
-    sMainDir.append("/");
-  #else
-    char * sHomeDir = getenv("HOME");
-    string tmp;
-    if(sHomeDir) {
-      tmp = sHomeDir;
-      tmp += "/rushub";
-      sPath = new char[256];
-      strcpy(sPath, tmp.c_str());
-    } else {
-      strcpy(sPath, "./.rushub");
-    }
+//    cService Service;
+//    if(Service.Cli(argc, argv, sConfPath, sExPath) <= 0) return -1;
+  #endif
+
+  /** Creating the server */
+  cDCServer Server(sConfPath, sExPath);
+
+  /** Listening all ports */
+  if(Server.Listening(0) != 0) {
+    if(Server.ErrLog(0))
+      Server.LogStream() << "Listening failed" << endl;
+    return -2;
+  }
+
+  #ifdef _WIN32
+//    if(bService && Service.Start() < 0) return -3;
+  #endif
+
+  int iResult = Server.Run();
+
+  #ifdef _WIN32
+//    if(bService && Service.Stop() < 0) return -4;
+  #endif
+
+  return iResult;
+}
+
+int main(int argc, char **argv) {
+
+  signal(SIGINT, SigHandler);
+  signal(SIGTERM, SigHandler);
+  #ifndef _WIN32
     signal(SIGQUIT, SigHandler);
     signal(SIGHUP, SigHandler);
   #endif
-  signal(SIGINT, SigHandler);
-  signal(SIGTERM, SigHandler);
 
-  int iResult = 0;
-  //cService Service;
-  //if(Service.SetService(argc, argv, sMainDir, sPath) > 0) {
-
-    /** Creating the server */
-    cDCServer Server(sMainDir, sPath);
-
-    /** Listening all ports */
-    if(Server.Listening(0) != 0) return -1;
-    iResult = Server.Run();
-
-  //}
-
-  return iResult;
+  return runHub(argc, argv, false);
 }

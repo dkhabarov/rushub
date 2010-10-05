@@ -42,6 +42,11 @@ static const struct {
   {"-i", eInstall},
   {"-u", eUninstall},
   {"-h", eHelp},
+  {"-service",   eService},
+  {"-config",    eConfig},
+  {"-install",   eInstall},
+  {"-uninstall", eUninstall},
+  {"-help",      eHelp},
   {"--service",   eService},
   {"--config",    eConfig},
   {"--install",   eInstall},
@@ -50,25 +55,28 @@ static const struct {
   {NULL, 0} // terminator
 };
 
+static SERVICE_STATUS_HANDLE ssh;
+static SERVICE_STATUS ss;
+int runHub(int, char **, bool);
+void WINAPI CtrlHandler(DWORD dwCtrl);
+void WINAPI ServiceMain(DWORD dwArgc, LPSTR *lpszArgv);
+
 class cService : public cObj
 {
-private:
-  static SERVICE_STATUS_HANDLE ssh;
-  static SERVICE_STATUS ss;
+public:
   static cService * mCurService;
-
-  string msMainPath;
-  char* msMainFile;
 
 public:
   cService();
   ~cService();
 
-  int InstallService(char * sName = NULL, const char * sPath = NULL);
-  int UninstallService(char * sName = NULL);
-  static void WINAPI CtrlHandler(DWORD dwCtrl);
-  static void WINAPI ServiceMain(DWORD dwArgc, LPSTR *lpszArgv);
-  int SetService(int argc, char* argv[], const string & sMainPath, const char * sMainFile);
+  static int InstallService(char * sName = NULL, const char * sConfPath = NULL);
+  static int UninstallService(char * sName = NULL);
+  static int ServiceStop(char * sName = NULL);
+  static int ServiceStart(char * sName = NULL);
+  static int Cli(int argc, char* argv[], string & sConfPath, const string & sExPath);
+  static int Start();
+  static int Stop();
 
 }; // cService
 

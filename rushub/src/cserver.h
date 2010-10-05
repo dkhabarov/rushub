@@ -29,7 +29,7 @@
 #include <list> /** tConnList */
 
 #define INTERNALNAME "RusHub"
-#define INTERNALVERSION "2.2.4"
+#define INTERNALVERSION "2.2.5"
 
 //#if USE_SELECT
   #include "cconnselect.h" /** Check sockets by method select */
@@ -89,7 +89,7 @@ public:
   cMeanFrequency<unsigned, 21> mMeanFrequency; /** Mean frequency */
   int mStepDelay; /** Step delay (for testing) */
 
-  int miNumCloseConn; /** Number closed? but not del conn */
+  int miNumCloseConn; /** Strong close conn flag */
 
   int miTimerServPeriod; /** Serv period (msec) */
   int miTimerConnPeriod; /** Conn period (msec) */

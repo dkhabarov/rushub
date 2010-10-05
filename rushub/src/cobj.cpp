@@ -19,9 +19,10 @@
 
 #include "cobj.h"
 #include "ctime.h"
+#include "cdir.h" // for ExecPath
 
 using namespace std;
-using nUtils::cTime;
+using namespace nUtils;
 
 
 /** 
@@ -45,9 +46,9 @@ int cObj::miMaxErrLevel = 2;
 
 int cObj::mCounterObj = 0; /** Objects counter */
 const string cObj::msEmpty;
+char * cObj::msPath = NULL;
 
 ofstream cObj::mOfs;
-ofstream cObj::mErrOfs;
 
 cObj::cObj(const char *name) : mClassName(name), mToLog(&cout) { ++mCounterObj; }
 cObj::cObj() : mClassName("Obj"), mToLog(&cout) { ++mCounterObj; }
@@ -62,7 +63,7 @@ void cObj::SetClassName(const char *sName) {
 int cObj::StrLog(ostream &ostr, int iLevel, int iMaxLevel) {
   cTime now;
   if(iLevel <= iMaxLevel) {
-    ostr << "[" << now.AsDate() << "] (" << iLevel << ") " << mClassName << ": ";
+    ostr << "[" << now.AsDateMS() << "] (" << iLevel << ") " << mClassName << ": ";
     return 1;
   }
   return 0;
@@ -83,16 +84,30 @@ int cObj::ErrLog(int iLevel) {
 
 /** Virtual log function. Return log straem */
 ostream & cObj::Log() {
-  if(!mOfs.is_open()) mOfs.open("./system.log");
+  if(!mOfs.is_open()) {
+    string sPath;
+    if(msPath == NULL)
+      ExecPath(sPath);
+    else
+      sPath = msPath;
+    sPath += "system.log";
+    mOfs.open(sPath.c_str());
+  }
   if(!mOfs.is_open()) return cout;
   return mOfs;
 }
 
 /** Virtual errlog function. Return errlog straem */
 ostream & cObj::ErrLog() {
-  //if(!mErrOfs.is_open()) mErrOfs.open("errors.log");
-  //return mErrOfs;
-  if(!mOfs.is_open()) mOfs.open("./system.log");
+  if(!mOfs.is_open()) {
+    string sPath;
+    if(msPath == NULL)
+      ExecPath(sPath);
+    else
+      sPath = msPath;
+    sPath += "system.log";
+    mOfs.open(sPath.c_str());
+  }
   if(!mOfs.is_open()) return cerr;
   return mOfs;
 }

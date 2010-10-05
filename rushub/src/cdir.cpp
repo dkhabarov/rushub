@@ -158,3 +158,39 @@ bool FileExists(const char * sName)
 #endif
 	return false;
 }
+
+void ExecPath(string & sPath) {
+  char * sExPath = NULL;
+  #ifdef _WIN32
+    char sBuf[MAX_PATH+1];
+    ::GetModuleFileName(NULL, sBuf, MAX_PATH);
+    sExPath = sBuf;
+    char * sSlash = strrchr(sExPath, '\\');
+    if(sSlash) sPath = string(sExPath, sSlash - sExPath);
+    else sPath = sExPath;
+    size_t iPos = sPath.find("\\");
+    while(iPos != sPath.npos) {
+      sPath.replace(iPos, 1, "/");
+      iPos = sPath.find("\\", iPos);
+    }
+    sPath.append("/");
+  #else
+    char * sHomeDir = getenv("HOME");
+    if(sHomeDir) {
+      sPath = sHomeDir;
+      sPath += "/rushub/";
+    } else {
+      sPath = "./rushub/"
+    }
+  #endif
+}
+
+void CheckEndSlash(string & sPath) {
+  size_t iPos = sPath.find("\\");
+  while(iPos != sPath.npos) {
+    sPath.replace(iPos, 1, "/");
+    iPos = sPath.find("\\", iPos);
+  }
+  if(sPath.substr(sPath.size()-1, 1) != "/")
+    sPath.append("/");
+}

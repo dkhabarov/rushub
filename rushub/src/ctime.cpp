@@ -91,8 +91,8 @@ std::ostream &operator << (std::ostream &os, const cTime &t)
   #endif
   long n, rest;
 
-  switch (t.mPrintType)
-  {
+  switch (t.mPrintType) {
+  case 4: /** AsDateMS */
   case 1: /** AsDate */
     #ifndef _WIN32
       const time_t * ta;
@@ -110,6 +110,8 @@ std::ostream &operator << (std::ostream &os, const cTime &t)
     #endif
     buf[strlen(buf) - 1] = 0;
     os << buf;
+    if(t.mPrintType == 4)
+      os << "|" << t.tv_usec / 1000;
     break;
   case 2: /** AsPeriod */
     rest = t.tv_sec;

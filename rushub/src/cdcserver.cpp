@@ -32,10 +32,10 @@ cDCListIterator::cDCListIterator(cDCServer * server) :
 
 cDCServer * cDCServer::sCurrentServer = NULL;
 
-cDCServer::cDCServer(string sDir, const string &):
+cDCServer::cDCServer(const string & sConfPath, const string & sExPath):
+  mMainPath(sConfPath, sExPath),
   cServer(DC_SEPARATOR),
   mSysLoading(eSL_OK),
-  msMainDir(sDir),
   mDCUserList("UserList", true, true, true),
   mDCBotList("BotList", true),
   mOpList("OpList", true),
@@ -47,7 +47,7 @@ cDCServer::cDCServer(string sDir, const string &):
   miTotalUserCount(0),
   miTotalShare(0),
   mConfigLoader(),
-  mPluginList(sDir + "plugins/"),
+  mPluginList(mMainPath.msConfPath + "plugins/"),
   msHubName(INTERNALNAME" "INTERNALVERSION" "__DATE__" "__TIME__),
   mListenFactory(NULL),
   mWebListenFactory(NULL),
