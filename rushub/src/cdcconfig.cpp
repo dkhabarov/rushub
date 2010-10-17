@@ -261,13 +261,13 @@ void cDCLang::AddVars()
 bool cDCLang::Load()
 {
   string sFile(mDCServer->mMainPath.msConfPath + string("lang.xml"));
-  return mDCServer->mConfigLoader.Load(this, sFile);
+  return mDCServer->mConfigLoader.Load(this, sFile.c_str());
 }
 
 bool cDCLang::Save()
 {
   string sFile(mDCServer->mMainPath.msConfPath + string("lang.xml"));
-  return mDCServer->mConfigLoader.Save(this, sFile);
+  return mDCServer->mConfigLoader.Save(this, sFile.c_str());
 }
 
 }; // nDCServer
