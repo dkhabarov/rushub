@@ -189,6 +189,7 @@ public:
 
   static bool CheckIp(const string &ip);
 
+  bool IsClosed() { return mbClosed; }
 private:
 
   cTime mCloseTime; /** Time before closing the conn */
@@ -205,6 +206,7 @@ private:
   typedef tConnList::iterator tCLIt;
 
   unsigned miAttemptSend;
+  bool mbClosed; /** closed flag, for close counter */
 
 public:
   tCLIt mIterator; /** Optimisation */

@@ -31,12 +31,6 @@ cMainPath::cMainPath(const string & sConfPath, const string & sExPath) : cObj("c
 }
 
 cMainPath::~cMainPath() {
-  if(Log(1)) {
-    LogStream() << endl <<
-    "Allocated objects: " << cObj::GetCount() - 1 << endl <<
-    "Unclosed sockets: " << cDCConn::iConnCounter << endl;
-  }
-  if(mOfs.is_open()) mOfs.close();
 }
 
 } // nDCServer

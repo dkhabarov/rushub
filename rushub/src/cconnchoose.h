@@ -22,29 +22,21 @@
 
 #include "ctime.h"
 #include "cconnbase.h"
+#include "tchashtable.h" /** Hash table (tcHashTable) */
 
 using namespace nUtils; /** tcHashTable, cTime */
 
-//#ifdef _WIN32
+#ifdef _WIN32
   #define USE_SELECT 1
-  #include "tchashtable.h" /** Hash table (tcHashTable) */
-/*#else
-  #if HAVE_SYS_POLL_H
+#else
+  //#define USE_SELECT 1
+/*  #if HAVE_SYS_POLL_H // for configure
     #define USE_SELECT 0
   #else
     #define USE_SELECT 1
   #endif
-
-  #ifndef USE_OLD_CONNLIST
-    #include <vector>
-    using std::vector;
-  #else
-    #include <map>
-    #include "tchashmap.h"
-    using std::map;
-  #endif
-#endif*/
-
+*/
+#endif
 
 namespace nServer {
 
@@ -54,17 +46,14 @@ protected:
   tSocket  mMaxSocket;
 
 public:
-  
-//  #ifdef _WIN32
     /** Hash-table for connections */
     typedef tcHashTable<cConnBase *> tConnBaseList;
-/*  #else
+/*  
     #ifdef USE_OLD_CONNLIST
       typedef tcHashMap <cConnBase *, tSocket> tConnBaseList;
     #else
       typedef vector <cConnBase *> tConnBaseList;
     #endif
-  #endif
 */
 
   /** Hash-table */
@@ -84,6 +73,9 @@ public:
 
   cConnChoose() : mMaxSocket(0) {};
   virtual ~cConnChoose(){};
+
+  /** virtual function for select limit detect */
+  virtual unsigned Size() { return 0; }
 
   /** Add conn in mConnBaseList */
   virtual bool AddConn(cConnBase *);
@@ -191,61 +183,44 @@ protected:
 }; // cConnBaseChoose
 
 
-bool cConnChoose::OptIn(cConnBase *conn, cConnChoose::tEventFlag eMask)
-{
+bool cConnChoose::OptIn(cConnBase *conn, cConnChoose::tEventFlag eMask) {
   if(!conn) return false;
   return this->OptIn(tSocket(*conn), eMask);
 }
 
 
-void cConnChoose::OptOut(cConnBase *conn, cConnChoose::tEventFlag eMask)
-{
+void cConnChoose::OptOut(cConnBase *conn, cConnChoose::tEventFlag eMask) {
   if(!conn) return;
   this->OptOut(tSocket(*conn), eMask);
 }
 
 
-int cConnChoose::OptGet(cConnBase *conn)
-{
+int cConnChoose::OptGet(cConnBase *conn) {
   if(!conn) return 0;
   return this->OptGet(tSocket(*conn));
 }
 
 
-int cConnChoose::RevGet(cConnBase *conn)
-{
+int cConnChoose::RevGet(cConnBase *conn) {
   if(!conn) return 0;
   return this->RevGet(tSocket(*conn));
 }
 
 
-bool cConnChoose::RevTest(cConnBase *conn)
-{
+bool cConnChoose::RevTest(cConnBase *conn) {
   if(!conn) return false;
   return this->RevTest(tSocket(*conn));
 }
 
 
-tSocket cConnChoose::operator [] (cConnBase *conn)
-{
+tSocket cConnChoose::operator [] (cConnBase *conn) {
   if(!conn) return INVALID_SOCKET;
   return (tSocket)(*conn);
 }
 
-
-//#if defined(USE_OLD_CONNLIST) || defined(_WIN32)
-cConnBase * cConnChoose::operator [] (tSocket sock)
-{
+cConnBase * cConnChoose::operator [] (tSocket sock) {
   return mConnBaseList.Find(sock);
 }
-/*#else
-cConnBase * cConnChoose::operator [] (tSocket sock) // for vector
-{
-  if(tSocket(mConnBaseList.size()) > sock) return mConnBaseList[sock];
-  else return NULL;
-}
-#endif //USE_OLD_CONNLIST
-*/
 
 }; // nServer
 

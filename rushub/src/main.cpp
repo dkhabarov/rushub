@@ -63,7 +63,8 @@ void SigHandler(int iSig) {
   }
 }
 
-int runHub(int argc, char **argv, bool bService) {
+//int runHub(int argc, char **argv, bool bService) {
+int runHub(int, char **, bool) {
 
   string sConfPath, sExPath;
   ExecPath(sConfPath);

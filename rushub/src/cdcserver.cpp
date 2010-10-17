@@ -33,8 +33,8 @@ cDCListIterator::cDCListIterator(cDCServer * server) :
 cDCServer * cDCServer::sCurrentServer = NULL;
 
 cDCServer::cDCServer(const string & sConfPath, const string & sExPath):
-  mMainPath(sConfPath, sExPath),
   cServer(DC_SEPARATOR),
+  mMainPath(sConfPath, sExPath),
   mSysLoading(eSL_OK),
   mDCUserList("UserList", true, true, true),
   mDCBotList("BotList", true),

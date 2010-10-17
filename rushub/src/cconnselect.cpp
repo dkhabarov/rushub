@@ -19,7 +19,7 @@
 
 #include "cconnselect.h"
 
-//#if USE_SELECT
+#if USE_SELECT
 
 namespace nServer
 {
@@ -175,4 +175,4 @@ void cConnSelect::SetRevents(cSelectFD &fdset, unsigned eMask)
 
 }; // nServer
 
-//#endif // USE_SELECT
+#endif // USE_SELECT

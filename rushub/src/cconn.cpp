@@ -50,6 +50,7 @@ cConn::cConn(tSocket sock, cServer *s, tConnType st) :
   mbBlockInput(false),
   mbBlockOutput(true),
   miAttemptSend(0),
+  mbClosed(false),
   mConnType(st),
   miNetIp(0),
   miPort(0),
@@ -196,7 +197,7 @@ void cConn::Close() {
     --iConnCounter;
     if(Log(3)) LogStream() << "Closing socket: " << mSocket << endl;
   }
-  else if(ErrLog(1)) LogStream() << "Socket not closed" << endl;
+  else if(ErrLog(1)) LogStream() << "Socket not closed: " << SockErr << endl;
 
   mSocket = 0;
 }
@@ -221,6 +222,7 @@ void cConn::CloseNow() {
   if(mServer) {
     if(!(mServer->mConnChooser.cConnChoose::OptGet((cConnBase*)this) & cConnChoose::eEF_CLOSE)) {
       mServer->miNumCloseConn ++;
+      mbClosed = true; // poll conflict
       mServer->mConnChooser.cConnChoose::OptIn((cConnBase*)this, cConnChoose::eEF_CLOSE);
       mServer->mConnChooser.cConnChoose::OptOut((cConnBase*)this, cConnChoose::eEF_ALL);
     }

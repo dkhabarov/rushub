@@ -106,10 +106,11 @@ public:
   typedef cUserList::tKeyType tUserKey;
 
   static cDCServer * sCurrentServer; /** Current server */
-  tSysLoading mSysLoading; /** Indicator of the system overloading */
-  string msSysVersion; /** Verion of OS System */
 
   cMainPath mMainPath;
+  tSysLoading mSysLoading; /** Indicator of the system overloading */
+  string msSysVersion; /** Verion of OS System */
+  
   cTime mStartTime; /** Start time of the hub */
   cDCProtocol mDCProtocol; /** DC Protocol */
   cDCParser mDCParser; /** Parser for checking syntax of commands */

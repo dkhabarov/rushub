@@ -29,17 +29,17 @@
 #include <list> /** tConnList */
 
 #define INTERNALNAME "RusHub"
-#define INTERNALVERSION "2.2.5"
+#define INTERNALVERSION "2.2.6"
 
-//#if USE_SELECT
+#if USE_SELECT
   #include "cconnselect.h" /** Check sockets by method select */
-//#else
-//  #ifdef USE_EPOLL
-//    #include "cconnepoll.h" /** Check sockets by method epoll */
-//  #else
-//    #include "cconnpoll.h" /** Check sockets by method poll */
-//  #endif
-//#endif
+#else
+  #ifdef USE_EPOLL
+    #include "cconnepoll.h" /** Check sockets by method epoll */
+  #else
+    #include "cconnpoll.h" /** Check sockets by method poll */
+  #endif
+#endif
 
 
 using namespace std;
@@ -158,14 +158,13 @@ protected:
   tListenList mListenList; /** ListenList */
 
   /** select or poll object */
-  //#if USE_SELECT
+  #if USE_SELECT
     cConnSelect mConnChooser;
     typedef cConnSelect::iterator tChIt;
-  /*#else
+  #else
     cConnPoll mConnChooser;
     typedef cConnChoose::iterator tChIt;
   #endif
-  */
 
   bool mbRun; /** Run-flag */
   int miMainLoopCode; /** MainLoopCode (0) */

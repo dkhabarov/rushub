@@ -160,8 +160,8 @@ bool FileExists(const char * sName)
 }
 
 void ExecPath(string & sPath) {
-  char * sExPath = NULL;
   #ifdef _WIN32
+    char * sExPath = NULL;
     char sBuf[MAX_PATH+1];
     ::GetModuleFileName(NULL, sBuf, MAX_PATH);
     sExPath = sBuf;
@@ -180,7 +180,7 @@ void ExecPath(string & sPath) {
       sPath = sHomeDir;
       sPath += "/rushub/";
     } else {
-      sPath = "./rushub/"
+      sPath = "./rushub/";
     }
   #endif
 }

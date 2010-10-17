@@ -21,22 +21,19 @@
 #define CCONNSELECT_H
 
 #include "cconnchoose.h"
+#include "tchashtable.h"
 
-//#if USE_SELECT
+#if USE_SELECT
 
 #ifndef _WIN32
   #include <sys/select.h>
   #include <memory.h>
 #endif
 
-#include "tchashtable.h"
-
 namespace nServer {
 
-
 /** cConnSelect */
-class cConnSelect : public cConnChoose
-{
+class cConnSelect : public cConnChoose {
 
 public:
 
@@ -51,24 +48,21 @@ public:
   cConnSelect(){};
   virtual ~cConnSelect();
 
-  unsigned Size() { return mResList.Size(); }
+  virtual unsigned Size() { return mResList.Size(); }
 
   virtual bool OptIn(tSocket, tEventFlag);
   virtual void OptOut(tSocket, tEventFlag);
   virtual int OptGet(tSocket);
   virtual int RevGet(tSocket);
   virtual bool RevTest(tSocket);
-  virtual inline int Choose(cTime &tmout){ return this->Select(tmout); };
+  virtual inline int Choose(cTime &tmout){ return this->Select(tmout); }
 
 
-  struct cSelectFD : public fd_set
-  {
-    cSelectFD()
-    {
+  struct cSelectFD : public fd_set {
+    cSelectFD() {
       FD_ZERO(this);
     }
-    cSelectFD & operator = (const cSelectFD &set)
-    {
+    cSelectFD & operator = (const cSelectFD &set) {
       #ifdef _WIN32
         fd_count = set.fd_count;
         static size_t fd_array_size = sizeof(fd_array);
@@ -83,8 +77,7 @@ public:
 
     void Clr(tSocket sock){ FD_CLR(sock, this); }
 
-    bool Set(tSocket sock)
-    {
+    bool Set(tSocket sock) {
       #ifdef _WIN32
         if(fd_count >= FD_SETSIZE) return false;
       #endif
@@ -96,47 +89,27 @@ public:
   void ClearRevents();
   void SetRevents(cSelectFD &fdset, unsigned eMask);
 
-  struct iterator
-  {
+  struct iterator {
     tResList::iterator mIt; /** iterator for list */
     cConnSelect *mSel; /** for operator [] */
     iterator(){}
     iterator(cConnSelect *sel, tResList::iterator it) : mIt(it), mSel(sel)
     {}
 
-    iterator & operator = (const iterator &it)
-    {
+    iterator & operator = (const iterator &it) {
       mSel= it.mSel;
       mIt = it.mIt;
       return *this;
     }
     bool operator != (const iterator &it){ return mIt != it.mIt; }
-    sChooseRes & operator *()
-    {
-      //__try {
-        if((*mIt)->mConnBase == NULL)
-          (*mIt)->mConnBase = (*mSel)[(*mIt)->mFd];
-      /*} __except(1) {
-        if(mSel->mResList.ErrLog(0)) mSel->mResList.LogStream() << "Fatal error: " << endl
-          << "error in operator *()" << endl
-          << "Item = " << mIt.mItem << endl
-          << "Hash = " << mIt.i.i << endl
-          << "End = " << mIt.i.end << endl;
-      }*/
+    sChooseRes & operator *() {
+      if((*mIt)->mConnBase == NULL)
+        (*mIt)->mConnBase = (*mSel)[(*mIt)->mFd];
       return *(*mIt);
     }
 
-    iterator & operator ++()
-    {
-      //__try {
+    iterator & operator ++() {
       while(!(++mIt).IsEnd() && !(*mIt)->mRevents){}
-      /*} __except(1) {
-        if(mSel->mResList.ErrLog(0)) mSel->mResList.LogStream() << "Fatal error: " << endl
-          << "error in operator ++()" << endl
-          << "Item = " << mIt.mItem << endl
-          << "Hash = " << mIt.i.i << endl
-          << "End = " << mIt.i.end << endl;
-      }*/
       return *this;
     }
   }; // iterator
@@ -165,6 +138,6 @@ protected:
 
 }; // nServer
 
-//#endif // USE_SELECT
+#endif // USE_SELECT
 
 #endif // CCONNSELECT_H

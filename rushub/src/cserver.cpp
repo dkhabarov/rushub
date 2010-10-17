@@ -90,6 +90,12 @@ cServer::~cServer() {
   ::WSACleanup();
   WSinit = false;
 #endif
+  if(Log(1)) {
+    LogStream() << endl <<
+    "Allocated objects: " << cObj::GetCount() - 1 << endl <<
+    "Unclosed sockets: " << cConn::iConnCounter << endl;
+  }
+  if(mOfs.is_open()) mOfs.close();
 }
 
 /** Set and Listen port */
@@ -169,7 +175,7 @@ bool cServer::StopListen(cConn *conn)
 
 cConn * cServer::FindConnByPort(int iPort)
 {
-  cConnSelect::tConnBaseList::iterator it;
+  cConnChoose::tConnBaseList::iterator it;
   cConn * conn;
   for(it = mConnChooser.mConnBaseList.begin(); it != mConnChooser.mConnBaseList.end(); ++it) {
     conn = (cConn *)(*it);
@@ -253,13 +259,13 @@ void cServer::Step()
     throw "Exception in Choose";
   }
 
-  static tChIt it, it_e = mConnChooser.end(); // end iterator optimization
+  static tChIt it; // end iterator optimization
   static cConnChoose::sChooseRes res;
   static int activity;
 
   if(Log(5)) LogStream() << "<new actions>: " << ret << " [" << miNumCloseConn << "]" << endl;
 
-  for(it = mConnChooser.begin(); it != it_e;) {
+  for(it = mConnChooser.begin(); it != mConnChooser.end();) {
     res = (*it);
     ++it;
     if(res.mRevents == 0) continue; // optimization cycle
@@ -318,7 +324,7 @@ void cServer::Step()
 
       if(!bOk || (activity & (cConnChoose::eEF_ERROR | cConnChoose::eEF_CLOSE))) {
 
-        if(mConnChooser.cConnChoose::OptGet(mNowConn) & cConnChoose::eEF_CLOSE) // check close flag
+        if(mNowConn->IsClosed()) // check close flag
           --miNumCloseConn;
 
         cConn *conn = mNowConn;
