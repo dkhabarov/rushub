@@ -385,6 +385,19 @@ int cLua::OnTimer() {
   return 1;
 }
 
+/** OnConfigChange event */
+int cLua::OnConfigChange(const char * sName, const char * sValue) {
+  cLuaInterpreter * Script;
+  for(tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
+    Script = *it;
+    if(!Script->mL) continue;
+    Script->NewCallParam((void *)sName, LUA_TSTRING);
+    Script->NewCallParam((void *)sValue, LUA_TSTRING);
+    Script->CallFunc("OnConfigChange");
+  }
+  return 0;
+}
+
 /** OnFlood event */
 int cLua::OnFlood(cDCConnBase * DCConn, int iType1, int iType2) {
   if(DCConn != NULL) {

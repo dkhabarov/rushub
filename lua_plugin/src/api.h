@@ -105,6 +105,7 @@ int SetLang(lua_State *L);              // SetLang(sName, sValue)
 int Call(lua_State *L);                 // Call(sScriptName, sFunc, sParam)
 int RegBot(lua_State *L);               // RegBot(sNick, bKey, sMyINFO, sIP)
 int UnregBot(lua_State *L);             // UnregBot(sNick)
+int SetHubState(lua_State *L);          // SetHubState(iNumber)
 
 }; // nLua
 

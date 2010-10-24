@@ -30,7 +30,7 @@
 #include <math.h> /** abs */
 
 #define PLUGIN_NAME "LuaScripts"
-#define PLUGIN_VERSION "1.25"
+#define PLUGIN_VERSION "1.26"
 
 namespace nDCServer{class cDCServerBase;}
 
@@ -104,6 +104,7 @@ public:
   virtual int OnScriptError(cLuaInterpreter * Current, const char* sScriptName, const char* sErrMsg, bool bStoped = true);
   virtual int OnScriptAction(const char * sScriptName, const char * sAction);
 
+  int OnConfigChange(const char *, const char *);
 
   int CallAll(const char *, cDCConnBase * conn = NULL, cDCParserBase * DCParser = NULL); /** Calling event for all scripts */
 

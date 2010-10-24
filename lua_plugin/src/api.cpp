@@ -192,9 +192,11 @@ int ConfigNewindex(lua_State *L) {
     lua_settop(L, 0);
     return 0;
   }
-  char * sVal = (char *)lua_tostring(L, 3);
-  if(!sVal) sVal = (char *)lua_toboolean(L, 3);
-  cLua::mCurServer->SetConfig(luaL_checkstring(L, 2), sVal);
+  const char * sName = luaL_checkstring(L, 2);
+  char * sValue = (char *)lua_tostring(L, 3);
+  if(!sValue) sValue = (char *)lua_toboolean(L, 3);
+  cLua::mCurServer->SetConfig(sName, sValue);
+  cLua::mCurLua->OnConfigChange(sName, sValue);
   lua_settop(L, 0);
   return 0;
 }
@@ -1132,6 +1134,23 @@ int UnregBot(lua_State *L) {
   lua_settop(L, 0);
   lua_pushboolean(L, 1);
   return 1;
+}
+
+/// SetHubState(iNumber) | iNumber = 0 or nil - stop, iNumber = 1 - restart
+int SetHubState(lua_State *L) {
+  int iTop = lua_gettop(L);
+  if(iTop > 1) ERR_COUNT("0 or 1");
+
+  if(iTop == 0 || lua_isnil(L, 1))
+    cLua::mCurServer->StopHub(); // stoping
+  else {
+    int iNum(luaL_checkint(L, 1));
+    if(iNum == 0)
+      cLua::mCurServer->StopHub(); // stoping
+    else if(iNum == 1)
+      cLua::mCurServer->RestartHub(); // restarting
+  }
+  return 0;
 }
 
 }; // nLua

@@ -91,7 +91,7 @@ int cLuaInterpreter::Start()
   RegFunc("Call",                 &Call);
   RegFunc("RegBot",               &RegBot);
   RegFunc("UnregBot",             &UnregBot);
-  
+  RegFunc("SetHubState",          &SetHubState);
 
   RegStrField("sLuaPluginVersion", PLUGIN_NAME" "PLUGIN_VERSION);
   RegStrField("sHubVersion", cLua::mCurServer->GetHubInfo().c_str());
