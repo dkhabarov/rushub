@@ -951,12 +951,32 @@ bool cDCServer::SetConfig(const string & sName, const string & sValue) {
 
   cConfig * config = mDCConfig[sName];
   if(!config) return false;
+
+  if(sName == "sHubBot") {
+    UnregBot(mDCConfig.msHubBot);
+  } else if(sName == "bRegMainBot") {
+    if(sValue == "true" || 0 != atoi(sValue.c_str()) ) {
+      if(RegBot(mDCConfig.msHubBot, mDCConfig.msMainBotMyINFO, 
+        mDCConfig.msMainBotIP, mDCConfig.mbMainBotKey) == -2)
+          RegBot(mDCConfig.msHubBot, string("$ $$$0$"), 
+            mDCConfig.msMainBotIP, mDCConfig.mbMainBotKey);
+    } else
+      UnregBot(mDCConfig.msHubBot);
+  }
+
   config->ConvertFrom(sValue);
 
-  if(sName == "sHubName" || sName == "sTopic") {
+  if(sName == "sHubBot") {
+    if(mDCConfig.mbRegMainBot) /** Регистрация основного бота */
+      if(RegBot(mDCConfig.msHubBot, mDCConfig.msMainBotMyINFO, 
+        mDCConfig.msMainBotIP, mDCConfig.mbMainBotKey) == -2)
+          RegBot(mDCConfig.msHubBot, string("$ $$$0$"), 
+            mDCConfig.msMainBotIP, mDCConfig.mbMainBotKey);
+  } else if(sName == "sHubName" || sName == "sTopic") {
     string sMsg;
     SendToAll(cDCProtocol::Append_DC_HubName(sMsg, mDCConfig.msHubName, mDCConfig.msTopic).c_str());
   }
+
   mDCConfig.Save();
   return true;
 }

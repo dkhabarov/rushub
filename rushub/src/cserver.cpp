@@ -51,6 +51,7 @@ cServer::cServer(const string sSep, int iPort) :
   miNumCloseConn(0),
   miTimerServPeriod(100),
   miTimerConnPeriod(4000),
+  mbMAC(true),
   mNowConn(NULL),
   miMainLoopCode(0),
   mbQuitAction(false)
@@ -226,7 +227,7 @@ int cServer::Run()
 void cServer::Stop(int iCode)
 {
   mbRun = false;
-  miMainLoopCode = iCode;
+  miMainLoopCode = iCode; // 1 - restart
 }
 
 
@@ -239,16 +240,12 @@ void cServer::Step()
   try {
     /** Checking the arrival data in listen sockets */
     ret = mConnChooser.Choose(tmout);
-    if(!ret && !miNumCloseConn) { 
+    if(ret <= 0 && !miNumCloseConn) { 
       #ifdef _WIN32
         //Sleep(0);
       #else
         usleep(50); // 50 мксек
       #endif
-      return;
-    } else if(ret == -1) {
-      if(ErrLog(0)) LogStream() << "Error in Choose function: " << SockErr << endl;
-      mbRun = false;
       return;
     }
   }catch(const char *str){

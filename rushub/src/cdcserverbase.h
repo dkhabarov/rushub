@@ -83,6 +83,9 @@ public:
   virtual int RegBot(const string & sNick, const string & sMyINFO, const string & sIP, bool bKey = true) = 0;
   virtual int UnregBot(const string & sNick) = 0;
 
+  virtual void StopHub() = 0;
+  virtual void RestartHub() = 0;
+
 }; // cDCServerBase
 
 }; // nDCServer

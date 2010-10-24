@@ -73,7 +73,7 @@ cConn::cConn(tSocket sock, cServer *s, tConnType st) :
     msIp = inet_ntoa(saddr_in->sin_addr); /** String ip */
     miPort = ntohs(saddr_in->sin_port); /** Port */
 
-    GetMac();
+    if(mServer->mbMAC) GetMac();
   }
 }
 

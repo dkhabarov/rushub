@@ -128,7 +128,8 @@ void cDCConfig::AddVars()
   Add("iLenCmdOFM",           mMaxCmdLen[eDC_OPFORCEMOVE],  512   );
   Add("iLenCmdGetINFO",       mMaxCmdLen[eDC_GETINFO],      128   );
   Add("iLenCmdUnknown",       mMaxCmdLen[eDC_UNKNOWN],      128   );
-  
+
+  Add("bMAC",                 mDCServer->mbMAC,             false);
   Add("bWebServer",           mbWebServer,                  false);
   Add("bDisableNoDCCmd",      mbDisableNoDCCmd,             true);
   Add("bNicklistOnLogin",     mbNicklistOnLogin,            true);
@@ -141,8 +142,7 @@ void cDCConfig::AddVars()
   Add("bSendUserIp",          mbSendUserIp,                 true);
   Add("bRegMainBot",          mbRegMainBot,                 true);
   Add("bMainBotKey",          mbMainBotKey,                 true);
-  
-  
+
   Add("sWebServerIP",         msWebServerIP,                string("0.0.0.0") );
   Add("sHubIP",               mDCServer->msIp,              string("0.0.0.0") );
   Add("sSubPorts",            msSubPorts,                   string("")        );

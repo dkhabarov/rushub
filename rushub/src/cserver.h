@@ -94,6 +94,8 @@ public:
   int miTimerServPeriod; /** Serv period (msec) */
   int miTimerConnPeriod; /** Conn period (msec) */
 
+  bool mbMAC; /** allow to define MAC address */
+
 public:
 
   cServer(const string sSep, int iPort = 411);
@@ -167,7 +169,7 @@ protected:
   #endif
 
   bool mbRun; /** Run-flag */
-  int miMainLoopCode; /** MainLoopCode (0) */
+  int miMainLoopCode; /** MainLoopCode (0) If 1 then restart hub! */
   bool mbQuitAction; /** Quit action flag */
 
   struct sTimes { /** Timers */

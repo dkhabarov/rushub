@@ -25,12 +25,14 @@
 #ifdef _WIN32
   #define SIGQUIT 1000
   #define SIGHUP 1001
-  #pragma comment(lib, "config.lib")
-  #pragma comment(lib, "utils.lib")
-  #pragma comment(lib, "server.lib")
-  #pragma comment(lib, "webserver.lib")
-  #pragma comment(lib, "plugin.lib")
-  #pragma comment(lib, "tinyxml.lib")
+  #ifdef MODULAR
+    #pragma comment(lib, "config.lib")
+    #pragma comment(lib, "utils.lib")
+    #pragma comment(lib, "server.lib")
+    #pragma comment(lib, "webserver.lib")
+    #pragma comment(lib, "plugin.lib")
+    #pragma comment(lib, "tinyxml.lib")
+  #endif
 #endif
 
 using nDCServer::cDCServer;
@@ -66,34 +68,40 @@ void SigHandler(int iSig) {
 //int runHub(int argc, char **argv, bool bService) {
 int runHub(int, char **, bool) {
 
-  string sConfPath, sExPath;
-  ExecPath(sConfPath);
-  sExPath = sConfPath;
+  int iResult = 1;
 
-  #ifdef _WIN32
-//    cService Service;
-//    if(Service.Cli(argc, argv, sConfPath, sExPath) <= 0) return -1;
-  #endif
+  while(iResult == 1) {
 
-  /** Creating the server */
-  cDCServer Server(sConfPath, sExPath);
+    string sConfPath, sExPath;
+    ExecPath(sConfPath);
+    sExPath = sConfPath;
 
-  /** Listening all ports */
-  if(Server.Listening(0) != 0) {
-    if(Server.ErrLog(0))
-      Server.LogStream() << "Listening failed" << endl;
-    return -2;
+    #ifdef _WIN32
+//      cService Service;
+//      if(Service.Cli(argc, argv, sConfPath, sExPath) <= 0) return -1;
+    #endif
+
+    /** Creating the server */
+    cDCServer Server(sConfPath, sExPath);
+
+    /** Listening all ports */
+    if(Server.Listening(0) != 0) {
+      if(Server.ErrLog(0))
+        Server.LogStream() << "Listening failed" << endl;
+      return -2;
+    }
+
+    #ifdef _WIN32
+//      if(bService && Service.Start() < 0) return -3;
+    #endif
+
+    iResult = Server.Run(); // 1 - restart
+
+    #ifdef _WIN32
+//      if(bService && Service.Stop() < 0) return -4;
+    #endif
+
   }
-
-  #ifdef _WIN32
-//    if(bService && Service.Start() < 0) return -3;
-  #endif
-
-  int iResult = Server.Run();
-
-  #ifdef _WIN32
-//    if(bService && Service.Stop() < 0) return -4;
-  #endif
 
   return iResult;
 }

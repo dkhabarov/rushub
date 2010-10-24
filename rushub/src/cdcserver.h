@@ -187,6 +187,9 @@ public:
   int RegBot(const string & sNick, const string & sMyINFO, const string & sIP, bool bKey = true);
   int UnregBot(const string & sNick);
 
+  void StopHub() { Stop(0); }
+  void RestartHub() { Stop(1); }
+
 protected:
 
   /** Function action when joining the client */
