@@ -176,12 +176,16 @@ void ExecPath(string & sPath) {
     sPath.append("/");
   #else
     char * sHomeDir = getenv("HOME");
-    if(sHomeDir) {
-      sPath = sHomeDir;
-      sPath += "/rushub/";
-    } else {
-      sPath = "./rushub/";
-    }
+    char * sP = new char[256];
+	  string tmp;
+	  if(sHomeDir) {
+	    tmp = sHomeDir;
+	    tmp += "/rushub";
+	    strcpy(sP, tmp.c_str());
+	  } else {
+	    strcpy(sP, "./.rushub");
+	  }
+    sPath = sP;
   #endif
 }
 
