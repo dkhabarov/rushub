@@ -74,6 +74,9 @@ int runHub(int, char **, bool) {
 
     string sConfPath, sExPath;
     ExecPath(sConfPath);
+    const char * sDir = sConfPath.c_str();
+    if(!DirExists(sDir))
+      mkdir(sDir, NULL);
     sExPath = sConfPath;
 
     #ifdef _WIN32

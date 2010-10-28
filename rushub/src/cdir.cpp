@@ -18,6 +18,7 @@
  */
 
 #include "cdir.h"
+#include <string.h>
 
 #ifdef _WIN32
 
@@ -176,16 +177,12 @@ void ExecPath(string & sPath) {
     sPath.append("/");
   #else
     char * sHomeDir = getenv("HOME");
-    char * sP = new char[256];
-	  string tmp;
 	  if(sHomeDir) {
-	    tmp = sHomeDir;
-	    tmp += "/rushub";
-	    strcpy(sP, tmp.c_str());
+	    sPath = sHomeDir;
+	    sPath += "/rushub";
 	  } else {
-	    strcpy(sP, "./.rushub");
+	    sPath = "./.rushub";
 	  }
-    sPath = sP;
   #endif
 }
 
