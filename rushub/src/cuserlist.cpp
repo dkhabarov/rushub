@@ -106,7 +106,7 @@ string &cUserList::GetNickList()
 /**
  Sendind data to all users from the list
  sData - sending data
- bUseCache - true - not send and save to cache, false - send data and sand cache
+ bUseCache - true - not send and save to cache, false - send data and send cache
  bAddSep - add sep to end of list
  */
 void cUserList::SendToAll(const string &sData, bool bUseCache, bool bAddSep)

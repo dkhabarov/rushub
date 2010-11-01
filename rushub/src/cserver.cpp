@@ -53,8 +53,7 @@ cServer::cServer(const string sSep, int iPort) :
   miTimerConnPeriod(4000),
   mbMAC(true),
   mNowConn(NULL),
-  miMainLoopCode(0),
-  mbQuitAction(false)
+  miMainLoopCode(0)
 {
   //mConnFactory = new cConnFactory(NULL, this);
 
@@ -198,9 +197,8 @@ int cServer::Run()
       mTime.Get(); /** Current time */
       Step(); /** Server's step */
 
-      /** Timers (miTimerServPeriod (=100) msec) */
-      if(abs(int(now.Get() - mTimes.mServ)) >= miTimerServPeriod || mbQuitAction) { /** transfer of time */
-        mbQuitAction = false;
+      /** Timers (100 msec) */
+      if(abs(int(now.Get() - mTimes.mServ)) >= 100) { /** transfer of time */
         mTimes.mServ = now;
         OnTimerBase(now);
       }

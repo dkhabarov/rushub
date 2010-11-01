@@ -41,16 +41,14 @@ class cDCUser;
 class cUserBase;
 
 /** The structure, allowing add and delete the users. Quick iterations cycle for sending */
-class cUserList : public cObj, public tcHashTable<cUserBase*>
-{
+class cUserList : public cObj, public tcHashTable<cUserBase*> {
 
 friend class cDCServer;
 
 public:
 
   /** Unary function for sending data to users */
-  struct ufSend : public unary_function<void, iterator>
-  {
+  struct ufSend : public unary_function<void, iterator> {
     string &msData; /** Data for sending */
     bool mbProfile;
     unsigned long miProfile;
@@ -60,8 +58,7 @@ public:
   };
 
   /** Unary function for sending data sDataS+sNick+sDataE to each user */
-  struct ufSendWithNick : public unary_function<void, iterator>
-  {
+  struct ufSendWithNick : public unary_function<void, iterator> {
     string &msDataStart, &msDataEnd; /** Data for sending */
     bool mbProfile;
     unsigned long miProfile;
@@ -80,15 +77,14 @@ public:
   };
 
   /** Unary function for constructing nick-list */
-  struct ufDoNickList : public unary_function<void, iterator>
-  {
+  struct ufDoNickList : public unary_function<void, iterator> {
     string &msList; /** List */
     string msStart; /** Prefix */
     string msSep; /** Separator */
 
     ufDoNickList(string &sList) : msList(sList){}
     virtual ~ufDoNickList(){}
-    virtual void Clear(){ /** Clear var and record prefix */
+    virtual void Clear() { /** Clear var and record prefix */
       msList.erase(0, msList.size());
       msList.append(msStart.c_str(), msStart.size());
     }
@@ -116,8 +112,7 @@ public:
   cUserList(string sName, bool bKeepNickList = false);
   virtual ~cUserList(){}
 
-  tKeyType Nick2Key(const string &sNick)
-  {
+  tKeyType Nick2Key(const string &sNick) {
     string sKey;
     sKey.assign(sNick);
     ::std::transform(sKey.begin(), sKey.end(), sKey.begin(), ::tolower);

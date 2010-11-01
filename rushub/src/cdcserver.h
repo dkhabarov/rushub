@@ -123,8 +123,8 @@ public:
   cUserList mIpList; /** Ip list */
   cUserList mActiveList; /** Active user list */
   cUserList mHelloList; /** Hello user list */
-  cUserList mEnterList;
-  cUserList mChatList;
+  cUserList mEnterList; /** Enter list */
+  cUserList mChatList; /** Chat list */
   
   int miTotalUserCount; /** Total number of the users */
   __int64 miTotalShare; /** Total hub share size */

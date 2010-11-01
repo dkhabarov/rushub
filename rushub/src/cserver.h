@@ -170,7 +170,6 @@ protected:
 
   bool mbRun; /** Run-flag */
   int miMainLoopCode; /** MainLoopCode (0) If 1 then restart hub! */
-  bool mbQuitAction; /** Quit action flag */
 
   struct sTimes { /** Timers */
     cTime mServ; /** (miTimerServPeriod) */

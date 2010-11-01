@@ -812,7 +812,7 @@ void cDCProtocol::SendMode(cDCConn *dcconn, const string & sStr, int iMode, cUse
   if(sStr.substr(sStr.size() - 1, 1) != DC_SEPARATOR) bAddSep = true;
 
   if(iMode == 0) /** Send to all */
-    UL.SendToAll(sStr, true, bAddSep);
+    UL.SendToAll(sStr, false, bAddSep);
   else if(iMode == 3) { /** Send to all except current user */
     if(dcconn->mDCUser->mbInUserList) {
       dcconn->mDCUser->mbInUserList = false;

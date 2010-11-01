@@ -66,7 +66,6 @@ cDCServer::cDCServer(const string & sConfPath, const string & sExPath):
   mDCLang.SetServer(this);
   mPluginList.SetServer(this);
 
-
   if(!mDCConfig.Load()) mDCConfig.Save();
   if(!mDCLang.Load()) mDCLang.Save();
 
@@ -167,18 +166,19 @@ int cDCServer::Listening(int iPort) {
 
 int cDCServer::OnTimer(cTime &now) {
 
-  mHelloList.FlushCache();
-  mDCUserList.FlushCache();
-  mDCBotList.FlushCache();
-  mEnterList.FlushCache();
-  mOpList.FlushCache();
-  mIpList.FlushCache();
-  mChatList.FlushCache();
-  mActiveList.FlushCache();
-
   /** Execute each second */
-  if(abs(int(now - mChecker)) >= 1000) {
+  if(abs(int(now - mChecker)) >= miTimerServPeriod) {
+
     mChecker = now;
+
+    mHelloList.FlushCache();
+    mDCUserList.FlushCache();
+    mDCBotList.FlushCache();
+    mEnterList.FlushCache();
+    mOpList.FlushCache();
+    mIpList.FlushCache();
+    mChatList.FlushCache();
+    mActiveList.FlushCache();
 
     if(0 < mMeanFrequency.mNumFill) {
       double iFrequency = mMeanFrequency.GetMean(mTime);
@@ -612,7 +612,6 @@ bool cDCServer::RemoveFromDCUserList(cDCUser *User) {
 
     /** Delay in sending MyINFO (and Quit) */
     mDCUserList.SendToAll(sMsg, true/*mDCConfig.mbDelayedMyINFO*/, false);
-    mbQuitAction = true;
   }
   return true;
 }

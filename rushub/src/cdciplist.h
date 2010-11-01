@@ -26,11 +26,9 @@
 using namespace nUtils;
 using namespace std;
 
-namespace nDCServer
-{
+namespace nDCServer {
 
-class cDCIPList : public cObj
-{
+class cDCIPList : public cObj {
 
 protected:
 
@@ -63,8 +61,7 @@ public:
     return false;
   }
 
-  class iterator
-  {
+  class iterator {
   public:
     tItem * mItem; /** Pointer on element of the array */
     iterator() : mItem(NULL){}
@@ -87,7 +84,9 @@ public:
     it.mItem = mIPList.Find(iIP);
     return it;
   }
-  iterator end(){ return iterator(); }
+  iterator end() {
+    return iterator();
+  }
 
 protected:
 

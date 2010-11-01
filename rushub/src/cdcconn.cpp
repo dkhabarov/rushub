@@ -18,7 +18,7 @@
  */
 
 #include "cdcconn.h"
-#include "cdcserver.h" /** Server() */
+#include "cdcserver.h" /** Server() and cUserList */
 #include "cdcuser.h" /** for mDCUser */
 
 namespace nDCServer {

@@ -164,7 +164,7 @@ public:
   virtual int GetPortConn() const { return miPortConn; }     //< Get connection port
   virtual int GetProfile() const { return miProfile; }       //< Get profile
   virtual unsigned long GetNetIp() const { return miNetIp; }       //< Get numeric IP
-  virtual void SetProfile(int iProfile){ miProfile = iProfile; }
+  virtual void SetProfile(int iProfile) { miProfile = iProfile; }
   virtual void SetData(const string & sData){ msData = sData; }
   virtual long GetEnterTime() const { return mTimes.mKey.Sec(); }
 
@@ -185,10 +185,10 @@ public:
 
   virtual void CloseNow(int iReason = 0);
   virtual void CloseNice(int msec, int iReason = 0);
-  virtual void Disconnect(){CloseNice(9000, eCR_PLUGIN);} // for plugins
+  virtual void Disconnect(){ CloseNice(9000, eCR_PLUGIN); } // for plugins
 
   /** Pointer to the server */
-  inline cDCServer * Server(){return (cDCServer*) mServer;}
+  inline cDCServer * Server(){ return (cDCServer*) mServer; }
   bool SetUser(cDCUser * User); /** Set user object for current connection */
 
 private:

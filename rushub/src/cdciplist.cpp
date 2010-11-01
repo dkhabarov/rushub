@@ -20,15 +20,12 @@
 #include "cdciplist.h"
 #include "cdcconn.h"
 
-namespace nDCServer
-{
+namespace nDCServer {
 
-cDCIPList::cDCIPList() : cObj("cDCIPList"), mbFlush(false), mbAddSep(false)
-{
+cDCIPList::cDCIPList() : cObj("cDCIPList"), mbFlush(false), mbAddSep(false) {
 }
 
-cDCIPList::~cDCIPList()
-{
+cDCIPList::~cDCIPList() {
   tItem * Item;
   tIPList::iterator it;
   for(it = mIPList.begin(); it != mIPList.end(); ++it) {
@@ -38,8 +35,7 @@ cDCIPList::~cDCIPList()
   }
 }
 
-bool cDCIPList::Add(cDCConn* Conn)
-{
+bool cDCIPList::Add(cDCConn* Conn) {
   tItem * Item = mIPList.Find(Conn->GetNetIp());
   if(Item == NULL)
     mIPList.Add(Conn->GetNetIp(), new tItem(Conn->mSocket, Conn));
@@ -48,8 +44,7 @@ bool cDCIPList::Add(cDCConn* Conn)
   return true;
 }
 
-bool cDCIPList::Remove(cDCConn* Conn)
-{
+bool cDCIPList::Remove(cDCConn* Conn) {
   tItem *Item = NULL, *Items = mIPList.Find(Conn->GetNetIp());
   if(Items == NULL) return false;
   Item = Items;
@@ -64,14 +59,15 @@ bool cDCIPList::Remove(cDCConn* Conn)
   return true;
 }
 
-void cDCIPList::SendToIP(const char *sIP, string &sData, unsigned long iProfile, bool bFlush, bool bAddSep)
-{ SendToIP(cConn::Ip2Num(sIP), sData, iProfile, bFlush, bAddSep); }
+void cDCIPList::SendToIP(const char *sIP, string &sData, unsigned long iProfile, bool bFlush, bool bAddSep) {
+  SendToIP(cConn::Ip2Num(sIP), sData, iProfile, bFlush, bAddSep);
+}
 
-void cDCIPList::SendToIPWithNick(const char *sIP, string &sStart, string &sEnd, unsigned long iProfile, bool bFlush, bool bAddSep)
-{ SendToIPWithNick(cConn::Ip2Num(sIP), sStart, sEnd, iProfile, bFlush, bAddSep); }
+void cDCIPList::SendToIPWithNick(const char *sIP, string &sStart, string &sEnd, unsigned long iProfile, bool bFlush, bool bAddSep) {
+  SendToIPWithNick(cConn::Ip2Num(sIP), sStart, sEnd, iProfile, bFlush, bAddSep);
+}
 
-void cDCIPList::SendToIP(unsigned long iIP, string &sData, unsigned long iProfile, bool bFlush, bool bAddSep)
-{
+void cDCIPList::SendToIP(unsigned long iIP, string &sData, unsigned long iProfile, bool bFlush, bool bAddSep) {
   miProfile = iProfile;
   msData1 = sData;
   mbFlush = bFlush;
@@ -83,8 +79,7 @@ void cDCIPList::SendToIP(unsigned long iIP, string &sData, unsigned long iProfil
   }
 }
 
-void cDCIPList::SendToIPWithNick(unsigned long iIP, string &sStart, string &sEnd, unsigned long iProfile, bool bFlush, bool bAddSep)
-{
+void cDCIPList::SendToIPWithNick(unsigned long iIP, string &sStart, string &sEnd, unsigned long iProfile, bool bFlush, bool bAddSep) {
   miProfile = iProfile;
   msData1 = sStart;
   msData2 = sEnd;
@@ -97,32 +92,26 @@ void cDCIPList::SendToIPWithNick(unsigned long iIP, string &sStart, string &sEnd
   }
 }
 
-int cDCIPList::Send(cDCConn * Conn)
-{
+int cDCIPList::Send(cDCConn * Conn) {
   if(!Conn || !Conn->mbIpRecv) return 0;
-  if(!miProfile)
-    return Conn->Send(msData1, mbAddSep, mbFlush);
-  else {
-    static int iProfile;
-    iProfile = Conn->miProfile + 1;
+  if(miProfile) {
+    int iProfile = Conn->miProfile + 1;
     if(iProfile < 0) iProfile = -iProfile;
     if(iProfile > 31) iProfile = (iProfile % 32) - 1;
     if(miProfile & (1 << iProfile))
       return Conn->Send(msData1, mbAddSep, mbFlush);
+  } else {
+    return Conn->Send(msData1, mbAddSep, mbFlush);
   }
   return 0;
 }
 
-int cDCIPList::SendWithNick(cDCConn * Conn)
-{
+int cDCIPList::SendWithNick(cDCConn * Conn) {
   if(!Conn || !Conn->mDCUser || !Conn->mbIpRecv) return 0;
   string sStr(msData1);
   sStr.append(Conn->mDCUser->msNick);
-  if(!miProfile)
-    return Conn->Send(sStr.append(msData2), mbAddSep, mbFlush);
-  else {
-    static int iProfile;
-    iProfile = Conn->miProfile + 1;
+  if(miProfile) {
+    int iProfile = Conn->miProfile + 1;
     if(iProfile < 0) iProfile = -iProfile;
     if(iProfile > 31) iProfile = (iProfile % 32) - 1;
     if(miProfile & (1 << iProfile)) {
@@ -130,6 +119,8 @@ int cDCIPList::SendWithNick(cDCConn * Conn)
       sStr.append(Conn->mDCUser->msNick);
       return Conn->Send(sStr.append(msData2), mbAddSep, mbFlush);
     }
+  } else {
+    return Conn->Send(sStr.append(msData2), mbAddSep, mbFlush);
   }
   return 0;
 }

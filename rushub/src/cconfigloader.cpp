@@ -93,7 +93,7 @@ bool cConfigLoader::LoadFromXml()
 bool cConfigLoader::SaveToXml()
 {
   TiXmlDocument file(msFileName.c_str());
-  file.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
+  file.InsertEndChild(TiXmlDeclaration("1.0", "windows-1251", "yes"));
   TiXmlElement MainItem(INTERNALNAME);
   MainItem.SetAttribute("Version", INTERNALVERSION);
   for(cConfigListBase::tHLMIt it = mConfigList->mList.begin(); it != mConfigList->mList.end(); ++it) {
