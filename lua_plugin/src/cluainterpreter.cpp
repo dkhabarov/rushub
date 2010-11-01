@@ -19,6 +19,7 @@
 
 #include "cluainterpreter.h"
 #include "clua.h" /** for dirs */
+#include <string.h>
 
 using namespace std;
 
