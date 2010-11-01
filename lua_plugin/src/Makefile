@@ -43,4 +43,4 @@ $(CURDIR)/ctimerlist.o: $(CURDIR)/ctimerlist.cpp $(CURDIR)/clist.h $(CURDIR)/cti
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
 clean:
-	-rm -f $(CURDIR)/api.o $(CURDIR)/cdir.o $(CURDIR)/clua.o $(CURDIR)/cluainterpreter.o $(CURDIR)/ctaskslist.o $(CURDIR)/ctimerlist.o $(LIB)
+	-rm -f $(OBJS) lua.so
