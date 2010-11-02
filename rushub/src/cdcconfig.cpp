@@ -65,6 +65,7 @@ void cDCConfig::AddVars()
   Add("iMaxNickLen",          miMaxNickLen,                 32);
   Add("iMinNickLen",          miMinNickLen,                 2);
   Add("iWebTimeout",          miWebTimeout,                 30);
+  Add("iUsersLimit",          miUsersLimit,                 -1);
   
   Add("iFloodCountReconnIp",  miFloodCountReconnIp,         1);
   Add("iFloodCountMyINFO",    miFloodCountMyINFO,           6);

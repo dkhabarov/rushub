@@ -78,6 +78,7 @@ enum {
   eCR_LOGIN_ERR,    //< Bad login sequence
   eCR_KICKED,       //< User was kicked
   eCR_FORCEMOVE,    //< User was force moved on other hub
+  eCR_USERS_LIMIT,  //< User's limit
   eCR_PLUGIN,
   eCR_UNKNOWN_CMD,  //< Unknown cmd
   eCR_FLOOD

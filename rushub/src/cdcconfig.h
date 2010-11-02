@@ -49,6 +49,8 @@ public:
   int miStartPing;        //< Time interval in sec, after which begins ping user
   int miMaxPassiveRes;    //< Max results in the passive search
   int miWebServerPort;    //< Web-server port
+
+  int miUsersLimit;  //< User's limit
   
   unsigned long miWebStrSizeMax; //< Max size of web cmd
 

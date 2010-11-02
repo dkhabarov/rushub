@@ -222,6 +222,12 @@ int cDCProtocol::DC_ValidateNick(cDCParser *dcparser, cDCConn *dcconn) {
     return -2;
   }
 
+  /** Global user's limit */
+  if(mDCServer->mDCConfig.miUsersLimit >= 0 && mDCServer->miTotalUserCount >= mDCServer->mDCConfig.miUsersLimit) {
+    dcconn->CloseNice(9000, eCR_USERS_LIMIT);
+    return -3;
+  }
+
   dcconn->SetLSFlag(eLS_ALOWED);
   ++mDCServer->miTotalUserCount;
 
@@ -235,7 +241,7 @@ int cDCProtocol::DC_ValidateNick(cDCParser *dcparser, cDCConn *dcconn) {
     if(mDCServer->mCalls.mOnValidateNick.CallAll(dcconn, dcparser)) {
       dcconn->Send(Append_DC_GetPass(sMsg), false); // newPolitic /** We are sending the query for reception of the password */
       dcconn->SetTimeOut(eTO_PASS, mDCServer->mDCConfig.miTimeout[eTO_PASS], mDCServer->mTime);
-      return -3;
+      return -4;
     }
   #endif
 
