@@ -163,7 +163,7 @@ int cDCProtocol::DC_Supports(cDCParser *dcparser, cDCConn *dcconn) {
   #endif
 
   static string sMsg("$Supports UserCommand NoGetINFO NoHello UserIP2"DC_SEPARATOR);
-  dcconn->Send(sMsg, false, false); // newPolitic & not
+  dcconn->Send(sMsg, false, false);
 
   return 0;
 }
@@ -224,6 +224,8 @@ int cDCProtocol::DC_ValidateNick(cDCParser *dcparser, cDCConn *dcconn) {
 
   /** Global user's limit */
   if(mDCServer->mDCConfig.miUsersLimit >= 0 && mDCServer->miTotalUserCount >= mDCServer->mDCConfig.miUsersLimit) {
+		if(dcconn->Log(3)) dcconn->LogStream() << "User " << sNick << " was disconnected (user's limit: " << mDCServer->mDCConfig.miUsersLimit << ")" << endl;
+		mDCServer->SendToUser(dcconn, mDCServer->mDCLang.msUsersLimit.c_str(), (char*)mDCServer->mDCConfig.msHubBot.c_str());
     dcconn->CloseNice(9000, eCR_USERS_LIMIT);
     return -3;
   }
@@ -239,7 +241,7 @@ int cDCProtocol::DC_ValidateNick(cDCParser *dcparser, cDCConn *dcconn) {
   
   #ifndef WITHOUT_PLUGINS
     if(mDCServer->mCalls.mOnValidateNick.CallAll(dcconn, dcparser)) {
-      dcconn->Send(Append_DC_GetPass(sMsg), false); // newPolitic /** We are sending the query for reception of the password */
+      dcconn->Send(Append_DC_GetPass(sMsg)); /** We are sending the query for reception of the password */
       dcconn->SetTimeOut(eTO_PASS, mDCServer->mDCConfig.miTimeout[eTO_PASS], mDCServer->mTime);
       return -4;
     }
@@ -250,7 +252,7 @@ int cDCProtocol::DC_ValidateNick(cDCParser *dcparser, cDCConn *dcconn) {
   dcconn->SetTimeOut(eTO_MYINFO, mDCServer->mDCConfig.miTimeout[eTO_MYINFO], mDCServer->mTime);
   dcconn->SetLSFlag(eLS_PASSWD); /** Does not need password */
   
-  dcconn->Send(Append_DC_Hello(sMsg, dcconn->mDCUser->msNick), false); // newPolitic /** Protection from change the command */
+  dcconn->Send(Append_DC_Hello(sMsg, dcconn->mDCUser->msNick)); /** Protection from change the command */
   return 0;
 }
 
@@ -281,7 +283,7 @@ int cDCProtocol::DC_MyPass(cDCParser *dcparser, cDCConn *dcconn) {
     sMsg.append(dcconn->mDCUser->msNick);
     sMsg.append(DC_SEPARATOR);
   }
-  dcconn->Send(sMsg, false); // newPolitic
+  dcconn->Send(sMsg);
   dcconn->ClearTimeOut(eTO_PASS);
   dcconn->SetTimeOut(eTO_MYINFO, mDCServer->mDCConfig.miTimeout[eTO_MYINFO], mDCServer->mTime);
   return 0;
@@ -365,9 +367,9 @@ int cDCProtocol::DC_MyINFO(cDCParser *dcparser, cDCConn *dcconn) {
   if(iMode != 1 && dcconn->mDCUser->mbInUserList) {
     if(sOldMyINFO != dcconn->mDCUser->GetMyINFO()) {
       if(dcconn->mDCUser->mbHide)
-        dcconn->Send(dcparser->mStr, true); // newPolitic // send to self only
+        dcconn->Send(dcparser->mStr, true); // send to self only
       else
-        SendMode(dcconn, dcparser->mStr, iMode, mDCServer->mDCUserList);
+        SendMode(dcconn, dcparser->mStr, iMode, mDCServer->mDCUserList, true); // Use cache for send to all
         //mDCServer->mDCUserList.SendToAll(dcparser->mStr, true/*mDCServer->mDCConfig.mbDelayedMyINFO*/); // send to all
     }
   } else if(!dcconn->mDCUser->mbInUserList) {
@@ -412,7 +414,7 @@ int cDCProtocol::DC_Chat(cDCParser *dcparser, cDCConn *dcconn) {
   //cout << Key << endl;
 
   /** Sending message */
-  SendMode(dcconn, dcparser->mStr, iMode, mDCServer->mChatList);
+  SendMode(dcconn, dcparser->mStr, iMode, mDCServer->mChatList, false); // Don't use cache for send to all
   return 0;
 }
 
@@ -444,7 +446,7 @@ int cDCProtocol::DC_To(cDCParser *dcparser, cDCConn *dcconn) {
   cDCUser *User = (cDCUser *)mDCServer->mDCUserList.GetUserBaseByNick(sNick);
   if(!User) return -2;
 
-  User->Send(dcparser->mStr, true); // newPolitic
+  User->Send(dcparser->mStr, true);
   return 0;
 }
 
@@ -485,11 +487,11 @@ int cDCProtocol::DC_Search(cDCParser *dcparser, cDCConn *dcconn) {
         dcconn->CloseNice(9000, eCR_SYNTAX);
         return -1;
       }
-      SendMode(dcconn, dcparser->mStr, iMode, mDCServer->mDCUserList);
+      SendMode(dcconn, dcparser->mStr, iMode, mDCServer->mDCUserList, true); // Use cache for send to all
       break;
     case eDC_SEARCH_PAS:
       dcconn->miSRCounter = 0; /** Zeroizing result counter of the passive search */
-      SendMode(dcconn, dcparser->mStr, iMode, mDCServer->mActiveList);
+      SendMode(dcconn, dcparser->mStr, iMode, mDCServer->mActiveList, true); // Use cache for send to all
       break;
     case eDC_MSEARCH:
       if(mDCServer->mDCConfig.mbCheckSearchIp && (dcconn->msIp != dcparser->ChunkString(eCH_AS_IP))) {
@@ -505,11 +507,11 @@ int cDCProtocol::DC_Search(cDCParser *dcparser, cDCConn *dcconn) {
       sMsg += dcparser->ChunkString(eCH_AS_ADDR);
       sMsg += ' ';
       sMsg += dcparser->ChunkString(eCH_AS_QUERY);
-      SendMode(dcconn, sMsg, iMode, mDCServer->mDCUserList);
+      SendMode(dcconn, sMsg, iMode, mDCServer->mDCUserList, true); // Use cache for send to all
       break;
     case eDC_MSEARCH_PAS:
       dcconn->miSRCounter = 0; /** Zeroizing result counter of the passive search */
-      SendMode(dcconn, dcparser->mStr, iMode, mDCServer->mActiveList);
+      SendMode(dcconn, dcparser->mStr, iMode, mDCServer->mActiveList, true); // Use cache for send to all
       break;
     default: return -4;
   }
@@ -552,7 +554,7 @@ int cDCProtocol::DC_SR(cDCParser *dcparser, cDCConn *dcconn) {
   /** Sending cmd */
   if(!mDCServer->mDCConfig.miMaxPassiveRes || (User->mDCConn->miSRCounter++ < unsigned(mDCServer->mDCConfig.miMaxPassiveRes))) {
     string sStr(dcparser->mStr, 0, dcparser->mChunks[eCH_SR_TO].first - 1); /** Remove nick on the end of cmd */
-    User->mDCConn->Send(sStr, true, false); // newPolitic & not
+    User->mDCConn->Send(sStr, true, false);
   }
   return 0;
 }
@@ -585,7 +587,7 @@ int cDCProtocol::DC_ConnectToMe(cDCParser *dcparser, cDCConn *dcconn) {
     if(mDCServer->mCalls.mOnConnectToMe.CallAll(dcconn, dcparser)) return -2;
   #endif
 
-  User->Send(dcparser->mStr, true); // newPolitic
+  User->Send(dcparser->mStr, true);
   return 0;
 }
 
@@ -619,7 +621,7 @@ int cDCProtocol::DC_RevConnectToMe(cDCParser *dcparser, cDCConn *dcconn) {
     if(mDCServer->mCalls.mOnRevConnectToMe.CallAll(dcconn, dcparser)) return -2;
   #endif
 
-  other->Send(dcparser->mStr, true); // newPolitic
+  other->Send(dcparser->mStr, true);
   return 0;
 }
 
@@ -674,7 +676,7 @@ int cDCProtocol::DC_GetINFO(cDCParser *dcparser, cDCConn *dcconn) {
 
   //if(!(dcconn->mFeatures & eSF_NOGETINFO)){
   if(!User->mbHide) {
-    dcconn->Send(string(User->GetMyINFO()), true, false); // newPolitic & not
+    dcconn->Send(string(User->GetMyINFO()), true, false);
   }
   return 0;
 }
@@ -813,16 +815,16 @@ string & cDCProtocol::Append_DC_UserIP(string &sStr, const string &sNick, const 
 }
 
 
-void cDCProtocol::SendMode(cDCConn *dcconn, const string & sStr, int iMode, cUserList & UL) {
+void cDCProtocol::SendMode(cDCConn *dcconn, const string & sStr, int iMode, cUserList & UL, bool bUseCache) {
   bool bAddSep = false;
   if(sStr.substr(sStr.size() - 1, 1) != DC_SEPARATOR) bAddSep = true;
 
   if(iMode == 0) /** Send to all */
-    UL.SendToAll(sStr, false, bAddSep);
+    UL.SendToAll(sStr, bUseCache, bAddSep);
   else if(iMode == 3) { /** Send to all except current user */
     if(dcconn->mDCUser->mbInUserList) {
       dcconn->mDCUser->mbInUserList = false;
-      UL.SendToAll(sStr, false, bAddSep);
+      UL.SendToAll(sStr, bUseCache, bAddSep);
       dcconn->mDCUser->mbInUserList = true;
     }
   } else if(iMode == 4) { /** Send to all except users with ip of the current user */
@@ -835,7 +837,7 @@ void cDCProtocol::SendMode(cDCConn *dcconn, const string & sStr, int iMode, cUse
         ul.push_back(conn);
       }
     }
-    UL.SendToAll(sStr, false, bAddSep);
+    UL.SendToAll(sStr, bUseCache, bAddSep);
     for(vector<cDCConn*>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it)
       (*ul_it)->mDCUser->mbInUserList = true;
   }
@@ -872,8 +874,8 @@ int cDCProtocol::SendNickList(cDCConn *dcconn) {
     if(dcconn->mDCUser->mbInUserList && dcconn->mDCUser->mbInIpList) {
       if(dcconn->Log(3)) dcconn->LogStream() << "Sending Iplist" << endl;
       // seperator "|" was not added in GetIpList function, because seperator was "$$"
-      dcconn->Send(mDCServer->mDCUserList.GetIpList(), true); // newPolitic
-    } else {
+      dcconn->Send(mDCServer->mDCUserList.GetIpList(), true);
+		} else {
       if(!dcconn->SendBufIsEmpty()) // buf would not flush, if it was empty
         dcconn->Flush(); // newPolitic
       else {

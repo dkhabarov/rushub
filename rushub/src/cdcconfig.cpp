@@ -215,6 +215,7 @@ void cDCLang::AddVars()
   Add("sBadNickLen", msBadNickLen, string("Недопустимая длина ника. Допустимая длина ника от %[min] до %[max] символов."));
   Add("sBadChars", msBadChars, string("Недопустимые символы в нике."));
   Add("sFreqClientPing", msFreqClientPing, string("Ваш клиент слишком часто пингует хаб."));
+	Add("sUsersLimit", msUsersLimit, string("Достигнут придел по количеству подключенных пользователей."));
   
   Add("sFloodMyINFO", msFloodMyINFO, string("Пожалуйста не флудите командой MyINFO."));
   Add("sFloodSearch", msFloodSearch, string("Пожалуйста не используйте поиск так часто."));

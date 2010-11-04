@@ -440,7 +440,7 @@ int cConn::Remaining() {
 /** Write data in sending buffer and send to conn */
 int cConn::WriteData(const string &sData, bool bFlush) {
   if(msSendBuf.size() + sData.size() >= miSendBufMax) {
-    if(Log(2)) LogStream() << "Sending buffer has big size, closing" << endl;
+    if(Log(0)) LogStream() << "Sending buffer has big size, closing" << endl;
     CloseNow();
     return -1;
   }
@@ -562,9 +562,9 @@ int cConn::Send(const char *buf, size_t &len) {
   #else
         0);
   #endif
-      } else {
-        static int tolen = sizeof(struct sockaddr);
-        n = sendto(mSocket, buf + total, bytesleft, 0, (struct sockaddr *)&mAddrIN, tolen);
+      //} else {
+      //  static int tolen = sizeof(struct sockaddr);
+      //  n = sendto(mSocket, buf + total, bytesleft, 0, (struct sockaddr *)&mAddrIN, tolen);
       }
     } catch(...) {
       if(ErrLog(1))

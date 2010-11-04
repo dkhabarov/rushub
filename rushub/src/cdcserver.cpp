@@ -334,7 +334,7 @@ void cDCServer::AddToOps(cDCUser * User) {
       string sMsg;
       mOpList.AddWithNick(User->msNick, User);
       if(User->mbHide) {
-        User->Send(cDCProtocol::Append_DC_OpList(sMsg, User->msNick), false); // newPolitic
+        User->Send(cDCProtocol::Append_DC_OpList(sMsg, User->msNick), false, true);
       } else {
         mDCUserList.SendToAll(cDCProtocol::Append_DC_OpList(sMsg, User->msNick), true/*mDCConfig.mbDelayedMyINFO*/, false);
         mEnterList.SendToAll(sMsg, true/*mDCConfig.mbDelayedMyINFO*/, false);
@@ -362,10 +362,10 @@ void cDCServer::DelFromOps(cDCUser * User) {
           User->Send(cDCProtocol::Append_DC_Hello(sMsg2, User->msNick), false, false);
 
         if((User->mDCConn->mFeatures & eSF_USERIP2) || User->mbInIpList)
-          User->Send(cDCProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->GetIp()), false); // newPolitic
+          User->Send(cDCProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->GetIp()));
         else {
           s.clear();
-          User->Send(s); // newPolitic
+          User->Send(s);
         }
       } else {
         mDCUserList.SendToAll(cDCProtocol::Append_DC_Quit(sMsg1, User->msNick), true/*mDCConfig.mbDelayedMyINFO*/, false);
@@ -384,7 +384,7 @@ void cDCServer::AddToIpList(cDCUser * User) {
     User->mbInIpList = true;
     if(User->mbInUserList) {
       mIpList.AddWithNick(User->msNick, User);
-      User->Send(mDCUserList.GetIpList(), true); // newPolitic
+      User->Send(mDCUserList.GetIpList(), true);
     }
   }
 }
@@ -670,7 +670,7 @@ bool cDCServer::ShowUserToAll(cDCUser *User) {
       User->Send(sStr, false, false);
   }
   static string s;
-  User->Send(s);
+  User->Send(s, false, true);
   return true;
 }
 
@@ -722,21 +722,21 @@ bool cDCServer::SendToUser(cDCConnBase *DCConn, const char *sData, char *sNick, 
     string sTo("<unknown>"), sStr;
     if(DCConn->mDCUserBase)
       sTo = DCConn->mDCUserBase->GetNick();
-    DCConn->Send(cDCProtocol::Append_DC_PM(sStr, sTo, sFrom, sNick, sData), false); // newPolitic
+    DCConn->Send(cDCProtocol::Append_DC_PM(sStr, sTo, sFrom, sNick, sData));
     return true;
   }
 
   // Chat
   if(sNick) {
     string sStr;
-    DCConn->Send(cDCProtocol::Append_DC_Chat(sStr, sNick, sData), false); // newPolitic
+    DCConn->Send(cDCProtocol::Append_DC_Chat(sStr, sNick, sData));
     return true;
   }
 
   // Simple Msg
   string sMsg(sData);
   if(DCConn->_miConnType == 1 && sMsg.substr(sMsg.size() - 1, 1) != DC_SEPARATOR) sMsg.append(DC_SEPARATOR);
-  DCConn->Send(sMsg, false); // newPolitic
+  DCConn->Send(sMsg);
 	return true;
 }
 
@@ -749,21 +749,21 @@ bool cDCServer::SendToNick(const char *sTo, const char *sData, char *sNick, char
   // PM
   if(sFrom && sNick) {
     string sStr;
-    User->mDCConn->Send(cDCProtocol::Append_DC_PM(sStr, sTo, sFrom, sNick, sData), false); // newPolitic
+    User->mDCConn->Send(cDCProtocol::Append_DC_PM(sStr, sTo, sFrom, sNick, sData));
     return true;
   }
 
   // Chat
   if(sNick) {
     string sStr;
-    User->mDCConn->Send(cDCProtocol::Append_DC_Chat(sStr, sNick, sData), false); // newPolitic
+    User->mDCConn->Send(cDCProtocol::Append_DC_Chat(sStr, sNick, sData));
     return true;
   }
 
   // Simple Msg
   string sMsg(sData);
   if(sMsg.substr(sMsg.size() - 1, 1) != DC_SEPARATOR) sMsg.append(DC_SEPARATOR);
-  User->mDCConn->Send(sMsg, false); // newPolitic
+  User->mDCConn->Send(sMsg);
 	return true;
 }
 
@@ -782,14 +782,14 @@ bool cDCServer::SendToAll(const char *sData, char *sNick, char *sFrom) {
   // Chat
   if(sNick) {
     string sStr;
-    mDCUserList.SendToAll(cDCProtocol::Append_DC_Chat(sStr, sNick, sData), true, false);
+    mDCUserList.SendToAll(cDCProtocol::Append_DC_Chat(sStr, sNick, sData), false, false);
     return true;
   }
   
   // Simple Msg
   string sMsg(sData);
   if(sMsg.substr(sMsg.size() - 1, 1) != DC_SEPARATOR) sMsg.append(DC_SEPARATOR);
-  mDCUserList.SendToAll(sMsg, true, false);
+  mDCUserList.SendToAll(sMsg, false, false);
   return true;
 }
 
@@ -973,7 +973,7 @@ bool cDCServer::SetConfig(const string & sName, const string & sValue) {
             mDCConfig.msMainBotIP, mDCConfig.mbMainBotKey);
   } else if(sName == "sHubName" || sName == "sTopic") {
     string sMsg;
-    SendToAll(cDCProtocol::Append_DC_HubName(sMsg, mDCConfig.msHubName, mDCConfig.msTopic).c_str());
+    SendToAll(cDCProtocol::Append_DC_HubName(sMsg, mDCConfig.msHubName, mDCConfig.msTopic).c_str()); // use cache ?
   }
 
   mDCConfig.Save();

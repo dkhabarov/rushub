@@ -46,10 +46,10 @@ public:
   bool Add(cDCConn*);
   bool Remove(cDCConn*);
 
-  void SendToIP(unsigned long iIP, string &sData, unsigned long iProfile = 0, bool bFlush = true, bool bAddSep = false);
-  void SendToIP(const char *sIP, string &sData, unsigned long iProfile = 0, bool bFlush = true, bool bAddSep = false);
-  void SendToIPWithNick(unsigned long iIP, string &sStart, string &sEnd, unsigned long iProfile = 0, bool bFlush = true, bool bAddSep = false);
-  void SendToIPWithNick(const char *sIP, string &sStart, string &sEnd, unsigned long iProfile = 0, bool bFlush = true, bool bAddSep = false);
+  void SendToIP(unsigned long iIP, string &sData, unsigned long iProfile = 0, bool bAddSep = false, bool bFlush = true);
+  void SendToIP(const char *sIP, string &sData, unsigned long iProfile = 0, bool bAddSep = false, bool bFlush = true);
+  void SendToIPWithNick(unsigned long iIP, string &sStart, string &sEnd, unsigned long iProfile = 0, bool bAddSep = false, bool bFlush = true);
+  void SendToIPWithNick(const char *sIP, string &sStart, string &sEnd, unsigned long iProfile = 0, bool bAddSep = false, bool bFlush = true);
 
   bool AutoResize() {
     unsigned iSize, iCapacity, iNewSize;

@@ -59,15 +59,15 @@ bool cDCIPList::Remove(cDCConn* Conn) {
   return true;
 }
 
-void cDCIPList::SendToIP(const char *sIP, string &sData, unsigned long iProfile, bool bFlush, bool bAddSep) {
-  SendToIP(cConn::Ip2Num(sIP), sData, iProfile, bFlush, bAddSep);
+void cDCIPList::SendToIP(const char *sIP, string &sData, unsigned long iProfile, bool bAddSep, bool bFlush) {
+  SendToIP(cConn::Ip2Num(sIP), sData, iProfile, bAddSep, bFlush);
 }
 
-void cDCIPList::SendToIPWithNick(const char *sIP, string &sStart, string &sEnd, unsigned long iProfile, bool bFlush, bool bAddSep) {
-  SendToIPWithNick(cConn::Ip2Num(sIP), sStart, sEnd, iProfile, bFlush, bAddSep);
+void cDCIPList::SendToIPWithNick(const char *sIP, string &sStart, string &sEnd, unsigned long iProfile, bool bAddSep, bool bFlush) {
+  SendToIPWithNick(cConn::Ip2Num(sIP), sStart, sEnd, iProfile, bAddSep, bFlush);
 }
 
-void cDCIPList::SendToIP(unsigned long iIP, string &sData, unsigned long iProfile, bool bFlush, bool bAddSep) {
+void cDCIPList::SendToIP(unsigned long iIP, string &sData, unsigned long iProfile, bool bAddSep, bool bFlush) {
   miProfile = iProfile;
   msData1 = sData;
   mbFlush = bFlush;
@@ -79,7 +79,7 @@ void cDCIPList::SendToIP(unsigned long iIP, string &sData, unsigned long iProfil
   }
 }
 
-void cDCIPList::SendToIPWithNick(unsigned long iIP, string &sStart, string &sEnd, unsigned long iProfile, bool bFlush, bool bAddSep) {
+void cDCIPList::SendToIPWithNick(unsigned long iIP, string &sStart, string &sEnd, unsigned long iProfile, bool bAddSep, bool bFlush) {
   miProfile = iProfile;
   msData1 = sStart;
   msData2 = sEnd;

@@ -46,22 +46,27 @@ cDCConn::~cDCConn() {
 }
 
 int cDCConn::Send(const string & sData, bool bAddSep, bool bFlush) {
-  string sMsg(sData);
+	static int iRet;
   if(!mbWritable) return 0;
-  if(sMsg.size() >= MAX_SEND_SIZE) {
-    if(Log(2))
-      LogStream() << "Too long message. Size: " 
-        << sData.size() << ". Max size: " << MAX_SEND_SIZE << " Message starts with: " << sMsg.substr(0,25) << endl;
-    sMsg.resize(MAX_SEND_SIZE - 1, ' ');
-  }
 
-  static int iRet;
-  if(bAddSep) {
-    sMsg.append(DC_SEPARATOR);
-    iRet = WriteData(sMsg, bFlush);
-  }
-  else iRet = WriteData(sMsg, bFlush);
-  
+  if(sData.size() >= MAX_SEND_SIZE) {
+		string sMsg(sData);
+    if(Log(0))
+			LogStream() << "Too long message. Size: " 
+				<< sMsg.size() << ". Max size: " << MAX_SEND_SIZE 
+				<< " Message starts with: " << sMsg.substr(0,25) << endl;
+		sMsg.resize(MAX_SEND_SIZE - 1);
+
+		if(bAddSep) {
+			WriteData(sMsg, false);
+			iRet = WriteData(DC_SEPARATOR, bFlush);
+		} else iRet = WriteData(sMsg, bFlush);
+	} else {
+		if(bAddSep) {
+			WriteData(sData, false);
+			iRet = WriteData(DC_SEPARATOR, bFlush);
+		} else iRet = WriteData(sData, bFlush);
+	}
   return iRet;
 }
 
@@ -139,8 +144,8 @@ int cDCConn::OnTimer(cTime &now) {
     mDCUser->mTimeEnter < Ago
     )
   {
-    static string s(DC_SEPARATOR);
-    Send(s);
+		string s;
+    Send(s, true, true);
   }
   return 0;
 }

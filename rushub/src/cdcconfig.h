@@ -39,21 +39,18 @@ class cDCConn;
 
 /** Server's configuration (settings)
   Main config class */
-class cDCConfig : public cConfigList
-{
+class cDCConfig : public cConfigList {
 
 public:
   cDCServer * mDCServer;
-
   
   int miStartPing;        //< Time interval in sec, after which begins ping user
   int miMaxPassiveRes;    //< Max results in the passive search
   int miWebServerPort;    //< Web-server port
-
-  int miUsersLimit;  //< User's limit
   
-  unsigned long miWebStrSizeMax; //< Max size of web cmd
+	int miUsersLimit;  //< User's limit
 
+  unsigned long miWebStrSizeMax; //< Max size of web cmd
   unsigned mMaxCmdLen[eDC_UNKNOWN + 1];
   unsigned miMaxNickLen;  //< Max length of nick
   unsigned miMinNickLen;  //< Min length of nick
@@ -158,6 +155,7 @@ public:
   string msTimeoutCmd[6];     //< Timeouts names
   string msTimeoutAny;        //< Message about connection timeout
   string msFreqClientPing;    //< Message about frequent pings on the client side (one of the methods of the attack)
+	string msUsersLimit;
 
   string msFloodMyINFO;
   string msFloodSearch;
