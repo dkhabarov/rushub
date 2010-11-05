@@ -453,7 +453,11 @@ bool cDCServer::ValidateUser(cDCConn *dcconn, const string &sNick) {
   tUserKey Key = mDCUserList.Nick2Key(sNick);
   if(mDCUserList.ContainsKey(Key)) {
     string sMsg;
-    if(dcconn->Log(2)) dcconn->LogStream() << "Bad nick (used): '" << sNick << "'" << endl;
+		cDCUser * us = (cDCUser*)mDCUserList.Find(Key);
+		if(dcconn->Log(0)) dcconn->LogStream() << "Bad nick (used): '" << sNick << "'[" // Log(0) for testing (was 2)
+			<< dcconn->Ip() << "] vs '" << us->msNick << "'[" << us->GetIp() 
+			<< "],sock:" << us->mDCConn->mSocket << endl; // for testing
+
     SendToUser(dcconn, StringReplace(mDCLang.msUsedNick, string("nick"), sMsg, sNick).c_str(), (char*)mDCConfig.msHubBot.c_str());
     dcconn->Send(cDCProtocol::Append_DC_ValidateDenide(sMsg.erase(), sNick));
     return false;
@@ -464,7 +468,11 @@ bool cDCServer::ValidateUser(cDCConn *dcconn, const string &sNick) {
 bool cDCServer::CheckNickLength(cDCConn *dcconn, const unsigned iLen) {
   if(dcconn->miProfile == -1 && (iLen > mDCConfig.miMaxNickLen || iLen < mDCConfig.miMinNickLen)) {
     string sMsg;
-    if(dcconn->Log(2)) dcconn->LogStream() << "Bad nick len: " << iLen << " [" << mDCConfig.miMinNickLen << ", " << mDCConfig.miMaxNickLen << "]" << endl;
+
+    if(dcconn->Log(2))
+			dcconn->LogStream() << "Bad nick len: " << iLen << " (" << dcconn->mDCUser->msNick 
+			<< ") [" << mDCConfig.miMinNickLen << ", " << mDCConfig.miMaxNickLen << "]" << endl;
+
     StringReplace(mDCLang.msBadNickLen, string("min"), sMsg, (int)mDCConfig.miMinNickLen);
     SendToUser(dcconn, StringReplace(sMsg, string("max"), sMsg, (int)mDCConfig.miMaxNickLen).c_str(), (char*)mDCConfig.msHubBot.c_str());
     return false;
@@ -503,7 +511,8 @@ bool cDCServer::BeforeUserEnter(cDCConn *dcconn) {
 void cDCServer::DoUserEnter(cDCConn *dcconn) {
   /** Check entry stages */
   if(eLS_LOGIN_DONE != dcconn->GetLSFlag(eLS_LOGIN_DONE)) {
-    if(dcconn->Log(2)) dcconn->LogStream() << "User Login when not all done"<<endl;
+		if(dcconn->Log(2))
+			dcconn->LogStream() << "User Login when not all done (" << dcconn->GetLSFlag(eLS_LOGIN_DONE) << ")" <<endl;
     dcconn->CloseNow();
     return;
   }
@@ -548,7 +557,14 @@ bool cDCServer::AddToUserList(cDCUser * User) {
   if(mDCUserList.Log(4)) mDCUserList.LogStream() << "Before add: " << User->msNick << " Size: " << mDCUserList.Size() << endl;
 
   if(!mDCUserList.AddWithKey(Key, User)) {
-    if(Log(1)) LogStream() << "Adding twice user with same nick " << User->msNick << " (" << mDCUserList.Find(Key)->msNick << ")" << endl;
+
+		//if(Log(1)) LogStream() << "Adding twice user with same nick " << User->msNick << " (" << mDCUserList.Find(Key)->msNick << ")" << endl;
+
+		cDCUser * us = (cDCUser*)mDCUserList.Find(Key);
+		if(Log(0)) LogStream() << "Adding twice user with same nick " << User->msNick << "'[" // Log(0) for testing (was 1)
+			<< User->GetIp() << "] vs '" << us->msNick << "'[" << us->GetIp() 
+			<< "],sock:" << us->mDCConn->mSocket << endl; // for testing
+
     User->mbInUserList = false;
     return false;
   }

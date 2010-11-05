@@ -72,10 +72,10 @@
 
 #define SOCK_BACKLOG 0x64 /** SOMAXCONN */
 
-#define MAX_RECV_SIZE 0x02FFFF     /** Max buf size for recv (196607) */
-#define MAX_SEND_SIZE 0x17FFFF     /** Max buf size for send (1572863) [0x0FFFFF (1048575)] */
-#define MAX_SEND_UNBLOCK_SIZE 0x10FFFF /** Max size (send) unblock input chanel 0x10FFFF [0x07FFFF (524287)] */
-#define MAX_SEND_BLOCK_SIZE   0x12FFFF /** Max size (send) block input chanel 0x12FFFF [0x0AFFFF (720895)] */
+#define MAX_RECV_SIZE 0x02FFFF     /** Max buf size for recv */
+#define MAX_SEND_SIZE 0x2AFFFF     /** Max buf size for send */
+#define MAX_SEND_UNBLOCK_SIZE 0x25FFFF /** Max size (send) unblock input chanel */
+#define MAX_SEND_BLOCK_SIZE   0x28FFFF /** Max size (send) block input chanel */
 #define MAX_ATTEMPT_SEND 50 /** MAX_ATTEMPT_SEND */
 
 #ifdef _WIN32

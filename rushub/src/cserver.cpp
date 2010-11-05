@@ -99,8 +99,7 @@ cServer::~cServer() {
 }
 
 /** Set and Listen port */
-int cServer::Listening(cListenFactory * ListenFactory, const string & sIP, int iPort)
-{
+int cServer::Listening(cListenFactory * ListenFactory, const string & sIP, int iPort) {
   cConn * conn;
   if((conn = Listen(sIP, iPort)) != NULL) { /** Listen port (TCP) */
     conn->mListenFactory = ListenFactory;
@@ -112,8 +111,7 @@ int cServer::Listening(cListenFactory * ListenFactory, const string & sIP, int i
 
 
 /** Listen port (TCP/UDP) */
-cConn *cServer::Listen(const string & sIP, int iPort, bool bUDP)
-{
+cConn *cServer::Listen(const string & sIP, int iPort, bool bUDP) {
   cConn *conn = NULL;
 
   if(!bUDP) /** Create socket object for TCP port */
@@ -132,8 +130,7 @@ cConn *cServer::Listen(const string & sIP, int iPort, bool bUDP)
 
 
 /** Create, bind and add connection for port */
-cConn *cServer::AddListen(cConn *conn, const string & sIP, int iPort, bool bUDP)
-{
+cConn *cServer::AddListen(cConn *conn, const string & sIP, int iPort, bool bUDP) {
   /** Socket object was created */
   if(conn) {
     if(conn->ListenPort(iPort, sIP.c_str(), bUDP) < 0) {
@@ -163,8 +160,7 @@ cConn *cServer::AddListen(cConn *conn, const string & sIP, int iPort, bool bUDP)
 }
 
 /** StopListen */
-bool cServer::StopListen(cConn *conn)
-{
+bool cServer::StopListen(cConn *conn) {
   if(conn) {
     mConnChooser.DelConn(conn);
     return true;
@@ -173,8 +169,7 @@ bool cServer::StopListen(cConn *conn)
     return false;
 }
 
-cConn * cServer::FindConnByPort(int iPort)
-{
+cConn * cServer::FindConnByPort(int iPort) {
   cConnChoose::tConnBaseList::iterator it;
   cConn * conn;
   for(it = mConnChooser.mConnBaseList.begin(); it != mConnChooser.mConnBaseList.end(); ++it) {
@@ -186,10 +181,9 @@ cConn * cServer::FindConnByPort(int iPort)
 }
 
 /** Main cycle */
-int cServer::Run()
-{
-  mbRun = true;
+int cServer::Run() {
   cTime now;
+	mbRun = true;
   if(Log(1)) LogStream() << "Main loop start" << endl;
 
   while(mbRun) { /** Main cycle */
@@ -222,16 +216,14 @@ int cServer::Run()
 }
 
 /** Stop main cycle */
-void cServer::Stop(int iCode)
-{
+void cServer::Stop(int iCode) {
   mbRun = false;
   miMainLoopCode = iCode; // 1 - restart
 }
 
 
 /** Step */
-void cServer::Step()
-{
+void cServer::Step() {
   static int ret;
   static cTime tmout(0, 1000l); /** timeout 1 msec */
 
@@ -242,7 +234,7 @@ void cServer::Step()
       #ifdef _WIN32
         //Sleep(0);
       #else
-        usleep(50); // 50 мксек
+        usleep(50); // 50 usec
       #endif
       return;
     }
@@ -254,23 +246,19 @@ void cServer::Step()
     throw "Exception in Choose";
   }
 
-  static tChIt it; // end iterator optimization
   static cConnChoose::sChooseRes res;
-  static int activity;
+  //if(Log(5)) LogStream() << "<new actions>: " << ret << " [" << miNumCloseConn << "]" << endl;
 
-  if(Log(5)) LogStream() << "<new actions>: " << ret << " [" << miNumCloseConn << "]" << endl;
-
-  for(it = mConnChooser.begin(); it != mConnChooser.end();) {
+  for(tChIt it = mConnChooser.begin(); it != mConnChooser.end();) {
     res = (*it);
     ++it;
-    if(res.mRevents == 0) continue; // optimization cycle
-    if((mNowConn = (cConn* )res.mConnBase) == NULL) continue;
+    if(res.mRevents == 0 || ((mNowConn = (cConn* )res.mConnBase) == NULL)) continue; // optimization cycle
     bool &bOk = mNowConn->mbOk;
-    activity = res.mRevents;
+    int activity = res.mRevents;
 
     if(bOk && (activity & cConnChoose::eEF_INPUT) && (mNowConn->GetConnType() == eCT_LISTEN)) {
 
-      if(mNowConn->Log(5)) mNowConn->LogStream() << "::(s)NewConn" << endl;
+      //if(mNowConn->Log(5)) mNowConn->LogStream() << "::(s)NewConn" << endl;
 
       cConn * new_conn = mNowConn->CreateNewConn(); /** eCT_CLIENTTCP (cConn) */
       if(new_conn) {
@@ -281,17 +269,17 @@ void cServer::Step()
         if(AddConnection(new_conn) > 0)
           mNowConn->mListenFactory->OnNewConn(new_conn);
       }
-      if(mNowConn->Log(5)) mNowConn->LogStream() << "::(e)NewConn. Number connections: " << mConnChooser.mConnBaseList.Size() << endl;
+      //if(mNowConn->Log(5)) mNowConn->LogStream() << "::(e)NewConn. Number connections: " << mConnChooser.mConnBaseList.Size() << endl;
 
     } else { // not listening socket (optimization)
 
       if(bOk && (activity & cConnChoose::eEF_INPUT) && ((mNowConn->GetConnType() == eCT_CLIENTTCP) || (mNowConn->GetConnType() == eCT_CLIENTUDP))) {
         try {
-          if(mNowConn->Log(5)) mNowConn->LogStream() << "::(s)InputData" << endl;
+          //if(mNowConn->Log(5)) mNowConn->LogStream() << "::(s)InputData" << endl;
 
           if(InputData(mNowConn) <= 0) bOk = false;
 
-          if(mNowConn->Log(5)) mNowConn->LogStream() << "::(e)InputData" << endl;
+          //if(mNowConn->Log(5)) mNowConn->LogStream() << "::(e)InputData" << endl;
         }catch(const char *str){
           if(ErrLog(0)) LogStream() << "Exception in InputData: " << str << endl;
           throw "Exception in InputData";
@@ -303,11 +291,11 @@ void cServer::Step()
 
       if(bOk && (activity & cConnChoose::eEF_OUTPUT)) {
         try {
-          if(mNowConn->Log(5)) mNowConn->LogStream() << "::(s)OutputData" << endl;
+          //if(mNowConn->Log(5)) mNowConn->LogStream() << "::(s)OutputData" << endl;
 
           OutputData(mNowConn);
 
-          if(mNowConn->Log(5)) mNowConn->LogStream() << "::(e)OutputData" << endl;
+          //if(mNowConn->Log(5)) mNowConn->LogStream() << "::(e)OutputData" << endl;
         }catch(const char *str){
           if(ErrLog(0)) LogStream() << "Exception in OutputData: " << str << endl;
           throw "Exception in OutputData";
@@ -322,14 +310,12 @@ void cServer::Step()
         if(mNowConn->IsClosed()) // check close flag
           --miNumCloseConn;
 
-        cConn *conn = mNowConn;
-        mNowConn = NULL;
         try {
-          if(Log(5)) LogStream() << "::(s)DelConnection" << endl;
+          //if(Log(5)) LogStream() << "::(s)DelConnection" << endl;
 
-          DelConnection(conn);
+          DelConnection(mNowConn);
 
-          if(Log(5)) LogStream() << "::(e)DelConnection. Number connections: " << mConnChooser.mConnBaseList.Size() << endl;
+          //if(Log(5)) LogStream() << "::(e)DelConnection. Number connections: " << mConnChooser.mConnBaseList.Size() << endl;
         }catch(const char *str){
           if(ErrLog(0)) LogStream() << "Exception in DelConnection: " << str << endl;
           throw "Exception in DelConnection";
@@ -340,22 +326,21 @@ void cServer::Step()
       }
     }
 
-    if(activity - cConnChoose::eEF_CLOSE)
-      --ret;
-
-    if(ret < 0) { // this will not happen, but we must be reinsure
-      if(ErrLog(0)) LogStream() << "Faild error in return value" << endl;
-      break;
-    }
-    if(!(ret + miNumCloseConn))
-      break;
-  }  
+    //if(activity - cConnChoose::eEF_CLOSE)
+    //  --ret;
+    //if(ret < 0) { // this will not happen, but we must be reinsure
+    //  if(ErrLog(0)) LogStream() << "Faild error in return value" << endl;
+    //  break;
+    //}
+    //if(!(ret + miNumCloseConn))
+    //  break;
+  }
+	if(miNumCloseConn) miNumCloseConn = 0;
 }
 
 ///////////////////////////////////add_connection/del_connection///////////////////////////////////
 
-int cServer::AddConnection(cConn *conn)
-{
+int cServer::AddConnection(cConn *conn) {
   if(!conn) {
     if(conn->ErrLog(0)) LogStream() << "Fatal error: AddConnection null pointer" << endl;
     throw "Fatal error: AddConnection null pointer";
@@ -369,7 +354,6 @@ int cServer::AddConnection(cConn *conn)
 
   //if(Log(4)) LogStream() << "Num clients before add: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.Size() << endl;
   //if(Log(4)) LogStream() << "Add new connection on socket: " << conn->mSocket << " - " << conn->Ip() << ":" << conn->Port() << endl;
-
 
   if((mConnChooser.Size() == (FD_SETSIZE - 1)) || !mConnChooser.cConnChoose::OptIn((cConnBase *)conn,
     cConnChoose::tEventFlag(cConnChoose::eEF_INPUT | cConnChoose::eEF_ERROR)))
@@ -395,15 +379,10 @@ int cServer::AddConnection(cConn *conn)
 }
 
 /** DelConnection(cConn *old_conn) */
-int cServer::DelConnection(cConn *old_conn)
-{
+int cServer::DelConnection(cConn *old_conn) {
   if(!old_conn) {
     if(mNowConn && mNowConn->ErrLog(0)) mNowConn->LogStream() << "Fatal error: DelConnection null pointer" << endl;
     throw "Fatal error: DelConnection null pointer";
-  }
-  if(mNowConn == old_conn) { /** Use mNowConn. Close current conn with mbOk == false automatic in end of cycle */
-    old_conn->mbOk = false;
-    return -1;
   }
 
   //if(Log(4)) LogStream() << "Num clients before del: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.Size() << endl;
@@ -431,22 +410,19 @@ int cServer::DelConnection(cConn *old_conn)
 }
 
 /** OnNewConn */
-int cServer::OnNewConn(cConn *conn)
-{
+int cServer::OnNewConn(cConn *conn) {
   if(!conn) return -1;
   return 0;
 }
 
 /** OnClose */
-void cServer::OnClose(cConn *conn)
-{
+void cServer::OnClose(cConn *conn) {
   if(!conn) return;
   mConnChooser.DelConn(conn);
 }
 
 /** InputData */
-int cServer::InputData(cConn *conn)
-{
+int cServer::InputData(cConn *conn) {
   try {
     if(conn->Recv() <= 0) return 0;
   }catch(const char *str){
@@ -477,33 +453,27 @@ int cServer::InputData(cConn *conn)
     }
     if(conn->RecvBufIsEmpty()) break;
   }
-  //if(newPolitic)
-    //conn->Flush(); // newPolitic
   return iRead;
 }
 
 /** GetPtrForStr */
-string * cServer::GetPtrForStr(cConn *)
-{
+string * cServer::GetPtrForStr(cConn *) {
   return new string;
 }
 
 /** OnNewData */
-void cServer::OnNewData(cConn *, string *str)
-{
+void cServer::OnNewData(cConn *, string *str) {
   delete str;
 }
 
 /** OutputData */
-int cServer::OutputData(cConn *conn)
-{
+int cServer::OutputData(cConn *conn) {
   conn->Flush();
   return 0;
 }
 
 /** Main mase timer */
-int cServer::OnTimerBase(cTime &now)
-{
+int cServer::OnTimerBase(cTime &now) {
   static tCLIt it, it_e;
   OnTimer(now);
   if(abs(int(now - mTimes.mConn)) >= miTimerConnPeriod) {
@@ -516,28 +486,22 @@ int cServer::OnTimerBase(cTime &now)
 }
 
 /** Main timer */
-int cServer::OnTimer(cTime &)
-{
+int cServer::OnTimer(cTime &) {
   return 0;
 }
 
-cListenFactory::cListenFactory(cServer * Server) : mServer(Server)
-{
+cListenFactory::cListenFactory(cServer * Server) : mServer(Server) {
 }
 
-cListenFactory::~cListenFactory()
-{
+cListenFactory::~cListenFactory() {
 }
 
-cConnFactory * cListenFactory::ConnFactory()
-{
+cConnFactory * cListenFactory::ConnFactory() {
   return mServer->mConnFactory;
 }
 
-int cListenFactory::OnNewConn(cConn * conn)
-{
+int cListenFactory::OnNewConn(cConn * conn) {
   return mServer->OnNewConn(conn);
 }
-
 
 }; // nServer

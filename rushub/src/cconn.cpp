@@ -309,11 +309,13 @@ int cConn::Recv() {
   if(!mbOk || !mbWritable) return -1;
 
   static int iBufLen, i;
-  static bool bUdp;
-  
   iBufLen = 0; i = 0;
+
+#ifdef USE_UDP
+	static bool bUdp;
   bUdp = (this->mConnType == eCT_CLIENTUDP);
   if(!bUdp) { /** TCP */
+#endif
     while(
       ((iBufLen = recv(mSocket, msRecvBuf, MAX_RECV_SIZE, 0)) == SOCKET_ERROR) &&
       ((SockErr == SOCK_EAGAIN) || (SockErr == SOCK_EINTR))
@@ -323,6 +325,7 @@ int cConn::Recv() {
         usleep(5);
       #endif
     }
+#ifdef USE_UDP
   } else { /** bUdp */
     if(Log(4)) LogStream() << "Start read (UDP)" << endl;
     static int iAddrLen = sizeof(struct sockaddr);
@@ -336,10 +339,13 @@ int cConn::Recv() {
     }
     if(Log(4)) LogStream() << "End read (UDP). Read bytes: " << iBufLen << endl;
   }
+#endif
 
   miRecvBufRead = miRecvBufEnd = 0;
   if(iBufLen <= 0) {
+		#ifdef USE_UDP
     if(!bUdp) {
+		#endif
       if(iBufLen == 0) {
         if(Log(3)) LogStream() << "User itself was disconnected" << endl;
       } else {
@@ -365,7 +371,9 @@ int cConn::Recv() {
       }
       CloseNow();
       return -1;
+		#ifdef USE_UDP
     }
+		#endif
   } else {
     miRecvBufEnd = iBufLen; /** End buf pos */
     miRecvBufRead = 0; /** Pos for reading from buf */
@@ -555,17 +563,21 @@ int cConn::Send(const char *buf, size_t &len) {
   bUDP = (this->mConnType == eCT_SERVERUDP);
   while(total < len) { // EMSGSIZE (WSAEMSGSIZE)
     try {
+			#ifdef USE_UDP
       if(!bUDP) {
+			#endif
         n = send(mSocket, buf + total, bytesleft, 
-  #ifndef _WIN32
-        MSG_NOSIGNAL|MSG_DONTWAIT);
-  #else
-        0);
-  #endif
-      //} else {
-      //  static int tolen = sizeof(struct sockaddr);
-      //  n = sendto(mSocket, buf + total, bytesleft, 0, (struct sockaddr *)&mAddrIN, tolen);
+				#ifndef _WIN32
+					MSG_NOSIGNAL|MSG_DONTWAIT);
+				#else
+					0);
+				#endif
+			#ifdef USE_UDP
+      } else {
+        static int tolen = sizeof(struct sockaddr);
+        n = sendto(mSocket, buf + total, bytesleft, 0, (struct sockaddr *)&mAddrIN, tolen);
       }
+			#endif
     } catch(...) {
       if(ErrLog(1))
         LogStream() << "exception in Send(buf," << len
