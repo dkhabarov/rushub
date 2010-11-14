@@ -24,18 +24,18 @@
 #include <math.h> /** abs */
 
 #ifdef _WIN32
-  #pragma comment(lib, "ws2_32.lib")
+	#pragma comment(lib, "ws2_32.lib")
 #else
-  #include <sys/socket.h>
-  #include <unistd.h> // for usleep function
-  #include <cstdlib> // for abs
+	#include <sys/socket.h>
+	#include <unistd.h> // for usleep function
+	#include <cstdlib> // for abs
 #endif
 
 namespace nServer {
 
 #ifdef _WIN32
   /** Set flag WS */
-  bool cServer::WSinit = false;
+  bool cServer::initWSA = false;
 #endif
 
 //////////////////////////////////////////////constructor////////////////////////////////////////
@@ -58,8 +58,8 @@ cServer::cServer(const string sSep, int iPort) :
   //mConnFactory = new cConnFactory(NULL, this);
 
 #ifdef _WIN32
-  /** WS for windows */
-  if(!WSinit) {
+  /** WSA for windows */
+  if(!initWSA) {
     WSADATA lpWSAData;
     //WORD wVersionRequested = MAKEWORD(2, 2);
 
@@ -76,7 +76,7 @@ cServer::cServer(const string sSep, int iPort) :
     }
 
     /** WinSock DLL was found */
-    WSinit = true;
+    initWSA = true;
   }
 #endif
 }
@@ -86,9 +86,9 @@ cServer::cServer(const string sSep, int iPort) :
 cServer::~cServer() {
   mNowConn = NULL;
 #ifdef _WIN32
-  /** Close WS DLL lib */
+  /** Close WSA DLL lib */
   ::WSACleanup();
-  WSinit = false;
+  initWSA = false;
 #endif
   if(Log(1)) {
     LogStream() << endl <<
@@ -221,7 +221,6 @@ void cServer::Stop(int iCode) {
   miMainLoopCode = iCode; // 1 - restart
 }
 
-
 /** Step */
 void cServer::Step() {
   static int ret;
@@ -247,7 +246,8 @@ void cServer::Step() {
   }
 
   static cConnChoose::sChooseRes res;
-  //if(Log(5)) LogStream() << "<new actions>: " << ret << " [" << miNumCloseConn << "]" << endl;
+
+  if(Log(5)) LogStream() << "<new actions>: " << ret << " [" << miNumCloseConn << "]" << endl;
 
   for(tChIt it = mConnChooser.begin(); it != mConnChooser.end();) {
     res = (*it);
@@ -258,7 +258,7 @@ void cServer::Step() {
 
     if(bOk && (activity & cConnChoose::eEF_INPUT) && (mNowConn->GetConnType() == eCT_LISTEN)) {
 
-      //if(mNowConn->Log(5)) mNowConn->LogStream() << "::(s)NewConn" << endl;
+      if(mNowConn->Log(5)) mNowConn->LogStream() << "::(s)NewConn" << endl;
 
       cConn * new_conn = mNowConn->CreateNewConn(); /** eCT_CLIENTTCP (cConn) */
       if(new_conn) {
@@ -269,17 +269,17 @@ void cServer::Step() {
         if(AddConnection(new_conn) > 0)
           mNowConn->mListenFactory->OnNewConn(new_conn);
       }
-      //if(mNowConn->Log(5)) mNowConn->LogStream() << "::(e)NewConn. Number connections: " << mConnChooser.mConnBaseList.Size() << endl;
+      if(mNowConn->Log(5)) mNowConn->LogStream() << "::(e)NewConn. Number connections: " << mConnChooser.mConnBaseList.Size() << endl;
 
     } else { // not listening socket (optimization)
 
       if(bOk && (activity & cConnChoose::eEF_INPUT) && ((mNowConn->GetConnType() == eCT_CLIENTTCP) || (mNowConn->GetConnType() == eCT_CLIENTUDP))) {
         try {
-          //if(mNowConn->Log(5)) mNowConn->LogStream() << "::(s)InputData" << endl;
+          if(mNowConn->Log(5)) mNowConn->LogStream() << "::(s)InputData" << endl;
 
           if(InputData(mNowConn) <= 0) bOk = false;
 
-          //if(mNowConn->Log(5)) mNowConn->LogStream() << "::(e)InputData" << endl;
+          if(mNowConn->Log(5)) mNowConn->LogStream() << "::(e)InputData" << endl;
         }catch(const char *str){
           if(ErrLog(0)) LogStream() << "Exception in InputData: " << str << endl;
           throw "Exception in InputData";
@@ -291,11 +291,11 @@ void cServer::Step() {
 
       if(bOk && (activity & cConnChoose::eEF_OUTPUT)) {
         try {
-          //if(mNowConn->Log(5)) mNowConn->LogStream() << "::(s)OutputData" << endl;
+          if(mNowConn->Log(5)) mNowConn->LogStream() << "::(s)OutputData" << endl;
 
           OutputData(mNowConn);
 
-          //if(mNowConn->Log(5)) mNowConn->LogStream() << "::(e)OutputData" << endl;
+          if(mNowConn->Log(5)) mNowConn->LogStream() << "::(e)OutputData" << endl;
         }catch(const char *str){
           if(ErrLog(0)) LogStream() << "Exception in OutputData: " << str << endl;
           throw "Exception in OutputData";
@@ -311,11 +311,11 @@ void cServer::Step() {
           --miNumCloseConn;
 
         try {
-          //if(Log(5)) LogStream() << "::(s)DelConnection" << endl;
+          if(Log(5)) LogStream() << "::(s)DelConnection" << endl;
 
           DelConnection(mNowConn);
 
-          //if(Log(5)) LogStream() << "::(e)DelConnection. Number connections: " << mConnChooser.mConnBaseList.Size() << endl;
+          if(Log(5)) LogStream() << "::(e)DelConnection. Number connections: " << mConnChooser.mConnBaseList.Size() << endl;
         }catch(const char *str){
           if(ErrLog(0)) LogStream() << "Exception in DelConnection: " << str << endl;
           throw "Exception in DelConnection";
@@ -335,7 +335,10 @@ void cServer::Step() {
     //if(!(ret + miNumCloseConn))
     //  break;
   }
-	if(miNumCloseConn) miNumCloseConn = 0;
+	if(miNumCloseConn) {
+		if(ErrLog(0)) LogStream() << "Conn for close not null: " << miNumCloseConn << endl;
+		miNumCloseConn = 0;
+	}
 }
 
 ///////////////////////////////////add_connection/del_connection///////////////////////////////////
@@ -348,26 +351,31 @@ int cServer::AddConnection(cConn *conn) {
   if(!conn->mbOk) { 
     if(conn->Log(2)) conn->LogStream() << "Not reserved connection: " << conn->Ip() << endl;
     if(conn->mConnFactory != NULL) conn->mConnFactory->DelConn(conn);
-    else delete conn; 
+		else {
+			if(conn->Log(2)) conn->LogStream() << "Connection without factory: " << conn->Ip() << endl;
+			delete conn;
+		}
     return -1;
   }
 
   //if(Log(4)) LogStream() << "Num clients before add: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.Size() << endl;
   //if(Log(4)) LogStream() << "Add new connection on socket: " << conn->mSocket << " - " << conn->Ip() << ":" << conn->Port() << endl;
 
-  if((mConnChooser.Size() == (FD_SETSIZE - 1)) || !mConnChooser.cConnChoose::OptIn((cConnBase *)conn,
+  if(
+		#if USE_SELECT
+			(mConnChooser.Size() == (FD_SETSIZE - 1)) || 
+		#endif
+		!mConnChooser.cConnChoose::OptIn((cConnBase *)conn,
     cConnChoose::tEventFlag(cConnChoose::eEF_INPUT | cConnChoose::eEF_ERROR)))
   {
-    if(conn->ErrLog(1)) conn->LogStream() << "Error: Can't add socket! Very much socks!" << endl;
+    if(conn->ErrLog(1)) conn->LogStream() << "Error: Can't add socket!" << endl;
     if(conn->mConnFactory != NULL) 
       conn->mConnFactory->DelConn(conn); 
     else delete conn; 
     return -2;
   }
 
-
   mConnChooser.AddConn(conn);
-
 
   tCLIt it = mConnList.insert(mConnList.begin(), conn);
   conn->mIterator = it;

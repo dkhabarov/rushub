@@ -26,6 +26,7 @@ using namespace std;
 
 #ifndef DC_SEPARATOR
   #define DC_SEPARATOR "|" /** DC Protocol separator */
+	#define DC_SEPARATOR_LEN 1
 #endif
 
 namespace nDCServer {

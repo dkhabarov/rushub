@@ -59,7 +59,8 @@ cConn::cConn(tSocket sock, cServer *s, tConnType st) :
 {
   ClearStr(); /** Clear params */
   memset(&mCloseTime, 0, sizeof(mCloseTime));
-  if(mSocket) {
+
+	if(mSocket) {
     static struct sockaddr saddr;
     static socklen_t saddr_size = sizeof(saddr);
     struct sockaddr_in *saddr_in;
@@ -89,7 +90,7 @@ cConn::~cConn() {
 
 /** ListenPort */
 tSocket cConn::ListenPort(int iPort, const char *sIp, bool bUDP) {
-  if(mSocket) return -1; /** Socket is already created */
+  if(mSocket > 0) return -1; /** Socket is already created */
   mSocket = SocketCreate(bUDP); /** Create socket */
   mSocket = SocketBind(mSocket, iPort, sIp); /** Bind */
   if(!bUDP) {
@@ -105,17 +106,17 @@ tSocket cConn::ListenPort(int iPort, const char *sIp, bool bUDP) {
 tSocket cConn::SocketCreate(bool bUDP) {
   tSocket sock;
   if(!bUDP) { /* Create socket TCP */
-    if((sock = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
-      return SOCKET_ERROR;
+    if(SOCK_INVALID(sock = socket(AF_INET, SOCK_STREAM, 0)))
+      return -1;
     sockoptval_t yes = 1;
 
     /* TIME_WAIT after close conn. Reuse address after disconn */
-    if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(sockoptval_t)) == INVALID_SOCKET)
-      return SOCKET_ERROR;
+    if(SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(sockoptval_t))))
+      return -1;
   }
   else /* Create socket UDP */
-    if((sock = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET)
-      return SOCKET_ERROR;
+    if(SOCK_INVALID(sock = socket(AF_INET, SOCK_DGRAM, 0)))
+      return -1;
 
   ++iConnCounter;
   if(Log(3)) LogStream() << "Created new socket: " << sock << endl;
@@ -130,7 +131,7 @@ tSocket cConn::SocketCreate(bool bUDP) {
   mAddrIN.sin_zero = 0x00000000;
 */
 tSocket cConn::SocketBind(tSocket sock, int iPort, const char *sIp) {
-  if(sock == SOCKET_ERROR) return SOCKET_ERROR;
+  if(sock < 0) return -1;
   string sIP(sIp);
   memset(&mAddrIN, 0, sizeof(struct sockaddr_in));
   mAddrIN.sin_family = AF_INET;
@@ -152,26 +153,26 @@ tSocket cConn::SocketBind(tSocket sock, int iPort, const char *sIp) {
   memset(&(mAddrIN.sin_zero), '\0', 8);
 
   /** Bind */
-  if(bind(sock, (struct sockaddr *)&mAddrIN, sizeof(mAddrIN)) == SOCKET_ERROR)
-    return SOCKET_ERROR;
+  if(SOCK_ERROR(bind(sock, (struct sockaddr *)&mAddrIN, sizeof(mAddrIN))))
+    return -1;
 
   return sock;
 }
 
 /** Listen TCP socket */
 tSocket cConn::SocketListen(tSocket sock) {
-  if(sock == SOCKET_ERROR) return SOCKET_ERROR;
-  if(listen(sock, SOCK_BACKLOG) == SOCKET_ERROR) {
+  if(sock < 0) return -1;
+  if(SOCK_ERROR(listen(sock, SOCK_BACKLOG))) {
     SOCK_CLOSE(sock);
     if(ErrLog(1)) LogStream() << "Error listening" << endl;
-    return SOCKET_ERROR;
+    return -1;
   }
   return sock;
 }
 
 /** Set non-block socket */
 tSocket cConn::SocketNonBlock(tSocket sock) {
-  if(sock == SOCKET_ERROR) return SOCKET_ERROR;
+  if(sock < 0) return -1;
   SOCK_NON_BLOCK(sock);
   return sock;
 }
@@ -192,7 +193,7 @@ void cConn::Close() {
 #else
   static int err;
   err = TEMP_FAILURE_RETRY(SOCK_CLOSE(mSocket));
-  if(err != SOCKET_ERROR){
+  if(!(SOCK_ERROR(err))){
 #endif
     --iConnCounter;
     if(Log(3)) LogStream() << "Closing socket: " << mSocket << endl;
@@ -231,8 +232,9 @@ void cConn::CloseNow() {
 
 /** CreateNewConn */
 cConn * cConn::CreateNewConn() {
-  static tSocket sock;
-  if((sock = Accept()) == INVALID_SOCKET) return NULL;
+  tSocket sock;
+	if((sock = Accept()) < 0) return NULL;
+
   cConnFactory *Factory = NULL;
   cConn *new_conn = NULL;
 
@@ -258,14 +260,13 @@ tSocket cConn::Accept() {
     static struct sockaddr_in client;
   #endif
   static socklen_t namelen = sizeof(client);
-  static tSocket sock;
-  static int i;
+  tSocket sock;
+  int i;
 
   i = 0;
-  sock = INVALID_SOCKET;
   memset(&client, 0, namelen);
   sock = accept(mSocket, (struct sockaddr *)&client, (socklen_t*)&namelen);
-  while((sock == INVALID_SOCKET) && ((SockErr == SOCK_EAGAIN) || (SockErr == SOCK_EINTR)) && (i++ < 10))
+  while(SOCK_INVALID(sock) && ((SockErr == SOCK_EAGAIN) || (SockErr == SOCK_EINTR)) && (i++ < 10))
   { /** Try to accept connection not more than 10 once */
     sock = ::accept(mSocket, (struct sockaddr *)&client, (socklen_t*)&namelen);
     #ifdef _WIN32
@@ -274,32 +275,36 @@ tSocket cConn::Accept() {
       usleep(50);
     #endif
   }
-  if(sock == INVALID_SOCKET) {
-    if(ErrLog(1)) LogStream() << "Socket not accept: " << SockErr << "  " << sizeof(fd_set) << endl;
-    return INVALID_SOCKET;
+  if(SOCK_INVALID(sock)) {
+    if(ErrLog(1)) LogStream() << "Socket not accept: " << SockErr << endl;
+    return -1;
   }
 
   static sockoptval_t yes = 1;
   static socklen_t yeslen = sizeof(yes);
-  if(setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &yes, yeslen) == SOCKET_ERROR) {
+  if(SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &yes, yeslen))) {
 #ifdef _WIN32
     static int err;
     err = TEMP_FAILURE_RETRY(SOCK_CLOSE(sock));
-    if(err != SOCKET_ERROR)
+    if(SOCK_ERROR(err))
 #else
     TEMP_FAILURE_RETRY(SOCK_CLOSE(sock));
     if(SockErr != SOCK_EINTR)
 #endif
-    { if(Log(3)) LogStream() << "Closing socket: " << sock << endl; }
+    { if(Log(2)) LogStream() << "Couldn't set keepalive flag for accepted socket" << endl; }
     else if(ErrLog(1)) LogStream() << "Socket not closed" << endl;
-    return INVALID_SOCKET;
+    return -1;
   }
 
   /** Non-block socket */
-  if((sock = SocketNonBlock(sock)) == INVALID_SOCKET) return INVALID_SOCKET;
+	if(SocketNonBlock(sock) < 0) {
+		if(ErrLog(1)) LogStream() << "Couldn't set non-block flag for accepted socket" << endl;
+		return -1;
+	}
 
   /** Accept new socket */
   if(Log(3)) LogStream() << "Accept new socket: " << sock << endl;
+
   ++iConnCounter;
   return sock;
 }
@@ -317,7 +322,7 @@ int cConn::Recv() {
   if(!bUdp) { /** TCP */
 #endif
     while(
-      ((iBufLen = recv(mSocket, msRecvBuf, MAX_RECV_SIZE, 0)) == SOCKET_ERROR) &&
+      (SOCK_ERROR(iBufLen = recv(mSocket, msRecvBuf, MAX_RECV_SIZE, 0))) &&
       ((SockErr == SOCK_EAGAIN) || (SockErr == SOCK_EINTR))
       && (i++ <= 100)
     )  {
@@ -330,7 +335,7 @@ int cConn::Recv() {
     if(Log(4)) LogStream() << "Start read (UDP)" << endl;
     static int iAddrLen = sizeof(struct sockaddr);
     while(
-      ((iBufLen = recvfrom(mSocket, msRecvBuf, MAX_RECV_SIZE, 0, (struct sockaddr *)&mAddrIN, (socklen_t *)&iAddrLen)) == SOCKET_ERROR) &&
+      (SOCK_ERROR(iBufLen = recvfrom(mSocket, msRecvBuf, MAX_RECV_SIZE, 0, (struct sockaddr *)&mAddrIN, (socklen_t *)&iAddrLen))) &&
       (i++ <= 100)
     ) {
       #ifndef _WIN32
@@ -476,7 +481,7 @@ int cConn::WriteData(const string &sData, bool bFlush) {
   }
 
   /** Sending */
-  if(Send(send_buf, size) == SOCKET_ERROR) {
+  if(Send(send_buf, size) < 0) {
 
     if((SockErr != SOCK_EAGAIN) /*&& (SockErr != SOCK_EINTR)*/) {
       if(Log(2)) LogStream() << "Error in sending: " << SockErr << "(not EAGAIN), closing" << endl;
@@ -554,7 +559,7 @@ int cConn::Send(const char *buf, size_t &len) {
     len = send(mSocket, buf, len, 0);
   else
     len = sendto(mSocket, buf, len, 0, (struct sockaddr *)&mAddrIN, sizeof(struct sockaddr));
-  return len == SOCKET_ERROR ? SOCKET_ERROR : 0; /* return SOCKET_ERROR - fail, 0 - ok */
+  return SOCK_ERROR(len) ? -1 : 0; /* return -1 - fail, 0 - ok */
 #else
   static size_t total, bytesleft;
   static int n;
@@ -584,19 +589,19 @@ int cConn::Send(const char *buf, size_t &len) {
           << ") total=" << total
           << " left=" << bytesleft
           << " n=" << n << endl;
-      return SOCKET_ERROR;
+      return -1;
     }
     if(Log(5))
         LogStream() << "len = " << len
           << " total=" << total
           << " left=" << bytesleft
           << " n=" << n << endl;
-    if(n == SOCKET_ERROR) break;
+    if(SOCK_ERROR(n)) break;
     total += n;
     bytesleft -= n;
   }
   len = total; /* Number sending bytes */
-  return n == SOCKET_ERROR ? SOCKET_ERROR : 0; /* return -1 - fail, 0 - ok */
+  return SOCK_ERROR(n) ? -1 : 0; /* return -1 - fail, 0 - ok */
 #endif
 }
 
@@ -638,7 +643,7 @@ int cConn::OnTimer(cTime &) {
 
 int cConn::StrLog(ostream & ostr, int iLevel, int iMaxLevel) {
   if(cObj::StrLog(ostr, iLevel, iMaxLevel)) {
-    LogStream() << "(sock " << this->mSocket << ") ";
+    LogStream() << "(sock " << mSocket << ") ";
     return 1;
   }
   return 0;

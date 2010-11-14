@@ -214,7 +214,7 @@ bool cConnChoose::RevTest(cConnBase *conn) {
 
 
 tSocket cConnChoose::operator [] (cConnBase *conn) {
-  if(!conn) return INVALID_SOCKET;
+  if(!conn) return -1;
   return (tSocket)(*conn);
 }
 

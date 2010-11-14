@@ -76,7 +76,7 @@ int cConnPoll::RevGet(tSocket Socket) {
 }
 
 bool cConnPoll::RevTest(cPollFD & PollFD) {
- 	if(PollFD.fd == INVALID_SOCKET) return false;
+ 	if(SOCK_INVALID(PollFD.fd)) return false;
 	if(!PollFD.events) return true;
  	unsigned iEvent = PollFD.revents;
  	if(!iEvent) return false;

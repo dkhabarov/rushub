@@ -119,7 +119,7 @@ int cConnSelect::Select(cTime &tmout)
 
   /** select */
   int ret = ::select(mMaxSocket, &mResReadFS, &mResWriteFS, &mResExceptFS, (timeval *)(&tmout));
-  if(ret == SOCKET_ERROR) return -1;
+  if(SOCK_ERROR(ret)) return -1;
 
   ClearRevents();
   SetRevents(mResReadFS, eEF_INPUT);

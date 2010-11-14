@@ -693,123 +693,128 @@ int cDCProtocol::DC_GetINFO(cDCParser *dcparser, cDCConn *dcconn) {
 
 
 
-
-
+// $Lock ...|
 string & cDCProtocol::Append_DC_Lock(string &sStr) {
-  static string s("$Lock EXTENDEDPROTOCOL_" INTERNALNAME "_by_setuper_" INTERNALVERSION " Pk=" INTERNALNAME);
-  sStr.append(s);
-  sStr.append(DC_SEPARATOR);
-  return sStr;
+  static const char * cmd = "$Lock EXTENDEDPROTOCOL_" INTERNALNAME "_by_setuper_" INTERNALVERSION " Pk=" INTERNALNAME DC_SEPARATOR;
+	static unsigned int cmdLen = strlen(cmd);
+	return sStr.append(cmd, cmdLen);
 }
 
+// $Hello sNick|
 string & cDCProtocol::Append_DC_Hello(string &sStr, const string &sNick) {
-  static string s("$Hello ");
-  sStr.append(s);
-  sStr.append(sNick);
-  sStr.append(DC_SEPARATOR);
-  return sStr;
+	static const char * cmd = "$Hello ";
+	static unsigned int cmdLen = 7 + DC_SEPARATOR_LEN;
+	sStr.reserve(sStr.size() + sNick.size() + cmdLen);
+	return sStr.append(cmd, 7).append(sNick).append(DC_SEPARATOR, DC_SEPARATOR_LEN);
 }
 
+// $HubIsFull|
 string & cDCProtocol::Append_DC_HubIsFull(string &sStr) {
-  static string s("$HubIsFull"DC_SEPARATOR);
-  sStr.append(s);
-  return sStr;
+  static const char * cmd = "$HubIsFull" DC_SEPARATOR;
+	static unsigned int cmdLen = 10 + DC_SEPARATOR_LEN;
+  return sStr.append(cmd, cmdLen);
 }
 
+// $GetPass|
 string & cDCProtocol::Append_DC_GetPass(string &sStr) {
-  static string s("$GetPass"DC_SEPARATOR);
-  sStr.append(s);
-  return sStr;
+  static const char * cmd = "$GetPass" DC_SEPARATOR;
+	static unsigned int cmdLen = 8 + DC_SEPARATOR_LEN;
+  return sStr.append(cmd, cmdLen);
 }
 
+// $ValidateDenide sNick|
 string & cDCProtocol::Append_DC_ValidateDenide(string &sStr, const string &sNick) {
-  static string s("$ValidateDenide ");
-  sStr.append(s);
-  sStr.append(sNick);
-  sStr.append(DC_SEPARATOR);
-  return sStr;
+	static const char * cmd = "$ValidateDenide ";
+	static unsigned int cmdLen = 16 + DC_SEPARATOR_LEN;
+	sStr.reserve(sStr.size() + sNick.size() + cmdLen);
+  return sStr.append(cmd, 16).append(sNick).append(DC_SEPARATOR, DC_SEPARATOR_LEN);
 }
 
+// $HubName sHubName - sTopic|
 string & cDCProtocol::Append_DC_HubName(string &sStr, const string &sHubName, const string &sTopic) {
-  static string s1("$HubName ");
-  static string s2(" - ");
-  sStr.append(s1);
-  sStr.append(sHubName);
-  if(sTopic.length()) {
-    sStr.append(s2);
-    sStr.append(sTopic);
-  }
-  sStr.append(DC_SEPARATOR);
-  return sStr;
+	static const char * cmd = "$HubName ";
+	static const char * cmd2 = " - ";
+	static unsigned int cmdLen = 9 + DC_SEPARATOR_LEN;
+	static unsigned int cmdLen2 = 12 + DC_SEPARATOR_LEN;
+	if(sTopic.length()) {
+		sStr.reserve(sStr.size() + sHubName.size() + sTopic.size() + cmdLen2);
+		return sStr.append(cmd, 9).append(sHubName).append(cmd2, 3).append(sTopic).append(DC_SEPARATOR, DC_SEPARATOR_LEN);
+	} else {
+		sStr.reserve(sStr.size() + sHubName.size() + cmdLen);
+		return sStr.append(cmd, 9).append(sHubName).append(DC_SEPARATOR, DC_SEPARATOR_LEN);
+	}
 }
 
+// $HubTopic sHubTopic|
 string & cDCProtocol::Append_DC_HubTopic(string &sStr, const string &sHubTopic) {
-  static string s("$HubTopic ");
-  sStr.append(s);
-  sStr.append(sHubTopic);
-  sStr.append(DC_SEPARATOR);
-  return sStr;
+	static const char * cmd = "$HubTopic ";
+	static unsigned int cmdLen = 10 + DC_SEPARATOR_LEN;
+	sStr.reserve(sStr.size() + sHubTopic.size() + cmdLen);
+  return sStr.append(cmd, 10).append(sHubTopic).append(DC_SEPARATOR, DC_SEPARATOR_LEN);
 }
 
+// <sNick> sMsg|
 string & cDCProtocol::Append_DC_Chat(string &sStr, const string &sNick, const string &sMsg) {
-  sStr.reserve(sStr.size() + sNick.size() + sMsg.size() + 4);
-  sStr.append("<");
-  sStr.append(sNick);
-  sStr.append("> ");
-  sStr.append(sMsg);
-  sStr.append(DC_SEPARATOR);
-  return sStr;
+	static const char * cmd = "<";
+	static const char * cmd2 = "> ";
+	static unsigned int cmdLen = 3 + DC_SEPARATOR_LEN;
+  sStr.reserve(sStr.size() + sNick.size() + sMsg.size() + cmdLen);
+  return sStr.append(cmd, 1).append(sNick).append(cmd2, 2).append(sMsg).append(DC_SEPARATOR, DC_SEPARATOR_LEN);
 }
 
+// $To: sTo From: sFrom $<sNick> sMsg|
 string & cDCProtocol::Append_DC_PM(string &sStr, const string &sTo, const string &sFrom, const string &sNick, const string &sMsg) {
-  //$To: sTo From: sFrom $<sNick> sMsg|
-  sStr.reserve(sStr.size() + sTo.size() + sFrom.size() + sNick.size() + sMsg.size() + 18);
-  sStr.append("$To: ");
-  sStr.append(sTo);
-  sStr.append(" From: ");
-  sStr.append(sFrom);
-  sStr.append(" $<");
-  sStr.append(sNick);
-  sStr.append("> ");
-  sStr.append(sMsg);
-  sStr.append(DC_SEPARATOR);
-  return sStr;
+	static const char * cmd = "$To: ";
+	static const char * cmd2 = " From: ";
+	static const char * cmd3 = " $<";
+	static const char * cmd4 = "> ";
+	static unsigned int cmdLen = 17 + DC_SEPARATOR_LEN;
+  sStr.reserve(sStr.size() + sTo.size() + sFrom.size() + sNick.size() + sMsg.size() + cmdLen);
+  sStr.append(cmd, 5).append(sTo).append(cmd2, 7).append(sFrom).append(cmd3, 3).append(sNick);
+  return sStr.append(cmd4, 2).append(sMsg).append(DC_SEPARATOR, DC_SEPARATOR_LEN);
 }
 
+// $To: sTo From: sFrom $<sNick> sMsg|
 void cDCProtocol::Append_DC_PMToAll(string &sStart, string &sEnd, const string &sFrom, const string &sNick, const string &sMsg) {
-  //$To: sTo From: sFrom $<sNick> sMsg|
-  sStart.append("$To: ");
-  sEnd.reserve(sFrom.size() + sNick.size() + sMsg.size() + 13);
-  sEnd.append(" From: ");
-  sEnd.append(sFrom);
-  sEnd.append(" $<");
-  sEnd.append(sNick);
-  sEnd.append("> ");
-  sEnd.append(sMsg);
-  sEnd.append(DC_SEPARATOR);
+	static const char * cmd = "$To: ";
+	static const char * cmd2 = " From: ";
+	static const char * cmd3 = " $<";
+	static const char * cmd4 = "> ";
+	static unsigned int cmdLen = 12 + DC_SEPARATOR_LEN;
+  sStart.append(cmd, 5);
+  sEnd.reserve(sEnd.size() + sFrom.size() + sNick.size() + sMsg.size() + cmdLen);
+	sEnd.append(cmd2, 7).append(sFrom).append(cmd3, 3).append(sNick);
+  sEnd.append(cmd4, 2).append(sMsg).append(DC_SEPARATOR, DC_SEPARATOR_LEN);
 }
 
+// $Quit sNick|
 string & cDCProtocol::Append_DC_Quit(string &sStr, const string &sNick) {
-  sStr.append("$Quit ");
-  sStr.append(sNick);
-  sStr.append(DC_SEPARATOR);
-  return sStr;
+	static const char * cmd = "$Quit ";
+	static unsigned int cmdLen = 6 + DC_SEPARATOR_LEN;
+	sStr.reserve(sStr.size() + sNick.size() + cmdLen);
+  return sStr.append(cmd, 6).append(sNick).append(DC_SEPARATOR, DC_SEPARATOR_LEN);
 }
 
+// $OpList sNick$$|
 string & cDCProtocol::Append_DC_OpList(string &sStr, const string &sNick) {
-  sStr.append("$OpList ");
-  sStr.append(sNick);
-  sStr.append("$$"DC_SEPARATOR);
-  return sStr;
+	static const char * cmd = "$OpList ";
+	static const char * cmd2 = "$$"DC_SEPARATOR;
+	static unsigned int cmdLen = 10 + DC_SEPARATOR_LEN;
+	static unsigned int cmdLen2 = 2 + DC_SEPARATOR_LEN;
+  sStr.reserve(sStr.size() + sNick.size() + cmdLen);
+  return sStr.append(cmd, 8).append(sNick).append(cmd2, cmdLen2);
 }
 
+// $UserIP sNick sIP$$|
 string & cDCProtocol::Append_DC_UserIP(string &sStr, const string &sNick, const string &sIP) {
+	static const char * cmd = "$UserIP ";
+	static const char * cmd2 = " ";
+	static const char * cmd3 = "$$"DC_SEPARATOR;
+	static unsigned int cmdLen = 11 + DC_SEPARATOR_LEN;
+	static unsigned int cmdLen2 = 2 + DC_SEPARATOR_LEN;
   if(sIP.length()) {
-    sStr.append("$UserIP ");
-    sStr.append(sNick);
-    sStr.append(" ");
-    sStr.append(sIP);
-    sStr.append("$$"DC_SEPARATOR);
+		sStr.reserve(sStr.size() + sNick.size() + sIP.size() + cmdLen);
+    sStr.append(cmd, 8).append(sNick).append(cmd2, 1).append(sIP).append(cmd3, cmdLen2);
   }
   return sStr;
 }

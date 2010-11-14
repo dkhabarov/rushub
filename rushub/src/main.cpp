@@ -50,9 +50,9 @@ void SigHandler(int iSig) {
 
       cout << "Received a " << iSig << " signal, quiting" << endl;
       cDCServer::sCurrentServer->Stop(0);
-      cDCServer::sCurrentServer->~cDCServer();
-      cDCServer::sCurrentServer = NULL;
-      exit(0);
+//      cDCServer::sCurrentServer->~cDCServer();
+//      cDCServer::sCurrentServer = NULL;
+//      exit(0);
       break;
     default:
 

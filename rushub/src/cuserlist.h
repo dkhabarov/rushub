@@ -34,8 +34,7 @@
 using namespace nUtils; /** for tcHashTable */
 using namespace std;
 
-namespace nDCServer
-{
+namespace nDCServer {
 
 class cDCUser;
 class cUserBase;
@@ -231,7 +230,7 @@ public:
   virtual string &GetInfoList(bool bComplete = false);
   virtual string &GetIpList();
 
-  inline void Remake(){
+  inline void Remake() {
     if(!mbOptRemake)
       mbRemakeNextNickList = mbRemakeNextInfoList = mbRemakeNextIpList = true;
     else
@@ -240,15 +239,13 @@ public:
 
 
   /** OnAdd */
-  virtual void OnAdd(cUserBase *User)
-  {
+  virtual void OnAdd(cUserBase *User) {
     cUserList::OnAdd(User);
     if(!mbRemakeNextInfoList && mbKeepInfoList) mINFOListMaker(User);
     if(!mbRemakeNextIpList && mbKeepIpList) mIpListMaker(User);
   }
   /** OnRemove */
-  virtual void OnRemove(cUserBase *User)
-  {
+  virtual void OnRemove(cUserBase *User) {
     cUserList::OnRemove(User);
     mbRemakeNextInfoList = mbKeepInfoList;
     mbRemakeNextIpList = mbKeepIpList;

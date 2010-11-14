@@ -50,12 +50,13 @@ char * cObj::msPath = NULL;
 
 ofstream cObj::mOfs;
 
-cObj::cObj(const char *name) : mClassName(name), mToLog(&cout) { ++mCounterObj; }
-cObj::cObj() : mClassName("Obj"), mToLog(&cout) { ++mCounterObj; }
-cObj::~cObj(){ --mCounterObj; }
+cObj::cObj(const char *name) : mClassName(name), mToLog(&cout) { ++mCounterObj; /*if(Log(0)) LogStream() << "+ " << mClassName << endl;*/ }
+cObj::cObj() : mClassName("Obj"), mToLog(&cout) { ++mCounterObj; /*if(Log(0)) LogStream() << "+ " << mClassName << endl;*/ }
+cObj::~cObj(){ --mCounterObj; /*if(string(mClassName) != "cDCServer" && Log(0)) LogStream() << "- " << mClassName << endl;*/ }
 
 /** Set class name */
 void cObj::SetClassName(const char *sName) {
+	//if(Log(0)) LogStream() << "r " << mClassName << " -> " << sName << endl;
   mClassName = sName;
 }
 

@@ -102,7 +102,10 @@ cDCServer::~cDCServer() {
     Us = (cDCUser *)*it;
     ++it;
     if(Us->mDCConn) DelConnection(Us->mDCConn);
-    else if(Us->mbInUserList) this->RemoveFromDCUserList(Us);
+		else {
+			if(Us->mbInUserList) this->RemoveFromDCUserList(Us);
+			delete Us;
+		}
   }
   // del User
   Close();
@@ -110,9 +113,6 @@ cDCServer::~cDCServer() {
   if(mListenFactory) delete mListenFactory; mListenFactory = NULL;
   if(mWebListenFactory) delete mWebListenFactory; mWebListenFactory = NULL;
   if(mConnFactory) delete mConnFactory; mConnFactory = NULL;
-  
-  //if(cObj::mOfs.is_open()) cObj::mOfs.close();
-  //if(cObj::mErrOfs.is_open()) cObj::mErrOfs.close();
 }
 
 /** Close server */
@@ -180,6 +180,8 @@ int cDCServer::OnTimer(cTime &now) {
     mChatList.FlushCache();
     mActiveList.FlushCache();
 
+
+		int SysLoading = mSysLoading;
     if(0 < mMeanFrequency.mNumFill) {
       double iFrequency = mMeanFrequency.GetMean(mTime);
       if     (iFrequency < 0.4 * mDCConfig.miSysLoading) mSysLoading = eSL_SYSTEM_DOWN; // 0.4 (>2000 ms)
@@ -188,6 +190,9 @@ int cDCServer::OnTimer(cTime &now) {
       else if(iFrequency < 18  * mDCConfig.miSysLoading) mSysLoading = eSL_LOWER;       // 18  (>50   ms)
       else mSysLoading = eSL_OK;
     } else mSysLoading = eSL_OK;
+
+		if(mSysLoading != SysLoading)
+			if(Log(1)) LogStream() << "System loading: " << mSysLoading << " level (was " << SysLoading << " level)" << endl;
 
     mIPEnterFlood.Del(now); // Removing ip addresses, which already long ago entered
 
@@ -483,7 +488,7 @@ bool cDCServer::CheckNickLength(cDCConn *dcconn, const unsigned iLen) {
 
 bool cDCServer::BeforeUserEnter(cDCConn *dcconn) {
   unsigned iWantedMask;
-  if(mDCConfig.mbDelayedLogin) iWantedMask = eLS_LOGIN_DONE - eLS_NICKLST;
+  if(mDCConfig.mbDelayedLogin && dcconn->mbSendNickList) iWantedMask = eLS_LOGIN_DONE - eLS_NICKLST;
   else iWantedMask = eLS_LOGIN_DONE;
   
   if(iWantedMask == dcconn->GetLSFlag(iWantedMask)) {
@@ -501,6 +506,8 @@ bool cDCServer::BeforeUserEnter(cDCConn *dcconn) {
     if(!dcconn->mDCUser->mbInUserList) DoUserEnter(dcconn);
     return true;
   } else { /** Invalid sequence of the sent commands */
+		if(dcconn->Log(2)) dcconn->LogStream() << "Invalid sequence of the sent commands (" 
+			<< dcconn->GetLSFlag(iWantedMask) << "), wanted: " << iWantedMask << endl;
     dcconn->CloseNow();
     return false;
   }
@@ -563,7 +570,7 @@ bool cDCServer::AddToUserList(cDCUser * User) {
 		cDCUser * us = (cDCUser*)mDCUserList.Find(Key);
 		if(Log(0)) LogStream() << "Adding twice user with same nick " << User->msNick << "'[" // Log(0) for testing (was 1)
 			<< User->GetIp() << "] vs '" << us->msNick << "'[" << us->GetIp() 
-			<< "],sock:" << us->mDCConn->mSocket << endl; // for testing
+			<< "],sock:" << User->mDCConn->mSocket << " vs " << us->mDCConn->mSocket << endl; // for testing
 
     User->mbInUserList = false;
     return false;
@@ -1015,6 +1022,8 @@ int cDCServer::RegBot(const string & sNick, const string & sMyINFO, const string
   if(!sINFO.length()) sINFO = "$ $$$0$";
   if(!User->SetMyINFO(string("$MyINFO $ALL ") + sNick + " " + sINFO, sNick)) return -2;
 
+	if(Log(3)) LogStream() << "Reg bot: " << sNick << endl;
+
   if(!AddToUserList(User)) {
     delete User;
     return -3;
@@ -1025,6 +1034,9 @@ int cDCServer::RegBot(const string & sNick, const string & sMyINFO, const string
 }
 
 int cDCServer::UnregBot(const string & sNick) {
+
+	if(Log(3)) LogStream() << "Unreg bot: " << sNick << endl;
+
   cDCUser * User = (cDCUser*)mDCUserList.GetUserBaseByNick(sNick);
   if(!User || User->mDCConn) return -1;
   RemoveFromDCUserList(User);

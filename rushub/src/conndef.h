@@ -54,6 +54,8 @@
   #define SockErr WSAGetLastError()
   #define SOCK_EAGAIN WSAEWOULDBLOCK
   #define SOCK_EINTR WSAEINTR
+	#define SOCK_INVALID(SOCK) (SOCK) == INVALID_SOCKET
+	#define SOCK_ERROR(SOCK) (SOCK) == SOCKET_ERROR
   typedef SOCKET tSocket;
 #else
   #include <arpa/inet.h>
@@ -65,8 +67,8 @@
   #define SockErr errno
   #define SOCK_EAGAIN EAGAIN
   #define SOCK_EINTR EINTR
-  #define INVALID_SOCKET -1
-  #define SOCKET_ERROR -1
+	#define SOCK_INVALID(SOCK) (SOCK) < 0
+	#define SOCK_ERROR(SOCK) (SOCK) < 0
   typedef int tSocket;
 #endif
 
@@ -82,13 +84,13 @@
   #define SOCK_CLOSE(SOCK) ::closesocket(SOCK)
   #define SOCK_NON_BLOCK(SOCK) \
     static unsigned long one = 1; \
-    if(ioctlsocket(SOCK, FIONBIO, &one) == SOCKET_ERROR) return SOCKET_ERROR;
+    if(ioctlsocket(SOCK, FIONBIO, &one) == SOCKET_ERROR) return -1;
 #else
   #define SOCK_CLOSE(SOCK) ::close(SOCK)
   #define SOCK_NON_BLOCK(SOCK) \
     static int flags; \
-    if((flags = fcntl(SOCK, F_GETFL, 0)) < 0) return SOCKET_ERROR; \
-    if(fcntl(SOCK, F_SETFL, flags | O_NONBLOCK) < 0) return SOCKET_ERROR;
+    if((flags = fcntl(SOCK, F_GETFL, 0)) < 0) return -1; \
+    if(fcntl(SOCK, F_SETFL, flags | O_NONBLOCK) < 0) return -1;
 #endif
 
 

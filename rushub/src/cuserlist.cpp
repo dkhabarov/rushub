@@ -22,11 +22,9 @@
 
 #include <algorithm>
 
-namespace nDCServer
-{
+namespace nDCServer {
 
-void cUserList::ufSend::operator()(cUserBase *User)
-{
+void cUserList::ufSend::operator()(cUserBase *User) {
   if(User && User->CanSend()) {
     if(!mbProfile) {
       User->Send(msData, false); // newPolitic
@@ -41,8 +39,7 @@ void cUserList::ufSend::operator()(cUserBase *User)
   }
 }
 
-void cUserList::ufSendWithNick::operator()(cUserBase *User)
-{
+void cUserList::ufSendWithNick::operator()(cUserBase *User) {
   if(User && User->CanSend()) { 
     if(!mbProfile) {
       User->Send(msDataStart, false, false);
@@ -62,8 +59,7 @@ void cUserList::ufSendWithNick::operator()(cUserBase *User)
   }
 }
 
-void cUserList::ufDoNickList::operator()(cUserBase *User)
-{
+void cUserList::ufDoNickList::operator()(cUserBase *User) {
   if(!User->mbHide) {
     msList.append(User->msNick);
     msList.append(msSep);
@@ -72,7 +68,7 @@ void cUserList::ufDoNickList::operator()(cUserBase *User)
 
 cUserList::cUserList(string sName, bool bKeepNickList) :
   cObj("cUserList"),
-  tcHashTable<cUserBase*>(256), // 256 for big hubs and big check interval of resize
+  tcHashTable<cUserBase*>(1024), // 1024 for big hubs and big check interval of resize
   msName(sName),
   mNickListMaker(msNickList),
   mbKeepNickList(bKeepNickList),
@@ -81,20 +77,17 @@ cUserList::cUserList(string sName, bool bKeepNickList) :
 {
 }
 
-bool cUserList::Add(cUserBase *User)
-{
+bool cUserList::Add(cUserBase *User) {
   if(User) return List_t::Add(Nick2Key(User->msNick), User);
   else return false;
 }
 
-bool cUserList::Remove(cUserBase *User)
-{
+bool cUserList::Remove(cUserBase *User) {
   if(User) return List_t::Remove(Nick2Key(User->msNick));
   else return false;
 }
 
-string &cUserList::GetNickList()
-{
+string &cUserList::GetNickList() {
   if(mbRemakeNextNickList && mbKeepNickList) {
     mNickListMaker.Clear();
     For_each(begin(), end(), mNickListMaker);
@@ -109,8 +102,7 @@ string &cUserList::GetNickList()
  bUseCache - true - not send and save to cache, false - send data and send cache
  bAddSep - add sep to end of list
  */
-void cUserList::SendToAll(const string &sData, bool bUseCache, bool bAddSep)
-{
+void cUserList::SendToAll(const string &sData, bool bUseCache, bool bAddSep) {
   msCache.append(sData.c_str(), sData.size());
   if(bAddSep) msCache.append(DC_SEPARATOR);
   if(!bUseCache) {
@@ -122,8 +114,7 @@ void cUserList::SendToAll(const string &sData, bool bUseCache, bool bAddSep)
 }
 
 /** Sending data to profiles */
-void cUserList::SendToProfiles(unsigned long iProfile, const string &sData, bool bAddSep)
-{
+void cUserList::SendToProfiles(unsigned long iProfile, const string &sData, bool bAddSep) {
   string sMsg(sData);
   if(bAddSep) sMsg.append(DC_SEPARATOR);
   if(Log(4)) LogStream() << "SendToProfiles begin" << endl;
@@ -134,34 +125,29 @@ void cUserList::SendToProfiles(unsigned long iProfile, const string &sData, bool
 /** Sending data sStart+msNick+sEnd to all
     msNick - user's nick
     Use for private send to all */
-void cUserList::SendToWithNick(string &sStart, string &sEnd)
-{
+void cUserList::SendToWithNick(string &sStart, string &sEnd) {
   For_each(begin(), end(), ufSendWithNick(sStart, sEnd));
 }
 
-void cUserList::SendToWithNick(string &sStart, string &sEnd, unsigned long iProfile)
-{
+void cUserList::SendToWithNick(string &sStart, string &sEnd, unsigned long iProfile) {
   For_each(begin(), end(), ufSendWithNick(sStart, sEnd, iProfile));
 }
 
 /** Flush user cache */
-void cUserList::FlushForUser(cUserBase *User)
-{
+void cUserList::FlushForUser(cUserBase *User) {
   if(msCache.size())
     ufSend(msCache).operator()(User);
 }
 
 /** Flush common cache */
-void cUserList::FlushCache()
-{
+void cUserList::FlushCache() {
   static string sStr;
   if(msCache.size())
     SendToAll(sStr, false, false);
 }
 
 /** Redefining log level function */
-int cUserList::StrLog(ostream & ostr, int iLevel, int iMaxLevel)
-{
+int cUserList::StrLog(ostream & ostr, int iLevel, int iMaxLevel) {
   if(cObj::StrLog(ostr, iLevel, iMaxLevel)) {
     LogStream() << "(" << Size() << ")" << "[" << msName << "] ";
     return 1;
@@ -170,16 +156,14 @@ int cUserList::StrLog(ostream & ostr, int iLevel, int iMaxLevel)
 }
 
 
-void cFullUserList::ufDoINFOList::operator()(cUserBase *User)
-{
+void cFullUserList::ufDoINFOList::operator()(cUserBase *User) {
   if(!User->mbHide) {
     msListComplete.append(User->MyINFO());
     msListComplete.append(msSep);
   }
 }
 
-void cFullUserList::ufDoIpList::operator()(cUserBase *User)
-{
+void cFullUserList::ufDoIpList::operator()(cUserBase *User) {
   if(!User->mbHide && User->GetIp().size()) {
     msList.append(User->msNick);
     msList.append(" ");
@@ -200,8 +184,7 @@ cFullUserList::cFullUserList(string sName, bool bKeepNickList, bool bKeepInfoLis
   SetClassName("cFullUserList");
 }
 
-string &cFullUserList::GetNickList()
-{
+string &cFullUserList::GetNickList() {
   if(mbKeepNickList) {
     msCompositeNickList = cUserList::GetNickList();
     mbOptRemake = false;
@@ -209,10 +192,8 @@ string &cFullUserList::GetNickList()
   return msCompositeNickList;
 }
 
-string &cFullUserList::GetInfoList(bool bComplete)
-{
-  if(mbKeepInfoList)
-  {
+string &cFullUserList::GetInfoList(bool bComplete) {
+  if(mbKeepInfoList) {
     if(mbRemakeNextInfoList && mbKeepInfoList) {
       mINFOListMaker.Clear();
       For_each(begin(), end(), mINFOListMaker);
@@ -224,8 +205,7 @@ string &cFullUserList::GetInfoList(bool bComplete)
   return msCompositeINFOList;
 }
 
-string &cFullUserList::GetIpList()
-{
+string &cFullUserList::GetIpList() {
   if(mbRemakeNextIpList && mbKeepIpList) {
     mIpListMaker.Clear();
     For_each(begin(), end(), mIpListMaker);

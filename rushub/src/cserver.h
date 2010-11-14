@@ -45,16 +45,14 @@
 using namespace std;
 using namespace nUtils; // cTime
 
-namespace nServer
-{
+namespace nServer {
 
 class cConn;
 class cConnFactory;
 class cServer;
 
 /** Base listen factory class */
-class cListenFactory
-{
+class cListenFactory {
 
 public:
   cListenFactory(cServer *);
@@ -68,8 +66,7 @@ protected:
 }; // cListenFactory
 
 
-class cServer : public cObj
-{
+class cServer : public cObj {
 
 friend class cConn; /** for protected var on close socket (cConn::CloseNow) */
 friend class cListenFactory; /* OnNewConn */
@@ -147,7 +144,7 @@ private:
 protected:
 
   #ifdef _WIN32
-    static bool WSinit; /** windows flag for WS */
+    static bool initWSA; /** Windows init flag for WSA (Windows Sockets API) */
   #endif
 
   typedef list<cConn *> tConnList; /** ConnList */
