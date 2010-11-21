@@ -22,10 +22,12 @@
 #include "cservice.h"
 #include "cdir.h" // for DirExists
 #include "cdcserver.h"
+#include "cstrtoarg.h" // for cStrToArg.String2Arg
 
 using nDCServer::cDCServer;
 
 cService * cService::mCurService = NULL;
+bool cService::IsService = false;
 
 cService::cService() : cObj("cService") {
   mCurService = this;
@@ -303,9 +305,12 @@ int cService::Cli(int argc, char* argv[], string & sConfPath, const string & sEx
   if(sInstallName)
     InstallService(sInstallName, sConfigDir);
 
+	if(IsService) // Service!
+		return 1;
+
   if(sStartName) {
     SERVICE_TABLE_ENTRY DispatchTable[] = {
-      { sStartName, (LPSERVICE_MAIN_FUNCTION)ServiceMain },
+			{ sStartName, (LPSERVICE_MAIN_FUNCTION)cService::ServiceMain },
       { NULL, NULL }
     };
     if(::StartServiceCtrlDispatcher(DispatchTable) == 0) {
@@ -318,10 +323,10 @@ int cService::Cli(int argc, char* argv[], string & sConfPath, const string & sEx
     return 0;
   }
 
-  return 1;
+  return 0;
 }
 
-void WINAPI CtrlHandler(DWORD dwCtrl) {
+void WINAPI cService::CtrlHandler(DWORD dwCtrl) {
   switch(dwCtrl) {
     case SERVICE_CONTROL_SHUTDOWN:
     case SERVICE_CONTROL_STOP:
@@ -347,7 +352,54 @@ void WINAPI CtrlHandler(DWORD dwCtrl) {
       cService::mCurService->LogStream() << "Set Service status failed (" << (unsigned long)GetLastError() << ")" << endl;
 }
 
-void WINAPI ServiceMain(DWORD dwArgc, LPSTR *lpszArgv) {
+void WINAPI cService::ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv) {
+
+	SC_HANDLE Manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+	if(!Manager) {
+		if(cService::mCurService->ErrLog(0))
+      cService::mCurService->LogStream() << "Open SCManager failed (" << GetLastError() << ")" << endl;
+		return;
+	}
+
+	SC_HANDLE Service = OpenService(Manager, lpszArgv[0], SERVICE_ALL_ACCESS);
+	if(!Service) {
+    if(cService::mCurService->ErrLog(0))
+      cService::mCurService->LogStream() << "Open service failed (" << GetLastError() << ")" << endl;
+    ::CloseServiceHandle(Manager);
+		return;
+	}
+
+	string sBinaryPathName;
+	LPQUERY_SERVICE_CONFIG lpBuf = (LPQUERY_SERVICE_CONFIG)malloc(4096);
+	if(lpBuf != NULL) {
+		DWORD dwBytesNeeded;
+		if(!::QueryServiceConfig(Service, lpBuf, 4096, &dwBytesNeeded)) {
+			if(cService::mCurService->ErrLog(0))
+				cService::mCurService->LogStream() << "QueryServiceConfig failed (" << GetLastError() << ")" << endl;
+			::CloseServiceHandle(Service);
+			::CloseServiceHandle(Manager);
+			return;
+		}
+
+		/*
+		ofstream mOfs;
+		mOfs.open("F:/c/rushub/Debug/my_log.log");
+		mOfs << "dwArgc = " << dwArgc << endl;
+		mOfs << "lpszArgv[0] = " << lpszArgv[0] << endl;
+		mOfs << lpBuf->lpBinaryPathName << endl;
+		mOfs.close();
+		*/
+
+		sBinaryPathName = lpBuf->lpBinaryPathName;
+		free(lpBuf);
+	}
+
+	::CloseServiceHandle(Service);
+	::CloseServiceHandle(Manager);
+
+
+	
+
   ssh = ::RegisterServiceCtrlHandler(lpszArgv[0], CtrlHandler);
   if(!ssh) {
     if(cService::mCurService->ErrLog(0))
@@ -365,7 +417,21 @@ void WINAPI ServiceMain(DWORD dwArgc, LPSTR *lpszArgv) {
       cService::mCurService->LogStream() << "Set service status failed (" << (unsigned long)GetLastError() << ")" << endl;
     return;
   }
-  runHub(dwArgc, lpszArgv, true);
+	int argc;
+	char ** argv;
+	cStrToArg::String2Arg(sBinaryPathName, &argc, &argv);
+
+		ofstream mOfs;
+		mOfs.open("F:/c/rushub/Debug/my_log.log");
+		mOfs << "dwArgc = " << dwArgc << endl;
+		mOfs << "lpszArgv[0] = " << lpszArgv[0] << endl;
+		for(int i = 0; i < argc; ++i) {
+			mOfs << argv[i] << endl;
+		}
+		mOfs.close();
+
+	IsService = true;
+  runHub(argc, argv, true);
 }
 
 #endif // _WIN32

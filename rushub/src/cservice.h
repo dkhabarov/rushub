@@ -20,6 +20,8 @@
 #ifndef CSERVICE_H
 #define CSERVICE_H
 
+int runHub(int argc, char **argv, bool bService = false);
+
 #ifdef _WIN32
 
 #include "cserver.h"
@@ -57,18 +59,19 @@ static const struct {
 
 static SERVICE_STATUS_HANDLE ssh;
 static SERVICE_STATUS ss;
-int runHub(int, char **, bool);
-void WINAPI CtrlHandler(DWORD dwCtrl);
-void WINAPI ServiceMain(DWORD dwArgc, LPSTR *lpszArgv);
 
 class cService : public cObj
 {
 public:
   static cService * mCurService;
+	static bool IsService;
 
 public:
   cService();
   ~cService();
+
+	static void WINAPI CtrlHandler(DWORD dwCtrl);
+	static void WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv);
 
   static int InstallService(char * sName = NULL, const char * sConfPath = NULL);
   static int UninstallService(char * sName = NULL);

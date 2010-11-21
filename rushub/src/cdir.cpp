@@ -179,11 +179,16 @@ void ExecPath(string & sPath) {
     char * sHomeDir = getenv("HOME");
 	  if(sHomeDir) {
 	    sPath = sHomeDir;
-	    sPath += "/rushub";
+	    sPath.append("/rushub");
 	  } else {
 	    sPath = "./.rushub";
 	  }
   #endif
+
+	/* A check to existing path */
+	const char * sDir = sPath.c_str();
+	if(!DirExists(sDir))
+		mkdir(sDir, NULL);
 }
 
 void CheckEndSlash(string & sPath) {

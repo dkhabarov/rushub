@@ -20,6 +20,7 @@
 #include "cdcserver.h"
 #include "cdir.h"
 #include "cservice.h"
+
 #include <signal.h>
 
 #ifdef _WIN32
@@ -33,6 +34,8 @@
     #pragma comment(lib, "plugin.lib")
     #pragma comment(lib, "tinyxml.lib")
   #endif
+#else
+	#include "ccli.h"
 #endif
 
 using nDCServer::cDCServer;
@@ -50,9 +53,6 @@ void SigHandler(int iSig) {
 
       cout << "Received a " << iSig << " signal, quiting" << endl;
       cDCServer::sCurrentServer->Stop(0);
-//      cDCServer::sCurrentServer->~cDCServer();
-//      cDCServer::sCurrentServer = NULL;
-//      exit(0);
       break;
     default:
 
@@ -65,58 +65,67 @@ void SigHandler(int iSig) {
   }
 }
 
-//int runHub(int argc, char **argv, bool bService) {
-int runHub(int, char **, bool) {
+int runHub(int argc, char **argv, bool bService /*= false*/) {
 
   int iResult = 1;
 
+	#ifndef _WIN32
+		cCli Cli;  
+		Cli.detectArgs(argc, argv);
+  #endif
+
   while(iResult == 1) {
 
-    string sConfPath, sExPath;
-    ExecPath(sConfPath);
-    const char * sDir = sConfPath.c_str();
-    if(!DirExists(sDir))
-      mkdir(sDir, NULL);
-    sExPath = sConfPath;
+		string sConfPath, sExPath;
+		#ifndef _WIN32
+			if(Cli.getMainDir().empty())
+				ExecPath(sConfPath);
+			else
+				sConfPath = Cli.getMainDir();
 
-    #ifdef _WIN32
-//      cService Service;
-//      if(Service.Cli(argc, argv, sConfPath, sExPath) <= 0) return -1;
-    #endif
+			sExPath = sConfPath;
+			if(Cli.getDaemon()) Cli.demonizeServer("/");
+		#else
+			ExecPath(sConfPath);
+			sExPath = sConfPath;
 
-    /** Creating the server */
-    cDCServer Server(sConfPath, sExPath);
+			cService Service;
+			if(Service.Cli(argc, argv, sConfPath, sExPath) <= 0) return -1;
+		#endif
 
-    /** Listening all ports */
-    if(Server.Listening(0) != 0) {
-      if(Server.ErrLog(0))
-        Server.LogStream() << "Listening failed" << endl;
-      return -2;
-    }
+		/** Creating the server */
+		cDCServer Server(sConfPath, sExPath);
 
-    #ifdef _WIN32
-//      if(bService && Service.Start() < 0) return -3;
-    #endif
+		/** Listening all ports */
+		if(Server.Listening(0) != 0) {
+			if(Server.ErrLog(0))
+				Server.LogStream() << "Listening failed" << endl;
+			return -2;
+		}
 
-    iResult = Server.Run(); // 1 - restart
+		#ifdef _WIN32
+			if(bService && Service.Start() < 0) return -3;
+		#endif
 
-    #ifdef _WIN32
-//      if(bService && Service.Stop() < 0) return -4;
-    #endif
+		iResult = Server.Run(); // 1 - restart
 
-  }
+		#ifdef _WIN32
+			if(bService && Service.Stop() < 0) return -4;
+		#endif
 
-  return iResult;
+	}
+
+	return iResult;
 }
 
 int main(int argc, char **argv) {
 
-  signal(SIGINT, SigHandler);
-  signal(SIGTERM, SigHandler);
-  #ifndef _WIN32
-    signal(SIGQUIT, SigHandler);
-    signal(SIGHUP, SigHandler);
-  #endif
+	signal(SIGINT, SigHandler);
+	signal(SIGTERM, SigHandler);
+	#ifndef _WIN32
+		signal(SIGQUIT, SigHandler);
+		signal(SIGHUP, SigHandler);
+	#endif
 
-  return runHub(argc, argv, false);
+	return runHub(argc, argv);
 }

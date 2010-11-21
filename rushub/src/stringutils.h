@@ -35,8 +35,7 @@ using namespace std;
   #include <stdlib.h> // for strtoll
 #endif
 
-namespace nUtils
-{
+namespace nUtils {
 
 /** Function of the comparison of the substring from string str1 with string str2
   (0 - equal, 1 - not equal, -1 - not is faithfully given size of the substring str1) */
