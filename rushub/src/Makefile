@@ -5,7 +5,7 @@ CXXFLAGS = -O2 -Wall -Wextra -pipe
 
 INCLUDE = -I/usr/include -I/usr/local/include
 
-OBJS = $(CURDIR)/cantiflood.o $(CURDIR)/ccalllist.o $(CURDIR)/cconfig.o $(CURDIR)/cconfiglist.o $(CURDIR)/cconfigloader.o $(CURDIR)/cconn.o $(CURDIR)/cconnchoose.o $(CURDIR)/cconnpoll.o $(CURDIR)/cconnselect.o $(CURDIR)/cdcconfig.o $(CURDIR)/cdcconn.o $(CURDIR)/cdciplist.o $(CURDIR)/cdcparser.o $(CURDIR)/cdcprotocol.o $(CURDIR)/cdcserver.o $(CURDIR)/cdcuser.o $(CURDIR)/cdir.o $(CURDIR)/cmainpath.o $(CURDIR)/cobj.o $(CURDIR)/cpluginlist.o $(CURDIR)/cpluginloader.o $(CURDIR)/cprotocol.o $(CURDIR)/cprotocolcmd.o $(CURDIR)/cserver.o $(CURDIR)/cservice.o $(CURDIR)/ctime.o $(CURDIR)/cuserlist.o $(CURDIR)/cwebconn.o $(CURDIR)/cwebparser.o $(CURDIR)/cwebprotocol.o $(CURDIR)/dlfcn.o $(CURDIR)/main.o $(CURDIR)/stringutils.o
+OBJS = $(CURDIR)/cantiflood.o $(CURDIR)/ccalllist.o $(CURDIR)/cconfig.o $(CURDIR)/cconfiglist.o $(CURDIR)/cconfigloader.o $(CURDIR)/cconn.o $(CURDIR)/cconnchoose.o $(CURDIR)/cconnpoll.o $(CURDIR)/cconnselect.o $(CURDIR)/cdcconfig.o $(CURDIR)/cdcconn.o $(CURDIR)/cdciplist.o $(CURDIR)/cdcparser.o $(CURDIR)/cdcprotocol.o $(CURDIR)/cdcserver.o $(CURDIR)/cdcuser.o $(CURDIR)/cdir.o $(CURDIR)/cmainpath.o $(CURDIR)/cobj.o $(CURDIR)/cpluginlist.o $(CURDIR)/cpluginloader.o $(CURDIR)/cprotocol.o $(CURDIR)/cprotocolcmd.o $(CURDIR)/cserver.o $(CURDIR)/cservice.o $(CURDIR)/ctime.o $(CURDIR)/cuserlist.o $(CURDIR)/cwebconn.o $(CURDIR)/cwebparser.o $(CURDIR)/cwebprotocol.o $(CURDIR)/dlfcn.o $(CURDIR)/main.o $(CURDIR)/stringutils.o $(CURDIR)/ccli.o
 
 RusHub: $(OBJS)
 	$(CXX) -lrt -ldl -o RusHub $(OBJS) $(CURDIR)/tinyxml/tinyxml.a
@@ -61,6 +61,9 @@ $(CURDIR)/cdcuser.o: $(CURDIR)/cdcuser.cpp $(CURDIR)/cobj.h $(CURDIR)/conndef.h 
 $(CURDIR)/cdir.o: $(CURDIR)/cdir.cpp $(CURDIR)/cdir.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
+$(CURDIR)/ccli.o: $(CURDIR)/ccli.cpp $(CURDIR)/ccli.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
+  
 $(CURDIR)/cmainpath.o: $(CURDIR)/cmainpath.cpp $(CURDIR)/cobj.h $(CURDIR)/cdcuserbase.h $(CURDIR)/cdcconnbase.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/cprotocol.h $(CURDIR)/cdcparserbase.h $(CURDIR)/cconn.h $(CURDIR)/cuserbase.h $(CURDIR)/cdcuser.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/cmainpath.h $(CURDIR)/cdir.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
@@ -103,7 +106,7 @@ $(CURDIR)/cwebprotocol.o: $(CURDIR)/cwebprotocol.cpp $(CURDIR)/cobj.h $(CURDIR)/
 $(CURDIR)/dlfcn.o: $(CURDIR)/dlfcn.cpp $(CURDIR)/dlfcn.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/main.o: $(CURDIR)/main.cpp $(CURDIR)/cobj.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/tchashtable.h $(CURDIR)/tchashmap.h $(CURDIR)/cconnchoose.h $(CURDIR)/cmeanfrequency.h $(CURDIR)/cconnselect.h $(CURDIR)/cconnpoll.h $(CURDIR)/cserver.h $(CURDIR)/cdcserverbase.h $(CURDIR)/cdcuserbase.h $(CURDIR)/cdcconnbase.h $(CURDIR)/cprotocol.h $(CURDIR)/cdcparserbase.h $(CURDIR)/cconn.h $(CURDIR)/cuserbase.h $(CURDIR)/cdcuser.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/cprotocolcmd.h $(CURDIR)/cdcparser.h $(CURDIR)/cdcprotocol.h $(CURDIR)/cconfig.h $(CURDIR)/cconfiglist.h $(CURDIR)/cdcconfig.h $(CURDIR)/cuserlist.h $(CURDIR)/cpluginlistbase.h $(CURDIR)/ccalllist.h $(CURDIR)/cpluginbase.h $(CURDIR)/cwebparserbase.h $(CURDIR)/cplugin.h $(CURDIR)/cwebconn.h $(CURDIR)/cpluginlist.h $(CURDIR)/stringutils.h $(CURDIR)/cconfigloader.h $(CURDIR)/cantiflood.h $(CURDIR)/cdciplist.h $(CURDIR)/cmainpath.h $(CURDIR)/cdcserver.h $(CURDIR)/cdir.h $(CURDIR)/cservice.h
+$(CURDIR)/main.o: $(CURDIR)/main.cpp $(CURDIR)/cobj.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/tchashtable.h $(CURDIR)/tchashmap.h $(CURDIR)/cconnchoose.h $(CURDIR)/cmeanfrequency.h $(CURDIR)/cconnselect.h $(CURDIR)/cconnpoll.h $(CURDIR)/cserver.h $(CURDIR)/cdcserverbase.h $(CURDIR)/cdcuserbase.h $(CURDIR)/cdcconnbase.h $(CURDIR)/cprotocol.h $(CURDIR)/cdcparserbase.h $(CURDIR)/cconn.h $(CURDIR)/cuserbase.h $(CURDIR)/cdcuser.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/cprotocolcmd.h $(CURDIR)/cdcparser.h $(CURDIR)/cdcprotocol.h $(CURDIR)/cconfig.h $(CURDIR)/cconfiglist.h $(CURDIR)/cdcconfig.h $(CURDIR)/cuserlist.h $(CURDIR)/cpluginlistbase.h $(CURDIR)/ccalllist.h $(CURDIR)/cpluginbase.h $(CURDIR)/cwebparserbase.h $(CURDIR)/cplugin.h $(CURDIR)/cwebconn.h $(CURDIR)/cpluginlist.h $(CURDIR)/stringutils.h $(CURDIR)/cconfigloader.h $(CURDIR)/cantiflood.h $(CURDIR)/cdciplist.h $(CURDIR)/cmainpath.h $(CURDIR)/cdcserver.h $(CURDIR)/cdir.h $(CURDIR)/cservice.h $(CURDIR)/ccli.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(CURDIR)/stringutils.o: $(CURDIR)/stringutils.cpp $(CURDIR)/stringutils.h
