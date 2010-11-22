@@ -84,7 +84,7 @@ int runHub(int argc, char **argv, bool bService /*= false*/) {
 				sConfPath = Cli.getMainDir();
 
 			sExPath = sConfPath;
-			if(Cli.getDaemon()) Cli.demonizeServer("/");
+			if(Cli.getDaemon()) Cli.demonizeServer(sConfPath);
 		#else
 			ExecPath(sConfPath);
 			sExPath = sConfPath;
