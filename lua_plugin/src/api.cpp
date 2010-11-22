@@ -202,8 +202,8 @@ int ConfigNewindex(lua_State *L) {
 }
 
 void LogError(const char *sMsg) {
-  const char * s = "luaerr.log";
-  ofstream Ofs(s, ios_base::app);
+	static string s(cLua::mCurServer->GetMainDir() + "luaerr.log");
+	ofstream Ofs(s.c_str(), ios_base::app);
   if(sMsg){
     Ofs << "[" << cLua::mCurServer->GetTime() << "] " << string(sMsg) << endl;
   }else{
