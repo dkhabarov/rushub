@@ -421,15 +421,6 @@ void WINAPI cService::ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv) {
 	char ** argv;
 	cStrToArg::String2Arg(sBinaryPathName, &argc, &argv);
 
-		ofstream mOfs;
-		mOfs.open("F:/c/rushub/Debug/my_log.log");
-		mOfs << "dwArgc = " << dwArgc << endl;
-		mOfs << "lpszArgv[0] = " << lpszArgv[0] << endl;
-		for(int i = 0; i < argc; ++i) {
-			mOfs << argv[i] << endl;
-		}
-		mOfs.close();
-
 	IsService = true;
   runHub(argc, argv, true);
 }
