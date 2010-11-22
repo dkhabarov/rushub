@@ -160,8 +160,10 @@
 ** the libraries, you may want to use the following definition (define
 ** LUA_BUILD_AS_DLL to get it).
 */
+#if defined(_WIN32)
 #define LUA_BUILD_AS_DLL
 #define LUA_LIB
+#endif
 
 #if defined(LUA_BUILD_AS_DLL)
 
