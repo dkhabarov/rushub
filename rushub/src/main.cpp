@@ -85,6 +85,10 @@ int runHub(int argc, char **argv, bool bService /*= false*/) {
 
 			sExPath = sConfPath;
 			if(Cli.getDaemon()) Cli.demonizeServer(sConfPath);
+			if((chdir(sConfPath.c_str())) < 0) {
+				fprintf(stderr, "Can not go to the work directory %s. Error: %s\n", sConfPath.c_str(), strerror(errno));
+				return -1;
+			}
 		#else
 			ExecPath(sConfPath);
 			sExPath = sConfPath;

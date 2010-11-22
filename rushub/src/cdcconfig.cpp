@@ -212,6 +212,8 @@ void cDCLang::AddVars()
   Add("sBadSRNick", msBadSRNick, string("Неверный ник в результатах поиска: %[nick]. Ваш реальный ник: %[real_nick]."));
   Add("sBadSearchIp", msBadSearchIp, string("В поисковом запросе вы отсылаете неверный ip адрес: %[ip], ваш реальный ip: %[real_ip]."));
   Add("sUsedNick", msUsedNick, string("Этот ник %[nick] уже используется другим пользователем."));
+	Add("sUsedNickReconn", msUsedNickReconn, string("Пожалуйста переподключитесь к хабу."));
+	
   Add("sBadNickLen", msBadNickLen, string("Недопустимая длина ника. Допустимая длина ника от %[min] до %[max] символов."));
   Add("sBadChars", msBadChars, string("Недопустимые символы в нике."));
   Add("sFreqClientPing", msFreqClientPing, string("Ваш клиент слишком часто пингует хаб."));

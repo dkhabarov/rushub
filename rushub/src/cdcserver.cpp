@@ -459,12 +459,20 @@ bool cDCServer::ValidateUser(cDCConn *dcconn, const string &sNick) {
   if(mDCUserList.ContainsKey(Key)) {
     string sMsg;
 		cDCUser * us = (cDCUser*)mDCUserList.Find(Key);
-		if(dcconn->Log(0)) dcconn->LogStream() << "Bad nick (used): '" << sNick << "'[" // Log(0) for testing (was 2)
-			<< dcconn->Ip() << "] vs '" << us->msNick << "'[" << us->GetIp() 
-			<< "],sock:" << us->mDCConn->mSocket << endl; // for testing
 
-    SendToUser(dcconn, StringReplace(mDCLang.msUsedNick, string("nick"), sMsg, sNick).c_str(), (char*)mDCConfig.msHubBot.c_str());
-    dcconn->Send(cDCProtocol::Append_DC_ValidateDenide(sMsg.erase(), sNick));
+		// ping old user
+		static string empty("");
+		if(!us->mDCConn || us->mDCConn->Send(empty, true) <= 0) {
+			if(dcconn->Log(0)) dcconn->LogStream() << "Bad nick (used): '" << sNick << "'[" // Log(0) for testing (was 2)
+				<< dcconn->Ip() << "] vs '" << us->msNick << "'[" << us->GetIp() 
+				<< "],sock:" << us->mDCConn->mSocket << endl; // for testing
+			SendToUser(dcconn, StringReplace(mDCLang.msUsedNick, string("nick"), sMsg, sNick).c_str(), (char*)mDCConfig.msHubBot.c_str());
+			dcconn->Send(cDCProtocol::Append_DC_ValidateDenide(sMsg.erase(), sNick));
+		} else {
+			SendToUser(dcconn, mDCLang.msUsedNickReconn.c_str(), (char*)mDCConfig.msHubBot.c_str());
+		}
+
+    
     return false;
   }
   return true;
@@ -568,10 +576,14 @@ bool cDCServer::AddToUserList(cDCUser * User) {
 		//if(Log(1)) LogStream() << "Adding twice user with same nick " << User->msNick << " (" << mDCUserList.Find(Key)->msNick << ")" << endl;
 
 		cDCUser * us = (cDCUser*)mDCUserList.Find(Key);
-		if(Log(0)) LogStream() << "Adding twice user with same nick " << User->msNick << "'[" // Log(0) for testing (was 1)
-			<< User->GetIp() << "] vs '" << us->msNick << "'[" << us->GetIp() 
-			<< "],sock:" << User->mDCConn->mSocket << " vs " << us->mDCConn->mSocket << endl; // for testing
 
+		if(User->mDCConn && us->mDCConn) {
+			if(Log(0)) LogStream() << "Adding twice user with same nick " << User->msNick << "'[" // Log(0) for testing (was 1)
+				<< User->GetIp() << "] vs '" << us->msNick << "'[" << us->GetIp() 
+				<< "],sock:" << User->mDCConn->mSocket << " vs " << us->mDCConn->mSocket << endl; // for testing
+		} else {
+			if(Log(2)) LogStream() << "Adding twice user with same nick " << User->msNick << endl;
+		}
     User->mbInUserList = false;
     return false;
   }

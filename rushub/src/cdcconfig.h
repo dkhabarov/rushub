@@ -175,6 +175,7 @@ public:
   string msBadNickLen;    //< Message about ban length for the nick
   string msBadChars;      //< Message about bad symbols in the nick
   string msTimes[5];      //< weeks, days, hours, min, sec
+	string msUsedNickReconn;
 
 public:
   cDCLang();
