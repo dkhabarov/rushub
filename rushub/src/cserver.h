@@ -74,8 +74,7 @@ friend class cConnFactory; /* OnNewData */
 
 public:
 
-  int miPort; /** Listen port */
-  string msIp; /** Ip address of server */
+  string msAddresses; /** string "Ip1[:port1] Ip2[:port2] ... IpN[:portN]" - addresses of server */
 
   cConnFactory * mConnFactory; /** cConnFactory */
 
@@ -95,7 +94,7 @@ public:
 
 public:
 
-  cServer(const string sSep, int iPort = 411);
+  cServer(const string sSep);
   virtual ~cServer();
 
   /** Set and Listen port */

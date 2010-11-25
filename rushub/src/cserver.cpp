@@ -39,10 +39,9 @@ namespace nServer {
 #endif
 
 //////////////////////////////////////////////constructor////////////////////////////////////////
-cServer::cServer(const string sSep, int iPort) :
+cServer::cServer(const string sSep) :
   cObj("cServer"),
-  miPort(iPort),
-  msIp("0.0.0.0"),
+  msAddresses("0.0.0.0"),
   mConnFactory(NULL),
   miStrSizeMax(10240),
   msSeparator(sSep),

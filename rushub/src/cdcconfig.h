@@ -46,7 +46,6 @@ public:
   
   int miStartPing;        //< Time interval in sec, after which begins ping user
   int miMaxPassiveRes;    //< Max results in the passive search
-  int miWebServerPort;    //< Web-server port
   
 	int miUsersLimit;  //< User's limit
 
@@ -119,8 +118,7 @@ public:
   bool mbRegMainBot;          //< Reg main bot
   bool mbMainBotKey;          //< Key for main bot
 
-  string msWebServerIP;       //< Main bot IP address
-  string msSubPorts;          //< Additional listening hub ports (separator: space)
+  string msWebAddresses;      //< Wib addresses "ip1[:port1] host2[:port2] ... ipN[:portN]"
   string msHubBot;            //< Nick of the main bot
   string msHubName;           //< Name of the hub
   string msTopic;             //< Hub topic

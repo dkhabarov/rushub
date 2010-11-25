@@ -190,6 +190,8 @@ public:
   void StopHub() { Stop(0); }
   void RestartHub() { Stop(1); }
 
+	static void getAddresses(const string & sAddresses, vector<pair<string, int>> & vec, int iDefPort);
+
 protected:
 
   /** Function action when joining the client */

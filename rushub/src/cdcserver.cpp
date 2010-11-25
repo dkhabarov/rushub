@@ -138,30 +138,57 @@ void cDCServer::DelConn(cConn * conn) {
   }
 }
 
+void cDCServer::getAddresses(const string & sAddresses, vector<pair<string, int>> & vec, int iDefPort) {
+	vector<string> vAddresses;
+	StringSplit(sAddresses, ' ', vAddresses);
+	for(vector<string>::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
+		vector<string> vIpPort;
+		StringSplit(*it, ':', vIpPort);
+		if(2 < vIpPort.size() || vIpPort.size() < 1) continue;
+		if(vIpPort[0].size() == 0) continue;
+		int iPort = iDefPort;
+		if(vIpPort.size() == 2) {
+			iPort = atoi(vIpPort[1].c_str());
+			if(iPort < 0 || iPort > 65535) continue;
+		}
+		vec.push_back(pair<string, int>(vIpPort[0], iPort));
+	}
+}
+
 /** Listening ports */
 int cDCServer::Listening(int iPort) {
   if(!mListenFactory) mListenFactory = new cListenFactory(this);
-  int iRes = cServer::Listening(mListenFactory, msIp, (iPort != 0) ? iPort : miPort);
-  cout << "Server " INTERNALNAME " " INTERNALVERSION " is running on " << msIp << ":" << miPort << " TCP" << endl;
+
+	vector<pair<string, int>> vAddresses;
+	getAddresses(msAddresses, vAddresses, 411);
+
+	if(vAddresses.size() == 0) {
+		if(ErrLog(0)) LogStream() << "Incorrect address of the hub" << endl;
+		return -1;
+	}
+	for(vector<pair<string, int>>::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
+		int iRes = cServer::Listening(mListenFactory, (*it).first, (iPort != 0) ? iPort : (*it).second);
+		if(iRes != 0) return iRes;
+		if(Log(0)) LogStream() << "Server " INTERNALNAME " " INTERNALVERSION " is running on " << ((*it).first) << ":" << ((iPort != 0) ? iPort : (*it).second) << " TCP" << endl;
+		cout << "Server " INTERNALNAME " " INTERNALVERSION " is running on " << ((*it).first) << ":" << ((iPort != 0) ? iPort : (*it).second) << " TCP" << endl;
+	}
 
   if(mDCConfig.mbWebServer) {
     if(!mWebListenFactory) mWebListenFactory = new cWebListenFactory(this);
-    cServer::Listening(mWebListenFactory, mDCConfig.msWebServerIP, mDCConfig.miWebServerPort);
-    cout << "Web-Server is running on " << mDCConfig.msWebServerIP << ":" << mDCConfig.miWebServerPort << " TCP" << endl;
-  }
 
-  /** Listening additional ports */
-  istringstream is(mDCConfig.msSubPorts);
-  int i = 1;
-  while(i) {
-    i = 0;
-    is >> i;
-    if(i) {
-      cConn * conn = cServer::Listen(msIp, i);
-      if(conn) conn->mListenFactory = mListenFactory;
-    }
+		vAddresses.clear();
+		getAddresses(mDCConfig.msWebAddresses, vAddresses, 80);
+
+		if(vAddresses.size() == 0) {
+			if(ErrLog(0)) LogStream() << "Incorrect address of the web server" << endl;
+		}
+		for(vector<pair<string, int>>::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
+			cServer::Listening(mWebListenFactory, (*it).first, (iPort != 0) ? iPort : (*it).second);
+			if(Log(0)) LogStream() << "Web-Server is running on " << ((*it).first) << ":" << ((*it).second) << " TCP" << endl;
+			cout << "Web-Server is running on " << ((*it).first) << ":" << ((*it).second) << " TCP" << endl;
+		}
   }
-  return iRes;
+  return 0;
 }
 
 int cDCServer::OnTimer(cTime &now) {
@@ -462,7 +489,7 @@ bool cDCServer::ValidateUser(cDCConn *dcconn, const string &sNick) {
 
 		// ping old user
 		static string empty("");
-		if(!us->mDCConn || us->mDCConn->Send(empty, true) <= 0) {
+		if(!us->mDCConn || us->mDCConn->Send(empty, true) > 0) {
 			if(dcconn->Log(0)) dcconn->LogStream() << "Bad nick (used): '" << sNick << "'[" // Log(0) for testing (was 2)
 				<< dcconn->Ip() << "] vs '" << us->msNick << "'[" << us->GetIp() 
 				<< "],sock:" << us->mDCConn->mSocket << endl; // for testing

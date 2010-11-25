@@ -22,50 +22,21 @@
 #include <string>
 using namespace std;
 
-namespace nDCServer
-{
+namespace nDCServer {
 
-cDCConfig::cDCConfig()
-{
+cDCConfig::cDCConfig() {
 }
 
-cDCConfig::~cDCConfig()
-{
+cDCConfig::~cDCConfig() {
 }
 
-void cDCConfig::SetServer(cDCServer * server)
-{
+void cDCConfig::SetServer(cDCServer * server) {
   mDCServer = server;
   AddVars();
 }
 
 
-void cDCConfig::AddVars()
-{
-  #ifndef _WIN32
-    Add("iMainPort", mDCServer->miPort, 4111);
-    Add("iWebServerPort", miWebServerPort, 8080);
-  #else
-    Add("iMainPort", mDCServer->miPort, 411);
-    Add("iWebServerPort", miWebServerPort, 81);
-  #endif
-
-  Add("iWebStrSizeMax",       miWebStrSizeMax,              10240);
-  Add("iStrSizeMax",          mDCServer->miStrSizeMax,      10240);
-  Add("iStepDelay",           mDCServer->mStepDelay,        0);
-  Add("iTimerServPeriod",     mDCServer->miTimerServPeriod, 1000);
-  Add("iTimerConnPeriod",     mDCServer->miTimerConnPeriod, 4000);
-  Add("iStartPing",           miStartPing,                  300);
-  Add("iPingInterval",        miPingInterval,               60.);
-  Add("iMaxLevel",            miMaxLevel,                   0);
-  Add("iMaxErrLevel",         miMaxErrLevel,                2);
-  Add("iMaxPassiveRes",       miMaxPassiveRes,              25);
-  Add("iMinClientPingInt",    miMinClientPingInt,           30.);
-  Add("iSysLoading",          miSysLoading,                 1.);
-  Add("iMaxNickLen",          miMaxNickLen,                 32);
-  Add("iMinNickLen",          miMinNickLen,                 2);
-  Add("iWebTimeout",          miWebTimeout,                 30);
-  Add("iUsersLimit",          miUsersLimit,                 -1);
+void cDCConfig::AddVars() {
   
   Add("iFloodCountReconnIp",  miFloodCountReconnIp,         1);
   Add("iFloodCountMyINFO",    miFloodCountMyINFO,           6);
@@ -130,32 +101,19 @@ void cDCConfig::AddVars()
   Add("iLenCmdGetINFO",       mMaxCmdLen[eDC_GETINFO],      128   );
   Add("iLenCmdUnknown",       mMaxCmdLen[eDC_UNKNOWN],      128   );
 
-  Add("bMAC",                 mDCServer->mbMAC,             false);
-  Add("bWebServer",           mbWebServer,                  false);
-  Add("bDisableNoDCCmd",      mbDisableNoDCCmd,             true);
-  Add("bNicklistOnLogin",     mbNicklistOnLogin,            true);
-  Add("bDelayedLogin",        mbDelayedLogin,               true);
-  mbDelayedMyINFO = false;//Add("bDelayedMyINFO",       mbDelayedMyINFO,              false);
-  Add("bCheckCTMIp",          mbCheckCTMIp,                 true);
-  Add("bCheckRctmNick",       mbCheckRctmNick,              true);
-  Add("bCheckSRNick",         mbCheckSRNick,                true);
-  Add("bCheckSearchIp",       mbCheckSearchIp,              true);
-  Add("bSendUserIp",          mbSendUserIp,                 true);
-  Add("bRegMainBot",          mbRegMainBot,                 true);
-  Add("bMainBotKey",          mbMainBotKey,                 true);
+	Add("iWebTimeout",          miWebTimeout,                 30);
+	Add("iWebStrSizeMax",       miWebStrSizeMax,              10240);
+  Add("sWebAddresses",        msWebAddresses,
+		#ifdef _WIN32
+			string("0.0.0.0:81")
+		#else
+			string("0.0.0.0:8080")
+		#endif
+	);
+	Add("bWebServer",           mbWebServer,                  false);
 
-  Add("sWebServerIP",         msWebServerIP,                string("0.0.0.0") );
-  Add("sHubIP",               mDCServer->msIp,              string("0.0.0.0") );
-  Add("sSubPorts",            msSubPorts,                   string("")        );
-  Add("sHubBot",              msHubBot,                     string("RusHub")  );
-  Add("sHubName",             msHubName,                    string("RusHub")  );
-  Add("sTopic",               msTopic,                      string("Russian hub software"));
-  Add("sLocale",              msLocale,                     string(setlocale(LC_ALL, "")) );
-  Add("sMainBotMyINFO",       msMainBotMyINFO,              string("RusHub bot<Bot V:1.0,M:A,H:0/0/1,S:0>$ $$$0$")  );
-  Add("sMainBotIP",           msMainBotIP,                  string("127.0.0.1")  );
-  
 
-  /* Timeouts of the protocol commands */
+	/* Timeouts of the protocol commands */
   const char *sTimeoutName[] = {"Key", "Nick", "Login", "Myinfo", "Getpass"};
   double iTimeoutDefault[] = { 60. , 30., 600., 40., 300. };
   string s;
@@ -166,6 +124,49 @@ void cDCConfig::AddVars()
     s.append(sTimeoutName[i]);
     Add(s, miTimeout[i], iTimeoutDefault[i]);
   }
+
+
+
+	Add("iTimerServPeriod",     mDCServer->miTimerServPeriod, 1000);
+  Add("iTimerConnPeriod",     mDCServer->miTimerConnPeriod, 4000);
+	Add("iStepDelay",           mDCServer->mStepDelay,        0);
+  Add("iStrSizeMax",          mDCServer->miStrSizeMax,      10240);
+	Add("iSysLoading",          miSysLoading,                 1.);
+	Add("iMinClientPingInt",    miMinClientPingInt,           30.);
+  Add("iStartPing",           miStartPing,                  300);
+  Add("iPingInterval",        miPingInterval,               60.);
+  Add("bNicklistOnLogin",     mbNicklistOnLogin,            true);
+  Add("bDelayedLogin",        mbDelayedLogin,               true);
+  mbDelayedMyINFO = false;//Add("bDelayedMyINFO",       mbDelayedMyINFO,              false);
+	Add("bDisableNoDCCmd",      mbDisableNoDCCmd,             true);
+	Add("bCheckSearchIp",       mbCheckSearchIp,              true);
+	Add("bCheckSRNick",         mbCheckSRNick,                true);
+	Add("bCheckRctmNick",       mbCheckRctmNick,              true);
+	Add("bCheckCTMIp",          mbCheckCTMIp,                 true);
+	Add("bSendUserIp",          mbSendUserIp,                 true);
+	Add("bMAC",                 mDCServer->mbMAC,             false);
+  Add("iMaxPassiveRes",       miMaxPassiveRes,              25);
+  Add("iMaxNickLen",          miMaxNickLen,                 32);
+  Add("iMinNickLen",          miMinNickLen,                 2);
+  Add("iUsersLimit",          miUsersLimit,                 -1);
+	Add("iMaxLevel",            miMaxLevel,                   0);
+  Add("iMaxErrLevel",         miMaxErrLevel,                2);
+  Add("sLocale",              msLocale,                     string(setlocale(LC_ALL, "")) );
+	Add("sMainBotIP",           msMainBotIP,                  string("127.0.0.1")  );
+  Add("sMainBotMyINFO",       msMainBotMyINFO,              string("RusHub bot<Bot V:1.0,M:A,H:0/0/1,S:0>$ $$$0$")  );
+	Add("bMainBotKey",          mbMainBotKey,                 true);
+	Add("sHubBot",              msHubBot,                     string("RusHub")  );
+	Add("bRegMainBot",          mbRegMainBot,                 true);
+  Add("sTopic",               msTopic,                      string("Russian hub software"));
+	Add("sHubName",             msHubName,                    string("RusHub")  );
+	Add("sAddresses",           mDCServer->msAddresses,
+		#ifdef _WIN32
+			string("0.0.0.0:411")
+		#else
+			string("0.0.0.0:4111")
+		#endif
+	);
+  
 }
 
 bool cDCConfig::Load()
