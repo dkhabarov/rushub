@@ -106,7 +106,7 @@
 #define LUA_LDIR  LUA_ROOT "share/lua/5.1/"
 #define LUA_CDIR  LUA_ROOT "lib/lua/5.1/"
 #define LUA_PATH_DEFAULT  \
-  "./?.lua;./libs/?.lua;./libs/?/init.lua;"
+  "./?.lua;./libs/?.lua;./libs/?/init.lua;" \
   LUA_LDIR"?.lua;" LUA_LDIR"?/init.lua;" \
   LUA_CDIR"?.lua;" LUA_CDIR"?/init.lua"
 #define LUA_CPATH_DEFAULT \
