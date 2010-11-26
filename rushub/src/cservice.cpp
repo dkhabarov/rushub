@@ -379,24 +379,12 @@ void WINAPI cService::ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv) {
 			::CloseServiceHandle(Manager);
 			return;
 		}
-
-		/*
-		ofstream mOfs;
-		mOfs.open("F:/c/rushub/Debug/my_log.log");
-		mOfs << "dwArgc = " << dwArgc << endl;
-		mOfs << "lpszArgv[0] = " << lpszArgv[0] << endl;
-		mOfs << lpBuf->lpBinaryPathName << endl;
-		mOfs.close();
-		*/
-
 		sBinaryPathName = lpBuf->lpBinaryPathName;
 		free(lpBuf);
 	}
 
 	::CloseServiceHandle(Service);
 	::CloseServiceHandle(Manager);
-
-
 	
 
 	ssh = ::RegisterServiceCtrlHandler(lpszArgv[0], CtrlHandler);
