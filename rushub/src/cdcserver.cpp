@@ -997,10 +997,7 @@ const char * cDCServer::GetLang(const string & sName) {
 }
 
 bool cDCServer::SetConfig(const string & sName, const string & sValue) {
-	if(sName == "sHubIP" || 
-		sName == "iMainPort" || 
-		sName == "sSubPorts"
-	) return false;
+	if(sName == "sAddresses") return false;
 
 	if(sName == "sLocale" && 
 		!setlocale(LC_ALL, sValue.c_str())
