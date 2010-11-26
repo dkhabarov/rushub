@@ -24,8 +24,8 @@
 #include <iostream> /** cout, endl */
 
 #ifdef _WIN32
-  #include <Iphlpapi.h> /** mac address */
-  #pragma comment(lib, "Iphlpapi.lib") /** mac address */
+	#include <Iphlpapi.h> /** mac address */
+	#pragma comment(lib, "Iphlpapi.lib") /** mac address */
 #endif
 
 using namespace nUtils; /** ShrinkStringToFit, StrCutLeft */
@@ -36,510 +36,510 @@ unsigned long cConn::iConnCounter = 0;
 char *cConn::msRecvBuf = new char[MAX_RECV_SIZE + 1];
 
 cConn::cConn(tSocket sock, cServer *s, tConnType st) :
-  cObj("cConn"),
-  mSocket(sock),
-  mbOk(sock > 0),
-  mbWritable(true),
-  mConnFactory(NULL),
-  mListenFactory(NULL),
-  mServer(s),
-  mProtocol(NULL),
-  mParser(NULL),
-  miRecvBufEnd(0),
-  miRecvBufRead(0),
-  mbBlockInput(false),
-  mbBlockOutput(true),
-  miAttemptSend(0),
-  mbClosed(false),
-  mConnType(st),
-  miNetIp(0),
-  miPort(0),
-  miPortConn(0),
-  miSendBufMax(MAX_SEND_SIZE)
+	cObj("cConn"),
+	mSocket(sock),
+	mbOk(sock > 0),
+	mbWritable(true),
+	mConnFactory(NULL),
+	mListenFactory(NULL),
+	mServer(s),
+	mProtocol(NULL),
+	mParser(NULL),
+	miRecvBufEnd(0),
+	miRecvBufRead(0),
+	mbBlockInput(false),
+	mbBlockOutput(true),
+	miAttemptSend(0),
+	mbClosed(false),
+	mConnType(st),
+	miNetIp(0),
+	miPort(0),
+	miPortConn(0),
+	miSendBufMax(MAX_SEND_SIZE)
 {
-  ClearStr(); /** Clear params */
-  memset(&mCloseTime, 0, sizeof(mCloseTime));
+	ClearStr(); /** Clear params */
+	memset(&mCloseTime, 0, sizeof(mCloseTime));
 
 	if(mSocket) {
-    static struct sockaddr saddr;
-    static socklen_t saddr_size = sizeof(saddr);
-    struct sockaddr_in *saddr_in;
-    if(getpeername(mSocket, &saddr, &saddr_size) < 0) {
-      if(Log(2)) LogStream() << "Error in getpeername, closing" << endl;
-      CloseNow();
-    }
-    saddr_in = (struct sockaddr_in *)&saddr;
+		static struct sockaddr saddr;
+		static socklen_t saddr_size = sizeof(saddr);
+		struct sockaddr_in *saddr_in;
+		if(getpeername(mSocket, &saddr, &saddr_size) < 0) {
+			if(Log(2)) LogStream() << "Error in getpeername, closing" << endl;
+			CloseNow();
+		}
+		saddr_in = (struct sockaddr_in *)&saddr;
 
-    miNetIp = saddr_in->sin_addr.s_addr; /** Numeric ip */
-    msIp = inet_ntoa(saddr_in->sin_addr); /** String ip */
-    miPort = ntohs(saddr_in->sin_port); /** Port */
+		miNetIp = saddr_in->sin_addr.s_addr; /** Numeric ip */
+		msIp = inet_ntoa(saddr_in->sin_addr); /** String ip */
+		miPort = ntohs(saddr_in->sin_port); /** Port */
 
-    if(mServer->mbMAC) GetMac();
-  }
+		if(mServer->mbMAC) GetMac();
+	}
 }
 
 cConn::~cConn() {
-  if(mParser) this->DeleteParser(mParser);
-  mParser = NULL;
-  mListenFactory = NULL;
-  mConnFactory = NULL;
-  mServer = NULL;
-  mProtocol = NULL;
-  this->Close();
+	if(mParser) this->DeleteParser(mParser);
+	mParser = NULL;
+	mListenFactory = NULL;
+	mConnFactory = NULL;
+	mServer = NULL;
+	mProtocol = NULL;
+	this->Close();
 }
 
 /** ListenPort */
 tSocket cConn::ListenPort(int iPort, const char *sIp, bool bUDP) {
-  if(mSocket > 0) return -1; /** Socket is already created */
-  mSocket = SocketCreate(bUDP); /** Create socket */
-  mSocket = SocketBind(mSocket, iPort, sIp); /** Bind */
-  if(!bUDP) {
-      mSocket = SocketListen(mSocket);
-      mSocket = SocketNonBlock(mSocket);
-  }
-  miPort = iPort; /** Set port */
-  mbOk = mSocket > 0; /** Reg conn */
-  return mSocket;
+	if(mSocket > 0) return -1; /** Socket is already created */
+	mSocket = SocketCreate(bUDP); /** Create socket */
+	mSocket = SocketBind(mSocket, iPort, sIp); /** Bind */
+	if(!bUDP) {
+			mSocket = SocketListen(mSocket);
+			mSocket = SocketNonBlock(mSocket);
+	}
+	miPort = iPort; /** Set port */
+	mbOk = mSocket > 0; /** Reg conn */
+	return mSocket;
 }
 
 /** Create socket (default TCP) */
 tSocket cConn::SocketCreate(bool bUDP) {
-  tSocket sock;
-  if(!bUDP) { /* Create socket TCP */
-    if(SOCK_INVALID(sock = socket(AF_INET, SOCK_STREAM, 0)))
-      return -1;
-    sockoptval_t yes = 1;
+	tSocket sock;
+	if(!bUDP) { /* Create socket TCP */
+		if(SOCK_INVALID(sock = socket(AF_INET, SOCK_STREAM, 0)))
+			return -1;
+		sockoptval_t yes = 1;
 
-    /* TIME_WAIT after close conn. Reuse address after disconn */
-    if(SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(sockoptval_t))))
-      return -1;
-  }
-  else /* Create socket UDP */
-    if(SOCK_INVALID(sock = socket(AF_INET, SOCK_DGRAM, 0)))
-      return -1;
+		/* TIME_WAIT after close conn. Reuse address after disconn */
+		if(SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(sockoptval_t))))
+			return -1;
+	}
+	else /* Create socket UDP */
+		if(SOCK_INVALID(sock = socket(AF_INET, SOCK_DGRAM, 0)))
+			return -1;
 
-  ++iConnCounter;
-  if(Log(3)) LogStream() << "Created new socket: " << sock << endl;
-  return sock;
+	++iConnCounter;
+	if(Log(3)) LogStream() << "Created new socket: " << sock << endl;
+	return sock;
 }
 
 
 /* Bind
-  mAddrIN.sin_family = AF_INET;
-  mAddrIN.sin_addr.s_addr = inet_addr(ip);
-  mAddrIN.sin_port = htons(port);
-  mAddrIN.sin_zero = 0x00000000;
+	mAddrIN.sin_family = AF_INET;
+	mAddrIN.sin_addr.s_addr = inet_addr(ip);
+	mAddrIN.sin_port = htons(port);
+	mAddrIN.sin_zero = 0x00000000;
 */
 tSocket cConn::SocketBind(tSocket sock, int iPort, const char *sIp) {
-  if(sock < 0) return -1;
-  string sIP(sIp);
-  memset(&mAddrIN, 0, sizeof(struct sockaddr_in));
-  mAddrIN.sin_family = AF_INET;
-  mAddrIN.sin_port = htons(iPort);
+	if(sock < 0) return -1;
+	string sIP(sIp);
+	memset(&mAddrIN, 0, sizeof(struct sockaddr_in));
+	mAddrIN.sin_family = AF_INET;
+	mAddrIN.sin_port = htons(iPort);
 
-  if(!CheckIp(sIP)) {
-    struct hostent *host = gethostbyname(sIp);
-    if(host)
-		  mAddrIN.sin_addr = *((struct in_addr *)host->h_addr);
-  } else {
-    mAddrIN.sin_addr.s_addr = INADDR_ANY; /* INADDR_ANY == 0 */
-    if(sIp)
-      #ifdef _WIN32
-        mAddrIN.sin_addr.s_addr = inet_addr(sIp);
-      #else
-        inet_aton(sIp, &mAddrIN.sin_addr);
-      #endif
-  }
-  memset(&(mAddrIN.sin_zero), '\0', 8);
+	if(!CheckIp(sIP)) {
+		struct hostent *host = gethostbyname(sIp);
+		if(host)
+			mAddrIN.sin_addr = *((struct in_addr *)host->h_addr);
+	} else {
+		mAddrIN.sin_addr.s_addr = INADDR_ANY; /* INADDR_ANY == 0 */
+		if(sIp)
+			#ifdef _WIN32
+				mAddrIN.sin_addr.s_addr = inet_addr(sIp);
+			#else
+				inet_aton(sIp, &mAddrIN.sin_addr);
+			#endif
+	}
+	memset(&(mAddrIN.sin_zero), '\0', 8);
 
-  /** Bind */
-  if(SOCK_ERROR(bind(sock, (struct sockaddr *)&mAddrIN, sizeof(mAddrIN))))
-    return -1;
+	/** Bind */
+	if(SOCK_ERROR(bind(sock, (struct sockaddr *)&mAddrIN, sizeof(mAddrIN))))
+		return -1;
 
-  return sock;
+	return sock;
 }
 
 /** Listen TCP socket */
 tSocket cConn::SocketListen(tSocket sock) {
-  if(sock < 0) return -1;
-  if(SOCK_ERROR(listen(sock, SOCK_BACKLOG))) {
-    SOCK_CLOSE(sock);
-    if(ErrLog(1)) LogStream() << "Error listening" << endl;
-    return -1;
-  }
-  return sock;
+	if(sock < 0) return -1;
+	if(SOCK_ERROR(listen(sock, SOCK_BACKLOG))) {
+		SOCK_CLOSE(sock);
+		if(ErrLog(1)) LogStream() << "Error listening" << endl;
+		return -1;
+	}
+	return sock;
 }
 
 /** Set non-block socket */
 tSocket cConn::SocketNonBlock(tSocket sock) {
-  if(sock < 0) return -1;
-  SOCK_NON_BLOCK(sock);
-  return sock;
+	if(sock < 0) return -1;
+	SOCK_NON_BLOCK(sock);
+	return sock;
 }
 
 
 ////////////////////////////////////////////////////////
 /** Close socket */
 void cConn::Close() {
-  if(mSocket <= 0) return;
-  mbWritable = mbOk = false;
+	if(mSocket <= 0) return;
+	mbWritable = mbOk = false;
 
-  /** OnClose */
-  if(mServer) mServer->OnClose(this);
+	/** OnClose */
+	if(mServer) mServer->OnClose(this);
 
 #ifndef _WIN32
-  TEMP_FAILURE_RETRY(SOCK_CLOSE(mSocket));
-  if(SockErr != SOCK_EINTR){
+	TEMP_FAILURE_RETRY(SOCK_CLOSE(mSocket));
+	if(SockErr != SOCK_EINTR){
 #else
-  static int err;
-  err = TEMP_FAILURE_RETRY(SOCK_CLOSE(mSocket));
-  if(!(SOCK_ERROR(err))){
+	static int err;
+	err = TEMP_FAILURE_RETRY(SOCK_CLOSE(mSocket));
+	if(!(SOCK_ERROR(err))){
 #endif
-    --iConnCounter;
-    if(Log(3)) LogStream() << "Closing socket: " << mSocket << endl;
-  }
-  else if(ErrLog(1)) LogStream() << "Socket not closed: " << SockErr << endl;
+		--iConnCounter;
+		if(Log(3)) LogStream() << "Closing socket: " << mSocket << endl;
+	}
+	else if(ErrLog(1)) LogStream() << "Socket not closed: " << SockErr << endl;
 
-  mSocket = 0;
+	mSocket = 0;
 }
 
 /** OnCloseNice */
 int cConn::OnCloseNice(void) {
-  return 0;
+	return 0;
 }
 
 /** CloseNice */
 void cConn::CloseNice(int imsec) {
-  OnCloseNice();
-  mbWritable = false;
-  if((imsec <= 0) || (!msSendBuf.size())){CloseNow(); return;}
-  mCloseTime.Get();
-  mCloseTime += int(imsec);
+	OnCloseNice();
+	mbWritable = false;
+	if((imsec <= 0) || (!msSendBuf.size())){CloseNow(); return;}
+	mCloseTime.Get();
+	mCloseTime += int(imsec);
 }
 
 /** CloseNow */
 void cConn::CloseNow() {
-  mbWritable = mbOk = false;
-  if(mServer) {
-    if(!(mServer->mConnChooser.cConnChoose::OptGet((cConnBase*)this) & cConnChoose::eEF_CLOSE)) {
-      mServer->miNumCloseConn ++;
-      mbClosed = true; // poll conflict
-      mServer->mConnChooser.cConnChoose::OptIn((cConnBase*)this, cConnChoose::eEF_CLOSE);
-      mServer->mConnChooser.cConnChoose::OptOut((cConnBase*)this, cConnChoose::eEF_ALL);
-    }
-  }
+	mbWritable = mbOk = false;
+	if(mServer) {
+		if(!(mServer->mConnChooser.cConnChoose::OptGet((cConnBase*)this) & cConnChoose::eEF_CLOSE)) {
+			mServer->miNumCloseConn ++;
+			mbClosed = true; // poll conflict
+			mServer->mConnChooser.cConnChoose::OptIn((cConnBase*)this, cConnChoose::eEF_CLOSE);
+			mServer->mConnChooser.cConnChoose::OptOut((cConnBase*)this, cConnChoose::eEF_ALL);
+		}
+	}
 }
 
 /** CreateNewConn */
 cConn * cConn::CreateNewConn() {
-  tSocket sock;
+	tSocket sock;
 	if((sock = Accept()) < 0) return NULL;
 
-  cConnFactory *Factory = NULL;
-  cConn *new_conn = NULL;
+	cConnFactory *Factory = NULL;
+	cConn *new_conn = NULL;
 
-  /** Presence of the factory for listen socket without fall! */
-  if(mListenFactory) Factory = mListenFactory->ConnFactory();
-  //if(mServer && mServer->mConnFactory) Factory = mServer->mConnFactory;
+	/** Presence of the factory for listen socket without fall! */
+	if(mListenFactory) Factory = mListenFactory->ConnFactory();
+	//if(mServer && mServer->mConnFactory) Factory = mServer->mConnFactory;
 
-  if(Factory != NULL) new_conn = Factory->CreateConn(sock); /** Create eCT_CLIENTTCP conn */
-  if(!new_conn) {
-    if(ErrLog(0)) LogStream() << "Fatal error: Can't create new connection object" << endl;
-    throw "Fatal error: Can't create new connection object";
-  }
+	if(Factory != NULL) new_conn = Factory->CreateConn(sock); /** Create eCT_CLIENTTCP conn */
+	if(!new_conn) {
+		if(ErrLog(0)) LogStream() << "Fatal error: Can't create new connection object" << endl;
+		throw "Fatal error: Can't create new connection object";
+	}
 
-  mTimeLastIOAction.Get();
-  return new_conn;
+	mTimeLastIOAction.Get();
+	return new_conn;
 }
 
 /** Accept new conn */
 tSocket cConn::Accept() {
-  #ifdef _WIN32
-    static struct sockaddr client;
-  #else
-    static struct sockaddr_in client;
-  #endif
-  static socklen_t namelen = sizeof(client);
-  tSocket sock;
-  int i;
+	#ifdef _WIN32
+		static struct sockaddr client;
+	#else
+		static struct sockaddr_in client;
+	#endif
+	static socklen_t namelen = sizeof(client);
+	tSocket sock;
+	int i;
 
-  i = 0;
-  memset(&client, 0, namelen);
-  sock = accept(mSocket, (struct sockaddr *)&client, (socklen_t*)&namelen);
-  while(SOCK_INVALID(sock) && ((SockErr == SOCK_EAGAIN) || (SockErr == SOCK_EINTR)) && (i++ < 10))
-  { /** Try to accept connection not more than 10 once */
-    sock = ::accept(mSocket, (struct sockaddr *)&client, (socklen_t*)&namelen);
-    #ifdef _WIN32
-      Sleep(1);
-    #else
-      usleep(50);
-    #endif
-  }
-  if(SOCK_INVALID(sock)) {
-    if(ErrLog(1)) LogStream() << "Socket not accept: " << SockErr << endl;
-    return -1;
-  }
+	i = 0;
+	memset(&client, 0, namelen);
+	sock = accept(mSocket, (struct sockaddr *)&client, (socklen_t*)&namelen);
+	while(SOCK_INVALID(sock) && ((SockErr == SOCK_EAGAIN) || (SockErr == SOCK_EINTR)) && (i++ < 10)) {
+		/** Try to accept connection not more than 10 once */
+		sock = ::accept(mSocket, (struct sockaddr *)&client, (socklen_t*)&namelen);
+		#ifdef _WIN32
+			Sleep(1);
+		#else
+			usleep(50);
+		#endif
+	}
+	if(SOCK_INVALID(sock)) {
+		if(ErrLog(1)) LogStream() << "Socket not accept: " << SockErr << endl;
+		return -1;
+	}
 
-  static sockoptval_t yes = 1;
-  static socklen_t yeslen = sizeof(yes);
-  if(SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &yes, yeslen))) {
+	static sockoptval_t yes = 1;
+	static socklen_t yeslen = sizeof(yes);
+	if(SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &yes, yeslen))) {
 #ifdef _WIN32
-    static int err;
-    err = TEMP_FAILURE_RETRY(SOCK_CLOSE(sock));
-    if(SOCK_ERROR(err))
+		static int err;
+		err = TEMP_FAILURE_RETRY(SOCK_CLOSE(sock));
+		if(SOCK_ERROR(err))
 #else
-    TEMP_FAILURE_RETRY(SOCK_CLOSE(sock));
-    if(SockErr != SOCK_EINTR)
+		TEMP_FAILURE_RETRY(SOCK_CLOSE(sock));
+		if(SockErr != SOCK_EINTR)
 #endif
-    { if(Log(2)) LogStream() << "Couldn't set keepalive flag for accepted socket" << endl; }
-    else if(ErrLog(1)) LogStream() << "Socket not closed" << endl;
-    return -1;
-  }
+		{ if(Log(2)) LogStream() << "Couldn't set keepalive flag for accepted socket" << endl; }
+		else if(ErrLog(1)) LogStream() << "Socket not closed" << endl;
+		return -1;
+	}
 
-  /** Non-block socket */
+	/** Non-block socket */
 	if(SocketNonBlock(sock) < 0) {
 		if(ErrLog(1)) LogStream() << "Couldn't set non-block flag for accepted socket" << endl;
 		return -1;
 	}
 
-  /** Accept new socket */
-  if(Log(3)) LogStream() << "Accept new socket: " << sock << endl;
+	/** Accept new socket */
+	if(Log(3)) LogStream() << "Accept new socket: " << sock << endl;
 
-  ++iConnCounter;
-  return sock;
+	++iConnCounter;
+	return sock;
 }
 
 /** Reading all data from socket to buffer of the conn */
 int cConn::Recv() {
-  if(!mbOk || !mbWritable) return -1;
+	if(!mbOk || !mbWritable) return -1;
 
-  static int iBufLen, i;
-  iBufLen = 0; i = 0;
+	static int iBufLen, i;
+	iBufLen = 0; i = 0;
 
 #ifdef USE_UDP
 	static bool bUdp;
-  bUdp = (this->mConnType == eCT_CLIENTUDP);
-  if(!bUdp) { /** TCP */
+	bUdp = (this->mConnType == eCT_CLIENTUDP);
+	if(!bUdp) { /** TCP */
 #endif
-    while(
-      (SOCK_ERROR(iBufLen = recv(mSocket, msRecvBuf, MAX_RECV_SIZE, 0))) &&
-      ((SockErr == SOCK_EAGAIN) || (SockErr == SOCK_EINTR))
-      && (i++ <= 100)
-    )  {
-      #ifndef _WIN32
-        usleep(5);
-      #endif
-    }
+		while(
+			(SOCK_ERROR(iBufLen = recv(mSocket, msRecvBuf, MAX_RECV_SIZE, 0))) &&
+			((SockErr == SOCK_EAGAIN) || (SockErr == SOCK_EINTR))
+			&& (i++ <= 100)
+		) {
+			#ifndef _WIN32
+				usleep(5);
+			#endif
+		}
 #ifdef USE_UDP
-  } else { /** bUdp */
-    if(Log(4)) LogStream() << "Start read (UDP)" << endl;
-    static int iAddrLen = sizeof(struct sockaddr);
-    while(
-      (SOCK_ERROR(iBufLen = recvfrom(mSocket, msRecvBuf, MAX_RECV_SIZE, 0, (struct sockaddr *)&mAddrIN, (socklen_t *)&iAddrLen))) &&
-      (i++ <= 100)
-    ) {
-      #ifndef _WIN32
-        usleep(5);
-      #endif
-    }
-    if(Log(4)) LogStream() << "End read (UDP). Read bytes: " << iBufLen << endl;
-  }
+	} else { /** bUdp */
+		if(Log(4)) LogStream() << "Start read (UDP)" << endl;
+		static int iAddrLen = sizeof(struct sockaddr);
+		while(
+			(SOCK_ERROR(iBufLen = recvfrom(mSocket, msRecvBuf, MAX_RECV_SIZE, 0, (struct sockaddr *)&mAddrIN, (socklen_t *)&iAddrLen))) &&
+			(i++ <= 100)
+		) {
+			#ifndef _WIN32
+				usleep(5);
+			#endif
+		}
+		if(Log(4)) LogStream() << "End read (UDP). Read bytes: " << iBufLen << endl;
+	}
 #endif
 
-  miRecvBufRead = miRecvBufEnd = 0;
-  if(iBufLen <= 0) {
+	miRecvBufRead = miRecvBufEnd = 0;
+	if(iBufLen <= 0) {
 		#ifdef USE_UDP
-    if(!bUdp) {
+		if(!bUdp) {
 		#endif
-      if(iBufLen == 0) {
-        if(Log(3)) LogStream() << "User itself was disconnected" << endl;
-      } else {
-        if(Log(2)) {
-          LogStream() << "Error in receive: " << SockErr;
-          switch(SockErr) {
-            case ECONNRESET: /** Connection reset by peer */
-              LogStream() << "(connection reset by peer)" << endl;
-              break;
-            case ETIMEDOUT: /** Connection timed out */
-              LogStream() << "(connection timed out)" << endl;
-              break;
-            case EHOSTUNREACH: /** No route to host */
-              LogStream() << "(no route to host)" << endl;
-              break;
-            case EWOULDBLOCK: /** Non-blocking socket operation */
-              return -1;
-            default:
-              LogStream() << "(other reason)" << endl;
-              break;
-          }
-        }
-      }
-      CloseNow();
-      return -1;
+			if(iBufLen == 0) {
+				if(Log(3)) LogStream() << "User itself was disconnected" << endl;
+			} else {
+				if(Log(2)) {
+					LogStream() << "Error in receive: " << SockErr;
+					switch(SockErr) {
+						case ECONNRESET: /** Connection reset by peer */
+							LogStream() << "(connection reset by peer)" << endl;
+							break;
+						case ETIMEDOUT: /** Connection timed out */
+							LogStream() << "(connection timed out)" << endl;
+							break;
+						case EHOSTUNREACH: /** No route to host */
+							LogStream() << "(no route to host)" << endl;
+							break;
+						case EWOULDBLOCK: /** Non-blocking socket operation */
+							return -1;
+						default:
+							LogStream() << "(other reason)" << endl;
+							break;
+					}
+				}
+			}
+			CloseNow();
+			return -1;
 		#ifdef USE_UDP
-    }
+		}
 		#endif
-  } else {
-    miRecvBufEnd = iBufLen; /** End buf pos */
-    miRecvBufRead = 0; /** Pos for reading from buf */
-    msRecvBuf[miRecvBufEnd] = '\0'; /** Adding 0 symbol to end of str */
-    mTimeLastIOAction.Get(); /** Write time last action */
-  }
-  return iBufLen;
+	} else {
+		miRecvBufEnd = iBufLen; /** End buf pos */
+		miRecvBufRead = 0; /** Pos for reading from buf */
+		msRecvBuf[miRecvBufEnd] = '\0'; /** Adding 0 symbol to end of str */
+		mTimeLastIOAction.Get(); /** Write time last action */
+	}
+	return iBufLen;
 }
 
 /** Clear params */
 void cConn::ClearStr() {
-  msStr = NULL;
-  msSeparator = "\0";
-  miStrSizeMax = 0;
-  meStrStatus = eSS_NO_STR;
+	msStr = NULL;
+	msSeparator = "\0";
+	miStrSizeMax = 0;
+	meStrStatus = eSS_NO_STR;
 }
 
 /** Installing the string, in which will be recorded received data, 
-  and installation main parameter */
+	and installation main parameter */
 void cConn::SetStrToRead(string *pStr, string separator, unsigned long iMax) {
-  if(meStrStatus != eSS_NO_STR) {
-    if(ErrLog(0)) LogStream() << "Fatal error: Bad SetStrToRead" << endl;
-    throw "Fatal error: Bad SetStrToRead";
-  }
-  if(!pStr) {
-    if(ErrLog(0)) LogStream() << "Fatal error: Bad SetStrToRead. Null string pointer" << endl;
-    throw "Fatal error: Bad SetStrToRead. Null string pointer";
-  }
-  msStr = pStr;
-  msSeparator = separator;
-  miStrSizeMax = iMax;
-  meStrStatus = eSS_PARTLY;
+	if(meStrStatus != eSS_NO_STR) {
+		if(ErrLog(0)) LogStream() << "Fatal error: Bad SetStrToRead" << endl;
+		throw "Fatal error: Bad SetStrToRead";
+	}
+	if(!pStr) {
+		if(ErrLog(0)) LogStream() << "Fatal error: Bad SetStrToRead. Null string pointer" << endl;
+		throw "Fatal error: Bad SetStrToRead. Null string pointer";
+	}
+	msStr = pStr;
+	msSeparator = separator;
+	miStrSizeMax = iMax;
+	meStrStatus = eSS_PARTLY;
 }
 
 /** Reading data from buffer and record in line of the protocol */
 int cConn::ReadFromRecvBuf() {
-  if(!msStr) {
-    if(ErrLog(0)) LogStream() << "Fatal error: ReadFromBuf with null string pointer" << endl;
-    throw "Fatal error: ReadFromBuf with null string pointer";
-  }
-  char *buf = msRecvBuf + miRecvBufRead;
-  unsigned pos, len = (miRecvBufEnd - miRecvBufRead);
-  if((pos = string(buf).find(msSeparator)) == string::npos) {
-    if(msStr->size() + len > miStrSizeMax) {
-      CloseNow();
-      return 0;
-    }
-    msStr->append((char*)buf, len);
-    miRecvBufRead = miRecvBufEnd = 0;
-    return len;
-  }
-  len = pos + msSeparator.size();
-  msStr->append((char*)buf, pos);
-  miRecvBufRead += len;
-  meStrStatus = eSS_STR_DONE;
-  return len;
+	if(!msStr) {
+		if(ErrLog(0)) LogStream() << "Fatal error: ReadFromBuf with null string pointer" << endl;
+		throw "Fatal error: ReadFromBuf with null string pointer";
+	}
+	char *buf = msRecvBuf + miRecvBufRead;
+	unsigned pos, len = (miRecvBufEnd - miRecvBufRead);
+	if((pos = string(buf).find(msSeparator)) == string::npos) {
+		if(msStr->size() + len > miStrSizeMax) {
+			CloseNow();
+			return 0;
+		}
+		msStr->append((char*)buf, len);
+		miRecvBufRead = miRecvBufEnd = 0;
+		return len;
+	}
+	len = pos + msSeparator.size();
+	msStr->append((char*)buf, pos);
+	miRecvBufRead += len;
+	meStrStatus = eSS_STR_DONE;
+	return len;
 }
 
 /** Remaining (for web-server) */
 int cConn::Remaining() {
-  char *buf = msRecvBuf + miRecvBufRead;
-  int len = miRecvBufEnd - miRecvBufRead;  
-  if(msStr->size() + len > miStrSizeMax) {
-    CloseNow();
-    return -1;
-  }
-  msStr->append((char*)buf, len);
-  miRecvBufRead = miRecvBufEnd = 0;
-  return len;
+	char *buf = msRecvBuf + miRecvBufRead;
+	int len = miRecvBufEnd - miRecvBufRead;
+	if(msStr->size() + len > miStrSizeMax) {
+		CloseNow();
+		return -1;
+	}
+	msStr->append((char*)buf, len);
+	miRecvBufRead = miRecvBufEnd = 0;
+	return len;
 }
 
 /** Write data in sending buffer and send to conn */
 int cConn::WriteData(const string &sData, bool bFlush) {
-  if(msSendBuf.size() + sData.size() >= miSendBufMax) {
-    if(Log(0)) LogStream() << "Sending buffer has big size, closing" << endl;
-    CloseNow();
-    return -1;
-  }
-  bFlush = bFlush || (msSendBuf.size() > (miSendBufMax >> 1));
+	if(msSendBuf.size() + sData.size() >= miSendBufMax) {
+		if(Log(0)) LogStream() << "Sending buffer has big size, closing" << endl;
+		CloseNow();
+		return -1;
+	}
+	bFlush = bFlush || (msSendBuf.size() > (miSendBufMax >> 1));
 
-  if(!bFlush) { 
-    msSendBuf.append(sData.c_str(), sData.size());
-    return 0;
-  }
+	if(!bFlush) { 
+		msSendBuf.append(sData.c_str(), sData.size());
+		return 0;
+	}
 
-  const char *send_buf; 
-  size_t size; 
-  static bool appended; 
+	const char *send_buf; 
+	size_t size; 
+	static bool appended; 
 
-  if(msSendBuf.size()) { 
-    msSendBuf.append(sData.c_str(), sData.size());
-    size = msSendBuf.size();
-    send_buf = msSendBuf.c_str();
-    appended = true;
-  } else { 
-    size = sData.size();
-    if(!size) return 0; 
-    send_buf = sData.c_str();
-    appended = false;
-  }
+	if(msSendBuf.size()) { 
+		msSendBuf.append(sData.c_str(), sData.size());
+		size = msSendBuf.size();
+		send_buf = msSendBuf.c_str();
+		appended = true;
+	} else { 
+		size = sData.size();
+		if(!size) return 0; 
+		send_buf = sData.c_str();
+		appended = false;
+	}
 
-  /** Sending */
-  if(Send(send_buf, size) < 0) {
+	/** Sending */
+	if(Send(send_buf, size) < 0) {
 
-    if((SockErr != SOCK_EAGAIN) /*&& (SockErr != SOCK_EINTR)*/) {
-      if(Log(2)) LogStream() << "Error in sending: " << SockErr << "(not EAGAIN), closing" << endl;
-      CloseNow();
-      return -1;
-    } //else if(miAttemptSend++ > MAX_ATTEMPT_SEND) {
-      //if(ErrLog(1)) LogStream() << "Error in sending: Attempt send more than " << MAX_ATTEMPT_SEND << ", closing" << endl;
-      //CloseNow();
-      //return -1;
-    //}
+		if((SockErr != SOCK_EAGAIN) /*&& (SockErr != SOCK_EINTR)*/) {
+			if(Log(2)) LogStream() << "Error in sending: " << SockErr << "(not EAGAIN), closing" << endl;
+			CloseNow();
+			return -1;
+		} //else if(miAttemptSend++ > MAX_ATTEMPT_SEND) {
+			//if(ErrLog(1)) LogStream() << "Error in sending: Attempt send more than " << MAX_ATTEMPT_SEND << ", closing" << endl;
+			//CloseNow();
+			//return -1;
+		//}
 
-    if(Log(3)) LogStream() << "Block sent: " << size << endl;
-    if(!appended)
-      StrCutLeft(sData, msSendBuf, size);
-    else
-      StrCutLeft(msSendBuf, size); /** del from buf sent data */
-    mTimeLastIOAction.Get();
+		if(Log(3)) LogStream() << "Block sent: " << size << endl;
+		if(!appended)
+			StrCutLeft(sData, msSendBuf, size);
+		else
+			StrCutLeft(msSendBuf, size); /** del from buf sent data */
+		mTimeLastIOAction.Get();
 
-    if(bool(mCloseTime)) {
-      CloseNow();
-      return size;
-    }
+		if(bool(mCloseTime)) {
+			CloseNow();
+			return size;
+		}
 
-    if(mServer && mbOk) {
-      if(mbBlockOutput) {
-        mbBlockOutput = false;
-        mServer->mConnChooser.cConnChoose::OptIn(this, cConnChoose::eEF_OUTPUT);
-        if(Log(3)) LogStream() << "Unblock output channel" << endl;
-      }
+		if(mServer && mbOk) {
+			if(mbBlockOutput) {
+				mbBlockOutput = false;
+				mServer->mConnChooser.cConnChoose::OptIn(this, cConnChoose::eEF_OUTPUT);
+				if(Log(3)) LogStream() << "Unblock output channel" << endl;
+			}
 
-      if(mbBlockInput && msSendBuf.size() < MAX_SEND_UNBLOCK_SIZE) { /** Снятие блокировки с входящего канала */
-        mServer->mConnChooser.cConnChoose::OptIn(this, cConnChoose::eEF_INPUT);
-        if(Log(3)) LogStream() << "Unblock input channel" << endl;
-      } else if(!mbBlockInput && msSendBuf.size() >= MAX_SEND_BLOCK_SIZE) { /** Установка блокировки на входящий канал */
-        mServer->mConnChooser.cConnChoose::OptOut(this, cConnChoose::eEF_INPUT);
-        if(Log(3)) LogStream() << "Block input channel" << endl;
-      }
-    }
-  } else {
-    if(appended) msSendBuf.erase(0, msSendBuf.size());
-    ShrinkStringToFit(msSendBuf);
+			if(mbBlockInput && msSendBuf.size() < MAX_SEND_UNBLOCK_SIZE) { /** Снятие блокировки с входящего канала */
+				mServer->mConnChooser.cConnChoose::OptIn(this, cConnChoose::eEF_INPUT);
+				if(Log(3)) LogStream() << "Unblock input channel" << endl;
+			} else if(!mbBlockInput && msSendBuf.size() >= MAX_SEND_BLOCK_SIZE) { /** Установка блокировки на входящий канал */
+				mServer->mConnChooser.cConnChoose::OptOut(this, cConnChoose::eEF_INPUT);
+				if(Log(3)) LogStream() << "Block input channel" << endl;
+			}
+		}
+	} else {
+		if(appended) msSendBuf.erase(0, msSendBuf.size());
+		ShrinkStringToFit(msSendBuf);
 
-    if(bool(mCloseTime)) {
-      CloseNow();
-      return size;
-    }
+		if(bool(mCloseTime)) {
+			CloseNow();
+			return size;
+		}
 
-    if(mServer && mbOk && !mbBlockOutput) {
-      mbBlockOutput = true;
-      mServer->mConnChooser.cConnChoose::OptOut(this, cConnChoose::eEF_OUTPUT);
-      if(Log(3)) LogStream() << "Block output channel" << endl;
-    }
-    miAttemptSend = 0;
-    mTimeLastIOAction.Get();
+		if(mServer && mbOk && !mbBlockOutput) {
+			mbBlockOutput = true;
+			mServer->mConnChooser.cConnChoose::OptOut(this, cConnChoose::eEF_OUTPUT);
+			if(Log(3)) LogStream() << "Block output channel" << endl;
+		}
+		miAttemptSend = 0;
+		mTimeLastIOAction.Get();
 
-    OnFlush();
-  }
-  return size;
+		OnFlush();
+	}
+	return size;
 }
 
 /** OnFlush */
@@ -548,142 +548,142 @@ void cConn::OnFlush() {
 
 /** Flush */
 void cConn::Flush() {
-  static string empty("");
-  if(msSendBuf.length()) WriteData(empty, true);
+	static string empty("");
+	if(msSendBuf.length()) WriteData(empty, true);
 }
 
 /** Send len byte from buf */
 int cConn::Send(const char *buf, size_t &len) {
 #ifdef QUICK_SEND /** Quick send */
-  if(this->mConnType != eCT_SERVERUDP)
-    len = send(mSocket, buf, len, 0);
-  else
-    len = sendto(mSocket, buf, len, 0, (struct sockaddr *)&mAddrIN, sizeof(struct sockaddr));
-  return SOCK_ERROR(len) ? -1 : 0; /* return -1 - fail, 0 - ok */
+	if(this->mConnType != eCT_SERVERUDP)
+		len = send(mSocket, buf, len, 0);
+	else
+		len = sendto(mSocket, buf, len, 0, (struct sockaddr *)&mAddrIN, sizeof(struct sockaddr));
+	return SOCK_ERROR(len) ? -1 : 0; /* return -1 - fail, 0 - ok */
 #else
-  static size_t total, bytesleft;
-  static int n;
-  static bool bUDP;
-  total = 0; bytesleft = len; n = 0;
-  bUDP = (this->mConnType == eCT_SERVERUDP);
-  while(total < len) { // EMSGSIZE (WSAEMSGSIZE)
-    try {
+	static size_t total, bytesleft;
+	static int n;
+	static bool bUDP;
+	total = 0; bytesleft = len; n = 0;
+	bUDP = (this->mConnType == eCT_SERVERUDP);
+	while(total < len) { // EMSGSIZE (WSAEMSGSIZE)
+		try {
 			#ifdef USE_UDP
-      if(!bUDP) {
+			if(!bUDP) {
 			#endif
-        n = send(mSocket, buf + total, bytesleft, 
+				n = send(mSocket, buf + total, bytesleft, 
 				#ifndef _WIN32
 					MSG_NOSIGNAL|MSG_DONTWAIT);
 				#else
 					0);
 				#endif
 			#ifdef USE_UDP
-      } else {
-        static int tolen = sizeof(struct sockaddr);
-        n = sendto(mSocket, buf + total, bytesleft, 0, (struct sockaddr *)&mAddrIN, tolen);
-      }
+			} else {
+				static int tolen = sizeof(struct sockaddr);
+				n = sendto(mSocket, buf + total, bytesleft, 0, (struct sockaddr *)&mAddrIN, tolen);
+			}
 			#endif
-    } catch(...) {
-      if(ErrLog(1))
-        LogStream() << "exception in Send(buf," << len
-          << ") total=" << total
-          << " left=" << bytesleft
-          << " n=" << n << endl;
-      return -1;
-    }
-    if(Log(5))
-        LogStream() << "len = " << len
-          << " total=" << total
-          << " left=" << bytesleft
-          << " n=" << n << endl;
-    if(SOCK_ERROR(n)) break;
-    total += n;
-    bytesleft -= n;
-  }
-  len = total; /* Number sending bytes */
-  return SOCK_ERROR(n) ? -1 : 0; /* return -1 - fail, 0 - ok */
+		} catch(...) {
+			if(ErrLog(1))
+				LogStream() << "exception in Send(buf," << len
+					<< ") total=" << total
+					<< " left=" << bytesleft
+					<< " n=" << n << endl;
+			return -1;
+		}
+		if(Log(5))
+				LogStream() << "len = " << len
+					<< " total=" << total
+					<< " left=" << bytesleft
+					<< " n=" << n << endl;
+		if(SOCK_ERROR(n)) break;
+		total += n;
+		bytesleft -= n;
+	}
+	len = total; /* Number sending bytes */
+	return SOCK_ERROR(n) ? -1 : 0; /* return -1 - fail, 0 - ok */
 #endif
 }
 
 /** Get pointer for string */
 string * cConn::GetPtrForStr() {
-  if(mParser == NULL) mParser = this->CreateParser();
-  if(mParser == NULL) return NULL;
-  mParser->ReInit();
-  return &(mParser->GetStr());
+	if(mParser == NULL) mParser = this->CreateParser();
+	if(mParser == NULL) return NULL;
+	mParser->ReInit();
+	return &(mParser->GetStr());
 }
 
 cParser * cConn::CreateParser() {
-  if(this->mProtocol != NULL)
-    return this->mProtocol->CreateParser();
-  else return NULL;
+	if(this->mProtocol != NULL)
+		return this->mProtocol->CreateParser();
+	else return NULL;
 }
 
 void cConn::DeleteParser(cParser *OldParser) {
-  if(this->mProtocol != NULL)
-    this->mProtocol->DeleteParser(OldParser);
-  else delete OldParser;
+	if(this->mProtocol != NULL)
+		this->mProtocol->DeleteParser(OldParser);
+	else delete OldParser;
 }
 
 /** Main base timer */
 int cConn::OnTimerBase(cTime &now) {
-  if(bool(mCloseTime) && mCloseTime > now) {
-    CloseNow();
-    return 0;
-  }
-  Flush();
-  OnTimer(now);
-  return 0;
+	if(bool(mCloseTime) && mCloseTime > now) {
+		CloseNow();
+		return 0;
+	}
+	Flush();
+	OnTimer(now);
+	return 0;
 }
 
 /** Main timer */
 int cConn::OnTimer(cTime &) {
-  return 0;
+	return 0;
 }
 
 int cConn::StrLog(ostream & ostr, int iLevel, int iMaxLevel) {
-  if(cObj::StrLog(ostr, iLevel, iMaxLevel)) {
-    LogStream() << "(sock " << mSocket << ") ";
-    return 1;
-  }
-  return 0;
+	if(cObj::StrLog(ostr, iLevel, iMaxLevel)) {
+		LogStream() << "(sock " << mSocket << ") ";
+		return 1;
+	}
+	return 0;
 }
 
 bool cConn::CheckIp(const string &ip) {
-  int i;
+	int i;
 	char c;
 	istringstream is(ip);
-  is >> i >> c; if(i < 0 || i > 255 || c != '.') return false;
-  is >> i >> c; if(i < 0 || i > 255 || c != '.') return false;
-  is >> i >> c; if(i < 0 || i > 255 || c != '.') return false;
-  is >> i >> (c = '\0'); if(i < 0 || i > 255 || c) return false;
-  return true;
+	is >> i >> c; if(i < 0 || i > 255 || c != '.') return false;
+	is >> i >> c; if(i < 0 || i > 255 || c != '.') return false;
+	is >> i >> c; if(i < 0 || i > 255 || c != '.') return false;
+	is >> i >> (c = '\0'); if(i < 0 || i > 255 || c) return false;
+	return true;
 }
 
 void cConn::GetMac() {
 #ifdef _WIN32
-  static char buf[17];
-  unsigned long ip = Ip2Num(msIp.c_str()), iSize = 0xFFFF;
-  MIB_IPNETTABLE * pT = (MIB_IPNETTABLE *) new char[0xFFFF];
-  if(0L == ::GetIpNetTable(pT, &iSize, 1)) {
-    for(unsigned long i = 0; i < pT->dwNumEntries; ++i)
-      if((pT->table[i].dwAddr == ip) && (pT->table[i].dwType != 2)) {
-        sprintf(buf, "%02x-%02x-%02x-%02x-%02x-%02x",
-          pT->table[i].bPhysAddr[0], pT->table[i].bPhysAddr[1],
-          pT->table[i].bPhysAddr[2], pT->table[i].bPhysAddr[3],
-          pT->table[i].bPhysAddr[4], pT->table[i].bPhysAddr[5]);
-        msMAC = string(buf);
-        break;
-      }
-    delete[] pT;
-  }
+	static char buf[17];
+	unsigned long ip = Ip2Num(msIp.c_str()), iSize = 0xFFFF;
+	MIB_IPNETTABLE * pT = (MIB_IPNETTABLE *) new char[0xFFFF];
+	if(0L == ::GetIpNetTable(pT, &iSize, 1)) {
+		for(unsigned long i = 0; i < pT->dwNumEntries; ++i)
+			if((pT->table[i].dwAddr == ip) && (pT->table[i].dwType != 2)) {
+				sprintf(buf, "%02x-%02x-%02x-%02x-%02x-%02x",
+					pT->table[i].bPhysAddr[0], pT->table[i].bPhysAddr[1],
+					pT->table[i].bPhysAddr[2], pT->table[i].bPhysAddr[3],
+					pT->table[i].bPhysAddr[4], pT->table[i].bPhysAddr[5]);
+				msMAC = string(buf);
+				break;
+			}
+		delete[] pT;
+	}
 #endif
 }
 
 bool cConn::Host() {
 	if(msHost.size()) return true;
-  struct hostent *h;
-  if((h = gethostbyaddr(msIp.c_str(), sizeof(msIp), AF_INET)) != NULL)
+	struct hostent *h;
+	if((h = gethostbyaddr(msIp.c_str(), sizeof(msIp), AF_INET)) != NULL)
 		msHost = h->h_name;
 	return h != NULL;
 }
@@ -692,7 +692,7 @@ unsigned long cConn::IpByHost(const string &sHost) {
 	struct sockaddr_in saddr;
 	memset(&saddr, 0, sizeof(sockaddr_in));
 	struct hostent *h;
-  if((h = gethostbyname(sHost.c_str())) != NULL) saddr.sin_addr = *((struct in_addr *)h->h_addr);
+	if((h = gethostbyname(sHost.c_str())) != NULL) saddr.sin_addr = *((struct in_addr *)h->h_addr);
 	return saddr.sin_addr.s_addr;
 }
 
@@ -700,11 +700,11 @@ bool cConn::HostByIp(const string &sIp, string &sHost) {
 	struct hostent *h;
 	struct in_addr addr;
 #ifndef _WIN32
-  if(!inet_aton(sIp.c_str(), &addr)) return false;
+	if(!inet_aton(sIp.c_str(), &addr)) return false;
 #else
-  addr.s_addr = inet_addr(sIp.c_str());
+	addr.s_addr = inet_addr(sIp.c_str());
 #endif
-  if((h = gethostbyaddr((char *)&addr, sizeof(addr), AF_INET)) != NULL)
+	if((h = gethostbyaddr((char *)&addr, sizeof(addr), AF_INET)) != NULL)
 		sHost = h->h_name;
 	return h != NULL;
 }
@@ -712,10 +712,10 @@ bool cConn::HostByIp(const string &sIp, string &sHost) {
 
 /////////////////////cConnFactory/////////////////////
 cConnFactory::cConnFactory(cProtocol *protocol, cServer *s) : 
-  miStrSizeMax(s->miStrSizeMax),
-  msSeparator(s->msSeparator),
-  mProtocol(protocol),
-  mServer(s)
+	miStrSizeMax(s->miStrSizeMax),
+	msSeparator(s->msSeparator),
+	mProtocol(protocol),
+	mServer(s)
 {
 }
 
@@ -723,20 +723,20 @@ cConnFactory::~cConnFactory() {
 }
 
 cConn * cConnFactory::CreateConn(tSocket sock) {
-  cConn *conn = new cConn(sock, mServer); /** eCT_CLIENTTCP */
-  conn->mConnFactory = this;
-  conn->mProtocol = mProtocol; /** proto */
-  return conn;
+	cConn *conn = new cConn(sock, mServer); /** eCT_CLIENTTCP */
+	conn->mConnFactory = this;
+	conn->mProtocol = mProtocol; /** proto */
+	return conn;
 }
 
 void cConnFactory::DelConn(cConn * &conn) {
-  conn->Close(); /** close socket */
-  delete conn;
-  conn = NULL;
+	conn->Close(); /** close socket */
+	delete conn;
+	conn = NULL;
 }
 
 void cConnFactory::OnNewData(cConn * conn, string * str) {
-  mServer->OnNewData(conn, str);
+	mServer->OnNewData(conn, str);
 }
 
 }; // nServer

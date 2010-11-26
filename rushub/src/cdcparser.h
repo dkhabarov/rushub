@@ -27,25 +27,21 @@
 using namespace nServer;
 using nDCServer::cDCParserBase;
 
-namespace nDCServer
-{
+namespace nDCServer {
 
-namespace nProtocol
-{
+namespace nProtocol {
 
 using namespace nDCServer::nProtoEnums;
 
-class cDCParser : public cParser, public cDCParserBase
-{
+class cDCParser : public cParser, public cDCParserBase {
 public:
-  cDCParser();
-  virtual ~cDCParser();
-  int Parse(); /** Do parse for command and return type of this command */
-  string & ChunkString(unsigned int n); /** Get string address for the chunk of command */
-  bool SplitChunks();
-  int GetType() const { return miType; }
-  static bool IsPassive(const string & sDesc);
-
+	cDCParser();
+	virtual ~cDCParser();
+	int Parse(); /** Do parse for command and return type of this command */
+	string & ChunkString(unsigned int n); /** Get string address for the chunk of command */
+	bool SplitChunks();
+	int GetType() const { return miType; }
+	static bool IsPassive(const string & sDesc);
 }; // cDCParser
 
 }; // nProtocol

@@ -21,7 +21,7 @@
 #define CDIR_H
 
 /**
-  Functions for work with dirs like unix systems
+	Functions for work with dirs like unix systems
 */
 
 #include <string>
@@ -29,34 +29,33 @@ using namespace std;
 
 #ifdef _WIN32
 
-  #include <errno.h>
-  #include <io.h> /* _findfirst and _findnext set errno iff they return -1 */
-  #include <stdlib.h>
+	#include <errno.h>
+	#include <io.h> /* _findfirst and _findnext set errno iff they return -1 */
+	#include <stdlib.h>
 
-  #include <windows.h>
+	#include <windows.h>
 
-  /** Create dir */
-  int mkdir(const char * path, int mode);
+	/** Create dir */
+	int mkdir(const char * path, int mode);
 
-  typedef struct DIR DIR;
+	typedef struct DIR DIR;
 
-  struct dirent
-  {
-    char *d_name;
-  };
+	struct dirent {
+		char *d_name;
+	};
 
-  DIR           *opendir(const char *);
-  int           closedir(DIR *);
-  struct dirent *readdir(DIR *);
-  void          rewinddir(DIR *);
+	DIR           *opendir(const char *);
+	int           closedir(DIR *);
+	struct dirent *readdir(DIR *);
+	void          rewinddir(DIR *);
 
 #else
 
-  #include <sys/types.h>
-  #include <dirent.h>
-  #include <sys/types.h> /** mkdir */
-  #include <sys/stat.h> /** mkdir */
-  #include <stdlib.h>
+	#include <sys/types.h>
+	#include <dirent.h>
+	#include <sys/types.h> /** mkdir */
+	#include <sys/stat.h> /** mkdir */
+	#include <stdlib.h>
 
 #endif // _WIN32
 

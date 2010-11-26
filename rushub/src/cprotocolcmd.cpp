@@ -22,16 +22,18 @@
 
 using namespace nUtils;
 
-namespace nServer
-{
+namespace nServer {
 
-cProtocolCmd::cProtocolCmd(){}
-cProtocolCmd::cProtocolCmd(string sKey) : mKey(sKey){ mLength = mKey.length(); }
-cProtocolCmd::~cProtocolCmd(){}
+cProtocolCmd::cProtocolCmd() {
+}
 
-bool cProtocolCmd::Check(const string &sStr) /** Checking that string contains command */
-{
-  return 0 == StrCompare(sStr, 0, mLength, mKey);
+cProtocolCmd::cProtocolCmd(string sKey) : mKey(sKey) { mLength = mKey.length(); }
+
+cProtocolCmd::~cProtocolCmd() {
+}
+
+bool cProtocolCmd::Check(const string &sStr) { /** Checking that string contains command */
+	return 0 == StrCompare(sStr, 0, mLength, mKey);
 }
 
 };

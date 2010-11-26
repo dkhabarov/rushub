@@ -28,31 +28,27 @@
 using namespace nServer;
 using namespace std;
 
-namespace nServer {class cServer;};
+namespace nServer { class cServer; };
 
-namespace nWebServer
-{
+namespace nWebServer {
 
 class cWebConn;
 
-namespace nProtocol
-{
+namespace nProtocol {
 
-class cWebProtocol : public cProtocol
-{
+class cWebProtocol : public cProtocol {
 
 public:
-  cWebProtocol();
-  virtual ~cWebProtocol();
-  void SetServer(cServer *);
-  virtual int DoCmd(cParser *, cConn *); /** Execution of the command */
-  virtual cParser * CreateParser(){return new cWebParser;} /** Creating parser of the protocol */
-  virtual void DeleteParser(cParser *parser){if(parser != NULL) delete parser;} /** Removing parser of the protocol */
+	cWebProtocol();
+	virtual ~cWebProtocol();
+	void SetServer(cServer *);
+	virtual int DoCmd(cParser *, cConn *); /** Execution of the command */
+	virtual cParser * CreateParser() { return new cWebParser; } /** Creating parser of the protocol */
+	virtual void DeleteParser(cParser *parser) { if(parser != NULL) delete parser; } /** Removing parser of the protocol */
 
 protected:
-  cServer * mServer;
+	cServer * mServer;
 
-  
 }; // cWebProtocol
 
 }; // nProtocol

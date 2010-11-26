@@ -24,88 +24,87 @@
 #include <fstream>
 #include <sstream> /** operation << for string */
 #ifndef _WIN32
-  #define __int64 long long
-  #include <memory.h>
+	#define __int64 long long
+	#include <memory.h>
 #endif
 
 using namespace std;
 
 #ifdef _WIN32
 template<class T1, class T2> inline
-  T2 For_each(T1 first, T1 last, T2 func) {
-    try{
-      for(; first != last; ++first) func(*first);
-    }catch(...){throw "for_each fatal error";}
-    return func;
-  }
+	T2 For_each(T1 first, T1 last, T2 func) {
+		try {
+			for( ; first != last; ++first) func(*first);
+		} catch(...) { throw "for_each fatal error"; }
+		return func;
+	}
 #else
 template<class T1, class T2> inline
-  T2 For_each(T1 first, T1 last, T2 func) {
-    return for_each(first, last, func);
-  }
+	T2 For_each(T1 first, T1 last, T2 func) {
+		return for_each(first, last, func);
+	}
 #endif // _WIN32
 
 
 /** Main object class (log class) */
-class cObj
-{
+class cObj {
 
 public:
 
-  /** Class name */
-  const char *mClassName;
+	/** Class name */
+	const char *mClassName;
 
-  /** output log stream */
-  ostream *mToLog;
+	/** output log stream */
+	ostream *mToLog;
 
-  /** Empty string */
-  static const string msEmpty;
+	/** Empty string */
+	static const string msEmpty;
 
-  /** Max log level of events */
-  static int miMaxLevel;
+	/** Max log level of events */
+	static int miMaxLevel;
 
-  /** Max log level of errors */
-  static int miMaxErrLevel;
+	/** Max log level of errors */
+	static int miMaxErrLevel;
 
-  static ofstream mOfs;
+	static ofstream mOfs;
 
-  static char * msPath;
+	static char * msPath;
 
 public:
 
-  cObj();
-  cObj(const char *name);
-  virtual ~cObj();
-  
-  /** Set class name */
-  void SetClassName(const char *name);
+	cObj();
+	cObj(const char *name);
+	virtual ~cObj();
 
-  /** Get counts of objects */
-  static int GetCount() { return mCounterObj; }
+	/** Set class name */
+	void SetClassName(const char *name);
 
-  /** Main function putting log in stream */
-  virtual int StrLog(ostream &ostr, int iLevel, int iMaxLevel);
+	/** Get counts of objects */
+	static int GetCount() { return mCounterObj; }
 
-  /** Return log straem */
-  int Log(int level);
+	/** Main function putting log in stream */
+	virtual int StrLog(ostream &ostr, int iLevel, int iMaxLevel);
 
-  /** Return errlog stream */
-  int ErrLog(int level);
+	/** Return log straem */
+	int Log(int level);
 
-  /** Virtual log function */
-  virtual ostream &Log();
+	/** Return errlog stream */
+	int ErrLog(int level);
 
-  /** Virtual errlog function */
-  virtual ostream &ErrLog();
+	/** Virtual log function */
+	virtual ostream &Log();
 
-  /** Return current log stream */
-  ostream &LogStream();
-  
+	/** Virtual errlog function */
+	virtual ostream &ErrLog();
+
+	/** Return current log stream */
+	ostream &LogStream();
+
 private:
 
-  /** Objects counter */
-  static int mCounterObj;
+	/** Objects counter */
+	static int mCounterObj;
 
-};
+}; // cObj
 
 #endif // COBJ_H

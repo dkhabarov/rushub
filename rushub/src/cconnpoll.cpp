@@ -41,7 +41,7 @@ bool cConnPoll::OptIn(tSocket Socket, tEventFlag eMask) {
 		if (eMask & eEF_ERROR) iEvent |= unsigned(POLLERR | POLLHUP | POLLNVAL);
 		FD(Socket).events |= iEvent;
 	}
-  return true;
+	return true;
 }
 
 void cConnPoll::OptOut(tSocket Socket, tEventFlag eMask) {
@@ -92,7 +92,7 @@ bool cConnPoll::RevTest(tSocket Socket) {
 
 int cConnPoll::poll(int iMiliSec) {
 	int tmp, n, iRet, iDone, iSize = mvFD.size();
-  n = iRet = iDone = 0;
+	n = iRet = iDone = 0;
 	while(iSize) {
 		tmp = iSize;
 		if(tmp > 1024) tmp = 1024; // poll 1024 socks max

@@ -21,27 +21,26 @@
 #include "stringutils.h" /** for StringToInt64 */
 
 #ifndef _WIN32
-  #include <memory.h>
+	#include <memory.h>
 #endif
 
 using namespace nUtils; /** for StringToInt64 */
 
-namespace nConfig
-{
+namespace nConfig {
 
 /** Convert from string */
 #define CCONVERTFROMCHAR() \
-void cConfigChar   ::ConvertFrom(const string &sStr){*this = *sStr.c_str();}
+void cConfigChar   ::ConvertFrom(const string &sStr) { *this = *sStr.c_str(); }
 #define CCONVERTFROMPCHAR() \
 void cConfigPChar  ::ConvertFrom(const string &sStr) { \
-  char *sData = this->Data(); if(sData) delete sData; sData = new char[sStr.size() + 1]; \
-  memcpy(sData, sStr.data(), sStr.size() + 1); *this = sData; \
+	char *sData = this->Data(); if(sData) delete sData; sData = new char[sStr.size() + 1]; \
+	memcpy(sData, sStr.data(), sStr.size() + 1); *this = sData; \
 }
 #define CCONVERTFROM(TYPE, SUFFIX, SUB) \
 void cConfig##SUFFIX ::ConvertFrom(const string &sStr) { *this = SUB; }\
 void cConfigP##SUFFIX::ConvertFrom(const string &sStr) { \
-  TYPE * sData = this->Data(); if(sData) delete sData; \
-  sData = new TYPE(SUB); *this = sData; \
+	TYPE * sData = this->Data(); if(sData) delete sData; \
+	sData = new TYPE(SUB); *this = sData; \
 }
 CCONVERTFROMCHAR();
 CCONVERTFROMPCHAR();
@@ -57,7 +56,7 @@ CCONVERTFROM(string, String, sStr);
 
 /** Convert to string */
 #define CCONVERTTO(SUFFIX, SUB) \
-void cConfig##SUFFIX::ConvertTo(string &sStr){SUB;}
+void cConfig##SUFFIX::ConvertTo(string &sStr) { SUB; }
 CCONVERTTO(Bool,    sStr = ((this->Data()) ? "1" : "0"))
 CCONVERTTO(String,  sStr = this->Data())
 CCONVERTTO(PChar,   sStr = this->Data())
@@ -81,20 +80,20 @@ CCONVERTTO(PInt64,  sprintf(msBuf, "%lld",*(this->Data())); sStr = msBuf)
 
 /** Read from stream */
 #define READFROMSTREAM(SUFFIX) \
-istream &cConfig##SUFFIX::ReadFromStream(istream& is){string sStr; \
-  is >> sStr; \
-  this->ConvertFrom(sStr); \
-  return is; \
+istream &cConfig##SUFFIX::ReadFromStream(istream& is) { string sStr; \
+	is >> sStr; \
+	this->ConvertFrom(sStr); \
+	return is; \
 }
 #define READFROMSTREAMTOSTR(SUFFIX) \
-istream &cConfig##SUFFIX::ReadFromStream(istream& is){ \
-  string sStr; stringstream ss; \
-  getline(is, sStr); ss << sStr; sStr.empty(); \
-  while(is.good()) { \
-    sStr.empty(); getline(is, sStr); \
-    ss << endl << sStr; \
-  } this->ConvertFrom(ss.str()); \
-  return is; \
+istream &cConfig##SUFFIX::ReadFromStream(istream& is) { \
+	string sStr; stringstream ss; \
+	getline(is, sStr); ss << sStr; sStr.empty(); \
+	while(is.good()) { \
+		sStr.empty(); getline(is, sStr); \
+		ss << endl << sStr; \
+	} this->ConvertFrom(ss.str()); \
+	return is; \
 }
 
 READFROMSTREAMTOSTR(String);
@@ -119,10 +118,10 @@ READFROMSTREAM(PInt64);
 
 /** Write in stream */
 #define WRITETOSTREAM(SUFFIX) \
-ostream &cConfig##SUFFIX::WriteToStream(ostream& os){string sStr; \
-  this->ConvertTo(sStr); \
-  os << sStr; \
-  return os; \
+ostream &cConfig##SUFFIX::WriteToStream(ostream& os) { string sStr; \
+	this->ConvertTo(sStr); \
+	os << sStr; \
+	return os; \
 }
 WRITETOSTREAM(Bool);
 WRITETOSTREAM(Double);
@@ -144,13 +143,13 @@ WRITETOSTREAM(PInt64);
 WRITETOSTREAM(PString);
 
 /** NULL values */
-#define ISNULL(SUFFIX)  bool cConfig##SUFFIX::IsNULL(){ return !this->Data(); } // 0, false, \0
-#define ISNULLPCHAR()   bool cConfigPChar ::IsNULL(){ return !this->Data() || !*(this->Data()); } // 0 or \0
-#define ISNULLDOUBLE()  bool cConfigDouble::IsNULL(){ return this->Data() == 0.; } // 0.
-#define ISNULLSTRING()  bool cConfigString::IsNULL(){ return !this->Data().size(); } // ""
-#define ISNULLP(SUFFIX) bool cConfigP##SUFFIX::IsNULL(){ return !this->Data() || !*(this->Data()); }
-#define ISNULLPDOUBLE() bool cConfigPDouble::IsNULL(){ return !this->Data() || *(this->Data()) == 0.; }
-#define ISNULLPSTRING() bool cConfigPString::IsNULL(){ return !this->Data() || !((*(this->Data())).size()); }
+#define ISNULL(SUFFIX)  bool cConfig##SUFFIX::IsNULL() { return !this->Data(); } // 0, false, \0
+#define ISNULLPCHAR()   bool cConfigPChar ::IsNULL() { return !this->Data() || !*(this->Data()); } // 0 or \0
+#define ISNULLDOUBLE()  bool cConfigDouble::IsNULL() { return this->Data() == 0.; } // 0.
+#define ISNULLSTRING()  bool cConfigString::IsNULL() { return !this->Data().size(); } // ""
+#define ISNULLP(SUFFIX) bool cConfigP##SUFFIX::IsNULL() { return !this->Data() || !*(this->Data()); }
+#define ISNULLPDOUBLE() bool cConfigPDouble::IsNULL() { return !this->Data() || *(this->Data()) == 0.; }
+#define ISNULLPSTRING() bool cConfigPString::IsNULL() { return !this->Data() || !((*(this->Data())).size()); }
 ISNULL(Bool);
 ISNULL(Int);
 ISNULL(UInt);

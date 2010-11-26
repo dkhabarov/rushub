@@ -28,67 +28,65 @@
 using namespace std;
 
 #if (!defined _WIN32) && (!defined __int64)
-  #define __int64 long long
+	#define __int64 long long
 #endif
 
-namespace nConfig
-{
+namespace nConfig {
 
-typedef enum
-{
-  eIT_VOID,     // void
-  eIT_BOOL,     // bool
-  eIT_DOUBLE,   // double
-  eIT_INT,      // int
-  eIT_LONG,     // long
-  eIT_UINT,     // unsigned int
-  eIT_ULONG,    // unsigned long
-  eIT_LLONG,    // __int64
-  eIT_CHAR,     // char
-  eIT_STRING,   // string
-  eIT_PCHAR,    // char*
-  eIT_PBOOL,    // bool*
-  eIT_PDOUBLE,  // double*
-  eIT_PINT,     // int*
-  eIT_PLONG,    // long*
-  eIT_PUINT,    // unsigned int*
-  eIT_PULONG,   // unsigned long*
-  eIT_PLLONG,   // __int64*
-  eIT_PSTRING,  // string*
+typedef enum {
+	eIT_VOID,     // void
+	eIT_BOOL,     // bool
+	eIT_DOUBLE,   // double
+	eIT_INT,      // int
+	eIT_LONG,     // long
+	eIT_UINT,     // unsigned int
+	eIT_ULONG,    // unsigned long
+	eIT_LLONG,    // __int64
+	eIT_CHAR,     // char
+	eIT_STRING,   // string
+	eIT_PCHAR,    // char*
+	eIT_PBOOL,    // bool*
+	eIT_PDOUBLE,  // double*
+	eIT_PINT,     // int*
+	eIT_PLONG,    // long*
+	eIT_PUINT,    // unsigned int*
+	eIT_PULONG,   // unsigned long*
+	eIT_PLLONG,   // __int64*
+	eIT_PSTRING,  // string*
 } tItemType;
 
 /** Abstract class of the element configuration (Config) */
-class cConfig
-{
-  friend class cConfigListBase; /** for mAddr */
+class cConfig {
+
+	friend class cConfigListBase; /** for mAddr */
 
 public:
-  string msName; /** Var name */
-  char msBuf[32]; /** Buffer for conversion in string */
+	string msName; /** Var name */
+	char msBuf[32]; /** Buffer for conversion in string */
 
 protected:
-  bool mbEmpty;
-  void *mAddr; /** Address of var */
+	bool mbEmpty;
+	void *mAddr; /** Address of var */
 
 public:
-  cConfig(void *addr = 0) : mbEmpty(true), mAddr(addr){};
-  virtual ~cConfig(){};
+	cConfig(void *addr = 0) : mbEmpty(true), mAddr(addr) {};
+	virtual ~cConfig() {};
 
-  template <class TYPE> cConfig &operator = (const TYPE &i){*(TYPE*)Address() = i; return *this;} /** Operator of the apropriation data */
-  template <class TYPE> operator TYPE(){return *(TYPE*)mAddr;} /** Operator of the transformation of the type */
+	template <class TYPE> cConfig &operator = (const TYPE &i) { *(TYPE*)Address() = i; return *this; } /** Operator of the apropriation data */
+	template <class TYPE> operator TYPE() { return *(TYPE*)mAddr; } /** Operator of the transformation of the type */
 
-  virtual istream &ReadFromStream(istream &) = 0; /** Read from stream */
-  virtual ostream &WriteToStream(ostream &) = 0; /** Write to stream */
-  friend istream &operator >> (istream &is, cConfig &ci){return ci.ReadFromStream(is);}
-  friend ostream &operator << (ostream &os, cConfig &ci){return ci.WriteToStream(os);}
+	virtual istream &ReadFromStream(istream &) = 0; /** Read from stream */
+	virtual ostream &WriteToStream(ostream &) = 0; /** Write to stream */
+	friend istream &operator >> (istream &is, cConfig &ci) { return ci.ReadFromStream(is); }
+	friend ostream &operator << (ostream &os, cConfig &ci) { return ci.WriteToStream(os); }
 
-  virtual tItemType GetTypeID() = 0; /** Function of the return the identifier */
-  virtual bool IsNULL() = 0; /** Function of the absence data */
-  virtual void ConvertFrom(const string &) = 0; /** Converts from line */
-  virtual void ConvertTo(string &) = 0; /** Converts to line */
+	virtual tItemType GetTypeID() = 0; /** Function of the return the identifier */
+	virtual bool IsNULL() = 0; /** Function of the absence data */
+	virtual void ConvertFrom(const string &) = 0; /** Converts from line */
+	virtual void ConvertTo(string &) = 0; /** Converts to line */
 
 protected:
-  virtual void *Address(){return mAddr;} /** Function returns address */
+	virtual void *Address() { return mAddr; } /** Function returns address */
 
 }; // cConfig
 
@@ -96,17 +94,17 @@ protected:
 #define CONFIGBASEITEM(TYPE, TYPEID, SUFFIX) \
 class cConfig##SUFFIX : public cConfig { \
 public: \
-  cConfig##SUFFIX(TYPE &var):cConfig((void*)&var){} \
-  cConfig##SUFFIX(TYPE &var, string const &sName) : cConfig((void*)&var){this->msName = sName;} \
-  virtual ~cConfig##SUFFIX(){} \
-  virtual cConfig##SUFFIX &operator = (TYPE const &i){*(TYPE*)Address() = i; return *this;} /** Operator of the apropriation */ \
-  virtual TYPE & Data(){return *(TYPE*)mAddr;} /** Returns data */ \
-  virtual istream &ReadFromStream(istream& is); /** Read from stream */ \
-  virtual ostream &WriteToStream(ostream& os); /** Write to stream */ \
-  virtual tItemType GetTypeID(){return TYPEID;} /** Function of the return the identifier */ \
-  virtual void ConvertFrom(const string &str); /** Converts from line */ \
-  virtual void ConvertTo(string &str); /** Converts to line */ \
-  virtual bool IsNULL(); /** Returns true if and when variable mAddr empty - a data are absent */ \
+	cConfig##SUFFIX(TYPE &var):cConfig((void*)&var) {} \
+	cConfig##SUFFIX(TYPE &var, string const &sName) : cConfig((void*)&var) { this->msName = sName; } \
+	virtual ~cConfig##SUFFIX() {} \
+	virtual cConfig##SUFFIX &operator = (TYPE const &i) { *(TYPE*)Address() = i; return *this; } /** Operator of the apropriation */ \
+	virtual TYPE & Data() { return *(TYPE*)mAddr; } /** Returns data */ \
+	virtual istream &ReadFromStream(istream& is); /** Read from stream */ \
+	virtual ostream &WriteToStream(ostream& os); /** Write to stream */ \
+	virtual tItemType GetTypeID() { return TYPEID; } /** Function of the return the identifier */ \
+	virtual void ConvertFrom(const string &str); /** Converts from line */ \
+	virtual void ConvertTo(string &str); /** Converts to line */ \
+	virtual bool IsNULL(); /** Returns true if and when variable mAddr empty - a data are absent */ \
 }; // cConfig##SUFFIX
 
 /** Announcement of the classes of the main types */

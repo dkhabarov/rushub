@@ -32,8 +32,7 @@
 using namespace std; /** string, cout, endl */
 using namespace nUtils; /** cTime */
 
-namespace nServer
-{
+namespace nServer {
 
 class cServer; /** for mServer */
 class cListenFactory;
@@ -42,219 +41,219 @@ class cProtocol; /** *mProtocol */
 class cParser; /** *mParser */
 
 /** Connection-factory for create and delete connection */
-class cConnFactory
-{
+class cConnFactory {
 
 public:
-  cConnFactory(cProtocol *, cServer *);
-  virtual ~cConnFactory();
-  virtual cConn * CreateConn(tSocket sock = 0);
-  virtual void DelConn(cConn * &);
+	cConnFactory(cProtocol *, cServer *);
+	virtual ~cConnFactory();
+	virtual cConn * CreateConn(tSocket sock = 0);
+	virtual void DelConn(cConn * &);
 
-  virtual void OnNewData(cConn *, string *);
+	virtual void OnNewData(cConn *, string *);
 
 public:
-  unsigned long miStrSizeMax;
-  string msSeparator;
-  cProtocol * mProtocol; /** Protocal */
+	unsigned long miStrSizeMax;
+	string msSeparator;
+	cProtocol * mProtocol; /** Protocal */
 
 protected:
-  cServer * mServer; /** Pointer on server */
+	cServer * mServer; /** Pointer on server */
 
-};
+}; // cConnFactory
 
 /** Типы соединений */
-enum tConnType
-{
-  eCT_LISTEN,    //< Listen TCP
-  eCT_CLIENTTCP, //< Client TCP
-  eCT_CLIENTUDP, //< Client UDP
-  eCT_SERVERTCP, //< Server TCP (hublist)
-  eCT_SERVERUDP  //< Server UDP (multihub)
+enum tConnType {
+	eCT_LISTEN,    //< Listen TCP
+	eCT_CLIENTTCP, //< Client TCP
+	eCT_CLIENTUDP, //< Client UDP
+	eCT_SERVERTCP, //< Server TCP (hublist)
+	eCT_SERVERUDP  //< Server UDP (multihub)
 };
 
 /** Статусы строки */
-enum
-{
-  eSS_NO_STR,   //< No str
-  eSS_PARTLY,   //< String is partly received
-  eSS_STR_DONE, //< String is completely received
-  eSS_ERROR     //< Error
+enum {
+	eSS_NO_STR,   //< No str
+	eSS_PARTLY,   //< String is partly received
+	eSS_STR_DONE, //< String is completely received
+	eSS_ERROR     //< Error
 };
 
 /** Main connection class for server */
-class cConn : public cObj, public cConnBase
-{
-  friend class cServer; /* for ports */
-public:
-  
-  tSocket mSocket; /** Socket descriptor */
-  static unsigned long iConnCounter; /** Conn counter */
-  bool mbOk; /** Points that given connection is registered (socket of connection is created and bound) */
-  bool mbWritable; /** Points that data can be read and be written */
-  cTime mTimeLastIOAction; /** Time of the last action of the client */
+class cConn : public cObj, public cConnBase {
 
-  cConnFactory * mConnFactory; /** Conn factory */
-  cListenFactory * mListenFactory; /** Listen factory */
-  cServer * mServer; /** Server */
-  cProtocol * mProtocol; /** Protocol */
-  cParser * mParser; /** Parser */
-
-  cTime mTimePing; /** Last ping time from client side */
+	friend class cServer; /* for ports */
 
 public:
 
-  cConn(tSocket sock = 0, cServer *s = NULL, tConnType st = eCT_CLIENTTCP);
-  virtual ~cConn();
+	tSocket mSocket; /** Socket descriptor */
+	static unsigned long iConnCounter; /** Conn counter */
+	bool mbOk; /** Points that given connection is registered (socket of connection is created and bound) */
+	bool mbWritable; /** Points that data can be read and be written */
+	cTime mTimeLastIOAction; /** Time of the last action of the client */
 
-  /** Get socket */
-  virtual operator tSocket() const { return mSocket; }
+	cConnFactory * mConnFactory; /** Conn factory */
+	cListenFactory * mListenFactory; /** Listen factory */
+	cServer * mServer; /** Server */
+	cProtocol * mProtocol; /** Protocol */
+	cParser * mParser; /** Parser */
 
-  /** Get type connection */
-  inline tConnType GetConnType() const { return mConnType; }
+	cTime mTimePing; /** Last ping time from client side */
 
-  /** Create, bind and listen connection (socket) */
-  tSocket ListenPort(int iPort, const char *sIp = NULL, bool bUDP = false);
+public:
 
-  void Close(); /** Close connection (socket) */
-  void CloseNice(int msec=0); /** Nice close conn (socket) */
-  void CloseNow(); /** Now close conn */
+	cConn(tSocket sock = 0, cServer *s = NULL, tConnType st = eCT_CLIENTTCP);
+	virtual ~cConn();
 
-  /** Creating the new object for enterring connection */
-  virtual cConn * CreateNewConn();
+	/** Get socket */
+	virtual operator tSocket() const { return mSocket; }
 
-  /** Reading all data from socket to buffer of the conn */
-  int Recv();
+	/** Get type connection */
+	inline tConnType GetConnType() const { return mConnType; }
 
-  /** Check empty recv buf */
-  int RecvBufIsEmpty() const { return miRecvBufEnd == miRecvBufRead; }
+	/** Create, bind and listen connection (socket) */
+	tSocket ListenPort(int iPort, const char *sIp = NULL, bool bUDP = false);
 
-  /** Check empty recv buf */
-  int SendBufIsEmpty() const { return msSendBuf.length() == 0; }
+	void Close(); /** Close connection (socket) */
+	void CloseNice(int msec=0); /** Nice close conn (socket) */
+	void CloseNow(); /** Now close conn */
 
-  /** Remaining (for web-server) */
-  virtual int Remaining();
+	/** Creating the new object for enterring connection */
+	virtual cConn * CreateNewConn();
 
-  /** Clear params */
-  void ClearStr();
+	/** Reading all data from socket to buffer of the conn */
+	int Recv();
 
-  /** Get status */
-  int StrStatus() const { return meStrStatus; }
+	/** Check empty recv buf */
+	int RecvBufIsEmpty() const { return miRecvBufEnd == miRecvBufRead; }
 
-  /** Installing the string, in which will be recorded received data, 
-  and installation main parameter */
-  void SetStrToRead(string *, string separator, unsigned long iMax);
+	/** Check empty recv buf */
+	int SendBufIsEmpty() const { return msSendBuf.length() == 0; }
 
-  /** Reading data from buffer and record in line of the protocol */
-  int ReadFromRecvBuf();
+	/** Remaining (for web-server) */
+	virtual int Remaining();
 
-  /** Get pointer for string */
-  virtual string * GetPtrForStr();
+	/** Clear params */
+	void ClearStr();
 
-  /** Create parser */
-  virtual cParser * CreateParser();
+	/** Get status */
+	int StrStatus() const { return meStrStatus; }
 
-  /** Remove parser */
-  virtual void DeleteParser(cParser *);
+	/** Installing the string, in which will be recorded received data, 
+	and installation main parameter */
+	void SetStrToRead(string *, string separator, unsigned long iMax);
 
-  /** Get pointer for string with data */
-  string * GetStr(){ return msStr; }
+	/** Reading data from buffer and record in line of the protocol */
+	int ReadFromRecvBuf();
 
-  /** Write data in sending buffer */
-  virtual int WriteData(const string &sData, bool bFlush);
+	/** Get pointer for string */
+	virtual string * GetPtrForStr();
 
-  /** OnFlush */
-  virtual void OnFlush();
+	/** Create parser */
+	virtual cParser * CreateParser();
 
-  void Flush(); /** Flush buffer */
+	/** Remove parser */
+	virtual void DeleteParser(cParser *);
 
-  static inline unsigned long Ip2Num(const char* sIP) { return inet_addr(sIP); }
-  static inline char* Num2Ip(unsigned long iIP) { struct in_addr in; in.s_addr = iIP; return inet_ntoa(in); }
-  const string & Ip() const { return msIp; } /** Get string ip */
-  int Port() const { return miPort; } /** Get port */
+	/** Get pointer for string with data */
+	string * GetStr(){ return msStr; }
 
-  void GetMac();
+	/** Write data in sending buffer */
+	virtual int WriteData(const string &sData, bool bFlush);
 
-  bool Host(); /** Get host */
-  static unsigned long IpByHost(const string &sHost); /** Get ip by host */
-  static bool HostByIp(const string &sIp, string &sHost); /** Get host by ip */
+	/** OnFlush */
+	virtual void OnFlush();
 
-  /** Main base timer */
-  int OnTimerBase(cTime &now);
+	void Flush(); /** Flush buffer */
 
-  /** Main timer */
-  virtual int OnTimer(cTime &now);
+	static inline unsigned long Ip2Num(const char* sIP) { return inet_addr(sIP); }
+	static inline char* Num2Ip(unsigned long iIP) { struct in_addr in; in.s_addr = iIP; return inet_ntoa(in); }
+	const string & Ip() const { return msIp; } /** Get string ip */
+	int Port() const { return miPort; } /** Get port */
 
-  virtual int StrLog(ostream & ostr, int iLevel, int iMaxLevel);
+	void GetMac();
 
-  static bool CheckIp(const string &ip);
+	bool Host(); /** Get host */
+	static unsigned long IpByHost(const string &sHost); /** Get ip by host */
+	static bool HostByIp(const string &sIp, string &sHost); /** Get host by ip */
 
-  bool IsClosed() { return mbClosed; }
+	/** Main base timer */
+	int OnTimerBase(cTime &now);
+
+	/** Main timer */
+	virtual int OnTimer(cTime &now);
+
+	virtual int StrLog(ostream & ostr, int iLevel, int iMaxLevel);
+
+	static bool CheckIp(const string &ip);
+
+	bool IsClosed() { return mbClosed; }
+
 private:
 
-  cTime mCloseTime; /** Time before closing the conn */
-  int miRecvBufEnd; /** Final position of the buffer msRecvBuf */
-  int miRecvBufRead; /** Current position of the buffer msRecvBuf */
-  int meStrStatus; /** Status of the line */
+	cTime mCloseTime; /** Time before closing the conn */
+	int miRecvBufEnd; /** Final position of the buffer msRecvBuf */
+	int miRecvBufRead; /** Current position of the buffer msRecvBuf */
+	int meStrStatus; /** Status of the line */
 
-  bool mbBlockInput; /** Blocking enterring channel for given conn */
-  bool mbBlockOutput; /** Blocking coming channel for given conn */
+	bool mbBlockInput; /** Blocking enterring channel for given conn */
+	bool mbBlockOutput; /** Blocking coming channel for given conn */
 
-  string *msStr; /** Pointer to line, in which will be written data from buffer */
+	string *msStr; /** Pointer to line, in which will be written data from buffer */
 
-  typedef list<cConn *> tConnList;
-  typedef tConnList::iterator tCLIt;
+	typedef list<cConn *> tConnList;
+	typedef tConnList::iterator tCLIt;
 
-  unsigned miAttemptSend;
-  bool mbClosed; /** closed flag, for close counter */
+	unsigned miAttemptSend;
+	bool mbClosed; /** closed flag, for close counter */
 
 public:
-  tCLIt mIterator; /** Optimisation */
+
+	tCLIt mIterator; /** Optimisation */
 
 protected:
 
-  /** Socket type */
-  tConnType mConnType;
+	/** Socket type */
+	tConnType mConnType;
 
-  /** struct sockaddr_in */
-  struct sockaddr_in mAddrIN;
+	/** struct sockaddr_in */
+	struct sockaddr_in mAddrIN;
 
-  unsigned long miNetIp; /** Numeric ip */
-  string msIp; /** String ip */
-  int miPort; /** port */
-  int miPortConn; /** listen-conn port */
+	unsigned long miNetIp; /** Numeric ip */
+	string msIp; /** String ip */
+	int miPort; /** port */
+	int miPortConn; /** listen-conn port */
 
-  string msMAC; /** mac address */
-  string msHost; /** DNS */
+	string msMAC; /** mac address */
+	string msHost; /** DNS */
 
-  static char * msRecvBuf; /** Recv buffer */
-  string msSeparator; /** Separator */
-  unsigned long miStrSizeMax; /** (10240) max size of msg */
+	static char * msRecvBuf; /** Recv buffer */
+	string msSeparator; /** Separator */
+	unsigned long miStrSizeMax; /** (10240) max size of msg */
 
-  string msSendBuf; /** Buffer for sending */
-  unsigned long miSendBufMax; /** Max size sending buf */
+	string msSendBuf; /** Buffer for sending */
+	unsigned long miSendBufMax; /** Max size sending buf */
 
 protected:
-  /** Create socket (default TCP) */
-  tSocket SocketCreate(bool bUDP = false);
+	/** Create socket (default TCP) */
+	tSocket SocketCreate(bool bUDP = false);
 
-  /** Bind */
-  tSocket SocketBind(tSocket, int iPort, const char *sIp = NULL);
+	/** Bind */
+	tSocket SocketBind(tSocket, int iPort, const char *sIp = NULL);
 
-  /** Listen TCP */
-  tSocket SocketListen(tSocket);
+	/** Listen TCP */
+	tSocket SocketListen(tSocket);
 
-  /** Set non-block socket */
-  tSocket SocketNonBlock(tSocket);
+	/** Set non-block socket */
+	tSocket SocketNonBlock(tSocket);
 
-  /** OnCloseNice event */
-  virtual int OnCloseNice(void);
+	/** OnCloseNice event */
+	virtual int OnCloseNice(void);
 
-  /** Accept new conn */
-  tSocket Accept();
+	/** Accept new conn */
+	tSocket Accept();
 
-  /** Send len byte from buf */
-  int Send(const char *buf, size_t &len);
+	/** Send len byte from buf */
+	int Send(const char *buf, size_t &len);
 
 }; // cConn
 

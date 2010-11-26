@@ -22,9 +22,9 @@
 
 #ifdef _WIN32
 
-#define RTLD_LAZY       0x001   /* Lazy function call binding. */
-#define RTLD_NOW        0x002   /* Immediate function call binding. */
-#define RTLD_BINDING_MASK 0x3   /* Mask of binding time value. */
+#define RTLD_LAZY 0x001 /** Lazy function call binding. */
+#define RTLD_NOW 0x002 /** Immediate function call binding. */
+#define RTLD_BINDING_MASK 0x3 /** Mask of binding time value. */
 
 char *dlerror(void);
 void *dlsym(void *handle, const char *symbol);
@@ -34,9 +34,7 @@ int dlclose(void *handle);
 static char last_dyn_error[512];
 
 #else
-
-  #include <dlfcn.h>
-
+#	include <dlfcn.h>
 #endif // _WIN32
 
 #endif // DLFCN

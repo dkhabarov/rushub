@@ -32,66 +32,66 @@ class cDCIPList : public cObj {
 
 protected:
 
-  typedef tcList<tSocket, cDCConn*> tItem;
-  typedef tcHashTable<tItem*> tIPList;
-  tIPList mIPList;
-  bool mbFlush, mbAddSep;
-  unsigned long miProfile;
-  string msData1, msData2;
+	typedef tcList<tSocket, cDCConn*> tItem;
+	typedef tcHashTable<tItem*> tIPList;
+	tIPList mIPList;
+	bool mbFlush, mbAddSep;
+	unsigned long miProfile;
+	string msData1, msData2;
 
 public:
-  cDCIPList();
-  virtual ~cDCIPList();
+	cDCIPList();
+	virtual ~cDCIPList();
 
-  bool Add(cDCConn*);
-  bool Remove(cDCConn*);
+	bool Add(cDCConn*);
+	bool Remove(cDCConn*);
 
-  void SendToIP(unsigned long iIP, string &sData, unsigned long iProfile = 0, bool bAddSep = false, bool bFlush = true);
-  void SendToIP(const char *sIP, string &sData, unsigned long iProfile = 0, bool bAddSep = false, bool bFlush = true);
-  void SendToIPWithNick(unsigned long iIP, string &sStart, string &sEnd, unsigned long iProfile = 0, bool bAddSep = false, bool bFlush = true);
-  void SendToIPWithNick(const char *sIP, string &sStart, string &sEnd, unsigned long iProfile = 0, bool bAddSep = false, bool bFlush = true);
+	void SendToIP(unsigned long iIP, string &sData, unsigned long iProfile = 0, bool bAddSep = false, bool bFlush = true);
+	void SendToIP(const char *sIP, string &sData, unsigned long iProfile = 0, bool bAddSep = false, bool bFlush = true);
+	void SendToIPWithNick(unsigned long iIP, string &sStart, string &sEnd, unsigned long iProfile = 0, bool bAddSep = false, bool bFlush = true);
+	void SendToIPWithNick(const char *sIP, string &sStart, string &sEnd, unsigned long iProfile = 0, bool bAddSep = false, bool bFlush = true);
 
-  bool AutoResize() {
-    unsigned iSize, iCapacity, iNewSize;
-    if(mIPList.AutoResize(iSize, iCapacity, iNewSize) && Log(3)) {
-      LogStream() << "Autoresizing: miSize = " << iSize << 
-      ", miCapacity = " << iCapacity << " -> " + iNewSize << endl;
-      return true;
-    }
-    return false;
-  }
+	bool AutoResize() {
+		unsigned iSize, iCapacity, iNewSize;
+		if(mIPList.AutoResize(iSize, iCapacity, iNewSize) && Log(3)) {
+			LogStream() << "Autoresizing: miSize = " << iSize << 
+			", miCapacity = " << iCapacity << " -> " + iNewSize << endl;
+			return true;
+		}
+		return false;
+	}
 
-  class iterator {
-  public:
-    tItem * mItem; /** Pointer on element of the array */
-    iterator() : mItem(NULL){}
-    iterator & operator = (const iterator &it){ mItem = it.mItem; return *this; }
-    iterator(const iterator &it){ (*this) = it; }
-    bool operator == (const iterator &it){ return mItem == it.mItem; }
-    bool operator != (const iterator &it){ return mItem != it.mItem; }
-    iterator & operator ++() {
-      if(mItem != NULL) mItem = mItem->mNext;
-      return *this;
-    }
-    cConn* operator *(){ return mItem->mData; }
-  }; // iterator
+	class iterator {
+	public:
+		tItem * mItem; /** Pointer on element of the array */
+		iterator() : mItem(NULL){}
+		iterator & operator = (const iterator &it){ mItem = it.mItem; return *this; }
+		iterator(const iterator &it){ (*this) = it; }
+		bool operator == (const iterator &it){ return mItem == it.mItem; }
+		bool operator != (const iterator &it){ return mItem != it.mItem; }
+		iterator & operator ++() {
+			if(mItem != NULL) mItem = mItem->mNext;
+			return *this;
+		}
+		cConn* operator *(){ return mItem->mData; }
+	}; // iterator
 
-  iterator begin(const char* sIP) {
-    return begin(cConn::Ip2Num(sIP));
-  }
-  iterator begin(unsigned long iIP) {
-    iterator it;
-    it.mItem = mIPList.Find(iIP);
-    return it;
-  }
-  iterator end() {
-    return iterator();
-  }
+	iterator begin(const char* sIP) {
+		return begin(cConn::Ip2Num(sIP));
+	}
+	iterator begin(unsigned long iIP) {
+		iterator it;
+		it.mItem = mIPList.Find(iIP);
+		return it;
+	}
+	iterator end() {
+		return iterator();
+	}
 
 protected:
 
-  int Send(cDCConn * Conn);
-  int SendWithNick(cDCConn * Conn);
+	int Send(cDCConn * Conn);
+	int SendWithNick(cDCConn * Conn);
 
 }; // cDCIPList
 

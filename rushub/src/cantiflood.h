@@ -23,39 +23,36 @@
 #include "ctime.h"
 #include "tchashtable.h"
 
-namespace nUtils
-{
+namespace nUtils {
 
 /**
-  \class cAntiFlood
-  \brief Antiflood
+	\class cAntiFlood
+	\brief Antiflood
 */
-class cAntiFlood
-{
+class cAntiFlood {
 
 public:
 
-  struct sItem
-  {
-    cTime mTime;
-    unsigned miCount;
-    sItem() : miCount(0) {}
-  };
+	struct sItem {
+		cTime mTime;
+		unsigned miCount;
+		sItem() : miCount(0) {}
+	};
 
-  typedef unsigned long HashType_t;
-  typedef tcList<HashType_t, sItem*> List_t;
-  List_t * mList;
+	typedef unsigned long HashType_t;
+	typedef tcList<HashType_t, sItem*> List_t;
+	List_t * mList;
 
 private:
-  unsigned & miCount;
-  double & mTime;
+	unsigned & miCount;
+	double & mTime;
 
 public:
 
-  cAntiFlood(unsigned &iCount, double &Time) : mList(NULL), miCount(iCount), mTime(Time) {}
-  ~cAntiFlood(){}
-  bool Check(HashType_t Hash);
-  void Del(cTime &now);
+	cAntiFlood(unsigned &iCount, double &Time) : mList(NULL), miCount(iCount), mTime(Time) {}
+	~cAntiFlood(){}
+	bool Check(HashType_t Hash);
+	void Del(cTime &now);
 
 }; // cAntiFlood
 

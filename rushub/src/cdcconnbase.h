@@ -27,30 +27,29 @@ using ::std::string;
 
 namespace nDCServer {
 
-class cDCConnBase
-{
+class cDCConnBase {
 
 public:
-  cDCUserBase * mDCUserBase; //< User
-  int _miConnType; //< Connection type (for protection and compatibility)
+	cDCUserBase * mDCUserBase; //< User
+	int _miConnType; //< Connection type (for protection and compatibility)
 
 public:
-  cDCConnBase() : mDCUserBase(NULL), _miConnType(1){}
-  ~cDCConnBase(){}
-  virtual int Send(const string & sData, bool bAddSep = false, bool bFlush = true) = 0; //< Sending RAW cmd to the client
-  virtual const string & GetVersion() const = 0; //< Client's protocol version
-  virtual const string & GetIp() const = 0; //< Get string of IP
-  virtual const string & GetData() const = 0; //< Get some user data
-  virtual const string & GetMacAddr() const = 0; //< Get mac address
-  virtual const string & GetSupports() const = 0;
-  virtual int GetPort() const = 0; //< Get real port
-  virtual int GetPortConn() const = 0; //< Get connection port
-  virtual int GetProfile() const = 0; //< Get profile
-  virtual unsigned long GetNetIp() const = 0; //< Get numeric IP
-  virtual void SetProfile(int) = 0;
-  virtual void SetData(const string &) = 0;
-  virtual void Disconnect() = 0;
-  virtual long GetEnterTime() const = 0; //< Get enter time
+	cDCConnBase() : mDCUserBase(NULL), _miConnType(1){}
+	~cDCConnBase(){}
+	virtual int Send(const string & sData, bool bAddSep = false, bool bFlush = true) = 0; //< Sending RAW cmd to the client
+	virtual const string & GetVersion() const = 0; //< Client's protocol version
+	virtual const string & GetIp() const = 0; //< Get string of IP
+	virtual const string & GetData() const = 0; //< Get some user data
+	virtual const string & GetMacAddr() const = 0; //< Get mac address
+	virtual const string & GetSupports() const = 0;
+	virtual int GetPort() const = 0; //< Get real port
+	virtual int GetPortConn() const = 0; //< Get connection port
+	virtual int GetProfile() const = 0; //< Get profile
+	virtual unsigned long GetNetIp() const = 0; //< Get numeric IP
+	virtual void SetProfile(int) = 0;
+	virtual void SetData(const string &) = 0;
+	virtual void Disconnect() = 0;
+	virtual long GetEnterTime() const = 0; //< Get enter time
 
 }; // cDCConnBase
 

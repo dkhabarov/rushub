@@ -22,101 +22,98 @@
 
 #include "tchashtable.h"
 #include "cobj.h"
+
 #include <list>
 #include <map>
 #include <string>
 
 using namespace std;
 
-namespace nUtils
-{
+namespace nUtils {
 
 /** Hash map with list */
-template <class tDataType, class tKeyType = unsigned long> class tcHashMap : public cObj
-{
+template <class tDataType, class tKeyType = unsigned long> class tcHashMap : public cObj {
 public:
-  typedef list<tDataType, allocator<tDataType> > List_t; /** Iteration list with data */
-  typedef typename List_t::iterator iterator; /** Iterator for the data-list */
-  typedef map<tKeyType, iterator> tHashMap; /** Map [tKeyType]=iterator */
-  typedef typename tHashMap::iterator tUHIt; /** Iterator for tHashMap */
-  typedef pair<tKeyType, iterator> tHashPair; /** pair (for insert) */
+	typedef list<tDataType, allocator<tDataType> > List_t; /** Iteration list with data */
+	typedef typename List_t::iterator iterator; /** Iterator for the data-list */
+	typedef map<tKeyType, iterator> tHashMap; /** Map [tKeyType]=iterator */
+	typedef typename tHashMap::iterator tUHIt; /** Iterator for tHashMap */
+	typedef pair<tKeyType, iterator> tHashPair; /** pair (for insert) */
 
-  tcHash<tKeyType> mHash; /** Hash function */
+	tcHash<tKeyType> mHash; /** Hash function */
 
 private:
-  List_t mList; /** List with data */
-  tHashMap  mHashMap; /** HashMap */
+	List_t mList; /** List with data */
+	tHashMap mHashMap; /** HashMap */
 
 public:
-  tcHashMap() : cObj("tcHashMap"){}
-  ~tcHashMap(){}
-  size_t Size() const { return mHashMap.size(); } /** Number element in container HashMap */
+	tcHashMap() : cObj("tcHashMap") {}
+	~tcHashMap() {}
+	size_t Size() const { return mHashMap.size(); } /** Number element in container HashMap */
 
-  iterator begin() { return mList.begin(); } /** Befin iterator of data list */
-  iterator end() { return mList.end(); } /** End iterator of data list */
+	iterator begin() { return mList.begin(); } /** Befin iterator of data list */
+	iterator end() { return mList.end(); } /** End iterator of data list */
 
-  bool Add(const tKeyType &Hash, tDataType Data); /** Adding data and hash-key (true - ok, false - fail) */
-  bool Remove(const tKeyType &Hash); /** Removing data by hash-key (true - ok, false - fail) */
-  bool Contain(const tKeyType &Hash); /** Check existed this hash-key (true - yes, false - no) */
-  tDataType Find(const tKeyType &Hash); /** Return data by hash-key. Return val else NULL */
-  virtual void OnAdd(tDataType){};
-  virtual void OnRemove(tDataType){};
+	bool Add(const tKeyType &Hash, tDataType Data); /** Adding data and hash-key (true - ok, false - fail) */
+	bool Remove(const tKeyType &Hash); /** Removing data by hash-key (true - ok, false - fail) */
+	bool Contain(const tKeyType &Hash); /** Check existed this hash-key (true - yes, false - no) */
+	tDataType Find(const tKeyType &Hash); /** Return data by hash-key. Return val else NULL */
+	virtual void OnAdd(tDataType) {};
+	virtual void OnRemove(tDataType) {};
 
 }; // tcHashMap
 
 
 /** Adding data and hash-key (true - ok, false - fail) */
 template <class tDataType, class tKeyType>
-bool tcHashMap<tDataType, tKeyType>::Add(const tKeyType &Hash, tDataType Data)
-{
-  /** Check */
-  if(Contain(Hash)) { if(Log(1)) LogStream() << "Hash " << Hash << " is contains already" << endl; return false; }
+bool tcHashMap<tDataType, tKeyType>::Add(const tKeyType &Hash, tDataType Data) {
+	/** Check */
+	if(Contain(Hash)) { if(Log(1)) LogStream() << "Hash " << Hash << " is contains already" << endl; return false; }
 
-  /** Insert data */
-  iterator ulit = mList.insert(mList.begin(), Data); /** Insert in begin list */
-  if(ulit == mList.end()){ if(Log(1)) LogStream() << "Don't add " << Hash << " into the list" << endl; return false; }
+	/** Insert data */
+	iterator ulit = mList.insert(mList.begin(), Data); /** Insert in begin list */
+	if(ulit == mList.end()) { if(Log(1)) LogStream() << "Don't add " << Hash << " into the list" << endl; return false; }
 
-  /** Insert hash-key */
-  pair<tUHIt, bool> P = mHashMap.insert(tHashPair(Hash, ulit));
-  if(P.second){
-    OnAdd(Data);
-    if(Log(4)) LogStream() << "Added: " << Hash << endl;
-  } else {
-    if(Log(1)) LogStream() << "Don't add " << Hash << endl;
-    mList.erase(ulit); /** Removing data fron list */
-    return false;
-  }
-  return true;
+	/** Insert hash-key */
+	pair<tUHIt, bool> P = mHashMap.insert(tHashPair(Hash, ulit));
+	if(P.second) {
+		OnAdd(Data);
+		if(Log(4)) LogStream() << "Added: " << Hash << endl;
+	} else {
+		if(Log(1)) LogStream() << "Don't add " << Hash << endl;
+		mList.erase(ulit); /** Removing data fron list */
+		return false;
+	}
+	return true;
 }
 
 /** Removing data by hash-key (true - ok, false - fail) */
 template <class tDataType, class tKeyType>
-bool tcHashMap<tDataType, tKeyType>::Remove(const tKeyType &Hash)
-{
-  tUHIt uhit = mHashMap.find(Hash);
-  if( uhit !=  mHashMap.end()) {
-    OnRemove(*(uhit->second));
-    mList.erase(uhit->second); /** Remove data */
-    mHashMap.erase(uhit); /** Remove key */
-    if(Log(4)) LogStream() << "Removed: " << Hash << endl;
-    return true;
-  }
-  if(Log(3)) LogStream() << "Don't exist: " << Hash << endl;
-  return false;
+bool tcHashMap<tDataType, tKeyType>::Remove(const tKeyType &Hash) {
+	tUHIt uhit = mHashMap.find(Hash);
+	if( uhit != mHashMap.end()) {
+		OnRemove(*(uhit->second));
+		mList.erase(uhit->second); /** Remove data */
+		mHashMap.erase(uhit); /** Remove key */
+		if(Log(4)) LogStream() << "Removed: " << Hash << endl;
+		return true;
+	}
+	if(Log(3)) LogStream() << "Don't exist: " << Hash << endl;
+	return false;
 }
 
 /** Check existed this hash-key (true - yes, false - no) */
 template <class tDataType, class tKeyType>
 bool tcHashMap<tDataType, tKeyType>::Contain(const tKeyType &Hash) {
-  return mHashMap.find(Hash) != mHashMap.end();
+	return mHashMap.find(Hash) != mHashMap.end();
 }
 
 /** Return data by hash-key. Return val else NULL */
 template <class tDataType, class tKeyType>
 tDataType tcHashMap<tDataType, tKeyType>::Find(const tKeyType &Hash) {
-  tUHIt uhit = mHashMap.find(Hash);
-  if(uhit !=  mHashMap.end()) return *(uhit->second); /** Pointer to iterator = val */
-  return NULL;
+	tUHIt uhit = mHashMap.find(Hash);
+	if(uhit != mHashMap.end()) return *(uhit->second); /** Pointer to iterator = val */
+	return NULL;
 }
 
 }; // nUtils

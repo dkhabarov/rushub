@@ -23,22 +23,20 @@
 #include <string>
 using namespace std;
 
-namespace nServer
-{
+namespace nServer {
 
 /** Protocol command */
-class cProtocolCmd
-{
+class cProtocolCmd {
 
 public:
-  string mKey; /** Key-word of cmd */
-  int mLength; /** Cmd len */
+	string mKey; /** Key-word of cmd */
+	int mLength; /** Cmd len */
 
 public:
-  cProtocolCmd();
-  cProtocolCmd(string sKey);
-  virtual ~cProtocolCmd();
-  bool Check(const string &sStr); /** Check */
+	cProtocolCmd();
+	cProtocolCmd(string sKey);
+	virtual ~cProtocolCmd();
+	bool Check(const string &sStr); /** Check */
 
 }; // cProtocolCmd
 

@@ -19,31 +19,25 @@
 
 #include "cwebparser.h"
 
-namespace nWebServer
-{
+namespace nWebServer {
 
-namespace nProtocol
-{
+namespace nProtocol {
 
-cWebParser::cWebParser() : cParser(5), cWebParserBase(mStr)
-{
-  SetClassName("cWebParser");
+cWebParser::cWebParser() : cParser(5), cWebParserBase(mStr) {
+	SetClassName("cWebParser");
 }
 
-cWebParser::~cWebParser()
-{
+cWebParser::~cWebParser() {
 }
 
 /** Parse cmd and return type */
-int cWebParser::Parse()
-{
-  return eUNPARSED;
+int cWebParser::Parse() {
+	return eUNPARSED;
 }
 
 /** Split cmd to chunks */
-bool cWebParser::SplitChunks()
-{
-  return false;
+bool cWebParser::SplitChunks() {
+	return false;
 }
 
 }; // nProtocol

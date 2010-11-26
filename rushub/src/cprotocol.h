@@ -25,78 +25,74 @@
 
 using namespace std;
 
-namespace nServer
-{
+namespace nServer {
 
 class cParser;
 class cConn;
 
-enum
-{
-  eUNPARSED = -1
+enum {
+	eUNPARSED = -1
 };
 
 
 /**
   * Main proto class
   */
-class cProtocol : public cObj
-{
+class cProtocol : public cObj {
 public:
-  cProtocol();
-  virtual ~cProtocol();
-  virtual int DoCmd(cParser *, cConn *) = 0; /** DoCmd */
-  virtual cParser * CreateParser() = 0; /** CreateParser */
-  virtual void DeleteParser(cParser *) = 0; /** DeleteParser */
-};
+	cProtocol();
+	virtual ~cProtocol();
+	virtual int DoCmd(cParser *, cConn *) = 0; /** DoCmd */
+	virtual cParser * CreateParser() = 0; /** CreateParser */
+	virtual void DeleteParser(cParser *) = 0; /** DeleteParser */
+}; // cProtocol
 
 
 /** Parser class
 */
-class cParser : public cObj
-{
+class cParser : public cObj {
 
 public:
 
-  string mStr; /** Main string with cmd */
-  int miType; /** Type of cmd */
-  unsigned miLen; /** Cmd len */
-  unsigned miKWSize; /** Key-word len */
-  bool mbError; /** error */
+	string mStr; /** Main string with cmd */
+	int miType; /** Type of cmd */
+	unsigned miLen; /** Cmd len */
+	unsigned miKWSize; /** Key-word len */
+	bool mbError; /** error */
 
-  typedef pair<int, int> tChunk; /** Pair for chunk (begin, end) */
-  typedef vector<tChunk> tChunkList; /** Chunks list */
-  typedef tChunkList::iterator tCLIt; /** Iterator */
-  tChunkList mChunks; /** List */
-  string *mStrings; /** String array for chunks */
-  unsigned long mStrMap; /** Chunk already existed */
-  
+	typedef pair<int, int> tChunk; /** Pair for chunk (begin, end) */
+	typedef vector<tChunk> tChunkList; /** Chunks list */
+	typedef tChunkList::iterator tCLIt; /** Iterator */
+	tChunkList mChunks; /** List */
+	string *mStrings; /** String array for chunks */
+	unsigned long mStrMap; /** Chunk already existed */
+
 public:
 
-  cParser(int max);
-  virtual ~cParser();
+	cParser(int max);
+	virtual ~cParser();
 
-  virtual int Parse() = 0; /** Parse */
-  virtual bool SplitChunks() = 0; /** SplitChunks */
+	virtual int Parse() = 0; /** Parse */
+	virtual bool SplitChunks() = 0; /** SplitChunks */
 
-  string & GetStr(); /** GetStr */
-  virtual void ReInit(); /** ReInit */
-  
+	string & GetStr(); /** GetStr */
+	virtual void ReInit(); /** ReInit */
+
 protected:
 
-  int mMaxChunks; /** Common (max) number of chunks */
+	int mMaxChunks; /** Common (max) number of chunks */
 
-  void SetChunk(int n, int start, int len);
+	void SetChunk(int n, int start, int len);
 
-  bool SplitOnTwo(size_t start, const string & lim, int cn1, int cn2, size_t len = 0, bool left = true);
-  bool SplitOnTwo(size_t start, const char lim, int cn1, int cn2, size_t len = 0, bool left = true);
+	bool SplitOnTwo(size_t start, const string & lim, int cn1, int cn2, size_t len = 0, bool left = true);
+	bool SplitOnTwo(size_t start, const char lim, int cn1, int cn2, size_t len = 0, bool left = true);
 
-  bool SplitOnTwo(const string & lim, int ch, int cn1, int cn2, bool left = true);
-  bool SplitOnTwo(const char lim, int ch, int cn1, int cn2, bool left = true);
+	bool SplitOnTwo(const string & lim, int ch, int cn1, int cn2, bool left = true);
+	bool SplitOnTwo(const char lim, int ch, int cn1, int cn2, bool left = true);
 
-  bool ChunkRedRight(int cn, int amount);
-  
-  bool ChunkRedLeft(int cn, int amount);
+	bool ChunkRedRight(int cn, int amount);
+
+	bool ChunkRedLeft(int cn, int amount);
 
 }; // cParser
 

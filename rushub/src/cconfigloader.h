@@ -26,13 +26,12 @@
 #include <fstream> /** for ifstream is */
 #include <sstream> /** for streams */
 
-namespace nConfig
-{
+namespace nConfig {
 
 class cConfigListBase;
 
-class cConfigLoader : public cObj
-{
+class cConfigLoader : public cObj {
+
 public:
 
 	cConfigLoader();
@@ -41,16 +40,16 @@ public:
 	bool Load(cConfigListBase *, const char*);
 	bool Save(cConfigListBase *, const char*);
 
-  bool LoadFromFile();
-  bool SaveToFile();
-  bool SaveToStream(ostream &);
+	bool LoadFromFile();
+	bool SaveToFile();
+	bool SaveToStream(ostream &);
 
-  bool LoadFromXml();
-  bool SaveToXml();
+	bool LoadFromXml();
+	bool SaveToXml();
 
 private:
-  cConfigListBase * mConfigList;
-  string msFileName;
+	cConfigListBase * mConfigList;
+	string msFileName;
 
 }; // cConfigLoader
 

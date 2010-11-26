@@ -34,7 +34,7 @@ int cStrToArg::String2Arg(char const * str, int * argc_p, char *** argv_p) {
 			break;
 		if(++argc >= act) {
 			act += act / 2;
-			res  = (char **) realloc(res, act * sizeof(char *));
+			res = (char **) realloc(res, act * sizeof(char *));
 			argv = res + (argc - 1);
 		}
 		*(argv++) = dest = scan;
@@ -67,7 +67,7 @@ token_done:
 done:
 	*argv_p = res;
 	*argc_p = argc;
-	*argv   = NULL;
+	*argv = NULL;
 	if(argc == 0) free((void *)str);
 	return 0;
 

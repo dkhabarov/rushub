@@ -24,16 +24,16 @@
 #include <signal.h>
 
 #ifdef _WIN32
-  #define SIGQUIT 1000
-  #define SIGHUP 1001
-  #ifdef MODULAR
-    #pragma comment(lib, "config.lib")
-    #pragma comment(lib, "utils.lib")
-    #pragma comment(lib, "server.lib")
-    #pragma comment(lib, "webserver.lib")
-    #pragma comment(lib, "plugin.lib")
-    #pragma comment(lib, "tinyxml.lib")
-  #endif
+	#define SIGQUIT 1000
+	#define SIGHUP 1001
+	#ifdef MODULAR
+		#pragma comment(lib, "config.lib")
+		#pragma comment(lib, "utils.lib")
+		#pragma comment(lib, "server.lib")
+		#pragma comment(lib, "webserver.lib")
+		#pragma comment(lib, "plugin.lib")
+		#pragma comment(lib, "tinyxml.lib")
+	#endif
 #else
 	#include "ccli.h"
 #endif
@@ -42,39 +42,39 @@ using nDCServer::cDCServer;
 using namespace nServer;
 
 void SigHandler(int iSig) {
-  switch(iSig) {
-    case SIGINT:
-    case SIGTERM:
-    case SIGQUIT:
-    case SIGHUP:
+	switch(iSig) {
+		case SIGINT:
+		case SIGTERM:
+		case SIGQUIT:
+		case SIGHUP:
 
-      if(cDCServer::sCurrentServer->Log(0))
-        cDCServer::sCurrentServer->LogStream() << "Received a " << iSig << " signal, quiting" << endl;
+			if(cDCServer::sCurrentServer->Log(0))
+				cDCServer::sCurrentServer->LogStream() << "Received a " << iSig << " signal, quiting" << endl;
 
-      cout << "Received a " << iSig << " signal, quiting" << endl;
-      cDCServer::sCurrentServer->Stop(0);
-      break;
-    default:
+			cout << "Received a " << iSig << " signal, quiting" << endl;
+			cDCServer::sCurrentServer->Stop(0);
+			break;
+		default:
 
-      if(cDCServer::sCurrentServer->Log(0))
-        cDCServer::sCurrentServer->LogStream() << "Received a " << iSig << " signal, ignoring it" << endl;
+			if(cDCServer::sCurrentServer->Log(0))
+				cDCServer::sCurrentServer->LogStream() << "Received a " << iSig << " signal, ignoring it" << endl;
 
-      cout << "Received a " << iSig << " signal, ignoring it" << endl;
-      signal(iSig, SigHandler);
-      break;
-  }
+			cout << "Received a " << iSig << " signal, ignoring it" << endl;
+			signal(iSig, SigHandler);
+			break;
+	}
 }
 
 int runHub(int argc, char **argv, bool bService /*= false*/) {
 
-  int iResult = 1;
+	int iResult = 1;
 
 	#ifndef _WIN32
-		cCli Cli;  
+		cCli Cli;
 		Cli.detectArgs(argc, argv);
-  #endif
+	#endif
 
-  while(iResult == 1) {
+	while(iResult == 1) {
 
 		string sConfPath, sExPath;
 		#ifndef _WIN32
@@ -118,7 +118,6 @@ int runHub(int argc, char **argv, bool bService /*= false*/) {
 		#endif
 
 	}
-
 	return iResult;
 }
 

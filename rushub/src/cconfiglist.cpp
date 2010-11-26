@@ -19,93 +19,79 @@
 
 #include "cconfiglist.h"
 
-namespace nConfig
-{
+namespace nConfig {
 
-cConfigListBase::cConfigListBase() : cObj("cConfigListBase")
-{
-  mBase = NULL; /** NULL base pointer */
-  mFactory = new cConfigFactory;
+cConfigListBase::cConfigListBase() : cObj("cConfigListBase") {
+	mBase = NULL; /** NULL base pointer */
+	mFactory = new cConfigFactory;
 }
 
-cConfigListBase::~cConfigListBase()
-{
-  tHashType Hash;
-  cConfig *config; /** Pointer on object */
-  for(tVIt it = mKeyList.begin(); it != mKeyList.end(); ++it)
-  {
-    Hash = *it; /** Get hash from vector */
-    config = mList.Find(Hash); /** Get object by hash */
-    mList.Remove(Hash); /** Del object from list by hash */
-    this->mFactory->Delete(config); /** Del object */
-  }
-  if(mFactory != NULL) delete mFactory;
-  mFactory = NULL;
+cConfigListBase::~cConfigListBase() {
+	tHashType Hash;
+	cConfig *config; /** Pointer on object */
+	for(tVIt it = mKeyList.begin(); it != mKeyList.end(); ++it) {
+		Hash = *it; /** Get hash from vector */
+		config = mList.Find(Hash); /** Get object by hash */
+		mList.Remove(Hash); /** Del object from list by hash */
+		this->mFactory->Delete(config); /** Del object */
+	}
+	if(mFactory != NULL) delete mFactory;
+	mFactory = NULL;
 }
 
 /** Adding config */
-cConfig * cConfigListBase::Add(const string &sKey, cConfig *cbi)
-{
-  tHashType Hash = mList.mHash(sKey);
-  if(!mList.Add(Hash, cbi)) /** Add */
-  {
-    if(Log(1))
-    {
-      cConfig *other = mList.Find(Hash);
-      LogStream() << "Don't add " << sKey << " because of " << (other ? other->msName.c_str() : "NULL") << endl;
-      return NULL;
-    }
-  }
-  mKeyList.push_back(Hash); /** Push back of vector */
-  cbi->msName = sKey; /** Record name */
-  return cbi;
+cConfig * cConfigListBase::Add(const string &sKey, cConfig *cbi) {
+	tHashType Hash = mList.mHash(sKey);
+	if(!mList.Add(Hash, cbi)) { /** Add */
+		if(Log(1)) {
+			cConfig *other = mList.Find(Hash);
+			LogStream() << "Don't add " << sKey << " because of " << (other ? other->msName.c_str() : "NULL") << endl;
+			return NULL;
+		}
+	}
+	mKeyList.push_back(Hash); /** Push back of vector */
+	cbi->msName = sKey; /** Record name */
+	return cbi;
 }
 
 /** Get config by name */
-cConfig * cConfigListBase::operator[](const char * sName)
-{
-  return mList.Find(mList.mHash(sName));
+cConfig * cConfigListBase::operator[](const char * sName) {
+	return mList.Find(mList.mHash(sName));
 }
 
 /** Get config by name */
-cConfig * cConfigListBase::operator[](const string &sName)
-{
-  return mList.Find(mList.mHash(sName));
+cConfig * cConfigListBase::operator[](const string &sName) {
+	return mList.Find(mList.mHash(sName));
 }
 
 /** Set new address */
-void cConfigListBase::SetBaseTo(void *new_base)
-{
-  if(mBase)
-    for(tVIt it = mKeyList.begin(); it != mKeyList.end(); ++it)
-      mList.Find(*it)->mAddr = (void*)(long(mList.Find(*it)->mAddr) + (long(new_base) - long(mBase)));
-  mBase = new_base;
+void cConfigListBase::SetBaseTo(void *new_base) {
+	if(mBase)
+		for(tVIt it = mKeyList.begin(); it != mKeyList.end(); ++it)
+			mList.Find(*it)->mAddr = (void*)(long(mList.Find(*it)->mAddr) + (long(new_base) - long(mBase)));
+	mBase = new_base;
 }
 
 /** Creating and adding configs */
 #define ADDVAL(TYPE) \
-cConfig * cConfigList::Add(const string &sName, TYPE &Var) \
-{ \
-  cConfig * cbi = this->mFactory->Add(Var); \
-  return this->cConfigListBase::Add(sName, cbi); \
+cConfig * cConfigList::Add(const string &sName, TYPE &Var) { \
+	cConfig * cbi = this->mFactory->Add(Var); \
+	return this->cConfigListBase::Add(sName, cbi); \
 } \
-cConfig * cConfigList::Add(const string &sName, TYPE &Var, TYPE const &Def) \
-{ \
-  cConfig * cbi = this->Add(sName, Var); \
-  *cbi = Def; \
-  return cbi; \
+cConfig * cConfigList::Add(const string &sName, TYPE &Var, TYPE const &Def) { \
+	cConfig * cbi = this->Add(sName, Var); \
+	*cbi = Def; \
+	return cbi; \
 }
 #define ADDPVAL(TYPE) \
-cConfig * cConfigList::Add(const string &sName, TYPE* &Var) \
-{ \
-  cConfig * cbi = this->mFactory->Add(Var); \
-  return this->cConfigListBase::Add(sName, cbi); \
+cConfig * cConfigList::Add(const string &sName, TYPE* &Var) { \
+	cConfig * cbi = this->mFactory->Add(Var); \
+	return this->cConfigListBase::Add(sName, cbi); \
 } \
-cConfig * cConfigList::Add(const string &sName, TYPE* &Var, TYPE const &Def) \
-{ \
-  cConfig * cbi = this->Add(sName, Var); \
-  *cbi = &Def; \
-  return cbi; \
+cConfig * cConfigList::Add(const string &sName, TYPE* &Var, TYPE const &Def) { \
+	cConfig * cbi = this->Add(sName, Var); \
+	*cbi = &Def; \
+	return cbi; \
 }
 #define ADDVALUES(TYPE) \
 ADDVAL(TYPE); \

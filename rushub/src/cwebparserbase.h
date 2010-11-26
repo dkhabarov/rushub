@@ -25,17 +25,16 @@
 using namespace std;
 
 #ifndef WEB_SEPARATOR
-  #define WEB_SEPARATOR "\r\n\r\n" /** Protocol separator */
+	#define WEB_SEPARATOR "\r\n\r\n" /** Protocol separator */
 #endif
 
 namespace nWebServer {
 
-class cWebParserBase
-{
+class cWebParserBase {
 public:
-  string & msStr; /** Ref to string with cmd */
+	string & msStr; /** Ref to string with cmd */
 public:
-  cWebParserBase(string & sStr):msStr(sStr){}
+	cWebParserBase(string & sStr):msStr(sStr) {}
 
 }; // cWebParserBase
 

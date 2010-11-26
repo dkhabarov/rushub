@@ -57,63 +57,63 @@ cObj::~cObj(){ --mCounterObj; /*if(string(mClassName) != "cDCServer" && Log(0)) 
 /** Set class name */
 void cObj::SetClassName(const char *sName) {
 	//if(Log(0)) LogStream() << "r " << mClassName << " -> " << sName << endl;
-  mClassName = sName;
+	mClassName = sName;
 }
 
 /** Main function putting log in stream */
 int cObj::StrLog(ostream &ostr, int iLevel, int iMaxLevel) {
-  cTime now;
-  if(iLevel <= iMaxLevel) {
-    ostr << "[" << now.AsDateMS() << "] (" << iLevel << ") " << mClassName << ": ";
-    return 1;
-  }
-  return 0;
+	cTime now;
+	if(iLevel <= iMaxLevel) {
+		ostr << "[" << now.AsDateMS() << "] (" << iLevel << ") " << mClassName << ": ";
+		return 1;
+	}
+	return 0;
 }
 
 /** Return log straem */
 int cObj::Log(int iLevel) {
-  mToLog = &Log();
-  return StrLog(*mToLog, iLevel, miMaxLevel);
+	mToLog = &Log();
+	return StrLog(*mToLog, iLevel, miMaxLevel);
 }
 
 /** Return errlog stream */
 int cObj::ErrLog(int iLevel) {
-  mToLog = &ErrLog();
-  *mToLog << "(error)";
-  return StrLog(*mToLog, iLevel, miMaxErrLevel);
+	mToLog = &ErrLog();
+	*mToLog << "(error)";
+	return StrLog(*mToLog, iLevel, miMaxErrLevel);
 }
 
 /** Virtual log function. Return log straem */
 ostream & cObj::Log() {
-  if(!mOfs.is_open()) {
-    string sPath;
-    if(msPath == NULL)
-      ExecPath(sPath);
-    else
-      sPath = msPath;
-    sPath += "system.log";
-    mOfs.open(sPath.c_str());
-  }
-  if(!mOfs.is_open()) return cout;
-  return mOfs;
+	if(!mOfs.is_open()) {
+		string sPath;
+		if(msPath == NULL)
+			ExecPath(sPath);
+		else
+			sPath = msPath;
+		sPath += "system.log";
+		mOfs.open(sPath.c_str());
+	}
+	if(!mOfs.is_open()) return cout;
+	return mOfs;
 }
 
 /** Virtual errlog function. Return errlog straem */
 ostream & cObj::ErrLog() {
-  if(!mOfs.is_open()) {
-    string sPath;
-    if(msPath == NULL)
-      ExecPath(sPath);
-    else
-      sPath = msPath;
-    sPath += "system.log";
-    mOfs.open(sPath.c_str());
-  }
-  if(!mOfs.is_open()) return cerr;
-  return mOfs;
+	if(!mOfs.is_open()) {
+		string sPath;
+		if(msPath == NULL)
+			ExecPath(sPath);
+		else
+			sPath = msPath;
+		sPath += "system.log";
+		mOfs.open(sPath.c_str());
+	}
+	if(!mOfs.is_open()) return cerr;
+	return mOfs;
 }
 
 /** Return current log stream */
 ostream & cObj::LogStream() {
-  return *mToLog;
+	return *mToLog;
 }

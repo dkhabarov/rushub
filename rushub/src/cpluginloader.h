@@ -26,45 +26,42 @@
 
 using std::string;
 
-
-namespace nPlugin
-{
+namespace nPlugin {
 
 class cPluginBase;
 
 /** Loader of plugin */
-class cPluginLoader : public cObj
-{
+class cPluginLoader : public cObj {
 
 public:
 
-  cPluginBase *mPlugin; /** Pointer on plugin */
+	cPluginBase *mPlugin; /** Pointer on plugin */
 
 public:
 
-  cPluginLoader(const string &sPathFile);
-  ~cPluginLoader();
+	cPluginLoader(const string &sPathFile);
+	~cPluginLoader();
 
-  bool IsError(){return (msError = dlerror()) != NULL;} /** Is error? */
-  string Error(){return string((msError != NULL) ? msError : "ok");} /** Get error msg */
-  string GetFileName(){ return msFile;} /** Get lib name of plugin */
-  bool Open(); /** Open lib dll(so) */
-  bool Close(); /** Close lib dll(so) */
-  bool LoadSym(); /** LoadSym */
-  void * LoadSym(const char *); /** LoadSym from dll(so) */
-  int StrLog(ostream & os, int iLevel, int iMaxLevel); /** Log */
+	bool IsError(){return (msError = dlerror()) != NULL;} /** Is error? */
+	string Error(){return string((msError != NULL) ? msError : "ok");} /** Get error msg */
+	string GetFileName(){ return msFile;} /** Get lib name of plugin */
+	bool Open(); /** Open lib dll(so) */
+	bool Close(); /** Close lib dll(so) */
+	bool LoadSym(); /** LoadSym */
+	void * LoadSym(const char *); /** LoadSym from dll(so) */
+	int StrLog(ostream & os, int iLevel, int iMaxLevel); /** Log */
 
 protected:
 
-  typedef cPluginBase *(*tGetPluginFunc)();
-  typedef void (*tDelPluginFunc)(cPluginBase *);
+	typedef cPluginBase *(*tGetPluginFunc)();
+	typedef void (*tDelPluginFunc)(cPluginBase *);
 
-  string msFile;
-  void *mHandle; /** Handle of lib */
-  const char * msError; /** Error msg */
+	string msFile;
+	void *mHandle; /** Handle of lib */
+	const char * msError; /** Error msg */
 
-  tGetPluginFunc mGetPluginFunc; /** Pointer on create-function from lib */
-  tDelPluginFunc mDelPluginFunc; /** Pointer on remove-function from lib */
+	tGetPluginFunc mGetPluginFunc; /** Pointer on create-function from lib */
+	tDelPluginFunc mDelPluginFunc; /** Pointer on remove-function from lib */
 
 }; // cPluginLoader
 

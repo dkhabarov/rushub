@@ -29,60 +29,58 @@
 
 using namespace std;
 
-namespace nDCServer{namespace nPlugin{ class cPluginList; };};
+namespace nDCServer { namespace nPlugin { class cPluginList; }; };
 using nDCServer::nPlugin::cPluginList;
 
-namespace nPlugin
-{
+namespace nPlugin {
 
 class cPluginBase;
 class cPluginListBase;
 
 
 /** Base class for call list */
-class cCallList : public cObj
-{
+class cCallList : public cObj {
 
 private:
 
-  typedef list<cPluginBase*> tPlugins;
-  tPlugins mPlugins; /** Plugin list of call list */
-  cPluginList *mPluginList; /** Pointer on common plugin list */
+	typedef list<cPluginBase*> tPlugins;
+	tPlugins mPlugins; /** Plugin list of call list */
+	cPluginList *mPluginList; /** Pointer on common plugin list */
 
 public:
 
-  /** Unary function of plugin list for current call list */
-  struct ufCallOne : public unary_function<void, tPlugins::iterator> {
-    cPluginList *mPluginList; /** Pointer on common plugin list */
-    cCallList *mCallList; /** Pointer on call list */
-    int miCall; /** Returning value from plugin */
+	/** Unary function of plugin list for current call list */
+	struct ufCallOne : public unary_function<void, tPlugins::iterator> {
+		cPluginList *mPluginList; /** Pointer on common plugin list */
+		cCallList *mCallList; /** Pointer on call list */
+		int miCall; /** Returning value from plugin */
 
-    void SetCallList(cCallList *CallList){mCallList = CallList;}
-    ufCallOne(cPluginList *PluginList) : 
-      mPluginList(PluginList),
-      miCall(0)
-    {}
-    void operator()(cPluginBase*);
-  };
+		void SetCallList(cCallList *CallList){mCallList = CallList;}
+		ufCallOne(cPluginList *PluginList) : 
+			mPluginList(PluginList),
+			miCall(0)
+		{}
+		void operator()(cPluginBase*);
+	};
 
 private:
 
-  ufCallOne mCallOne; /** Unary function */
-  string msName; /** Name of the call list */
+	ufCallOne mCallOne; /** Unary function */
+	string msName; /** Name of the call list */
 
 public:
 
-  cCallList(cPluginList*, string sId);
-  virtual ~cCallList(){}
+	cCallList(cPluginList*, string sId);
+	virtual ~cCallList() {}
 
-  /** Get name of the call list */
-  virtual const string &Name() const {return msName;}
+	/** Get name of the call list */
+	virtual const string &Name() const { return msName; }
 
-  bool Reg(cPluginBase*); /** Registers plugin in call list */
-  bool Unreg(cPluginBase*); /** Remove registration from call list */
-  virtual int CallAll(); /** Call all plugins */
-  virtual int CallOne(cPluginBase*) = 0; /** Call one plugin */
-  virtual void ListRegs(ostream &os, const char *sSep); /** Show plugins list for this call */
+	bool Reg(cPluginBase*); /** Registers plugin in call list */
+	bool Unreg(cPluginBase*); /** Remove registration from call list */
+	virtual int CallAll(); /** Call all plugins */
+	virtual int CallOne(cPluginBase*) = 0; /** Call one plugin */
+	virtual void ListRegs(ostream &os, const char *sSep); /** Show plugins list for this call */
 
 }; // cCallList
 

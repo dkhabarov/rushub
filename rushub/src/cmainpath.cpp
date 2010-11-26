@@ -23,11 +23,11 @@
 namespace nDCServer {
 
 cMainPath::cMainPath(const string & sConfPath, const string & sExPath) : cObj("cMainPath"), msConfPath(sConfPath), msExPath(sExPath) {
-  CheckEndSlash(msConfPath);
-  if(mOfs.is_open()) mOfs.close();
-  if(msPath == NULL)
-    msPath = new char[256];
-  strcpy(msPath, msConfPath.c_str());
+	CheckEndSlash(msConfPath);
+	if(mOfs.is_open()) mOfs.close();
+	if(msPath == NULL)
+		msPath = new char[256];
+	strcpy(msPath, msConfPath.c_str());
 }
 
 cMainPath::~cMainPath() {

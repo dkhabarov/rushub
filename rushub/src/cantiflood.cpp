@@ -20,57 +20,54 @@
 #include "cantiflood.h"
 #include <math.h>
 
-namespace nUtils
-{
+namespace nUtils {
 
-void cAntiFlood::Del(cTime &now)
-{
-  if(mList) {
-    List_t *Item = NULL;
-    if(mList->mData && double(now - mList->mData->mTime) > mTime) {
-      sItem * Data = mList->Remove(mList->mKey, Item);
-      delete Data;
-      delete mList;
-      mList = Item;
-      Del(now);
-    } else {
-      List_t *List = mList;
-      while(List->mNext) {
-        Item = List;
-        List = List->mNext;
-        if(List->mData && double(now - List->mData->mTime) > mTime) {
-          sItem * Data = mList->Remove(List->mKey, Item);
-          delete Data;
-          List = Item;
-        }
-      }
-    }
-  }
+void cAntiFlood::Del(cTime &now) {
+	if(mList) {
+		List_t *Item = NULL;
+		if(mList->mData && double(now - mList->mData->mTime) > mTime) {
+			sItem * Data = mList->Remove(mList->mKey, Item);
+			delete Data;
+			delete mList;
+			mList = Item;
+			Del(now);
+		} else {
+			List_t *List = mList;
+			while(List->mNext) {
+				Item = List;
+				List = List->mNext;
+				if(List->mData && double(now - List->mData->mTime) > mTime) {
+					sItem * Data = mList->Remove(List->mKey, Item);
+					delete Data;
+					List = Item;
+				}
+			}
+		}
+	}
 }
 
-bool cAntiFlood::Check(HashType_t Hash)
-{
-  sItem * Item;
-  if(!mList) {
-    Item = new sItem();
-    mList = new List_t(Hash, Item);
-    return false;
-  }
-  Item = mList->Find(Hash);
-  if(!Item) {
-    Item = new sItem();
-    mList->Add(Hash, Item);
-    return false;
-  }
-  bool bRet = false;
-  if(Item->miCount < miCount) ++Item->miCount;
-  else {
-    cTime now;
-    if(::fabs(double(now - Item->mTime)) < mTime) bRet = true;
-    Item->mTime = now;
-    Item->miCount = 0;
-  }
-  return bRet;
+bool cAntiFlood::Check(HashType_t Hash) {
+	sItem * Item;
+	if(!mList) {
+		Item = new sItem();
+		mList = new List_t(Hash, Item);
+		return false;
+	}
+	Item = mList->Find(Hash);
+	if(!Item) {
+		Item = new sItem();
+		mList->Add(Hash, Item);
+		return false;
+	}
+	bool bRet = false;
+	if(Item->miCount < miCount) ++Item->miCount;
+	else {
+		cTime now;
+		if(::fabs(double(now - Item->mTime)) < mTime) bRet = true;
+		Item->mTime = now;
+		Item->miCount = 0;
+	}
+	return bRet;
 }
 
 }; // nDCServer

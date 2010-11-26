@@ -32,13 +32,13 @@
 #define INTERNALVERSION "2.2.8"
 
 #if USE_SELECT
-  #include "cconnselect.h" /** Check sockets by method select */
+	#include "cconnselect.h" /** Check sockets by method select */
 #else
-  #ifdef USE_EPOLL
-    #include "cconnepoll.h" /** Check sockets by method epoll */
-  #else
-    #include "cconnpoll.h" /** Check sockets by method poll */
-  #endif
+	#ifdef USE_EPOLL
+		#include "cconnepoll.h" /** Check sockets by method epoll */
+	#else
+		#include "cconnpoll.h" /** Check sockets by method poll */
+	#endif
 #endif
 
 
@@ -55,13 +55,13 @@ class cServer;
 class cListenFactory {
 
 public:
-  cListenFactory(cServer *);
-  virtual ~cListenFactory();
-  virtual cConnFactory * ConnFactory();
-  virtual int OnNewConn(cConn *);
+	cListenFactory(cServer *);
+	virtual ~cListenFactory();
+	virtual cConnFactory * ConnFactory();
+	virtual int OnNewConn(cConn *);
 
 protected:
-  cServer * mServer;
+	cServer * mServer;
 
 }; // cListenFactory
 
@@ -74,123 +74,123 @@ friend class cConnFactory; /* OnNewData */
 
 public:
 
-  string msAddresses; /** string "Ip1[:port1] Ip2[:port2] ... IpN[:portN]" - addresses of server */
+	string msAddresses; /** string "Ip1[:port1] Ip2[:port2] ... IpN[:portN]" - addresses of server */
 
-  cConnFactory * mConnFactory; /** cConnFactory */
+	cConnFactory * mConnFactory; /** cConnFactory */
 
-  unsigned long miStrSizeMax; /** (10240) Max msg size */
-  string msSeparator; /** Proto separator */
+	unsigned long miStrSizeMax; /** (10240) Max msg size */
+	string msSeparator; /** Proto separator */
 
-  cTime mTime; /** Current time of main cycle on the server */
-  cMeanFrequency<unsigned, 21> mMeanFrequency; /** Mean frequency */
-  int mStepDelay; /** Step delay (for testing) */
+	cTime mTime; /** Current time of main cycle on the server */
+	cMeanFrequency<unsigned, 21> mMeanFrequency; /** Mean frequency */
+	int mStepDelay; /** Step delay (for testing) */
 
-  int miNumCloseConn; /** Strong close conn flag */
+	int miNumCloseConn; /** Strong close conn flag */
 
-  int miTimerServPeriod; /** Serv period (msec) */
-  int miTimerConnPeriod; /** Conn period (msec) */
+	int miTimerServPeriod; /** Serv period (msec) */
+	int miTimerConnPeriod; /** Conn period (msec) */
 
-  bool mbMAC; /** allow to define MAC address */
+	bool mbMAC; /** allow to define MAC address */
 
 public:
 
-  cServer(const string sSep);
-  virtual ~cServer();
+	cServer(const string sSep);
+	virtual ~cServer();
 
-  /** Set and Listen port */
-  virtual int Listening(cListenFactory *, const string & sIP, int iPort = 0);
+	/** Set and Listen port */
+	virtual int Listening(cListenFactory *, const string & sIP, int iPort = 0);
 
-  /** Listen port (TCP/UDP) */
-  virtual cConn * Listen(const string & sIP, int iPort, bool bUDP = false);
+	/** Listen port (TCP/UDP) */
+	virtual cConn * Listen(const string & sIP, int iPort, bool bUDP = false);
 
-  /** Create, bind and add connection for port */
-  virtual cConn * AddListen(cConn *, const string & sIP, int iPort, bool bUDP = false);
+	/** Create, bind and add connection for port */
+	virtual cConn * AddListen(cConn *, const string & sIP, int iPort, bool bUDP = false);
 
-  /** Stop listen conn */
-  virtual bool StopListen(cConn *);
+	/** Stop listen conn */
+	virtual bool StopListen(cConn *);
 
-  /** Find conn by port */
-  virtual cConn * FindConnByPort(int iPort);
+	/** Find conn by port */
+	virtual cConn * FindConnByPort(int iPort);
 
-  /** Main cycle */
-  int Run();
+	/** Main cycle */
+	int Run();
 
-  /** Main step in the cycle */
-  void Step();
+	/** Main step in the cycle */
+	void Step();
 
-  /** OnClose conn */
-  void OnClose(cConn *);
+	/** OnClose conn */
+	void OnClose(cConn *);
 
-  /** Stop cycle */
-  void Stop(int);
+	/** Stop cycle */
+	void Stop(int);
 
-  /** Main base timer */
-  int OnTimerBase(cTime &now);
+	/** Main base timer */
+	int OnTimerBase(cTime &now);
 
-  /** Main timer */
-  virtual int OnTimer(cTime &now);
+	/** Main timer */
+	virtual int OnTimer(cTime &now);
 
-  /** InputData */
-  int InputData(cConn *);
+	/** InputData */
+	int InputData(cConn *);
 
-  /** OutputData */
-  int OutputData(cConn *);
+	/** OutputData */
+	int OutputData(cConn *);
 
 private:
 
-  cConn *mNowConn; /** Current connection */
+	cConn *mNowConn; /** Current connection */
 
 protected:
 
-  #ifdef _WIN32
-    static bool initWSA; /** Windows init flag for WSA (Windows Sockets API) */
-  #endif
+	#ifdef _WIN32
+		static bool initWSA; /** Windows init flag for WSA (Windows Sockets API) */
+	#endif
 
-  typedef list<cConn *> tConnList; /** ConnList */
-  typedef tConnList::iterator tCLIt;
-  
-  typedef list<cConn *> tListenList; /** ListenList */
-  typedef tListenList::iterator tLLIt;
+	typedef list<cConn *> tConnList; /** ConnList */
+	typedef tConnList::iterator tCLIt;
 
-  tConnList mConnList; /** ConnList */
-  tListenList mListenList; /** ListenList */
+	typedef list<cConn *> tListenList; /** ListenList */
+	typedef tListenList::iterator tLLIt;
 
-  /** select or poll object */
-  #if USE_SELECT
-    cConnSelect mConnChooser;
-    typedef cConnSelect::iterator tChIt;
-  #else
-    cConnPoll mConnChooser;
-    typedef cConnChoose::iterator tChIt;
-  #endif
+	tConnList mConnList; /** ConnList */
+	tListenList mListenList; /** ListenList */
 
-  bool mbRun; /** Run-flag */
-  int miMainLoopCode; /** MainLoopCode (0) If 1 then restart hub! */
+	/** select or poll object */
+	#if USE_SELECT
+		cConnSelect mConnChooser;
+		typedef cConnSelect::iterator tChIt;
+	#else
+		cConnPoll mConnChooser;
+		typedef cConnChoose::iterator tChIt;
+	#endif
 
-  struct sTimes { /** Timers */
-    cTime mServ; /** (miTimerServPeriod) */
-    cTime mConn; /** (miTimerConnPeriod) */
-  } mTimes;
+	bool mbRun; /** Run-flag */
+	int miMainLoopCode; /** MainLoopCode (0) If 1 then restart hub! */
+
+	struct sTimes { /** Timers */
+		cTime mServ; /** (miTimerServPeriod) */
+		cTime mConn; /** (miTimerConnPeriod) */
+	} mTimes;
 
 protected:
 
-  /** AddConnection */
-  virtual int AddConnection(cConn *);
+	/** AddConnection */
+	virtual int AddConnection(cConn *);
 
-  /** DelConnection */
-  int DelConnection(cConn *);
+	/** DelConnection */
+	int DelConnection(cConn *);
 
-  /** OnNewConn */
-  virtual int OnNewConn(cConn *);
+	/** OnNewConn */
+	virtual int OnNewConn(cConn *);
 
-  /** GetPtrForStr */
-  virtual string * GetPtrForStr(cConn *);
+	/** GetPtrForStr */
+	virtual string * GetPtrForStr(cConn *);
 
-  /** OnNewData */
-  virtual void OnNewData(cConn *, string *);
+	/** OnNewData */
+	virtual void OnNewData(cConn *, string *);
 
-  /** Close server */
-  virtual void Close(){}
+	/** Close server */
+	virtual void Close(){}
 
 }; // cServer
 

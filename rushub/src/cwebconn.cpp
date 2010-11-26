@@ -23,107 +23,98 @@
 
 using namespace nDCServer;
 
-namespace nWebServer
-{
+namespace nWebServer {
 
 using namespace nProtocol;
 
 cWebConn::cWebConn(tSocket sock, cServer *s) :
-  cDCConn(sock, s)
+	cDCConn(sock, s)
 {
-  SetClassName("cWebConn");
-  _miConnType = 2;
+	SetClassName("cWebConn");
+	_miConnType = 2;
 }
 
-cWebConn::~cWebConn()
-{
+cWebConn::~cWebConn() {
 }
 
 /** Timer of the connection */
-int cWebConn::OnTimer(cTime &now)
-{
-  if(mTimeLastIOAction.Sec() < (now.Sec() + (long)(((cDCServer *)mServer)->mDCConfig.miWebTimeout))) {
-    if(Log(2)) LogStream() << "Any action timeout..." << endl;
-    CloseNice(9000);
-    return 1;
-  }
-  return 0;
+int cWebConn::OnTimer(cTime &now) {
+	if(mTimeLastIOAction.Sec() < (now.Sec() + (long)(((cDCServer *)mServer)->mDCConfig.miWebTimeout))) {
+		if(Log(2)) LogStream() << "Any action timeout..." << endl;
+		CloseNice(9000);
+		return 1;
+	}
+	return 0;
 }
 
-int cWebConn::Send(const string & sData, bool bFlush)
-{
-  if(!mbWritable) return 0;
-  return WriteData(sData, bFlush);
+int cWebConn::Send(const string & sData, bool bFlush) {
+	if(!mbWritable) return 0;
+	return WriteData(sData, bFlush);
 }
 
 
 
 cWebConnFactory::cWebConnFactory(cProtocol *protocol, cServer *s, string sSep, int iMax) : 
-  cConnFactory(protocol, s)
+	cConnFactory(protocol, s)
 {
-  msSeparator = sSep;
-  miStrSizeMax = iMax;
+	msSeparator = sSep;
+	miStrSizeMax = iMax;
 }
 
 cWebConnFactory::~cWebConnFactory() {
-  if(mProtocol) delete mProtocol; // only for WebProtocol!
-  mProtocol = NULL;
+	if(mProtocol) delete mProtocol; // only for WebProtocol!
+	mProtocol = NULL;
 }
 
 
 cConn *cWebConnFactory::CreateConn(tSocket sock) {
-  if(!mServer) return NULL;
+	if(!mServer) return NULL;
 
-  cWebConn * webconn = new cWebConn(sock, mServer);
-  webconn->mConnFactory = this; /** Fuctory current connection (cWebConnFactory) */
-  webconn->mProtocol = mProtocol; /** Protocol (cWebProtocol) */
+	cWebConn * webconn = new cWebConn(sock, mServer);
+	webconn->mConnFactory = this; /** Fuctory current connection (cWebConnFactory) */
+	webconn->mProtocol = mProtocol; /** Protocol (cWebProtocol) */
 
-  return (cConn *)webconn;
+	return (cConn *)webconn;
 }
 
 void cWebConnFactory::DelConn(cConn * &conn) {
-  cConnFactory::DelConn(conn);
+	cConnFactory::DelConn(conn);
 }
 
 void cWebConnFactory::OnNewData(cConn * conn, string * str) {
-  (*str).append(WEB_SEPARATOR);
-  if(conn->Remaining() < 0) return;
+	(*str).append(WEB_SEPARATOR);
+	if(conn->Remaining() < 0) return;
 
-  cDCServer * Server = (cDCServer*)mServer;
-  cWebConn * Conn = (cWebConn*) conn;
-  if(!Server || !Conn) return;
+	cDCServer * Server = (cDCServer*)mServer;
+	cWebConn * Conn = (cWebConn*) conn;
+	if(!Server || !Conn) return;
 #ifndef WITHOUT_PLUGINS
-  cWebParser * Parser = (cWebParser*)Conn->mParser;
-  if(!Server->mCalls.mOnWebData.CallAll(Conn, Parser))
+	cWebParser * Parser = (cWebParser*)Conn->mParser;
+	if(!Server->mCalls.mOnWebData.CallAll(Conn, Parser))
 #endif
-  {
-    conn->CloseNice(9000);
-  }
+	{
+		conn->CloseNice(9000);
+	}
 }
-
-
-
 
 
 cWebListenFactory::cWebListenFactory(cServer * Server) : cListenFactory(Server) {
-  cWebProtocol * WebProtocol = new cWebProtocol;
-  mWebConnFactory = new cWebConnFactory(WebProtocol, Server, "\r\n\r\n", ((cDCServer*)Server)->mDCConfig.miWebStrSizeMax);
+	cWebProtocol * WebProtocol = new cWebProtocol;
+	mWebConnFactory = new cWebConnFactory(WebProtocol, Server, "\r\n\r\n", ((cDCServer*)Server)->mDCConfig.miWebStrSizeMax);
 }
 
 cWebListenFactory::~cWebListenFactory() {
-  if(mWebConnFactory) delete mWebConnFactory; // only for WebConnFactory!
-  mWebConnFactory = NULL;
+	if(mWebConnFactory) delete mWebConnFactory; // only for WebConnFactory!
+	mWebConnFactory = NULL;
 }
 
-cConnFactory * cWebListenFactory::ConnFactory()
-{
-  return mWebConnFactory;
+cConnFactory * cWebListenFactory::ConnFactory() {
+	return mWebConnFactory;
 }
 
-int cWebListenFactory::OnNewConn(cConn * conn)
-{
-  mServer->InputData(conn);
-  return 0;//cListenFactory::OnNewConn(conn);
+int cWebListenFactory::OnNewConn(cConn * conn) {
+	mServer->InputData(conn);
+	return 0;//cListenFactory::OnNewConn(conn);
 }
 
 }; // nWebServer

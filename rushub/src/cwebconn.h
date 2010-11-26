@@ -27,46 +27,42 @@
 using namespace nServer;
 using namespace nDCServer;
 
-namespace nWebServer
-{
+namespace nWebServer {
 
-class cWebConnFactory : public cConnFactory
-{
+class cWebConnFactory : public cConnFactory {
 public:
-  cWebConnFactory(cProtocol *, cServer *, string sSep, int iMax);
-  virtual ~cWebConnFactory();
-  cConn * CreateConn(tSocket sock = 0);
-  void DelConn(cConn * &);
-  void OnNewData(cConn *, string *);
+	cWebConnFactory(cProtocol *, cServer *, string sSep, int iMax);
+	virtual ~cWebConnFactory();
+	cConn * CreateConn(tSocket sock = 0);
+	void DelConn(cConn * &);
+	void OnNewData(cConn *, string *);
 }; // cWebConnFactory
 
-class cWebListenFactory : public cListenFactory
-{
+class cWebListenFactory : public cListenFactory {
 public:
-  cWebListenFactory(cServer *);
-  virtual ~cWebListenFactory();
-  cConnFactory * ConnFactory();
-  int OnNewConn(cConn *);
+	cWebListenFactory(cServer *);
+	virtual ~cWebListenFactory();
+	cConnFactory * ConnFactory();
+	int OnNewConn(cConn *);
 protected:
-  cConnFactory * mWebConnFactory;
+	cConnFactory * mWebConnFactory;
 }; // cWebListenFactory
 
 
-class cWebConn : public cDCConn
-{
+class cWebConn : public cDCConn {
 public:
-  cWebConn(tSocket sock = 0, cServer *s = NULL);
-  virtual ~cWebConn();
+	cWebConn(tSocket sock = 0, cServer *s = NULL);
+	virtual ~cWebConn();
 
-  virtual int OnTimer(cTime &now); /** Timer of the connection */
+	virtual int OnTimer(cTime &now); /** Timer of the connection */
 
-  virtual const string & GetIp(){ return msIp; } /** Get string of ip */
-  virtual const string & GetMacAddr(){ return msMAC; } /** Get mac address */
-  virtual int GetPort(){ return miPort; } /** Get real port */
-  virtual int GetPortConn(){ return miPortConn; } /** Get conn port */
-  virtual unsigned long GetNetIp(){ return miNetIp; }
-  virtual int Send(const string & sData, bool bFlush = true);
-  virtual void Disconnect(){ CloseNice(9000); }
+	virtual const string & GetIp() { return msIp; } /** Get string of ip */
+	virtual const string & GetMacAddr() { return msMAC; } /** Get mac address */
+	virtual int GetPort() { return miPort; } /** Get real port */
+	virtual int GetPortConn() { return miPortConn; } /** Get conn port */
+	virtual unsigned long GetNetIp() { return miNetIp; }
+	virtual int Send(const string & sData, bool bFlush = true);
+	virtual void Disconnect() { CloseNice(9000); }
 
 }; // cWebConn
 

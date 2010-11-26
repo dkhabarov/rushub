@@ -20,130 +20,122 @@
 #include "ctime.h"
 #include <sstream>
 #if HAVE_STRING_H
-  #include <string.h>
+	#include <string.h>
 #endif
 
 using namespace std;
 
 #ifdef _WIN32
-  #ifndef __int64
-    #define __int64 long long
-  #endif
-  void gettimeofday(struct timeval *tv, struct timezone *tz)
-  {
-    union {
-      FILETIME ft;
-      unsigned __int64 ns100;
-    } now;
-    GetSystemTimeAsFileTime(&now.ft);
-    //116444736000000000 = (24 * 3600) * ((1970 - 1601) * 365 + 89) * (1000000000 / 100)
-    tv->tv_sec  = (long) ((now.ns100 - 116444736000000000LL) / 10000000LL);
-    tv->tv_usec = (long) ((now.ns100 / 10LL) % 1000000LL);
-  }
+	#ifndef __int64
+		#define __int64 long long
+	#endif
+	void gettimeofday(struct timeval *tv, struct timezone *tz) {
+		union {
+			FILETIME ft;
+			unsigned __int64 ns100;
+		} now;
+		GetSystemTimeAsFileTime(&now.ft);
+		//116444736000000000 = (24 * 3600) * ((1970 - 1601) * 365 + 89) * (1000000000 / 100)
+		tv->tv_sec = (long) ((now.ns100 - 116444736000000000LL) / 10000000LL);
+		tv->tv_usec = (long) ((now.ns100 / 10LL) % 1000000LL);
+	}
 #else
-  #include <cstring> // for strlen
+	#include <cstring> // for strlen
 #endif // _WIN32
 
-namespace nUtils
-{
+namespace nUtils {
 
 string cTime::AsString() const{
-  ostringstream os;
-  os << (*this);
-  return os.str();
+	ostringstream os;
+	os << (*this);
+	return os.str();
 }
 
-cTime & cTime::Get()
-{
-  gettimeofday(this, NULL);
-  return *this;
+cTime & cTime::Get() {
+	gettimeofday(this, NULL);
+	return *this;
 }
 
-cTime & cTime::Normalize()
-{
-  if(tv_usec >= 1000000 || tv_usec <= -1000000)
-  {
-    tv_sec += tv_usec/1000000;
-    tv_usec %= 1000000;
-  }
-  if( tv_sec < 0 && tv_usec > 0)
-  {
-    ++tv_sec;
-    tv_usec -= 1000000;
-  }
-  if( tv_sec > 0 && tv_usec < 0)
-  {
-    --tv_sec;
-    tv_usec += 1000000;
-  }
-  return *this;
+cTime & cTime::Normalize() {
+	if(tv_usec >= 1000000 || tv_usec <= -1000000) {
+		tv_sec += tv_usec/1000000;
+		tv_usec %= 1000000;
+	}
+	if( tv_sec < 0 && tv_usec > 0) {
+		++tv_sec;
+		tv_usec -= 1000000;
+	}
+	if( tv_sec > 0 && tv_usec < 0) {
+		--tv_sec;
+		tv_usec += 1000000;
+	}
+	return *this;
 }
 
-std::ostream &operator << (std::ostream &os, const cTime &t)
-{
-  #if !defined(_WIN32)
-    char * buf;
-    static char buff[26];
-  #elif defined(_WIN32) && !defined(_MSC_VER) || (_MSC_VER < 1400)
-    char * buf;
-  #else
-    static char buf[26];
-  #endif
-  long n, rest;
+std::ostream &operator << (std::ostream &os, const cTime &t) {
+	#if !defined(_WIN32)
+		char * buf;
+		static char buff[26];
+	#elif defined(_WIN32) && !defined(_MSC_VER) || (_MSC_VER < 1400)
+		char * buf;
+	#else
+		static char buf[26];
+	#endif
+	long n, rest;
 
-  switch (t.mPrintType) {
-  case 4: /** AsDateMS */
-  case 1: /** AsDate */
-    #ifndef _WIN32
-      const time_t * ta;
-      ta = (time_t*)&t.tv_sec;
-      //buf = ctime(&ta);
-      buf = ctime_r(ta, buff);
-    #else
-      time_t ta;
-      ta = (time_t)t.tv_sec;
-      #if defined(_MSC_VER) && (_MSC_VER >= 1400)
-        ctime_s(buf, 26, &ta);
-      #else
-        buf = ctime(&ta);
-      #endif
-    #endif
-    buf[strlen(buf) - 1] = 0;
-    os << buf;
-    if(t.mPrintType == 4)
-      os << "|" << t.tv_usec / 1000;
-    break;
-  case 2: /** AsPeriod */
-    rest = t.tv_sec;
-    os << rest << " sec ";
-    os << t.tv_usec / 1000 << " ms ";
-    os << t.tv_usec % 1000 << " 탎 ";
-    break;
-  case 3: /** AsFullPeriod */
-    rest = t.tv_sec;
+	switch (t.mPrintType) {
+	case 4: /** AsDateMS */
+	case 1: /** AsDate */
+		#ifndef _WIN32
+			const time_t * ta;
+			ta = (time_t*)&t.tv_sec;
+			//buf = ctime(&ta);
+			buf = ctime_r(ta, buff);
+		#else
+			time_t ta;
+			ta = (time_t)t.tv_sec;
+			#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+				ctime_s(buf, 26, &ta);
+			#else
+				buf = ctime(&ta);
+			#endif
+		#endif
+		buf[strlen(buf) - 1] = 0;
+		os << buf;
+		if(t.mPrintType == 4)
+			os << "|" << t.tv_usec / 1000;
+		break;
+	case 2: /** AsPeriod */
+		rest = t.tv_sec;
+		os << rest << " sec ";
+		os << t.tv_usec / 1000 << " ms ";
+		os << t.tv_usec % 1000 << " 탎 ";
+		break;
+	case 3: /** AsFullPeriod */
+		rest = t.tv_sec;
 
-    n = rest / (24 * 3600 * 7);
-    rest %= (24 * 3600 * 7);
-    if(n) os << n << " weeks ";
+		n = rest / (24 * 3600 * 7);
+		rest %= (24 * 3600 * 7);
+		if(n) os << n << " weeks ";
 
-    n = rest / (24 * 3600);
-    rest %= (24 * 3600);
-    if(n) os << n << " days ";
+		n = rest / (24 * 3600);
+		rest %= (24 * 3600);
+		if(n) os << n << " days ";
 
-    n = rest / 3600;
-    rest %= 3600;
-    if(n) os << n << " hours ";
+		n = rest / 3600;
+		rest %= 3600;
+		if(n) os << n << " hours ";
 
-    n = rest / 60;
-    rest %= 60;
-    if(n) os << n << " min ";
-    os << rest << " sec ";
-    break;
-  default: /** AsString */
-    os << t.tv_sec << " s " << t.tv_usec << " 탎";
-    break;
-  }
-  return os;
+		n = rest / 60;
+		rest %= 60;
+		if(n) os << n << " min ";
+		os << rest << " sec ";
+		break;
+	default: /** AsString */
+		os << t.tv_sec << " s " << t.tv_usec << " 탎";
+		break;
+	}
+	return os;
 }
 
 }; /** nUtils */

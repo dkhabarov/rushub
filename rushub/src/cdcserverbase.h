@@ -21,7 +21,7 @@
 #define CDCSERVERBASE_H
 
 #ifndef _WIN32
-  #define __int64 long long
+	#define __int64 long long
 #endif
 
 #include <string>
@@ -30,61 +30,58 @@
 
 using namespace std;
 
-namespace nDCServer
-{
+namespace nDCServer {
 
 class cDCUserBase;
 class cDCConnBase;
 
-class cDCConnListIterator
-{
+class cDCConnListIterator {
 public:
-  cDCConnListIterator(){}
-  virtual ~cDCConnListIterator(){}
-  virtual cDCConnBase * operator() (void) = 0;
+	cDCConnListIterator(){}
+	virtual ~cDCConnListIterator(){}
+	virtual cDCConnBase * operator() (void) = 0;
 }; // cDCConnListIterator
 
-class cDCServerBase
-{
+class cDCServerBase {
 
 public:
 
-  typedef vector<string> List_t;
+	typedef vector<string> List_t;
 
-  virtual const string & GetMainDir() const = 0;
-  virtual const string & GetTime() = 0;
-  virtual const string & GetHubInfo() const = 0; /** Name and version of the hub */
-  virtual const string & GetLocale() const = 0;
-  virtual const string & GetSystemVersion() const = 0;
-  virtual int GetMSec() const = 0;
-  virtual int GetUpTime() const = 0; /** Work time (sec) */
-  virtual int GetUsersCount() const = 0;
-  virtual __int64 GetTotalShare() const = 0;
+	virtual const string & GetMainDir() const = 0;
+	virtual const string & GetTime() = 0;
+	virtual const string & GetHubInfo() const = 0; /** Name and version of the hub */
+	virtual const string & GetLocale() const = 0;
+	virtual const string & GetSystemVersion() const = 0;
+	virtual int GetMSec() const = 0;
+	virtual int GetUpTime() const = 0; /** Work time (sec) */
+	virtual int GetUsersCount() const = 0;
+	virtual __int64 GetTotalShare() const = 0;
 
-  virtual int CheckCmd(const string &) = 0;
+	virtual int CheckCmd(const string &) = 0;
 
-  virtual bool SendToUser(cDCConnBase *DCConn, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;
-  virtual bool SendToNick(const char *sTo, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;
-  virtual bool SendToAll(const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;
-  virtual bool SendToProfiles(unsigned long iProfile, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;
-  virtual bool SendToIP(const char *sIP, const char *sData, unsigned long iProfile = 0, char *sNick = NULL, char *sFrom = NULL) = 0;
-  virtual bool SendToAllExceptNicks(List_t & NickList, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;
-  virtual bool SendToAllExceptIps(List_t & IPList, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;
+	virtual bool SendToUser(cDCConnBase *DCConn, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;
+	virtual bool SendToNick(const char *sTo, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;
+	virtual bool SendToAll(const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;
+	virtual bool SendToProfiles(unsigned long iProfile, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;
+	virtual bool SendToIP(const char *sIP, const char *sData, unsigned long iProfile = 0, char *sNick = NULL, char *sFrom = NULL) = 0;
+	virtual bool SendToAllExceptNicks(List_t & NickList, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;
+	virtual bool SendToAllExceptIps(List_t & IPList, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;
 
-  virtual void GetDCConnBase(const char * sIP,  vector<cDCConnBase *> & vconn) = 0;
-  virtual cDCUserBase * GetDCUserBase(const char *sNick) = 0;
-  virtual cDCConnListIterator * GetDCConnListIterator() = 0;
+	virtual void GetDCConnBase(const char * sIP, vector<cDCConnBase *> & vconn) = 0;
+	virtual cDCUserBase * GetDCUserBase(const char *sNick) = 0;
+	virtual cDCConnListIterator * GetDCConnListIterator() = 0;
 
-  virtual const char * GetConfig(const string & sName) = 0;
-  virtual const char * GetLang(const string & sName) = 0;
-  virtual bool SetConfig(const string & sName, const string & sValue) = 0;
-  virtual bool SetLang(const string & sName, const string & sValue) = 0;
+	virtual const char * GetConfig(const string & sName) = 0;
+	virtual const char * GetLang(const string & sName) = 0;
+	virtual bool SetConfig(const string & sName, const string & sValue) = 0;
+	virtual bool SetLang(const string & sName, const string & sValue) = 0;
 
-  virtual int RegBot(const string & sNick, const string & sMyINFO, const string & sIP, bool bKey = true) = 0;
-  virtual int UnregBot(const string & sNick) = 0;
+	virtual int RegBot(const string & sNick, const string & sMyINFO, const string & sIP, bool bKey = true) = 0;
+	virtual int UnregBot(const string & sNick) = 0;
 
-  virtual void StopHub() = 0;
-  virtual void RestartHub() = 0;
+	virtual void StopHub() = 0;
+	virtual void RestartHub() = 0;
 
 }; // cDCServerBase
 

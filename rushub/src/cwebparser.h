@@ -25,19 +25,16 @@
 
 using namespace nServer; // eUNPARSED
 
-namespace nWebServer
-{
+namespace nWebServer {
 
-namespace nProtocol
-{
+namespace nProtocol {
 
-class cWebParser : public cParser, public cWebParserBase
-{
+class cWebParser : public cParser, public cWebParserBase {
 public:
-  cWebParser();
-  virtual ~cWebParser();
-  int Parse(); /** Parse cmd and return type */
-  bool SplitChunks();
+	cWebParser();
+	virtual ~cWebParser();
+	int Parse(); /** Parse cmd and return type */
+	bool SplitChunks();
 
 }; // cWebParser
 

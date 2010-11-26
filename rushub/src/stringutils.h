@@ -31,8 +31,8 @@
 using namespace std;
 
 #ifndef _WIN32
-  #define __int64 long long
-  #include <stdlib.h> // for strtoll
+	#define __int64 long long
+	#include <stdlib.h> // for strtoll
 #endif
 
 namespace nUtils {

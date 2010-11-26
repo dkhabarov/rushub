@@ -26,27 +26,26 @@ cConnChoose::iterator cConnChoose::sEnd;
 
 /** Adding in mConnBaseList */
 bool cConnChoose::AddConn(cConnBase *conn) {
-  if(!conn) return false;
+	if(!conn) return false;
 
-  tSocket s = (tSocket)(*conn);
+	tSocket s = (tSocket)(*conn);
 
-  if(mConnBaseList.Contain(s)) return false;
-  if(s >= mMaxSocket) mMaxSocket = s + 1;
+	if(mConnBaseList.Contain(s)) return false;
+	if(s >= mMaxSocket) mMaxSocket = s + 1;
 
-  bool ret = mConnBaseList.Add(s, conn);
-  return ret;
+	bool ret = mConnBaseList.Add(s, conn);
+	return ret;
 }
 
 /** Del from mConnBaseList */
 bool cConnChoose::DelConn(cConnBase *conn) {
-  OptOut(conn, eEF_ALL_AND_CLOSE);
-  return mConnBaseList.Remove((tSocket)(*conn));
+	OptOut(conn, eEF_ALL_AND_CLOSE);
+	return mConnBaseList.Remove((tSocket)(*conn));
 }
 
 /** HasConn */
 bool cConnChoose::HasConn(cConnBase *conn) {
-  return mConnBaseList.Contain((tSocket)(*conn));
+	return mConnBaseList.Contain((tSocket)(*conn));
 }
-
 
 }; // nServer

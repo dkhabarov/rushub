@@ -27,12 +27,12 @@
 
 #if !defined _SYS_POLL_H_ && !defined _SYS_POLL_H && !defined pollfd && !defined _POLL_EMUL_H_
 
-  /** The poll file descriptor structure (where not defined) */
-  struct pollfd {
-    int fd;        /** File descriptor */
-    short events;  /** Requested events */
-    short revents; /** Returned events */
-  }; // pollfd
+	/** The poll file descriptor structure (where not defined) */
+	struct pollfd {
+		int fd;        /** File descriptor */
+		short events;  /** Requested events */
+		short revents; /** Returned events */
+	}; // pollfd
 
 #endif
 
@@ -46,15 +46,15 @@ class cConnPoll : public cConnChoose {
 
 public:
 
-  struct cPollFD: public pollfd {
+	struct cPollFD: public pollfd {
 		cPollFD(){ reset(); }
 		void reset(){
-      fd = -1;
-      events = revents = 0;
-    }
+			fd = -1;
+			events = revents = 0;
+		}
 	}; // cPollFD
 
-  typedef vector<cPollFD> tFDArray;
+	typedef vector<cPollFD> tFDArray;
 
 public:
 
@@ -65,15 +65,15 @@ public:
 	virtual void OptOut(tSocket, tEventFlag);
 	virtual int OptGet(tSocket);
 	virtual int RevGet(tSocket);
-  virtual bool RevTest(tSocket);
-  virtual bool RevTest(cPollFD &);
-  virtual int Choose(cTime & tmout){ return this->poll(tmout.MiliSec() + 1); }
+	virtual bool RevTest(tSocket);
+	virtual bool RevTest(cPollFD &);
+	virtual int Choose(cTime & tmout){ return this->poll(tmout.MiliSec() + 1); }
 
-  virtual bool AddConn(cConnBase *);
+	virtual bool AddConn(cConnBase *);
 
 	cPollFD & FD(int socket){ return mvFD[socket]; }
 
-  int poll(int iMiliSec);
+	int poll(int iMiliSec);
 
 private:
 	tFDArray mvFD;

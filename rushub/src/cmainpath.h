@@ -27,11 +27,11 @@ namespace nDCServer {
 
 class cMainPath : public cObj {
 public:
-  string msConfPath;
-  string msExPath;
+	string msConfPath;
+	string msExPath;
 public:
-  cMainPath(const string & sConfPath, const string & sExPath);
-  ~cMainPath();
+	cMainPath(const string & sConfPath, const string & sExPath);
+	~cMainPath();
 }; // cMainPath
 
 }; // nDCServer

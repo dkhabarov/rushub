@@ -21,58 +21,52 @@
 #include "cpluginbase.h"
 #include "cpluginlist.h"
 
-namespace nPlugin
-{
+namespace nPlugin {
 
 cCallList::cCallList(cPluginList *PluginList, string sId) :
-  cObj("cCallList"),
-  mPluginList(PluginList), mCallOne(mPluginList), msName(sId)
+	cObj("cCallList"),
+	mPluginList(PluginList), mCallOne(mPluginList), msName(sId)
 {
-  mCallOne.SetCallList(this);
-  if(mPluginList) mPluginList->SetCallList(sId, this);
+	mCallOne.SetCallList(this);
+	if(mPluginList) mPluginList->SetCallList(sId, this);
 }
 
-void cCallList::ufCallOne::operator()(cPluginBase *Plugin)
-{
-  miCall = mCallList->CallOne(Plugin);
-  if(!Plugin->IsAlive()) mPluginList->UnloadPlugin(Plugin->Name());
+void cCallList::ufCallOne::operator()(cPluginBase *Plugin) {
+	miCall = mCallList->CallOne(Plugin);
+	if(!Plugin->IsAlive()) mPluginList->UnloadPlugin(Plugin->Name());
 }
 
 /** Registers plugin in call list */
-bool cCallList::Reg(cPluginBase *Plugin)
-{
-  if(!Plugin) return false;
-  tPlugins::iterator i = find(mPlugins.begin(), mPlugins.end(), Plugin);
-  if(i != mPlugins.end()) return false;
-  mPlugins.push_back(Plugin);
-  return true;
+bool cCallList::Reg(cPluginBase *Plugin) {
+	if(!Plugin) return false;
+	tPlugins::iterator i = find(mPlugins.begin(), mPlugins.end(), Plugin);
+	if(i != mPlugins.end()) return false;
+	mPlugins.push_back(Plugin);
+	return true;
 }
 
 /** Remove registration from call list */
-bool cCallList::Unreg(cPluginBase *Plugin)
-{
-  if(!Plugin) return false;
-  tPlugins::iterator i = find(mPlugins.begin(), mPlugins.end(), Plugin);
-  if(i == mPlugins.end()) return false;
-  mPlugins.erase(i);
-  return true;
+bool cCallList::Unreg(cPluginBase *Plugin) {
+	if(!Plugin) return false;
+	tPlugins::iterator i = find(mPlugins.begin(), mPlugins.end(), Plugin);
+	if(i == mPlugins.end()) return false;
+	mPlugins.erase(i);
+	return true;
 }
 
 /** Call all plugins */
-int cCallList::CallAll()
-{
-  /** 0 - default, 1 - lock, 2, 3 */
-  mCallOne.miCall = 0;
-  return For_each(mPlugins.begin(), mPlugins.end(), mCallOne).miCall;
+int cCallList::CallAll() {
+	/** 0 - default, 1 - lock, 2, 3 */
+	mCallOne.miCall = 0;
+	return For_each(mPlugins.begin(), mPlugins.end(), mCallOne).miCall;
 }
 
 /** Show plugins list for this call */
-void cCallList::ListRegs(ostream &os, const char *sSep)
-{
-  tPlugins::iterator i;
-  for(i = mPlugins.begin(); i != mPlugins.end(); ++i) {
-    os << sSep << (*i)->Name() << "\n";
-  }
+void cCallList::ListRegs(ostream &os, const char *sSep) {
+	tPlugins::iterator i;
+	for(i = mPlugins.begin(); i != mPlugins.end(); ++i) {
+		os << sSep << (*i)->Name() << "\n";
+	}
 }
 
 }; // nPlugin

@@ -38,10 +38,9 @@ using namespace ::nPlugin;
 using namespace ::nUtils;
 using namespace nWebServer;
 
-namespace nPlugin{ class cPluginLoader; };
+namespace nPlugin { class cPluginLoader; };
 
-namespace nDCServer
-{
+namespace nDCServer {
 
 class cDCServerBase;
 class cDCUser;
@@ -49,223 +48,176 @@ class cUserList;
 class cDCTag;
 class cDCParserBase;
 
-namespace nPlugin
-{
+namespace nPlugin {
 
-class cPluginList : public cObj, public cPluginListBase
-{
-  friend class nDCServer::cDCServer; /** For LoadAll */
-  friend class cCallList; /** For SetCallList */
+class cPluginList : public cObj, public cPluginListBase {
+	friend class nDCServer::cDCServer; /** For LoadAll */
+	friend class cCallList; /** For SetCallList */
 
 public:
-
-  typedef tcHashMap<cPluginLoader*> tPluginList;
+	typedef tcHashMap<cPluginLoader*> tPluginList;
 
 public:
+	cPluginList(const string sPath);
+	virtual ~cPluginList() {}
+	void SetServer(cDCServerBase *);
 
-  cPluginList(const string sPath);
-  virtual ~cPluginList(){}
-  void SetServer(cDCServerBase *);
+	string &GetError() { return msError; } /** Get error msg */
+	virtual const string & GetPluginDir() { return msPluginDir; }
 
-  string &GetError(){return msError;} /** Get error msg */
-  virtual const string & GetPluginDir(){return msPluginDir;}
+	bool LoadAll(); /** Load all plugins */
+	bool LoadPlugin(const string &sPathFile); /** Load plugin by lib */
+	bool UnloadPlugin(const string &sName); /** Unload plugin by name */
+	bool ReloadPlugin(const string &sName); /** Reload plugin by name */
+	bool SetCallList(string sId, cCallList*); /** Set call list */
 
-  bool LoadAll(); /** Load all plugins */
-  bool LoadPlugin(const string &sPathFile); /** Load plugin by lib */
-  bool UnloadPlugin(const string &sName); /** Unload plugin by name */
-  bool ReloadPlugin(const string &sName); /** Reload plugin by name */
-  bool SetCallList(string sId, cCallList*); /** Set call list */
+	virtual bool RegCallList(const char * sId, cPluginBase*);
+	virtual bool UnregCallList(const char * sId, cPluginBase*);
 
-  virtual bool RegCallList(const char * sId, cPluginBase*);
-  virtual bool UnregCallList(const char * sId, cPluginBase*);
+	void List(ostream &os);
+	void ListAll(ostream &os);
 
-  void List(ostream &os);
-  void ListAll(ostream &os);
-  
-  cPluginBase * GetPlugin(const string &sName);
-  cPluginBase * GetPluginByLib(const string &sLib);
+	cPluginBase * GetPlugin(const string &sName);
+	cPluginBase * GetPluginByLib(const string &sLib);
 
-  void OnPluginLoad(cPluginBase*); /** OnPluginLoad event */
+	void OnPluginLoad(cPluginBase*); /** OnPluginLoad event */
 
 private:
-
-  cDCServerBase * mDCServer;
+	cDCServerBase * mDCServer;
 
 protected:
+	typedef tcHashMap<cCallList*> tAllCallLists;
 
-  typedef tcHashMap<cCallList*> tAllCallLists;
+	string msError; /** Last error mas */
+	string msPluginDir; /** Plugin dir */
 
-  string msError; /** Last error mas */
-  string msPluginDir; /** Plugin dir */
-
-  tPluginList mPluginList; /** List with loaders of plugins */
-  tAllCallLists mAllCallLists;
+	tPluginList mPluginList; /** List with loaders of plugins */
+	tAllCallLists mAllCallLists;
 
 }; // cPluginList
 
-
-class cCallListBase : public cCallList
-{
+class cCallListBase : public cCallList {
 
 public:
-
-  cCallListBase(cPluginList *PluginList, const char * sId) :
-    cCallList(PluginList, string(sId))
-  {}
-
-  virtual int CallOne(cPluginBase * Plugin){return CallOne((cPlugin *) Plugin);}
-  virtual int CallOne(cPlugin * Plugin) = 0;
-
+	cCallListBase(cPluginList *PluginList, const char * sId) :
+		cCallList(PluginList, string(sId))
+	{}
+	virtual int CallOne(cPluginBase * Plugin) { return CallOne((cPlugin *) Plugin); }
+	virtual int CallOne(cPlugin * Plugin) = 0;
 }; // cCallListBase
 
-
-class cCL_Simple : public cCallListBase
-{
+class cCL_Simple : public cCallListBase {
 
 public:
-
-  typedef int (cPlugin::*tpFunc)();
+	typedef int (cPlugin::*tpFunc) ();
 
 protected:
-
-  tpFunc mFunc;
+	tpFunc mFunc;
 
 public:
-  
-  cCL_Simple(cPluginList *PluginList, const char *sId, tpFunc pFunc) :
-    cCallListBase(PluginList, sId), mFunc(pFunc)
-  {}
-  virtual ~cCL_Simple(){}
-
-  virtual int CallOne(cPlugin * Plugin){return (Plugin->*mFunc)();}
-
+	cCL_Simple(cPluginList *PluginList, const char *sId, tpFunc pFunc) :
+		cCallListBase(PluginList, sId), mFunc(pFunc)
+	{}
+	virtual ~cCL_Simple() {}
+	virtual int CallOne(cPlugin * Plugin) { return (Plugin->*mFunc)(); }
 }; // cCL_Simple
 
 
-template <class Type1> class tcCallListType1 : public cCallListBase
-{
+template <class Type1> class tcCallListType1 : public cCallListBase {
 
 public:
-
-  typedef int (cPlugin::*tpFunc1)(Type1*);
+	typedef int (cPlugin::*tpFunc1) (Type1*);
 
 protected:
-
-  tpFunc1 mFunc1;
-  Type1 *mData1;
+	tpFunc1 mFunc1;
+	Type1 *mData1;
 
 public:
+	tcCallListType1(cPluginList * PluginList, const char* sId, tpFunc1 pFunc) :
+		cCallListBase(PluginList, sId), mFunc1(pFunc)
+	{ mData1 = NULL; }
+	virtual ~tcCallListType1() {}
 
-  tcCallListType1(cPluginList * PluginList, const char* sId, tpFunc1 pFunc) :
-    cCallListBase(PluginList, sId), mFunc1(pFunc)
-  {mData1 = NULL;}
-  virtual ~tcCallListType1(){}
-
-  virtual int CallOne(cPlugin *Plugin){return (Plugin->*mFunc1)(mData1);}
-  virtual int CallAll(Type1 *param1)
-  {
-    mData1 = param1;
-    if((mData1 != NULL)) return this->cCallList::CallAll();
-    else return 1;
-  }
-
+	virtual int CallOne(cPlugin *Plugin) { return (Plugin->*mFunc1)(mData1); }
+	virtual int CallAll(Type1 *param1) {
+		mData1 = param1;
+		if((mData1 != NULL)) return this->cCallList::CallAll();
+		else return 1;
+	}
 }; // tcCallListType1
 
-
-template <class Type1, class Type2> class tcCallListType2 : public cCallListBase
-{
+template <class Type1, class Type2> class tcCallListType2 : public cCallListBase {
 
 public:
-
-  typedef int (cPlugin::*tpFunc2)(Type1*, Type2*);
+	typedef int (cPlugin::*tpFunc2) (Type1*, Type2*);
 
 protected:
-
-  tpFunc2 mFunc2;
-  Type1 *mData1;
-  Type2 *mData2;
+	tpFunc2 mFunc2;
+	Type1 *mData1;
+	Type2 *mData2;
 
 public:
+	tcCallListType2(cPluginList *PluginList, const char* sId, tpFunc2 pFunc) :
+		cCallListBase(PluginList, sId), mFunc2(pFunc)
+	{ mData1 = NULL; mData2 = NULL; }
+	virtual ~tcCallListType2() {}
 
-  tcCallListType2(cPluginList *PluginList, const char* sId, tpFunc2 pFunc) :
-    cCallListBase(PluginList, sId), mFunc2(pFunc)
-  {mData1 = NULL; mData2 = NULL;}
-  virtual ~tcCallListType2(){}
-
-  virtual int CallOne(cPlugin *Plugin){return (Plugin->*mFunc2)(mData1, mData2);}
-  virtual int CallAll(Type1 *param1, Type2 *param2)
-  {
-    mData1 = param1;
-    mData2 = param2;
-    if((mData1 != NULL) && (mData2 !=NULL)) return this->cCallList::CallAll();
-    else return 1;
-  }
-
+	virtual int CallOne(cPlugin *Plugin) { return (Plugin->*mFunc2)(mData1, mData2); }
+	virtual int CallAll(Type1 *param1, Type2 *param2) {
+		mData1 = param1;
+		mData2 = param2;
+		if((mData1 != NULL) && (mData2 !=NULL)) return this->cCallList::CallAll();
+		else return 1;
+	}
 }; // tcCallListType2
 
-
-template <class Type1, class Type2, class Type3> class tcCallListType3 : public cCallListBase
-{
+template <class Type1, class Type2, class Type3> class tcCallListType3 : public cCallListBase {
 
 public:
-
-  typedef int (cPlugin::*tpFunc3)(Type1 , Type2 , Type3);
+	typedef int (cPlugin::*tpFunc3) (Type1 , Type2 , Type3);
 
 protected:
-
-  tpFunc3 mFunc3;
-  Type1 mData1;
-  Type2 mData2;
-  Type3 mData3;
+	tpFunc3 mFunc3;
+	Type1 mData1;
+	Type2 mData2;
+	Type3 mData3;
 
 public:
-
-  tcCallListType3(cPluginList *PluginList, const char* sId, tpFunc3 pFunc) :
-    cCallListBase(PluginList, sId), mFunc3(pFunc)
-  {}
-  virtual ~tcCallListType3(){}
-
-  virtual int CallOne(cPlugin *Plugin){return (Plugin->*mFunc3)(mData1, mData2, mData3);}
-  virtual int CallAll(Type1 param1, Type2 param2, Type3 param3)
-  {
-    mData1 = param1;
-    mData2 = param2;
-    mData3 = param3;
-    return this->cCallList::CallAll();
-  }
-
+	tcCallListType3(cPluginList *PluginList, const char* sId, tpFunc3 pFunc) :
+		cCallListBase(PluginList, sId), mFunc3(pFunc)
+	{}
+	virtual ~tcCallListType3() {}
+	virtual int CallOne(cPlugin *Plugin) { return (Plugin->*mFunc3)(mData1, mData2, mData3); }
+	virtual int CallAll(Type1 param1, Type2 param2, Type3 param3) {
+		mData1 = param1;
+		mData2 = param2;
+		mData3 = param3;
+		return this->cCallList::CallAll();
+	}
 }; // tcCallListType3
 
-
-class cCL_Connection : public cCallListBase
-{
+class cCL_Connection : public cCallListBase {
 
 public:
-
-  typedef int (cPlugin::*tpFuncConn)(cDCConnBase *);
+	typedef int (cPlugin::*tpFuncConn) (cDCConnBase *);
 
 protected:
-
-  tpFuncConn mFunc;
-  cDCConn *mDCConn;
+	tpFuncConn mFunc;
+	cDCConn *mDCConn;
 
 public:
+	cCL_Connection(cPluginList *PluginList, const char* sId, tpFuncConn pFunc) :
+		cCallListBase(PluginList, sId), mFunc(pFunc)
+	{ mDCConn = NULL; }
+	virtual ~cCL_Connection() {}
 
-  cCL_Connection(cPluginList *PluginList, const char* sId, tpFuncConn pFunc) :
-    cCallListBase(PluginList, sId), mFunc(pFunc)
-  {mDCConn = NULL;}
-  virtual ~cCL_Connection(){}
-
-  virtual int CallOne(cPlugin *Plugin){return (Plugin->*mFunc)(mDCConn);}
-  virtual int CallAll(cDCConnBase *dcconn)
-  {
-    mDCConn = (cDCConn*)dcconn;
-    if(mDCConn != NULL) return this->cCallList::CallAll();
-    else return 1;
-  }
-
+	virtual int CallOne(cPlugin *Plugin) { return (Plugin->*mFunc)(mDCConn); }
+	virtual int CallAll(cDCConnBase *dcconn) {
+		mDCConn = (cDCConn*)dcconn;
+		if(mDCConn != NULL) return this->cCallList::CallAll();
+		else return 1;
+	}
 }; // cCL_Connection
-
 
 typedef tcCallListType1<cDCUserBase> cCL_User;
 typedef tcCallListType1<string> cCL_String;

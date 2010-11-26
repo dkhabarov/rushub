@@ -21,29 +21,23 @@
 #include "cserver.h" /** for mServer */
 #include "cwebconn.h" /** for cWebConn */
 
-namespace nWebServer
-{
+namespace nWebServer {
 
-namespace nProtocol
-{
+namespace nProtocol {
 
-cWebProtocol::cWebProtocol()
-{
-  SetClassName("cWebProtocol");
+cWebProtocol::cWebProtocol() {
+	SetClassName("cWebProtocol");
 }
 
-cWebProtocol::~cWebProtocol()
-{
+cWebProtocol::~cWebProtocol() {
 }
 
-void cWebProtocol::SetServer(cServer * server)
-{
-  mServer = server;
+void cWebProtocol::SetServer(cServer * server) {
+	mServer = server;
 }
 
-int cWebProtocol::DoCmd(cParser *, cConn *)
-{
-  return 0;
+int cWebProtocol::DoCmd(cParser *, cConn *) {
+	return 0;
 }
 
 }; // nProtocol

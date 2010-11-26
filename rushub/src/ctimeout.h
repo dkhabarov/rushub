@@ -22,45 +22,42 @@
 
 #include "ctime.h"
 
-namespace nUtils
-{
+namespace nUtils {
 
 /** Controller with minimum and maximum delay */
-class cTimeOut
-{
+class cTimeOut {
 
 private:
-  cTime mMinDelay; /** Minimum delay between events */
-  cTime mMaxDelay; /** Maximum delay between events */
-  cTime mLast; /** Time of the last event */
+	cTime mMinDelay; /** Minimum delay between events */
+	cTime mMaxDelay; /** Maximum delay between events */
+	cTime mLast; /** Time of the last event */
 
 public: 
-  cTimeOut() : mMinDelay(0l), mMaxDelay(0l), mLast(0l) {}
-  cTimeOut(double iMin, double iMax, const cTime &now) : mMinDelay(iMin), mMaxDelay(iMax), mLast(now) {}
-  ~cTimeOut(){}
+	cTimeOut() : mMinDelay(0l), mMaxDelay(0l), mLast(0l) {}
+	cTimeOut(double iMin, double iMax, const cTime &now) : mMinDelay(iMin), mMaxDelay(iMax), mLast(now) {}
+	~cTimeOut(){}
 
-  inline void SetMinDelay(double iMin) { mMinDelay = iMin; }
-  inline void SetMaxDelay(double iMax) { mMaxDelay = iMax; }
+	inline void SetMinDelay(double iMin) { mMinDelay = iMin; }
+	inline void SetMaxDelay(double iMax) { mMaxDelay = iMax; }
 
-  /** Set time of the last event */
-  inline void Reset(const cTime & now) { mLast = now; }
-  inline void Disable() { mLast = 0.; }
+	/** Set time of the last event */
+	inline void Reset(const cTime & now) { mLast = now; }
+	inline void Disable() { mLast = 0.; }
 
-  /** Check enent
-  0 - ok (event is absent or in interval);
-  -1 - event not in interval (< min);
-  -2 - event was beyond the scope of interval (> max).
-  Flag bEvent checks lower verge and reset timer */
-  int Check(const cTime &now, bool bEvent = 0)
-  {
-    if(!bool(mLast)) return 0;
-    cTime diff(now);
-    diff -= mLast;
-    if(bEvent && (bool)mMinDelay && (mMinDelay > diff)) return -1;
-    if(bool(mMaxDelay) && (mMaxDelay < diff)) return -2;
-    if(bEvent) Reset(now);
-    return 0;
-  }
+	/** Check enent
+	0 - ok (event is absent or in interval);
+	-1 - event not in interval (< min);
+	-2 - event was beyond the scope of interval (> max).
+	Flag bEvent checks lower verge and reset timer */
+	int Check(const cTime &now, bool bEvent = 0) {
+		if(!bool(mLast)) return 0;
+		cTime diff(now);
+		diff -= mLast;
+		if(bEvent && (bool)mMinDelay && (mMinDelay > diff)) return -1;
+		if(bool(mMaxDelay) && (mMaxDelay < diff)) return -2;
+		if(bEvent) Reset(now);
+		return 0;
+	}
 
 }; // cTimeOut
 

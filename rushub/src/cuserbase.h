@@ -22,7 +22,7 @@
 
 #include <string>
 #ifndef _WIN32
-  #define __int64 long long
+	#define __int64 long long
 #endif
 
 using namespace std;
@@ -34,49 +34,49 @@ class cUserBase {
 
 protected:
 
-  string msMyINFO;
+	string msMyINFO;
 
-  string msDesc; /** User's description */
-  string msEmail; /** User's e-mail */
-  string msConnection; /** User's connection */
-  unsigned miByte; /** User's magic byte */
-  bool mbPassive; /** Passive mode flag */
-  __int64 miShare; /** Share size */
+	string msDesc; /** User's description */
+	string msEmail; /** User's e-mail */
+	string msConnection; /** User's connection */
+	unsigned miByte; /** User's magic byte */
+	bool mbPassive; /** Passive mode flag */
+	__int64 miShare; /** Share size */
 
-  string msTag;
-  string msClient;
-  string msVersion;
-  int miUnRegHubs;
-  int miRegHubs;
-  int miOpHubs;
-  int miSlots;
-  int miLimit;
-  int miOpen;
-  int miBandwidth;
-  int miDownload;
-  string msFraction;
-  string msMode;
-
-public:
-
-  string msNick; /** User's nick */
-  bool mbInUserList; /** User in user-list */
-  bool mbInOpList; /** User in op-list */
-  bool mbInIpList; /** User in ip-list */
-  bool mbHide; /** User was hide */
+	string msTag;
+	string msClient;
+	string msVersion;
+	int miUnRegHubs;
+	int miRegHubs;
+	int miOpHubs;
+	int miSlots;
+	int miLimit;
+	int miOpen;
+	int miBandwidth;
+	int miDownload;
+	string msFraction;
+	string msMode;
 
 public:
 
-  cUserBase() : miByte(0), mbPassive(false), miShare(0),
-    miUnRegHubs(0),miRegHubs(0),miOpHubs(0),miSlots(0),
-    miLimit(0),miOpen(0),miBandwidth(0),miDownload(0), 
-    mbInUserList(false), mbInOpList(false), mbInIpList(false), mbHide(false){}
-  virtual ~cUserBase(){}
-  virtual bool CanSend(){ return false; }
-  virtual void Send(string &msg, bool sep = false, bool flush = true) = 0;
-  virtual const string & MyINFO() const { return msMyINFO; }
-  virtual const string & GetIp() const { static const string s(""); return s; } /** Void ip for bot */
-  virtual int GetProfile() const { return 30; } /** 30 profile for bot */
+	string msNick; /** User's nick */
+	bool mbInUserList; /** User in user-list */
+	bool mbInOpList; /** User in op-list */
+	bool mbInIpList; /** User in ip-list */
+	bool mbHide; /** User was hide */
+
+public:
+
+	cUserBase() : miByte(0), mbPassive(false), miShare(0),
+		miUnRegHubs(0),miRegHubs(0),miOpHubs(0),miSlots(0),
+		miLimit(0),miOpen(0),miBandwidth(0),miDownload(0), 
+		mbInUserList(false), mbInOpList(false), mbInIpList(false), mbHide(false) {}
+	virtual ~cUserBase() {}
+	virtual bool CanSend() { return false; }
+	virtual void Send(string &msg, bool sep = false, bool flush = true) = 0;
+	virtual const string & MyINFO() const { return msMyINFO; }
+	virtual const string & GetIp() const { static const string s(""); return s; } /** Void ip for bot */
+	virtual int GetProfile() const { return 30; } /** 30 profile for bot */
 
 }; // cUserBase
 

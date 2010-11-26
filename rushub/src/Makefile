@@ -63,7 +63,7 @@ $(CURDIR)/cdir.o: $(CURDIR)/cdir.cpp $(CURDIR)/cdir.h
 
 $(CURDIR)/ccli.o: $(CURDIR)/ccli.cpp $(CURDIR)/ccli.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
-  
+
 $(CURDIR)/cmainpath.o: $(CURDIR)/cmainpath.cpp $(CURDIR)/cobj.h $(CURDIR)/cdcuserbase.h $(CURDIR)/cdcconnbase.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/cprotocol.h $(CURDIR)/cdcparserbase.h $(CURDIR)/cconn.h $(CURDIR)/cuserbase.h $(CURDIR)/cdcuser.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/cmainpath.h $(CURDIR)/cdir.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 

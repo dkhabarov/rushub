@@ -30,53 +30,50 @@
 using namespace ::nPlugin;
 using namespace nWebServer;
 
-namespace nDCServer
-{
+namespace nDCServer {
 
 using namespace nProtoEnums;
 
-namespace nPlugin
-{
+namespace nPlugin {
 
 using namespace ::nDCServer;
 
-class cPlugin : public cPluginBase
-{
+class cPlugin : public cPluginBase {
 public:
-  cDCServerBase * mDCServer;
+	cDCServerBase * mDCServer;
 
 public:
-  cPlugin(){}
-  virtual ~cPlugin(){}
-  
-  virtual bool RegAll(cPluginListBase*) = 0;
-  virtual void OnLoad(cDCServerBase * DCServer){mDCServer = DCServer;}
-  virtual int OnUserConnected(cDCConnBase *){ return 1; }
-  virtual int OnUserDisconnected(cDCConnBase *){ return 1; }
-  virtual int OnUserEnter(cDCConnBase *){ return 1; }
-  virtual int OnUserExit(cDCConnBase *){ return 1; }
-  virtual int OnSupports(cDCConnBase *, cDCParserBase *){ return 1; }
-  virtual int OnKey(cDCConnBase *, cDCParserBase *){ return 1; }
-  virtual int OnValidateNick(cDCConnBase *, cDCParserBase *){ return 1; }
-  virtual int OnMyPass(cDCConnBase *, cDCParserBase *){ return 1; }
-  virtual int OnVersion(cDCConnBase *, cDCParserBase *){ return 1; }
-  virtual int OnGetNickList(cDCConnBase *, cDCParserBase *){ return 1; }
-  virtual int OnMyINFO(cDCConnBase *, cDCParserBase *){ return 1; }
-  virtual int OnChat(cDCConnBase *, cDCParserBase *){ return 1; }
-  virtual int OnTo(cDCConnBase *, cDCParserBase *){ return 1; }
-  virtual int OnConnectToMe(cDCConnBase *, cDCParserBase *){ return 1; }
-  virtual int OnRevConnectToMe(cDCConnBase *, cDCParserBase *){ return 1; }
-  virtual int OnSearch(cDCConnBase *, cDCParserBase *){ return 1; }
-  virtual int OnSR(cDCConnBase *, cDCParserBase *){ return 1; }
-  virtual int OnKick(cDCConnBase *, cDCParserBase *){ return 1; }
-  virtual int OnOpForceMove(cDCConnBase *, cDCParserBase *){ return 1; }
-  virtual int OnGetINFO(cDCConnBase *, cDCParserBase *){ return 1; }
-  virtual int OnTimer(){ return 1; }
-  virtual int OnAny(cDCConnBase *, cDCParserBase *){ return 1; }
-  virtual int OnUnknown(cDCConnBase *, cDCParserBase *){ return 1; }
-  virtual int OnFlood(cDCConnBase *, int, int){ return 1; }
-  virtual int OnWebData(cDCConnBase *, cWebParserBase *){ return 1; }
-  
+	cPlugin(){}
+	virtual ~cPlugin(){}
+
+	virtual bool RegAll(cPluginListBase*) = 0;
+	virtual void OnLoad(cDCServerBase * DCServer) { mDCServer = DCServer; }
+	virtual int OnUserConnected(cDCConnBase *) { return 1; }
+	virtual int OnUserDisconnected(cDCConnBase *) { return 1; }
+	virtual int OnUserEnter(cDCConnBase *) { return 1; }
+	virtual int OnUserExit(cDCConnBase *) { return 1; }
+	virtual int OnSupports(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnKey(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnValidateNick(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnMyPass(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnVersion(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnGetNickList(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnMyINFO(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnChat(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnTo(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnConnectToMe(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnRevConnectToMe(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnSearch(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnSR(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnKick(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnOpForceMove(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnGetINFO(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnTimer() { return 1; }
+	virtual int OnAny(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnUnknown(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnFlood(cDCConnBase *, int, int) { return 1; }
+	virtual int OnWebData(cDCConnBase *, cWebParserBase *) { return 1; }
+
 }; // cPlugin
 
 }; // nPlugin

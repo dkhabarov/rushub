@@ -21,55 +21,55 @@
 #define CONNDEF_H
 
 //#if HAVE_ERRNO_H
-  #include <errno.h>
+	#include <errno.h>
 //#endif
 
-  
+
 
 #ifdef _WIN32
-  
-  #ifndef FD_SETSIZE // For select
-    #define FD_SETSIZE      10240//32768
-  #endif /* FD_SETSIZE */
-  
-  #include <winsock2.h>
-  #define socklen_t int /** unix type for socket (size_t) */
-  #define sockoptval_t char /** for setsockopt */
-  #ifdef ECONNRESET
-    #undef ECONNRESET
-  #endif
-  #ifdef ETIMEDOUT
-    #undef ETIMEDOUT
-  #endif
-  #ifdef EHOSTUNREACH
-    #undef EHOSTUNREACH
-  #endif
-  #ifdef EWOULDBLOCK
-    #undef EWOULDBLOCK
-  #endif
-  #define ECONNRESET WSAECONNRESET
-  #define ETIMEDOUT WSAETIMEDOUT
-  #define EHOSTUNREACH WSAEHOSTUNREACH
-  #define EWOULDBLOCK WSAEWOULDBLOCK
-  #define SockErr WSAGetLastError()
-  #define SOCK_EAGAIN WSAEWOULDBLOCK
-  #define SOCK_EINTR WSAEINTR
+
+	#ifndef FD_SETSIZE // For select
+		#define FD_SETSIZE      10240//32768
+	#endif /* FD_SETSIZE */
+
+	#include <winsock2.h>
+	#define socklen_t int /** unix type for socket (size_t) */
+	#define sockoptval_t char /** for setsockopt */
+	#ifdef ECONNRESET
+		#undef ECONNRESET
+	#endif
+	#ifdef ETIMEDOUT
+		#undef ETIMEDOUT
+	#endif
+	#ifdef EHOSTUNREACH
+		#undef EHOSTUNREACH
+	#endif
+	#ifdef EWOULDBLOCK
+		#undef EWOULDBLOCK
+	#endif
+	#define ECONNRESET WSAECONNRESET
+	#define ETIMEDOUT WSAETIMEDOUT
+	#define EHOSTUNREACH WSAEHOSTUNREACH
+	#define EWOULDBLOCK WSAEWOULDBLOCK
+	#define SockErr WSAGetLastError()
+	#define SOCK_EAGAIN WSAEWOULDBLOCK
+	#define SOCK_EINTR WSAEINTR
 	#define SOCK_INVALID(SOCK) (SOCK) == INVALID_SOCKET
 	#define SOCK_ERROR(SOCK) (SOCK) == SOCKET_ERROR
-  typedef SOCKET tSocket;
+	typedef SOCKET tSocket;
 #else
-  #include <arpa/inet.h>
-  #include <netinet/in.h> /** for sockaddr_in */
-  #include <sys/socket.h> /** for AF_INET */
-  #include <netdb.h>      /** for gethostbyaddr */
-  #include <fcntl.h>      /** for nonblock flags F_GETFL & etc. */
-  #define sockoptval_t int
-  #define SockErr errno
-  #define SOCK_EAGAIN EAGAIN
-  #define SOCK_EINTR EINTR
+	#include <arpa/inet.h>
+	#include <netinet/in.h> /** for sockaddr_in */
+	#include <sys/socket.h> /** for AF_INET */
+	#include <netdb.h>      /** for gethostbyaddr */
+	#include <fcntl.h>      /** for nonblock flags F_GETFL & etc. */
+	#define sockoptval_t int
+	#define SockErr errno
+	#define SOCK_EAGAIN EAGAIN
+	#define SOCK_EINTR EINTR
 	#define SOCK_INVALID(SOCK) (SOCK) < 0
 	#define SOCK_ERROR(SOCK) (SOCK) < 0
-  typedef int tSocket;
+	typedef int tSocket;
 #endif
 
 #define SOCK_BACKLOG 0x64 /** SOMAXCONN */
@@ -81,34 +81,33 @@
 #define MAX_ATTEMPT_SEND 50 /** MAX_ATTEMPT_SEND */
 
 #ifdef _WIN32
-  #define SOCK_CLOSE(SOCK) ::closesocket(SOCK)
-  #define SOCK_NON_BLOCK(SOCK) \
-    static unsigned long one = 1; \
-    if(ioctlsocket(SOCK, FIONBIO, &one) == SOCKET_ERROR) return -1;
+	#define SOCK_CLOSE(SOCK) ::closesocket(SOCK)
+	#define SOCK_NON_BLOCK(SOCK) \
+		static unsigned long one = 1; \
+		if(ioctlsocket(SOCK, FIONBIO, &one) == SOCKET_ERROR) return -1;
 #else
-  #define SOCK_CLOSE(SOCK) ::close(SOCK)
-  #define SOCK_NON_BLOCK(SOCK) \
-    static int flags; \
-    if((flags = fcntl(SOCK, F_GETFL, 0)) < 0) return -1; \
-    if(fcntl(SOCK, F_SETFL, flags | O_NONBLOCK) < 0) return -1;
+	#define SOCK_CLOSE(SOCK) ::close(SOCK)
+	#define SOCK_NON_BLOCK(SOCK) \
+		static int flags; \
+		if((flags = fcntl(SOCK, F_GETFL, 0)) < 0) return -1; \
+		if(fcntl(SOCK, F_SETFL, flags | O_NONBLOCK) < 0) return -1;
 #endif
 
-
 #ifndef TEMP_FAILURE_RETRY
-  #define TEMP_FAILURE_RETRY(expression) expression
+	#define TEMP_FAILURE_RETRY(expression) expression
 #endif
 #ifndef TEMP_FAILURE_RETRY
-  #ifdef _WIN32
-    #ifndef __extension__
-      #define __extension__
-    #endif
-    #define TEMP_FAILURE_RETRY(expression) \
-      (__extension__ ({ long int __result; \
-      while ((__result = (long int) (expression)) == -1L && SockErr == SOCK_EINTR){}; __result; }))
-  #else
-    #define TEMP_FAILURE_RETRY(expression) \
-      while ((long int) (expression) == -1L && SockErr == SOCK_EINTR){}
-  #endif
+	#ifdef _WIN32
+		#ifndef __extension__
+			#define __extension__
+		#endif
+		#define TEMP_FAILURE_RETRY(expression) \
+			(__extension__ ({ long int __result; \
+			while ((__result = (long int) (expression)) == -1L && SockErr == SOCK_EINTR){}; __result; }))
+	#else
+		#define TEMP_FAILURE_RETRY(expression) \
+			while ((long int) (expression) == -1L && SockErr == SOCK_EINTR){}
+	#endif
 #endif
 
 #endif // CONNDEF_H

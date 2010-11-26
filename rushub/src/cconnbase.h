@@ -22,15 +22,13 @@
 
 #include "conndef.h"
 
-namespace nServer
-{
+namespace nServer {
 
 /** Base connection class */
-class cConnBase
-{
+class cConnBase {
 
 public:
-  virtual operator tSocket() const = 0; /** Get socket */
+	virtual operator tSocket() const = 0; /** Get socket */
 
 }; // cConnBase
 

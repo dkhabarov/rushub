@@ -24,21 +24,19 @@
 
 using ::std::string;
 
-namespace nPlugin
-{
+namespace nPlugin {
 
 class cPluginBase;
 
-class cPluginListBase
-{
+class cPluginListBase {
 
 public:
-  cPluginListBase(){}
-  virtual ~cPluginListBase(){}
+	cPluginListBase(){}
+	virtual ~cPluginListBase(){}
 
-  virtual const string & GetPluginDir() = 0; /** Plugins dir */
-  virtual bool RegCallList(const char * sId, cPluginBase*) = 0; /** Reg plugin in list */
-  virtual bool UnregCallList(const char * sId, cPluginBase*) = 0; /** Unreg plugin in list */
+	virtual const string & GetPluginDir() = 0; /** Plugins dir */
+	virtual bool RegCallList(const char * sId, cPluginBase*) = 0; /** Reg plugin in list */
+	virtual bool UnregCallList(const char * sId, cPluginBase*) = 0; /** Unreg plugin in list */
 
 }; // cPluginListBase
 

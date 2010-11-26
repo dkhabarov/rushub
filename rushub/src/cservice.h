@@ -27,59 +27,58 @@ int runHub(int argc, char **argv, bool bService = false);
 #include "cserver.h"
 
 enum {
-  eDaemon = 1,
-  eService,
-  eConfig,
-  eInstall,
-  eUninstall,
-  eHelp
+	eDaemon = 1,
+	eService,
+	eConfig,
+	eInstall,
+	eUninstall,
+	eHelp
 };
 
 static const struct {
-  const char* val;
-  int id;
+	const char* val;
+	int id;
 } arg_list[] = {
-  {"-s", eService},
-  {"-c", eConfig},
-  {"-i", eInstall},
-  {"-u", eUninstall},
-  {"-h", eHelp},
-  {"-service",   eService},
-  {"-config",    eConfig},
-  {"-install",   eInstall},
-  {"-uninstall", eUninstall},
-  {"-help",      eHelp},
-  {"--service",   eService},
-  {"--config",    eConfig},
-  {"--install",   eInstall},
-  {"--uninstall", eUninstall},
-  {"--help",      eHelp},
-  {NULL, 0} // terminator
+	{"-s", eService},
+	{"-c", eConfig},
+	{"-i", eInstall},
+	{"-u", eUninstall},
+	{"-h", eHelp},
+	{"-service",   eService},
+	{"-config",    eConfig},
+	{"-install",   eInstall},
+	{"-uninstall", eUninstall},
+	{"-help",      eHelp},
+	{"--service",   eService},
+	{"--config",    eConfig},
+	{"--install",   eInstall},
+	{"--uninstall", eUninstall},
+	{"--help",      eHelp},
+	{NULL, 0} // terminator
 };
 
 static SERVICE_STATUS_HANDLE ssh;
 static SERVICE_STATUS ss;
 
-class cService : public cObj
-{
+class cService : public cObj {
 public:
-  static cService * mCurService;
+	static cService * mCurService;
 	static bool IsService;
 
 public:
-  cService();
-  ~cService();
+	cService();
+	~cService();
 
 	static void WINAPI CtrlHandler(DWORD dwCtrl);
 	static void WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv);
 
-  static int InstallService(char * sName = NULL, const char * sConfPath = NULL);
-  static int UninstallService(char * sName = NULL);
-  static int ServiceStop(char * sName = NULL);
-  static int ServiceStart(char * sName = NULL);
-  static int Cli(int argc, char* argv[], string & sConfPath, const string & sExPath);
-  static int Start();
-  static int Stop();
+	static int InstallService(char * sName = NULL, const char * sConfPath = NULL);
+	static int UninstallService(char * sName = NULL);
+	static int ServiceStop(char * sName = NULL);
+	static int ServiceStart(char * sName = NULL);
+	static int Cli(int argc, char* argv[], string & sConfPath, const string & sExPath);
+	static int Start();
+	static int Stop();
 
 }; // cService
 
