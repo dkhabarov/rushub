@@ -21,7 +21,7 @@
 #include "clua.h"
 
 #ifndef _WIN32
-  #include <cstdlib> // abs
+	#include <cstdlib> // abs
 #endif
 
 namespace nLua {
@@ -29,24 +29,23 @@ namespace nLua {
 int cTmrCnt::miCount = 0;
 
 cTimer::cTimer(int iId, int iInterval, const char * sFunc, cLuaInterpreter * Script) :
-  miInterval(iInterval),
-  msFunc(sFunc),
-  miId(iId),
-  mScript(Script)
+	miInterval(iInterval),
+	msFunc(sFunc),
+	miId(iId),
+	mScript(Script)
 {
-  miTime = cLua::mCurServer->GetMSec();
+	miTime = cLua::mCurServer->GetMSec();
 }
 
 cTimer::~cTimer() {
 }
 
 void cTimer::Check(int iTime) {
-  if(abs(iTime - miTime) >= miInterval) {
-    mScript->Timer(miId, msFunc.c_str());
-    miTime = iTime;
-  }
+	if(abs(iTime - miTime) >= miInterval) {
+		mScript->Timer(miId, msFunc.c_str());
+		miTime = iTime;
+	}
 }
-
 
 cTimerList::cTimerList() {
 }
@@ -54,28 +53,26 @@ cTimerList::cTimerList() {
 cTimerList::~cTimerList() {
 }
 
-
 static void Checker(void * val) {
-  ((cTimer*)val)->Check(cLua::mCurServer->GetMSec());
+	((cTimer*)val)->Check(cLua::mCurServer->GetMSec());
 }
 void cTimerList::OnTimer() {
-  mList.Loop(Checker);
+	mList.Loop(Checker);
 }
 
 int cTimerList::AddTimer(cTimer * timer) {
-  cTmrCnt::miCount = 0;
-  mList.Loop(cTmrCnt(timer->miId));
-  mList.Add(timer);
-  return ++cTmrCnt::miCount;
+	cTmrCnt::miCount = 0;
+	mList.Loop(cTmrCnt(timer->miId));
+	mList.Add(timer);
+	return ++cTmrCnt::miCount;
 }
 int cTimerList::DelTimer(int iId) {
-  cTmrCnt::miCount = 0;
-  mList.DelIf(cTmrCnt(iId));
-  return cTmrCnt::miCount;
+	cTmrCnt::miCount = 0;
+	mList.DelIf(cTmrCnt(iId));
+	return cTmrCnt::miCount;
 }
 void cTimerList::DelTimer() {
-  mList.Clear();
+	mList.Clear();
 }
-
 
 }; // nLua

@@ -19,47 +19,43 @@
 
 #ifndef CFUNCS_H
 #define CFUNCS_H
+
 #include "cdcserverbase.h" /** nDCServer */
+#include "lua.hpp"
 
 using namespace ::nDCServer;
 
-#include "lua.hpp"
+namespace nLua {
 
-namespace nLua
-{
-
-typedef enum
-{
-  eUD_sNick       = 1 << 0,
-  eUD_sIP         = 1 << 1,
-  eUD_UID         = 1 << 2,
-  eUD_iProfile    = 1 << 3,
-  eUD_sMyINFO     = 1 << 4,
-  eUD_sData       = 1 << 5,
-  eUD_bOpList     = 1 << 6,
-  eUD_bInList     = 1 << 7,
-  eUD_iPort       = 1 << 8,
-  eUD_iPortConn   = 1 << 9,
-  eUD_sMacAddress = 1 << 10,
-  eUD_sVersion    = 1 << 11,
-  eUD_bHide       = 1 << 12,
-  eUD_bIpList     = 1 << 13
+typedef enum {
+	eUD_sNick       = 1 << 0,
+	eUD_sIP         = 1 << 1,
+	eUD_UID         = 1 << 2,
+	eUD_iProfile    = 1 << 3,
+	eUD_sMyINFO     = 1 << 4,
+	eUD_sData       = 1 << 5,
+	eUD_bOpList     = 1 << 6,
+	eUD_bInList     = 1 << 7,
+	eUD_iPort       = 1 << 8,
+	eUD_iPortConn   = 1 << 9,
+	eUD_sMacAddress = 1 << 10,
+	eUD_sVersion    = 1 << 11,
+	eUD_bHide       = 1 << 12,
+	eUD_bIpList     = 1 << 13
 } tUserData; /** tUserData */
 
-typedef enum
-{
-  eUV_iProfile = 1,
-  eUV_sMyINFO,
-  eUV_sData,
-  eUV_bOpList,
-  eUV_bHide,
-  eUV_bIpList
+typedef enum {
+	eUV_iProfile = 1,
+	eUV_sMyINFO,
+	eUV_sData,
+	eUV_bOpList,
+	eUV_bHide,
+	eUV_bIpList
 } tUserValue; /** tUserValue */
 
 typedef struct {
-  short isExist;
+	short isExist;
 } cConfig;
-  
 
 int Tostring(lua_State *L);
 int UserIndex(lua_State *L);

@@ -22,49 +22,45 @@
 
 #include "clist.h"
 
-namespace nLua
-{
+namespace nLua {
 
 enum {
-  eTB_Save           = 1 << 1,
+	eTB_Save           = 1 << 1,
 }; /** TasksBytes */
 
 typedef enum {
-  eT_No = 0,
-  eT_Save,
-  eT_RestartScript,
-  eT_StopScript,
-  eT_MoveUp,
-  eT_MoveDown,
-  eT_ScriptError
+	eT_No = 0,
+	eT_Save,
+	eT_RestartScript,
+	eT_StopScript,
+	eT_MoveUp,
+	eT_MoveDown,
+	eT_ScriptError
 } tTask; /** tTask */
 
 
 class cTasksList {
 
-  int miTackChecker; /** Bits of the common tasks */
-  cList mList;
+	int miTackChecker; /** Bits of the common tasks */
+	cList mList;
 
 public:
+	struct cTask {
+		cTask():mParam(NULL) {}
+		cTask(tTask iType):miType(iType),mParam(NULL) {}
+		~cTask() {}
+		tTask miType;
+		void * mParam;
+	}; // cTasks
 
-  struct cTask {
-    cTask():mParam(NULL){}
-    cTask(tTask iType):miType(iType),mParam(NULL){}
-    ~cTask(){}
-    tTask miType;
-    void * mParam;
-  }; // cTasks
+	cTasksList() : miTackChecker(0) {}
+	~cTasksList() {}
 
-  cTasksList() : miTackChecker(0) {}
-  ~cTasksList(){}
-
-
-  void AddTask(void * Param, tTask iType = eT_No); /** Adding tasks */
-  void CheckTasks();
+	void AddTask(void * Param, tTask iType = eT_No); /** Adding tasks */
+	void CheckTasks();
 
 private:
-
-  void CommonTasks(); /** Common tasks */
+	void CommonTasks(); /** Common tasks */
 
 }; // cTasksList
 

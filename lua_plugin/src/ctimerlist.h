@@ -33,52 +33,49 @@ class cLuaInterpreter;
 class cTimer {
 
 private:
-
-  int miTime, miInterval;
-  string msFunc;
-
-public:
-
-  int miId;
-  cLuaInterpreter * mScript;
+	int miTime, miInterval;
+	string msFunc;
 
 public:
+	int miId;
+	cLuaInterpreter * mScript;
 
-  cTimer(int iId, int iInterval, const char * sFunc, cLuaInterpreter * Script);
-  ~cTimer();
-  void Check(int iTime);
+public:
+	cTimer(int iId, int iInterval, const char * sFunc, cLuaInterpreter * Script);
+	~cTimer();
+	void Check(int iTime);
 
 }; // cTimer
 
 class cTimerList {
 
-  cList mList;
-  
+	cList mList;
+
 public:
+	cTimerList();
+	~cTimerList();
 
-  cTimerList();
-  ~cTimerList();
-
-  void OnTimer();
-  int AddTimer(cTimer *);
-  int DelTimer(int);
-  void DelTimer();
-  int Size() { return mList.Size(); }
+	void OnTimer();
+	int AddTimer(cTimer *);
+	int DelTimer(int);
+	void DelTimer();
+	int Size() { return mList.Size(); }
 
 }; // cTimerList
 
-
 class cTmrCnt {
+
 private:
-  int miId;
+	int miId;
+
 public:
-  static int miCount; // static counter
-  cTmrCnt(int iId = 0) : miId(iId) {}
-  bool operator() (void * val) {
-    if(((cTimer*)val)->miId != miId) return false;
-    ++ miCount;
-    return true;
-  }
+	static int miCount; // static counter
+	cTmrCnt(int iId = 0) : miId(iId) {}
+	bool operator() (void * val) {
+		if(((cTimer*)val)->miId != miId) return false;
+		++ miCount;
+		return true;
+	}
 }; // cTmrCnt
 
 }; // nLua

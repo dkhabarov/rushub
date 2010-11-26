@@ -37,58 +37,54 @@ namespace nLua {
 #define MT_USER_CONN "User object"
 #define MT_CONFIG "Config object"
 
-class cLuaInterpreter
-{
+class cLuaInterpreter {
 
 public:
+	string msName;
+	string & msPath;
+	lua_State * mL;
+	bool mbEnabled;
 
-  string msName;
-  string & msPath;
-  lua_State * mL;
-  bool mbEnabled;
+	typedef list<string> tBotList;
+	tBotList mBotList;
 
-  typedef list<string> tBotList;
-  tBotList mBotList;
-  
 private:
+	struct sParam {
+		void * data;
+		lua_Number num;
+		int type;
+		sParam(void * d, int t):data(d),type(t){}
+		sParam(lua_Number n, int t):num(n),type(t){}
+	};
+	typedef vector<sParam*> tvCallParams;
+	tvCallParams mCallParams;
 
-  struct sParam {
-    void * data;
-    lua_Number num;
-    int type;
-    sParam(void * d, int t):data(d),type(t){}
-    sParam(lua_Number n, int t):num(n),type(t){}
-  };
-  typedef vector<sParam*> tvCallParams;
-  tvCallParams mCallParams;
+	void CreateUserMT();
+	void CreateConfigMT();
 
-  void CreateUserMT();
-  void CreateConfigMT();
-
-  cTimerList mTimerList;
+	cTimerList mTimerList;
 
 public:
+	cLuaInterpreter(const string & sName, string & sFullName);
+	~cLuaInterpreter();
 
-  cLuaInterpreter(const string & sName, string & sFullName);
-  ~cLuaInterpreter();
-  
-  int Start(); // (-1 - run already)
-  int Stop();
+	int Start(); // (-1 - run already)
+	int Stop();
 
-  int CallFunc(const char*);
-  void RegFunc(const char*, int (*)(lua_State*));
-  void RegStrField(const char*, const char*);
+	int CallFunc(const char*);
+	void RegFunc(const char*, int (*)(lua_State*));
+	void RegStrField(const char*, const char*);
 
-  void Timer(int iId, const char * sFunc);
-  bool OnError(const char* sFunc, const char* sErrMsg, bool bStop = false);
-  void NewCallParam(void * data, int type = 0);
-  void NewCallParam(lua_Number data, int type = 0);
+	void Timer(int iId, const char * sFunc);
+	bool OnError(const char* sFunc, const char* sErrMsg, bool bStop = false);
+	void NewCallParam(void * data, int type = 0);
+	void NewCallParam(lua_Number data, int type = 0);
 
-  inline void OnTimer() { mTimerList.OnTimer(); }
-  inline int AddTmr(cTimer * timer) { return mTimerList.AddTimer(timer); }
-  inline int Size() { return mTimerList.Size(); }
-  inline int DelTmr(int tm) { return mTimerList.DelTimer(tm); }
-  inline void DelTmr() { mTimerList.DelTimer(); }
+	inline void OnTimer() { mTimerList.OnTimer(); }
+	inline int AddTmr(cTimer * timer) { return mTimerList.AddTimer(timer); }
+	inline int Size() { return mTimerList.Size(); }
+	inline int DelTmr(int tm) { return mTimerList.DelTimer(tm); }
+	inline void DelTmr() { mTimerList.DelTimer(); }
 
 }; // cLuaInterpreter
 

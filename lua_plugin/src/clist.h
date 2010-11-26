@@ -25,88 +25,88 @@
 namespace nLua {
 
 class Item {
-  friend class cList;
-  void * mValue;
-  Item * mNext;
-  bool mbDel;
+	friend class cList;
+	void * mValue;
+	Item * mNext;
+	bool mbDel;
 public:
-  Item() : mValue(NULL), mNext(NULL), mbDel(true) {}
-  ~Item() { delete mValue; }
-  Item(void * value) : mValue(value), mNext(NULL), mbDel(false) {}
-  void * GetValue() const { return mValue; }
-  bool IsDel() const { return mbDel; }
-  void SetDel() { mbDel = true; }
+	Item() : mValue(NULL), mNext(NULL), mbDel(true) {}
+	~Item() { if(mValue) delete mValue; }
+	Item(void * value) : mValue(value), mNext(NULL), mbDel(false) {}
+	void * GetValue() const { return mValue; }
+	bool IsDel() const { return mbDel; }
+	void SetDel() { mbDel = true; }
 }; // Item
 
 class cList {
 
-  Item * mFirst;
-  Item * mLast;
+	Item * mFirst;
+	Item * mLast;
 
-  int miSize;
-  bool mbProcess;
+	int miSize;
+	bool mbProcess;
 
 public:
 
-  cList() : mFirst(NULL), mLast(NULL), miSize(0), mbProcess(false) {}
-  ~cList() { Clear(); }
+	cList() : mFirst(NULL), mLast(NULL), miSize(0), mbProcess(false) {}
+	~cList() { Clear(); }
 
-  void Clear() {
-    Item *p, *q = mFirst;
-    while(q) {
-      p = q;
-      q = q->mNext;
-      delete p;
-    }
-    mFirst = mLast = NULL;
-    miSize = 0;
-  }
-  int Size() { return miSize; }
-  void Add(void * value) {
-    if (value != NULL) {
-      if (mLast == NULL) {
-        mFirst = mLast = new Item(value);
-      } else {
-        mLast->mNext = new Item(value);
-        mLast = mLast->mNext;
-      }
-      ++miSize;
-    }
-  }
-  template<typename _Predicate> void DelIf(_Predicate pred) {
-    Item *p = mFirst;
-    while(p) {
-      if(!p->IsDel() && pred(p->GetValue()))
-        p->SetDel();
-      p = p->mNext;
-    }
-  }
-  template<typename _Predicate> void Loop(_Predicate pred) {
-    bool proc = mbProcess;
-    mbProcess = true;
-    Item *p = mFirst, *q = NULL, *r = NULL;
-    while(p) {
-      if(!p->IsDel())
-        pred(p->GetValue()); // may be Loop
-      p = p->mNext;
-    }
-    if(!proc) { // first Loop - removing all deleted elements
-      p = mFirst;
-      while(p) {
-        r = q;
-        q = p;
-        p = p->mNext;
-        if(q->IsDel()) {
-          if(q == mFirst) mFirst = p;
-          if(q == mLast) mLast = r;
-          delete q;
-          q = NULL;
-          --miSize;
-        }
-      }
-      mbProcess = false;
-    }
-  }
+	void Clear() {
+		Item *p, *q = mFirst;
+		while(q) {
+			p = q;
+			q = q->mNext;
+			delete p;
+		}
+		mFirst = mLast = NULL;
+		miSize = 0;
+	}
+	int Size() { return miSize; }
+	void Add(void * value) {
+		if (value != NULL) {
+			if (mLast == NULL) {
+				mFirst = mLast = new Item(value);
+			} else {
+				mLast->mNext = new Item(value);
+				mLast = mLast->mNext;
+			}
+			++miSize;
+		}
+	}
+	template<typename _Predicate> void DelIf(_Predicate pred) {
+		Item *p = mFirst;
+		while(p) {
+			if(!p->IsDel() && pred(p->GetValue()))
+				p->SetDel();
+			p = p->mNext;
+		}
+	}
+	template<typename _Predicate> void Loop(_Predicate pred) {
+		bool proc = mbProcess;
+		mbProcess = true;
+		Item *p = mFirst, *q = NULL, *r = NULL;
+		while(p) {
+			if(!p->IsDel())
+				pred(p->GetValue()); // may be Loop
+			p = p->mNext;
+		}
+		if(!proc) { // first Loop - removing all deleted elements
+			p = mFirst;
+			while(p) {
+				r = q;
+				q = p;
+				p = p->mNext;
+				if(q->IsDel()) {
+					if(q == mFirst) mFirst = p;
+					if(q == mLast) mLast = r;
+					delete q;
+					q = NULL;
+					--miSize;
+				}
+			}
+			mbProcess = false;
+		}
+	}
 
 }; // cList
 

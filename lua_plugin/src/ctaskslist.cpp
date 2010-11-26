@@ -24,41 +24,41 @@ namespace nLua {
 
 /** Do tasks */
 void Tasks(void * val) {
-  cTasksList::cTask * task = (cTasksList::cTask *) val;
-  cLuaInterpreter * Param = (cLuaInterpreter *)(task->mParam);
-  switch(task->miType) {
-    case eT_RestartScript:
-      cLua::mCurLua->RestartScript(Param); break;
-    case eT_StopScript:
-      cLua::mCurLua->StopScript(Param); break;
-    case eT_MoveUp:
-      cLua::mCurLua->MoveUp(Param); break;
-    case eT_MoveDown:
-      cLua::mCurLua->MoveDown(Param); break;
-    case eT_ScriptError:
-    default: break;
-  }
+	cTasksList::cTask * task = (cTasksList::cTask *) val;
+	cLuaInterpreter * Param = (cLuaInterpreter *)(task->mParam);
+	switch(task->miType) {
+		case eT_RestartScript:
+			cLua::mCurLua->RestartScript(Param); break;
+		case eT_StopScript:
+			cLua::mCurLua->StopScript(Param); break;
+		case eT_MoveUp:
+			cLua::mCurLua->MoveUp(Param); break;
+		case eT_MoveDown:
+			cLua::mCurLua->MoveDown(Param); break;
+		case eT_ScriptError:
+		default: break;
+	}
 }
 
 void cTasksList::CommonTasks() {
-  if(miTackChecker & eTB_Save) cLua::mCurLua->Save();
-  miTackChecker = 0;
+	if(miTackChecker & eTB_Save) cLua::mCurLua->Save();
+	miTackChecker = 0;
 }
 
 /** Add task */
 void cTasksList::AddTask(void * Param, tTask iType) {
-  if(!Param) miTackChecker = miTackChecker | (1 << iType); /** Common task */
-  else {
-    cTask * Task = new cTask(iType);
-    Task->mParam = Param;
-    mList.Add(Task);
-  }
+	if(!Param) miTackChecker = miTackChecker | (1 << iType); /** Common task */
+	else {
+		cTask * Task = new cTask(iType);
+		Task->mParam = Param;
+		mList.Add(Task);
+	}
 }
 
 void cTasksList::CheckTasks() {
-  mList.Loop(Tasks);
-  mList.Clear();
-  if(miTackChecker) CommonTasks();
+	mList.Loop(Tasks);
+	mList.Clear();
+	if(miTackChecker) CommonTasks();
 }
 
 }; // nLua
