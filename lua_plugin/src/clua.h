@@ -95,6 +95,7 @@ public:
 	virtual int OnKick(cDCConnBase *, cDCParserBase *);
 	virtual int OnOpForceMove(cDCConnBase *, cDCParserBase *);
 	virtual int OnGetINFO(cDCConnBase *, cDCParserBase *);
+	virtual int OnMCTo(cDCConnBase *, cDCParserBase *);
 	virtual int OnTimer();
 	virtual int OnAny(cDCConnBase *, cDCParserBase *);
 	virtual int OnUnknown(cDCConnBase *, cDCParserBase *);

@@ -83,6 +83,7 @@ bool cLua::RegAll(cPluginListBase* PluginList) {
 	PluginList->RegCallList("Kick", this);
 	PluginList->RegCallList("OpForce", this);
 	PluginList->RegCallList("GetINFO", this);
+	PluginList->RegCallList("MCTo", this);
 	PluginList->RegCallList("Any", this);
 	PluginList->RegCallList("Unknown", this);
 	PluginList->RegCallList("Flood", this);
@@ -535,5 +536,6 @@ DC_ACTION_3(OnSR,               "OnSR"              ); // OnSR(tUser, sData)
 DC_ACTION_3(OnKick,             "OnKick"            ); // OnKick(tUser, sData)
 DC_ACTION_3(OnOpForceMove,      "OnOpForceMove"     ); // OnOpForceMove(tUser, sData)
 DC_ACTION_3(OnGetINFO,          "OnGetINFO"         ); // OnGetINFO(tUser, sData)
+DC_ACTION_3(OnMCTo,             "OnMCTo"            ); // OnMCTo(tUser, sData)
 
 REG_PLUGIN(cLua);
