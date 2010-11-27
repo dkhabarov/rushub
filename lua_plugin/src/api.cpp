@@ -69,6 +69,21 @@ int Tostring(lua_State *L) {
 	return 1;
 }
 
+int ConfigTable(lua_State *L) {
+	static vector<string> vConf;
+	if(vConf.empty())
+		cLua::mCurServer->GetConfig(vConf);
+
+	int indx = 1;
+	lua_newtable(L);
+	for(vector<string>::iterator it = vConf.begin(); it != vConf.end(); ++it) {
+		lua_pushnumber(L, indx++);
+		lua_pushstring(L, (*it).c_str());
+		lua_rawset(L, -3);
+	}
+	return 1;
+}
+
 unsigned int GetHash(const char * s) {
 	size_t i, l = strlen(s);
 	unsigned h = l;
@@ -178,7 +193,13 @@ int ConfigIndex(lua_State *L) {
 		lua_pushnil(L);
 		return 1;
 	}
-	const char * sConfig = cLua::mCurServer->GetConfig(luaL_checkstring(L, 2));
+	const char * sName = luaL_checkstring(L, 2);
+	if(!strcmp(sName, "table")) {
+		lua_settop(L, 0);
+		lua_pushcfunction(L, &ConfigTable);
+		return 1;
+	}
+	const char * sConfig = cLua::mCurServer->GetConfig(sName);
 	lua_settop(L, 0);
 	if(!sConfig) lua_pushnil(L);
 	else lua_pushstring(L, sConfig);

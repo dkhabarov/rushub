@@ -58,6 +58,7 @@ typedef struct {
 } cConfig;
 
 int Tostring(lua_State *L);
+int ConfigTable(lua_State *L);
 int UserIndex(lua_State *L);
 int UserNewindex(lua_State *L);
 int ConfigIndex(lua_State *L);
