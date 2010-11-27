@@ -47,7 +47,8 @@ cProtocolCmd aDC_Commands[] = {
 	cProtocolCmd("$MultiConnectToMe "), // not implemented
 	cProtocolCmd("$Kick "),             // check: op, nick, conn
 	cProtocolCmd("$OpForceMove $Who:"), // check: op, nick
-	cProtocolCmd("$GetINFO ")           // check: logged_in(FI), nick
+	cProtocolCmd("$GetINFO "),          // check: logged_in(FI), nick
+	cProtocolCmd("$MCTo: ")             // check: nick, other_nick
 };
 
 
@@ -196,6 +197,10 @@ bool cDCParser::SplitChunks() {
 			break;
 		case eDC_GETINFO: /** $GetINFO [remote_nick] [nick] */
 			if(!SplitOnTwo(miKWSize, ' ', eCH_GI_OTHER, eCH_GI_NICK)) mbError = 1;
+			break;
+		case eDC_MCTO: /** $MCTo: [remote_nick] $[nick] [msg] */
+			if(!SplitOnTwo(miKWSize," $", eCH_MC_TO, eCH_MC_FROM)) mbError = 1;
+			if(!SplitOnTwo(' ', eCH_MC_FROM, eCH_MC_FROM, eCH_MC_MSG)) mbError = 1;
 			break;
 		default:
 			break;

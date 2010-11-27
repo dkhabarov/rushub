@@ -120,6 +120,7 @@ int cDCProtocol::DoCmd(cParser *parser, cConn *conn) {
 		case eDC_KICK:          DC_Kick(dcparser, dcconn); break;
 		case eDC_OPFORCEMOVE:   DC_OpForceMove(dcparser, dcconn); break;
 		case eDC_GETINFO:       DC_GetINFO(dcparser, dcconn); break;
+		case eDC_MCTO:          DC_MCTo(dcparser, dcconn); break;
 		case eDC_UNKNOWN:
 			#ifndef WITHOUT_PLUGINS
 			if(!mDCServer->mCalls.mOnUnknown.CallAll(dcconn, dcparser)) {
@@ -161,7 +162,7 @@ int cDCProtocol::DC_Supports(cDCParser *dcparser, cDCConn *dcconn) {
 			return -3;
 	#endif
 
-	static string sMsg("$Supports UserCommand NoGetINFO NoHello UserIP2"DC_SEPARATOR);
+	static string sMsg("$Supports UserCommand NoGetINFO NoHello UserIP2 MCTo"DC_SEPARATOR);
 	dcconn->Send(sMsg, false, false);
 
 	return 0;
@@ -445,6 +446,42 @@ int cDCProtocol::DC_To(cDCParser *dcparser, cDCConn *dcconn) {
 	if(!User) return -2;
 
 	User->Send(dcparser->mStr, true);
+	return 0;
+}
+
+int cDCProtocol::DC_MCTo(cDCParser *dcparser, cDCConn *dcconn) {
+	if(dcparser->SplitChunks()) {
+		if(dcconn->Log(2)) dcconn->LogStream() << "MCTo syntax error, closing" << endl;
+		dcconn->CloseNow(eCR_SYNTAX);
+		return -1;
+	}
+
+	ANTIFLOOD(MCTo, eFT_MCTO);
+
+	if(!dcconn->mDCUser) return -2;
+	if(!dcconn->mDCUser->mbInUserList) return -3;
+	string &sNick = dcparser->ChunkString(eCH_MC_TO);
+
+	/** Checking the coincidence nicks in command */
+	if(dcparser->ChunkString(eCH_MC_FROM) != dcconn->mDCUser->msNick) {
+		if(dcconn->Log(2)) dcconn->LogStream() << "Bad nick in MCTo, closing" <<endl;
+		dcconn->CloseNow();
+		return -1;
+	}
+
+	#ifndef WITHOUT_PLUGINS
+		if(mDCServer->mCalls.mOnMCTo.CallAll(dcconn, dcparser)) return 0;
+	#endif
+
+	/** Search user */
+	cDCUser *User = (cDCUser *)mDCServer->mDCUserList.GetUserBaseByNick(sNick);
+	if(!User) return -2;
+
+	string msg;
+	User->Send(Append_DC_Chat(msg, dcconn->mDCUser->msNick, dcparser->ChunkString(eCH_MC_MSG)));
+	if(dcconn->mDCUser->msNick != sNick) {
+		dcconn->Send(msg);
+	}
 	return 0;
 }
 

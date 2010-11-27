@@ -57,7 +57,8 @@ typedef enum { /** Types of the commands (for field mType) */
 	eDC_KICK,         //< 18 = $Kick
 	eDC_OPFORCEMOVE,  //< 19 = $OpForceMove
 	eDC_GETINFO,      //< 20 = $GetINFO
-	eDC_UNKNOWN       //< 21 = $Unknown
+	eDC_MCTO,         //< 21 = $MCTo
+	eDC_UNKNOWN       //< 22 = $Unknown
 } tDCType;
 
 
@@ -125,6 +126,11 @@ enum { eCH_PS_ALL, eCH_PS_NICK, eCH_PS_QUERY, eCH_PS_SEARCHLIMITS, eCH_PS_SEARCH
 		$SR [nick] [file/path][0x05][filesize] [freeslots]/[totalslots][0x05][hubname] ([hubhost][:[hubport]])[0x05][searching_nick]
 */
 enum { eCH_SR_ALL, eCH_SR_FROM, eCH_SR_PATH, eCH_SR_SIZE, eCH_SR_SLOTS, eCH_SR_SL_FR, eCH_SR_SL_TO, eCH_SR_HUBINFO, eCH_SR_TO };
+
+/** A number of the chunks for the private message
+		$MCTo: [remote_nick] $[nick] [msg]
+*/
+enum { eCH_MC_ALL, eCH_MC_TO, eCH_MC_FROM, eCH_MC_MSG };
 
 }; // nProtoEnums
 

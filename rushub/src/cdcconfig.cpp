@@ -47,6 +47,7 @@ void cDCConfig::AddVars() {
 	Add("iFloodCountNickList",  miFloodCountNickList,         1);
 	Add("iFloodCountCTM",       miFloodCountCTM,              500);
 	Add("iFloodCountRCTM",      miFloodCountRCTM,             250);
+	Add("iFloodCountMCTo",      miFloodCountMCTo,             5);
 	Add("iFloodCountUnknown",   miFloodCountUnknown,          1);
 	Add("iFloodCountMyINFO2",   miFloodCountMyINFO2,          30);
 	Add("iFloodCountSearch2",   miFloodCountSearch2,          10);
@@ -56,6 +57,7 @@ void cDCConfig::AddVars() {
 	Add("iFloodCountNickList2", miFloodCountNickList2,        1);
 	Add("iFloodCountCTM2",      miFloodCountCTM2,             5000);
 	Add("iFloodCountRCTM2",     miFloodCountRCTM2,            2500);
+	Add("iFloodCountMCTo2",     miFloodCountMCTo2,            30);
 	Add("iFloodCountUnknown2",  miFloodCountUnknown2,         10);
 
 	Add("iFloodTimeReconnIp",   miFloodTimeReconnIp,          5.);
@@ -67,6 +69,7 @@ void cDCConfig::AddVars() {
 	Add("iFloodTimeNickList",   miFloodTimeNickList,          60.);
 	Add("iFloodTimeCTM",        miFloodTimeCTM,               60.);
 	Add("iFloodTimeRCTM",       miFloodTimeRCTM,              60.);
+	Add("iFloodTimeMCTo",       miFloodTimeMCTo,              10.);
 	Add("iFloodTimeUnknown",    miFloodTimeUnknown,           3.);
 	Add("iFloodTimeMyINFO2",    miFloodTimeMyINFO2,           900.);
 	Add("iFloodTimeSearch2",    miFloodTimeSearch2,           60.);
@@ -76,6 +79,7 @@ void cDCConfig::AddVars() {
 	Add("iFloodTimeNickList2",  miFloodTimeNickList2,         1800.);
 	Add("iFloodTimeCTM2",       miFloodTimeCTM2,              600.);
 	Add("iFloodTimeRCTM2",      miFloodTimeRCTM2,             600.);
+	Add("iFloodTimeMCTo2",      miFloodTimeMCTo2,             30.);
 	Add("iFloodTimeUnknown2",   miFloodTimeUnknown2,          60.);
 
 	Add("iLenCmdMSearch",       mMaxCmdLen[eDC_MSEARCH],      256   );
@@ -99,6 +103,7 @@ void cDCConfig::AddVars() {
 	Add("iLenCmdKick",          mMaxCmdLen[eDC_KICK],         64    );
 	Add("iLenCmdOFM",           mMaxCmdLen[eDC_OPFORCEMOVE],  512   );
 	Add("iLenCmdGetINFO",       mMaxCmdLen[eDC_GETINFO],      128   );
+	Add("iLenCmdMCTo",          mMaxCmdLen[eDC_MCTO],           65536 );
 	Add("iLenCmdUnknown",       mMaxCmdLen[eDC_UNKNOWN],      128   );
 
 	Add("iWebTimeout",          miWebTimeout,                 30);
@@ -213,6 +218,7 @@ void cDCLang::AddVars() {
 	Add("sFloodNickList", msFloodNickList, string("Пожалуйста не флудите с помощью слишком частого получения списка пользователей."));
 	Add("sFloodCTM", msFloodCTM, string("Пожалуйста не флудите частыми запросами на соединение с пользователями хаба."));
 	Add("sFloodRCTM", msFloodRCTM, string("Пожалуйста не флудите частыми запросами на соединение с активнми пользователями хаба."));
+	Add("sFloodMCTo", msFloodTo, string("Пожалуйста не флудите!"));
 	Add("sFloodUnknown", msFloodUnknown, string("Не флудите неизвестными командами."));
 
 	string s;

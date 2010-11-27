@@ -68,6 +68,7 @@ public:
 	virtual int OnKick(cDCConnBase *, cDCParserBase *) { return 1; }
 	virtual int OnOpForceMove(cDCConnBase *, cDCParserBase *) { return 1; }
 	virtual int OnGetINFO(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int OnMCTo(cDCConnBase *, cDCParserBase *) { return 1; }
 	virtual int OnTimer() { return 1; }
 	virtual int OnAny(cDCConnBase *, cDCParserBase *) { return 1; }
 	virtual int OnUnknown(cDCConnBase *, cDCParserBase *) { return 1; }

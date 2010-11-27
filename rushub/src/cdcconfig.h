@@ -73,6 +73,8 @@ public:
 	unsigned miFloodCountCTM2;
 	unsigned miFloodCountRCTM;
 	unsigned miFloodCountRCTM2;
+	unsigned miFloodCountMCTo;
+	unsigned miFloodCountMCTo2;
 	unsigned miFloodCountUnknown;
 	unsigned miFloodCountUnknown2;
 
@@ -94,6 +96,8 @@ public:
 	double miFloodTimeCTM2;
 	double miFloodTimeRCTM;
 	double miFloodTimeRCTM2;
+	double miFloodTimeMCTo;
+	double miFloodTimeMCTo2;
 	double miFloodTimeUnknown;
 	double miFloodTimeUnknown2;
 
@@ -162,6 +166,7 @@ public:
 	string msFloodNickList;
 	string msFloodCTM;
 	string msFloodRCTM;
+	string msFloodMCTo;
 	string msFloodUnknown;
 
 	string msBadSearchIp;   //< Message about bad IP in the active search

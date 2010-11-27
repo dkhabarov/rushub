@@ -137,6 +137,8 @@ public:
 		unsigned miCTM;
 		cTime mRCTM;
 		unsigned miRCTM;
+		cTime mMCTo;
+		unsigned miMCTo;
 		cTime mUnknown;
 		unsigned miUnknown;
 		sTm() : 
@@ -148,6 +150,7 @@ public:
 			mTo(0l), miTo(0), 
 			mCTM(0l), miCTM(0), 
 			mRCTM(0l), miRCTM(0),
+			mMCTo(0l), miMCTo(0),
 			mUnknown(0l), miUnknown(0)
 		{}
 	} mTimes1, mTimes2;

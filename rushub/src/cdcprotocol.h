@@ -86,6 +86,7 @@ protected:
 	int DC_Kick(cDCParser *, cDCConn *); /** Kick */
 	int DC_OpForceMove(cDCParser *, cDCConn *); /** Force move */
 	int DC_GetINFO(cDCParser *, cDCConn *); /** Get user's MyINFO */
+	int DC_MCTo(cDCParser *, cDCConn *); /** Private message in chat */
 
 }; // cDCProtocol
 

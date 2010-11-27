@@ -70,6 +70,7 @@ typedef enum { /** Flood types */
 	eFT_SR,
 	eFT_CTM,
 	eFT_RCTM,
+	eFT_MCTO,
 	eFT_UNKNOWN
 } tFloodType;
 
@@ -278,6 +279,7 @@ private:
 			mOnKick(List, "Kick", &cPlugin::OnKick),
 			mOnOpForceMove(List, "OpForce", &cPlugin::OnOpForceMove),
 			mOnGetINFO(List, "GetINFO", &cPlugin::OnGetINFO),
+			mOnMCTo(List, "MCTo", &cPlugin::OnMCTo),
 			mOnTimer(List, "Timer", &cPlugin::OnTimer),
 			mOnAny(List, "Any", &cPlugin::OnAny),
 			mOnUnknown(List, "Unknown", &cPlugin::OnUnknown),
@@ -304,6 +306,7 @@ private:
 		cCL_ConnParser     mOnKick;
 		cCL_ConnParser     mOnOpForceMove;
 		cCL_ConnParser     mOnGetINFO;
+		cCL_ConnParser     mOnMCTo;
 		cCL_Simple         mOnTimer;
 		cCL_ConnParser     mOnAny;
 		cCL_ConnParser     mOnUnknown;
