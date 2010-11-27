@@ -24,6 +24,8 @@
 using namespace std;
 using namespace nUtils;
 
+#define LOG_FILE "system.%Y-%m-%d.log"
+#define ERR_LABEL "(error)"
 
 /** 
   * The event level. All events above limit are not considered
@@ -79,7 +81,7 @@ int cObj::Log(int iLevel) {
 /** Return errlog stream */
 int cObj::ErrLog(int iLevel) {
 	mToLog = &ErrLog();
-	*mToLog << "(error)";
+	*mToLog << ERR_LABEL;
 	return StrLog(*mToLog, iLevel, miMaxErrLevel);
 }
 
@@ -91,7 +93,14 @@ ostream & cObj::Log() {
 			ExecPath(sPath);
 		else
 			sPath = msPath;
-		sPath += "system.log";
+
+		char buf[64];
+		time_t rawtime;
+		time(&rawtime);
+		struct tm * tmr = localtime(&rawtime);
+		strftime(buf, 64, LOG_FILE, tmr);
+
+		sPath.append(buf);
 		mOfs.open(sPath.c_str());
 	}
 	if(!mOfs.is_open()) return cout;
@@ -106,7 +115,14 @@ ostream & cObj::ErrLog() {
 			ExecPath(sPath);
 		else
 			sPath = msPath;
-		sPath += "system.log";
+
+		char buf[64];
+		time_t rawtime;
+		time(&rawtime);
+		struct tm * tmr = localtime(&rawtime);
+		strftime(buf, 64, LOG_FILE, tmr);
+
+		sPath.append(buf);
 		mOfs.open(sPath.c_str());
 	}
 	if(!mOfs.is_open()) return cerr;
