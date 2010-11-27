@@ -32,6 +32,7 @@ enum {
 	eConfig,
 	eInstall,
 	eUninstall,
+	eQuit,
 	eHelp
 };
 
@@ -43,16 +44,19 @@ static const struct {
 	{"-c", eConfig},
 	{"-i", eInstall},
 	{"-u", eUninstall},
+	{"-q", eQuit},
 	{"-h", eHelp},
 	{"-service",   eService},
 	{"-config",    eConfig},
 	{"-install",   eInstall},
 	{"-uninstall", eUninstall},
+	{"-quit",      eQuit},
 	{"-help",      eHelp},
 	{"--service",   eService},
 	{"--config",    eConfig},
 	{"--install",   eInstall},
 	{"--uninstall", eUninstall},
+	{"--quit",      eQuit},
 	{"--help",      eHelp},
 	{NULL, 0} // terminator
 };

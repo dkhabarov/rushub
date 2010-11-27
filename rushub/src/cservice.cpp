@@ -263,6 +263,13 @@ int cService::Cli(int argc, char* argv[], string & sConfPath, const string & sEx
 				}
 				UninstallService(argv[i]);
 				return 0;
+			case eQuit:
+				if(++i >= argc) {
+					cout << "Please, set service name." << endl;
+					return -5;
+				}
+				ServiceStop(argv[i]);
+				return 0;
 			case eHelp:
 				cout << INTERNALNAME " " INTERNALVERSION " build on "__DATE__" "__TIME__ << endl << endl <<
 					"Usage: rushub [OPTIONS] ..." << endl << endl <<
@@ -271,6 +278,7 @@ int cService::Cli(int argc, char* argv[], string & sConfPath, const string & sEx
 					"  -c,\t--config <dir>\t\tset main config directory for hub" << endl <<
 					"  -i,\t--install <name>\tinstall service" << endl <<
 					"  -u,\t--uninstall <name>\tuninstall service, then exit" << endl <<
+					"  -q,\t--quit <name>\tstop service, then exit" << endl <<
 					"  -h,\t--help\t\t\tprint this help, then exit" << endl;
 				return 0;
 			default:
