@@ -90,9 +90,13 @@ cServer::~cServer() {
 	initWSA = false;
 #endif
 	if(Log(1)) {
-		LogStream() << endl <<
-		"Allocated objects: " << cObj::GetCount() - 1 << endl <<
-		"Unclosed sockets: " << cConn::iConnCounter << endl;
+		LogStream() << endl << "Allocated objects: " << 
+		#ifdef _WIN32
+			cObj::GetCount() - 2 // except cDCServer and cService
+		#else
+			cObj::GetCount() - 1 // except cDCServer
+		#endif
+		<< endl << "Unclosed sockets: " << cConn::iConnCounter << endl;
 	}
 	if(mOfs.is_open()) mOfs.close();
 }

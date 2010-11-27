@@ -101,7 +101,7 @@ ostream & cObj::Log() {
 		strftime(buf, 64, LOG_FILE, tmr);
 
 		sPath.append(buf);
-		mOfs.open(sPath.c_str());
+		mOfs.open(sPath.c_str(), ios_base::app);
 	}
 	if(!mOfs.is_open()) return cout;
 	return mOfs;
@@ -123,7 +123,7 @@ ostream & cObj::ErrLog() {
 		strftime(buf, 64, LOG_FILE, tmr);
 
 		sPath.append(buf);
-		mOfs.open(sPath.c_str());
+		mOfs.open(sPath.c_str(), ios_base::app);
 	}
 	if(!mOfs.is_open()) return cerr;
 	return mOfs;
