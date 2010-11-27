@@ -68,7 +68,6 @@ bool cPluginList::LoadAll() {
 /** Loadin plugin from file (lib) dll (so) */
 bool cPluginList::LoadPlugin(const string &sPathFile) {
 	cPluginLoader * PluginLoader = new cPluginLoader(sPathFile);
-	msError = "";
 	if(Log(3)) LogStream() << "Attempt loading plugin: " << sPathFile << endl;
 	try {
 		if(
@@ -76,8 +75,8 @@ bool cPluginList::LoadPlugin(const string &sPathFile) {
 			!PluginLoader->LoadSym() ||
 			!mPluginList.Add(mPluginList.mHash(PluginLoader->mPlugin->Name()), PluginLoader)
 		) {
-			msError = PluginLoader->Error();
-			if(Log(2)) LogStream() << "Failure loading plugin: " << sPathFile << (msError == "ok" ? "" : ("(" + msError + ")")) << endl;
+			const string & sError = PluginLoader->Error();
+			if(Log(0)) LogStream() << "Failure loading plugin: " << sPathFile << (sError.empty() ? "" : (" (" + sError + ")")) << endl;
 			PluginLoader->Close();
 			delete PluginLoader;
 			return false;
@@ -115,7 +114,7 @@ bool cPluginList::UnloadPlugin(const string &sName) {
 bool cPluginList::ReloadPlugin(const string &sName) {
 	cPluginLoader *PluginLoader = mPluginList.Find(mPluginList.mHash(sName));
 	if(!PluginLoader) return false;
-	string sPathFile = PluginLoader->GetFileName();
+	const string & sPathFile = PluginLoader->GetFileName();
 	if(!UnloadPlugin(sName)) return false;
 	if(!LoadPlugin(sPathFile)) return false;
 	return true;

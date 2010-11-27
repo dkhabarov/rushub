@@ -175,6 +175,7 @@ public:
 	bool SendToAllExceptNicks(List_t & NickList, const char *sData, char *sNick = NULL, char *sFrom = NULL);
 	bool SendToAllExceptIps(List_t & IPList, const char *sData, char *sNick = NULL, char *sFrom = NULL);
 
+	void GetConfig(vector<string> & vec);
 	const char * GetConfig(const string & sName);
 	const char * GetLang(const string & sName);
 	bool SetConfig(const string & sName, const string & sValue);

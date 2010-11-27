@@ -72,6 +72,7 @@ public:
 	virtual cDCUserBase * GetDCUserBase(const char *sNick) = 0;
 	virtual cDCConnListIterator * GetDCConnListIterator() = 0;
 
+	virtual void GetConfig(vector<string> & vec) = 0;
 	virtual const char * GetConfig(const string & sName) = 0;
 	virtual const char * GetLang(const string & sName) = 0;
 	virtual bool SetConfig(const string & sName, const string & sValue) = 0;

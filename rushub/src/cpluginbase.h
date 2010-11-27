@@ -46,7 +46,7 @@
 #endif // REG_PLUGIN
 
 #ifndef INTERNAL_PLUGIN_VERSION
-#	define INTERNAL_PLUGIN_VERSION 10005
+#	define INTERNAL_PLUGIN_VERSION 10006
 #endif
 
 using ::std::string;

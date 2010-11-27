@@ -42,9 +42,9 @@ public:
 	cPluginLoader(const string &sPathFile);
 	~cPluginLoader();
 
-	bool IsError(){return (msError = dlerror()) != NULL;} /** Is error? */
-	string Error(){return string((msError != NULL) ? msError : "ok");} /** Get error msg */
-	string GetFileName(){ return msFile;} /** Get lib name of plugin */
+	bool IsError(); /** Is error? */
+	const string & Error(){return msError;} /** Get error msg */
+	const string & GetFileName(){ return msFile;} /** Get lib name of plugin */
 	bool Open(); /** Open lib dll(so) */
 	bool Close(); /** Close lib dll(so) */
 	bool LoadSym(); /** LoadSym */
@@ -56,9 +56,9 @@ protected:
 	typedef cPluginBase *(*tGetPluginFunc)();
 	typedef void (*tDelPluginFunc)(cPluginBase *);
 
-	string msFile;
 	void *mHandle; /** Handle of lib */
-	const char * msError; /** Error msg */
+	string msError; /** Error msg */
+	string msFile;
 
 	tGetPluginFunc mGetPluginFunc; /** Pointer on create-function from lib */
 	tDelPluginFunc mDelPluginFunc; /** Pointer on remove-function from lib */

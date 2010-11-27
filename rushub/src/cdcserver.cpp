@@ -495,6 +495,7 @@ bool cDCServer::ValidateUser(cDCConn *dcconn, const string &sNick) {
 			SendToUser(dcconn, StringReplace(mDCLang.msUsedNick, string("nick"), sMsg, sNick).c_str(), (char*)mDCConfig.msHubBot.c_str());
 			dcconn->Send(cDCProtocol::Append_DC_ValidateDenide(sMsg.erase(), sNick));
 		} else {
+			us->mDCConn->CloseNow(eCR_TIMEOUT);
 			SendToUser(dcconn, mDCLang.msUsedNickReconn.c_str(), (char*)mDCConfig.msHubBot.c_str());
 		}
 		return false;
@@ -980,6 +981,12 @@ int cDCServer::CheckCmd(const string & sData) {
 	if(mDCParser.SplitChunks()) return -1;
 	if(mDCParser.miType > 0 && mDCParser.miType < 3) return 3;
 	return mDCParser.miType;
+}
+
+void cDCServer::GetConfig(vector<string> & vec) {
+	for(cConfigListBase::tHLMIt it = mDCConfig.mList.begin(); it != mDCConfig.mList.end(); ++it) {
+		vec.push_back((*it)->msName);
+	}
 }
 
 const char * cDCServer::GetConfig(const string & sName) {

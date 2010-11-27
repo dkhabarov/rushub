@@ -62,7 +62,6 @@ public:
 	virtual ~cPluginList() {}
 	void SetServer(cDCServerBase *);
 
-	string &GetError() { return msError; } /** Get error msg */
 	virtual const string & GetPluginDir() { return msPluginDir; }
 
 	bool LoadAll(); /** Load all plugins */
@@ -88,7 +87,6 @@ private:
 protected:
 	typedef tcHashMap<cCallList*> tAllCallLists;
 
-	string msError; /** Last error mas */
 	string msPluginDir; /** Plugin dir */
 
 	tPluginList mPluginList; /** List with loaders of plugins */

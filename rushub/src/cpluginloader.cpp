@@ -22,17 +22,26 @@
 
 namespace nPlugin {
 
+#define VERSION_ERROR "hub supported version of plugin %d, this plugin have version %d"
+
 cPluginLoader::cPluginLoader(const string &sPathFile) :
 	cObj("cPluginLoader"),
 	mPlugin(NULL),
 	msFile(sPathFile),
 	mHandle(NULL),
-	msError(NULL),
 	mGetPluginFunc(NULL),
 	mDelPluginFunc(NULL)
 {}
 
 cPluginLoader::~cPluginLoader() {
+}
+
+/** Is error? */
+bool cPluginLoader::IsError() {
+	const char * err = dlerror();
+	if(!err) return false;
+	msError = err;
+	return true;
 }
 
 /** Open lib dll(so) */
@@ -65,8 +74,14 @@ bool cPluginLoader::Close() {
 bool cPluginLoader::LoadSym() {
 	if(!mGetPluginFunc) mGetPluginFunc = tGetPluginFunc(LoadSym("get_plugin"));
 	if(!mDelPluginFunc) mDelPluginFunc = tDelPluginFunc(LoadSym("del_plugin"));
-	if(!mGetPluginFunc || !mDelPluginFunc) return false;
-	return ((mPlugin = mGetPluginFunc()) != NULL) && (mPlugin->miVersion >= INTERNAL_PLUGIN_VERSION && mPlugin->miVersion < 20000);
+	if(!mGetPluginFunc || !mDelPluginFunc || ((mPlugin = mGetPluginFunc()) == NULL)) return false;
+	if(mPlugin->miVersion != INTERNAL_PLUGIN_VERSION) {
+		char buf[128];
+		sprintf(buf, VERSION_ERROR, INTERNAL_PLUGIN_VERSION, mPlugin->miVersion);
+		msError = buf;
+		return false;
+	}
+	return true;
 }
 
 /** LoadSym from dll(so) */
