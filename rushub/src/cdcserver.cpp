@@ -137,7 +137,7 @@ void cDCServer::DelConn(cConn * conn) {
 	}
 }
 
-void cDCServer::getAddresses(const string & sAddresses, vector<pair<string, int>> & vec, int iDefPort) {
+void cDCServer::getAddresses(const string & sAddresses, vector<pair<string, int> > & vec, int iDefPort) {
 	vector<string> vAddresses;
 	StringSplit(sAddresses, ' ', vAddresses);
 	for(vector<string>::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
@@ -158,14 +158,14 @@ void cDCServer::getAddresses(const string & sAddresses, vector<pair<string, int>
 int cDCServer::Listening(int iPort) {
 	if(!mListenFactory) mListenFactory = new cListenFactory(this);
 
-	vector<pair<string, int>> vAddresses;
+	vector<pair<string, int> > vAddresses;
 	getAddresses(msAddresses, vAddresses, 411);
 
 	if(vAddresses.size() == 0) {
 		if(ErrLog(0)) LogStream() << "Incorrect address of the hub" << endl;
 		return -1;
 	}
-	for(vector<pair<string, int>>::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
+	for(vector<pair<string, int> >::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
 		int iRes = cServer::Listening(mListenFactory, (*it).first, (iPort != 0) ? iPort : (*it).second);
 		if(iRes != 0) return iRes;
 		if(Log(0)) LogStream() << "Server " INTERNALNAME " " INTERNALVERSION " is running on " << ((*it).first) << ":" << ((iPort != 0) ? iPort : (*it).second) << " TCP" << endl;
@@ -181,7 +181,7 @@ int cDCServer::Listening(int iPort) {
 		if(vAddresses.size() == 0) {
 			if(ErrLog(0)) LogStream() << "Incorrect address of the web server" << endl;
 		}
-		for(vector<pair<string, int>>::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
+		for(vector<pair<string, int> >::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
 			cServer::Listening(mWebListenFactory, (*it).first, (iPort != 0) ? iPort : (*it).second);
 			if(Log(0)) LogStream() << "Web-Server is running on " << ((*it).first) << ":" << ((*it).second) << " TCP" << endl;
 			cout << "Web-Server is running on " << ((*it).first) << ":" << ((*it).second) << " TCP" << endl;
