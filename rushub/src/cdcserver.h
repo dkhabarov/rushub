@@ -213,6 +213,9 @@ protected:
 	/** Check nick len */
 	bool CheckNickLength(cDCConn *dcconn, const unsigned iLen);
 
+	/** Check nick used */
+	bool CheckNick(cDCConn *dcconn);
+
 	/** Actions before user entry */
 	bool BeforeUserEnter(cDCConn *);
 

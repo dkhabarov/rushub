@@ -480,26 +480,6 @@ bool cDCServer::ValidateUser(cDCConn *dcconn, const string &sNick) {
 		return false;
 	}
 
-	/** Checking for this nick used */
-	tUserKey Key = mDCUserList.Nick2Key(sNick);
-	if(mDCUserList.ContainsKey(Key)) {
-		string sMsg;
-		cDCUser * us = (cDCUser*)mDCUserList.Find(Key);
-
-		// ping old user
-		static string empty("");
-		if(!us->mDCConn || us->mDCConn->Send(empty, true) > 0) {
-			if(dcconn->Log(0)) dcconn->LogStream() << "Bad nick (used): '" << sNick << "'[" // Log(0) for testing (was 2)
-				<< dcconn->Ip() << "] vs '" << us->msNick << "'[" << us->GetIp() 
-				<< "],sock:" << us->mDCConn->mSocket << endl; // for testing
-			SendToUser(dcconn, StringReplace(mDCLang.msUsedNick, string("nick"), sMsg, sNick).c_str(), (char*)mDCConfig.msHubBot.c_str());
-			dcconn->Send(cDCProtocol::Append_DC_ValidateDenide(sMsg.erase(), sNick));
-		} else {
-			us->mDCConn->CloseNow(eCR_TIMEOUT);
-			SendToUser(dcconn, mDCLang.msUsedNickReconn.c_str(), (char*)mDCConfig.msHubBot.c_str());
-		}
-		return false;
-	}
 	return true;
 }
 
@@ -518,6 +498,27 @@ bool cDCServer::CheckNickLength(cDCConn *dcconn, const unsigned iLen) {
 	return true;
 }
 
+/** Checking for this nick used */
+bool cDCServer::CheckNick(cDCConn *dcconn) {
+	tUserKey Key = mDCUserList.Nick2Key(dcconn->mDCUser->msNick);
+	if(mDCUserList.ContainsKey(Key)) {
+		string sMsg;
+		cDCUser * us = (cDCUser*)mDCUserList.Find(Key);
+
+		if(!us->mDCConn || (us->GetProfile() == -1 && us->GetIp() != dcconn->Ip())) {
+			if(dcconn->Log(2)) dcconn->LogStream() << "Bad nick (used): '" << dcconn->mDCUser->msNick << "'["
+				<< dcconn->Ip() << "] vs '" << us->msNick << "'[" << us->GetIp() << "]" << endl;
+			SendToUser(dcconn, StringReplace(mDCLang.msUsedNick, string("nick"), sMsg, dcconn->mDCUser->msNick).c_str(), (char*)mDCConfig.msHubBot.c_str());
+			dcconn->Send(cDCProtocol::Append_DC_ValidateDenide(sMsg.erase(), dcconn->mDCUser->msNick));
+			return false;
+		}
+		if(us->mDCConn->Log(3)) us->mDCConn->LogStream() << "removed old user" << endl;
+		RemoveFromDCUserList(us);
+		us->mDCConn->CloseNow(eCR_TIMEOUT);
+	}
+	return true;
+}
+
 
 bool cDCServer::BeforeUserEnter(cDCConn *dcconn) {
 	unsigned iWantedMask;
@@ -526,6 +527,10 @@ bool cDCServer::BeforeUserEnter(cDCConn *dcconn) {
 
 	if(iWantedMask == dcconn->GetLSFlag(iWantedMask)) {
 		if(dcconn->Log(3)) dcconn->LogStream() << "Begin login" << endl;
+		if(!CheckNick(dcconn)) {
+			dcconn->CloseNice(9000, eCR_INVALID_USER);
+			return false;
+		}
 		if(dcconn->mbSendNickList) {
 			if(!mDCConfig.mbDelayedLogin) DoUserEnter(dcconn);
 			else mEnterList.Add(dcconn->mDCUser);
@@ -554,6 +559,11 @@ void cDCServer::DoUserEnter(cDCConn *dcconn) {
 		if(dcconn->Log(2))
 			dcconn->LogStream() << "User Login when not all done (" << dcconn->GetLSFlag(eLS_LOGIN_DONE) << ")" <<endl;
 		dcconn->CloseNow();
+		return;
+	}
+
+	if(!CheckNick(dcconn)) {
+		dcconn->CloseNice(9000, eCR_INVALID_USER);
 		return;
 	}
 

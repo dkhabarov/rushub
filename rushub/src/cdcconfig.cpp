@@ -118,10 +118,10 @@ void cDCConfig::AddVars() {
 	Add("bWebServer",           mbWebServer,                  false);
 
 	/* Timeouts of the protocol commands */
-	const char *sTimeoutName[] = {"Key", "Nick", "Login", "Myinfo", "Getpass"};
-	double iTimeoutDefault[] = { 60. , 30., 600., 40., 300. };
+	const char *sTimeoutName[] = {"Key", "Nick", "Login", "Myinfo", "Getpass", "Recv"};
+	double iTimeoutDefault[] = { 60. , 30., 600., 40., 300., 600. };
 	string s;
-	for(int i = 0; i < 5; ++i) {
+	for(int i = 0; i < 6; ++i) {
 		miTimeout[i] = iTimeoutDefault[i];
 		s = "iTimeout";
 		s.append(sTimeoutName[i]);
@@ -203,7 +203,6 @@ void cDCLang::AddVars() {
 	Add("sBadSRNick", msBadSRNick, string("Неверный ник в результатах поиска: %[nick]. Ваш реальный ник: %[real_nick]."));
 	Add("sBadSearchIp", msBadSearchIp, string("В поисковом запросе вы отсылаете неверный ip адрес: %[ip], ваш реальный ip: %[real_ip]."));
 	Add("sUsedNick", msUsedNick, string("Этот ник %[nick] уже используется другим пользователем."));
-	Add("sUsedNickReconn", msUsedNickReconn, string("Пожалуйста переподключитесь к хабу."));
 	
 	Add("sBadNickLen", msBadNickLen, string("Недопустимая длина ника. Допустимая длина ника от %[min] до %[max] символов."));
 	Add("sBadChars", msBadChars, string("Недопустимые символы в нике."));
@@ -223,9 +222,9 @@ void cDCLang::AddVars() {
 
 	string s;
 	int i;
-	const char *sReason[] = {"получения ключа", "валидации ника", "входа", "получения MyINFO", "получения пароля"};
-	const char *sName[] = {"Key", "Nick", "Login", "Myinfo", "Getpass"};
-	for(i = 0; i < 5; ++i) {
+	const char *sReason[] = {"получения ключа", "валидации ника", "входа", "получения MyINFO", "получения пароля", "получения какой-либо команды"};
+	const char *sName[] = {"Key", "Nick", "Login", "Myinfo", "Getpass", "Recv"};
+	for(i = 0; i < 6; ++i) {
 		s = "sTimeout";
 		s.append(sName[i]);
 		Add(s, msTimeoutCmd[i], sReason[i]);

@@ -317,8 +317,7 @@ int cConn::Recv() {
 	iBufLen = 0; i = 0;
 
 #ifdef USE_UDP
-	static bool bUdp;
-	bUdp = (this->mConnType == eCT_CLIENTUDP);
+	bool bUdp = (this->mConnType == eCT_CLIENTUDP);
 	if(!bUdp) { /** TCP */
 #endif
 		while(
@@ -468,7 +467,7 @@ int cConn::WriteData(const string &sData, bool bFlush) {
 	size_t size; 
 	static bool appended; 
 
-	if(msSendBuf.size()) { 
+	if(msSendBuf.size()) {
 		msSendBuf.append(sData.c_str(), sData.size());
 		size = msSendBuf.size();
 		send_buf = msSendBuf.c_str();
@@ -561,11 +560,11 @@ int cConn::Send(const char *buf, size_t &len) {
 		len = sendto(mSocket, buf, len, 0, (struct sockaddr *)&mAddrIN, sizeof(struct sockaddr));
 	return SOCK_ERROR(len) ? -1 : 0; /* return -1 - fail, 0 - ok */
 #else
-	static size_t total, bytesleft;
-	static int n;
-	static bool bUDP;
-	total = 0; bytesleft = len; n = 0;
-	bUDP = (this->mConnType == eCT_SERVERUDP);
+	int n = -1;
+	size_t total = 0, bytesleft = len;
+	#ifdef USE_UDP
+	bool bUDP = (this->mConnType == eCT_SERVERUDP);
+	#endif
 	while(total < len) { // EMSGSIZE (WSAEMSGSIZE)
 		try {
 			#ifdef USE_UDP
@@ -573,7 +572,7 @@ int cConn::Send(const char *buf, size_t &len) {
 			#endif
 				n = send(mSocket, buf + total, bytesleft, 
 				#ifndef _WIN32
-					MSG_NOSIGNAL|MSG_DONTWAIT);
+					MSG_DONTWAIT); // MSG_NOSIGNAL
 				#else
 					0);
 				#endif

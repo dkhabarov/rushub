@@ -150,6 +150,12 @@ int cDCConn::OnTimer(cTime &now) {
 	return 0;
 }
 
+int cDCConn::Recv() {
+	static cDCServer * dcserver = (cDCServer *) mServer;
+	SetTimeOut(eTO_RECV, dcserver->mDCConfig.miTimeout[eTO_RECV], mServer->mTime);
+	return cConn::Recv();
+}
+
 int cDCConn::OnCloseNice() {
 	return 0;
 }

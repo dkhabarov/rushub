@@ -27,8 +27,8 @@ namespace nPlugin {
 cPluginLoader::cPluginLoader(const string &sPathFile) :
 	cObj("cPluginLoader"),
 	mPlugin(NULL),
-	msFile(sPathFile),
 	mHandle(NULL),
+	msFile(sPathFile),
 	mGetPluginFunc(NULL),
 	mDelPluginFunc(NULL)
 {}

@@ -121,7 +121,7 @@ public:
 	virtual cConn * CreateNewConn();
 
 	/** Reading all data from socket to buffer of the conn */
-	int Recv();
+	virtual int Recv();
 
 	/** Check empty recv buf */
 	int RecvBufIsEmpty() const { return miRecvBufEnd == miRecvBufRead; }

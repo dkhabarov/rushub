@@ -41,7 +41,7 @@
 using nDCServer::cDCServer;
 using namespace nServer;
 
-void SigHandler(int iSig) {
+static void SigHandler(int iSig) {
 	switch(iSig) {
 		case SIGINT:
 		case SIGTERM:
@@ -51,7 +51,6 @@ void SigHandler(int iSig) {
 			if(cDCServer::sCurrentServer->Log(0))
 				cDCServer::sCurrentServer->LogStream() << "Received a " << iSig << " signal, quiting" << endl;
 
-			cout << "Received a " << iSig << " signal, quiting" << endl;
 			cDCServer::sCurrentServer->Stop(0);
 			break;
 		default:
@@ -59,7 +58,6 @@ void SigHandler(int iSig) {
 			if(cDCServer::sCurrentServer->Log(0))
 				cDCServer::sCurrentServer->LogStream() << "Received a " << iSig << " signal, ignoring it" << endl;
 
-			cout << "Received a " << iSig << " signal, ignoring it" << endl;
 			signal(iSig, SigHandler);
 			break;
 	}
@@ -72,6 +70,7 @@ int runHub(int argc, char **argv, bool bService /*= false*/) {
 	#ifndef _WIN32
 		cCli Cli;
 		Cli.detectArgs(argc, argv);
+		bService = false; // for used
 	#endif
 
 	while(iResult == 1) {
@@ -128,6 +127,8 @@ int main(int argc, char **argv) {
 	#ifndef _WIN32
 		signal(SIGQUIT, SigHandler);
 		signal(SIGHUP, SigHandler);
+		signal(SIGPIPE, SigHandler);
+		signal(SIGIO, SigHandler);
 	#endif
 
 	return runHub(argc, argv);

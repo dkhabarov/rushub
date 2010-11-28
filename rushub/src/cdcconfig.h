@@ -102,7 +102,7 @@ public:
 	double miFloodTimeUnknown2;
 
 	double miPingInterval;      //< User's ping interval
-	double miTimeout[5];        //< Timeouts of the protocol commands
+	double miTimeout[6];        //< Timeouts of the protocol commands
 	double miMinClientPingInt;  //< Min ping interval from the client side
 	double miSysLoading;        //< Factor of the system loading
 
@@ -177,7 +177,6 @@ public:
 	string msBadNickLen;    //< Message about ban length for the nick
 	string msBadChars;      //< Message about bad symbols in the nick
 	string msTimes[5];      //< weeks, days, hours, min, sec
-	string msUsedNickReconn;
 
 public:
 	cDCLang();

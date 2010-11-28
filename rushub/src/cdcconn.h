@@ -51,6 +51,7 @@ typedef enum {
 	eTO_LOGIN,   //< Life time of the connection object before full entry (DoUserEnter)
 	eTO_MYINFO,  //< After $ValidateNick and before $MyINFO timeout
 	eTO_PASS,    //< Waiting pass
+	eTO_RECV,    //< Any data recv timeout
 	eTO_MAX      //< Max timeout type
 } tTimeOut;
 
@@ -176,6 +177,8 @@ public:
 	virtual int Send(const string & sData, bool bAddSep = false, bool bFlush = true);
 	/** Flush sending buffer */
 	virtual void OnFlush();
+
+	int Recv();
 
 	inline void SetLSFlag(unsigned int s){mLoginStatus |= s;}               //< Setting entry status flag
 	inline void ReSetLSFlag(unsigned int s){mLoginStatus = s;}              //< Reset flag
