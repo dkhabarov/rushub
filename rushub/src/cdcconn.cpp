@@ -212,7 +212,7 @@ cConn *cDCConnFactory::CreateConn(tSocket sock) {
 }
 
 void cDCConnFactory::DelConn(cConn * &conn) {
-	cDCConn * dcconn = (cDCConn *)conn;
+	cDCConn * dcconn = (cDCConn *) conn;
 	cDCServer * dcserver = (cDCServer *) mServer;
 	if(dcconn && dcserver) {
 		dcserver->mIPListConn->Remove(dcconn);
@@ -220,6 +220,10 @@ void cDCConnFactory::DelConn(cConn * &conn) {
 			dcserver->miTotalUserCount --;
 			if(dcconn->mDCUser)
 				dcserver->miTotalShare -= dcconn->mDCUser->GetShare();
+			else
+				if(conn->Log(0)) conn->LogStream() << "Del conn without user" << endl;
+		} else {
+			if(conn->Log(0)) conn->LogStream() << "Del conn without ALOWED flag: " << dcconn->GetLSFlag(eLS_LOGIN_DONE) << endl;
 		}
 		if(dcconn->mDCUser) {
 			if(dcconn->mDCUser->mbInUserList)
@@ -233,6 +237,10 @@ void cDCConnFactory::DelConn(cConn * &conn) {
 		#ifndef WITHOUT_PLUGINS
 			dcserver->mCalls.mOnUserDisconnected.CallAll(dcconn);
 		#endif
+	} else {
+		if(conn->ErrLog(0)) conn->LogStream() << "Fail error in DelConn: dcconn = " <<
+			(dcconn == NULL ? "NULL" : "not NULL") << ", dcserver = " << 
+			(dcserver == NULL ? "NULL" : "not NULL") << endl;
 	}
 	cConnFactory::DelConn(conn);
 }

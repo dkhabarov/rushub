@@ -226,7 +226,12 @@ void cConn::CloseNow() {
 			mbClosed = true; // poll conflict
 			mServer->mConnChooser.cConnChoose::OptIn((cConnBase*)this, cConnChoose::eEF_CLOSE);
 			mServer->mConnChooser.cConnChoose::OptOut((cConnBase*)this, cConnChoose::eEF_ALL);
+		} else {
+			if(Log(0)) LogStream() << "OptGet: Close flag is setted already!" << endl;
+			mServer->mConnChooser.cConnChoose::OptOut((cConnBase*)this, cConnChoose::eEF_ALL);
 		}
+	} else {
+		if(ErrLog(0)) LogStream() << "CloseNow without Server" << endl;
 	}
 }
 

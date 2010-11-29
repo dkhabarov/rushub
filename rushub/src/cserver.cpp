@@ -337,9 +337,10 @@ void cServer::Step() {
 		//if(!(ret + miNumCloseConn))
 		//	break;
 	}
+
 	if(miNumCloseConn) {
-		if(ErrLog(0)) LogStream() << "Conn for close not null: " << miNumCloseConn << endl;
-		miNumCloseConn = 0;
+		if(Log(0)) LogStream() << "Control not closed connections: " << miNumCloseConn << endl;
+		//miNumCloseConn = 0;
 	}
 }
 
@@ -413,7 +414,10 @@ int cServer::DelConnection(cConn *old_conn) {
 
 	if(old_conn->mConnFactory != NULL) 
 		old_conn->mConnFactory->DelConn(old_conn); 
-	else delete old_conn; 
+	else {
+		if(old_conn->Log(0)) old_conn->LogStream() << "Deleting conn without factory!" << endl;
+		delete old_conn;
+	}
 
 	//if(Log(4)) LogStream() << "Num clients after del: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.Size() << endl;
 	return 1;
