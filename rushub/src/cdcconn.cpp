@@ -221,9 +221,9 @@ void cDCConnFactory::DelConn(cConn * &conn) {
 			if(dcconn->mDCUser)
 				dcserver->miTotalShare -= dcconn->mDCUser->GetShare();
 			else
-				if(conn->Log(0)) conn->LogStream() << "Del conn without user" << endl;
+				if(conn->Log(3)) conn->LogStream() << "Del conn without user" << endl;
 		} else {
-			if(conn->Log(0)) conn->LogStream() << "Del conn without ALOWED flag: " << dcconn->GetLSFlag(eLS_LOGIN_DONE) << endl;
+			if(conn->Log(3)) conn->LogStream() << "Del conn without ALOWED flag: " << dcconn->GetLSFlag(eLS_LOGIN_DONE) << endl;
 		}
 		if(dcconn->mDCUser) {
 			if(dcconn->mDCUser->mbInUserList)

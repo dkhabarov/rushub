@@ -254,8 +254,8 @@ void cServer::Step() {
 	for(tChIt it = mConnChooser.begin(); it != mConnChooser.end();) {
 		res = (*it);
 		++it;
-		if(res.mRevents == 0 || ((mNowConn = (cConn* )res.mConnBase) == NULL)) continue; // optimization cycle
 		bool &bOk = mNowConn->mbOk;
+		if((res.mRevents == 0 && bOk) || ((mNowConn = (cConn* )res.mConnBase) == NULL)) continue; // optimization cycle
 		int activity = res.mRevents;
 
 		if(bOk && (activity & cConnChoose::eEF_INPUT) && (mNowConn->GetConnType() == eCT_LISTEN)) {

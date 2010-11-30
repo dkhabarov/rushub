@@ -227,11 +227,11 @@ void cConn::CloseNow() {
 			mServer->mConnChooser.cConnChoose::OptIn((cConnBase*)this, cConnChoose::eEF_CLOSE);
 			mServer->mConnChooser.cConnChoose::OptOut((cConnBase*)this, cConnChoose::eEF_ALL);
 		} else {
-			if(Log(0)) LogStream() << "OptGet: Close flag is setted already!" << endl;
+			if(Log(2)) LogStream() << "re off" << endl;
 			mServer->mConnChooser.cConnChoose::OptOut((cConnBase*)this, cConnChoose::eEF_ALL);
 		}
 	} else {
-		if(ErrLog(0)) LogStream() << "CloseNow without Server" << endl;
+		if(ErrLog(0)) LogStream() << "Close conn without Server" << endl;
 	}
 }
 
