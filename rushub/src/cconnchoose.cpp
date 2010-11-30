@@ -24,6 +24,45 @@ namespace nServer {
 cConnChoose::iterator cConnChoose::sBegin;
 cConnChoose::iterator cConnChoose::sEnd;
 
+bool cConnChoose::OptIn(cConnBase *conn, cConnChoose::tEventFlag eMask) {
+	if(!conn) return false;
+	return this->OptIn(tSocket(*conn), eMask);
+}
+
+
+void cConnChoose::OptOut(cConnBase *conn, cConnChoose::tEventFlag eMask) {
+	if(!conn) return;
+	this->OptOut(tSocket(*conn), eMask);
+}
+
+
+int cConnChoose::OptGet(cConnBase *conn) {
+	if(!conn) return 0;
+	return this->OptGet(tSocket(*conn));
+}
+
+
+int cConnChoose::RevGet(cConnBase *conn) {
+	if(!conn) return 0;
+	return this->RevGet(tSocket(*conn));
+}
+
+
+bool cConnChoose::RevTest(cConnBase *conn) {
+	if(!conn) return false;
+	return this->RevTest(tSocket(*conn));
+}
+
+
+tSocket cConnChoose::operator [] (cConnBase *conn) {
+	if(!conn) return -1;
+	return (tSocket)(*conn);
+}
+
+cConnBase * cConnChoose::operator [] (tSocket sock) {
+	return mConnBaseList.Find(sock);
+}
+
 /** Adding in mConnBaseList */
 bool cConnChoose::AddConn(cConnBase *conn) {
 	if(!conn) return false;

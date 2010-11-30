@@ -330,20 +330,6 @@ void cServer::Step() {
 				}
 			}
 		}
-
-		//if(activity - cConnChoose::eEF_CLOSE)
-		//	--ret;
-		//if(ret < 0) { // this will not happen, but we must be reinsure
-		//	if(ErrLog(0)) LogStream() << "Faild error in return value" << endl;
-		//	break;
-		//}
-		//if(!(ret + miNumCloseConn))
-		//	break;
-	}
-
-	if(miNumCloseConn) {
-		if(Log(0)) LogStream() << "Control not closed connections: " << miNumCloseConn << endl;
-		//miNumCloseConn = 0;
 	}
 }
 
