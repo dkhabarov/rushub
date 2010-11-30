@@ -224,8 +224,8 @@ void cConn::CloseNow() {
 		if(!(mServer->mConnChooser.cConnChoose::OptGet((cConnBase*)this) & cConnChoose::eEF_CLOSE)) {
 			mServer->miNumCloseConn ++;
 			mbClosed = true; // poll conflict
-			mServer->mConnChooser.cConnChoose::OptIn((cConnBase*)this, cConnChoose::eEF_CLOSE);
 			mServer->mConnChooser.cConnChoose::OptOut((cConnBase*)this, cConnChoose::eEF_ALL);
+			mServer->mConnChooser.cConnChoose::OptIn((cConnBase*)this, cConnChoose::eEF_CLOSE);
 		} else {
 			if(Log(2)) LogStream() << "re off" << endl;
 			mServer->mConnChooser.cConnChoose::OptOut((cConnBase*)this, cConnChoose::eEF_ALL);
