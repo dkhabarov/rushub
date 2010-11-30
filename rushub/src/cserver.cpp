@@ -331,6 +331,10 @@ void cServer::Step() {
 			}
 		}
 	}
+
+	if(miNumCloseConn) {
+		if(Log(3)) LogStream() << "Control not closed connections: " << miNumCloseConn << endl;
+	}
 }
 
 ///////////////////////////////////add_connection/del_connection///////////////////////////////////
