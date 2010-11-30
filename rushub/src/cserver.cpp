@@ -247,16 +247,19 @@ void cServer::Step() {
 		throw "Exception in Choose";
 	}
 
-	static cConnChoose::sChooseRes res;
-
 	if(Log(5)) LogStream() << "<new actions>: " << ret << " [" << miNumCloseConn << "]" << endl;
+
+	cConnChoose::sChooseRes res;
+	int activity;
 
 	for(tChIt it = mConnChooser.begin(); it != mConnChooser.end();) {
 		res = (*it);
 		++it;
+
+		if(((mNowConn = (cConn* )res.mConnBase) == NULL) ||
+			((activity = res.mRevents) == 0 && mNowConn->mbOk)) continue;
+
 		bool &bOk = mNowConn->mbOk;
-		if((res.mRevents == 0 && bOk) || ((mNowConn = (cConn* )res.mConnBase) == NULL)) continue; // optimization cycle
-		int activity = res.mRevents;
 
 		if(bOk && (activity & cConnChoose::eEF_INPUT) && (mNowConn->GetConnType() == eCT_LISTEN)) {
 
