@@ -778,15 +778,16 @@ int DisconnectIP(lua_State *L) {
 	if(!iProfile)
 		for(it = v.begin(); it != v.end(); ++it)
 			(*it)->Disconnect();
-	else
+	else {
+		int iPrf;
 		for(it = v.begin(); it != v.end(); ++it) {
-			static int iPrf;
 			iPrf = (*it)->GetProfile() + 1;
 			if(iPrf < 0) iPrf = -iPrf;
 			if(iPrf > 31) iPrf = (iPrf % 32) - 1;
 			if(iProfile & (1 << iPrf))
 				(*it)->Disconnect();
 		}
+	}
 
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
