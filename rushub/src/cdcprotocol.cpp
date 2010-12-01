@@ -140,12 +140,11 @@ int cDCProtocol::DoCmd(cParser *parser, cConn *conn) {
 int cDCProtocol::DC_Supports(cDCParser *dcparser, cDCConn *dcconn) {
 	ANTIFLOOD(NickList, eFT_NICKLIST);
 
-	static string sFeature;
+	string sFeature;
 	istringstream is(dcparser->mStr);
 	is >> sFeature;
 	dcconn->mFeatures = 0;
 	while(1) {
-		sFeature = this->mDCServer->msEmpty;
 		is >> sFeature;
 		if(!sFeature.size()) break;
 		if(sFeature      == "UserCommand") dcconn->mFeatures |= eSF_USERCOMMAND;
@@ -391,12 +390,10 @@ int cDCProtocol::DC_Chat(cDCParser *dcparser, cDCConn *dcconn) {
 	if(!dcconn->mDCUser) return -2;
 	if(!dcconn->mDCUser->mbInUserList) return -3;
 
-	static string sMsg;
-
 	/** Check chat nick */
 	if((dcparser->ChunkString(eCH_CH_NICK) != dcconn->mDCUser->msNick) ) {
 		if(dcconn->Log(2)) dcconn->LogStream() << "Bad nick in chat, closing" << endl;
-		sMsg = mDCServer->mDCLang.msBadChatNick;
+		string sMsg = mDCServer->mDCLang.msBadChatNick;
 		StringReplace(sMsg, string("nick"), sMsg, dcparser->ChunkString(eCH_CH_NICK));
 		StringReplace(sMsg, string("real_nick"), sMsg, dcconn->mDCUser->msNick);
 		mDCServer->SendToUser(dcconn, sMsg.c_str(), (char*)mDCServer->mDCConfig.msHubBot.c_str());
@@ -639,8 +636,7 @@ int cDCProtocol::DC_RevConnectToMe(cDCParser *dcparser, cDCConn *dcconn) {
 
 	/** Checking the nick */
 	if(mDCServer->mDCConfig.mbCheckRctmNick && (dcparser->ChunkString(eCH_RC_NICK) != dcconn->mDCUser->msNick)) {
-		static string sMsg;
-		sMsg = mDCServer->mDCLang.msBadRevConNick;
+		string sMsg = mDCServer->mDCLang.msBadRevConNick;
 		StringReplace(sMsg, string("nick"), sMsg, dcparser->ChunkString(eCH_RC_NICK));
 		StringReplace(sMsg, string("real_nick"), sMsg, dcconn->mDCUser->msNick);
 		mDCServer->SendToUser(dcconn, sMsg.c_str(), (char*)mDCServer->mDCConfig.msHubBot.c_str());

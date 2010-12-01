@@ -189,16 +189,14 @@ void cConn::Close() {
 
 #ifndef _WIN32
 	TEMP_FAILURE_RETRY(SOCK_CLOSE(mSocket));
-	if(SockErr != SOCK_EINTR){
+	if(SockErr != SOCK_EINTR || (mServer && !mServer->mbRun)) { // Interrupted system call on exit
 #else
-	static int err;
-	err = TEMP_FAILURE_RETRY(SOCK_CLOSE(mSocket));
-	if(!(SOCK_ERROR(err))){
+	int err = TEMP_FAILURE_RETRY(SOCK_CLOSE(mSocket));
+	if(!(SOCK_ERROR(err))) {
 #endif
 		--iConnCounter;
 		if(Log(3)) LogStream() << "Closing socket: " << mSocket << endl;
-	}
-	else if(ErrLog(1)) LogStream() << "Socket not closed: " << SockErr << endl;
+	} else if(ErrLog(1)) LogStream() << "Socket not closed: " << SockErr << endl;
 
 	mSocket = 0;
 }
@@ -212,7 +210,7 @@ int cConn::OnCloseNice(void) {
 void cConn::CloseNice(int imsec) {
 	OnCloseNice();
 	mbWritable = false;
-	if((imsec <= 0) || (!msSendBuf.size())){CloseNow(); return;}
+	if((imsec <= 0) || (!msSendBuf.size())) { CloseNow(); return; }
 	mCloseTime.Get();
 	mCloseTime += int(imsec);
 }
@@ -222,7 +220,7 @@ void cConn::CloseNow() {
 	mbWritable = mbOk = false;
 	if(mServer) {
 		if(!(mServer->mConnChooser.cConnChoose::OptGet((cConnBase*)this) & cConnChoose::eEF_CLOSE)) {
-			mServer->miNumCloseConn ++;
+			++ mServer->miNumCloseConn;
 			mbClosed = true; // poll conflict
 			mServer->mConnChooser.cConnChoose::OptOut((cConnBase*)this, cConnChoose::eEF_ALL);
 			mServer->mConnChooser.cConnChoose::OptIn((cConnBase*)this, cConnChoose::eEF_CLOSE);
@@ -266,9 +264,7 @@ tSocket cConn::Accept() {
 	#endif
 	static socklen_t namelen = sizeof(client);
 	tSocket sock;
-	int i;
-
-	i = 0;
+	int i = 0;
 	memset(&client, 0, namelen);
 	sock = accept(mSocket, (struct sockaddr *)&client, (socklen_t*)&namelen);
 	while(SOCK_INVALID(sock) && ((SockErr == SOCK_EAGAIN) || (SockErr == SOCK_EINTR)) && (i++ < 10)) {
@@ -289,8 +285,7 @@ tSocket cConn::Accept() {
 	static socklen_t yeslen = sizeof(yes);
 	if(SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &yes, yeslen))) {
 #ifdef _WIN32
-		static int err;
-		err = TEMP_FAILURE_RETRY(SOCK_CLOSE(sock));
+		int err = TEMP_FAILURE_RETRY(SOCK_CLOSE(sock));
 		if(SOCK_ERROR(err))
 #else
 		TEMP_FAILURE_RETRY(SOCK_CLOSE(sock));
@@ -318,8 +313,7 @@ tSocket cConn::Accept() {
 int cConn::Recv() {
 	if(!mbOk || !mbWritable) return -1;
 
-	static int iBufLen, i;
-	iBufLen = 0; i = 0;
+	int iBufLen = 0, i = 0;
 
 #ifdef USE_UDP
 	bool bUdp = (this->mConnType == eCT_CLIENTUDP);
@@ -470,7 +464,7 @@ int cConn::WriteData(const string &sData, bool bFlush) {
 
 	const char *send_buf; 
 	size_t size; 
-	static bool appended; 
+	bool appended = false;
 
 	if(msSendBuf.size()) {
 		msSendBuf.append(sData.c_str(), sData.size());
@@ -481,7 +475,6 @@ int cConn::WriteData(const string &sData, bool bFlush) {
 		size = sData.size();
 		if(!size) return 0; 
 		send_buf = sData.c_str();
-		appended = false;
 	}
 
 	/** Sending */
@@ -497,7 +490,7 @@ int cConn::WriteData(const string &sData, bool bFlush) {
 			//return -1;
 		//}
 
-		if(Log(3)) LogStream() << "Block sent: " << size << endl;
+		if(Log(3)) LogStream() << "Block sent. Was sent " << size << " bytes" << endl;
 		if(!appended)
 			StrCutLeft(sData, msSendBuf, size);
 		else
@@ -577,7 +570,7 @@ int cConn::Send(const char *buf, size_t &len) {
 			#endif
 				n = send(mSocket, buf + total, bytesleft, 
 				#ifndef _WIN32
-					MSG_DONTWAIT); // MSG_NOSIGNAL
+					MSG_NOSIGNAL | MSG_DONTWAIT);
 				#else
 					0);
 				#endif

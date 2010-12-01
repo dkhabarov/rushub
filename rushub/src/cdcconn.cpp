@@ -46,7 +46,7 @@ cDCConn::~cDCConn() {
 }
 
 int cDCConn::Send(const string & sData, bool bAddSep, bool bFlush) {
-	static int iRet;
+	int iRet;
 	if(!mbWritable) return 0;
 
 	if(sData.size() >= MAX_SEND_SIZE) {
@@ -151,7 +151,7 @@ int cDCConn::OnTimer(cTime &now) {
 }
 
 int cDCConn::Recv() {
-	static cDCServer * dcserver = (cDCServer *) mServer;
+	cDCServer * dcserver = (cDCServer *) mServer;
 	SetTimeOut(eTO_RECV, dcserver->mDCConfig.miTimeout[eTO_RECV], mServer->mTime);
 	return cConn::Recv();
 }

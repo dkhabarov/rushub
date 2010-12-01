@@ -225,7 +225,7 @@ void cServer::Stop(int iCode) {
 
 /** Step */
 void cServer::Step() {
-	static int ret;
+	int ret;
 	static cTime tmout(0, 1000l); /** timeout 1 msec */
 
 	try {
@@ -481,12 +481,11 @@ int cServer::OutputData(cConn *conn) {
 
 /** Main mase timer */
 int cServer::OnTimerBase(cTime &now) {
-	static tCLIt it, it_e;
 	OnTimer(now);
 	if(abs(int(now - mTimes.mConn)) >= miTimerConnPeriod) {
 		mTimes.mConn = now;
-		it_e = mConnList.end();
-		for(it = mConnList.begin(); it != it_e; ++it)
+		tCLIt it_e = mConnList.end();
+		for(tCLIt it = mConnList.begin(); it != it_e; ++it)
 			if((*it)->mbOk) (*it)->OnTimerBase(now); 
 	}
 	return 0;

@@ -29,8 +29,7 @@ void cUserList::ufSend::operator()(cUserBase *User) {
 		if(!mbProfile) {
 			User->Send(msData, false); // newPolitic
 		} else {
-			static int iProfile;
-			iProfile = User->GetProfile() + 1;
+			int iProfile = User->GetProfile() + 1;
 			if(iProfile < 0) iProfile = -iProfile;
 			if(iProfile > 31) iProfile = (iProfile % 32) - 1;
 			if(miProfile & (1 << iProfile))
@@ -46,8 +45,7 @@ void cUserList::ufSendWithNick::operator()(cUserBase *User) {
 			User->Send(User->msNick, false, false);
 			User->Send(msDataEnd, true); // newPolitic
 		} else {
-			static int iProfile;
-			iProfile = User->GetProfile() + 1;
+			int iProfile = User->GetProfile() + 1;
 			if(iProfile < 0) iProfile = -iProfile;
 			if(iProfile > 31) iProfile = (iProfile % 32) - 1;
 			if(miProfile & (1 << iProfile)) {
