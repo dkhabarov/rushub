@@ -60,6 +60,7 @@ void cCli::detectArgs(int argc, char **argv) {
 				sMainDir = optarg;
 				break;
 			case 's':
+				cObj::mbSysLogOn = true;
 				break;
 			case '?':
 				printUsage(stdout, EXIT_SUCCESS);

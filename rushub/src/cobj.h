@@ -26,6 +26,7 @@
 #ifndef _WIN32
 	#define __int64 long long
 	#include <memory.h>
+	#include <syslog.h> 
 #endif
 
 using namespace std;
@@ -67,8 +68,9 @@ public:
 	static int miMaxErrLevel;
 
 	static ofstream mOfs;
-
 	static char * msPath;
+
+	static bool mbSysLogOn;
 
 public:
 
@@ -83,7 +85,7 @@ public:
 	static int GetCount() { return mCounterObj; }
 
 	/** Main function putting log in stream */
-	virtual int StrLog(ostream &ostr, int iLevel, int iMaxLevel);
+	virtual int StrLog(ostream &ostr, int iLevel, int iMaxLevel, bool bIsError = false);
 
 	/** Return log straem */
 	int Log(int level);
@@ -100,10 +102,16 @@ public:
 	/** Return current log stream */
 	ostream &LogStream();
 
+	/** Return level for syslog */
+	static int SysLogLevel(int iLevel, bool bIsError = false);
+
 private:
 
 	/** Objects counter */
 	static int mCounterObj;
+	static int miLevel;
+	static ostringstream mOss;
+	static bool mbIsErrorLog;
 
 }; // cObj
 
