@@ -145,6 +145,7 @@ int cDCProtocol::DC_Supports(cDCParser *dcparser, cDCConn *dcconn) {
 	is >> sFeature;
 	dcconn->mFeatures = 0;
 	while(1) {
+		sFeature.clear();
 		is >> sFeature;
 		if(!sFeature.size()) break;
 		if(sFeature      == "UserCommand") dcconn->mFeatures |= eSF_USERCOMMAND;
