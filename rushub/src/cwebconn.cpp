@@ -41,7 +41,7 @@ cWebConn::~cWebConn() {
 int cWebConn::OnTimer(cTime &now) {
 	if(mTimeLastIOAction.Sec() < (now.Sec() + (long)(((cDCServer *)mServer)->mDCConfig.miWebTimeout))) {
 		if(Log(2)) LogStream() << "Any action timeout..." << endl;
-		CloseNice(9000);
+		CloseNice(9000, eCR_WEB);
 		return 1;
 	}
 	return 0;
@@ -93,7 +93,7 @@ void cWebConnFactory::OnNewData(cConn * conn, string * str) {
 	if(!Server->mCalls.mOnWebData.CallAll(Conn, Parser))
 #endif
 	{
-		conn->CloseNice(9000);
+		conn->CloseNice(9000, eCR_WEB);
 	}
 }
 

@@ -61,7 +61,7 @@ protected:
 
 }; // cConnFactory
 
-/** Типы соединений */
+/** Connections types */
 enum tConnType {
 	eCT_LISTEN,    //< Listen TCP
 	eCT_CLIENTTCP, //< Client TCP
@@ -70,12 +70,25 @@ enum tConnType {
 	eCT_SERVERUDP  //< Server UDP (multihub)
 };
 
-/** Статусы строки */
+/** Status of string */
 enum {
 	eSS_NO_STR,   //< No str
 	eSS_PARTLY,   //< String is partly received
 	eSS_STR_DONE, //< String is completely received
 	eSS_ERROR     //< Error
+};
+
+/** Enumeration of reasons to closing connection (Close Reason) */
+enum {
+	eCR_CLIENT_DISCONNECT = 1,
+	eCR_ERROR_RECV,
+	eCR_ERROR_SEND,
+	eCR_GETPEERNAME,
+	eCR_MAXSIZE_RECV,
+	eCR_MAXSIZE_SEND,
+	eCR_MAXSIZE_REMAINING,
+	eCR_MAX_ATTEMPT_SEND,
+	eCR_MAX
 };
 
 /** Main connection class for server */
@@ -90,6 +103,8 @@ public:
 	bool mbOk; /** Points that given connection is registered (socket of connection is created and bound) */
 	bool mbWritable; /** Points that data can be read and be written */
 	cTime mTimeLastIOAction; /** Time of the last action of the client */
+
+	int miCloseReason; /** Reason of close connection */
 
 	cConnFactory * mConnFactory; /** Conn factory */
 	cListenFactory * mListenFactory; /** Listen factory */
@@ -112,8 +127,8 @@ public:
 	tSocket ListenPort(int iPort, const char *sIp = NULL, bool bUDP = false);
 
 	void Close(); /** Close connection (socket) */
-	void CloseNice(int msec=0); /** Nice close conn (socket) */
-	void CloseNow(); /** Now close conn */
+	void CloseNice(int msec = 0, int iReason = 0); /** Nice close conn (socket) */
+	void CloseNow(int iReason = 0); /** Now close conn */
 
 	/** Creating the new object for enterring connection */
 	virtual cConn * CreateNewConn();
@@ -245,7 +260,7 @@ protected:
 	tSocket SocketNonBlock(tSocket);
 
 	/** OnCloseNice event */
-	virtual int OnCloseNice(void);
+	virtual int OnCloseNice();
 
 	/** Accept new conn */
 	tSocket Accept();

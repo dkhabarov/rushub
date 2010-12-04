@@ -218,7 +218,7 @@ int cDCServer::OnTimer(cTime &now) {
 		} else mSysLoading = eSL_OK;
 
 		if(mSysLoading != SysLoading)
-			if(Log(1)) LogStream() << "System loading: " << mSysLoading << " level (was " << SysLoading << " level)" << endl;
+			if(Log(0)) LogStream() << "System loading: " << mSysLoading << " level (was " << SysLoading << " level)" << endl;
 
 		mIPEnterFlood.Del(now); // Removing ip addresses, which already long ago entered
 
@@ -244,10 +244,16 @@ int cDCServer::OnTimer(cTime &now) {
 int cDCServer::OnNewConn(cConn *conn) {
 	cDCConn * dcconn = (cDCConn *) conn;
 
+	if(mSysLoading == eSL_SYSTEM_DOWN) {
+		if(dcconn->Log(1)) dcconn->LogStream() << "System down, close" << endl;
+		dcconn->CloseNow(eCR_HUB_LOAD);
+		return 1;
+	}
+
 	/** Checking flood-entry (by ip) */
 	if(mIPEnterFlood.Check(dcconn->GetNetIp(), mTime)) {
-		dcconn->CloseNow();
-		return 1;
+		dcconn->CloseNow(eCR_IP_FLOOD);
+		return 2;
 	}
 
 	if(dcconn->Log(5)) dcconn->LogStream() << "[S]Stage OnNewConn" << endl;
@@ -496,7 +502,7 @@ bool cDCServer::CheckNick(cDCConn *dcconn) {
 		}
 		if(us->mDCConn->Log(3)) us->mDCConn->LogStream() << "removed old user" << endl;
 		RemoveFromDCUserList(us);
-		us->mDCConn->CloseNow(eCR_TIMEOUT);
+		us->mDCConn->CloseNow(eCR_OLD_CLIENT);
 	}
 	return true;
 }
@@ -510,7 +516,7 @@ bool cDCServer::BeforeUserEnter(cDCConn *dcconn) {
 	if(iWantedMask == dcconn->GetLSFlag(iWantedMask)) {
 		if(dcconn->Log(3)) dcconn->LogStream() << "Begin login" << endl;
 		if(!CheckNick(dcconn)) {
-			dcconn->CloseNice(9000, eCR_INVALID_USER);
+			dcconn->CloseNice(9000, eCR_INVALID_NICK);
 			return false;
 		}
 		if(dcconn->mbSendNickList) {
@@ -528,7 +534,7 @@ bool cDCServer::BeforeUserEnter(cDCConn *dcconn) {
 	} else { /** Invalid sequence of the sent commands */
 		if(dcconn->Log(2)) dcconn->LogStream() << "Invalid sequence of the sent commands (" 
 			<< dcconn->GetLSFlag(iWantedMask) << "), wanted: " << iWantedMask << endl;
-		dcconn->CloseNow();
+		dcconn->CloseNow(eCR_BAD_SEQUENCE);
 		return false;
 	}
 }
@@ -540,12 +546,12 @@ void cDCServer::DoUserEnter(cDCConn *dcconn) {
 	if(eLS_LOGIN_DONE != dcconn->GetLSFlag(eLS_LOGIN_DONE)) {
 		if(dcconn->Log(2))
 			dcconn->LogStream() << "User Login when not all done (" << dcconn->GetLSFlag(eLS_LOGIN_DONE) << ")" <<endl;
-		dcconn->CloseNow();
+		dcconn->CloseNow(eCR_NOT_LOGIN_DONE);
 		return;
 	}
 
 	if(!CheckNick(dcconn)) {
-		dcconn->CloseNice(9000, eCR_INVALID_USER);
+		dcconn->CloseNice(9000, eCR_INVALID_NICK);
 		return;
 	}
 
@@ -560,7 +566,7 @@ void cDCServer::DoUserEnter(cDCConn *dcconn) {
 
 	/** Adding user to the user list */
 	if(!AddToUserList((cDCUser *)dcconn->mDCUser)) {
-		dcconn->CloseNow();
+		dcconn->CloseNow(eCR_ADD_USER);
 		return;
 	}
 

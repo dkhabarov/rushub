@@ -62,7 +62,7 @@ public:
 	virtual int GetPortConn() { return miPortConn; } /** Get conn port */
 	virtual unsigned long GetNetIp() { return miNetIp; }
 	virtual int Send(const string & sData, bool bFlush = true);
-	virtual void Disconnect() { CloseNice(9000); }
+	virtual void Disconnect() { CloseNice(9000, eCR_WEB); }
 
 }; // cWebConn
 

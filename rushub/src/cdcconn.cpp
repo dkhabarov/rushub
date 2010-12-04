@@ -27,7 +27,6 @@ cDCConn::cDCConn(tSocket sock, cServer *s) :
 	cConn(sock, s),
 	mFeatures(0),
 	miProfile(-1),
-	miCloseReason(0),
 	mbSendNickList(false),
 	mbIpRecv(false),
 	mbNickListInProgress(false),
@@ -161,13 +160,11 @@ int cDCConn::OnCloseNice() {
 }
 
 void cDCConn::CloseNice(int msec, int iReason) {
-	miCloseReason = iReason;
-	cConn::CloseNice(msec);
+	cConn::CloseNice(msec, iReason);
 }
 
 void cDCConn::CloseNow(int iReason) {
-	miCloseReason = iReason;
-	cConn::CloseNow();
+	cConn::CloseNow(iReason);
 }
 
 /** Set user object for current connection */

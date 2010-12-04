@@ -68,21 +68,57 @@ typedef enum {
 
 /** Enumeration of reasons to closing connection (Close Reason) */
 enum {
-	eCR_DEFAULT = 0,  //< Default
-	eCR_SYNTAX,       //< Symtax error in NMDC command
-	eCR_HUB_LOAD,     //< Critical loading on the hub, do not take new users
-	eCR_TIMEOUT,      //< Timeout to receive of the command
-	eCR_TO_ANYACTION, //< Any action timeout
-	eCR_INVALID_USER, //< Invalid user (bad nick or IP)
-	eCR_CHAT_NICK,    //< Using bad nick in the chat
-	eCR_QUIT,         //< Using $Quit command
-	eCR_LOGIN_ERR,    //< Bad login sequence
-	eCR_KICKED,       //< User was kicked
-	eCR_FORCEMOVE,    //< User was force moved on other hub
-	eCR_USERS_LIMIT,  //< User's limit
+	eCR_HUB_LOAD1,     //< Critical loading on the hub, do not take new users	
+};
+
+/** Enumeration of reasons to closing connection (Close Reason) */
+enum {
+	eCR_BAD_FLAG = eCR_MAX,
+	eCR_BAD_CMD_PARAM,
+	eCR_BAD_CMD_LENGTH,
+	eCR_BAD_CMD_NULL,
+	eCR_LONG_NICK,
+	eCR_SETUSER,
+	eCR_SYNTAX_CHAT,
+	eCR_SYNTAX_TO,
+	eCR_BAD_NICK_PM,
+	eCR_SYNTAX_MCTO,
+	eCR_BAD_NICK_MCTO,
+	eCR_SYNTAX_SEARCH,
+	eCR_SYNTAX_SR,
+	eCR_SYNTAX_CTM,
+	eCR_SYNTAX_RCTM,
+	eCR_SYNTAX_KICK,
+	eCR_SYNTAX_OFM,
+	eCR_SYNTAX_GETINFO,
+	eCR_BAD_DC_CMD,
+	eCR_IP_FLOOD,
+	eCR_OLD_CLIENT,
+	eCR_BAD_SEQUENCE,
+	eCR_NOT_LOGIN_DONE,
+	eCR_ADD_USER,
 	eCR_PLUGIN,
-	eCR_UNKNOWN_CMD,  //< Unknown cmd
-	eCR_FLOOD
+	eCR_TIMEOUT,
+	eCR_TO_ANYACTION,
+	eCR_FLOOD,
+	eCR_INVALID_USER,
+	eCR_INVALID_NICK,
+	eCR_USERS_LIMIT,
+	eCR_NICK_LEN,
+	eCR_LOGIN_ERR,
+	eCR_SYNTAX_VERSION,
+	eCR_SYNTAX_MYINFO,
+	eCR_MYINFO_WITHOUT_USER,
+	eCR_BAD_MYINFO_NICK,
+	eCR_CHAT_NICK,
+	eCR_NICK_SEARCH,
+	eCR_NICK_SR,
+	eCR_NICK_CTM,
+	eCR_NICK_RCTM,
+	eCR_UNKNOWN_CMD,
+	eCR_QUIT,
+	eCR_WEB,
+	eCR_HUB_LOAD // System down, do not take new users	
 };
 
 }; // nEnums
@@ -115,7 +151,6 @@ public:
 	string msVersion;           //< DC version
 	string msData;              //< Some user's data
 	int miProfile;              //< Profile
-	int miCloseReason;          //< Reason of close connection
 	bool mbSendNickList;        //< Sending user list when login
 	bool mbIpRecv;              //< Permit on reception of the messages, sending on my ip
 	bool mbNickListInProgress;  //< True while sending first nicklist

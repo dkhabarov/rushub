@@ -40,6 +40,7 @@ cConn::cConn(tSocket sock, cServer *s, tConnType st) :
 	mSocket(sock),
 	mbOk(sock > 0),
 	mbWritable(true),
+	miCloseReason(0),
 	mConnFactory(NULL),
 	mListenFactory(NULL),
 	mServer(s),
@@ -66,7 +67,7 @@ cConn::cConn(tSocket sock, cServer *s, tConnType st) :
 		struct sockaddr_in *saddr_in;
 		if(getpeername(mSocket, &saddr, &saddr_size) < 0) {
 			if(Log(2)) LogStream() << "Error in getpeername, closing" << endl;
-			CloseNow();
+			CloseNow(eCR_GETPEERNAME);
 		}
 		saddr_in = (struct sockaddr_in *)&saddr;
 
@@ -202,32 +203,36 @@ void cConn::Close() {
 }
 
 /** OnCloseNice */
-int cConn::OnCloseNice(void) {
+int cConn::OnCloseNice() {
 	return 0;
 }
 
 /** CloseNice */
-void cConn::CloseNice(int imsec) {
+void cConn::CloseNice(int imsec /* = 0 */, int iReason /* = 0 */) {
 	OnCloseNice();
 	mbWritable = false;
-	if((imsec <= 0) || (!msSendBuf.size())) { CloseNow(); return; }
+	if(iReason) miCloseReason = iReason;
+	if((imsec <= 0) || (!msSendBuf.size())) { CloseNow(iReason); return; }
 	mCloseTime.Get();
 	mCloseTime += int(imsec);
 }
 
 /** CloseNow */
-void cConn::CloseNow() {
+void cConn::CloseNow(int iReason /* = 0 */) {
 	mbWritable = mbOk = false;
 	if(mServer) {
 		if(!(mServer->mConnChooser.cConnChoose::OptGet((cConnBase*)this) & cConnChoose::eEF_CLOSE)) {
 			++ mServer->miNumCloseConn;
 			mbClosed = true; // poll conflict
 
+			if(iReason) miCloseReason = iReason;
+			if(Log(3)) LogStream() << "CloseNow (reason " << miCloseReason << ")" << endl;
+
 			// this sequence of flags for poll!
 			mServer->mConnChooser.cConnChoose::OptOut((cConnBase*)this, cConnChoose::eEF_ALL);
 			mServer->mConnChooser.cConnChoose::OptIn((cConnBase*)this, cConnChoose::eEF_CLOSE);
 		} else {
-			if(Log(3)) LogStream() << "Re-closure" << endl;
+			if(Log(3)) LogStream() << "Re-closure (reason " << iReason << ")" << endl;
 		}
 	} else {
 		if(ErrLog(0)) LogStream() << "Close conn without Server" << endl;
@@ -352,6 +357,7 @@ int cConn::Recv() {
 		#endif
 			if(iBufLen == 0) {
 				if(Log(3)) LogStream() << "User itself was disconnected" << endl;
+				CloseNow(eCR_CLIENT_DISCONNECT);
 			} else {
 				if(Log(2)) {
 					LogStream() << "Error in receive: " << SockErr;
@@ -372,8 +378,8 @@ int cConn::Recv() {
 							break;
 					}
 				}
+				CloseNow(eCR_ERROR_RECV);
 			}
-			CloseNow();
 			return -1;
 		#ifdef USE_UDP
 		}
@@ -422,7 +428,7 @@ int cConn::ReadFromRecvBuf() {
 	unsigned pos, len = (miRecvBufEnd - miRecvBufRead);
 	if((pos = string(buf).find(msSeparator)) == string::npos) {
 		if(msStr->size() + len > miStrSizeMax) {
-			CloseNow();
+			CloseNow(eCR_MAXSIZE_RECV);
 			return 0;
 		}
 		msStr->append((char*)buf, len);
@@ -441,7 +447,7 @@ int cConn::Remaining() {
 	char *buf = msRecvBuf + miRecvBufRead;
 	int len = miRecvBufEnd - miRecvBufRead;
 	if(msStr->size() + len > miStrSizeMax) {
-		CloseNow();
+		CloseNow(eCR_MAXSIZE_REMAINING);
 		return -1;
 	}
 	msStr->append((char*)buf, len);
@@ -453,7 +459,7 @@ int cConn::Remaining() {
 int cConn::WriteData(const string &sData, bool bFlush) {
 	if(msSendBuf.size() + sData.size() >= miSendBufMax) {
 		if(Log(0)) LogStream() << "Sending buffer has big size, closing" << endl;
-		CloseNow();
+		CloseNow(eCR_MAXSIZE_SEND);
 		return -1;
 	}
 	bFlush = bFlush || (msSendBuf.size() > (miSendBufMax >> 1));
@@ -483,11 +489,11 @@ int cConn::WriteData(const string &sData, bool bFlush) {
 
 		if((SockErr != SOCK_EAGAIN) /*&& (SockErr != SOCK_EINTR)*/) {
 			if(Log(2)) LogStream() << "Error in sending: " << SockErr << "(not EAGAIN), closing" << endl;
-			CloseNow();
+			CloseNow(eCR_ERROR_SEND);
 			return -1;
 		} //else if(miAttemptSend++ > MAX_ATTEMPT_SEND) {
 			//if(ErrLog(1)) LogStream() << "Error in sending: Attempt send more than " << MAX_ATTEMPT_SEND << ", closing" << endl;
-			//CloseNow();
+			//CloseNow(eCR_MAX_ATTEMPT_SEND);
 			//return -1;
 		//}
 

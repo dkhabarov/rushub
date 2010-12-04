@@ -28,14 +28,14 @@ namespace nProtocol {
 #define BADCMDPARAM(CMD) \
 if(dcparser->SplitChunks()) { \
 	if(dcconn->Log(1)) dcconn->LogStream() << "Attempt to attack in " CMD " (bad cmd param)" << endl; \
-	dcconn->CloseNow(); \
+	dcconn->CloseNow(eCR_BAD_CMD_PARAM); \
 	return -1; \
 }
 
 #define BADFLAG(CMD, FLAG) \
 if(dcconn->GetLSFlag(FLAG)) { \
 	if(dcconn->Log(1)) dcconn->LogStream() << "Attempt to attack in " CMD " (repeated sending)" << endl; \
-	dcconn->CloseNow(); \
+	dcconn->CloseNow(eCR_BAD_FLAG); \
 	return -1; \
 }
 
@@ -89,14 +89,14 @@ int cDCProtocol::DoCmd(cParser *parser, cConn *conn) {
 	// Checking length of command
 	if(dcparser->miLen > mDCServer->mDCConfig.mMaxCmdLen[dcparser->miType]) {
 		if(dcconn->Log(1)) dcconn->LogStream() << "Bad CMD(" << dcparser->miType << ") length: " << dcparser->miLen << endl;
-		dcconn->CloseNow();
+		dcconn->CloseNow(eCR_BAD_CMD_LENGTH);
 		return -1;
 	}
 
 	// Checking null chars
 	if(strlen(dcparser->mStr.data()) < dcparser->mStr.size()) {
 		if(dcconn->Log(1)) dcconn->LogStream() << "Sending null chars, probably attempt of an attack" << endl;
-		dcconn->CloseNow();
+		dcconn->CloseNow(eCR_BAD_CMD_NULL);
 		return -2;
 	}
 
@@ -199,7 +199,7 @@ int cDCProtocol::DC_ValidateNick(cDCParser *dcparser, cDCConn *dcconn) {
 	/** Additional checking the nick length */
 	if(iNickLen > 0xFF) {
 		if(dcconn->Log(1)) dcconn->LogStream() << "Attempt to attack by long nick" << endl;
-		dcconn->CloseNow();
+		dcconn->CloseNow(eCR_LONG_NICK);
 		return -1;
 	}
 
@@ -208,13 +208,13 @@ int cDCProtocol::DC_ValidateNick(cDCParser *dcparser, cDCConn *dcconn) {
 	try {
 		cDCUser *NewUser = new cDCUser(sNick);
 		if(!dcconn->SetUser(NewUser)) {
-			dcconn->CloseNow();
+			dcconn->CloseNow(eCR_SETUSER);
 			return -2;
 		}
 	} catch(...) {
-		if(mDCServer->ErrLog(1)) mDCServer->LogStream() << "Unhandled exception in cDCProtocol::DC_ValidateNick" << endl;
-		if(dcconn->ErrLog(1)) dcconn->LogStream() << "Error in SetUser closing" << endl;
-		dcconn->CloseNice(9000);
+		if(mDCServer->ErrLog(0)) mDCServer->LogStream() << "Unhandled exception in cDCProtocol::DC_ValidateNick" << endl;
+		if(dcconn->ErrLog(0)) dcconn->LogStream() << "Error in SetUser closing" << endl;
+		dcconn->CloseNice(9000, eCR_SETUSER);
 		return -2;
 	}
 
@@ -249,7 +249,7 @@ int cDCProtocol::DC_ValidateNick(cDCParser *dcparser, cDCConn *dcconn) {
 	#endif
 
 	if(!mDCServer->CheckNickLength(dcconn, iNickLen))
-		dcconn->CloseNice(9000, eCR_INVALID_USER);
+		dcconn->CloseNice(9000, eCR_NICK_LEN);
 	dcconn->SetTimeOut(eTO_MYINFO, mDCServer->mDCConfig.miTimeout[eTO_MYINFO], mDCServer->mTime);
 	dcconn->SetLSFlag(eLS_PASSWD); /** Does not need password */
 
@@ -275,7 +275,7 @@ int cDCProtocol::DC_MyPass(cDCParser *dcparser, cDCConn *dcconn) {
 	#endif
 
 	if(!mDCServer->CheckNickLength(dcconn, dcconn->mDCUser->msNick.length()))
-		dcconn->CloseNice(9000, eCR_INVALID_USER);
+		dcconn->CloseNice(9000, eCR_NICK_LEN);
 	string sMsg;
 	dcconn->SetLSFlag(eLS_PASSWD); /** Password is accepted */
 	Append_DC_Hello(sMsg, dcconn->mDCUser->msNick);
@@ -299,7 +299,7 @@ int cDCProtocol::DC_Version(cDCParser *dcparser, cDCConn *dcconn) {
 
 	#ifndef WITHOUT_PLUGINS
 		if(mDCServer->mCalls.mOnVersion.CallAll(dcconn, dcparser) && sVersion != "1,0091")
-			dcconn->CloseNice(9000, eCR_SYNTAX); /** Checking of the version */
+			dcconn->CloseNice(9000, eCR_SYNTAX_VERSION); /** Checking of the version */
 	#endif
 
 	dcconn->SetLSFlag(eLS_VERSION); /** Version was checked */
@@ -332,7 +332,7 @@ int cDCProtocol::DC_MyINFO(cDCParser *dcparser, cDCConn *dcconn) {
 	if(dcparser->SplitChunks()) {
 		if(dcconn->Log(2)) dcconn->LogStream() << "MyINFO syntax error, closing" << endl;
 		mDCServer->SendToUser(dcconn, mDCServer->mDCLang.msMyinfoError.c_str(), (char*)mDCServer->mDCConfig.msHubBot.c_str());
-		dcconn->CloseNice(9000, eCR_SYNTAX);
+		dcconn->CloseNice(9000, eCR_SYNTAX_MYINFO);
 		return -1;
 	}
 
@@ -347,13 +347,13 @@ int cDCProtocol::DC_MyINFO(cDCParser *dcparser, cDCConn *dcconn) {
 		} else {
 			if(dcconn->Log(2)) dcconn->LogStream() << "Myinfo without user: " << dcparser->mStr << endl;
 			mDCServer->SendToUser(dcconn, mDCServer->mDCLang.msBadLoginSequence.c_str(), (char*)mDCServer->mDCConfig.msHubBot.c_str());
-			dcconn->CloseNice(9000, eCR_LOGIN_ERR);
+			dcconn->CloseNice(9000, eCR_MYINFO_WITHOUT_USER);
 			return -2;
 		}
 	} else if(sNick != dcconn->mDCUser->msNick) { /** Проверка ника */
 		if(dcconn->Log(2)) dcconn->LogStream() << "Bad nick in MyINFO, closing" << endl;
 		mDCServer->SendToUser(dcconn, mDCServer->mDCLang.msBadMyinfoNick.c_str(), (char*)mDCServer->mDCConfig.msHubBot.c_str());
-		dcconn->CloseNice(9000, eCR_SYNTAX);
+		dcconn->CloseNice(9000, eCR_BAD_MYINFO_NICK);
 		return -1;
 	}
 
@@ -384,7 +384,7 @@ int cDCProtocol::DC_MyINFO(cDCParser *dcparser, cDCConn *dcconn) {
 int cDCProtocol::DC_Chat(cDCParser *dcparser, cDCConn *dcconn) {
 	if(dcparser->SplitChunks()) {
 		if(dcconn->Log(2)) dcconn->LogStream() << "Chat syntax error, closing" << endl;
-		dcconn->CloseNow(eCR_SYNTAX);
+		dcconn->CloseNow(eCR_SYNTAX_CHAT);
 		return -1;
 	}
 
@@ -420,7 +420,7 @@ int cDCProtocol::DC_Chat(cDCParser *dcparser, cDCConn *dcconn) {
 int cDCProtocol::DC_To(cDCParser *dcparser, cDCConn *dcconn) {
 	if(dcparser->SplitChunks()) {
 		if(dcconn->Log(2)) dcconn->LogStream() << "PM syntax error, closing" << endl;
-		dcconn->CloseNow(eCR_SYNTAX);
+		dcconn->CloseNow(eCR_SYNTAX_TO);
 		return -1;
 	}
 
@@ -433,7 +433,7 @@ int cDCProtocol::DC_To(cDCParser *dcparser, cDCConn *dcconn) {
 	/** Checking the coincidence nicks in command */
 	if(dcparser->ChunkString(eCH_PM_FROM) != dcconn->mDCUser->msNick || dcparser->ChunkString(eCH_PM_NICK) != dcconn->mDCUser->msNick) {
 		if(dcconn->Log(2)) dcconn->LogStream() << "Bad nick in PM, closing" <<endl;
-		dcconn->CloseNow();
+		dcconn->CloseNow(eCR_BAD_NICK_PM);
 		return -1;
 	}
 
@@ -452,7 +452,7 @@ int cDCProtocol::DC_To(cDCParser *dcparser, cDCConn *dcconn) {
 int cDCProtocol::DC_MCTo(cDCParser *dcparser, cDCConn *dcconn) {
 	if(dcparser->SplitChunks()) {
 		if(dcconn->Log(2)) dcconn->LogStream() << "MCTo syntax error, closing" << endl;
-		dcconn->CloseNow(eCR_SYNTAX);
+		dcconn->CloseNow(eCR_SYNTAX_MCTO);
 		return -1;
 	}
 
@@ -465,7 +465,7 @@ int cDCProtocol::DC_MCTo(cDCParser *dcparser, cDCConn *dcconn) {
 	/** Checking the coincidence nicks in command */
 	if(dcparser->ChunkString(eCH_MC_FROM) != dcconn->mDCUser->msNick) {
 		if(dcconn->Log(2)) dcconn->LogStream() << "Bad nick in MCTo, closing" <<endl;
-		dcconn->CloseNow();
+		dcconn->CloseNow(eCR_BAD_NICK_MCTO);
 		return -1;
 	}
 
@@ -494,7 +494,7 @@ int cDCProtocol::DC_MCTo(cDCParser *dcparser, cDCConn *dcconn) {
 int cDCProtocol::DC_Search(cDCParser *dcparser, cDCConn *dcconn) {
 	if(dcparser->SplitChunks()) {
 		if(dcconn->Log(2)) dcconn->LogStream() << "Search syntax error, closing" << endl;
-		dcconn->CloseNow(eCR_SYNTAX);
+		dcconn->CloseNow(eCR_SYNTAX_SEARCH);
 		return -1;
 	}
 
@@ -519,7 +519,7 @@ int cDCProtocol::DC_Search(cDCParser *dcparser, cDCConn *dcconn) {
 				StringReplace(sMsg, string("ip"), sMsg, dcparser->ChunkString(eCH_AS_IP));
 				StringReplace(sMsg, string("real_ip"), sMsg, dcconn->msIp);
 				mDCServer->SendToUser(dcconn, sMsg.c_str(), (char*)mDCServer->mDCConfig.msHubBot.c_str());
-				dcconn->CloseNice(9000, eCR_SYNTAX);
+				dcconn->CloseNice(9000, eCR_NICK_SEARCH);
 				return -1;
 			}
 			SendMode(dcconn, dcparser->mStr, iMode, mDCServer->mDCUserList, true); // Use cache for send to all
@@ -535,7 +535,7 @@ int cDCProtocol::DC_Search(cDCParser *dcparser, cDCConn *dcconn) {
 				StringReplace(sMsg, string("ip"), sMsg, dcparser->ChunkString(eCH_AS_IP));
 				StringReplace(sMsg, string("real_ip"), sMsg, dcconn->msIp);
 				mDCServer->SendToUser(dcconn, sMsg.c_str(), (char*)mDCServer->mDCConfig.msHubBot.c_str());
-				dcconn->CloseNice(9000, eCR_SYNTAX);
+				dcconn->CloseNice(9000, eCR_NICK_SEARCH);
 				return -1;
 			}
 			sMsg = "$Search ";
@@ -556,7 +556,7 @@ int cDCProtocol::DC_Search(cDCParser *dcparser, cDCConn *dcconn) {
 int cDCProtocol::DC_SR(cDCParser *dcparser, cDCConn *dcconn) {
 	if(dcparser->SplitChunks()) {
 		if(dcconn->Log(2)) dcconn->LogStream() << "SR syntax error, closing" << endl;
-		dcconn->CloseNow(eCR_SYNTAX);
+		dcconn->CloseNow(eCR_SYNTAX_SR);
 		return -1;
 	}
 
@@ -571,7 +571,7 @@ int cDCProtocol::DC_SR(cDCParser *dcparser, cDCConn *dcconn) {
 		StringReplace(sMsg, "nick", sMsg, dcparser->ChunkString(eCH_SR_FROM));
 		StringReplace(sMsg, "real_nick", sMsg, dcconn->mDCUser->msNick);
 		mDCServer->SendToUser(dcconn, sMsg.c_str(), (char*)mDCServer->mDCConfig.msHubBot.c_str());
-		dcconn->CloseNice(9000, eCR_SYNTAX);
+		dcconn->CloseNice(9000, eCR_NICK_SR);
 		return -1;
 	}
 
@@ -598,7 +598,7 @@ int cDCProtocol::DC_SR(cDCParser *dcparser, cDCConn *dcconn) {
 int cDCProtocol::DC_ConnectToMe(cDCParser *dcparser, cDCConn *dcconn) {
 	if(dcparser->SplitChunks()) {
 		if(dcconn->Log(2)) dcconn->LogStream() << "CTM syntax error, closing" << endl;
-		dcconn->CloseNow(eCR_SYNTAX);
+		dcconn->CloseNow(eCR_SYNTAX_CTM);
 		return -1;
 	}
 
@@ -611,7 +611,7 @@ int cDCProtocol::DC_ConnectToMe(cDCParser *dcparser, cDCConn *dcconn) {
 		StringReplace(sMsg, string("ip"), sMsg, dcparser->ChunkString(eCH_CM_IP));
 		StringReplace(sMsg, string("real_ip"), sMsg, dcconn->msIp);
 		mDCServer->SendToUser(dcconn, sMsg.c_str(), (char*)mDCServer->mDCConfig.msHubBot.c_str());
-		dcconn->CloseNice(9000, eCR_SYNTAX);
+		dcconn->CloseNice(9000, eCR_NICK_CTM);
 		return -1;
 	}
 
@@ -629,7 +629,7 @@ int cDCProtocol::DC_ConnectToMe(cDCParser *dcparser, cDCConn *dcconn) {
 int cDCProtocol::DC_RevConnectToMe(cDCParser *dcparser, cDCConn *dcconn) {
 	if(dcparser->SplitChunks()) {
 		if(dcconn->Log(2)) dcconn->LogStream() << "RCTM syntax error, closing" << endl;
-		dcconn->CloseNow(eCR_SYNTAX);
+		dcconn->CloseNow(eCR_SYNTAX_RCTM);
 		return -1;
 	}
 
@@ -643,7 +643,7 @@ int cDCProtocol::DC_RevConnectToMe(cDCParser *dcparser, cDCConn *dcconn) {
 		StringReplace(sMsg, string("nick"), sMsg, dcparser->ChunkString(eCH_RC_NICK));
 		StringReplace(sMsg, string("real_nick"), sMsg, dcconn->mDCUser->msNick);
 		mDCServer->SendToUser(dcconn, sMsg.c_str(), (char*)mDCServer->mDCConfig.msHubBot.c_str());
-		dcconn->CloseNice(9000, eCR_SYNTAX);
+		dcconn->CloseNice(9000, eCR_NICK_RCTM);
 		return -1;
 	}
 
@@ -667,7 +667,7 @@ int cDCProtocol::DC_MultiConnectToMe(cDCParser *, cDCConn *dcconn) {
 int cDCProtocol::DC_Kick(cDCParser *dcparser, cDCConn *dcconn) {
 	if(dcparser->SplitChunks()) {
 		if(dcconn->Log(2)) dcconn->LogStream() << "Kick syntax error, closing" << endl;
-		dcconn->CloseNow(eCR_SYNTAX);
+		dcconn->CloseNow(eCR_SYNTAX_KICK);
 		return -1;
 	}
 
@@ -680,7 +680,7 @@ int cDCProtocol::DC_Kick(cDCParser *dcparser, cDCConn *dcconn) {
 int cDCProtocol::DC_OpForceMove(cDCParser *dcparser, cDCConn *dcconn) {
 	if(dcparser->SplitChunks()) {
 		if(dcconn->Log(2)) dcconn->LogStream() << "OpForceMove syntax error, closing" << endl;
-		dcconn->CloseNow(eCR_SYNTAX);
+		dcconn->CloseNow(eCR_SYNTAX_OFM);
 		return -1;
 	}
 
@@ -693,7 +693,7 @@ int cDCProtocol::DC_OpForceMove(cDCParser *dcparser, cDCConn *dcconn) {
 int cDCProtocol::DC_GetINFO(cDCParser *dcparser, cDCConn *dcconn) {
 	if(dcparser->SplitChunks()) {
 		if(dcconn->Log(2)) dcconn->LogStream() << "GetINFO syntax error, closing" << endl;
-		dcconn->CloseNow(eCR_SYNTAX);
+		dcconn->CloseNow(eCR_SYNTAX_GETINFO);
 		return -1;
 	}
 	if(!dcconn->mDCUser || !dcconn->mDCUser->mbInUserList) return -1;
@@ -725,7 +725,7 @@ int cDCProtocol::DC_Unknown(cDCParser *dcparser, cDCConn *dcconn) {
 	// Protection from commands, not belonging to DC protocol
 	if(dcparser->mStr.compare(0, 1, "$") && mDCServer->mDCConfig.mbDisableNoDCCmd) {
 		if(dcconn->Log(1)) dcconn->LogStream() << "Bad DC cmd: " << dcparser->mStr.substr(0, 10) << " ..., close" << endl;
-		dcconn->CloseNow();
+		dcconn->CloseNow(eCR_BAD_DC_CMD);
 		return -1;
 	}
 
@@ -953,8 +953,7 @@ int cDCProtocol::SendNickList(cDCConn *dcconn) {
 			}
 		}
 	} catch(...) {
-		if(dcconn->ErrLog(2)) dcconn->LogStream() << "exception in SendNickList" << endl;
-		dcconn->CloseNow();
+		if(dcconn->ErrLog(0)) dcconn->LogStream() << "exception in SendNickList" << endl;
 		return -1;
 	}
 	return 0;
