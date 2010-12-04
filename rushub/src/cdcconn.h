@@ -140,6 +140,8 @@ public:
 		unsigned miRCTM;
 		cTime mMCTo;
 		unsigned miMCTo;
+		cTime mPing;
+		unsigned miPing;
 		cTime mUnknown;
 		unsigned miUnknown;
 		sTm() : 
@@ -152,6 +154,7 @@ public:
 			mCTM(0l), miCTM(0), 
 			mRCTM(0l), miRCTM(0),
 			mMCTo(0l), miMCTo(0),
+			mPing(0l), miPing(0),
 			mUnknown(0l), miUnknown(0)
 		{}
 	} mTimes1, mTimes2;
@@ -209,7 +212,7 @@ protected:
 
 	struct sTimes { /** Timers */
 		cTime mKey; //< Time sending cmd $Key to the server
-		cTime mPing; //< Time last ping from the client
+		cTime mPingServer; //< Time last ping from server to client
 	} mTimes;
 
 protected:

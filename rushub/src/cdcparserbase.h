@@ -58,7 +58,8 @@ typedef enum { /** Types of the commands (for field mType) */
 	eDC_OPFORCEMOVE,  //< 19 = $OpForceMove
 	eDC_GETINFO,      //< 20 = $GetINFO
 	eDC_MCTO,         //< 21 = $MCTo
-	eDC_UNKNOWN       //< 22 = $Unknown
+	eDC_PING,         //< 22 = |
+	eDC_UNKNOWN       //< 23 = $Unknown
 } tDCType;
 
 

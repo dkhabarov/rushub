@@ -87,6 +87,7 @@ public:
 	cTime &Normalize();
 	void Null(){tv_sec = tv_usec = 0;}
 	string AsString() const;
+	void AsTimeVals(int &w, int &d, int &h, int &m) const;
 	friend std::ostream &operator << (std::ostream &os, const cTime &t);
 
 private:

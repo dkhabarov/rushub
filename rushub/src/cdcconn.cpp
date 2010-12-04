@@ -138,7 +138,7 @@ int cDCConn::OnTimer(cTime &now) {
 	cTime Ago(now);
 	Ago -= dcserver->mDCConfig.miStartPing;
 	if(
-		dcserver->MinDelay(mTimes.mPing, dcserver->mDCConfig.miPingInterval) &&
+		dcserver->MinDelay(mTimes.mPingServer, dcserver->mDCConfig.miPingInterval) &&
 		mDCUser &&
 		mDCUser->mbInUserList &&
 		mDCUser->mTimeEnter < Ago

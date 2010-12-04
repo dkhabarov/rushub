@@ -48,6 +48,7 @@ void cDCConfig::AddVars() {
 	Add("iFloodCountCTM",       miFloodCountCTM,              500);
 	Add("iFloodCountRCTM",      miFloodCountRCTM,             250);
 	Add("iFloodCountMCTo",      miFloodCountMCTo,             5);
+	Add("iFloodCountPing",      miFloodCountPing,             5);
 	Add("iFloodCountUnknown",   miFloodCountUnknown,          1);
 	Add("iFloodCountMyINFO2",   miFloodCountMyINFO2,          30);
 	Add("iFloodCountSearch2",   miFloodCountSearch2,          10);
@@ -58,6 +59,7 @@ void cDCConfig::AddVars() {
 	Add("iFloodCountCTM2",      miFloodCountCTM2,             5000);
 	Add("iFloodCountRCTM2",     miFloodCountRCTM2,            2500);
 	Add("iFloodCountMCTo2",     miFloodCountMCTo2,            30);
+	Add("iFloodCountPing2",     miFloodCountPing2,            20);
 	Add("iFloodCountUnknown2",  miFloodCountUnknown2,         10);
 
 	Add("iFloodTimeReconnIp",   miFloodTimeReconnIp,          5.);
@@ -70,6 +72,7 @@ void cDCConfig::AddVars() {
 	Add("iFloodTimeCTM",        miFloodTimeCTM,               60.);
 	Add("iFloodTimeRCTM",       miFloodTimeRCTM,              60.);
 	Add("iFloodTimeMCTo",       miFloodTimeMCTo,              10.);
+	Add("iFloodTimePing",       miFloodTimePing,              1.);
 	Add("iFloodTimeUnknown",    miFloodTimeUnknown,           3.);
 	Add("iFloodTimeMyINFO2",    miFloodTimeMyINFO2,           900.);
 	Add("iFloodTimeSearch2",    miFloodTimeSearch2,           60.);
@@ -80,6 +83,7 @@ void cDCConfig::AddVars() {
 	Add("iFloodTimeCTM2",       miFloodTimeCTM2,              600.);
 	Add("iFloodTimeRCTM2",      miFloodTimeRCTM2,             600.);
 	Add("iFloodTimeMCTo2",      miFloodTimeMCTo2,             30.);
+	Add("iFloodTimePing2",      miFloodTimePing2,             30.);
 	Add("iFloodTimeUnknown2",   miFloodTimeUnknown2,          60.);
 
 	Add("iLenCmdMSearch",       mMaxCmdLen[eDC_MSEARCH],      256   );
@@ -103,8 +107,9 @@ void cDCConfig::AddVars() {
 	Add("iLenCmdKick",          mMaxCmdLen[eDC_KICK],         64    );
 	Add("iLenCmdOFM",           mMaxCmdLen[eDC_OPFORCEMOVE],  512   );
 	Add("iLenCmdGetINFO",       mMaxCmdLen[eDC_GETINFO],      128   );
-	Add("iLenCmdMCTo",          mMaxCmdLen[eDC_MCTO],           65536 );
+	Add("iLenCmdMCTo",          mMaxCmdLen[eDC_MCTO],         65536 );
 	Add("iLenCmdUnknown",       mMaxCmdLen[eDC_UNKNOWN],      128   );
+	mMaxCmdLen[eDC_PING] = 0; // ping length
 
 	Add("iWebTimeout",          miWebTimeout,                 30);
 	Add("iWebStrSizeMax",       miWebStrSizeMax,              10240);
@@ -133,7 +138,6 @@ void cDCConfig::AddVars() {
 	Add("iStepDelay",           mDCServer->mStepDelay,        0);
 	Add("iStrSizeMax",          mDCServer->miStrSizeMax,      10240);
 	Add("iSysLoading",          miSysLoading,                 1.);
-	Add("iMinClientPingInt",    miMinClientPingInt,           30.);
 	Add("iStartPing",           miStartPing,                  300);
 	Add("iPingInterval",        miPingInterval,               60.);
 	Add("bNicklistOnLogin",     mbNicklistOnLogin,            true);
@@ -191,7 +195,7 @@ void cDCLang::SetServer(cDCServer * server) {
 }
 
 void cDCLang::AddVars() {
-	Add("sFirstMsg", msFirstMsg, string("Этот хаб работает под управлением %[HUB] (Время работы: %[uptime] / Юзеров: %[total_users])."));
+	Add("sFirstMsg", msFirstMsg, string("Этот хаб работает под управлением %[HUB] (Время работы: %[uptime] / Юзеров: %[users] / Шара: %[share])."));
 	Add("sBadChatNick", msBadChatNick, string("Неверный ник: %[nick]."));
 	Add("sMyinfoError", msMyinfoError, string("Ошибка в синтаксисе команды MyINFO."));
 	Add("sBadLoginSequence", msBadLoginSequence, string("Не правильная последовательность отосланных команд при входе."));
@@ -206,7 +210,6 @@ void cDCLang::AddVars() {
 	
 	Add("sBadNickLen", msBadNickLen, string("Недопустимая длина ника. Допустимая длина ника от %[min] до %[max] символов."));
 	Add("sBadChars", msBadChars, string("Недопустимые символы в нике."));
-	Add("sFreqClientPing", msFreqClientPing, string("Ваш клиент слишком часто пингует хаб."));
 	Add("sUsersLimit", msUsersLimit, string("Достигнут придел по количеству подключенных пользователей."));
 
 	Add("sFloodMyINFO", msFloodMyINFO, string("Пожалуйста не флудите командой MyINFO."));
@@ -218,6 +221,7 @@ void cDCLang::AddVars() {
 	Add("sFloodCTM", msFloodCTM, string("Пожалуйста не флудите частыми запросами на соединение с пользователями хаба."));
 	Add("sFloodRCTM", msFloodRCTM, string("Пожалуйста не флудите частыми запросами на соединение с активнми пользователями хаба."));
 	Add("sFloodMCTo", msFloodTo, string("Пожалуйста не флудите!"));
+	Add("sFloodPing", msFloodPing, string("Ваш клиент слишком часто пингует хаб."));
 	Add("sFloodUnknown", msFloodUnknown, string("Не флудите неизвестными командами."));
 
 	string s;

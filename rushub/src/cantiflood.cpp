@@ -46,7 +46,7 @@ void cAntiFlood::Del(cTime &now) {
 	}
 }
 
-bool cAntiFlood::Check(HashType_t Hash) {
+bool cAntiFlood::Check(HashType_t Hash, cTime now) {
 	sItem * Item;
 	if(!mList) {
 		Item = new sItem();
@@ -59,15 +59,17 @@ bool cAntiFlood::Check(HashType_t Hash) {
 		mList->Add(Hash, Item);
 		return false;
 	}
-	bool bRet = false;
 	if(Item->miCount < miCount) ++Item->miCount;
 	else {
-		cTime now;
-		if(::fabs(double(now - Item->mTime)) < mTime) bRet = true;
+		if(::fabs(double(now - Item->mTime)) < mTime) {
+			Item->mTime = now;
+			Item->miCount = 0;
+			return true;
+		}
 		Item->mTime = now;
 		Item->miCount = 0;
 	}
-	return bRet;
+	return false;
 }
 
 }; // nDCServer

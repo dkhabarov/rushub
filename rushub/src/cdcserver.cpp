@@ -242,22 +242,18 @@ int cDCServer::OnTimer(cTime &now) {
 
 /** Function action after joining the client */
 int cDCServer::OnNewConn(cConn *conn) {
-	if(!conn) {
-		if(ErrLog(0)) LogStream() << "Fatal error: OnNewConn null pointer" << endl;
-		throw "Fatal error: OnNewConn null pointer";
-	}
 	cDCConn * dcconn = (cDCConn *) conn;
 
 	/** Checking flood-entry (by ip) */
-	if(mIPEnterFlood.Check(dcconn->GetNetIp())) {
-		conn->CloseNow();
+	if(mIPEnterFlood.Check(dcconn->GetNetIp(), mTime)) {
+		dcconn->CloseNow();
 		return 1;
 	}
 
-	if(conn->Log(5)) conn->LogStream() << "[S]Stage OnNewConn" << endl;
+	if(dcconn->Log(5)) dcconn->LogStream() << "[S]Stage OnNewConn" << endl;
 	string sMsg;
-	cDCProtocol::Append_DC_Lock(sMsg);
-	dcconn->Send(cDCProtocol::Append_DC_HubName(sMsg, mDCConfig.msHubName, mDCConfig.msTopic), false, false);
+	dcconn->Send(cDCProtocol::Append_DC_HubName(cDCProtocol::Append_DC_Lock(sMsg),
+		mDCConfig.msHubName, mDCConfig.msTopic), false, false);
 
 	#ifndef WITHOUT_PLUGINS
 		if(mCalls.mOnUserConnected.CallAll(dcconn))
@@ -265,29 +261,47 @@ int cDCServer::OnNewConn(cConn *conn) {
 		else
 	#endif
 	{
-		sMsg = mDCLang.msFirstMsg;
-		StringReplace(sMsg, string("HUB"), sMsg, string(INTERNALNAME " " INTERNALVERSION));
-		StringReplace(sMsg, string("total_users"), sMsg, miTotalUserCount);
-
-		cTime Uptime;
+		static __int64 iShareVal = -1;
+		static int iUsersVal = -1;
+		static long iTimeVal = -1;
+		static string sTimeCache, sShareCache, sCache;
+		bool useCache = true;
+		cTime Uptime(mTime);
 		Uptime -= mStartTime;
-		stringstream oss;
-		oss << Uptime.AsFullPeriod();
-		string sUptime(oss.str());
-		StringReplace(sUptime, string("weeks"), sUptime, mDCLang.msTimes[0], true);
-		StringReplace(sUptime, string("days"),  sUptime, mDCLang.msTimes[1], true);
-		StringReplace(sUptime, string("hours"), sUptime, mDCLang.msTimes[2], true);
-		StringReplace(sUptime, string("min"),   sUptime, mDCLang.msTimes[3], true);
-		StringReplace(sUptime, string("sec"),   sUptime, mDCLang.msTimes[4], true);
-
-		StringReplace(sMsg, string("uptime"), sMsg, sUptime);
-
-		SendToUser(dcconn, sMsg.c_str(), (char*)mDCConfig.msHubBot.c_str());
+		long min = Uptime.Sec() / 60;
+		if(iTimeVal != min) {
+			iTimeVal = min;
+			useCache = false;
+			stringstream oss;
+			int w, d, h, m;
+			Uptime.AsTimeVals(w, d, h, m);
+			if(w) oss << w << " " << mDCLang.msTimes[0] << " ";
+			if(d) oss << d << " " << mDCLang.msTimes[1] << " ";
+			if(h) oss << h << " " << mDCLang.msTimes[2] << " ";
+			oss << m << " " << mDCLang.msTimes[3];
+			sTimeCache = oss.str();
+		}
+		if(iShareVal != miTotalShare) {
+			iShareVal = miTotalShare;
+			useCache = false;
+			sShareCache = cDCProtocol::GetNormalShare(iShareVal);
+		}
+		if(iUsersVal != miTotalUserCount) {
+			iUsersVal = miTotalUserCount;
+			useCache = false;
+		}
+		if(!useCache) {
+			StringReplace(mDCLang.msFirstMsg, string("HUB"), sCache, string(INTERNALNAME " " INTERNALVERSION));
+			StringReplace(sCache, string("uptime"), sCache, sTimeCache);
+			StringReplace(sCache, string("users"), sCache, iUsersVal);
+			StringReplace(sCache, string("share"), sCache, sShareCache);
+		}
+		SendToUser(dcconn, sCache.c_str(), (char*)mDCConfig.msHubBot.c_str());
 	}
-	dcconn->SetTimeOut(eTO_LOGIN, mDCConfig.miTimeout[eTO_LOGIN], mTime); /** Тайм-аут на вход */
+	dcconn->SetTimeOut(eTO_LOGIN, mDCConfig.miTimeout[eTO_LOGIN], mTime); /** Timeout for enter */
 	dcconn->SetTimeOut(eTO_KEY, mDCConfig.miTimeout[eTO_KEY], mTime);
-	if(conn->Log(5)) conn->LogStream() << "[E]Stage OnNewConn" << endl;
-	conn->Flush();
+	if(dcconn->Log(5)) dcconn->LogStream() << "[E]Stage OnNewConn" << endl;
+	dcconn->Flush();
 	return 0;
 }
 
@@ -298,48 +312,17 @@ string * cDCServer::GetPtrForStr(cConn *conn) {
 
 /** Function of the processing enterring data */
 void cDCServer::OnNewData(cConn *conn, string *str) {
-	string & sStr = *str;
-	static string sProtoChar = "$";
 
-	if(conn->Log(4)) conn->LogStream() << "IN: " << sStr << DC_SEPARATOR << endl;
-	int iType = conn->mParser->Parse();
+	if(conn->Log(4)) conn->LogStream() << "IN: " << (*str) << DC_SEPARATOR << endl;
 
-	/* Protection from commands, not belonging to DC protocol */
-	if(iType == eDC_UNKNOWN && 
-		conn->mParser->miLen && 
-		sStr.compare(0, 1, sProtoChar) && 
-		mDCConfig.mbDisableNoDCCmd) {
-		if(conn->Log(1)) conn->LogStream() << "Bad DC cmd: " << sStr.substr(0, 10) << " ..., close" << endl;
-		conn->CloseNow();
-		return;
-	}
-
-	/* Ping from client side */
-	if(!conn->mParser->miLen && conn->RecvBufIsEmpty()) { /** Separate ping and void cmd */
-		cTime now;
-		if(double(now - conn->mTimePing) < mDCConfig.miMinClientPingInt) {
-			if(conn->Log(1)) conn->LogStream() << "Ping flood, close" << endl;
-			SendToUser((cDCConn *)conn, mDCLang.msFreqClientPing.c_str(), (char*)mDCConfig.msHubBot.c_str());
-			conn->CloseNice(9000);
-			return;
-		}
-		conn->mTimePing = now;
-		return;
-	}
-
-	if(conn->mParser->miLen > mDCConfig.mMaxCmdLen[iType]) { // Checking the length of the command
-		if(conn->Log(1)) conn->LogStream() << "Bad CMD(" << iType << ") length: " << conn->mParser->miLen << endl;
-		conn->CloseNow();
-		return;
-	}
+	conn->mParser->Parse();
 	conn->mProtocol->DoCmd(conn->mParser, conn);
 }
 
 /** Function checks min interval */
 bool cDCServer::MinDelay(cTime &time, double sec) {
-	cTime now;
-	if(::fabs(double(now - time)) >= sec) {
-		time = now;
+	if(::fabs(double(mTime - time)) >= sec) {
+		time = mTime;
 		return true;
 	}
 	return false;
@@ -348,12 +331,11 @@ bool cDCServer::MinDelay(cTime &time, double sec) {
 /** Antiflood function */
 bool cDCServer::AntiFlood(unsigned &iCount, cTime &Time, const unsigned &iCountLimit, const double &iTimeLimit) {
 	bool bRet = false;
-	cTime now;
-	if(::fabs(double(now - Time)) < iTimeLimit) {
+	if(::fabs(double(mTime - Time)) < iTimeLimit) {
 		if(iCountLimit < ++iCount) bRet = true;
 		else return false;
 	}
-	Time = now;
+	Time = mTime;
 	iCount = 0;
 	return bRet;
 }

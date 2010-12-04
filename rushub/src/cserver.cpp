@@ -340,10 +340,7 @@ void cServer::Step() {
 ///////////////////////////////////add_connection/del_connection///////////////////////////////////
 
 int cServer::AddConnection(cConn *conn) {
-	if(!conn) {
-		if(conn->ErrLog(0)) LogStream() << "Fatal error: AddConnection null pointer" << endl;
-		throw "Fatal error: AddConnection null pointer";
-	}
+
 	if(!conn->mbOk) { 
 		if(conn->Log(2)) conn->LogStream() << "Not reserved connection: " << conn->Ip() << endl;
 		if(conn->mConnFactory != NULL) conn->mConnFactory->DelConn(conn);

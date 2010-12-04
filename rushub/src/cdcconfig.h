@@ -75,6 +75,8 @@ public:
 	unsigned miFloodCountRCTM2;
 	unsigned miFloodCountMCTo;
 	unsigned miFloodCountMCTo2;
+	unsigned miFloodCountPing;
+	unsigned miFloodCountPing2;
 	unsigned miFloodCountUnknown;
 	unsigned miFloodCountUnknown2;
 
@@ -98,12 +100,13 @@ public:
 	double miFloodTimeRCTM2;
 	double miFloodTimeMCTo;
 	double miFloodTimeMCTo2;
+	double miFloodTimePing;
+	double miFloodTimePing2;
 	double miFloodTimeUnknown;
 	double miFloodTimeUnknown2;
 
 	double miPingInterval;      //< User's ping interval
 	double miTimeout[6];        //< Timeouts of the protocol commands
-	double miMinClientPingInt;  //< Min ping interval from the client side
 	double miSysLoading;        //< Factor of the system loading
 
 	bool mbWebServer;           //< Web-server on/off
@@ -155,7 +158,6 @@ public:
 	string msTimeout;           //< Message about timeout with the reason
 	string msTimeoutCmd[6];     //< Timeouts names
 	string msTimeoutAny;        //< Message about connection timeout
-	string msFreqClientPing;    //< Message about frequent pings on the client side (one of the methods of the attack)
 	string msUsersLimit;
 
 	string msFloodMyINFO;
@@ -167,6 +169,7 @@ public:
 	string msFloodCTM;
 	string msFloodRCTM;
 	string msFloodMCTo;
+	string msFloodPing;
 	string msFloodUnknown;
 
 	string msBadSearchIp;   //< Message about bad IP in the active search

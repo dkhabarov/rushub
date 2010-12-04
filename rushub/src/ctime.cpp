@@ -45,10 +45,21 @@ using namespace std;
 
 namespace nUtils {
 
-string cTime::AsString() const{
+string cTime::AsString() const {
 	ostringstream os;
 	os << (*this);
 	return os.str();
+}
+
+void cTime::AsTimeVals(int &w, int &d, int &h, int &m) const {
+	long rest = tv_sec;
+	w = rest / (24 * 3600 * 7);
+	rest %= (24 * 3600 * 7);
+	d = rest / (24 * 3600);
+	rest %= (24 * 3600);
+	h = rest / 3600;
+	rest %= 3600;
+	m = rest / 60;
 }
 
 cTime & cTime::Get() {
@@ -127,9 +138,9 @@ std::ostream &operator << (std::ostream &os, const cTime &t) {
 		if(n) os << n << " hours ";
 
 		n = rest / 60;
-		rest %= 60;
 		if(n) os << n << " min ";
-		os << rest << " sec ";
+		rest %= 60;
+		os << rest << " sec";
 		break;
 	default: /** AsString */
 		os << t.tv_sec << " s " << t.tv_usec << " µs";

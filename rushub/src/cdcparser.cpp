@@ -69,7 +69,8 @@ int cDCParser::Parse() {
 			break;
 		}
 	}
-	if(miType == eUNPARSED) miType = eDC_UNKNOWN; /** Unknown cmd */
+	if(!mStr.size()) miType = eDC_PING;
+	else if(miType == eUNPARSED) miType = eDC_UNKNOWN; /** Unknown cmd */
 	return miType;
 }
 

@@ -64,7 +64,7 @@ public:
 
 	void SendMode(cDCConn *dcconn, const string & sStr, int iMode, cUserList &, bool bUseCache = false);
 	int SendNickList(cDCConn *); /** Sending user-list and op-list */
-	string GetNormalShare(__int64); /** Get normal share size */
+	static string GetNormalShare(__int64); /** Get normal share size */
 
 protected:
 	cDCServer * mDCServer;
@@ -87,6 +87,9 @@ protected:
 	int DC_OpForceMove(cDCParser *, cDCConn *); /** Force move */
 	int DC_GetINFO(cDCParser *, cDCConn *); /** Get user's MyINFO */
 	int DC_MCTo(cDCParser *, cDCConn *); /** Private message in chat */
+	int DC_Ping(cDCParser *, cDCConn *); /** Ping cmd */
+	int DC_Unknown(cDCParser *, cDCConn *); /** Unknown cmd */
+	int DC_Quit(cDCParser *, cDCConn *); /** Quit cmd */
 
 }; // cDCProtocol
 

@@ -71,6 +71,7 @@ typedef enum { /** Flood types */
 	eFT_CTM,
 	eFT_RCTM,
 	eFT_MCTO,
+	eFT_PING,
 	eFT_UNKNOWN
 } tFloodType;
 

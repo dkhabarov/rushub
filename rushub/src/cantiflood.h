@@ -51,7 +51,7 @@ public:
 
 	cAntiFlood(unsigned &iCount, double &Time) : mList(NULL), miCount(iCount), mTime(Time) {}
 	~cAntiFlood(){}
-	bool Check(HashType_t Hash);
+	bool Check(HashType_t Hash, cTime now);
 	void Del(cTime &now);
 
 }; // cAntiFlood

@@ -97,8 +97,6 @@ public:
 	cProtocol * mProtocol; /** Protocol */
 	cParser * mParser; /** Parser */
 
-	cTime mTimePing; /** Last ping time from client side */
-
 public:
 
 	cConn(tSocket sock = 0, cServer *s = NULL, tConnType st = eCT_CLIENTTCP);

@@ -86,19 +86,27 @@ int cDCProtocol::DoCmd(cParser *parser, cConn *conn) {
 	cDCConn *dcconn = (cDCConn *)conn;
 	cDCParser *dcparser = (cDCParser *)parser;
 
-	if(strlen(parser->mStr.data()) < parser->mStr.size()) {
-		// Sending null chars, probably attempt of an attack.
-		conn->CloseNow();
+	// Checking length of command
+	if(dcparser->miLen > mDCServer->mDCConfig.mMaxCmdLen[dcparser->miType]) {
+		if(dcconn->Log(1)) dcconn->LogStream() << "Bad CMD(" << dcparser->miType << ") length: " << dcparser->miLen << endl;
+		dcconn->CloseNow();
 		return -1;
 	}
 
+	// Checking null chars
+	if(strlen(dcparser->mStr.data()) < dcparser->mStr.size()) {
+		if(dcconn->Log(1)) dcconn->LogStream() << "Sending null chars, probably attempt of an attack" << endl;
+		dcconn->CloseNow();
+		return -2;
+	}
+
 	#ifndef WITHOUT_PLUGINS
-		if(parser->miType != eUNPARSED) {
+		if(dcparser->miType != eUNPARSED) {
 			if(mDCServer->mCalls.mOnAny.CallAll(dcconn, dcparser)) return 1;
 		}
 	#endif
 
-	if(conn->Log(5)) conn->LogStream() << "[S]Stage " << parser->miType << endl;
+	if(dcconn->Log(5)) dcconn->LogStream() << "[S]Stage " << dcparser->miType << endl;
 	switch(parser->miType) {
 		case eDC_MSEARCH:
 		case eDC_MSEARCH_PAS:
@@ -121,19 +129,13 @@ int cDCProtocol::DoCmd(cParser *parser, cConn *conn) {
 		case eDC_OPFORCEMOVE:   DC_OpForceMove(dcparser, dcconn); break;
 		case eDC_GETINFO:       DC_GetINFO(dcparser, dcconn); break;
 		case eDC_MCTO:          DC_MCTo(dcparser, dcconn); break;
-		case eDC_UNKNOWN:
-			#ifndef WITHOUT_PLUGINS
-			if(!mDCServer->mCalls.mOnUnknown.CallAll(dcconn, dcparser)) {
-				dcconn->CloseNice(9000, eCR_UNKNOWN_CMD);
-			}
-			#endif
-			ANTIFLOOD(Unknown, eFT_UNKNOWN);
-			break;
-		case eDC_QUIT:          dcconn->CloseNice(9000, eCR_QUIT); break;
-		case eUNPARSED:         parser->Parse(); return DoCmd(parser, dcconn);
+		case eDC_PING:          DC_Ping(dcparser, dcconn); break;
+		case eDC_UNKNOWN:       DC_Unknown(dcparser, dcconn); break;
+		case eDC_QUIT:          DC_Quit(dcparser, dcconn); break;
+		case eUNPARSED:         dcparser->Parse(); return DoCmd(parser, dcconn);
 		default: if(Log(2)) LogStream() << "Incoming untreated event" << endl; break;
 	}
-	if(conn->Log(5)) conn->LogStream() << "[E]Stage " << parser->miType << endl;
+	if(dcconn->Log(5)) dcconn->LogStream() << "[E]Stage " << dcparser->miType << endl;
 	return 0;
 }
 
@@ -713,6 +715,34 @@ int cDCProtocol::DC_GetINFO(cDCParser *dcparser, cDCConn *dcconn) {
 	return 0;
 }
 
+int cDCProtocol::DC_Ping(cDCParser *dcparser, cDCConn *dcconn) {
+	ANTIFLOOD(Ping, eFT_PING);
+	return 0;
+}
+
+int cDCProtocol::DC_Unknown(cDCParser *dcparser, cDCConn *dcconn) {
+
+	// Protection from commands, not belonging to DC protocol
+	if(dcparser->mStr.compare(0, 1, "$") && mDCServer->mDCConfig.mbDisableNoDCCmd) {
+		if(dcconn->Log(1)) dcconn->LogStream() << "Bad DC cmd: " << dcparser->mStr.substr(0, 10) << " ..., close" << endl;
+		dcconn->CloseNow();
+	}
+
+	#ifndef WITHOUT_PLUGINS
+	if(!mDCServer->mCalls.mOnUnknown.CallAll(dcconn, dcparser)) {
+		dcconn->CloseNice(9000, eCR_UNKNOWN_CMD);
+	}
+	#endif
+
+	ANTIFLOOD(Unknown, eFT_UNKNOWN);
+	return 0;
+}
+
+int cDCProtocol::DC_Quit(cDCParser *dcparser, cDCConn *dcconn) {
+	dcconn->CloseNice(9000, eCR_QUIT);
+	return 0;
+}
+
 
 
 
@@ -934,7 +964,7 @@ string cDCProtocol::GetNormalShare(__int64 iVal) {
 	float s = static_cast<float>(iVal);
 	int i = 0;
 	for(; ((s >= 1024) && (i < 7)); ++i) s /= 1024;
-	os << ::std::floor(s * 1000 + 0.5) / 1000 << " " << mDCServer->mDCLang.msUnits[i];
+	os << ::std::floor(s * 1000 + 0.5) / 1000 << " " << cDCServer::sCurrentServer->mDCLang.msUnits[i];
 	return os.str();
 }
 
