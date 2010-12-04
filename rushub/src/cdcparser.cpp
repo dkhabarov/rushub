@@ -48,7 +48,8 @@ cProtocolCmd aDC_Commands[] = {
 	cProtocolCmd("$Kick "),             // check: op, nick, conn
 	cProtocolCmd("$OpForceMove $Who:"), // check: op, nick
 	cProtocolCmd("$GetINFO "),          // check: logged_in(FI), nick
-	cProtocolCmd("$MCTo: ")             // check: nick, other_nick
+	cProtocolCmd("$MCTo: "),            // check: nick, other_nick
+	cProtocolCmd("|")                   // ping cmd (cap)
 };
 
 
@@ -66,10 +67,10 @@ int cDCParser::Parse() {
 		if(aDC_Commands[i].Check(mStr)) { /** Check cmd from mStr */
 			miType = tDCType(i); /** Set cmd type */
 			miKWSize = aDC_Commands[i].mLength; /** Set length of key word for command */
-			break;
+			return miType;
 		}
 	}
-	if(!mStr.size()) miType = eDC_PING;
+	if(!miLen) miType = eDC_PING;
 	else if(miType == eUNPARSED) miType = eDC_UNKNOWN; /** Unknown cmd */
 	return miType;
 }

@@ -715,7 +715,7 @@ int cDCProtocol::DC_GetINFO(cDCParser *dcparser, cDCConn *dcconn) {
 	return 0;
 }
 
-int cDCProtocol::DC_Ping(cDCParser *dcparser, cDCConn *dcconn) {
+int cDCProtocol::DC_Ping(cDCParser *, cDCConn *dcconn) {
 	ANTIFLOOD(Ping, eFT_PING);
 	return 0;
 }
@@ -726,11 +726,13 @@ int cDCProtocol::DC_Unknown(cDCParser *dcparser, cDCConn *dcconn) {
 	if(dcparser->mStr.compare(0, 1, "$") && mDCServer->mDCConfig.mbDisableNoDCCmd) {
 		if(dcconn->Log(1)) dcconn->LogStream() << "Bad DC cmd: " << dcparser->mStr.substr(0, 10) << " ..., close" << endl;
 		dcconn->CloseNow();
+		return -1;
 	}
 
 	#ifndef WITHOUT_PLUGINS
 	if(!mDCServer->mCalls.mOnUnknown.CallAll(dcconn, dcparser)) {
 		dcconn->CloseNice(9000, eCR_UNKNOWN_CMD);
+		return -2;
 	}
 	#endif
 
@@ -738,7 +740,7 @@ int cDCProtocol::DC_Unknown(cDCParser *dcparser, cDCConn *dcconn) {
 	return 0;
 }
 
-int cDCProtocol::DC_Quit(cDCParser *dcparser, cDCConn *dcconn) {
+int cDCProtocol::DC_Quit(cDCParser *, cDCConn *dcconn) {
 	dcconn->CloseNice(9000, eCR_QUIT);
 	return 0;
 }
