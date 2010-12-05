@@ -48,7 +48,7 @@ cServer::cServer(const string sSep) :
 	mMeanFrequency(mTime, 90.0, 20),
 	mStepDelay(0),
 	miNumCloseConn(0),
-	miTimerServPeriod(100),
+	miTimerServPeriod(1000),
 	miTimerConnPeriod(4000),
 	mbMAC(true),
 	mNowConn(NULL),

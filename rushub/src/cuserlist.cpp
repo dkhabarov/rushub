@@ -66,7 +66,7 @@ void cUserList::ufDoNickList::operator()(cUserBase *User) {
 
 cUserList::cUserList(string sName, bool bKeepNickList) :
 	cObj("cUserList"),
-	tcHashTable<cUserBase*>(1024), // 1024 for big hubs and big check interval of resize
+	tcHashTable<cUserBase*>(2048), // 2048 for big hubs and big check interval of resize
 	msName(sName),
 	mNickListMaker(msNickList),
 	mbKeepNickList(bKeepNickList),

@@ -278,7 +278,7 @@ protected:
 
 public:
 
-	tcHashTable(unsigned iCapacity = 1024) : 
+	tcHashTable(unsigned iCapacity = 2048) : 
 		miSize(0),
 		mbIsResizing(false)
 	{

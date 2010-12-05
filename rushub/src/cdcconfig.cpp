@@ -133,7 +133,7 @@ void cDCConfig::AddVars() {
 		Add(s, miTimeout[i], iTimeoutDefault[i]);
 	}
 
-	Add("iTimerServPeriod",     mDCServer->miTimerServPeriod, 1000);
+	Add("iTimerServPeriod",     mDCServer->miTimerServPeriod, 2000);
 	Add("iTimerConnPeriod",     mDCServer->miTimerConnPeriod, 4000);
 	Add("iStepDelay",           mDCServer->mStepDelay,        0);
 	Add("iStrSizeMax",          mDCServer->miStrSizeMax,      10240);
