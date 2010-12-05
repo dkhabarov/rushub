@@ -1,13 +1,6 @@
 #  files for make:
 #
-#  cdcconnbase.h
-#  cdcparserbase.h
-#  cdcserverbase.h
-#  cdcuserbase.h
 #  cplugin.h
-#  cpluginbase.h
-#  cpluginlistbase.h
-#  cwebparserbase.h
 #  tinyxml/tinystr.h
 #  tinyxml/tinyxml.h
 #  tinyxml/tinyxml.a

@@ -37,7 +37,6 @@ namespace nDCServer{class cDCServerBase;}
 using namespace std;
 using namespace ::nPlugin;
 using namespace ::nDCServer;
-using namespace ::nDCServer::nPlugin;
 using namespace ::nDCServer::nProtoEnums;
 using namespace ::nLua;
 

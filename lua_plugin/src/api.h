@@ -20,7 +20,7 @@
 #ifndef CFUNCS_H
 #define CFUNCS_H
 
-#include "cdcserverbase.h" /** nDCServer */
+#include "cplugin.h" /** nDCServer */
 #include "lua.hpp"
 
 using namespace ::nDCServer;
