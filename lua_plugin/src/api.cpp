@@ -1205,44 +1205,6 @@ int Redirect(lua_State *L) {
 	return 1;
 }
 
-/// Kick(UID/sNick, [sReason])
-int Kick(lua_State *L) {
-	size_t iLen;
-	int iType;
-	const char *sReason = NULL;
-
-	switch(lua_gettop(L)) {
-		case 2:
-			iType = lua_type(L, 2);
-			if(iType != LUA_TNIL) {
-				sReason = luaL_checklstring(L, 2, &iLen);
-				if(iLen > 1024) { lua_settop(L, 0); lua_pushnil(L); lua_pushliteral(L, "very long reason."); return 2; }
-			}
-		case 1:
-			break;
-		default:
-			ERR_COUNT("1 or 2");
-	}
-
-	iType = lua_type(L, 1);
-	cDCConnBase * Conn = NULL;
-	if(iType != LUA_TLIGHTUSERDATA) {
-		if(iType != LUA_TSTRING) return luaL_typeerror(L, 1, "lightuserdata or string");
-		cDCUserBase * User = cLua::mCurServer->GetDCUserBase(lua_tostring(L, 1));
-		if(!User || !User->mDCConnBase) ERR("user was not found");
-		Conn = User->mDCConnBase;
-	} else {
-		Conn = (cDCConnBase *)lua_touserdata(L, 1);
-	}
-
-	if(!Conn || (Conn->_miConnType != 1)) ERR("user was not found");
-
-	cLua::mCurServer->Kick(Conn, sReason);
-	lua_settop(L, 0);
-	lua_pushboolean(L, 1);
-	return 1;
-}
-
 /// SetHubState(iNumber) | iNumber = 0 or nil - stop, iNumber = 1 - restart
 int SetHubState(lua_State *L) {
 	int iTop = lua_gettop(L);
