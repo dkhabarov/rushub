@@ -157,10 +157,10 @@ public:
 	int CheckCmd(const string &);
 
 	/** Listebing of ports */
-	virtual int Listening(int iPort = 0);
+	int Listening(int iPort = 0);
 
 	/** Main timer */
-	virtual int OnTimer(cTime &now);
+	int OnTimer(cTime &now);
 
 	/** Pointer on the user (or NULL) */
 	cDCUser * GetDCUser(const char *sNick);
@@ -168,13 +168,16 @@ public:
 	cDCUserBase * GetDCUserBase(const char *sNick);
 	cDCConnListIterator * GetDCConnListIterator(){ return new cDCListIterator(this); }
 
-	bool SendToUser(cDCConnBase *DCConn, const char *sData, char *sNick = NULL, char *sFrom = NULL);
-	bool SendToNick(const char *sTo, const char *sData, char *sNick = NULL, char *sFrom = NULL);
-	bool SendToAll(const char *sData, char *sNick = NULL, char *sFrom = NULL);
-	bool SendToProfiles(unsigned long iProfile, const char *sData, char *sNick = NULL, char *sFrom = NULL);
-	bool SendToIP(const char *sIP, const char *sData, unsigned long iProfile = 0, char *sNick = NULL, char *sFrom = NULL);
-	bool SendToAllExceptNicks(List_t & NickList, const char *sData, char *sNick = NULL, char *sFrom = NULL);
-	bool SendToAllExceptIps(List_t & IPList, const char *sData, char *sNick = NULL, char *sFrom = NULL);
+	bool SendToUser(cDCConnBase *DCConn, const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
+	bool SendToNick(const char *sTo, const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
+	bool SendToAll(const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
+	bool SendToProfiles(unsigned long iProfile, const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
+	bool SendToIP(const char *sIP, const char *sData, unsigned long iProfile = 0, const char *sNick = NULL, const char *sFrom = NULL);
+	bool SendToAllExceptNicks(List_t & NickList, const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
+	bool SendToAllExceptIps(List_t & IPList, const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
+
+	void ForceMove(cDCConnBase *DCConn, const char *sAddress, const char *sReason = NULL); //< Redirection client
+	void Kick(cDCConnBase *DCConn, const char *sReason = NULL); //< Kick user
 
 	void GetConfig(vector<string> & vec);
 	const char * GetConfig(const string & sName);

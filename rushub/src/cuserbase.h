@@ -64,13 +64,16 @@ public:
 	bool mbInOpList; /** User in op-list */
 	bool mbInIpList; /** User in ip-list */
 	bool mbHide; /** User was hide */
+	bool mbForceMove; /** User can redirect other users */
+	bool mbKick; /** User can kick other users */
 
 public:
 
 	cUserBase() : miByte(0), mbPassive(false), miShare(0),
 		miUnRegHubs(0),miRegHubs(0),miOpHubs(0),miSlots(0),
 		miLimit(0),miOpen(0),miBandwidth(0),miDownload(0), 
-		mbInUserList(false), mbInOpList(false), mbInIpList(false), mbHide(false) {}
+		mbInUserList(false), mbInOpList(false), mbInIpList(false),
+		mbHide(false), mbForceMove(false), mbKick(false) {}
 	virtual ~cUserBase() {}
 	virtual bool CanSend() { return false; }
 	virtual void Send(string &msg, bool sep = false, bool flush = true) = 0;

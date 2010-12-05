@@ -211,6 +211,9 @@ void cDCLang::AddVars() {
 	Add("sBadNickLen", msBadNickLen, string("Недопустимая длина ника. Допустимая длина ника от %[min] до %[max] символов."));
 	Add("sBadChars", msBadChars, string("Недопустимые символы в нике."));
 	Add("sUsersLimit", msUsersLimit, string("Достигнут придел по количеству подключенных пользователей."));
+	Add("sForceMove", msForceMove, string("Вы были перенаправлены на хаб dchub://%[address] причина: %[reason]"));
+	Add("sKick", msKick, string("Вы были кикнуты по причине: %[reason]"));
+	
 
 	Add("sFloodMyINFO", msFloodMyINFO, string("Пожалуйста не флудите командой MyINFO."));
 	Add("sFloodSearch", msFloodSearch, string("Пожалуйста не используйте поиск так часто."));

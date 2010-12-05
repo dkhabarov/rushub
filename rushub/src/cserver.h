@@ -29,7 +29,7 @@
 #include <list> /** tConnList */
 
 #define INTERNALNAME "RusHub"
-#define INTERNALVERSION "2.2.10[beta]" // without space!
+#define INTERNALVERSION "2.2.10" // without space!
 
 #if USE_SELECT
 	#include "cconnselect.h" /** Check sockets by method select */

@@ -60,6 +60,8 @@ public:
 	static string & Append_DC_Quit(string &sStr, const string &sNick);
 	static string & Append_DC_OpList(string &sStr, const string &sNick);
 	static string & Append_DC_UserIP(string &sStr, const string &sNick, const string &sIP);
+	static string & Append_DC_ForceMove(string &sStr, const string &sAddress);
+	static string & Append_DC_Kick(string &sStr, const string &sNick);
 	static void Append_DC_PMToAll(string &sStart, string &sEnd, const string &sFrom, const string &sNick, const string &sMsg);
 
 	void SendMode(cDCConn *dcconn, const string & sStr, int iMode, cUserList &, bool bUseCache = false);

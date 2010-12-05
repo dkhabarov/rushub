@@ -674,6 +674,15 @@ int cDCProtocol::DC_Kick(cDCParser *dcparser, cDCConn *dcconn) {
 	#ifndef WITHOUT_PLUGINS
 		if(mDCServer->mCalls.mOnKick.CallAll(dcconn, dcparser)) return -1;
 	#endif
+
+	if(!dcconn->mDCUser || !dcconn->mDCUser->mbKick) return -2;
+
+	cDCUser *User = (cDCUser *)mDCServer->mDCUserList.GetUserBaseByNick(dcparser->ChunkString(eCH_1_PARAM));
+
+	/** Is user exist? */
+	if(!User || !User->mDCConn) return -3;
+
+	User->mDCConn->CloseNice(9000, eCR_KICK);
 	return 0;
 }
 
@@ -687,6 +696,15 @@ int cDCProtocol::DC_OpForceMove(cDCParser *dcparser, cDCConn *dcconn) {
 	#ifndef WITHOUT_PLUGINS
 		if(mDCServer->mCalls.mOnOpForceMove.CallAll(dcconn, dcparser)) return -1;
 	#endif
+
+	if(!dcconn->mDCUser || !dcconn->mDCUser->mbForceMove) return -2;
+
+	cDCUser *User = (cDCUser *)mDCServer->mDCUserList.GetUserBaseByNick(dcparser->ChunkString(eCH_FM_NICK));
+
+	/** Is user exist? */
+	if(!User || !User->mDCConn || !dcparser->ChunkString(eCH_FM_DEST).size()) return -3;
+
+	mDCServer->ForceMove(User->mDCConn, dcparser->ChunkString(eCH_FM_DEST).c_str(), dcparser->ChunkString(eCH_FM_REASON).c_str());
 	return 0;
 }
 
@@ -882,6 +900,21 @@ string & cDCProtocol::Append_DC_UserIP(string &sStr, const string &sNick, const 
 	}
 	return sStr;
 }
+
+string & cDCProtocol::Append_DC_ForceMove(string &sStr, const string &sAddress) {
+	static const char * cmd = "$ForceMove ";
+	sStr.reserve(sAddress.size() + 11 + DC_SEPARATOR_LEN);
+	return sStr.append(cmd, 11).append(sAddress).append(DC_SEPARATOR, DC_SEPARATOR_LEN);
+}
+
+string & cDCProtocol::Append_DC_Kick(string &sStr, const string &sNick) {
+	static const char * cmd = "$Kick ";
+	sStr.reserve(sNick.size() + 6 + DC_SEPARATOR_LEN);
+	return sStr.append(cmd, 6).append(sNick).append(DC_SEPARATOR, DC_SEPARATOR_LEN);
+}
+
+
+
 
 
 void cDCProtocol::SendMode(cDCConn *dcconn, const string & sStr, int iMode, cUserList & UL, bool bUseCache) {

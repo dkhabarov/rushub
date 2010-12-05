@@ -54,47 +54,51 @@ public:
 	cDCUser();
 	cDCUser(const string & sNick);
 	virtual ~cDCUser();
-	virtual bool CanSend();
-	virtual void Send(string & sData, bool bAddSep = false, bool bFlush = true);
-	virtual const string & GetIp() const { return msIp; } /** Get IP address of user */
-	virtual const string & GetNick() const { return msNick; } /** Get nick (for plugins) */
-	virtual const string & GetMyINFO() const { return msMyINFO; } /** Get MyINFO (for plugins) */
-	virtual bool IsInUserList() const { return mbInUserList; } /** (for plugins) */
-	virtual bool IsInOpList() const { return mbInOpList; } /** (for plugins) */
-	virtual bool IsInIpList() const { return mbInIpList; } /** (for plugins) */
-	virtual bool IsHide() const { return mbHide; } /** (for plugins) */
-	virtual int GetProfile() const;
-	virtual void SetIp(const string & sIP);
+	bool CanSend();
+	void Send(string & sData, bool bAddSep = false, bool bFlush = true);
+	const string & GetIp() const { return msIp; } /** Get IP address of user */
+	const string & GetNick() const { return msNick; } /** Get nick (for plugins) */
+	const string & GetMyINFO() const { return msMyINFO; } /** Get MyINFO (for plugins) */
+	bool IsInUserList() const { return mbInUserList; } /** (for plugins) */
+	bool IsInOpList() const { return mbInOpList; } /** (for plugins) */
+	bool IsInIpList() const { return mbInIpList; } /** (for plugins) */
+	bool IsHide() const { return mbHide; } /** (for plugins) */
+	bool IsForceMove() const { return mbForceMove; } /** (for plugins) */
+	bool IsKick() const { return mbKick; } /** (for plugins) */
+	int GetProfile() const;
+	void SetIp(const string & sIP);
 
-	virtual const string & GetDesc() const { return msDesc; } /** Get description (for plugins) */
-	virtual const string & GetEmail() const { return msEmail; } /** Get e-mail (for plugins) */
-	virtual const string & GetConnection() const { return msConnection; } /** Get connection (for plugins) */
-	virtual unsigned GetByte() const { return miByte; } /** Get byte (for plugins) */
-	virtual __int64 GetShare() const { return miShare; } /** Get share (for plugins) */
-	virtual bool IsPassive() const { return mbPassive; }
+	const string & GetDesc() const { return msDesc; } /** Get description (for plugins) */
+	const string & GetEmail() const { return msEmail; } /** Get e-mail (for plugins) */
+	const string & GetConnection() const { return msConnection; } /** Get connection (for plugins) */
+	unsigned GetByte() const { return miByte; } /** Get byte (for plugins) */
+	__int64 GetShare() const { return miShare; } /** Get share (for plugins) */
+	bool IsPassive() const { return mbPassive; }
 
-	virtual const string & GetTag() const { return msTag; }
-	virtual const string & GetClient() const { return msClient; }
-	virtual const string & GetVersion() const { return msVersion; }
-	virtual unsigned GetUnRegHubs() const { return miUnRegHubs; }
-	virtual unsigned GetRegHubs() const { return miRegHubs; }
-	virtual unsigned GetOpHubs() const { return miOpHubs; }
-	virtual unsigned GetSlots() const { return miSlots; }
-	virtual unsigned GetLimit() const { return miLimit; }
-	virtual unsigned GetOpen() const { return miOpen; }
-	virtual unsigned GetBandwidth() const { return miBandwidth; }
-	virtual unsigned GetDownload() const { return miDownload; }
-	virtual const string & GetFraction() const { return msFraction; }
-	virtual const string & GetMode() const { return msMode; }
+	const string & GetTag() const { return msTag; }
+	const string & GetClient() const { return msClient; }
+	const string & GetVersion() const { return msVersion; }
+	unsigned GetUnRegHubs() const { return miUnRegHubs; }
+	unsigned GetRegHubs() const { return miRegHubs; }
+	unsigned GetOpHubs() const { return miOpHubs; }
+	unsigned GetSlots() const { return miSlots; }
+	unsigned GetLimit() const { return miLimit; }
+	unsigned GetOpen() const { return miOpen; }
+	unsigned GetBandwidth() const { return miBandwidth; }
+	unsigned GetDownload() const { return miDownload; }
+	const string & GetFraction() const { return msFraction; }
+	const string & GetMode() const { return msMode; }
 
 	// check myinfo format
-	virtual bool SetMyINFO(const string & sMyINFO, const string & sNick); /** (for plugins) */
-	virtual bool SetMyINFO(cDCParserBase * Parser);
-	virtual void ParseMyINFO(cDCParserBase * Parser);
+	bool SetMyINFO(const string & sMyINFO, const string & sNick); /** (for plugins) */
+	bool SetMyINFO(cDCParserBase * Parser);
+	void ParseMyINFO(cDCParserBase * Parser);
 
-	virtual void SetOpList(bool bInOpList); /** (for plugins) */
-	virtual void SetIpList(bool bInIpList); /** (for plugins) */
-	virtual void SetHide(bool bHide); /** (for plugins) */
+	void SetOpList(bool bInOpList); /** (for plugins) */
+	void SetIpList(bool bInIpList); /** (for plugins) */
+	void SetHide(bool bHide); /** (for plugins) */
+	void SetForceMove(bool bForceMove); /** (for plugins) */
+	void SetKick(bool bKick); /** (for plugins) */
 
 private:
 

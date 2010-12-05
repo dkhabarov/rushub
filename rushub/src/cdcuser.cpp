@@ -241,4 +241,12 @@ void cDCUser::SetHide(bool bHide) { /** Set/unset user in HideList (for plugins)
 	else mDCServer->DelFromHide(this);
 }
 
+void cDCUser::SetForceMove(bool bForceMove) { /** Set/unset ForceMove flag */
+	mbForceMove = bForceMove;
+}
+
+void cDCUser::SetKick(bool bKick) { /** Set/unset Kick flag */
+	mbKick = bKick;
+}
+
 }; // nDCServer

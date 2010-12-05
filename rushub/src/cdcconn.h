@@ -118,7 +118,9 @@ enum {
 	eCR_UNKNOWN_CMD,
 	eCR_QUIT,
 	eCR_WEB,
-	eCR_HUB_LOAD // System down, do not take new users	
+	eCR_HUB_LOAD, // System down, do not take new users	
+	eCR_FORCE_MOVE,
+	eCR_KICK
 };
 
 }; // nEnums

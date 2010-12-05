@@ -139,7 +139,7 @@ enum { eCH_0_ALL };
 /** A number of the chunks for commands with one parameter.
 		$Key [key], $ValidateNick [nick], $Version [1,0091], $Quit [nick], $MyPass [pass], $Kick [nick]
 */
-enum { eCH_1_ALL, eCH_1_PARAM }; 
+enum { eCH_1_ALL, eCH_1_PARAM };
 
 /** A number of the chunks for partition chat message
 		<[nick]> [msg]
@@ -258,11 +258,15 @@ public:
 	virtual bool IsInOpList() const = 0;               //< User in op-list (has op-key)
 	virtual bool IsInIpList() const = 0;               //< User in ip-list (can receive ip addresses of users)
 	virtual bool IsHide() const = 0;                   //< User is hidden
+	virtual bool IsForceMove() const = 0;              //< User can redirect
+	virtual bool IsKick() const = 0;                   //< User can kick
 
 	virtual bool SetMyINFO(const string &sMyINFO, const string & sNick) = 0; //< Set user's MyINFO cmd
 	virtual void SetOpList(bool) = 0;                  //< Add user in op-list
 	virtual void SetIpList(bool) = 0;                  //< Add user in ip-list
 	virtual void SetHide(bool) = 0;                    //< Hide the user
+	virtual void SetForceMove(bool) = 0;               //< Redirect flag (user can redirect)
+	virtual void SetKick(bool) = 0;                    //< Kick flag (user can kick)
 
 	virtual const string & GetDesc() const = 0;        //< Get user's description
 	virtual const string & GetEmail() const = 0;       //< Get user's email address
@@ -322,13 +326,16 @@ public:
 
 	virtual int CheckCmd(const string &) = 0;              //< Checking syntax of cmd. Returned tDCType enum of checked cmd
 
-	virtual bool SendToUser(cDCConnBase *DCConn, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0; //< Send comand to user
-	virtual bool SendToNick(const char *sTo, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;     //< Send comand to nick
-	virtual bool SendToAll(const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;                       //< Send comand to all
-	virtual bool SendToProfiles(unsigned long iProfile, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0; //< Send comand to profiles
-	virtual bool SendToIP(const char *sIP, const char *sData, unsigned long iProfile = 0, char *sNick = NULL, char *sFrom = NULL) = 0; //< Send comand to ip
-	virtual bool SendToAllExceptNicks(List_t & NickList, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0; //< Send comand to all except nicks
-	virtual bool SendToAllExceptIps(List_t & IPList, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0; //< Send comand to all except ips
+	virtual bool SendToUser(cDCConnBase *DCConn, const char *sData, const char *sNick = NULL, const char *sFrom = NULL) = 0; //< Send comand to user
+	virtual bool SendToNick(const char *sTo, const char *sData, const char *sNick = NULL, const char *sFrom = NULL) = 0;     //< Send comand to nick
+	virtual bool SendToAll(const char *sData, const char *sNick = NULL, const char *sFrom = NULL) = 0;                       //< Send comand to all
+	virtual bool SendToProfiles(unsigned long iProfile, const char *sData, const char *sNick = NULL, const char *sFrom = NULL) = 0; //< Send comand to profiles
+	virtual bool SendToIP(const char *sIP, const char *sData, unsigned long iProfile = 0, const char *sNick = NULL, const char *sFrom = NULL) = 0; //< Send comand to ip
+	virtual bool SendToAllExceptNicks(List_t & NickList, const char *sData, const char *sNick = NULL, const char *sFrom = NULL) = 0; //< Send comand to all except nicks
+	virtual bool SendToAllExceptIps(List_t & IPList, const char *sData, const char *sNick = NULL, const char *sFrom = NULL) = 0; //< Send comand to all except ips
+
+	virtual void ForceMove(cDCConnBase *DCConn, const char *sAddress, const char *sReason = NULL) = 0; //< Redirection client
+	virtual void Kick(cDCConnBase *DCConn, const char *sReason = NULL) = 0; //< Kick user
 
 	virtual void GetDCConnBase(const char * sIP, vector<cDCConnBase *> & vconn) = 0; //< Get conn base by ip
 	virtual cDCUserBase * GetDCUserBase(const char *sNick) = 0; //< Get user base by nick

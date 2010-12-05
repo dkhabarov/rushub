@@ -738,8 +738,7 @@ void cDCServer::AfterUserEnter(cDCConn *dcconn) {
 	#endif
 }
 
-/** Get user by nick (or NULL)
-*/
+/** Get user by nick (or NULL) */
 cDCUser * cDCServer::GetDCUser(const char *sNick) {
 	string sN(sNick);
 	if(sN.size()) {
@@ -771,7 +770,7 @@ void cDCServer::GetDCConnBase(const char * sIP, vector<cDCConnBase *> & vconn) {
 }
 
 /** Send data to user */
-bool cDCServer::SendToUser(cDCConnBase *DCConn, const char *sData, char *sNick, char *sFrom) {
+bool cDCServer::SendToUser(cDCConnBase *DCConn, const char *sData, const char *sNick, const char *sFrom) {
 	if(!DCConn || !sData) return false;
 
 	// PM
@@ -798,7 +797,7 @@ bool cDCServer::SendToUser(cDCConnBase *DCConn, const char *sData, char *sNick, 
 }
 
 /** Send data to nick */
-bool cDCServer::SendToNick(const char *sTo, const char *sData, char *sNick, char *sFrom) {
+bool cDCServer::SendToNick(const char *sTo, const char *sData, const char *sNick, const char *sFrom) {
 	if(!sTo || !sData) return false;
 	cDCUser *User = GetDCUser(sTo);
 	if(!User || !User->mDCConn) return false;
@@ -825,7 +824,7 @@ bool cDCServer::SendToNick(const char *sTo, const char *sData, char *sNick, char
 }
 
 /** Send data to all */
-bool cDCServer::SendToAll(const char *sData, char *sNick, char *sFrom) {
+bool cDCServer::SendToAll(const char *sData, const char *sNick, const char *sFrom) {
 	if(!sData) return false;
 
 	// PM
@@ -851,7 +850,7 @@ bool cDCServer::SendToAll(const char *sData, char *sNick, char *sFrom) {
 }
 
 /** Send data to profiles */
-bool cDCServer::SendToProfiles(unsigned long iProfile, const char *sData, char *sNick, char *sFrom) {
+bool cDCServer::SendToProfiles(unsigned long iProfile, const char *sData, const char *sNick, const char *sFrom) {
 	if(!sData) return false;
 
 	// PM
@@ -876,7 +875,7 @@ bool cDCServer::SendToProfiles(unsigned long iProfile, const char *sData, char *
 	return true;
 }
 
-bool cDCServer::SendToIP(const char *sIP, const char *sData, unsigned long iProfile, char *sNick, char *sFrom) {
+bool cDCServer::SendToIP(const char *sIP, const char *sData, unsigned long iProfile, const char *sNick, const char *sFrom) {
 	if(!sIP || !sData || !cConn::CheckIp(sIP)) return false;
 
 	// PM
@@ -902,7 +901,7 @@ bool cDCServer::SendToIP(const char *sIP, const char *sData, unsigned long iProf
 }
 
 /** Send data to all except nick list */
-bool cDCServer::SendToAllExceptNicks(cDCServer::List_t &NickList, const char *sData, char *sNick, char *sFrom) {
+bool cDCServer::SendToAllExceptNicks(cDCServer::List_t &NickList, const char *sData, const char *sNick, const char *sFrom) {
 	if(!sData) return false;
 
 	cUserBase * User;
@@ -934,7 +933,7 @@ bool cDCServer::SendToAllExceptNicks(cDCServer::List_t &NickList, const char *sD
 	return true;
 }
 
-bool cDCServer::SendToAllExceptIps(cDCServer::List_t & IPList, const char *sData, char *sNick, char *sFrom) {
+bool cDCServer::SendToAllExceptIps(cDCServer::List_t & IPList, const char *sData, const char *sNick, const char *sFrom) {
 	if(!sData) return false;
 
 	cDCConn * dcconn;
@@ -980,6 +979,34 @@ int cDCServer::CheckCmd(const string & sData) {
 	if(mDCParser.miType > 0 && mDCParser.miType < 3) return 3;
 	return mDCParser.miType;
 }
+
+void cDCServer::ForceMove(cDCConnBase *DCConn, const char *sAddress, const char *sReason /* = NULL */) {
+	if(!DCConn || !sAddress) return;
+	cDCConn * dcconn = (cDCConn *) DCConn;
+
+	string sMsg, sForce, sNick("<unknown>");
+	if(dcconn->mDCUser) sNick = dcconn->mDCUser->msNick;
+
+	StringReplace(mDCLang.msForceMove, string("address"), sForce, string(sAddress));
+	StringReplace(sForce, string("reason"), sForce, string(sReason != NULL ? sReason : ""));
+	cDCProtocol::Append_DC_PM(sMsg, sNick, mDCConfig.msHubBot, mDCConfig.msHubBot, sForce);
+	cDCProtocol::Append_DC_Chat(sMsg, mDCConfig.msHubBot, sForce);
+	dcconn->Send(cDCProtocol::Append_DC_ForceMove(sMsg, sAddress));
+	dcconn->CloseNice(9000, eCR_FORCE_MOVE);
+}
+
+void cDCServer::Kick(cDCConnBase *DCConn, const char *sReason /* = NULL */) {
+	if(!DCConn || !DCConn->mDCUserBase) return;
+	cDCConn * dcconn = (cDCConn *) DCConn;
+
+	string sMsg, sKickMsg, sNick = dcconn->mDCUser->msNick;
+	StringReplace(mDCLang.msKick, string("reason"), sKickMsg, string(sReason != NULL ? sReason : ""));
+	cDCProtocol::Append_DC_PM(sMsg, sNick, mDCConfig.msHubBot, mDCConfig.msHubBot, sKickMsg);
+	cDCProtocol::Append_DC_Chat(sMsg, mDCConfig.msHubBot, sKickMsg);
+	dcconn->Send(cDCProtocol::Append_DC_Kick(sMsg, sNick));
+	dcconn->CloseNice(9000, eCR_KICK);
+}
+
 
 void cDCServer::GetConfig(vector<string> & vec) {
 	for(cConfigListBase::tHLMIt it = mDCConfig.mList.begin(); it != mDCConfig.mList.end(); ++it) {
