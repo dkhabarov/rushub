@@ -200,6 +200,7 @@ public:
 	virtual ~cDCConn();
 	virtual const string & GetVersion() const { return msVersion; }  //< Client's protocol version
 	virtual const string & GetIp() const { return msIp; }            //< Get string of IP
+	virtual const string & GetIpConn() const { return msIpConn; }    //< Get string of server IP (host)
 	virtual const string & GetData() const { return msData; }        //< Get some user data
 	virtual const string & GetMacAddr() const { return msMAC; }      //< Get mac address
 	virtual const string & GetSupports() const { return msSupports; }

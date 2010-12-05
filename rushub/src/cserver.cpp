@@ -376,6 +376,7 @@ int cServer::AddConnection(cConn *conn) {
 	//if(Log(4)) LogStream() << "Num clients after add: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.Size() << endl;
 
 	conn->miPortConn = mNowConn->miPort;
+	conn->msIpConn = mNowConn->msIp;
 	return 1;
 }
 

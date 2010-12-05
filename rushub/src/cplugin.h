@@ -64,7 +64,7 @@ using namespace ::std;
 #endif // REG_PLUGIN
 
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10006  //< Internal plugin version
+	#define INTERNAL_PLUGIN_VERSION 10007  //< Internal plugin version
 #endif
 
 #ifndef DC_SEPARATOR
@@ -228,6 +228,7 @@ public:
 	virtual void Disconnect() = 0;                   //< Disconnect this client
 	virtual const string & GetVersion() const = 0;   //< Client's protocol version
 	virtual const string & GetIp() const = 0;        //< Get string of IP
+	virtual const string & GetIpConn() const = 0;    //< Get string of server ip (host)
 	virtual const string & GetData() const = 0;      //< Get some client data
 	virtual const string & GetMacAddr() const = 0;   //< Get mac address
 	virtual const string & GetSupports() const = 0;  //< Get all support cmd parameters, except of cmd name

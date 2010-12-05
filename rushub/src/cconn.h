@@ -233,6 +233,7 @@ protected:
 
 	unsigned long miNetIp; /** Numeric ip */
 	string msIp; /** String ip */
+	string msIpConn; /** String ip (host) of server */
 	int miPort; /** port */
 	int miPortConn; /** listen-conn port */
 

@@ -57,6 +57,7 @@ public:
 	virtual int OnTimer(cTime &now); /** Timer of the connection */
 
 	virtual const string & GetIp() { return msIp; } /** Get string of ip */
+	virtual const string & GetIpConn() const { return msIpConn; } /** Get string of server IP (host) */
 	virtual const string & GetMacAddr() { return msMAC; } /** Get mac address */
 	virtual int GetPort() { return miPort; } /** Get real port */
 	virtual int GetPortConn() { return miPortConn; } /** Get conn port */

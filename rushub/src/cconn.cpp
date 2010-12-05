@@ -99,6 +99,7 @@ tSocket cConn::ListenPort(int iPort, const char *sIp, bool bUDP) {
 			mSocket = SocketNonBlock(mSocket);
 	}
 	miPort = iPort; /** Set port */
+	msIp = sIp; /** Set ip (host) */
 	mbOk = mSocket > 0; /** Reg conn */
 	return mSocket;
 }
