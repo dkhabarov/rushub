@@ -995,19 +995,6 @@ void cDCServer::ForceMove(cDCConnBase *DCConn, const char *sAddress, const char 
 	dcconn->CloseNice(9000, eCR_FORCE_MOVE);
 }
 
-void cDCServer::Kick(cDCConnBase *DCConn, const char *sReason /* = NULL */) {
-	if(!DCConn || !DCConn->mDCUserBase) return;
-	cDCConn * dcconn = (cDCConn *) DCConn;
-
-	string sMsg, sKickMsg, sNick = dcconn->mDCUser->msNick;
-	StringReplace(mDCLang.msKick, string("reason"), sKickMsg, string(sReason != NULL ? sReason : ""));
-	cDCProtocol::Append_DC_PM(sMsg, sNick, mDCConfig.msHubBot, mDCConfig.msHubBot, sKickMsg);
-	cDCProtocol::Append_DC_Chat(sMsg, mDCConfig.msHubBot, sKickMsg);
-	dcconn->Send(cDCProtocol::Append_DC_Kick(sMsg, sNick));
-	dcconn->CloseNice(9000, eCR_KICK);
-}
-
-
 void cDCServer::GetConfig(vector<string> & vec) {
 	for(cConfigListBase::tHLMIt it = mDCConfig.mList.begin(); it != mDCConfig.mList.end(); ++it) {
 		vec.push_back((*it)->msName);

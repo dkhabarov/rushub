@@ -207,13 +207,11 @@ void cDCLang::AddVars() {
 	Add("sBadSRNick", msBadSRNick, string("Неверный ник в результатах поиска: %[nick]. Ваш реальный ник: %[real_nick]."));
 	Add("sBadSearchIp", msBadSearchIp, string("В поисковом запросе вы отсылаете неверный ip адрес: %[ip], ваш реальный ip: %[real_ip]."));
 	Add("sUsedNick", msUsedNick, string("Этот ник %[nick] уже используется другим пользователем."));
-	
+
 	Add("sBadNickLen", msBadNickLen, string("Недопустимая длина ника. Допустимая длина ника от %[min] до %[max] символов."));
 	Add("sBadChars", msBadChars, string("Недопустимые символы в нике."));
 	Add("sUsersLimit", msUsersLimit, string("Достигнут придел по количеству подключенных пользователей."));
 	Add("sForceMove", msForceMove, string("Вы были перенаправлены на хаб dchub://%[address] причина: %[reason]"));
-	Add("sKick", msKick, string("Вы были кикнуты по причине: %[reason]"));
-	
 
 	Add("sFloodMyINFO", msFloodMyINFO, string("Пожалуйста не флудите командой MyINFO."));
 	Add("sFloodSearch", msFloodSearch, string("Пожалуйста не используйте поиск так часто."));

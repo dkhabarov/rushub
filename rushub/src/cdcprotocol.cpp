@@ -907,12 +907,6 @@ string & cDCProtocol::Append_DC_ForceMove(string &sStr, const string &sAddress) 
 	return sStr.append(cmd, 11).append(sAddress).append(DC_SEPARATOR, DC_SEPARATOR_LEN);
 }
 
-string & cDCProtocol::Append_DC_Kick(string &sStr, const string &sNick) {
-	static const char * cmd = "$Kick ";
-	sStr.reserve(sNick.size() + 6 + DC_SEPARATOR_LEN);
-	return sStr.append(cmd, 6).append(sNick).append(DC_SEPARATOR, DC_SEPARATOR_LEN);
-}
-
 
 
 

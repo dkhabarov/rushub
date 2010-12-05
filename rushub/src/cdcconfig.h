@@ -159,7 +159,6 @@ public:
 	string msTimeoutCmd[6];     //< Timeouts names
 	string msTimeoutAny;        //< Message about connection timeout
 	string msForceMove;         //< Redirection message
-	string msKick;              //< Kick message
 	string msUsersLimit;
 
 	string msFloodMyINFO;

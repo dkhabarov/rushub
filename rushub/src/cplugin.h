@@ -335,7 +335,6 @@ public:
 	virtual bool SendToAllExceptIps(List_t & IPList, const char *sData, const char *sNick = NULL, const char *sFrom = NULL) = 0; //< Send comand to all except ips
 
 	virtual void ForceMove(cDCConnBase *DCConn, const char *sAddress, const char *sReason = NULL) = 0; //< Redirection client
-	virtual void Kick(cDCConnBase *DCConn, const char *sReason = NULL) = 0; //< Kick user
 
 	virtual void GetDCConnBase(const char * sIP, vector<cDCConnBase *> & vconn) = 0; //< Get conn base by ip
 	virtual cDCUserBase * GetDCUserBase(const char *sNick) = 0; //< Get user base by nick

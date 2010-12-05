@@ -177,7 +177,6 @@ public:
 	bool SendToAllExceptIps(List_t & IPList, const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
 
 	void ForceMove(cDCConnBase *DCConn, const char *sAddress, const char *sReason = NULL); //< Redirection client
-	void Kick(cDCConnBase *DCConn, const char *sReason = NULL); //< Kick user
 
 	void GetConfig(vector<string> & vec);
 	const char * GetConfig(const string & sName);
