@@ -121,6 +121,7 @@ typedef enum { /** Param's hash */
 	ePH_HIDE       = 153, //< "bHide"
 	ePH_PORT       = 72,  //< "iPort"
 	ePH_PORTCONN   = 113, //< "iPortConn"
+	ePH_IPCONN     = 25,  //< "sIPConn"
 	ePH_MACADDRESS = 108, //< "sMacAddress"
 	ePH_SUPPORTS   = 195, //< "sSupports"
 	ePH_VERSION    = 58,  //< "sVersion"
@@ -160,6 +161,7 @@ int UserIndex(lua_State *L) {
 		case ePH_HIDE:       if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->IsHide() ? 1 : 0);else lua_pushnil(L); break;
 		case ePH_PORT:       lua_pushnumber(L, Conn->GetPort()); break;
 		case ePH_PORTCONN:   lua_pushnumber(L, Conn->GetPortConn()); break;
+		case ePH_IPCONN:     lua_pushstring(L, Conn->GetIpConn().c_str()); break;
 		case ePH_MACADDRESS: lua_pushstring(L, Conn->GetMacAddr().size() ? Conn->GetMacAddr().c_str() : "n/a"); break;
 		case ePH_SUPPORTS:   lua_pushstring(L, Conn->GetSupports().c_str()); break;
 		case ePH_VERSION:    lua_pushstring(L, Conn->GetVersion().c_str()); break;
