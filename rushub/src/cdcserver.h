@@ -21,9 +21,9 @@
 #define CDCSERVER_H
 
 #include "cserver.h"
-#include "cdcserverbase.h"
 #include "cdcconn.h"
 #include "cdcprotocol.h"
+#include "cplugin.h"
 
 #include "cdcconfig.h"
 #include "cuserlist.h"
@@ -42,14 +42,13 @@
 
 namespace nConfig{class cConfigLoader;};
 using namespace nConfig;
+using namespace nPlugin;
 
 namespace nDCServer {
 
 using namespace nServer; /** for cServer */
 using namespace nProtocol;
 using namespace nUtils; /** for StringReplace */
-using namespace nPlugin;
-
 
 /** Индикаторы загруженности хаба */
 typedef enum {

@@ -24,7 +24,7 @@
 #include "ctime.h" /** cTime */
 #include "cconnbase.h"
 #include "cprotocol.h"
-#include "cdcparserbase.h" /** for DC_SEPARATOR */
+#include "cplugin.h" /** for DC_SEPARATOR */
 
 #include <string>
 #include <list>

@@ -21,7 +21,6 @@
 #define CPLUGINLIST_H
 
 #include "tchashmap.h"
-#include "cpluginlistbase.h"
 #include "ccalllist.h"
 #include "cplugin.h"
 
@@ -34,21 +33,22 @@
 using ::std::string;
 using ::std::ostream;
 
-using namespace ::nPlugin;
 using namespace ::nUtils;
 using namespace nWebServer;
 
-namespace nPlugin { class cPluginLoader; };
-
 namespace nDCServer {
-
-class cDCServerBase;
-class cDCUser;
-class cUserList;
-class cDCTag;
-class cDCParserBase;
+	class cDCServerBase;
+	class cDCUser;
+	class cUserList;
+	class cDCTag;
+	class cDCParserBase;
+};
 
 namespace nPlugin {
+
+using namespace ::nDCServer;
+
+class cPluginLoader;
 
 class cPluginList : public cObj, public cPluginListBase {
 	friend class nDCServer::cDCServer; /** For LoadAll */
@@ -70,16 +70,16 @@ public:
 	bool ReloadPlugin(const string &sName); /** Reload plugin by name */
 	bool SetCallList(string sId, cCallList*); /** Set call list */
 
-	virtual bool RegCallList(const char * sId, cPluginBase*);
-	virtual bool UnregCallList(const char * sId, cPluginBase*);
+	virtual bool RegCallList(const char * sId, cPlugin*);
+	virtual bool UnregCallList(const char * sId, cPlugin*);
 
 	void List(ostream &os);
 	void ListAll(ostream &os);
 
-	cPluginBase * GetPlugin(const string &sName);
-	cPluginBase * GetPluginByLib(const string &sLib);
+	cPlugin * GetPlugin(const string &sName);
+	cPlugin * GetPluginByLib(const string &sLib);
 
-	void OnPluginLoad(cPluginBase*); /** OnPluginLoad event */
+	void OnPluginLoad(cPlugin*); /** OnPluginLoad event */
 
 private:
 	cDCServerBase * mDCServer;
@@ -100,7 +100,6 @@ public:
 	cCallListBase(cPluginList *PluginList, const char * sId) :
 		cCallList(PluginList, string(sId))
 	{}
-	virtual int CallOne(cPluginBase * Plugin) { return CallOne((cPlugin *) Plugin); }
 	virtual int CallOne(cPlugin * Plugin) = 0;
 }; // cCallListBase
 
@@ -227,7 +226,5 @@ typedef tcCallListType3<cDCUserBase*, cDCUserBase*, string*> cCL_UserUserString;
 typedef tcCallListType3<cDCConnBase*, int, int> cCL_ConnIntInt;
 
 }; // nPlugin
-
-}; // nDCServer
 
 #endif // CPLUGINLIST_H

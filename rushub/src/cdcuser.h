@@ -23,8 +23,7 @@
 #include "cobj.h"
 #include "ctime.h"
 #include "cuserbase.h"
-#include "cdcuserbase.h"
-#include "cdcparserbase.h"
+#include "cplugin.h"
 
 #include <string>
 

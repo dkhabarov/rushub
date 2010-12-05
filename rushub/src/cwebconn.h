@@ -21,7 +21,7 @@
 #define CWEBCONN_H
 
 #include "cdcconn.h"
-#include "cwebparserbase.h"
+#include "cplugin.h"
 #include "cserver.h"
 
 using namespace nServer;

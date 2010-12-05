@@ -29,21 +29,18 @@
 
 using namespace std;
 
-namespace nDCServer { namespace nPlugin { class cPluginList; }; };
-using nDCServer::nPlugin::cPluginList;
-
 namespace nPlugin {
 
-class cPluginBase;
+class cPlugin;
+class cPluginList;
 class cPluginListBase;
-
 
 /** Base class for call list */
 class cCallList : public cObj {
 
 private:
 
-	typedef list<cPluginBase*> tPlugins;
+	typedef list<cPlugin*> tPlugins;
 	tPlugins mPlugins; /** Plugin list of call list */
 	cPluginList *mPluginList; /** Pointer on common plugin list */
 
@@ -60,7 +57,7 @@ public:
 			mPluginList(PluginList),
 			miCall(0)
 		{}
-		void operator()(cPluginBase*);
+		void operator()(cPlugin*);
 	};
 
 private:
@@ -76,10 +73,10 @@ public:
 	/** Get name of the call list */
 	virtual const string &Name() const { return msName; }
 
-	bool Reg(cPluginBase*); /** Registers plugin in call list */
-	bool Unreg(cPluginBase*); /** Remove registration from call list */
+	bool Reg(cPlugin *); /** Registers plugin in call list */
+	bool Unreg(cPlugin *); /** Remove registration from call list */
 	virtual int CallAll(); /** Call all plugins */
-	virtual int CallOne(cPluginBase*) = 0; /** Call one plugin */
+	virtual int CallOne(cPlugin *) = 0; /** Call one plugin */
 	virtual void ListRegs(ostream &os, const char *sSep); /** Show plugins list for this call */
 
 }; // cCallList

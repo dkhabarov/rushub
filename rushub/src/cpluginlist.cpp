@@ -22,8 +22,6 @@
 #include "cdir.h"
 #include "cpluginloader.h"
 
-namespace nDCServer {
-
 namespace nPlugin {
 
 cPluginList::cPluginList(const string sPath) :
@@ -128,7 +126,7 @@ bool cPluginList::SetCallList(string sId, cCallList *CallList) {
 }
 
 /** Reg plugin in call list */
-bool cPluginList::RegCallList(const char * sId, cPluginBase *Plugin) {
+bool cPluginList::RegCallList(const char * sId, cPlugin *Plugin) {
 	if(!Plugin) return false;
 	cCallList * CallList = mAllCallLists.Find(mAllCallLists.mHash(sId));
 	if(!CallList) return false;
@@ -136,7 +134,7 @@ bool cPluginList::RegCallList(const char * sId, cPluginBase *Plugin) {
 }
 
 /** Unreg plugin in call list */
-bool cPluginList::UnregCallList(const char * sId, cPluginBase *Plugin) {
+bool cPluginList::UnregCallList(const char * sId, cPlugin *Plugin) {
 	if(!Plugin) return false;
 	cCallList *CallList = mAllCallLists.Find(mAllCallLists.mHash(sId));
 	if(!CallList) return false;
@@ -161,7 +159,7 @@ void cPluginList::ListAll(ostream &os) {
 }
 
 /** Get plugin by name */
-cPluginBase * cPluginList::GetPlugin(const string &sName) {
+cPlugin * cPluginList::GetPlugin(const string &sName) {
 	cPluginLoader *pi;
 	pi = mPluginList.Find(mPluginList.mHash(sName));
 	if(pi) return pi->mPlugin;
@@ -169,7 +167,7 @@ cPluginBase * cPluginList::GetPlugin(const string &sName) {
 }
 
 /** Get plugin by lib */
-cPluginBase * cPluginList::GetPluginByLib(const string &sLib) {
+cPlugin * cPluginList::GetPluginByLib(const string &sLib) {
 	tPluginList::iterator it;
 	for(it = mPluginList.begin(); it != mPluginList.end(); ++it)
 		if((*it)->GetFileName() == sLib) return (*it)->mPlugin;
@@ -177,11 +175,9 @@ cPluginBase * cPluginList::GetPluginByLib(const string &sLib) {
 }
 
 /** OnPluginLoad */
-void cPluginList::OnPluginLoad(cPluginBase *Plugin) {
+void cPluginList::OnPluginLoad(cPlugin *Plugin) {
 	if(Log(1)) LogStream() << "OnPluginLoad: " << Plugin->Name() << endl;
 	((cPlugin *)Plugin)->OnLoad(mDCServer);
 }
 
 }; // nPlugin
-
-}; // nDCServer

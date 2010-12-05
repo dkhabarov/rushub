@@ -18,7 +18,7 @@
  */
 
 #include "cpluginloader.h"
-#include "cpluginbase.h"
+#include "cplugin.h"
 
 namespace nPlugin {
 

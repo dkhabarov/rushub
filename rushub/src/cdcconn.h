@@ -20,7 +20,7 @@
 #ifndef CDCCONN_H
 #define CDCCONN_H
 
-#include "cdcconnbase.h"
+#include "cplugin.h"
 #include "cconn.h"
 #include "cdcuser.h"
 #include "ctimeout.h"

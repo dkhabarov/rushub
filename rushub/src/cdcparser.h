@@ -22,7 +22,7 @@
 
 #include "cprotocol.h"
 #include "cprotocolcmd.h" // for cProtocolCmd
-#include "cdcparserbase.h"
+#include "cplugin.h"
 
 using namespace nServer;
 using nDCServer::cDCParserBase;

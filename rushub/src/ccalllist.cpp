@@ -18,7 +18,7 @@
  */
 
 #include "ccalllist.h"
-#include "cpluginbase.h"
+#include "cplugin.h"
 #include "cpluginlist.h"
 
 namespace nPlugin {
@@ -31,13 +31,13 @@ cCallList::cCallList(cPluginList *PluginList, string sId) :
 	if(mPluginList) mPluginList->SetCallList(sId, this);
 }
 
-void cCallList::ufCallOne::operator()(cPluginBase *Plugin) {
+void cCallList::ufCallOne::operator()(cPlugin *Plugin) {
 	miCall = mCallList->CallOne(Plugin);
 	if(!Plugin->IsAlive()) mPluginList->UnloadPlugin(Plugin->Name());
 }
 
 /** Registers plugin in call list */
-bool cCallList::Reg(cPluginBase *Plugin) {
+bool cCallList::Reg(cPlugin *Plugin) {
 	if(!Plugin) return false;
 	tPlugins::iterator i = find(mPlugins.begin(), mPlugins.end(), Plugin);
 	if(i != mPlugins.end()) return false;
@@ -46,7 +46,7 @@ bool cCallList::Reg(cPluginBase *Plugin) {
 }
 
 /** Remove registration from call list */
-bool cCallList::Unreg(cPluginBase *Plugin) {
+bool cCallList::Unreg(cPlugin *Plugin) {
 	if(!Plugin) return false;
 	tPlugins::iterator i = find(mPlugins.begin(), mPlugins.end(), Plugin);
 	if(i == mPlugins.end()) return false;

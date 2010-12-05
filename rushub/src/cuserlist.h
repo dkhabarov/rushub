@@ -22,7 +22,7 @@
 
 #include "cobj.h"
 #include "tchashtable.h"
-#include "cdcparserbase.h" /** for DC_SEPARATOR */
+#include "cplugin.h" /** for DC_SEPARATOR */
 
 #include <string>
 #include <functional>

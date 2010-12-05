@@ -21,7 +21,7 @@
 #define CWEBPARSER_H
 
 #include "cprotocol.h"
-#include "cwebparserbase.h"
+#include "cplugin.h"
 
 using namespace nServer; // eUNPARSED
 

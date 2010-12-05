@@ -28,14 +28,14 @@ using std::string;
 
 namespace nPlugin {
 
-class cPluginBase;
+class cPlugin;
 
 /** Loader of plugin */
 class cPluginLoader : public cObj {
 
 public:
 
-	cPluginBase *mPlugin; /** Pointer on plugin */
+	cPlugin * mPlugin; /** Pointer on plugin */
 
 public:
 
@@ -53,8 +53,8 @@ public:
 
 protected:
 
-	typedef cPluginBase *(*tGetPluginFunc)();
-	typedef void (*tDelPluginFunc)(cPluginBase *);
+	typedef cPlugin *(*tGetPluginFunc)();
+	typedef void (*tDelPluginFunc)(cPlugin *);
 
 	void *mHandle; /** Handle of lib */
 	string msError; /** Error msg */
