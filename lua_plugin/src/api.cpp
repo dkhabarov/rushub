@@ -118,6 +118,8 @@ typedef enum { /** Param's hash */
 	ePH_INOPLIST   = 135, //< "bInOpList"
 	ePH_INIPLIST   = 130, //< "bInIpList"
 	ePH_INUSERLIST = 177, //< "bInUserList"
+	ePH_KICK       = 106, //< "bKick"
+	ePH_REDIRECT   = 60,  //< "bRedirect"
 	ePH_HIDE       = 153, //< "bHide"
 	ePH_PORT       = 72,  //< "iPort"
 	ePH_PORTCONN   = 113, //< "iPortConn"
@@ -158,6 +160,8 @@ int UserIndex(lua_State *L) {
 		case ePH_INOPLIST:   if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->IsInOpList() ? 1 : 0);else lua_pushnil(L); break;
 		case ePH_INIPLIST:   if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->IsInIpList() ? 1 : 0);else lua_pushnil(L); break;
 		case ePH_INUSERLIST: if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->IsInUserList() ? 1 : 0);else lua_pushnil(L); break;
+		case ePH_KICK:       if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->IsKick() ? 1 : 0);else lua_pushnil(L); break;
+		case ePH_REDIRECT:   if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->IsForceMove() ? 1 : 0);else lua_pushnil(L); break;
 		case ePH_HIDE:       if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->IsHide() ? 1 : 0);else lua_pushnil(L); break;
 		case ePH_PORT:       lua_pushnumber(L, Conn->GetPort()); break;
 		case ePH_PORTCONN:   lua_pushnumber(L, Conn->GetPortConn()); break;
@@ -180,7 +184,9 @@ int UserNewindex(lua_State *L) {
 		case ePH_MYINFO:    if(Conn->mDCUserBase)Conn->mDCUserBase->SetMyINFO(luaL_checkstring(L, 3), Conn->mDCUserBase->GetNick());else lua_pushnil(L); break;
 		case ePH_INOPLIST:  if(Conn->mDCUserBase){ luaL_checktype(L, 3, LUA_TBOOLEAN); Conn->mDCUserBase->SetOpList(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
 		case ePH_INIPLIST:  if(Conn->mDCUserBase){ luaL_checktype(L, 3, LUA_TBOOLEAN); Conn->mDCUserBase->SetIpList(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
-		case ePH_HIDE:      if(Conn->mDCUserBase){ luaL_checktype(L, 3, LUA_TBOOLEAN); Conn->mDCUserBase->SetHide  (lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
+		case ePH_HIDE:      if(Conn->mDCUserBase){ luaL_checktype(L, 3, LUA_TBOOLEAN); Conn->mDCUserBase->SetHide(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
+		case ePH_KICK:      if(Conn->mDCUserBase){ luaL_checktype(L, 3, LUA_TBOOLEAN); Conn->mDCUserBase->SetKick(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
+		case ePH_REDIRECT:  if(Conn->mDCUserBase){ luaL_checktype(L, 3, LUA_TBOOLEAN); Conn->mDCUserBase->SetForceMove(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
 		case ePH_DATA:      Conn->SetData(luaL_checkstring(L, 3)); break;
 		default:            break;
 	}
@@ -316,20 +322,20 @@ int SetGVal(lua_State *L) {
 int SendToUser(lua_State *L) {
 	size_t iLen;
 	int iType;
-	char *sNick = NULL, *sFrom = NULL;
+	const char *sNick = NULL, *sFrom = NULL;
 	bool bByUID = true;
 
 	switch(lua_gettop(L)) {
 		case 4:
 			iType = lua_type(L, 4);
 			if(iType != LUA_TNIL) {
-				sFrom = (char *)luaL_checklstring(L, 4, &iLen);
+				sFrom = luaL_checklstring(L, 4, &iLen);
 				NICKLEN(iLen);
 			}
 		case 3:
 			iType = lua_type(L, 3);
 			if(iType != LUA_TNIL) {
-				sNick = (char *)luaL_checklstring(L, 3, &iLen);
+				sNick = luaL_checklstring(L, 3, &iLen);
 				NICKLEN(iLen);
 			}
 		case 2:
@@ -371,20 +377,20 @@ int SendToUser(lua_State *L) {
 /// SendToAll(sData, sNick, sFrom)
 int SendToAll(lua_State *L) {
 	size_t iLen;
-	char *sData, *sNick = NULL, *sFrom = NULL;
+	const char *sData, *sNick = NULL, *sFrom = NULL;
 	switch(lua_gettop(L)) {
 		case 3:
 			if(lua_type(L, 3) != LUA_TNIL) {
-				sFrom = (char *)luaL_checklstring(L, 3, &iLen);
+				sFrom = luaL_checklstring(L, 3, &iLen);
 				NICKLEN(iLen);
 			}
 		case 2:
 			if(lua_type(L, 2) != LUA_TNIL) {
-				sNick = (char *)luaL_checklstring(L, 2, &iLen);
+				sNick = luaL_checklstring(L, 2, &iLen);
 				NICKLEN(iLen);
 			}
 		case 1:
-			sData = (char *)luaL_checklstring(L, 1, &iLen);
+			sData = luaL_checklstring(L, 1, &iLen);
 			MSGLEN(iLen);
 			break;
 		default:
@@ -402,20 +408,20 @@ int SendToProfile(lua_State *L) {
 	size_t iLen;
 	unsigned long iProfile = 0, iPrf;
 	int iType, iProf;
-	char *sData, *sNick = NULL, *sFrom = NULL;
+	const char *sData, *sNick = NULL, *sFrom = NULL;
 	switch(lua_gettop(L)) {
 		case 4:
 			if(lua_type(L, 4) != LUA_TNIL) {
-				sFrom = (char *)luaL_checklstring(L, 4, &iLen);
+				sFrom = luaL_checklstring(L, 4, &iLen);
 				NICKLEN(iLen);
 			}
 		case 3:
 			if(lua_type(L, 3) != LUA_TNIL) {
-				sNick = (char *)luaL_checklstring(L, 3, &iLen);
+				sNick = luaL_checklstring(L, 3, &iLen);
 				NICKLEN(iLen);
 			}
 		case 2:
-			sData = (char *)luaL_checklstring(L, 2, &iLen);
+			sData = luaL_checklstring(L, 2, &iLen);
 			MSGLEN(iLen);
 
 			iType = lua_type(L, 1);
@@ -448,7 +454,7 @@ int SendToIP(lua_State *L) {
 	size_t iLen;
 	unsigned long iProfile = 0, iPrf;
 	int iType, iProf;
-	char *sIP, *sData, *sNick = NULL, *sFrom = NULL;
+	const char *sIP, *sData, *sNick = NULL, *sFrom = NULL;
 
 	switch(lua_gettop(L)) {
 		case 5:
@@ -468,22 +474,22 @@ int SendToIP(lua_State *L) {
 			} else if(iType != LUA_TNIL) return luaL_typeerror(L, 1, "number or table");
 		case 4:
 			if(lua_type(L, 4) != LUA_TNIL) {
-				sFrom = (char *)luaL_checklstring(L, 4, &iLen);
+				sFrom = luaL_checklstring(L, 4, &iLen);
 				NICKLEN(iLen);
 			}
 		case 3:
 			if(lua_type(L, 3) != LUA_TNIL) {
-				sNick = (char *)luaL_checklstring(L, 3, &iLen);
+				sNick = luaL_checklstring(L, 3, &iLen);
 				NICKLEN(iLen);
 			}
 		case 2:
-			sData = (char *)luaL_checklstring(L, 2, &iLen);
+			sData = luaL_checklstring(L, 2, &iLen);
 			MSGLEN(iLen);
 			break;
 		default:
 			ERR_COUNT("2, 3, 4 or 5");
 	}
-	sIP = (char *)luaL_checklstring(L, 1, &iLen);
+	sIP = luaL_checklstring(L, 1, &iLen);
 	if(sIP && !cLua::mCurServer->SendToIP(sIP, sData, iProfile, sNick, sFrom))
 		ERR("wrong ip format");
 	lua_settop(L, 0);
@@ -495,26 +501,26 @@ int SendToIP(lua_State *L) {
 int SendToAllExceptNicks(lua_State *L) {
 	size_t iLen;
 	vector<string> NickList;
-	char *sData, *sNick = NULL, *sFrom = NULL, *sN;
+	const char *sData, *sNick = NULL, *sFrom = NULL, *sN;
 	switch(lua_gettop(L)) {
 		case 4:
 			if(lua_type(L, 4) != LUA_TNIL) {
-				sFrom = (char *)luaL_checklstring(L, 4, &iLen);
+				sFrom = luaL_checklstring(L, 4, &iLen);
 				NICKLEN(iLen);
 			}
 		case 3:
 			if(lua_type(L, 3) != LUA_TNIL) {
-				sNick = (char *)luaL_checklstring(L, 3, &iLen);
+				sNick = luaL_checklstring(L, 3, &iLen);
 				NICKLEN(iLen);
 			}
 		case 2:
 			luaL_checktype(L, 1, LUA_TTABLE);
-			sData = (char *)luaL_checklstring(L, 2, &iLen);
+			sData = luaL_checklstring(L, 2, &iLen);
 			MSGLEN(iLen);
 
 			lua_pushnil(L);
 			while(lua_next(L, 1) != 0) {
-				sN = (char *)luaL_checklstring(L, -1, &iLen);
+				sN = luaL_checklstring(L, -1, &iLen);
 				NICKLEN(iLen);
 				NickList.push_back(sN);
 				lua_pop(L, 1);
@@ -535,26 +541,26 @@ int SendToAllExceptNicks(lua_State *L) {
 int SendToAllExceptIps(lua_State *L) {
 	size_t iLen;
 	vector<string> IPList;
-	char *sData, *sNick = NULL, *sFrom = NULL, *sN;
+	const char *sData, *sNick = NULL, *sFrom = NULL, *sN;
 	switch(lua_gettop(L)) {
 		case 4:
 			if(lua_type(L, 4) != LUA_TNIL) {
-				sFrom = (char *)luaL_checklstring(L, 4, &iLen);
+				sFrom = luaL_checklstring(L, 4, &iLen);
 				NICKLEN(iLen);
 			}
 		case 3:
 			if(lua_type(L, 3) != LUA_TNIL) {
-				sNick = (char *)luaL_checklstring(L, 3, &iLen);
+				sNick = luaL_checklstring(L, 3, &iLen);
 				NICKLEN(iLen);
 			}
 		case 2:
 			luaL_checktype(L, 1, LUA_TTABLE);
-			sData = (char *)luaL_checklstring(L, 2, &iLen);
+			sData = luaL_checklstring(L, 2, &iLen);
 			MSGLEN(iLen);
 
 			lua_pushnil(L);
 			while(lua_next(L, 1) != 0) {
-				sN = (char *)luaL_checklstring(L, -1, &iLen);
+				sN = luaL_checklstring(L, -1, &iLen);
 				NICKLEN(iLen);
 				IPList.push_back(sN);
 				lua_pop(L, 1);
@@ -574,26 +580,26 @@ int SendToAllExceptIps(lua_State *L) {
 /// SendToNicks(tNicks, sData, sNick, sFrom)
 int SendToNicks(lua_State *L) {
 	size_t iLen;
-	char *sData, *sNick = NULL, *sFrom = NULL, *sN;
+	const char *sData, *sNick = NULL, *sFrom = NULL, *sN;
 	switch(lua_gettop(L)) {
 		case 4:
 			if(lua_type(L, 4) != LUA_TNIL) {
-				sFrom = (char *)luaL_checklstring(L, 4, &iLen);
+				sFrom = luaL_checklstring(L, 4, &iLen);
 				NICKLEN(iLen);
 			}
 		case 3:
 			if(lua_type(L, 3) != LUA_TNIL) {
-				sNick = (char *)luaL_checklstring(L, 3, &iLen);
+				sNick = luaL_checklstring(L, 3, &iLen);
 				NICKLEN(iLen);
 			}
 		case 2:
 			luaL_checktype(L, 1, LUA_TTABLE);
-			sData = (char *)luaL_checklstring(L, 2, &iLen);
+			sData = luaL_checklstring(L, 2, &iLen);
 			MSGLEN(iLen);
 
 			lua_pushnil(L);
 			while(lua_next(L, 1) != 0) {
-				sN = (char *)luaL_checklstring(L, -1, &iLen);
+				sN = luaL_checklstring(L, -1, &iLen);
 				NICKLEN(iLen);
 				cLua::mCurServer->SendToNick(sN, sData, sNick, sFrom);
 				lua_pop(L, 1);
@@ -730,7 +736,7 @@ int Disconnect(lua_State *L) {
 		Conn->Disconnect();
 	} else if(iType == LUA_TSTRING) {
 		size_t iLen;
-		char * sNick = (char *)lua_tolstring(L, 1, &iLen);
+		const char * sNick = lua_tolstring(L, 1, &iLen);
 		NICKLEN(iLen);
 		cDCUserBase * User = cLua::mCurServer->GetDCUserBase(sNick);
 		if(!User || !User->mDCConnBase) ERR("user was not found");
@@ -979,7 +985,7 @@ int SetCmd(lua_State *L) {
 			return 0;
 		}
 	}
-	cLua::mCurLua->mCurDCParser->msStr = (char *)sData;
+	cLua::mCurLua->mCurDCParser->msStr = sData;
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
 	return 1;
@@ -1154,6 +1160,84 @@ int UnregBot(lua_State *L) {
 	NICKLEN(iLen);
 	if(cLua::mCurServer->UnregBot(sNick) == -1) ERR("bot was not found");
 	cLua::mCurLua->mCurScript->mBotList.remove(sNick);
+	lua_settop(L, 0);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+/// Redirect(UID/sNick, sAddress, [sReason])
+int Redirect(lua_State *L) {
+	size_t iLen;
+	int iType;
+	const char *sAddress = NULL, *sReason = NULL;
+
+	switch(lua_gettop(L)) {
+		case 3:
+			iType = lua_type(L, 3);
+			if(iType != LUA_TNIL) {
+				sReason = luaL_checklstring(L, 3, &iLen);
+				if(iLen > 1024) { lua_settop(L, 0); lua_pushnil(L); lua_pushliteral(L, "very long reason."); return 2; }
+			}
+		case 2:
+			sAddress = luaL_checklstring(L, 2, &iLen);
+			if(iLen > 128) { lua_settop(L, 0); lua_pushnil(L); lua_pushliteral(L, "very long address."); return 2; }
+			break;
+		default:
+			ERR_COUNT("2 or 3");
+	}
+
+	iType = lua_type(L, 1);
+	cDCConnBase * Conn = NULL;
+	if(iType != LUA_TLIGHTUSERDATA) {
+		if(iType != LUA_TSTRING) return luaL_typeerror(L, 1, "lightuserdata or string");
+		cDCUserBase * User = cLua::mCurServer->GetDCUserBase(lua_tostring(L, 1));
+		if(!User || !User->mDCConnBase) ERR("user was not found");
+		Conn = User->mDCConnBase;
+	} else {
+		Conn = (cDCConnBase *)lua_touserdata(L, 1);
+	}
+
+	if(!Conn || (Conn->_miConnType != 1)) ERR("user was not found");
+
+	cLua::mCurServer->ForceMove(Conn, sAddress, sReason);
+	lua_settop(L, 0);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+/// Kick(UID/sNick, [sReason])
+int Kick(lua_State *L) {
+	size_t iLen;
+	int iType;
+	const char *sReason = NULL;
+
+	switch(lua_gettop(L)) {
+		case 2:
+			iType = lua_type(L, 2);
+			if(iType != LUA_TNIL) {
+				sReason = luaL_checklstring(L, 2, &iLen);
+				if(iLen > 1024) { lua_settop(L, 0); lua_pushnil(L); lua_pushliteral(L, "very long reason."); return 2; }
+			}
+		case 1:
+			break;
+		default:
+			ERR_COUNT("1 or 2");
+	}
+
+	iType = lua_type(L, 1);
+	cDCConnBase * Conn = NULL;
+	if(iType != LUA_TLIGHTUSERDATA) {
+		if(iType != LUA_TSTRING) return luaL_typeerror(L, 1, "lightuserdata or string");
+		cDCUserBase * User = cLua::mCurServer->GetDCUserBase(lua_tostring(L, 1));
+		if(!User || !User->mDCConnBase) ERR("user was not found");
+		Conn = User->mDCConnBase;
+	} else {
+		Conn = (cDCConnBase *)lua_touserdata(L, 1);
+	}
+
+	if(!Conn || (Conn->_miConnType != 1)) ERR("user was not found");
+
+	cLua::mCurServer->Kick(Conn, sReason);
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
 	return 1;

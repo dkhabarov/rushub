@@ -30,7 +30,7 @@
 #include <math.h> /** abs */
 
 #define PLUGIN_NAME "LuaScripts"
-#define PLUGIN_VERSION "1.29[beta]"
+#define PLUGIN_VERSION "1.29"
 
 namespace nDCServer{class cDCServerBase;}
 

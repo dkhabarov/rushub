@@ -103,6 +103,8 @@ int Call(lua_State *L);                 // Call(sScriptName, sFunc, sParam)
 int RegBot(lua_State *L);               // RegBot(sNick, bKey, sMyINFO, sIP)
 int UnregBot(lua_State *L);             // UnregBot(sNick)
 int SetHubState(lua_State *L);          // SetHubState(iNumber)
+int Redirect(lua_State *L);             // Redirect(UID/sNick, sAddress, [sReason])
+int Kick(lua_State *L);                 // Kick(UID/sNick, [sReason])
 
 }; // nLua
 
