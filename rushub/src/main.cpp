@@ -51,6 +51,8 @@ static void SigHandler(int iSig) {
 			if(cDCServer::sCurrentServer->Log(0))
 				cDCServer::sCurrentServer->LogStream() << "Received a " << iSig << " signal, quiting" << endl;
 
+			cout << "Received a " << iSig << " signal, quiting" << endl;
+
 			cDCServer::sCurrentServer->Stop(0);
 			break;
 		default:
@@ -110,7 +112,7 @@ int runHub(int argc, char **argv, bool bService /*= false*/) {
 			if(bService && Service.Start() < 0) return -3;
 		#endif
 
-		iResult = Server.Run(); // 1 - restart
+		iResult = Server.Run(); // 1 = restart
 
 		#ifdef _WIN32
 			if(bService && Service.Stop() < 0) return -4;

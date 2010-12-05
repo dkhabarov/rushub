@@ -142,7 +142,7 @@ public:
 	const string & GetHubInfo() const { return msHubName; }
 	const string & GetLocale() const { return mDCConfig.msLocale; };
 	const string & GetSystemVersion() const { return msSysVersion; }
-	int GetMSec() const { cTime tm; return tm;}
+	int GetMSec() const { cTime tm; return tm; }
 	int GetUpTime() const { cTime tm; tm -= mStartTime; return tm.Sec(); } /** Work time (sec) */
 	int GetUsersCount() const { return miTotalUserCount; }
 	__int64 GetTotalShare() const { return miTotalShare; }

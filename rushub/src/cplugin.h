@@ -24,13 +24,22 @@
 #include <iostream>
 #include <vector>
 
+using namespace ::std;
+
 #ifndef _WIN32
 	#ifndef __int64
 		#define __int64 long long
 	#endif
 #endif
 
+
 #ifndef REG_PLUGIN
+
+	namespace nPlugin {
+		class cPlugin;
+	};
+	using nPlugin::cPlugin;
+
 	#ifdef _WIN32
 		#define BUILDING_DLL 1
 		#if BUILDING_DLL
@@ -38,12 +47,14 @@
 		#else
 			#define DLLIMPORT __declspec (dllimport)
 		#endif
+		//< Macros for registration plugin
 		#define REG_PLUGIN(__classname) \
 		extern "C" { \
 			DLLIMPORT cPlugin * get_plugin() { return new (__classname); } \
 			DLLIMPORT void del_plugin(cPlugin *Plugin) { if(Plugin) delete Plugin; } \
 		}
 	#else
+		//< Macros for registration plugin
 		#define REG_PLUGIN(__classname) \
 		extern "C" { \
 			cPlugin * get_plugin(void) { return new (__classname); } \
@@ -53,66 +64,65 @@
 #endif // REG_PLUGIN
 
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10006
+	#define INTERNAL_PLUGIN_VERSION 10006  //< Internal plugin version
 #endif
 
 #ifndef DC_SEPARATOR
-	#define DC_SEPARATOR "|" /** DC Protocol separator */
-	#define DC_SEPARATOR_LEN 1
+	#define DC_SEPARATOR "|"               //< DC protocol separator
+	#define DC_SEPARATOR_LEN 1             //< Length of DC protocol separator
 #endif
 
 #ifndef WEB_SEPARATOR
-	#define WEB_SEPARATOR "\r\n\r\n" /** Protocol separator */
+	#define WEB_SEPARATOR "\r\n\r\n"       //< Web protocol separator
+	#define WEB_SEPARATOR_LEN 4            //< Length of web protocol separator
 #endif
-
-using namespace ::std;
 
 namespace nDCServer {
 
 typedef enum { /** Params with null values flags */
-	eMYINFO_TAG       = 1 << 0,  //< Tag
-	eMYINFO_CLIENT    = 1 << 1,  //< Client name
-	eMYINFO_VERSION   = 1 << 2,  //< Client version
-	eMYINFO_MODE      = 1 << 3,  //< Mode
-	eMYINFO_UNREG     = 1 << 4,  //< Usual hubs
-	eMYINFO_REG       = 1 << 5,  //< Reg hubs
-	eMYINFO_OP        = 1 << 6,  //< Op hubs
-	eMYINFO_SLOT      = 1 << 7,  //< Slots
-	eMYINFO_LIMIT     = 1 << 8,  //< Limit
-	eMYINFO_OPEN      = 1 << 9,  //< Open
-	eMYINFO_BANDWIDTH = 1 << 10, //< Bandwidth
-	eMYINFO_DOWNLOAD  = 1 << 11, //< Download
-	eMYINFO_FRACTION  = 1 << 12, //< Fraction
+	eMYINFO_TAG       = 1 << 0,   //< Tag
+	eMYINFO_CLIENT    = 1 << 1,   //< Client name
+	eMYINFO_VERSION   = 1 << 2,   //< Client version
+	eMYINFO_MODE      = 1 << 3,   //< Mode
+	eMYINFO_UNREG     = 1 << 4,   //< Usual hubs
+	eMYINFO_REG       = 1 << 5,   //< Reg hubs
+	eMYINFO_OP        = 1 << 6,   //< Op hubs
+	eMYINFO_SLOT      = 1 << 7,   //< Slots
+	eMYINFO_LIMIT     = 1 << 8,   //< Limit
+	eMYINFO_OPEN      = 1 << 9,   //< Open
+	eMYINFO_BANDWIDTH = 1 << 10,  //< Bandwidth
+	eMYINFO_DOWNLOAD  = 1 << 11,  //< Download
+	eMYINFO_FRACTION  = 1 << 12,  //< Fraction
 } tMYINFONilType;
 
 namespace nProtoEnums {
 
 typedef enum { /** Types of the commands (for field mType) */
 	eDC_NO = -1,
-	eDC_MSEARCH,      //< 0  = $MultiSearch
-	eDC_MSEARCH_PAS,  //< 1  = $MultiSearch Hub:
-	eDC_SEARCH_PAS,   //< 2  = $Search Hub:
-	eDC_SEARCH,       //< 3  = $Search
-	eDC_SR,           //< 4  = $SR
-	eDC_MYNIFO,       //< 5  = $MyNIFO
-	eDC_SUPPORTS,     //< 6  = $Support
-	eDC_KEY,          //< 7  = $Key
-	eDC_VALIDATENICK, //< 8  = $ValidateNick
-	eDC_VERSION,      //< 9  = $Version
-	eDC_GETNICKLIST,  //< 10 = $GetNickList
-	eDC_CHAT,         //< 11 = Chat
-	eDC_TO,           //< 12 = $To
-	eDC_QUIT,         //< 13 = $Quit
-	eDC_MYPASS,       //< 14 = $MyPass
-	eDC_CONNECTTOME,  //< 15 = $ConnecToMe
-	eDC_RCONNECTTOME, //< 16 = $RevConnectToMe
-	eDC_MCONNECTTOME, //< 17 = $MultiConnectToMe
-	eDC_KICK,         //< 18 = $Kick
-	eDC_OPFORCEMOVE,  //< 19 = $OpForceMove
-	eDC_GETINFO,      //< 20 = $GetINFO
-	eDC_MCTO,         //< 21 = $MCTo
-	eDC_PING,         //< 22 = |
-	eDC_UNKNOWN       //< 23 = $Unknown
+	eDC_MSEARCH,        //< 0  = $MultiSearch
+	eDC_MSEARCH_PAS,    //< 1  = $MultiSearch Hub:
+	eDC_SEARCH_PAS,     //< 2  = $Search Hub:
+	eDC_SEARCH,         //< 3  = $Search
+	eDC_SR,             //< 4  = $SR
+	eDC_MYNIFO,         //< 5  = $MyNIFO
+	eDC_SUPPORTS,       //< 6  = $Support
+	eDC_KEY,            //< 7  = $Key
+	eDC_VALIDATENICK,   //< 8  = $ValidateNick
+	eDC_VERSION,        //< 9  = $Version
+	eDC_GETNICKLIST,    //< 10 = $GetNickList
+	eDC_CHAT,           //< 11 = Chat
+	eDC_TO,             //< 12 = $To
+	eDC_QUIT,           //< 13 = $Quit
+	eDC_MYPASS,         //< 14 = $MyPass
+	eDC_CONNECTTOME,    //< 15 = $ConnecToMe
+	eDC_RCONNECTTOME,   //< 16 = $RevConnectToMe
+	eDC_MCONNECTTOME,   //< 17 = $MultiConnectToMe
+	eDC_KICK,           //< 18 = $Kick
+	eDC_OPFORCEMOVE,    //< 19 = $OpForceMove
+	eDC_GETINFO,        //< 20 = $GetINFO
+	eDC_MCTO,           //< 21 = $MCTo
+	eDC_PING,           //< 22 = |
+	eDC_UNKNOWN         //< 23 = $Unknown
 } tDCType;
 
 
@@ -194,91 +204,97 @@ class cDCUserBase;
 
 // ================ cDCConnBase ================
 
+/** Base DC connection */
 class cDCConnBase {
 
 public:
-	cDCUserBase * mDCUserBase; //< User
-	int _miConnType; //< Connection type (for protection and compatibility)
+
+	cDCUserBase * mDCUserBase;  //< User
+	int _miConnType;            //< Connection type (for protection and compatibility)
 
 public:
-	cDCConnBase() : mDCUserBase(NULL), _miConnType(1){}
-	~cDCConnBase(){}
+
+	cDCConnBase() : mDCUserBase(NULL), _miConnType(1) {}
+	~cDCConnBase() {}
+
 	virtual int Send(const string & sData, bool bAddSep = false, bool bFlush = true) = 0; //< Sending RAW cmd to the client
-	virtual const string & GetVersion() const = 0; //< Client's protocol version
-	virtual const string & GetIp() const = 0; //< Get string of IP
-	virtual const string & GetData() const = 0; //< Get some user data
-	virtual const string & GetMacAddr() const = 0; //< Get mac address
-	virtual const string & GetSupports() const = 0;
-	virtual int GetPort() const = 0; //< Get real port
-	virtual int GetPortConn() const = 0; //< Get connection port
-	virtual int GetProfile() const = 0; //< Get profile
-	virtual unsigned long GetNetIp() const = 0; //< Get numeric IP
-	virtual void SetProfile(int) = 0;
-	virtual void SetData(const string &) = 0;
-	virtual void Disconnect() = 0;
-	virtual long GetEnterTime() const = 0; //< Get enter time
+	virtual int GetPort() const = 0;                 //< Get real clients port
+	virtual int GetPortConn() const = 0;             //< Get connection port
+	virtual int GetProfile() const = 0;              //< Get client profile
+	virtual long GetEnterTime() const = 0;           //< Get enter time
+	virtual unsigned long GetNetIp() const = 0;      //< Get numeric IP
+	virtual void SetProfile(int) = 0;                //< Set client profile
+	virtual void SetData(const string &) = 0;        //< Set some client data
+	virtual void Disconnect() = 0;                   //< Disconnect this client
+	virtual const string & GetVersion() const = 0;   //< Client's protocol version
+	virtual const string & GetIp() const = 0;        //< Get string of IP
+	virtual const string & GetData() const = 0;      //< Get some client data
+	virtual const string & GetMacAddr() const = 0;   //< Get mac address
+	virtual const string & GetSupports() const = 0;  //< Get all support cmd parameters, except of cmd name
 
 }; // cDCConnBase
 
 
 // ================ cDCUserBase ================
 
-/** Base user class */
+/** Base DC user */
 class cDCUserBase {
 
 public:
 
-	cDCConnBase * mDCConnBase;
-	unsigned int mNil;
+	cDCConnBase * mDCConnBase;  //< Connection
+	unsigned int mNil;          //< Empty MyINFO command parameters
 
 public:
 
-	cDCUserBase(){}
-	virtual ~cDCUserBase(){}
+	cDCUserBase() {}
+	virtual ~cDCUserBase() {}
 
-	virtual const string & GetNick() const = 0;
-	virtual const string & GetMyINFO() const = 0;
-	virtual bool IsInUserList() const = 0;
-	virtual bool IsInOpList() const = 0;
-	virtual bool IsInIpList() const = 0;
-	virtual bool IsHide() const = 0;
+	virtual const string & GetNick() const = 0;        //< Get user's nick
+	virtual const string & GetMyINFO() const = 0;      //< Get user's MyINFO cmd
 
-	virtual bool SetMyINFO(const string &sMyINFO, const string & sNick) = 0;
-	virtual void SetOpList(bool) = 0;
-	virtual void SetIpList(bool) = 0;
-	virtual void SetHide(bool) = 0;
+	virtual bool IsInUserList() const = 0;             //< User in user-list
+	virtual bool IsInOpList() const = 0;               //< User in op-list (has op-key)
+	virtual bool IsInIpList() const = 0;               //< User in ip-list (can receive ip addresses of users)
+	virtual bool IsHide() const = 0;                   //< User is hidden
 
-	virtual const string & GetDesc() const = 0;
-	virtual const string & GetEmail() const = 0;
-	virtual const string & GetConnection() const = 0;
-	virtual unsigned GetByte() const = 0;
-	virtual __int64 GetShare() const = 0;
+	virtual bool SetMyINFO(const string &sMyINFO, const string & sNick) = 0; //< Set user's MyINFO cmd
+	virtual void SetOpList(bool) = 0;                  //< Add user in op-list
+	virtual void SetIpList(bool) = 0;                  //< Add user in ip-list
+	virtual void SetHide(bool) = 0;                    //< Hide the user
 
-	virtual const string & GetTag() const = 0;
-	virtual const string & GetClient() const = 0;
-	virtual const string & GetVersion() const = 0;
-	virtual unsigned GetUnRegHubs() const = 0;
-	virtual unsigned GetRegHubs() const = 0;
-	virtual unsigned GetOpHubs() const = 0;
-	virtual unsigned GetSlots() const = 0;
-	virtual unsigned GetLimit() const = 0;
-	virtual unsigned GetOpen() const = 0;
-	virtual unsigned GetBandwidth() const = 0;
-	virtual unsigned GetDownload() const = 0;
-	virtual const string & GetFraction() const = 0;
-	virtual const string & GetMode() const = 0;
+	virtual const string & GetDesc() const = 0;        //< Get user's description
+	virtual const string & GetEmail() const = 0;       //< Get user's email address
+	virtual const string & GetConnection() const = 0;  //< Get user's connection flag
+	virtual unsigned GetByte() const = 0;              //< Get user's magic byte
+	virtual __int64 GetShare() const = 0;              //< Get user's share size
+
+	virtual const string & GetTag() const = 0;         //< Get user's tag
+	virtual const string & GetClient() const = 0;      //< Get user's client
+	virtual const string & GetVersion() const = 0;     //< Get user's client version
+	virtual const string & GetMode() const = 0;        //< Get user's mode
+	virtual unsigned GetUnRegHubs() const = 0;         //< Get user's unreg-hubs
+	virtual unsigned GetRegHubs() const = 0;           //< Get user's reg-hubs
+	virtual unsigned GetOpHubs() const = 0;            //< Get user's op-hubs
+	virtual unsigned GetSlots() const = 0;             //< Get user's slots
+	virtual unsigned GetLimit() const = 0;             //< Get user's L-limit
+	virtual unsigned GetOpen() const = 0;              //< Get user's O-limit
+	virtual unsigned GetBandwidth() const = 0;         //< Get user's B-limit
+	virtual unsigned GetDownload() const = 0;          //< Get user's D-limit
+	virtual const string & GetFraction() const = 0;    //< Get user's F-limit
 
 }; // cDCUserBase
 
 
 // ================ cDCConnListIterator ================
 
+/** Iterator for list of base connections */
 class cDCConnListIterator {
 
 public:
 
-	cDCConnListIterator(){}
-	virtual ~cDCConnListIterator(){}
+	cDCConnListIterator() {}
+	virtual ~cDCConnListIterator() {}
 	virtual cDCConnBase * operator() (void) = 0;
 
 }; // cDCConnListIterator
@@ -286,64 +302,66 @@ public:
 
 // ================ cDCServerBase ================
 
+/** Base DC server */
 class cDCServerBase {
 
 public:
 
 	typedef vector<string> List_t;
 
-	virtual const string & GetMainDir() const = 0;
-	virtual const string & GetTime() = 0;
-	virtual const string & GetHubInfo() const = 0; /** Name and version of the hub */
-	virtual const string & GetLocale() const = 0;
-	virtual const string & GetSystemVersion() const = 0;
-	virtual int GetMSec() const = 0;
-	virtual int GetUpTime() const = 0; /** Work time (sec) */
-	virtual int GetUsersCount() const = 0;
-	virtual __int64 GetTotalShare() const = 0;
+	virtual const string & GetMainDir() const = 0;         //< Get main hub path
+	virtual const string & GetTime() = 0;                  //< Get system date-time string (now)
+	virtual const string & GetHubInfo() const = 0;         //< Get name and version of the hub
+	virtual const string & GetLocale() const = 0;          //< Get main locale
+	virtual const string & GetSystemVersion() const = 0;   //< Get OS name and version
+	virtual int GetMSec() const = 0;                       //< Get time in milliseconds (now)
+	virtual int GetUpTime() const = 0;                     //< Get hub work time in sec
+	virtual int GetUsersCount() const = 0;                 //< Get total hub users count
+	virtual __int64 GetTotalShare() const = 0;             //< Get total hub share size
 
-	virtual int CheckCmd(const string &) = 0;
+	virtual int CheckCmd(const string &) = 0;              //< Checking syntax of cmd. Returned tDCType enum of checked cmd
 
-	virtual bool SendToUser(cDCConnBase *DCConn, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;
-	virtual bool SendToNick(const char *sTo, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;
-	virtual bool SendToAll(const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;
-	virtual bool SendToProfiles(unsigned long iProfile, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;
-	virtual bool SendToIP(const char *sIP, const char *sData, unsigned long iProfile = 0, char *sNick = NULL, char *sFrom = NULL) = 0;
-	virtual bool SendToAllExceptNicks(List_t & NickList, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;
-	virtual bool SendToAllExceptIps(List_t & IPList, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;
+	virtual bool SendToUser(cDCConnBase *DCConn, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0; //< Send comand to user
+	virtual bool SendToNick(const char *sTo, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;     //< Send comand to nick
+	virtual bool SendToAll(const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0;                       //< Send comand to all
+	virtual bool SendToProfiles(unsigned long iProfile, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0; //< Send comand to profiles
+	virtual bool SendToIP(const char *sIP, const char *sData, unsigned long iProfile = 0, char *sNick = NULL, char *sFrom = NULL) = 0; //< Send comand to ip
+	virtual bool SendToAllExceptNicks(List_t & NickList, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0; //< Send comand to all except nicks
+	virtual bool SendToAllExceptIps(List_t & IPList, const char *sData, char *sNick = NULL, char *sFrom = NULL) = 0; //< Send comand to all except ips
 
-	virtual void GetDCConnBase(const char * sIP, vector<cDCConnBase *> & vconn) = 0;
-	virtual cDCUserBase * GetDCUserBase(const char *sNick) = 0;
-	virtual cDCConnListIterator * GetDCConnListIterator() = 0;
+	virtual void GetDCConnBase(const char * sIP, vector<cDCConnBase *> & vconn) = 0; //< Get conn base by ip
+	virtual cDCUserBase * GetDCUserBase(const char *sNick) = 0; //< Get user base by nick
+	virtual cDCConnListIterator * GetDCConnListIterator() = 0;  //< Get iterator of conn base
 
-	virtual void GetConfig(vector<string> & vec) = 0;
-	virtual const char * GetConfig(const string & sName) = 0;
-	virtual const char * GetLang(const string & sName) = 0;
-	virtual bool SetConfig(const string & sName, const string & sValue) = 0;
-	virtual bool SetLang(const string & sName, const string & sValue) = 0;
+	virtual void GetConfig(vector<string> & vec) = 0;           //< Get all configs names
+	virtual const char * GetConfig(const string & sName) = 0;   //< Get config value by name
+	virtual const char * GetLang(const string & sName) = 0;     //< Get lang value by name
+	virtual bool SetConfig(const string & sName, const string & sValue) = 0;  //< Set config value by name
+	virtual bool SetLang(const string & sName, const string & sValue) = 0;    //< Set lang value by name
 
-	virtual int RegBot(const string & sNick, const string & sMyINFO, const string & sIP, bool bKey = true) = 0;
-	virtual int UnregBot(const string & sNick) = 0;
+	virtual int RegBot(const string & sNick, const string & sMyINFO, const string & sIP, bool bKey = true) = 0; //< Registration bot
+	virtual int UnregBot(const string & sNick) = 0; //< Unreg bot
 
-	virtual void StopHub() = 0;
-	virtual void RestartHub() = 0;
+	virtual void StopHub() = 0;         //< Stop hub
+	virtual void RestartHub() = 0;      //< Restarting hub
 
 }; // cDCServerBase
 
 
 // ================ cDCParserBase ================
 
+/** Base DC parser */
 class cDCParserBase {
 
 public:
 
-	string & msStr; //< address of the string with command
+	string & msStr; //< Ref to string with command
 
 public:
 
 	cDCParserBase(string & sStr) : msStr(sStr) {}
-	virtual string & ChunkString(unsigned int n) = 0; /** Get string address for the chunk of command */
-	virtual int GetType() const = 0; /** Get command type */
+	virtual string & ChunkString(unsigned int n) = 0; //< Get string address for the chunk of command
+	virtual int GetType() const = 0;                  //< Get command type
 
 }; // cDCParserBase
 
@@ -356,15 +374,16 @@ namespace nWebServer {
 
 // ================ cWebParserBase ================
 
+/** Base web parser */
 class cWebParserBase {
 
 public:
 
-	string & msStr; /** Ref to string with cmd */
+	string & msStr; //< Ref to string with cmd
 
 public:
 
-	cWebParserBase(string & sStr):msStr(sStr) {}
+	cWebParserBase(string & sStr) : msStr(sStr) {}
 
 }; // cWebParserBase
 
@@ -383,40 +402,42 @@ class cPlugin;
 
 // ================ cPluginListBase ================
 
+/** Base plugin list */
 class cPluginListBase {
 
 public:
 
-	cPluginListBase(){}
-	virtual ~cPluginListBase(){}
+	cPluginListBase() {}
+	virtual ~cPluginListBase() {}
 
-	virtual const string & GetPluginDir() = 0; /** Plugins dir */
-	virtual bool RegCallList(const char * sId, cPlugin *) = 0; /** Reg plugin in list */
-	virtual bool UnregCallList(const char * sId, cPlugin *) = 0; /** Unreg plugin in list */
+	virtual const string & GetPluginDir() = 0;                   //< Get plugins path
+	virtual bool RegCallList(const char * sId, cPlugin *) = 0;   //< Reg plugin in list with id
+	virtual bool UnregCallList(const char * sId, cPlugin *) = 0; //< Unreg plugin from list with id
 
 }; // cPluginListBase
 
 
 // ================ cPlugin ================
 
-/** Plugin base class */
+/** Base plugin */
 class cPlugin {
 
-private:
-	bool mbIsAlive; /** State of plugin (loaded or not loaded) */
+public:
+
+	int miVersion;               //< Version of plugin interface
+	cDCServerBase * mDCServer;   //< Main DC Server
 
 public:
-	int miVersion; /** Interface version of all plugins */
-	cDCServerBase * mDCServer;
 
-public:
-	cPlugin() : mbIsAlive(true), miVersion(0), mDCServer(NULL), mPluginList(NULL) {
+	cPlugin() : miVersion(0), mDCServer(NULL), mbIsAlive(true), mPluginList(NULL) {
 		miVersion = INTERNAL_PLUGIN_VERSION;
 	}
 	virtual ~cPlugin() {}
 
-	virtual bool RegAll(cPluginListBase *) = 0; /** Reg function in all call lists */
-	virtual void OnLoad(cDCServerBase * DCServer) { mDCServer = DCServer; }
+	virtual bool RegAll(cPluginListBase *) = 0; //< Reg function in all call lists
+	virtual void OnLoad(cDCServerBase * DCServer) { mDCServer = DCServer; } //< OnLoad plugin function
+
+	/** Events */
 	virtual int OnUserConnected(cDCConnBase *) { return 1; }
 	virtual int OnUserDisconnected(cDCConnBase *) { return 1; }
 	virtual int OnUserEnter(cDCConnBase *) { return 1; }
@@ -445,18 +466,22 @@ public:
 	virtual int OnWebData(cDCConnBase *, cWebParserBase *) { return 1; }
 
 
-	const string &Name() { return msName; } /** Get name of the plugin */
-	const string &Version() { return msVersion; } /** Get version of the plugin */
-	void Suicide() { mbIsAlive = true; } /** Destruction plugin */
-	bool IsAlive() { return mbIsAlive; } /** Check state */
-	void SetPluginList(cPluginListBase * PluginList) { mPluginList = PluginList; } /** Set plugin list for plugin */
-	virtual const string & GetPluginDir() { return mPluginList->GetPluginDir(); }; /** Plugin's dir */
+	const string &Name() const { return msName; }       //< Get name of plugin
+	const string &Version() const { return msVersion; } //< Get version of plugin
+	void Suicide() { mbIsAlive = false; }               //< Destruction of plugin
+	bool IsAlive() const { return mbIsAlive; }          //< Check state
+	void SetPluginList(cPluginListBase * PluginList) { mPluginList = PluginList; } //< Set plugin-list for plugin
+	virtual const string & GetPluginDir() { return mPluginList->GetPluginDir(); }  //< Get plugins path
+
+private:
+
+	bool mbIsAlive;                  //< State of plugin (loaded or not loaded)
 
 protected:
 
-	string msName; /** Name of the plugin */
-	string msVersion; /** Version of the plugin */
-	cPluginListBase * mPluginList; /** Pointer to list of all plugins */
+	string msName;                   //< Name of the plugin
+	string msVersion;                //< Version of the plugin
+	cPluginListBase * mPluginList;   //< Pointer to list of all plugins
 
 }; // cPlugin
 
