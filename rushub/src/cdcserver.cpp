@@ -595,18 +595,7 @@ bool cDCServer::AddToUserList(cDCUser * User) {
 	if(mDCUserList.Log(4)) mDCUserList.LogStream() << "Before add: " << User->msNick << " Size: " << mDCUserList.Size() << endl;
 
 	if(!mDCUserList.AddWithKey(Key, User)) {
-
-		//if(Log(1)) LogStream() << "Adding twice user with same nick " << User->msNick << " (" << mDCUserList.Find(Key)->msNick << ")" << endl;
-
-		cDCUser * us = (cDCUser*)mDCUserList.Find(Key);
-
-		if(User->mDCConn && us->mDCConn) {
-			if(Log(0)) LogStream() << "Adding twice user with same nick " << User->msNick << "'[" // Log(0) for testing (was 1)
-				<< User->GetIp() << "] vs '" << us->msNick << "'[" << us->GetIp() 
-				<< "],sock:" << User->mDCConn->mSocket << " vs " << us->mDCConn->mSocket << endl; // for testing
-		} else {
-			if(Log(2)) LogStream() << "Adding twice user with same nick " << User->msNick << endl;
-		}
+		if(Log(1)) LogStream() << "Adding twice user with same nick " << User->msNick << " (" << mDCUserList.Find(Key)->msNick << ")" << endl;
 		User->mbInUserList = false;
 		return false;
 	}

@@ -168,7 +168,7 @@ public:
 	}
 
 	/** Redefining log level function */
-	virtual int StrLog(ostream & ostr, int iLevel, int iMaxLevel);
+	virtual int StrLog(ostream & ostr, int iLevel, int iMaxLevel, bool bIsError = false);
 
 }; // cUserList
 

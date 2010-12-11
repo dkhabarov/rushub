@@ -35,24 +35,23 @@ namespace nServer {
 unsigned long cConn::iConnCounter = 0;
 char *cConn::msRecvBuf = new char[MAX_RECV_SIZE + 1];
 
-cConn::cConn(tSocket sock, cServer *s, tConnType st) :
+cConn::cConn(tSocket socket, cServer * server, tConnType connType) :
 	cObj("cConn"),
-	mSocket(sock),
-	mbOk(sock > 0),
+	mbOk(socket > 0),
 	mbWritable(true),
 	miCloseReason(0),
 	mConnFactory(NULL),
 	mListenFactory(NULL),
-	mServer(s),
+	mServer(server),
 	mProtocol(NULL),
 	mParser(NULL),
+	mSocket(socket),
 	miRecvBufEnd(0),
 	miRecvBufRead(0),
 	mbBlockInput(false),
 	mbBlockOutput(true),
-	miAttemptSend(0),
 	mbClosed(false),
-	mConnType(st),
+	mConnType(connType),
 	miNetIp(0),
 	miPort(0),
 	miPortConn(0),
@@ -89,17 +88,17 @@ cConn::~cConn() {
 	this->Close();
 }
 
-/** ListenPort */
-tSocket cConn::ListenPort(int iPort, const char *sIp, bool bUDP) {
+/** MakeSocket */
+tSocket cConn::MakeSocket(int port, const char * ip, bool udp) {
 	if(mSocket > 0) return -1; /** Socket is already created */
-	mSocket = SocketCreate(bUDP); /** Create socket */
-	mSocket = SocketBind(mSocket, iPort, sIp); /** Bind */
-	if(!bUDP) {
+	mSocket = SocketCreate(udp); /** Create socket */
+	mSocket = SocketBind(mSocket, port, ip); /** Bind */
+	if(!udp) {
 			mSocket = SocketListen(mSocket);
 			mSocket = SocketNonBlock(mSocket);
 	}
-	miPort = iPort; /** Set port */
-	msIp = sIp; /** Set ip (host) */
+	miPort = port; /** Set port */
+	msIp = ip; /** Set ip (host) */
 	mbOk = mSocket > 0; /** Reg conn */
 	return mSocket;
 }
@@ -203,14 +202,8 @@ void cConn::Close() {
 	mSocket = 0;
 }
 
-/** OnCloseNice */
-int cConn::OnCloseNice() {
-	return 0;
-}
-
 /** CloseNice */
 void cConn::CloseNice(int imsec /* = 0 */, int iReason /* = 0 */) {
-	OnCloseNice();
 	mbWritable = false;
 	if(iReason) miCloseReason = iReason;
 	if((imsec <= 0) || (!msSendBuf.size())) { CloseNow(iReason); return; }
@@ -258,7 +251,6 @@ cConn * cConn::CreateNewConn() {
 		throw "Fatal error: Can't create new connection object";
 	}
 
-	mTimeLastIOAction.Get();
 	return new_conn;
 }
 
@@ -389,7 +381,7 @@ int cConn::Recv() {
 		miRecvBufEnd = iBufLen; /** End buf pos */
 		miRecvBufRead = 0; /** Pos for reading from buf */
 		msRecvBuf[miRecvBufEnd] = '\0'; /** Adding 0 symbol to end of str */
-		mTimeLastIOAction.Get(); /** Write time last action */
+		mLastRecv.Get(); /** Write time last recv action */
 	}
 	return iBufLen;
 }
@@ -458,12 +450,13 @@ int cConn::Remaining() {
 
 /** Write data in sending buffer and send to conn */
 int cConn::WriteData(const string &sData, bool bFlush) {
-	if(msSendBuf.size() + sData.size() >= miSendBufMax) {
+	size_t bufLen = msSendBuf.size();
+	if(bufLen + sData.size() >= miSendBufMax) {
 		if(Log(0)) LogStream() << "Sending buffer has big size, closing" << endl;
 		CloseNow(eCR_MAXSIZE_SEND);
 		return -1;
 	}
-	bFlush = bFlush || (msSendBuf.size() > (miSendBufMax >> 1));
+	bFlush = bFlush || (bufLen > (miSendBufMax >> 1));
 
 	if(!bFlush) { 
 		msSendBuf.append(sData.c_str(), sData.size());
@@ -474,7 +467,7 @@ int cConn::WriteData(const string &sData, bool bFlush) {
 	size_t size; 
 	bool appended = false;
 
-	if(msSendBuf.size()) {
+	if(bufLen) {
 		msSendBuf.append(sData.c_str(), sData.size());
 		size = msSendBuf.size();
 		send_buf = msSendBuf.c_str();
@@ -492,18 +485,13 @@ int cConn::WriteData(const string &sData, bool bFlush) {
 			if(Log(2)) LogStream() << "Error in sending: " << SockErr << "(not EAGAIN), closing" << endl;
 			CloseNow(eCR_ERROR_SEND);
 			return -1;
-		} //else if(miAttemptSend++ > MAX_ATTEMPT_SEND) {
-			//if(ErrLog(1)) LogStream() << "Error in sending: Attempt send more than " << MAX_ATTEMPT_SEND << ", closing" << endl;
-			//CloseNow(eCR_MAX_ATTEMPT_SEND);
-			//return -1;
-		//}
+		}
 
 		if(Log(3)) LogStream() << "Block sent. Was sent " << size << " bytes" << endl;
 		if(!appended)
 			StrCutLeft(sData, msSendBuf, size);
 		else
 			StrCutLeft(msSendBuf, size); /** del from buf sent data */
-		mTimeLastIOAction.Get();
 
 		if(bool(mCloseTime)) {
 			CloseNow();
@@ -517,10 +505,11 @@ int cConn::WriteData(const string &sData, bool bFlush) {
 				if(Log(3)) LogStream() << "Unblock output channel" << endl;
 			}
 
-			if(mbBlockInput && msSendBuf.size() < MAX_SEND_UNBLOCK_SIZE) { /** Снятие блокировки с входящего канала */
+			bufLen = msSendBuf.size();
+			if(mbBlockInput && bufLen < MAX_SEND_UNBLOCK_SIZE) { /** Unset block of input */
 				mServer->mConnChooser.cConnChoose::OptIn(this, cConnChoose::eEF_INPUT);
 				if(Log(3)) LogStream() << "Unblock input channel" << endl;
-			} else if(!mbBlockInput && msSendBuf.size() >= MAX_SEND_BLOCK_SIZE) { /** Установка блокировки на входящий канал */
+			} else if(!mbBlockInput && bufLen >= MAX_SEND_BLOCK_SIZE) { /** Set block of input */
 				mServer->mConnChooser.cConnChoose::OptOut(this, cConnChoose::eEF_INPUT);
 				if(Log(3)) LogStream() << "Block input channel" << endl;
 			}
@@ -539,9 +528,6 @@ int cConn::WriteData(const string &sData, bool bFlush) {
 			mServer->mConnChooser.cConnChoose::OptOut(this, cConnChoose::eEF_OUTPUT);
 			if(Log(3)) LogStream() << "Block output channel" << endl;
 		}
-		miAttemptSend = 0;
-		mTimeLastIOAction.Get();
-
 		OnFlush();
 	}
 	return size;
@@ -646,8 +632,8 @@ int cConn::OnTimer(cTime &) {
 	return 0;
 }
 
-int cConn::StrLog(ostream & ostr, int iLevel, int iMaxLevel) {
-	if(cObj::StrLog(ostr, iLevel, iMaxLevel)) {
+int cConn::StrLog(ostream & ostr, int iLevel, int iMaxLevel, bool bIsError /* = false */) {
+	if(cObj::StrLog(ostr, iLevel, iMaxLevel, bIsError)) {
 		LogStream() << "(sock " << mSocket << ") ";
 		return 1;
 	}

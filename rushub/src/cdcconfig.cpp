@@ -111,7 +111,7 @@ void cDCConfig::AddVars() {
 	Add("iLenCmdUnknown",       mMaxCmdLen[eDC_UNKNOWN],      128   );
 	mMaxCmdLen[eDC_PING] = 0; // ping length
 
-	Add("iWebTimeout",          miWebTimeout,                 30);
+	Add("iWebTimeout",          miWebTimeout,                 30.);
 	Add("iWebStrSizeMax",       miWebStrSizeMax,              10240);
 	Add("sWebAddresses",        msWebAddresses,
 		#ifdef _WIN32
@@ -123,16 +123,17 @@ void cDCConfig::AddVars() {
 	Add("bWebServer",           mbWebServer,                  false);
 
 	/* Timeouts of the protocol commands */
-	const char *sTimeoutName[] = {"Key", "Nick", "Login", "Myinfo", "Getpass", "Recv"};
-	double iTimeoutDefault[] = { 60. , 30., 600., 40., 300., 600. };
+	const char *sTimeoutName[] = {"Key", "Nick", "Login", "Myinfo", "Getpass"};
+	double iTimeoutDefault[] = { 60. , 30., 600., 40., 300. };
 	string s;
-	for(int i = 0; i < 6; ++i) {
+	for(int i = 0; i < 5; ++i) {
 		miTimeout[i] = iTimeoutDefault[i];
 		s = "iTimeout";
 		s.append(sTimeoutName[i]);
 		Add(s, miTimeout[i], iTimeoutDefault[i]);
 	}
 
+	Add("iTimeoutAny",          miTimeoutAny,                 600.);
 	Add("iTimerServPeriod",     mDCServer->miTimerServPeriod, 2000);
 	Add("iTimerConnPeriod",     mDCServer->miTimerConnPeriod, 4000);
 	Add("iStepDelay",           mDCServer->mStepDelay,        0);
@@ -227,9 +228,9 @@ void cDCLang::AddVars() {
 
 	string s;
 	int i;
-	const char *sReason[] = {"получения ключа", "валидации ника", "входа", "получения MyINFO", "получения пароля", "получения какой-либо команды"};
-	const char *sName[] = {"Key", "Nick", "Login", "Myinfo", "Getpass", "Recv"};
-	for(i = 0; i < 6; ++i) {
+	const char *sReason[] = {"получения ключа", "валидации ника", "входа", "получения MyINFO", "получения пароля"};
+	const char *sName[] = {"Key", "Nick", "Login", "Myinfo", "Getpass"};
+	for(i = 0; i < 5; ++i) {
 		s = "sTimeout";
 		s.append(sName[i]);
 		Add(s, msTimeoutCmd[i], sReason[i]);

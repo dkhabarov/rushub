@@ -44,14 +44,13 @@ typedef enum {
 	eLS_LOGIN_DONE = eLS_KEY|eLS_ALOWED|eLS_VALNICK|eLS_PASSWD|eLS_VERSION|eLS_MYINFO|eLS_NICKLST
 } tLoginStatus;
 
-/** TimeOuts */
+/** TimeOuts during entering on hub only */
 typedef enum {
 	eTO_KEY = 0, //< Waiting $Key after $Lock
 	eTO_VALNICK, //< Waiting $ValidateNick after $Lock
 	eTO_LOGIN,   //< Life time of the connection object before full entry (DoUserEnter)
 	eTO_MYINFO,  //< After $ValidateNick and before $MyINFO timeout
 	eTO_PASS,    //< Waiting pass
-	eTO_RECV,    //< Any data recv timeout
 	eTO_MAX      //< Max timeout type
 } tTimeOut;
 
@@ -219,14 +218,12 @@ public:
 	/** Flush sending buffer */
 	virtual void OnFlush();
 
-	int Recv();
-
 	inline void SetLSFlag(unsigned int s){mLoginStatus |= s;}               //< Setting entry status flag
 	inline void ReSetLSFlag(unsigned int s){mLoginStatus = s;}              //< Reset flag
 	inline unsigned int GetLSFlag(unsigned int s){return mLoginStatus & s;} //< Get flag
 
-	int SetTimeOut(tTimeOut, double Sec, cTime &now); //< Set timeout
-	int ClearTimeOut(tTimeOut); //< Clear timeout
+	void SetTimeOut(tTimeOut, double Sec, cTime &now); //< Set timeout
+	void ClearTimeOut(tTimeOut); //< Clear timeout
 	int CheckTimeOut(tTimeOut t, cTime &now); // Check timeout
 
 	virtual int OnTimer(cTime &now); //< Timer for current connection
@@ -240,7 +237,7 @@ public:
 	bool SetUser(cDCUser * User); /** Set user object for current connection */
 
 private:
-	cTime mLastSend;
+
 	unsigned int mLoginStatus; //< Login status
 
 protected:
@@ -252,9 +249,6 @@ protected:
 		cTime mKey; //< Time sending cmd $Key to the server
 		cTime mPingServer; //< Time last ping from server to client
 	} mTimes;
-
-protected:
-	virtual int OnCloseNice(); /** Event of nice close connection */
 
 }; // cDCConn
 

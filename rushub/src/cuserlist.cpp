@@ -145,8 +145,8 @@ void cUserList::FlushCache() {
 }
 
 /** Redefining log level function */
-int cUserList::StrLog(ostream & ostr, int iLevel, int iMaxLevel) {
-	if(cObj::StrLog(ostr, iLevel, iMaxLevel)) {
+int cUserList::StrLog(ostream & ostr, int iLevel, int iMaxLevel, bool bIsError /* = false */) {
+	if(cObj::StrLog(ostr, iLevel, iMaxLevel, bIsError)) {
 		LogStream() << "(" << Size() << ")" << "[" << msName << "] ";
 		return 1;
 	}

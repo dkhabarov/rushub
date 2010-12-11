@@ -95,8 +95,8 @@ void * cPluginLoader::LoadSym(const char *sName) {
 }
 
 /** Log */
-int cPluginLoader::StrLog(ostream & os, int iLevel, int iMaxLevel) {
-	if(cObj::StrLog(os, iLevel, iMaxLevel)) {
+int cPluginLoader::StrLog(ostream & os, int iLevel, int iMaxLevel, bool bIsError /* = false */) {
+	if(cObj::StrLog(os, iLevel, iMaxLevel, bIsError)) {
 		LogStream() << "(" << msFile << ") ";
 		return 1;
 	}

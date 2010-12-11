@@ -80,12 +80,12 @@ public:
 	long Sec() const {return tv_sec;}
 
 	/** Get milisec */
-	unsigned long MiliSec() const {return (unsigned long)(tv_sec) * 1000 + (unsigned long)(tv_usec) / 1000;}
+	unsigned long MiliSec() const { return (unsigned long)(tv_sec) * 1000 + (unsigned long)(tv_usec) / 1000; }
 
 	/*bool LocalTime(struct tm &result){ return localtime_r(this, &result) == &result;}*/
 	cTime &Get();
 	cTime &Normalize();
-	void Null(){tv_sec = tv_usec = 0;}
+	void Null() { tv_sec = tv_usec = 0; }
 	string AsString() const;
 	void AsTimeVals(int &w, int &d, int &h, int &m) const;
 	friend std::ostream &operator << (std::ostream &os, const cTime &t);
@@ -95,10 +95,10 @@ private:
 	mutable int mPrintType;
 
 public:
-	const cTime &AsDate() const {mPrintType = 1; return *this;}
-	const cTime &AsPeriod() const {mPrintType = 2; return *this;}
-	const cTime &AsFullPeriod() const {mPrintType = 3; return *this;}
-	const cTime &AsDateMS() const {mPrintType = 4; return *this;}
+	const cTime &AsDate() const { mPrintType = 1; return *this; }
+	const cTime &AsPeriod() const { mPrintType = 2; return *this; }
+	const cTime &AsFullPeriod() const { mPrintType = 3; return *this; }
+	const cTime &AsDateMS() const { mPrintType = 4; return *this; }
 
 }; // cTime
 

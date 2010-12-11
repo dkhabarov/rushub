@@ -146,13 +146,12 @@ protected:
 		static bool initWSA; /** Windows init flag for WSA (Windows Sockets API) */
 	#endif
 
-	typedef list<cConn *> tConnList; /** ConnList */
+	typedef list<cConn *> tConnList; /** tConnList */
 	typedef tConnList::iterator tCLIt;
-
-	typedef list<cConn *> tListenList; /** ListenList */
-	typedef tListenList::iterator tLLIt;
-
 	tConnList mConnList; /** ConnList */
+
+	typedef list<cConn *> tListenList; /** tListenList */
+	typedef tListenList::iterator tLLIt;
 	tListenList mListenList; /** ListenList */
 
 	/** select or poll object */

@@ -49,7 +49,7 @@ public:
 	bool Close(); /** Close lib dll(so) */
 	bool LoadSym(); /** LoadSym */
 	void * LoadSym(const char *); /** LoadSym from dll(so) */
-	int StrLog(ostream & os, int iLevel, int iMaxLevel); /** Log */
+	int StrLog(ostream & os, int iLevel, int iMaxLevel, bool bIsError = false); /** Log */
 
 protected:
 

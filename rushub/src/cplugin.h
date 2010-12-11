@@ -24,22 +24,19 @@
 #include <iostream>
 #include <vector>
 
-using namespace ::std;
-
 #ifndef _WIN32
 	#ifndef __int64
 		#define __int64 long long
 	#endif
 #endif
 
+namespace nPlugin {
+	class cPlugin;
+};
+using nPlugin::cPlugin;
+using namespace ::std;
 
 #ifndef REG_PLUGIN
-
-	namespace nPlugin {
-		class cPlugin;
-	};
-	using nPlugin::cPlugin;
-
 	#ifdef _WIN32
 		#define BUILDING_DLL 1
 		#if BUILDING_DLL
@@ -415,7 +412,7 @@ public:
 	cPluginListBase() {}
 	virtual ~cPluginListBase() {}
 
-	virtual const string & GetPluginDir() = 0;                   //< Get plugins path
+	virtual const string & GetPluginDir() const = 0;                   //< Get plugins path
 	virtual bool RegCallList(const char * sId, cPlugin *) = 0;   //< Reg plugin in list with id
 	virtual bool UnregCallList(const char * sId, cPlugin *) = 0; //< Unreg plugin from list with id
 
@@ -476,7 +473,7 @@ public:
 	void Suicide() { mbIsAlive = false; }               //< Destruction of plugin
 	bool IsAlive() const { return mbIsAlive; }          //< Check state
 	void SetPluginList(cPluginListBase * PluginList) { mPluginList = PluginList; } //< Set plugin-list for plugin
-	virtual const string & GetPluginDir() { return mPluginList->GetPluginDir(); }  //< Get plugins path
+	virtual const string & GetPluginDir() const { return mPluginList->GetPluginDir(); }  //< Get plugins path
 
 private:
 

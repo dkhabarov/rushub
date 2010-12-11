@@ -62,7 +62,6 @@ public:
 
 	typedef pair<int, int> tChunk; /** Pair for chunk (begin, end) */
 	typedef vector<tChunk> tChunkList; /** Chunks list */
-	typedef tChunkList::iterator tCLIt; /** Iterator */
 	tChunkList mChunks; /** List */
 	string *mStrings; /** String array for chunks */
 	unsigned long mStrMap; /** Chunk already existed */

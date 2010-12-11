@@ -39,7 +39,9 @@ cWebConn::~cWebConn() {
 
 /** Timer of the connection */
 int cWebConn::OnTimer(cTime &now) {
-	if(mTimeLastIOAction.Sec() < (now.Sec() + (long)(((cDCServer *)mServer)->mDCConfig.miWebTimeout))) {
+	cDCServer * dcserver = Server();
+	cTime lastRecv(mLastRecv);
+	if(dcserver->MinDelay(lastRecv, dcserver->mDCConfig.miWebTimeout)) {
 		if(Log(2)) LogStream() << "Any action timeout..." << endl;
 		CloseNice(9000, eCR_WEB);
 		return 1;
@@ -82,6 +84,9 @@ void cWebConnFactory::DelConn(cConn * &conn) {
 }
 
 void cWebConnFactory::OnNewData(cConn * conn, string * str) {
+
+	if(conn->Log(1)) conn->LogStream() << "WEB IN: " << (*str) << endl;
+
 	(*str).append(WEB_SEPARATOR);
 	if(conn->Remaining() < 0) return;
 

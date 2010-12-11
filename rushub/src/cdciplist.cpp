@@ -38,9 +38,9 @@ cDCIPList::~cDCIPList() {
 bool cDCIPList::Add(cDCConn* Conn) {
 	tItem * Item = mIPList.Find(Conn->GetNetIp());
 	if(Item == NULL)
-		mIPList.Add(Conn->GetNetIp(), new tItem(Conn->mSocket, Conn));
+		mIPList.Add(Conn->GetNetIp(), new tItem((tSocket)(*Conn), Conn));
 	else
-		Item->Add(Conn->mSocket, Conn);
+		Item->Add((tSocket)(*Conn), Conn);
 	return true;
 }
 
@@ -48,7 +48,7 @@ bool cDCIPList::Remove(cDCConn* Conn) {
 	tItem *Item = NULL, *Items = mIPList.Find(Conn->GetNetIp());
 	if(Items == NULL) return false;
 	Item = Items;
-	cConn * conn = Items->Remove(Conn->mSocket, Item);
+	cConn * conn = Items->Remove((tSocket)(*Conn), Item);
 	if(Item != Items) {
 		if(Item) mIPList.Update(Conn->GetNetIp(), Item);
 		else mIPList.Remove(Conn->GetNetIp()); /** Removing the list from hash-table */

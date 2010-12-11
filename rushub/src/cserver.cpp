@@ -136,7 +136,7 @@ cConn *cServer::Listen(const string & sIP, int iPort, bool bUDP) {
 cConn *cServer::AddListen(cConn *conn, const string & sIP, int iPort, bool bUDP) {
 	/** Socket object was created */
 	if(conn) {
-		if(conn->ListenPort(iPort, sIP.c_str(), bUDP) < 0) {
+		if(conn->MakeSocket(iPort, sIP.c_str(), bUDP) < 0) {
 			if(ErrLog(0))
 				LogStream() << "Fatal error: Can't listen on " << sIP << ":" << iPort << (bUDP ? " UDP" : " TCP") << endl;
 			return NULL;
@@ -341,7 +341,7 @@ void cServer::Step() {
 
 int cServer::AddConnection(cConn *conn) {
 
-	if(!conn->mbOk) { 
+	if(!conn->mbOk) {
 		if(conn->Log(2)) conn->LogStream() << "Not reserved connection: " << conn->Ip() << endl;
 		if(conn->mConnFactory != NULL) conn->mConnFactory->DelConn(conn);
 		else {
@@ -352,7 +352,7 @@ int cServer::AddConnection(cConn *conn) {
 	}
 
 	//if(Log(4)) LogStream() << "Num clients before add: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.Size() << endl;
-	//if(Log(4)) LogStream() << "Add new connection on socket: " << conn->mSocket << " - " << conn->Ip() << ":" << conn->Port() << endl;
+	//if(Log(4)) LogStream() << "Add new connection on socket: " << (tSocket)(*conn) << " - " << conn->Ip() << ":" << conn->Port() << endl;
 
 	if(
 		#if USE_SELECT
@@ -388,9 +388,9 @@ int cServer::DelConnection(cConn *old_conn) {
 	}
 
 	//if(Log(4)) LogStream() << "Num clients before del: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.Size() << endl;
-	//if(Log(4)) LogStream() << "Delete connection on socket: " << old_conn->mSocket << endl;
+	//if(Log(4)) LogStream() << "Delete connection on socket: " << (tSocket)(*old_conn) << endl;
 
-	tCLIt it = old_conn->mIterator;//find(mConnList.begin(), mConnList.end(), old_conn);
+	tCLIt it = old_conn->mIterator;
 	cConn *found = (*it);
 	if((it == mConnList.end()) || (found != old_conn)) {
 		if(old_conn->ErrLog(0)) old_conn->LogStream() << "Fatal error: Delete unknown connection: " << old_conn << endl;
@@ -484,7 +484,7 @@ int cServer::OnTimerBase(cTime &now) {
 		mTimes.mConn = now;
 		tCLIt it_e = mConnList.end();
 		for(tCLIt it = mConnList.begin(); it != it_e; ++it)
-			if((*it)->mbOk) (*it)->OnTimerBase(now); 
+			if((*it)->mbOk) (*it)->OnTimerBase(now);
 	}
 	return 0;
 }

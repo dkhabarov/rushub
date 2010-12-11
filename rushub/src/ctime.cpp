@@ -100,7 +100,6 @@ std::ostream &operator << (std::ostream &os, const cTime &t) {
 		#ifndef _WIN32
 			const time_t * ta;
 			ta = (time_t*)&t.tv_sec;
-			//buf = ctime(&ta);
 			buf = ctime_r(ta, buff);
 		#else
 			time_t ta;

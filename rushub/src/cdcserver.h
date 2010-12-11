@@ -139,7 +139,7 @@ public:
 	virtual ~cDCServer();
 
 	const string & GetMainDir() const { return mMainPath.msConfPath; }
-	const string & GetTime(){ stringstream oss; oss << mTime.AsDate(); mTimeBuf = oss.str(); return mTimeBuf;}
+	const string & GetTime() { stringstream oss; oss << mTime.AsDate(); mTimeBuf = oss.str(); return mTimeBuf; }
 	const string & GetHubInfo() const { return msHubName; }
 	const string & GetLocale() const { return mDCConfig.msLocale; };
 	const string & GetSystemVersion() const { return msSysVersion; }
@@ -162,6 +162,9 @@ public:
 
 	/** Main timer */
 	int OnTimer(cTime &now);
+
+	/** Function checks min interval */
+	bool MinDelay(cTime &then, double sec);
 
 	/** Pointer on the user (or NULL) */
 	cDCUser * GetDCUser(const char *sNick);
@@ -203,9 +206,6 @@ protected:
 
 	/** Function of the processing enterring data */
 	void OnNewData(cConn *, string *);
-
-	/** Function checks min interval */
-	bool MinDelay(cTime &then, double sec);
 
 	/** Antiflood function */
 	bool AntiFlood(unsigned &iCount, cTime &Time, const unsigned &iCountLimit, const double &iTimeLimit);

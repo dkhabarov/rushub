@@ -78,7 +78,6 @@
 #define MAX_SEND_SIZE 0x2AFFFF     /** Max buf size for send */
 #define MAX_SEND_UNBLOCK_SIZE 0x25FFFF /** Max size (send) unblock input chanel */
 #define MAX_SEND_BLOCK_SIZE   0x28FFFF /** Max size (send) block input chanel */
-#define MAX_ATTEMPT_SEND 50 /** MAX_ATTEMPT_SEND */
 
 #ifdef _WIN32
 	#define SOCK_CLOSE(SOCK) ::closesocket(SOCK)

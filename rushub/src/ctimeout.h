@@ -35,7 +35,7 @@ private:
 public: 
 	cTimeOut() : mMinDelay(0l), mMaxDelay(0l), mLast(0l) {}
 	cTimeOut(double iMin, double iMax, const cTime &now) : mMinDelay(iMin), mMaxDelay(iMax), mLast(now) {}
-	~cTimeOut(){}
+	~cTimeOut() {}
 
 	inline void SetMinDelay(double iMin) { mMinDelay = iMin; }
 	inline void SetMaxDelay(double iMax) { mMaxDelay = iMax; }

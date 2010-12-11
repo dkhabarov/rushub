@@ -48,13 +48,12 @@ int cDCConn::Send(const string & sData, bool bAddSep, bool bFlush) {
 	int iRet;
 	if(!mbWritable) return 0;
 
-	if(sData.size() >= MAX_SEND_SIZE) {
+	if(sData.size() >= miSendBufMax) {
 		string sMsg(sData);
 		if(Log(0))
-			LogStream() << "Too long message. Size: " 
-				<< sMsg.size() << ". Max size: " << MAX_SEND_SIZE 
-				<< " Message starts with: " << sMsg.substr(0,25) << endl;
-		sMsg.resize(MAX_SEND_SIZE - 1);
+			LogStream() << "Too long message. Size: " << sMsg.size() << ". Max size: "
+				<< miSendBufMax << " Message starts with: " << sMsg.substr(0, 25) << endl;
+		sMsg.resize(miSendBufMax - 1);
 
 		if(bAddSep) {
 			WriteData(sMsg, false);
@@ -71,7 +70,6 @@ int cDCConn::Send(const string & sData, bool bAddSep, bool bFlush) {
 
 /** OnFlush sending buffer */
 void cDCConn::OnFlush() {
-	msSendBuf.erase(0, msSendBuf.size());
 	if(mbNickListInProgress) {
 		SetLSFlag(eLS_NICKLST);
 		mbNickListInProgress = false;
@@ -85,35 +83,28 @@ void cDCConn::OnFlush() {
 }
 
 /** Set timeout for this connection */
-int cDCConn::SetTimeOut(tTimeOut to, double Sec, cTime &now) {
-	if(to >= eTO_MAX) return 0;
-	if(Sec == 0.) return 0;
+void cDCConn::SetTimeOut(tTimeOut to, double Sec, cTime &now) {
 	mTimeOut[to].SetMaxDelay(Sec);
 	mTimeOut[to].Reset(now);
-	return 1;
 }
 
 /** Clear timeout */
-int cDCConn::ClearTimeOut(tTimeOut to) {
-	if(to >= eTO_MAX) return 0;
+void cDCConn::ClearTimeOut(tTimeOut to) {
 	mTimeOut[to].Disable();
-	return 1;
 }
 
 /** Check timeout */
 int cDCConn::CheckTimeOut(tTimeOut to, cTime &now) {
-	if(to >= eTO_MAX) return 0;
 	return 0 == mTimeOut[to].Check(now);
-	return 1;
 }
 
 /** Timer for the current connection */
 int cDCConn::OnTimer(cTime &now) {
 	cDCServer * dcserver = Server();
 
-	/** Check timeouts */
-	if(!mDCUser || !mDCUser->mbInUserList) // Optimisation
-		for(int i = 0; i < eTO_MAX; ++i)
+	/** Check timeouts. For entering only */
+	if(!mDCUser || !mDCUser->mbInUserList) { // Optimisation
+		for(int i = 0; i < eTO_MAX; ++i) {
 			if(!CheckTimeOut(tTimeOut(i), now)) {
 				string sMsg;
 				if(Log(2)) LogStream() << "Operation timeout (" << tTimeOut(i) << ")" << endl;
@@ -122,8 +113,11 @@ int cDCConn::OnTimer(cTime &now) {
 				this->CloseNice(9000, eCR_TIMEOUT);
 				return 1;
 			}
+		}
+	}
 
-	if(mTimeLastIOAction.Sec() < (mLastSend.Sec() - 270)) {
+	cTime lastRecv(mLastRecv);
+	if(dcserver->MinDelay(lastRecv, dcserver->mDCConfig.miTimeoutAny)) {
 		if(Log(2)) LogStream() << "Any action timeout..." << endl;
 		dcserver->SendToUser(this, dcserver->mDCLang.msTimeoutAny.c_str(), (char*)dcserver->mDCConfig.msHubBot.c_str());
 		CloseNice(9000, eCR_TO_ANYACTION);
@@ -138,24 +132,11 @@ int cDCConn::OnTimer(cTime &now) {
 	Ago -= dcserver->mDCConfig.miStartPing;
 	if(
 		dcserver->MinDelay(mTimes.mPingServer, dcserver->mDCConfig.miPingInterval) &&
-		mDCUser &&
-		mDCUser->mbInUserList &&
-		mDCUser->mTimeEnter < Ago
-		)
-	{
+		mDCUser && mDCUser->mbInUserList && mDCUser->mTimeEnter < Ago
+	) {
 		string s;
 		Send(s, true, true);
 	}
-	return 0;
-}
-
-int cDCConn::Recv() {
-	cDCServer * dcserver = (cDCServer *) mServer;
-	SetTimeOut(eTO_RECV, dcserver->mDCConfig.miTimeout[eTO_RECV], mServer->mTime);
-	return cConn::Recv();
-}
-
-int cDCConn::OnCloseNice() {
 	return 0;
 }
 

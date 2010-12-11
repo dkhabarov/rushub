@@ -62,7 +62,7 @@ public:
 	virtual ~cPluginList() {}
 	void SetServer(cDCServerBase *);
 
-	virtual const string & GetPluginDir() { return msPluginDir; }
+	virtual const string & GetPluginDir() const { return msPluginDir; }
 
 	bool LoadAll(); /** Load all plugins */
 	bool LoadPlugin(const string &sPathFile); /** Load plugin by lib */

@@ -53,7 +53,6 @@ public:
 	unsigned mMaxCmdLen[eDC_UNKNOWN + 1];
 	unsigned miMaxNickLen;  //< Max length of nick
 	unsigned miMinNickLen;  //< Min length of nick
-	unsigned miWebTimeout;  //< Connection timeout with web-client (in sec)
 
 	/** Allowed number reconnection during miTimeReconnIp sec */
 	unsigned miFloodCountReconnIp;
@@ -106,7 +105,9 @@ public:
 	double miFloodTimeUnknown2;
 
 	double miPingInterval;      //< User's ping interval
-	double miTimeout[6];        //< Timeouts of the protocol commands
+	double miTimeout[5];        //< Timeouts of the protocol entering commands
+	double miTimeoutAny;        //< Timeout connection
+	double miWebTimeout;        //< Timeout connection with web-client (in sec)
 	double miSysLoading;        //< Factor of the system loading
 
 	bool mbWebServer;           //< Web-server on/off
@@ -156,7 +157,7 @@ public:
 	string msBadMyinfoNick;     //< Message about bad nick in MyINFO command
 	string msUnits[7];          //< Units: B, KB, MB, GB, TB, PB, EB
 	string msTimeout;           //< Message about timeout with the reason
-	string msTimeoutCmd[6];     //< Timeouts names
+	string msTimeoutCmd[5];     //< Timeouts names
 	string msTimeoutAny;        //< Message about connection timeout
 	string msForceMove;         //< Redirection message
 	string msUsersLimit;
