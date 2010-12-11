@@ -760,13 +760,14 @@ cDCUserBase * cDCServer::GetDCUserBase(const char *sNick) {
 	return NULL;
 }
 
-void cDCServer::GetDCConnBase(const char * sIP, vector<cDCConnBase *> & vconn) {
+const vector<cDCConnBase*> & cDCServer::GetDCConnBase(const char * sIP) {
 	cDCIPList::iterator it;
 	for(it = mIPListConn->begin(cDCConn::Ip2Num(sIP)); it != mIPListConn->end(); ++it) {
 		cDCConn * dcconn = (cDCConn *)(*it);
 		if(dcconn->_miConnType == 1)
-			vconn.push_back(dcconn);
+			mvIPConn.push_back(dcconn);
 	}
+	return mvIPConn;
 }
 
 /** Send data to user */
@@ -901,12 +902,12 @@ bool cDCServer::SendToIP(const char *sIP, const char *sData, unsigned long iProf
 }
 
 /** Send data to all except nick list */
-bool cDCServer::SendToAllExceptNicks(cDCServer::List_t &NickList, const char *sData, const char *sNick, const char *sFrom) {
+bool cDCServer::SendToAllExceptNicks(const vector<string> & NickList, const char *sData, const char *sNick, const char *sFrom) {
 	if(!sData) return false;
 
 	cUserBase * User;
 	vector<cUserBase *> ul;
-	for(List_t::iterator it = NickList.begin(); it != NickList.end(); ++it) {
+	for(List_t::const_iterator it = NickList.begin(); it != NickList.end(); ++it) {
 		User = mDCUserList.GetUserBaseByNick(*it);
 		if(User && User->mbInUserList) {
 			User->mbInUserList = false;
@@ -933,13 +934,13 @@ bool cDCServer::SendToAllExceptNicks(cDCServer::List_t &NickList, const char *sD
 	return true;
 }
 
-bool cDCServer::SendToAllExceptIps(cDCServer::List_t & IPList, const char *sData, const char *sNick, const char *sFrom) {
+bool cDCServer::SendToAllExceptIps(const vector<string> & IPList, const char *sData, const char *sNick, const char *sFrom) {
 	if(!sData) return false;
 
 	cDCConn * dcconn;
 	vector<cDCConn*> ul;
 	bool bBadIP = false;
-	for(List_t::iterator it = IPList.begin(); it != IPList.end(); ++it) {
+	for(List_t::const_iterator it = IPList.begin(); it != IPList.end(); ++it) {
 		if(!cDCConn::CheckIp(*it)) bBadIP = true;
 		for(cDCIPList::iterator mit = mIPListConn->begin(cDCConn::Ip2Num((*it).c_str())); mit != mIPListConn->end(); ++mit) {
 			dcconn = (cDCConn*)(*mit);
@@ -995,10 +996,13 @@ void cDCServer::ForceMove(cDCConnBase *DCConn, const char *sAddress, const char 
 	dcconn->CloseNice(9000, eCR_FORCE_MOVE);
 }
 
-void cDCServer::GetConfig(vector<string> & vec) {
-	for(cConfigListBase::tHLMIt it = mDCConfig.mList.begin(); it != mDCConfig.mList.end(); ++it) {
-		vec.push_back((*it)->msName);
+const vector<string> & cDCServer::GetConfig() {
+	if(mvConfigNames.empty()) {
+		for(cConfigListBase::tHLMIt it = mDCConfig.mList.begin(); it != mDCConfig.mList.end(); ++it) {
+			mvConfigNames.push_back((*it)->msName);
+		}
 	}
+	return mvConfigNames;
 }
 
 const char * cDCServer::GetConfig(const string & sName) {

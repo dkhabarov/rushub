@@ -64,7 +64,7 @@ using namespace ::std;
 #endif // REG_PLUGIN
 
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10007  //< Internal plugin version
+	#define INTERNAL_PLUGIN_VERSION 10008  //< Internal plugin version
 #endif
 
 #ifndef DC_SEPARATOR
@@ -312,8 +312,6 @@ class cDCServerBase {
 
 public:
 
-	typedef vector<string> List_t;
-
 	virtual const string & GetMainDir() const = 0;         //< Get main hub path
 	virtual const string & GetTime() = 0;                  //< Get system date-time string (now)
 	virtual const string & GetHubInfo() const = 0;         //< Get name and version of the hub
@@ -331,16 +329,16 @@ public:
 	virtual bool SendToAll(const char *sData, const char *sNick = NULL, const char *sFrom = NULL) = 0;                       //< Send comand to all
 	virtual bool SendToProfiles(unsigned long iProfile, const char *sData, const char *sNick = NULL, const char *sFrom = NULL) = 0; //< Send comand to profiles
 	virtual bool SendToIP(const char *sIP, const char *sData, unsigned long iProfile = 0, const char *sNick = NULL, const char *sFrom = NULL) = 0; //< Send comand to ip
-	virtual bool SendToAllExceptNicks(List_t & NickList, const char *sData, const char *sNick = NULL, const char *sFrom = NULL) = 0; //< Send comand to all except nicks
-	virtual bool SendToAllExceptIps(List_t & IPList, const char *sData, const char *sNick = NULL, const char *sFrom = NULL) = 0; //< Send comand to all except ips
+	virtual bool SendToAllExceptNicks(const vector<string> & NickList, const char *sData, const char *sNick = NULL, const char *sFrom = NULL) = 0; //< Send comand to all except nicks
+	virtual bool SendToAllExceptIps(const vector<string> & IPList, const char *sData, const char *sNick = NULL, const char *sFrom = NULL) = 0; //< Send comand to all except ips
 
 	virtual void ForceMove(cDCConnBase *DCConn, const char *sAddress, const char *sReason = NULL) = 0; //< Redirection client
 
-	virtual void GetDCConnBase(const char * sIP, vector<cDCConnBase *> & vconn) = 0; //< Get conn base by ip
+	virtual const vector<cDCConnBase*> & GetDCConnBase(const char * sIP) = 0; //< Get conn base by ip
 	virtual cDCUserBase * GetDCUserBase(const char *sNick) = 0; //< Get user base by nick
 	virtual cDCConnListIterator * GetDCConnListIterator() = 0;  //< Get iterator of conn base
 
-	virtual void GetConfig(vector<string> & vec) = 0;           //< Get all configs names
+	virtual const vector<string> & GetConfig() = 0;             //< Get all configs names
 	virtual const char * GetConfig(const string & sName) = 0;   //< Get config value by name
 	virtual const char * GetLang(const string & sName) = 0;     //< Get lang value by name
 	virtual bool SetConfig(const string & sName, const string & sValue) = 0;  //< Set config value by name

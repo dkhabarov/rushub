@@ -100,6 +100,7 @@ class cDCServer : public cServer, public cDCServerBase {
 	friend class ::nWebServer::cWebConnFactory; /** for call plugins */
 
 public:
+	typedef vector<string> List_t;
 	typedef cUserList::tKeyType tUserKey;
 
 	static cDCServer * sCurrentServer; /** Current server */
@@ -164,7 +165,7 @@ public:
 
 	/** Pointer on the user (or NULL) */
 	cDCUser * GetDCUser(const char *sNick);
-	void GetDCConnBase(const char * sIP, vector<cDCConnBase *> & vconn);
+	const vector<cDCConnBase*> & GetDCConnBase(const char * sIP);
 	cDCUserBase * GetDCUserBase(const char *sNick);
 	cDCConnListIterator * GetDCConnListIterator(){ return new cDCListIterator(this); }
 
@@ -173,12 +174,12 @@ public:
 	bool SendToAll(const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
 	bool SendToProfiles(unsigned long iProfile, const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
 	bool SendToIP(const char *sIP, const char *sData, unsigned long iProfile = 0, const char *sNick = NULL, const char *sFrom = NULL);
-	bool SendToAllExceptNicks(List_t & NickList, const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
-	bool SendToAllExceptIps(List_t & IPList, const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
+	bool SendToAllExceptNicks(const vector<string> & NickList, const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
+	bool SendToAllExceptIps(const vector<string> & IPList, const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
 
 	void ForceMove(cDCConnBase *DCConn, const char *sAddress, const char *sReason = NULL); //< Redirection client
 
-	void GetConfig(vector<string> & vec);
+	const vector<string> & GetConfig();
 	const char * GetConfig(const string & sName);
 	const char * GetLang(const string & sName);
 	bool SetConfig(const string & sName, const string & sValue);
@@ -245,6 +246,8 @@ private:
 	tCLIt conn_it; /** Iterator for optimum */
 	string msHubName; /** Hub name for plugins */
 	string sBuf; /** Temp buffer */
+	vector<cDCConnBase *> mvIPConn; /** Conn with same ip for plugins */
+	vector<string> mvConfigNames; /** Config names for plugins */
 
 	cListenFactory * mListenFactory;
 	cWebListenFactory * mWebListenFactory;
