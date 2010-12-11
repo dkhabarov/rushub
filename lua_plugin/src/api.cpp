@@ -70,13 +70,10 @@ int Tostring(lua_State *L) {
 }
 
 int ConfigTable(lua_State *L) {
-	static vector<string> vConf;
-	if(vConf.empty())
-		cLua::mCurServer->GetConfig(vConf);
-
+	static const vector<string> & vConf = cLua::mCurServer->GetConfig();
 	int indx = 1;
 	lua_newtable(L);
-	for(vector<string>::iterator it = vConf.begin(); it != vConf.end(); ++it) {
+	for(vector<string>::const_iterator it = vConf.begin(); it != vConf.end(); ++it) {
 		lua_pushnumber(L, indx++);
 		lua_pushstring(L, (*it).c_str());
 		lua_rawset(L, -3);
@@ -679,10 +676,8 @@ int GetUsers(lua_State *L) {
 	int iTopTab = lua_gettop(L), i = 1;
 
 	if(lua_type(L, 1) == LUA_TSTRING) {
-		vector<cDCConnBase *> v;
-		vector<cDCConnBase *>::iterator it;
-		cLua::mCurServer->GetDCConnBase(lua_tostring(L, 1), v);
-		for(it = v.begin(); it != v.end(); ++it) {
+		const vector<cDCConnBase *> & v = cLua::mCurServer->GetDCConnBase(lua_tostring(L, 1));
+		for(vector<cDCConnBase *>::const_iterator it = v.begin(); it != v.end(); ++it) {
 			lua_pushnumber(L, i);
 			lua_pushlightuserdata(L, (void*)(*it));
 			luaL_getmetatable(L, MT_USER_CONN);
@@ -779,10 +774,8 @@ int DisconnectIP(lua_State *L) {
 		} else if(iType != LUA_TNIL) return luaL_typeerror(L, 1, "number or table");
 	}
 
-	vector<cDCConnBase *> v;
-	vector<cDCConnBase *>::iterator it;
-	cLua::mCurServer->GetDCConnBase(sIP, v);
-
+	const vector<cDCConnBase *> & v = cLua::mCurServer->GetDCConnBase(sIP);
+	vector<cDCConnBase *>::const_iterator it;
 	if(!iProfile)
 		for(it = v.begin(); it != v.end(); ++it)
 			(*it)->Disconnect();
@@ -796,7 +789,6 @@ int DisconnectIP(lua_State *L) {
 				(*it)->Disconnect();
 		}
 	}
-
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
 	return 1;
