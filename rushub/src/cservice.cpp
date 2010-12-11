@@ -24,6 +24,9 @@
 #include "cdcserver.h"
 #include "cstrtoarg.h" // for cStrToArg.String2Arg
 
+// C4996
+#define stricmp _stricmp
+
 using nDCServer::cDCServer;
 
 cService * cService::mCurService = NULL;
@@ -214,7 +217,7 @@ int cService::Stop() {
 }
 
 
-int cService::Cli(int argc, char* argv[], string & sConfPath, const string & sExPath) {
+int cService::Cli(int argc, char* argv[], string & sConfPath, const string &) {
 
 	// Simple start
 	if(argc < 2) return 1;
@@ -359,7 +362,7 @@ void WINAPI cService::CtrlHandler(DWORD dwCtrl) {
 			cService::mCurService->LogStream() << "Set Service status failed (" << (unsigned long)GetLastError() << ")" << endl;
 }
 
-void WINAPI cService::ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv) {
+void WINAPI cService::ServiceMain(DWORD, LPTSTR *lpszArgv) {
 
 	SC_HANDLE Manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 	if(!Manager) {

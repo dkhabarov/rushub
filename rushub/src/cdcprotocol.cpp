@@ -146,7 +146,7 @@ int cDCProtocol::DC_Supports(cDCParser *dcparser, cDCConn *dcconn) {
 	istringstream is(dcparser->mStr);
 	is >> sFeature;
 	dcconn->mFeatures = 0;
-	while(1) {
+	while(true) {
 		sFeature.clear();
 		is >> sFeature;
 		if(!sFeature.size()) break;
@@ -269,7 +269,7 @@ int cDCProtocol::DC_MyPass(cDCParser *dcparser, cDCConn *dcconn) {
 
 	// Checking the accepted password, otherwise send $BadPass|
 	// or $Hello Nick|$LogedIn Nick|
-	bool bOp = false;
+	int bOp = 0;
 	#ifndef WITHOUT_PLUGINS
 		bOp = (mDCServer->mCalls.mOnMyPass.CallAll(dcconn, dcparser));
 	#endif
