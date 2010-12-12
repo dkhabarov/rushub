@@ -27,6 +27,11 @@
 #endif
 using namespace std;
 
+enum {
+	eHS_STOP,
+	eHS_RESTART
+};
+
 
 #define MAX_TIMERS 100 // max count timers per script
 #define ERR_COUNT(SARG) { \
@@ -43,6 +48,8 @@ if(lua_gettop(L) != NARG) { \
 	ERR_COUNT(sBuf); \
 }
 
+#define REDIRECT_REASON_MAX_LEN 1024
+#define REDIRECT_ADDRESS_MAX_LEN 128
 #define MSGLEN(LEN) if(LEN < 1 || LEN > 128000) { lua_settop(L, 0); lua_pushnil(L); lua_pushliteral(L, "very long string."); return 2; }
 #define NICKLEN(LEN) if(LEN < 1 || LEN > 64) { lua_settop(L, 0); lua_pushnil(L); lua_pushliteral(L, "very long nick."); return 2; }
 #define FILELEN(LEN) if(LEN < 1 || LEN > 256) { lua_settop(L, 0); lua_pushnil(L); lua_pushliteral(L, "very long file name."); return 2; }
@@ -1168,11 +1175,11 @@ int Redirect(lua_State *L) {
 			iType = lua_type(L, 3);
 			if(iType != LUA_TNIL) {
 				sReason = luaL_checklstring(L, 3, &iLen);
-				if(iLen > 1024) { lua_settop(L, 0); lua_pushnil(L); lua_pushliteral(L, "very long reason."); return 2; }
+				if(iLen > REDIRECT_REASON_MAX_LEN) { lua_settop(L, 0); lua_pushnil(L); lua_pushliteral(L, "very long reason."); return 2; }
 			}
 		case 2:
 			sAddress = luaL_checklstring(L, 2, &iLen);
-			if(iLen > 128) { lua_settop(L, 0); lua_pushnil(L); lua_pushliteral(L, "very long address."); return 2; }
+			if(iLen > REDIRECT_ADDRESS_MAX_LEN) { lua_settop(L, 0); lua_pushnil(L); lua_pushliteral(L, "very long address."); return 2; }
 			break;
 		default:
 			ERR_COUNT("2 or 3");
@@ -1206,9 +1213,9 @@ int SetHubState(lua_State *L) {
 		cLua::mCurServer->StopHub(); // stoping
 	else {
 		int iNum(luaL_checkint(L, 1));
-		if(iNum == 0)
+		if(iNum == eHS_STOP)
 			cLua::mCurServer->StopHub(); // stoping
-		else if(iNum == 1)
+		else if(iNum == eHS_RESTART)
 			cLua::mCurServer->RestartHub(); // restarting
 	}
 	return 0;
