@@ -58,7 +58,7 @@ public:
 	typedef tcHashMap<cPluginLoader*> tPluginList;
 
 public:
-	cPluginList(const string sPath);
+	cPluginList(const string & sPath);
 	virtual ~cPluginList() {}
 	void SetServer(cDCServerBase *);
 
@@ -87,7 +87,7 @@ private:
 protected:
 	typedef tcHashMap<cCallList*> tAllCallLists;
 
-	string msPluginDir; /** Plugin dir */
+	const string & msPluginDir; /** Plugin dir */
 
 	tPluginList mPluginList; /** List with loaders of plugins */
 	tAllCallLists mAllCallLists;

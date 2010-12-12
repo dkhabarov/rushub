@@ -138,7 +138,7 @@ public:
 	cDCServer(const string & sConfPath, const string &sExPath);
 	virtual ~cDCServer();
 
-	const string & GetMainDir() const { return mMainPath.msConfPath; }
+	const string & GetMainDir() const { return mMainPath.GetConfPath(); }
 	const string & GetTime() { stringstream oss; oss << mTime.AsDate(); mTimeBuf = oss.str(); return mTimeBuf; }
 	const string & GetHubInfo() const { return msHubName; }
 	const string & GetLocale() const { return mDCConfig.msLocale; };

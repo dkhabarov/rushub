@@ -164,3 +164,13 @@ void CheckEndSlash(string & sPath) {
 	if(sPath.substr(sPath.size()-1, 1) != "/")
 		sPath.append("/");
 }
+
+void CheckPath(string & sPath) {
+	// Check MAX_PATH size
+	if(sPath.size() >= MAX_PATH) {
+		sPath = sPath.substr(0, MAX_PATH - 1);
+		CheckEndSlash(sPath);
+	}
+	const char * sDir = sPath.c_str();
+	if(!DirExists(sDir)) mkdir(sDir, NULL);
+}

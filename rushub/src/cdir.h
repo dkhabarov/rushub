@@ -57,6 +57,10 @@ using namespace std;
 	#include <sys/stat.h> /** mkdir */
 	#include <stdlib.h>
 
+	#ifndef MAX_PATH
+	#define MAX_PATH 256
+	#endif
+
 #endif // _WIN32
 
 /** Check exists of the dir */
@@ -66,5 +70,6 @@ bool FileExists(const char * sName);
 
 void ExecPath(string &);
 void CheckEndSlash(string &);
+void CheckPath(string &);
 
 #endif // CDIR_H

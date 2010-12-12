@@ -26,12 +26,27 @@
 namespace nDCServer {
 
 class cMainPath : public cObj {
-public:
+
 	string msConfPath;
 	string msExPath;
+	string msLogPath;
+	string msPluginPath;
+
 public:
+
 	cMainPath(const string & sConfPath, const string & sExPath);
 	~cMainPath();
+
+	const string & GetConfPath() const { return msConfPath; }
+	const string & GetExPath() const { return msExPath; }
+	const string & GetLogPath() const { return msLogPath; }
+	const string & GetPluginPath() const { return msPluginPath; }
+
+	void SetConfPath(const string & sNewConfPath) { msConfPath = sNewConfPath; }
+	void SetExPath(const string & sNewExPath) { msExPath = sNewExPath; }
+	void SetLogsPath(const string & sNewLogPath) { msLogPath = sNewLogPath; }
+	void SetPluginsPath(const string & sNewPluginPath) { msPluginPath = sNewPluginPath; }
+	
 }; // cMainPath
 
 }; // nDCServer

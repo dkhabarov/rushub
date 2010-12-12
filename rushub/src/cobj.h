@@ -68,7 +68,7 @@ public:
 	static int miMaxErrLevel;
 
 	static ofstream mOfs;
-	static char * msPath;
+	static string * msPath;
 
 	static bool mbSysLogOn;
 

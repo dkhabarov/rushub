@@ -49,7 +49,7 @@ int cObj::miMaxErrLevel = 2;
 int cObj::mCounterObj = 0; /** Objects counter */
 int cObj::miLevel = 0;
 const string cObj::msEmpty;
-char * cObj::msPath = NULL;
+string * cObj::msPath = NULL; /** Logs path */
 
 bool cObj::mbSysLogOn = false;
 bool cObj::mbIsErrorLog = false;
@@ -113,7 +113,7 @@ ostream & cObj::Log() {
 			if(msPath == NULL)
 				ExecPath(sPath);
 			else
-				sPath = msPath;
+				sPath = *msPath;
 
 			char buf[64];
 			time_t rawtime;
@@ -142,7 +142,7 @@ ostream & cObj::ErrLog() {
 			if(msPath == NULL)
 				ExecPath(sPath);
 			else
-				sPath = msPath;
+				sPath = *msPath;
 
 			char buf[64];
 			time_t rawtime;

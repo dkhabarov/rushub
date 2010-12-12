@@ -24,7 +24,7 @@
 
 namespace nPlugin {
 
-cPluginList::cPluginList(const string sPath) :
+cPluginList::cPluginList(const string & sPath) :
 	cObj("cPluginList"),
 	cPluginListBase(),
 	msPluginDir(sPath)

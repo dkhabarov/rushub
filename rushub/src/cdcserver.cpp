@@ -47,7 +47,7 @@ cDCServer::cDCServer(const string & sConfPath, const string & sExPath):
 	miTotalUserCount(0),
 	miTotalShare(0),
 	mConfigLoader(),
-	mPluginList(mMainPath.msConfPath + "plugins/"),
+	mPluginList(mMainPath.GetPluginPath()),
 	msHubName(INTERNALNAME" "INTERNALVERSION" "__DATE__" "__TIME__),
 	mListenFactory(NULL),
 	mWebListenFactory(NULL),

@@ -22,15 +22,29 @@
 
 namespace nDCServer {
 
-cMainPath::cMainPath(const string & sConfPath, const string & sExPath) : cObj("cMainPath"), msConfPath(sConfPath), msExPath(sExPath) {
+cMainPath::cMainPath(const string & sConfPath, const string & sExPath) : 
+	cObj("cMainPath"),
+	msConfPath(sConfPath),
+	msExPath(sExPath)
+{
+	// Config Path
 	CheckEndSlash(msConfPath);
+	CheckPath(msConfPath);
+
+	// Logs Path
+	msLogPath = msConfPath + "logs/";
+	CheckPath(msLogPath);
+	msPath = &msLogPath; // Set log point path
+
+	// Plugins Path
+	msPluginPath = msConfPath + "plugins/";
+	CheckPath(msPluginPath);
+
 	if(mOfs.is_open()) mOfs.close();
-	if(msPath == NULL)
-		msPath = new char[256];
-	strcpy(msPath, msConfPath.c_str());
 }
 
 cMainPath::~cMainPath() {
+	msPath = NULL;
 }
 
 } // nDCServer
