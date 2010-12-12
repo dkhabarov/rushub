@@ -117,13 +117,13 @@ int cDCConn::OnTimer(cTime &now) {
 		}
 	}
 
-	cTime lastRecv(mLastRecv);
+	/*cTime lastRecv(mLastRecv);
 	if(dcserver->MinDelay(lastRecv, dcserver->mDCConfig.miTimeoutAny)) {
 		if(Log(2)) LogStream() << "Any action timeout..." << endl;
 		dcserver->SendToUser(this, dcserver->mDCLang.msTimeoutAny.c_str(), (char*)dcserver->mDCConfig.msHubBot.c_str());
 		CloseNice(9000, eCR_TO_ANYACTION);
 		return 2;
-	}
+	}*/
 
 	/** Check user on freeze.
 		Sending void msg to all users, starting on miStartPing sec after entry,
