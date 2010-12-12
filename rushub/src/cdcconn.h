@@ -197,7 +197,7 @@ public:
 
 public:
 
-	cDCConn(tSocket sock = 0, cServer *s = NULL);
+	cDCConn(int type, tSocket sock = 0, cServer *s = NULL);
 	virtual ~cDCConn();
 	virtual const string & GetVersion() const { return msVersion; }  //< Client's protocol version
 	virtual const string & GetIp() const { return msIp; }            //< Get string of IP

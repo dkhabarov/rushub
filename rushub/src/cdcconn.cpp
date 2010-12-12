@@ -23,8 +23,9 @@
 
 namespace nDCServer {
 
-cDCConn::cDCConn(tSocket sock, cServer *s) : 
+cDCConn::cDCConn(int type, tSocket sock, cServer *s) : 
 	cConn(sock, s),
+	cDCConnBase(type),
 	mFeatures(0),
 	miProfile(-1),
 	mbSendNickList(false),
@@ -178,7 +179,7 @@ cDCConnFactory::~cDCConnFactory() {
 cConn *cDCConnFactory::CreateConn(tSocket sock) {
 	if(!mServer) return NULL;
 
-	cDCConn * dcconn = new cDCConn(sock, mServer);
+	cDCConn * dcconn = new cDCConn(eT_DC_CLIENT, sock, mServer);
 	dcconn->mConnFactory = this; /** Connection factory for current connection (cDCConnFactory) */
 	dcconn->mProtocol = mProtocol; /** Protocol pointer (cDCProtocol) */
 

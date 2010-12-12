@@ -58,7 +58,7 @@ bool cPluginLoader::Open() {
 /** Close lib dll(so) */
 bool cPluginLoader::Close() {
 	if(mHandle) {
-		if(mPlugin && mDelPluginFunc && mPlugin->miVersion >= INTERNAL_PLUGIN_VERSION && mPlugin->miVersion < 20000) mDelPluginFunc(mPlugin);
+		if(mPlugin && mDelPluginFunc && mPlugin->miVersion == INTERNAL_PLUGIN_VERSION) mDelPluginFunc(mPlugin);
 		mPlugin = NULL;
 		dlclose(mHandle);
 		if(IsError()) {

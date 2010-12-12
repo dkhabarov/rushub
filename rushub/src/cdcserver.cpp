@@ -736,7 +736,7 @@ cDCUser * cDCServer::GetDCUser(const char *sNick) {
 		cDCConn * dcconn;
 		for(tCLIt it = mConnList.begin(); it != mConnList.end(); ++it) {
 			dcconn = (cDCConn *)(*it);
-			if(dcconn && dcconn->_miConnType == 1 && dcconn->mDCUser && dcconn->mDCUser->msNick == sN)
+			if(dcconn && dcconn->mType == eT_DC_CLIENT && dcconn->mDCUser && dcconn->mDCUser->msNick == sN)
 				return (cDCUser *)dcconn->mDCUser;
 		}
 	}
@@ -753,7 +753,7 @@ const vector<cDCConnBase*> & cDCServer::GetDCConnBase(const char * sIP) {
 	cDCIPList::iterator it;
 	for(it = mIPListConn->begin(cDCConn::Ip2Num(sIP)); it != mIPListConn->end(); ++it) {
 		cDCConn * dcconn = (cDCConn *)(*it);
-		if(dcconn->_miConnType == 1)
+		if(dcconn->mType == eT_DC_CLIENT)
 			mvIPConn.push_back(dcconn);
 	}
 	return mvIPConn;
@@ -781,7 +781,7 @@ bool cDCServer::SendToUser(cDCConnBase *DCConn, const char *sData, const char *s
 
 	// Simple Msg
 	string sMsg(sData);
-	if(DCConn->_miConnType == 1 && sMsg.substr(sMsg.size() - 1, 1) != DC_SEPARATOR) sMsg.append(DC_SEPARATOR);
+	if(DCConn->mType == eT_DC_CLIENT && sMsg.substr(sMsg.size() - 1, 1) != DC_SEPARATOR) sMsg.append(DC_SEPARATOR);
 	DCConn->Send(sMsg);
 	return true;
 }

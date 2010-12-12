@@ -76,6 +76,11 @@ using namespace ::std;
 
 namespace nDCServer {
 
+enum {
+	eT_DC_CLIENT,
+	eT_WEB_CLIENT
+};
+
 typedef enum { /** Params with null values flags */
 	eMYINFO_TAG       = 1 << 0,   //< Tag
 	eMYINFO_CLIENT    = 1 << 1,   //< Client name
@@ -94,7 +99,7 @@ typedef enum { /** Params with null values flags */
 
 namespace nProtoEnums {
 
-typedef enum { /** Types of the commands (for field mType) */
+typedef enum { /** Types of the commands */
 	eDC_NO = -1,
 	eDC_MSEARCH,        //< 0  = $MultiSearch
 	eDC_MSEARCH_PAS,    //< 1  = $MultiSearch Hub:
@@ -207,11 +212,11 @@ class cDCConnBase {
 public:
 
 	cDCUserBase * mDCUserBase;  //< User
-	int _miConnType;            //< Connection type (for protection and compatibility)
+	const int mType;            //< Connection type (for protection and compatibility)
 
 public:
 
-	cDCConnBase() : mDCUserBase(NULL), _miConnType(1) {}
+	cDCConnBase(int type) : mDCUserBase(NULL), mType(type) {}
 	~cDCConnBase() {}
 
 	virtual int Send(const string & sData, bool bAddSep = false, bool bFlush = true) = 0; //< Sending RAW cmd to the client
@@ -426,14 +431,18 @@ class cPlugin {
 
 public:
 
-	int miVersion;               //< Version of plugin interface
+	const int miVersion;               //< Version of plugin interface
 	cDCServerBase * mDCServer;   //< Main DC Server
 
 public:
 
-	cPlugin() : miVersion(0), mDCServer(NULL), mbIsAlive(true), mPluginList(NULL) {
-		miVersion = INTERNAL_PLUGIN_VERSION;
-	}
+	cPlugin() : 
+		miVersion(INTERNAL_PLUGIN_VERSION),
+		mDCServer(NULL),
+		mbIsAlive(true),
+		mPluginList(NULL)
+	{}
+
 	virtual ~cPlugin() {}
 
 	virtual bool RegAll(cPluginListBase *) = 0; //< Reg function in all call lists

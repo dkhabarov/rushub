@@ -27,11 +27,8 @@ namespace nWebServer {
 
 using namespace nProtocol;
 
-cWebConn::cWebConn(tSocket sock, cServer *s) :
-	cDCConn(sock, s)
-{
+cWebConn::cWebConn(tSocket sock, cServer *s) : cDCConn(eT_WEB_CLIENT, sock, s) {
 	SetClassName("cWebConn");
-	_miConnType = 2;
 }
 
 cWebConn::~cWebConn() {
