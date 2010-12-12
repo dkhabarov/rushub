@@ -350,8 +350,8 @@ int SendToUser(lua_State *L) {
 
 	if(bByUID) {
 		cDCConnBase * Conn = (cDCConnBase *)lua_touserdata(L, 1);
-		if(!Conn || (Conn->_miConnType != 1 && Conn->_miConnType != 2)) ERR("user was not found");
-		if(Conn->_miConnType == 2) {
+		if(!Conn || (Conn->mType != eT_DC_CLIENT && Conn->mType != eT_WEB_CLIENT)) ERR("user was not found");
+		if(Conn->mType == eT_WEB_CLIENT) {
 			if(!Conn->Send(sData)) // not newPolitic fot timers only
 				ERR("data was not sent");
 		} else {
@@ -633,7 +633,7 @@ int SetUser(lua_State *L) {
 	cDCConnBase * Conn;
 	if(lua_type(L, 1) == LUA_TLIGHTUSERDATA) {
 		Conn = (cDCConnBase *)lua_touserdata(L, 1);
-		if(!Conn || Conn->_miConnType != 1) ERR("user was not found");
+		if(!Conn || Conn->mType != eT_DC_CLIENT) ERR("user was not found");
 	} else if(lua_isstring(L, 1)) {
 		size_t iLen;
 		const char * sNick = lua_tolstring(L, 1, &iLen);
@@ -689,7 +689,7 @@ int GetUsers(lua_State *L) {
 		cDCConnListIterator * it = cLua::mCurServer->GetDCConnListIterator();
 		cDCConnBase * Conn;
 		while((Conn = it->operator ()()) != NULL) {
-			if(Conn->_miConnType != 1) continue;
+			if(Conn->mType != eT_DC_CLIENT) continue;
 			lua_pushnumber(L, i);
 			lua_pushlightuserdata(L, (void*)Conn);
 			luaL_getmetatable(L, MT_USER_CONN);
@@ -1189,7 +1189,7 @@ int Redirect(lua_State *L) {
 		Conn = (cDCConnBase *)lua_touserdata(L, 1);
 	}
 
-	if(!Conn || (Conn->_miConnType != 1)) ERR("user was not found");
+	if(!Conn || (Conn->mType != eT_DC_CLIENT)) ERR("user was not found");
 
 	cLua::mCurServer->ForceMove(Conn, sAddress, sReason);
 	lua_settop(L, 0);
