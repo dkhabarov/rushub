@@ -27,7 +27,6 @@
 #include "cplugin.h" /** nDCServer */
 #include "api.h"
 #include "ctimerlist.h"
-#include <string>
 #include <list>
 #include <iostream>
 using namespace std;

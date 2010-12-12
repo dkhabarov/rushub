@@ -28,6 +28,7 @@
 #include <vector>
 #include <list>
 #include <math.h> /** abs */
+#include <string>
 
 #define PLUGIN_NAME "LuaScripts"
 #define PLUGIN_VERSION "1.30"
