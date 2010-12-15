@@ -423,8 +423,8 @@ void cDCServer::AddToHide(cDCUser * User) {
 		if(User->mbInUserList) {
 			string sMsg;
 			User->mbInUserList = false;
-			mDCUserList.SendToAll(cDCProtocol::Append_DC_Quit(sMsg, User->msNick), true/*mDCConfig.mbDelayedMyINFO*/, false);
-			mEnterList.SendToAll(sMsg, true/*mDCConfig.mbDelayedMyINFO*/, false);
+			mDCUserList.SendToAll(cDCProtocol::Append_DC_Quit(sMsg, User->msNick), false/*mDCConfig.mbDelayedMyINFO*/, false);
+			mEnterList.SendToAll(sMsg, false/*mDCConfig.mbDelayedMyINFO*/, false); // false cache
 			User->mbInUserList = true;
 			mOpList.Remake();
 			mDCUserList.Remake();
@@ -439,18 +439,18 @@ void cDCServer::DelFromHide(cDCUser * User) {
 			string sMsg1, sMsg2, sMsg3;
 			if(User->mbInOpList) {
 				User->mbInUserList = false;
-				mHelloList.SendToAll(cDCProtocol::Append_DC_Hello(sMsg1, User->msNick), true/*mDCConfig.mbDelayedMyINFO*/, false);
+				mHelloList.SendToAll(cDCProtocol::Append_DC_Hello(sMsg1, User->msNick), false/*mDCConfig.mbDelayedMyINFO*/, false);
 				sMsg2 = string(User->GetMyINFO()).append(DC_SEPARATOR);
-				mDCUserList.SendToAll(cDCProtocol::Append_DC_OpList(sMsg2, User->msNick), true/*mDCConfig.mbDelayedMyINFO*/, false);
-				mEnterList.SendToAll(sMsg2, true/*mDCConfig.mbDelayedMyINFO*/, false);
-				mIpList.SendToAll(cDCProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->GetIp()), true, false);
+				mDCUserList.SendToAll(cDCProtocol::Append_DC_OpList(sMsg2, User->msNick), false/*mDCConfig.mbDelayedMyINFO*/, false);
+				mEnterList.SendToAll(sMsg2, false/*mDCConfig.mbDelayedMyINFO*/, false);
+				mIpList.SendToAll(cDCProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->GetIp()), false, false);
 				User->mbInUserList = true;
 			} else {
 				User->mbInUserList = false;
-				mHelloList.SendToAll(cDCProtocol::Append_DC_Hello(sMsg1, User->msNick), true/*mDCConfig.mbDelayedMyINFO*/, false);
-				mDCUserList.SendToAll(User->GetMyINFO(), true/*mDCConfig.mbDelayedMyINFO*/);
-				mEnterList.SendToAll(User->GetMyINFO(), true/*mDCConfig.mbDelayedMyINFO*/);
-				mIpList.SendToAll(cDCProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->GetIp()), true, false);
+				mHelloList.SendToAll(cDCProtocol::Append_DC_Hello(sMsg1, User->msNick), false/*mDCConfig.mbDelayedMyINFO*/, false);
+				mDCUserList.SendToAll(User->GetMyINFO(), false/*mDCConfig.mbDelayedMyINFO*/);
+				mEnterList.SendToAll(User->GetMyINFO(), false/*mDCConfig.mbDelayedMyINFO*/);
+				mIpList.SendToAll(cDCProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->GetIp()), false, false);
 				User->mbInUserList = true;
 			}
 			mOpList.Remake();
@@ -654,11 +654,13 @@ bool cDCServer::RemoveFromDCUserList(cDCUser *User) {
 	if(User->mbInUserList) {
 		User->mbInUserList = false;
 
-		string sMsg;
-		cDCProtocol::Append_DC_Quit(sMsg, User->msNick);
+		if(!User->IsHide()) {
+			string sMsg;
+			cDCProtocol::Append_DC_Quit(sMsg, User->msNick);
 
-		/** Delay in sending MyINFO (and Quit) */
-		mDCUserList.SendToAll(sMsg, true/*mDCConfig.mbDelayedMyINFO*/, false);
+			/** Delay in sending MyINFO (and Quit) */
+			mDCUserList.SendToAll(sMsg, true/*mDCConfig.mbDelayedMyINFO*/, false);
+		}
 	}
 	return true;
 }
