@@ -48,6 +48,10 @@ if(lua_gettop(L) != NARG) { \
 	ERR_COUNT(sBuf); \
 }
 
+#define ERR_TYPEMETA(NARG, OBJ, SARG) { \
+	return luaL_error(L, "bad argument #%d to " LUA_QS " (%s expected, got %s)", NARG, OBJ, SARG, luaL_typename(L, NARG)); \
+}
+
 #define REDIRECT_REASON_MAX_LEN 1024
 #define REDIRECT_ADDRESS_MAX_LEN 128
 #define MSGLEN(LEN) if(LEN < 1 || LEN > 128000) { lua_settop(L, 0); lua_pushnil(L); lua_pushliteral(L, "very long string."); return 2; }
@@ -138,7 +142,9 @@ typedef enum { /** Param's hash */
 
 int UserIndex(lua_State *L) {
 	cDCConnBase * Conn = (cDCConnBase *)lua_touserdata(L, 1);
-	switch(GetHash(luaL_checkstring(L, 2))) {
+	const char * s = lua_tostring(L, 2);
+	if(!s) ERR_TYPEMETA(2, "UID", "string");
+	switch(GetHash(s)) {
 		case ePH_NICK:       if(Conn->mDCUserBase)lua_pushstring(L, Conn->mDCUserBase->GetNick().c_str());else lua_pushnil(L); break;
 		case ePH_IP:         lua_pushstring (L, Conn->GetIp().c_str()); break;
 		case ePH_PROFILE:    lua_pushnumber (L, Conn->GetProfile()); break;
@@ -183,15 +189,17 @@ int UserIndex(lua_State *L) {
 
 int UserNewindex(lua_State *L) {
 	cDCConnBase * Conn = (cDCConnBase *)lua_touserdata(L, 1);
-	switch(GetHash(luaL_checkstring(L, 2))) {
+	const char * s = lua_tostring(L, 2);
+	if(!s) ERR_TYPEMETA(2, "UID", "string");
+	switch(GetHash(s)) {
 		case ePH_PROFILE:   Conn->SetProfile(luaL_checkint(L, 3)); break;
-		case ePH_MYINFO:    if(Conn->mDCUserBase)Conn->mDCUserBase->SetMyINFO(luaL_checkstring(L, 3), Conn->mDCUserBase->GetNick());else lua_pushnil(L); break;
-		case ePH_INOPLIST:  if(Conn->mDCUserBase){ luaL_checktype(L, 3, LUA_TBOOLEAN); Conn->mDCUserBase->SetOpList(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
-		case ePH_INIPLIST:  if(Conn->mDCUserBase){ luaL_checktype(L, 3, LUA_TBOOLEAN); Conn->mDCUserBase->SetIpList(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
-		case ePH_HIDE:      if(Conn->mDCUserBase){ luaL_checktype(L, 3, LUA_TBOOLEAN); Conn->mDCUserBase->SetHide(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
-		case ePH_KICK:      if(Conn->mDCUserBase){ luaL_checktype(L, 3, LUA_TBOOLEAN); Conn->mDCUserBase->SetKick(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
-		case ePH_REDIRECT:  if(Conn->mDCUserBase){ luaL_checktype(L, 3, LUA_TBOOLEAN); Conn->mDCUserBase->SetForceMove(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
-		case ePH_DATA:      Conn->SetData(luaL_checkstring(L, 3)); break;
+		case ePH_MYINFO:    if(Conn->mDCUserBase){ s = lua_tostring(L, 3); if(!s) ERR_TYPEMETA(3, "UID", "string"); Conn->mDCUserBase->SetMyINFO(s, Conn->mDCUserBase->GetNick()); }else lua_pushnil(L); break;
+		case ePH_INOPLIST:  if(Conn->mDCUserBase){ if(lua_type(L, 3) != LUA_TBOOLEAN) ERR_TYPEMETA(3, "UID", "boolean"); Conn->mDCUserBase->SetOpList(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
+		case ePH_INIPLIST:  if(Conn->mDCUserBase){ if(lua_type(L, 3) != LUA_TBOOLEAN) ERR_TYPEMETA(3, "UID", "boolean"); Conn->mDCUserBase->SetIpList(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
+		case ePH_HIDE:      if(Conn->mDCUserBase){ if(lua_type(L, 3) != LUA_TBOOLEAN) ERR_TYPEMETA(3, "UID", "boolean"); Conn->mDCUserBase->SetHide(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
+		case ePH_KICK:      if(Conn->mDCUserBase){ if(lua_type(L, 3) != LUA_TBOOLEAN) ERR_TYPEMETA(3, "UID", "boolean"); Conn->mDCUserBase->SetKick(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
+		case ePH_REDIRECT:  if(Conn->mDCUserBase){ if(lua_type(L, 3) != LUA_TBOOLEAN) ERR_TYPEMETA(3, "UID", "boolean"); Conn->mDCUserBase->SetForceMove(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
+		case ePH_DATA:      s = lua_tostring(L, 3); if(!s) ERR_TYPEMETA(3, "UID", "string"); Conn->SetData(s); break;
 		default:            break;
 	}
 	lua_settop(L, 0);
@@ -205,7 +213,8 @@ int ConfigIndex(lua_State *L) {
 		lua_pushnil(L);
 		return 1;
 	}
-	const char * sName = luaL_checkstring(L, 2);
+	const char * sName = lua_tostring(L, 2);
+	if(!sName) ERR_TYPEMETA(2, "Config", "string");
 	if(!strcmp(sName, "table")) {
 		lua_settop(L, 0);
 		lua_pushcfunction(L, &ConfigTable);
@@ -224,9 +233,11 @@ int ConfigNewindex(lua_State *L) {
 		lua_settop(L, 0);
 		return 0;
 	}
-	const char * sName = luaL_checkstring(L, 2);
+	const char * sName = lua_tostring(L, 2);
+	if(!sName) ERR_TYPEMETA(2, "Config", "string");
 	char * sValue = (char *)lua_tostring(L, 3);
 	if(!sValue) sValue = (char *)lua_toboolean(L, 3);
+	if(!sValue) ERR_TYPEMETA(3, "Config", "string or boolean");
 	cLua::mCurServer->SetConfig(sName, sValue);
 	cLua::mCurLua->OnConfigChange(sName, sValue);
 	lua_settop(L, 0);
