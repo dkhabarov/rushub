@@ -57,9 +57,9 @@ void cLua::OnLoad(cDCServerBase *DCServer) {
 	string sMainDir(DCServer->GetMainDir());
 
 	msScriptsDir = sMainDir + "scripts/";
-	const char* sLibs = string(sMainDir + "libs/").c_str();
+	string sLibs = sMainDir + "libs/";
 	if(!DirExists(msScriptsDir.c_str())) mkDir(msScriptsDir.c_str());
-	if(!DirExists(sLibs)) mkDir(sLibs);
+	if(!DirExists(sLibs.c_str())) mkDir(sLibs.c_str());
 
 	#ifdef _WIN32
 
