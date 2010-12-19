@@ -753,6 +753,7 @@ cDCUserBase * cDCServer::GetDCUserBase(const char *sNick) {
 
 const vector<cDCConnBase*> & cDCServer::GetDCConnBase(const char * sIP) {
 	cDCIPList::iterator it;
+	mvIPConn.clear();
 	for(it = mIPListConn->begin(cDCConn::Ip2Num(sIP)); it != mIPListConn->end(); ++it) {
 		cDCConn * dcconn = (cDCConn *)(*it);
 		if(dcconn->mType == eT_DC_CLIENT)

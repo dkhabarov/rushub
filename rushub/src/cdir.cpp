@@ -103,7 +103,7 @@ int mkDir(const char * path) {
 			return 0;
 		return -1;
 	#else
-		return mkDir(path, S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP);
+		return mkdir(path, S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP);
 	#endif
 }
 
