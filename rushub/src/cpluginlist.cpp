@@ -29,7 +29,7 @@ cPluginList::cPluginList(const string & sPath) :
 	cPluginListBase(),
 	msPluginDir(sPath)
 {
-	if(!DirExists(msPluginDir.c_str())) mkdir(msPluginDir.c_str(), NULL);
+	if(!DirExists(msPluginDir.c_str())) mkDir(msPluginDir.c_str());
 	if(Log(1)) LogStream() << "Using plugins in: " << msPluginDir << endl;
 }
 

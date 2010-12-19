@@ -35,9 +35,6 @@ using namespace std;
 
 	#include <windows.h>
 
-	/** Create dir */
-	int mkdir(const char * path, int mode);
-
 	typedef struct DIR DIR;
 
 	struct dirent {
@@ -62,6 +59,9 @@ using namespace std;
 	#endif
 
 #endif // _WIN32
+
+/** Create dir */
+int mkDir(const char * path);
 
 /** Check exists of the dir */
 bool DirExists(const char* sName);
