@@ -35,9 +35,6 @@ using namespace std;
 
 	#include <windows.h>
 
-	/** Create dir */
-	int mkdir(const char * path, int mode);
-
 	typedef struct DIR DIR;
 
 	struct dirent {
@@ -57,7 +54,14 @@ using namespace std;
 	#include <sys/stat.h> /** mkdir */
 	#include <stdlib.h>
 
+	#ifndef MAX_PATH
+	#define MAX_PATH 256
+	#endif
+
 #endif // _WIN32
+
+/** Create dir */
+int mkDir(const char * path);
 
 /** Check exists of the dir */
 bool DirExists(const char* sName);
@@ -66,5 +70,6 @@ bool FileExists(const char * sName);
 
 void ExecPath(string &);
 void CheckEndSlash(string &);
+void CheckPath(string &);
 
 #endif // CDIR_H

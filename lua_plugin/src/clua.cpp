@@ -52,9 +52,9 @@ void cLua::OnLoad(cDCServerBase *DCServer) {
 	cPlugin::OnLoad(DCServer);
 
 	msScriptsDir = DCServer->GetMainDir() + "scripts/";
-	string sLibs = DCServer->GetMainDir() + "libs/";
-	if(!DirExists(msScriptsDir.c_str())) mkdir(msScriptsDir.c_str(), NULL);
-	if(!DirExists(sLibs.c_str())) mkdir(sLibs.c_str(), NULL);
+	const char* sLibs = string(DCServer->GetMainDir() + "libs/").c_str();
+	if(!DirExists(msScriptsDir.c_str())) mkDir(msScriptsDir.c_str());
+	if(!DirExists(sLibs)) mkDir(sLibs);
 
 	LoadScripts();
 	Save();
@@ -265,7 +265,7 @@ int cLua::LoadScripts() {
 
 void cLua::CheckNewScripts() {
 	const char * sScriptsDir = msScriptsDir.c_str();
-	if(!DirExists(sScriptsDir)) mkdir(sScriptsDir, NULL);
+	if(!DirExists(sScriptsDir)) mkDir(sScriptsDir);
 	DIR *dir = opendir(sScriptsDir);
 	if(!dir) return;
 

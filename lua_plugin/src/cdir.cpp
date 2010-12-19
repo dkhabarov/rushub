@@ -95,14 +95,17 @@ void rewinddir(DIR *dir) {
 	}
 }
 
-int mkdir(const char * path, int mode) {
-	if(CreateDirectoryA(path, NULL))
-		return 0;
-	return -1;
-}
-
 #endif // _WIN32
 
+int mkDir(const char * path) {
+	#ifdef _WIN32
+		if(CreateDirectoryA(path, NULL))
+			return 0;
+		return -1;
+	#else
+		return mkDir(path, S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP);
+	#endif
+}
 
 /** Check exists of the dir */
 bool DirExists(const char* sName)	{
@@ -152,7 +155,7 @@ void ExecPath(string & sPath) {
 	/* A check to existing path */
 	const char * sDir = sPath.c_str();
 	if(!DirExists(sDir))
-		mkdir(sDir, NULL);
+		mkDir(sDir);
 }
 
 void CheckEndSlash(string & sPath) {
@@ -163,4 +166,14 @@ void CheckEndSlash(string & sPath) {
 	}
 	if(sPath.substr(sPath.size()-1, 1) != "/")
 		sPath.append("/");
+}
+
+void CheckPath(string & sPath) {
+	// Check MAX_PATH size
+	if(sPath.size() >= MAX_PATH) {
+		sPath = sPath.substr(0, MAX_PATH - 1);
+		CheckEndSlash(sPath);
+	}
+	const char * sDir = sPath.c_str();
+	if(!DirExists(sDir)) mkDir(sDir);
 }
