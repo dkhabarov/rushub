@@ -31,7 +31,7 @@
 #include <string>
 
 #define PLUGIN_NAME "LuaScripts"
-#define PLUGIN_VERSION "1.30"
+#define PLUGIN_VERSION "1.31"
 
 namespace nDCServer{class cDCServerBase;}
 
@@ -51,6 +51,10 @@ public:
 
 	static cDCServerBase * mCurServer; /** Current server */
 	static cLua * mCurLua; /** Current plugin */
+
+	static string msLuaPath; /** lua package.path */
+	static string msLuaCPath; /** lua package.cpath */
+	static bool mbSetLuaPath; /** is set package.path and package.cpath */
 
 	typedef list<cLuaInterpreter *> tvLuaInterpreter;
 	tvLuaInterpreter mLua; /** Script-list */

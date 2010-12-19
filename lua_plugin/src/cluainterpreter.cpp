@@ -55,6 +55,35 @@ int cLuaInterpreter::Start() {
 	luaopen_loadlib(mL);
 #endif
 
+	// set new package.path and package.cpath
+	lua_pushliteral(mL, "package");
+	lua_gettable(mL, LUA_GLOBALSINDEX);
+
+	if(!cLua::mCurLua->mbSetLuaPath) {
+		lua_pushliteral(mL, "path");
+		lua_rawget(mL, -2);
+		cLua::mCurLua->msLuaPath.append(lua_tostring(mL, -1));
+		lua_pop(mL, 1);
+
+		lua_pushliteral(mL, "cpath");
+		lua_rawget(mL, -2);
+		cLua::mCurLua->msLuaCPath.append(lua_tostring(mL, -1));
+		lua_pop(mL, 1);
+
+		cLua::mCurLua->mbSetLuaPath = true;
+	}
+
+	lua_pushliteral(mL, "path");
+	lua_pushstring(mL, cLua::mCurLua->msLuaPath.c_str());
+	lua_settable(mL, -3);
+
+	lua_pushliteral(mL, "cpath");
+	lua_pushstring(mL, cLua::mCurLua->msLuaCPath.c_str());
+	lua_settable(mL, -3);
+
+	lua_settop(mL, 0);
+
+
 	lua_newtable(mL);
 	RegFunc("GetGVal",              &GetGVal);
 	RegFunc("SetGVal",              &SetGVal);

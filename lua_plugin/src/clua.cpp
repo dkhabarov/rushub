@@ -27,6 +27,9 @@
 
 cDCServerBase * cLua::mCurServer = NULL;
 cLua * cLua::mCurLua = NULL;
+string cLua::msLuaCPath;
+string cLua::msLuaPath;
+bool cLua::mbSetLuaPath = false;
 
 cLua::cLua() : 
 	mCurScript(NULL),
@@ -51,10 +54,50 @@ void cLua::OnLoad(cDCServerBase *DCServer) {
 	mCurServer = DCServer;
 	cPlugin::OnLoad(DCServer);
 
-	msScriptsDir = DCServer->GetMainDir() + "scripts/";
-	const char* sLibs = string(DCServer->GetMainDir() + "libs/").c_str();
+	string sMainDir(DCServer->GetMainDir());
+
+	msScriptsDir = sMainDir + "scripts/";
+	const char* sLibs = string(sMainDir + "libs/").c_str();
 	if(!DirExists(msScriptsDir.c_str())) mkDir(msScriptsDir.c_str());
 	if(!DirExists(sLibs)) mkDir(sLibs);
+
+	#ifdef _WIN32
+
+		// replace slashes
+		size_t iPos = sMainDir.find("/");
+		while(iPos != sMainDir.npos) {
+			sMainDir.replace(iPos, 1, LUA_DIRSEP);
+			iPos = sMainDir.find("/", iPos);
+		}
+
+		msLuaCPath = sMainDir + "libs" LUA_DIRSEP "?.dll;" +
+			sMainDir + "?.dll;" +
+			sMainDir + "scripts" LUA_DIRSEP "?.dll;" +
+			sMainDir + "plugins" LUA_DIRSEP "?.dll;" +
+			sMainDir + "scripts" LUA_DIRSEP "libs" LUA_DIRSEP "?.dll;";
+
+	#else
+
+		msLuaCPath = sMainDir + "libs" LUA_DIRSEP "?.so;" +
+			sMainDir + "?.so;" +
+			sMainDir + "scripts" LUA_DIRSEP "?.so;" +
+			sMainDir + "plugins" LUA_DIRSEP "?.so;" +
+			sMainDir + "scripts" LUA_DIRSEP "libs" LUA_DIRSEP "?.so;";
+
+	#endif
+
+	msLuaPath = sMainDir + "libs" LUA_DIRSEP "?.lua;" +
+		sMainDir + "libs" LUA_DIRSEP "?" LUA_DIRSEP "init.lua;" +
+		sMainDir + "?.lua;" +
+		sMainDir + "?" LUA_DIRSEP "init.lua;" +
+		sMainDir + "scripts" LUA_DIRSEP "?.lua;" +
+		sMainDir + "scripts" LUA_DIRSEP "?" LUA_DIRSEP "init.lua;" +
+		sMainDir + "plugins" LUA_DIRSEP "?.lua;" +
+		sMainDir + "plugins" LUA_DIRSEP "?" LUA_DIRSEP "init.lua;" +
+		sMainDir + "scripts" LUA_DIRSEP "libs" LUA_DIRSEP "?.lua;" +
+		sMainDir + "scripts" LUA_DIRSEP "libs" LUA_DIRSEP "?" LUA_DIRSEP "init.lua;";
+
+	mbSetLuaPath = false;
 
 	LoadScripts();
 	Save();
