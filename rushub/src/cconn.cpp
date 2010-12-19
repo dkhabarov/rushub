@@ -582,11 +582,12 @@ int cConn::Send(const char *buf, size_t &len) {
 					<< " n=" << n << endl;
 			return -1;
 		}
-		if(Log(5))
+/*		if(Log(5))
 				LogStream() << "len = " << len
 					<< " total=" << total
 					<< " left=" << bytesleft
 					<< " n=" << n << endl;
+*/
 		if(SOCK_ERROR(n)) break;
 		total += n;
 		bytesleft -= n;

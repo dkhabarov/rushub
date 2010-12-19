@@ -23,6 +23,8 @@
 #include "cconnchoose.h"
 #include "tchashtable.h"
 
+#include "cobj.h"
+
 #if USE_SELECT
 
 #ifndef _WIN32
@@ -33,7 +35,7 @@
 namespace nServer {
 
 /** cConnSelect */
-class cConnSelect : public cConnChoose {
+class cConnSelect : public cConnChoose, public cObj {
 
 public:
 
@@ -45,7 +47,7 @@ protected:
 	tResList mResList; /** Res list */
 
 public:
-	cConnSelect(){};
+	cConnSelect() : cConnChoose(), cObj("cConnSelect"){};
 	virtual ~cConnSelect();
 
 	virtual unsigned Size() { return mResList.Size(); }
@@ -103,13 +105,38 @@ public:
 		}
 		bool operator != (const iterator &it){ return mIt != it.mIt; }
 		sChooseRes & operator *() {
+#ifdef _WIN32
+			__try {
+				if((*mIt)->mConnBase == NULL)
+					(*mIt)->mConnBase = (*mSel)[(*mIt)->mFd];
+			} __except(1) {
+				if(mSel->ErrLog(0)) mSel->LogStream() << "Fatal error: " << endl
+					<< "error in operator *()" << endl
+					<< "Item = " << mIt.mItem << endl
+					<< "Hash = " << mIt.i.i << endl
+					<< "End = " << mIt.i.end << endl;
+			}
+#else
 			if((*mIt)->mConnBase == NULL)
 				(*mIt)->mConnBase = (*mSel)[(*mIt)->mFd];
+#endif
 			return *(*mIt);
 		}
 
 		iterator & operator ++() {
+#ifdef _WIN32
+			__try {
+				while(!(++mIt).IsEnd() && !(*mIt)->mRevents){}
+			} __except(1) {
+				if(mSel->ErrLog(0)) mSel->LogStream() << "Fatal error: " << endl
+					<< "error in operator ++()" << endl
+					<< "Item = " << mIt.mItem << endl
+					<< "Hash = " << mIt.i.i << endl
+					<< "End = " << mIt.i.end << endl; 
+			}
+#else
 			while(!(++mIt).IsEnd() && !(*mIt)->mRevents){}
+#endif
 			return *this;
 		}
 	}; // iterator

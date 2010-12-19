@@ -92,7 +92,7 @@ cServer::~cServer() {
 	if(Log(1)) {
 		LogStream() << endl << "Allocated objects: " << 
 		#ifdef _WIN32
-			cObj::GetCount() - 2 // except cDCServer and cService
+			cObj::GetCount() - 3 // except cDCServer, cService, cConnSelect
 		#else
 			cObj::GetCount() - 1 // except cDCServer
 		#endif
@@ -261,6 +261,8 @@ void cServer::Step() {
 
 		bool &bOk = mNowConn->mbOk;
 
+		if(Log(5)) LogStream() << "::(s)NowConn" << endl;
+
 		if(bOk && (activity & cConnChoose::eEF_INPUT) && (mNowConn->GetConnType() == eCT_LISTEN)) {
 
 			if(mNowConn->Log(5)) mNowConn->LogStream() << "::(s)NewConn" << endl;
@@ -330,11 +332,13 @@ void cServer::Step() {
 				}
 			}
 		}
+		if(Log(5)) LogStream() << "::(e)NowConn" << endl;
 	}
 
 	if(miNumCloseConn) {
 		if(Log(3)) LogStream() << "Control not closed connections: " << miNumCloseConn << endl;
 	}
+	if(Log(5)) LogStream() << "end loop" << endl;
 }
 
 ///////////////////////////////////add_connection/del_connection///////////////////////////////////
