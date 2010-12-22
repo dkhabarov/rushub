@@ -51,7 +51,7 @@ using namespace ::std;
 			DLLIMPORT void del_plugin(cPlugin *Plugin) { if(Plugin) delete Plugin; } \
 		}
 	#else
-		//< Macros for registration plugin
+		//< Macros for unregistration plugin
 		#define REG_PLUGIN(__classname) \
 		extern "C" { \
 			cPlugin * get_plugin(void) { return new (__classname); } \
