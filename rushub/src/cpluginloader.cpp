@@ -1,6 +1,11 @@
 /*
  * RusHub - hub server for Direct Connect peer to peer network.
 
+ * begin: Wed Jun 11 2003
+ * Copyright (C) 2003 by dan at verliba dot cziel Muller
+ * E-Mail: dan at verliba dot cz@verliba.cz
+
+ * modified: 10 Dec 2009
  * Copyright (C) 2009-2010 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
 
