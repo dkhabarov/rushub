@@ -31,7 +31,7 @@
 #include <string>
 
 #define PLUGIN_NAME "LuaScripts"
-#define PLUGIN_VERSION "1.31"
+#define PLUGIN_VERSION "1.32"
 
 namespace nDCServer{class cDCServerBase;}
 
