@@ -181,7 +181,7 @@ int UserIndex(lua_State *L) {
 		case ePH_VERSION:    lua_pushstring(L, Conn->GetVersion().c_str()); break;
 		case ePH_DATA:       lua_pushstring(L, Conn->GetData().c_str()); break;
 		case ePH_ENTERTIME:  lua_pushnumber(L, (lua_Number)Conn->GetEnterTime()); break;
-		case ePH_UID:        lua_pushlightuserdata(L, (void*)Conn); break; // for compatibility
+		case ePH_UID:        lua_pushlightuserdata(L, (void*)Conn); luaL_getmetatable(L, MT_USER_CONN); lua_setmetatable(L, -2); break;
 		default:             lua_pushnil(L); break;
 	}
 	return 1;
