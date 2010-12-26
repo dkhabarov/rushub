@@ -39,6 +39,7 @@
 		#pragma comment(lib, "plugin.lib")
 		#pragma comment(lib, "tinyxml.lib")
 	#endif
+	#include "cexception.h"
 #else
 	#include "ccli.h"
 #endif
@@ -136,6 +137,8 @@ int main(int argc, char **argv) {
 		signal(SIGHUP, SigHandler);
 		signal(SIGPIPE, SigHandler);
 		signal(SIGIO, SigHandler);
+	#else
+		SetUnhandledExceptionFilter(&cException::ExceptionFilter);
 	#endif
 
 	return runHub(argc, argv);

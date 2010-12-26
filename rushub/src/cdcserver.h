@@ -112,7 +112,7 @@ public:
 
 	cMainPath mMainPath;
 	tSysLoading mSysLoading; /** Indicator of the system overloading */
-	string msSysVersion; /** Verion of OS System */
+	static string msSysVersion; /** Verion of OS System */
 
 	cTime mStartTime; /** Start time of the hub */
 	cDCProtocol mDCProtocol; /** DC Protocol */

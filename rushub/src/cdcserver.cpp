@@ -36,6 +36,7 @@ cDCListIterator::cDCListIterator(cDCServer * server) :
 }
 
 cDCServer * cDCServer::sCurrentServer = NULL;
+string cDCServer::msSysVersion = "";
 
 cDCServer::cDCServer(const string & sConfPath, const string & sExPath):
 	cServer(DC_SEPARATOR),
@@ -1100,7 +1101,7 @@ int cDCServer::UnregBot(const string & sNick) {
 bool cDCServer::GetSysVersion() {
 	OSVERSIONINFOEX osvi;
 	bool bOsVersionInfoEx;
-	msSysVersion = "";
+	if (!msSysVersion.empty()) return true;
 
 	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
 	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
