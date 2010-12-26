@@ -54,12 +54,8 @@ bool cConnSelect::OptIn(tSocket sock, tEventFlag eMask) {
 		if(!mCloseFS.Set(sock)) return false;
 
 	sChooseRes *ChR = mResList.Find(sock);
-	if(!ChR) {
-		ChR = new sChooseRes;
-		ChR->mFd = sock;
-		ChR->mEvents = eMask;
-		mResList.Add(sock, ChR);
-	}
+	if(!ChR)
+		mResList.Add(sock, new sChooseRes(sock, eMask));
 	else
 		ChR->mEvents |= eMask;
 
@@ -127,8 +123,7 @@ int cConnSelect::Select(cTime &tmout) {
 }
 
 void cConnSelect::ClearRevents(void) {
-	tResList::iterator it;
-	for(it = mResList.begin(); it != mResList.end(); ++it)
+	for(tResList::iterator it = mResList.begin(); it != mResList.end(); ++it)
 		if(*it) (*it)->mRevents = 0;
 }
 
@@ -139,13 +134,8 @@ void cConnSelect::SetRevents(cSelectFD &fdset, unsigned eMask) {
 	for(unsigned i = 0; i < fdset.fd_count; ++i) {
 		sock = fdset.fd_array[i];
 		sChooseRes *ChR = mResList.Find(sock);
-		if(!ChR) { 
-			ChR = new sChooseRes;
-			ChR->mFd = sock;
-			ChR->mEvents = 0; 
-			ChR->mRevents = eMask; 
-			mResList.Add(sock, ChR);
-		}
+		if(!ChR)
+			mResList.Add(sock, new sChooseRes(sock, 0, eMask));
 		else
 			ChR->mRevents |= eMask;
 	}
@@ -154,13 +144,8 @@ void cConnSelect::SetRevents(cSelectFD &fdset, unsigned eMask) {
 		sock = i;
 		if(FD_ISSET(sock, &fdset)) {
 			sChooseRes *ChR = mResList.Find(sock);
-			if(!ChR) {
-				ChR = new sChooseRes;
-				ChR->mFd = sock;
-				ChR->mEvents = 0;
-				ChR->mRevents = eMask;
-				mResList.Add(sock, ChR);
-			}
+			if(!ChR)
+				mResList.Add(sock, new sChooseRes(sock, 0, eMask));
 			else
 				ChR->mRevents |= eMask;
 		}

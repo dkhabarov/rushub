@@ -126,7 +126,7 @@ public:
 		int mEvents; /** Events */
 		int mRevents; /** Revents */
 		cConnBase *mConnBase; /** Connection */
-		sChooseRes() : mFd(0), mEvents(tEventFlag(0)), mRevents(tEventFlag(0)), mConnBase(NULL){}
+		sChooseRes(tSocket fd = 0, int events = 0, int revents = 0) : mFd(fd), mEvents(events), mRevents(revents), mConnBase(NULL){}
 	};
 
 

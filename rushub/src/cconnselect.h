@@ -120,6 +120,8 @@ public:
 					<< "Item = " << mIt.mItem << endl
 					<< "Hash = " << mIt.i.i << endl
 					<< "End = " << mIt.i.end << endl;
+				if(mSel->ErrLog(0)) mSel->LogStream()	<< "ConnBase = " << (*mIt)->mConnBase << endl
+					<< "Socket = " << (*mIt)->mFd << endl;
 			}
 #else
 			if((*mIt)->mConnBase == NULL)
@@ -137,7 +139,8 @@ public:
 					<< "error in operator ++()" << endl
 					<< "Item = " << mIt.mItem << endl
 					<< "Hash = " << mIt.i.i << endl
-					<< "End = " << mIt.i.end << endl; 
+					<< "End = " << mIt.i.end << endl
+					<< "Socket = " << (*mIt)->mFd << endl; 
 			}
 #else
 			while(!(++mIt).IsEnd() && !(*mIt)->mRevents){}
