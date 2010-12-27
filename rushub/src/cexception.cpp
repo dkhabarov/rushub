@@ -260,7 +260,7 @@ void cException::StackTrace(void * hThread, char * msg, std::ostream & f, unsign
 
 	f << srcInfo << ": " << symInfo << endl;
 
-	for(unsigned long i = 0; i < 100; ++i) {
+	for(unsigned long i = 0; i < 1000; ++i) {
 		bResult = StackWalk(
 			IMAGE_FILE_MACHINE_I386,
 			hProcess,
