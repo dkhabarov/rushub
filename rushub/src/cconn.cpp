@@ -227,9 +227,15 @@ void cConn::CloseNow(int iReason /* = 0 */) {
 			if(iReason) miCloseReason = iReason;
 			if(Log(3)) LogStream() << "CloseNow (reason " << miCloseReason << ")" << endl;
 
+#if USE_SELECT
+			mServer->mConnChooser.cConnChoose::OptIn((cConnBase*)this, cConnChoose::eEF_CLOSE);
+			mServer->mConnChooser.cConnChoose::OptOut((cConnBase*)this, cConnChoose::eEF_ALL);
+#else
 			// this sequence of flags for poll!
 			mServer->mConnChooser.cConnChoose::OptOut((cConnBase*)this, cConnChoose::eEF_ALL);
 			mServer->mConnChooser.cConnChoose::OptIn((cConnBase*)this, cConnChoose::eEF_CLOSE);
+#endif
+			
 		} else {
 			if(Log(3)) LogStream() << "Re-closure (reason " << iReason << ")" << endl;
 		}
