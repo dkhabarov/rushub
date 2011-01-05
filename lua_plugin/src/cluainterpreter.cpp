@@ -207,10 +207,12 @@ int cLuaInterpreter::CallFunc(const char* sFunc) {
 		return 0;
 	}
 
+	void** userdata;
 	for(it = mCallParams.begin(); it != mCallParams.end(); ++it) {
 		switch((*it)->type) {
 			case LUA_TLIGHTUSERDATA:
-				lua_pushlightuserdata(mL, (*it)->data);
+				userdata = (void**) lua_newuserdata(mL, sizeof(void*));
+				*userdata = (*it)->data;
 				luaL_getmetatable(mL, MT_USER_CONN);
 				lua_setmetatable(mL, -2);
 				break;

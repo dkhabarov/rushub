@@ -57,6 +57,8 @@ typedef struct {
 	short isExist;
 } cConfig;
 
+cDCConnBase * GetDCConnBase(lua_State *L, int indx);
+
 int Tostring(lua_State *L);
 int ConfigTable(lua_State *L);
 int UserIndex(lua_State *L);

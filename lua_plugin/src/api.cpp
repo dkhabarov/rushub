@@ -73,9 +73,17 @@ if(!LIP || !LIP->mL) ERR("script was not found");
 
 namespace nLua {
 
+cDCConnBase * GetDCConnBase(lua_State *L, int indx) {
+	void ** userdata = (void**) lua_touserdata(L, indx);
+	cDCConnBase * Conn = (cDCConnBase*)*userdata;
+	if(Conn->mType != eT_DC_CLIENT && Conn->mType != eT_WEB_CLIENT)
+		return NULL;
+	return Conn;
+}
+
 int Tostring(lua_State *L) {
 	char buf[9];
-	sprintf(buf, "%p", lua_touserdata(L, 1));
+	sprintf(buf, "%p", *((void**)lua_touserdata(L, 1)));
 	lua_pushfstring(L, "%s (%s)", lua_tostring(L, lua_upvalueindex(1)), buf);
 	return 1;
 }
@@ -141,9 +149,11 @@ typedef enum { /** Param's hash */
 } tParamHash;
 
 int UserIndex(lua_State *L) {
-	cDCConnBase * Conn = (cDCConnBase *)lua_touserdata(L, 1);
+	cDCConnBase * Conn = GetDCConnBase(L, 1);
+	if(!Conn) ERR_TYPEMETA(1, "UID", "userdata");
 	const char * s = lua_tostring(L, 2);
 	if(!s) ERR_TYPEMETA(2, "UID", "string");
+	void ** userdata;
 	switch(GetHash(s)) {
 		case ePH_NICK:       if(Conn->mDCUserBase)lua_pushstring(L, Conn->mDCUserBase->GetNick().c_str());else lua_pushnil(L); break;
 		case ePH_IP:         lua_pushstring (L, Conn->GetIp().c_str()); break;
@@ -181,14 +191,15 @@ int UserIndex(lua_State *L) {
 		case ePH_VERSION:    lua_pushstring(L, Conn->GetVersion().c_str()); break;
 		case ePH_DATA:       lua_pushstring(L, Conn->GetData().c_str()); break;
 		case ePH_ENTERTIME:  lua_pushnumber(L, (lua_Number)Conn->GetEnterTime()); break;
-		case ePH_UID:        lua_pushlightuserdata(L, (void*)Conn); luaL_getmetatable(L, MT_USER_CONN); lua_setmetatable(L, -2); break;
+		case ePH_UID:        userdata = (void**)lua_newuserdata(L, sizeof(void*)); *userdata = (void*)Conn; luaL_getmetatable(L, MT_USER_CONN); lua_setmetatable(L, -2); break;
 		default:             lua_pushnil(L); break;
 	}
 	return 1;
 }
 
 int UserNewindex(lua_State *L) {
-	cDCConnBase * Conn = (cDCConnBase *)lua_touserdata(L, 1);
+	cDCConnBase * Conn = GetDCConnBase(L, 1);
+	if(!Conn) ERR_TYPEMETA(1, "UID", "userdata");
 	const char * s = lua_tostring(L, 2);
 	if(!s) ERR_TYPEMETA(2, "UID", "string");
 	switch(GetHash(s)) {
@@ -268,6 +279,8 @@ static void SetTbl(lua_State *L1, lua_State *L2, int idx) {
 }
 
 void CopyValue(lua_State *From, lua_State *To, int idx) {
+	void ** userdata;
+	void * udata;
 	switch(lua_type(From, idx)) {
 		case LUA_TSTRING:
 			lua_pushstring(To, lua_tostring(From, idx));
@@ -283,6 +296,15 @@ void CopyValue(lua_State *From, lua_State *To, int idx) {
 			break;
 		case LUA_TLIGHTUSERDATA:
 			lua_pushlightuserdata(To, lua_touserdata(From, idx));
+			break;
+		case LUA_TUSERDATA:
+			udata = (void *)GetDCConnBase(From, idx);
+			if(udata) {
+				userdata = (void**) lua_newuserdata(To, sizeof(void*));
+				*userdata = udata;
+			} else {
+				lua_pushnil(To);
+			}
 			break;
 		default:
 			lua_pushnil(To);
@@ -355,8 +377,8 @@ int SendToUser(lua_State *L) {
 			}
 		case 2:
 			iType = lua_type(L, 1);
-			if(iType != LUA_TLIGHTUSERDATA) {
-				if(iType != LUA_TSTRING) return luaL_typeerror(L, 1, "lightuserdata or string");
+			if(iType != LUA_TUSERDATA) {
+				if(iType != LUA_TSTRING) return luaL_typeerror(L, 1, "userdata or string");
 				bByUID = false;
 			}
 			break;
@@ -367,8 +389,8 @@ int SendToUser(lua_State *L) {
 	const char * sData = luaL_checklstring(L, 2, &iLen);
 
 	if(bByUID) {
-		cDCConnBase * Conn = (cDCConnBase *)lua_touserdata(L, 1);
-		if(!Conn || (Conn->mType != eT_DC_CLIENT && Conn->mType != eT_WEB_CLIENT)) ERR("user was not found");
+		cDCConnBase * Conn = GetDCConnBase(L, 1);
+		if(!Conn) ERR("user was not found");
 		if(Conn->mType == eT_WEB_CLIENT) {
 			if(!Conn->Send(sData)) // not newPolitic fot timers only
 				ERR("data was not sent");
@@ -630,18 +652,28 @@ int SendToNicks(lua_State *L) {
 
 /// GetUser(UID/sNick, iByte)
 int GetUser(lua_State *L) {
-	if(lua_type(L, 1) == LUA_TLIGHTUSERDATA)
-		lua_pushlightuserdata(L, lua_touserdata(L, 1));
-	else if(lua_isstring(L, 1)) {
+	if(lua_type(L, 1) == LUA_TUSERDATA) {
+		//cDCConnBase * Conn = GetDCConnBase(L, 1);
+		//if(!Conn) ERR("user was not found");
+		//void ** userdata = (void**) lua_newuserdata(L, sizeof(void*));
+		//*userdata = (void*)User->mDCConnBase;
+
+		lua_pushvalue(L, 1);
+		luaL_getmetatable(L, MT_USER_CONN);
+		lua_setmetatable(L, -2);
+
+		
+	} else if(lua_isstring(L, 1)) {
 		size_t iLen;
 		const char * sNick = lua_tolstring(L, 1, &iLen);
 		NICKLEN(iLen);
 		cDCUserBase * User = cLua::mCurServer->GetDCUserBase(sNick);
 		if(!User || !User->mDCConnBase) ERR("user was not found");
-		lua_pushlightuserdata(L, (void*)User->mDCConnBase);
+		void ** userdata = (void**) lua_newuserdata(L, sizeof(void*));
+		*userdata = (void*)User->mDCConnBase;
 		luaL_getmetatable(L, MT_USER_CONN);
 		lua_setmetatable(L, -2);
-	} else return luaL_typeerror(L, 1, "lightuserdata or string");
+	} else return luaL_typeerror(L, 1, "userdata or string");
 	return 1;
 }
 
@@ -649,8 +681,8 @@ int GetUser(lua_State *L) {
 int SetUser(lua_State *L) {
 	CHECK_COUNT(3);
 	cDCConnBase * Conn;
-	if(lua_type(L, 1) == LUA_TLIGHTUSERDATA) {
-		Conn = (cDCConnBase *)lua_touserdata(L, 1);
+	if(lua_type(L, 1) == LUA_TUSERDATA) {
+		Conn = GetDCConnBase(L, 1);
 		if(!Conn || Conn->mType != eT_DC_CLIENT) ERR("user was not found");
 	} else if(lua_isstring(L, 1)) {
 		size_t iLen;
@@ -659,7 +691,7 @@ int SetUser(lua_State *L) {
 		cDCUserBase * User = cLua::mCurServer->GetDCUserBase(sNick);
 		if(!User || !User->mDCConnBase) ERR("user was not found");
 		Conn = User->mDCConnBase;
-	} else return luaL_typeerror(L, 1, "lightuserdata or string");
+	} else return luaL_typeerror(L, 1, "userdata or string");
 
 	unsigned iNum = (unsigned)luaL_checkinteger(L, 2);
 	if(iNum == eUV_iProfile) {
@@ -697,7 +729,8 @@ int GetUsers(lua_State *L) {
 		const vector<cDCConnBase *> & v = cLua::mCurServer->GetDCConnBase(lua_tostring(L, 1));
 		for(vector<cDCConnBase *>::const_iterator it = v.begin(); it != v.end(); ++it) {
 			lua_pushnumber(L, i);
-			lua_pushlightuserdata(L, (void*)(*it));
+			void ** userdata = (void**) lua_newuserdata(L, sizeof(void*));
+			*userdata = (void*)(*it);
 			luaL_getmetatable(L, MT_USER_CONN);
 			lua_setmetatable(L, -2);
 			lua_rawset(L, iTopTab);
@@ -709,7 +742,8 @@ int GetUsers(lua_State *L) {
 		while((Conn = it->operator ()()) != NULL) {
 			if(Conn->mType != eT_DC_CLIENT) continue;
 			lua_pushnumber(L, i);
-			lua_pushlightuserdata(L, (void*)Conn);
+			void ** userdata = (void**) lua_newuserdata(L, sizeof(void*));
+			*userdata = (void*)Conn;
 			luaL_getmetatable(L, MT_USER_CONN);
 			lua_setmetatable(L, -2);
 			lua_rawset(L, iTopTab);
@@ -742,10 +776,9 @@ int GetUpTime(lua_State *L) {
 int Disconnect(lua_State *L) {
 	CHECK_COUNT(1);
 	int iType = lua_type(L, 1);
-	if(iType == LUA_TLIGHTUSERDATA) {
-		cDCConnBase * Conn = (cDCConnBase *)lua_touserdata(L, 1);
-		if(!Conn)
-			ERR("user was not found");
+	if(iType == LUA_TUSERDATA) {
+		cDCConnBase * Conn = GetDCConnBase(L, 1);
+		if(!Conn) ERR("user was not found");
 		Conn->Disconnect();
 	} else if(iType == LUA_TSTRING) {
 		size_t iLen;
@@ -754,7 +787,7 @@ int Disconnect(lua_State *L) {
 		cDCUserBase * User = cLua::mCurServer->GetDCUserBase(sNick);
 		if(!User || !User->mDCConnBase) ERR("user was not found");
 		User->mDCConnBase->Disconnect();
-	} else return luaL_typeerror(L, 1, "lightuserdata or string");
+	} else return luaL_typeerror(L, 1, "userdata or string");
 
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
@@ -1198,13 +1231,13 @@ int Redirect(lua_State *L) {
 
 	iType = lua_type(L, 1);
 	cDCConnBase * Conn = NULL;
-	if(iType != LUA_TLIGHTUSERDATA) {
-		if(iType != LUA_TSTRING) return luaL_typeerror(L, 1, "lightuserdata or string");
+	if(iType != LUA_TUSERDATA) {
+		if(iType != LUA_TSTRING) return luaL_typeerror(L, 1, "userdata or string");
 		cDCUserBase * User = cLua::mCurServer->GetDCUserBase(lua_tostring(L, 1));
 		if(!User || !User->mDCConnBase) ERR("user was not found");
 		Conn = User->mDCConnBase;
 	} else {
-		Conn = (cDCConnBase *)lua_touserdata(L, 1);
+		Conn = GetDCConnBase(L, 1);
 	}
 
 	if(!Conn || (Conn->mType != eT_DC_CLIENT)) ERR("user was not found");
