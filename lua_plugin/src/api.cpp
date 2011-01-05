@@ -355,12 +355,11 @@ int SetGVal(lua_State *L) {
 	return 1;
 }
 
-/// SendToUser(UID/sToNick, sData, sNick, sFrom)
+/// SendToUser(UID/sToNick/tNicks, sData, sNick, sFrom)
 int SendToUser(lua_State *L) {
 	size_t iLen;
 	int iType;
-	const char *sNick = NULL, *sFrom = NULL;
-	bool bByUID = true;
+	const char *sNick = NULL, *sFrom = NULL, *sN;
 
 	switch(lua_gettop(L)) {
 		case 4:
@@ -377,39 +376,82 @@ int SendToUser(lua_State *L) {
 			}
 		case 2:
 			iType = lua_type(L, 1);
-			if(iType != LUA_TUSERDATA) {
-				if(iType != LUA_TSTRING) return luaL_typeerror(L, 1, "userdata or string");
-				bByUID = false;
-			}
 			break;
 		default:
 			ERR_COUNT("2, 3 or 4");
 	}
 
 	const char * sData = luaL_checklstring(L, 2, &iLen);
+	MSGLEN(iLen);
 
-	if(bByUID) {
+	if(iType == LUA_TUSERDATA) {
 		cDCConnBase * Conn = GetDCConnBase(L, 1);
 		if(!Conn) ERR("user was not found");
 		if(Conn->mType == eT_WEB_CLIENT) {
 			if(!Conn->Send(sData)) // not newPolitic fot timers only
 				ERR("data was not sent");
 		} else {
-			MSGLEN(iLen);
 			if(!cLua::mCurServer->SendToUser(Conn, sData, sNick, sFrom))
 				ERR("user was not found");
 		}
-	} else {
+	} else if (iType == LUA_TSTRING) {
 		const char *sTo = lua_tolstring(L, 1, &iLen);
 		NICKLEN(iLen);
 		if(!cLua::mCurServer->SendToNick(sTo, sData, sNick, sFrom))
 			ERR("user was not found");
+	} else if (iType == LUA_TTABLE) {
+		lua_pushnil(L);
+		while(lua_next(L, 1) != 0) {
+			sN = luaL_checklstring(L, -1, &iLen);
+			NICKLEN(iLen);
+			cLua::mCurServer->SendToNick(sN, sData, sNick, sFrom);
+			lua_pop(L, 1);
+		}
+	} else {
+		return luaL_typeerror(L, 1, "userdata, string or table");
 	}
-
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
 	return 1;
 }
+
+//! deprecated
+/// SendToNicks(tNicks, sData, sNick, sFrom)
+int SendToNicks(lua_State *L) {
+	size_t iLen;
+	const char *sData, *sNick = NULL, *sFrom = NULL, *sN;
+	switch(lua_gettop(L)) {
+		case 4:
+			if(lua_type(L, 4) != LUA_TNIL) {
+				sFrom = luaL_checklstring(L, 4, &iLen);
+				NICKLEN(iLen);
+			}
+		case 3:
+			if(lua_type(L, 3) != LUA_TNIL) {
+				sNick = luaL_checklstring(L, 3, &iLen);
+				NICKLEN(iLen);
+			}
+		case 2:
+			luaL_checktype(L, 1, LUA_TTABLE);
+			sData = luaL_checklstring(L, 2, &iLen);
+			MSGLEN(iLen);
+
+			lua_pushnil(L);
+			while(lua_next(L, 1) != 0) {
+				sN = luaL_checklstring(L, -1, &iLen);
+				NICKLEN(iLen);
+				cLua::mCurServer->SendToNick(sN, sData, sNick, sFrom);
+				lua_pop(L, 1);
+			}
+			break;
+		default:
+			ERR_COUNT("2, 3 or 4");
+	}
+	lua_settop(L, 0);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
 
 /// SendToAll(sData, sNick, sFrom)
 int SendToAll(lua_State *L) {
@@ -614,55 +656,12 @@ int SendToAllExceptIps(lua_State *L) {
 	return 1;
 }
 
-/// SendToNicks(tNicks, sData, sNick, sFrom)
-int SendToNicks(lua_State *L) {
-	size_t iLen;
-	const char *sData, *sNick = NULL, *sFrom = NULL, *sN;
-	switch(lua_gettop(L)) {
-		case 4:
-			if(lua_type(L, 4) != LUA_TNIL) {
-				sFrom = luaL_checklstring(L, 4, &iLen);
-				NICKLEN(iLen);
-			}
-		case 3:
-			if(lua_type(L, 3) != LUA_TNIL) {
-				sNick = luaL_checklstring(L, 3, &iLen);
-				NICKLEN(iLen);
-			}
-		case 2:
-			luaL_checktype(L, 1, LUA_TTABLE);
-			sData = luaL_checklstring(L, 2, &iLen);
-			MSGLEN(iLen);
-
-			lua_pushnil(L);
-			while(lua_next(L, 1) != 0) {
-				sN = luaL_checklstring(L, -1, &iLen);
-				NICKLEN(iLen);
-				cLua::mCurServer->SendToNick(sN, sData, sNick, sFrom);
-				lua_pop(L, 1);
-			}
-			break;
-		default:
-			ERR_COUNT("2, 3 or 4");
-	}
-	lua_settop(L, 0);
-	lua_pushboolean(L, 1);
-	return 1;
-}
-
 /// GetUser(UID/sNick, iByte)
 int GetUser(lua_State *L) {
 	if(lua_type(L, 1) == LUA_TUSERDATA) {
-		//cDCConnBase * Conn = GetDCConnBase(L, 1);
-		//if(!Conn) ERR("user was not found");
-		//void ** userdata = (void**) lua_newuserdata(L, sizeof(void*));
-		//*userdata = (void*)User->mDCConnBase;
-
 		lua_pushvalue(L, 1);
 		luaL_getmetatable(L, MT_USER_CONN);
 		lua_setmetatable(L, -2);
-
-		
 	} else if(lua_isstring(L, 1)) {
 		size_t iLen;
 		const char * sNick = lua_tolstring(L, 1, &iLen);
@@ -677,6 +676,7 @@ int GetUser(lua_State *L) {
 	return 1;
 }
 
+//! deprecated
 /// SetUser(UID/sNick, iType, Value)
 int SetUser(lua_State *L) {
 	CHECK_COUNT(3);
@@ -724,7 +724,6 @@ int SetUser(lua_State *L) {
 int GetUsers(lua_State *L) {
 	lua_newtable(L);
 	int iTopTab = lua_gettop(L), i = 1;
-
 	if(lua_type(L, 1) == LUA_TSTRING) {
 		const vector<cDCConnBase *> & v = cLua::mCurServer->GetDCConnBase(lua_tostring(L, 1));
 		for(vector<cDCConnBase *>::const_iterator it = v.begin(); it != v.end(); ++it) {
@@ -1063,6 +1062,7 @@ int DelTimer(lua_State *L) {
 	return 1;
 }
 
+//! deprecated
 /// GetConfig(sName)
 int GetConfig(lua_State *L) {
 	CHECK_COUNT(1);
@@ -1073,6 +1073,7 @@ int GetConfig(lua_State *L) {
 	return 1;
 }
 
+//! deprecated
 /// SetConfig(sName, sValue)
 int SetConfig(lua_State *L) {
 	CHECK_COUNT(2);
@@ -1123,8 +1124,13 @@ int Call(lua_State *L) {
 	int iBase = lua_gettop(LL);
 	lua_pushliteral(LL, "_TRACEBACK");
 	lua_rawget(LL, LUA_GLOBALSINDEX); // lua 5.1
+	if(lua_isfunction(LL, -1)) {
+		iBase = lua_gettop(LL);
+	} else {
+		lua_pop(LL, 1);
+	}
 	//lua_rawget(LL, LUA_ENVIRONINDEX); // lua 5.2
-	lua_insert(LL, iBase);
+	//lua_insert(LL, iBase);
 
 	lua_getglobal(LL, luaL_checkstring(L, 2));
 	if(lua_type(LL, -1) != LUA_TFUNCTION) {

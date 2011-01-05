@@ -194,10 +194,17 @@ int cLuaInterpreter::CallFunc(const char* sFunc) {
 	tvCallParams::iterator it;
 	lua_settop(mL, 0);
 	int iBase = lua_gettop(mL);
+
 	lua_pushliteral(mL, "_TRACEBACK");
 	lua_rawget(mL, LUA_GLOBALSINDEX); // lua 5.1
+	if(lua_isfunction(mL, -1)) {
+		iBase = lua_gettop(mL);
+	} else {
+		lua_pop(mL, 1);
+	}
 	//lua_rawget(mL, LUA_ENVIRONINDEX); // lua 5.2
-	lua_insert(mL, iBase);
+	//lua_insert(mL, iBase);
+
 	lua_getglobal(mL, sFunc);
 	if(lua_isnil(mL, -1)) { // function not exists
 		for(it = mCallParams.begin(); it != mCallParams.end(); ++it) delete (*it);
