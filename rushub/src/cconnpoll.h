@@ -52,8 +52,8 @@ class cConnPoll : public cConnChoose {
 public:
 
 	struct cPollFD: public pollfd {
-		cPollFD(){ reset(); }
-		void reset(){
+		cPollFD() { reset(); }
+		void reset() {
 			fd = -1;
 			events = revents = 0;
 		}

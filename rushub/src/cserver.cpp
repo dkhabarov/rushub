@@ -261,12 +261,9 @@ void cServer::Step() {
 		res = (*it);
 		++it;
 
-		if(((mNowConn = (cConn* )res.mConnBase) == NULL) ||
-			((activity = res.mRevents) == 0 && mNowConn->mbOk)) continue;
-
+		mNowConn = (cConn*)res.mConnBase;
+		activity = res.mRevents;
 		bool &bOk = mNowConn->mbOk;
-
-		if(Log(5)) LogStream() << "::(s)NowConn" << endl;
 
 		if(bOk && (activity & cConnChoose::eEF_INPUT) && (mNowConn->GetConnType() == eCT_LISTEN)) {
 
@@ -337,13 +334,11 @@ void cServer::Step() {
 				}
 			}
 		}
-		if(Log(5)) LogStream() << "::(e)NowConn" << endl;
 	}
 
 	if(miNumCloseConn) {
-		if(Log(3)) LogStream() << "Control not closed connections: " << miNumCloseConn << endl;
+		//if(Log(3)) LogStream() << "Control not closed connections: " << miNumCloseConn << endl;
 	}
-	if(Log(5)) LogStream() << "end loop" << endl;
 }
 
 ///////////////////////////////////add_connection/del_connection///////////////////////////////////
@@ -370,7 +365,7 @@ int cServer::AddConnection(cConn *conn) {
 		!mConnChooser.cConnChoose::OptIn((cConnBase *)conn,
 		cConnChoose::tEventFlag(cConnChoose::eEF_INPUT | cConnChoose::eEF_ERROR)))
 	{
-		if(conn->ErrLog(1)) conn->LogStream() << "Error: Can't add socket!" << endl;
+		if(conn->ErrLog(0)) conn->LogStream() << "Error: Can't add socket!" << endl;
 		if(conn->mConnFactory != NULL) 
 			conn->mConnFactory->DelConn(conn); 
 		else delete conn; 

@@ -85,9 +85,7 @@ bool cConnPoll::RevTest(cPollFD & PollFD) {
 	if(!PollFD.events) return true;
  	unsigned iEvent = PollFD.revents;
  	if(!iEvent) return false;
-	if(iEvent & POLLOUT) return true;
-	if(iEvent & (POLLIN | POLLPRI)) return true;
-	if(iEvent & (POLLERR | POLLHUP | POLLNVAL)) return true;
+	if(iEvent & (POLLIN | POLLPRI | POLLOUT | POLLERR | POLLHUP | POLLNVAL)) return true;
 	return false;
 }
 

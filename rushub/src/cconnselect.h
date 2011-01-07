@@ -97,11 +97,10 @@ public:
 	void SetRevents(cSelectFD &fdset, unsigned eMask);
 
 	struct iterator {
-		tResList::iterator mIt; /** iterator for list */
 		cConnSelect *mSel; /** for operator [] */
-		iterator(){}
-		iterator(cConnSelect *sel, tResList::iterator it) : mIt(it), mSel(sel)
-		{}
+		tResList::iterator mIt; /** iterator for list */
+		iterator() {}
+		iterator(cConnSelect *sel, tResList::iterator it) : mSel(sel), mIt(it) {}
 
 		iterator & operator = (const iterator &it) {
 			mSel= it.mSel;
@@ -113,7 +112,7 @@ public:
 #ifdef _WIN32
 			__try {
 				if((*mIt)->mConnBase == NULL)
-					(*mIt)->mConnBase = (*mSel)[(*mIt)->mFd];
+					(*mIt)->mConnBase = mSel->operator[]((*mIt)->mFd);
 			} __except(1) {
 				if(mSel->ErrLog(0)) mSel->LogStream() << "Fatal error: " << endl
 					<< "error in operator *()" << endl
@@ -133,7 +132,7 @@ public:
 		iterator & operator ++() {
 #ifdef _WIN32
 			__try {
-				while(!(++mIt).IsEnd() && !(*mIt)->mRevents){}
+				while(!(++mIt).IsEnd() && !(*mIt)->mRevents && !((*mIt)->mEvents & eEF_CLOSE)){}
 			} __except(1) {
 				if(mSel->ErrLog(0)) mSel->LogStream() << "Fatal error: " << endl
 					<< "error in operator ++()" << endl
@@ -149,8 +148,15 @@ public:
 		}
 	}; // iterator
 
-	iterator begin(){ return iterator(this, mResList.begin()); }
-	iterator end(){ return iterator(this, mResList.end()); }
+	iterator begin() {
+		static iterator sBegin(this, mResList.begin());
+		sBegin.mIt = mResList.begin();
+		return sBegin;
+	}
+	iterator end() {
+		static iterator sEnd(this, mResList.end());
+		return sEnd;
+	}
 
 protected:
 

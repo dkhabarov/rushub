@@ -133,12 +133,12 @@ public:
 	/** The Iterator, which returns the object of the result of the choice.
 	Return only objects, in which have entered the data! */
 	struct iterator {
-		tSocket *mMax; /** Max descriptor */
 		cConnChoose *mChoose; /** Pointer on cConnChoose (for operator []) */
+		tSocket *mMax; /** Max descriptor */
 		sChooseRes mRes; /** sChooseRes */
 
-		iterator(cConnChoose *ch, tSocket *max) : mMax(max), mChoose(ch){}
-		iterator() : mMax(0), mChoose(0){};
+		iterator(cConnChoose *ch, tSocket *max) : mChoose(ch), mMax(max) {}
+		iterator() : mChoose(0), mMax(0) {};
 
 		iterator & operator ++() {
 			while( (++mRes.mFd < *mMax) && !(mChoose->RevTest(mRes.mFd)) ){}
