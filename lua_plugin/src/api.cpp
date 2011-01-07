@@ -302,6 +302,8 @@ void CopyValue(lua_State *From, lua_State *To, int idx) {
 			if(udata) {
 				userdata = (void**) lua_newuserdata(To, sizeof(void*));
 				*userdata = udata;
+				luaL_getmetatable(To, MT_USER_CONN);
+				lua_setmetatable(To, -2);
 			} else {
 				lua_pushnil(To);
 			}
