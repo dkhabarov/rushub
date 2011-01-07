@@ -5,8 +5,8 @@
  * Copyright (C) 2003 by Daniel Muller
  * E-Mail: dan at verliba dot cz
 
- * modified: 10 Dec 2009
- * Copyright (C) 2009-2010 by Setuper
+ * modified: 27 Aug 2009
+ * Copyright (C) 2009-2011 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
 
  * This program is free software: you can redistribute it and/or modify
