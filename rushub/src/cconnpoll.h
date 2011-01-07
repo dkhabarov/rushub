@@ -63,24 +63,21 @@ public:
 
 public:
 
-	cConnPoll();
-	~cConnPoll();
+	cConnPoll() { mvFD.reserve(16384); }
+	~cConnPoll() {}
 
-	virtual bool OptIn(tSocket, tEventFlag);
-	virtual void OptOut(tSocket, tEventFlag);
-	virtual int OptGet(tSocket);
-	virtual int RevGet(tSocket);
-	virtual bool RevTest(tSocket);
-	virtual bool RevTest(cPollFD &);
-	virtual int Choose(cTime & tmout){ return this->poll(tmout.MiliSec() + 1); }
+	bool AddConn(cConnBase *);
 
-	virtual bool AddConn(cConnBase *);
+	int Choose(cTime &);
 
-	cPollFD & FD(int socket){ return mvFD[socket]; }
-
-	int poll(int iMiliSec);
+	bool OptIn(tSocket, tEventFlag);
+	void OptOut(tSocket, tEventFlag);
+	int OptGet(tSocket);
+	int RevGet(tSocket);
+	bool RevTest(tSocket);
 
 private:
+
 	tFDArray mvFD;
 
 }; // cConnPoll

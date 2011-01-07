@@ -76,8 +76,8 @@ public:
 
 public:
 
-	cConnChoose() : mMaxSocket(0) {};
-	virtual ~cConnChoose(){};
+	cConnChoose() : mMaxSocket(0) {}
+	virtual ~cConnChoose() {}
 
 	/** virtual function for select limit detect */
 	virtual unsigned Size() { return 0; }

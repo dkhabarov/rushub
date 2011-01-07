@@ -32,7 +32,7 @@ cConnSelect::~cConnSelect() {
 	tResList::iterator it;
 	sChooseRes *ChR;
 	tSocket sock;
-	for(it = mResList.begin(); it != mResList.end();) {
+	for(it = mResList.begin(); it != mResList.end(); ) {
 		ChR = *it;
 		++it;
 		if(ChR) {
@@ -44,21 +44,15 @@ cConnSelect::~cConnSelect() {
 }
 
 bool cConnSelect::OptIn(tSocket sock, tEventFlag eMask) {
-	if(eMask & eEF_INPUT ) 
-		if(!mReadFS.Set(sock)) return false;
-	if(eMask & eEF_OUTPUT) 
-		if(!mWriteFS.Set(sock)) return false;
-	if(eMask & eEF_ERROR ) 
-		if(!mExceptFS.Set(sock)) return false;
-	if(eMask & eEF_CLOSE ) 
-		if(!mCloseFS.Set(sock)) return false;
-
+	if(eMask & eEF_INPUT && !mReadFS.Set(sock)) return false;
+	if(eMask & eEF_OUTPUT && !mWriteFS.Set(sock)) return false;
+	if(eMask & eEF_ERROR && !mExceptFS.Set(sock)) return false;
+	if(eMask & eEF_CLOSE && !mCloseFS.Set(sock)) return false;
 	sChooseRes *ChR = mResList.Find(sock);
 	if(!ChR)
 		mResList.Add(sock, new sChooseRes(sock, eMask));
 	else
 		ChR->mEvents |= eMask;
-
 	return true;
 }
 
@@ -105,13 +99,13 @@ bool cConnSelect::RevTest(tSocket sock) {
 }
 
 /** Do select */
-int cConnSelect::Select(cTime &tmout) {
+int cConnSelect::Choose(cTime &timeout) {
 	mResReadFS = mReadFS;
 	mResWriteFS = mWriteFS;
 	mResExceptFS = mExceptFS;
 
 	/** select */
-	int ret = ::select(mMaxSocket, &mResReadFS, &mResWriteFS, &mResExceptFS, (timeval *)(&tmout));
+	int ret = ::select(mMaxSocket, &mResReadFS, &mResWriteFS, &mResExceptFS, (timeval *)(&timeout));
 	if(SOCK_ERROR(ret)) return -1;
 
 	ClearRevents();
@@ -123,17 +117,19 @@ int cConnSelect::Select(cTime &tmout) {
 }
 
 void cConnSelect::ClearRevents(void) {
+	sChooseRes *ChR;
 	for(tResList::iterator it = mResList.begin(); it != mResList.end(); ++it)
-		if(*it) (*it)->mRevents = 0;
+		if((ChR = (*it)) != NULL) ChR->mRevents = 0;
 }
 
 
 void cConnSelect::SetRevents(cSelectFD &fdset, unsigned eMask) {
 	tSocket sock;
+	sChooseRes *ChR;
 	#ifdef _WIN32
 	for(unsigned i = 0; i < fdset.fd_count; ++i) {
 		sock = fdset.fd_array[i];
-		sChooseRes *ChR = mResList.Find(sock);
+		ChR = mResList.Find(sock);
 		if(!ChR)
 			mResList.Add(sock, new sChooseRes(sock, 0, eMask));
 		else
@@ -143,7 +139,7 @@ void cConnSelect::SetRevents(cSelectFD &fdset, unsigned eMask) {
 	for(unsigned i = 0; i < FD_SETSIZE; ++i) {
 		sock = i;
 		if(FD_ISSET(sock, &fdset)) {
-			sChooseRes *ChR = mResList.Find(sock);
+			ChR = mResList.Find(sock);
 			if(!ChR)
 				mResList.Add(sock, new sChooseRes(sock, 0, eMask));
 			else

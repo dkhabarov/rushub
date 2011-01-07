@@ -28,74 +28,15 @@
 
 namespace nServer {
 
-cConnPoll::cConnPoll() {
-	mvFD.reserve(16384);
-}
-
-cConnPoll::~cConnPoll() {
-}
-
-bool cConnPoll::OptIn(tSocket Socket, tEventFlag eMask) {
- 	unsigned iEvent = FD(Socket).events;
-	if(!iEvent && eMask) FD(Socket).fd = Socket;
-
-	if (eMask & eEF_CLOSE) FD(Socket).events = 0;
-	else {
-		if (eMask & eEF_INPUT) iEvent = unsigned(POLLIN | POLLPRI);
-		if (eMask & eEF_OUTPUT) iEvent |= unsigned(POLLOUT);
-		if (eMask & eEF_ERROR) iEvent |= unsigned(POLLERR | POLLHUP | POLLNVAL);
-		FD(Socket).events |= iEvent;
-	}
+bool cConnPoll::AddConn(cConnBase * conn) {
+	if(!cConnChoose::AddConn(conn)) return false;
+	if(mMaxSocket >= (tSocket)mvFD.size()) mvFD.resize(mMaxSocket + (mMaxSocket >> 1));
 	return true;
 }
 
-void cConnPoll::OptOut(tSocket Socket, tEventFlag eMask) {
- 	unsigned iEvent = ~(0u);
-	if(eMask & eEF_INPUT) iEvent = ~unsigned(POLLIN | POLLPRI);
-	if(eMask & eEF_OUTPUT) iEvent &= ~unsigned(POLLOUT);
-	if(eMask & eEF_ERROR) iEvent &= ~unsigned(POLLERR | POLLHUP | POLLNVAL);
-	if(!(FD(Socket).events &= iEvent)) FD(Socket).reset();
-}
-
-int cConnPoll::OptGet(tSocket Socket) {
-	int eMask = 0;
- 	unsigned iEvent = FD(Socket).events;
-	if(!iEvent && (FD(Socket).fd == Socket)) eMask = eEF_CLOSE;
-	else {
-		if (iEvent & (POLLIN | POLLPRI)) eMask |= eEF_INPUT;
-		if (iEvent & POLLOUT) eMask |= eEF_OUTPUT;
-		if (iEvent & (POLLERR | POLLHUP | POLLNVAL)) eMask |= eEF_ERROR;
-	}
-	return eMask;
-}
-
-int cConnPoll::RevGet(tSocket Socket) {
-	int eMask = 0;
-	cPollFD & PollFD = FD(Socket);
- 	unsigned iEvent = PollFD.revents;
-	if(!PollFD.events && (PollFD.fd == Socket)) eMask = eEF_CLOSE;
-	if(iEvent & (POLLIN | POLLPRI)) eMask |= eEF_INPUT;
-	if(iEvent & POLLOUT) eMask |= eEF_OUTPUT;
-	if(iEvent & (POLLERR | POLLHUP | POLLNVAL)) eMask |= eEF_ERROR;
-	return eMask;
-}
-
-bool cConnPoll::RevTest(cPollFD & PollFD) {
- 	if(SOCK_INVALID(PollFD.fd)) return false;
-	if(!PollFD.events) return true;
- 	unsigned iEvent = PollFD.revents;
- 	if(!iEvent) return false;
-	if(iEvent & (POLLIN | POLLPRI | POLLOUT | POLLERR | POLLHUP | POLLNVAL)) return true;
-	return false;
-}
-
-bool cConnPoll::RevTest(tSocket Socket) {
-	return RevTest(FD(Socket));
-}
-
-int cConnPoll::poll(int iMiliSec) {
-	int tmp, n, iRet, iDone, iSize = mvFD.size();
-	n = iRet = iDone = 0;
+int cConnPoll::Choose(cTime & timeout) {
+	int iMiliSec = timeout.MiliSec() + 1;
+	int tmp, n = 0, iRet = 0, iDone = 0, iSize = mvFD.size();
 	while(iSize) {
 		tmp = iSize;
 		if(tmp > 1024) tmp = 1024; // poll 1024 socks max
@@ -108,10 +49,62 @@ int cConnPoll::poll(int iMiliSec) {
 	return n;
 }
 
-bool cConnPoll::AddConn(cConnBase * conn) {
-	if(!cConnChoose::AddConn(conn)) return false;
-	if(mMaxSocket >= (tSocket)mvFD.size()) mvFD.resize(mMaxSocket + (mMaxSocket >> 1));
+bool cConnPoll::OptIn(tSocket Socket, tEventFlag eMask) {
+	cPollFD & PollFD = mvFD[Socket];
+ 	unsigned iEvent = PollFD.events;
+	if(!iEvent && eMask) PollFD.fd = Socket;
+
+	if (eMask & eEF_CLOSE) PollFD.events = 0;
+	else {
+		if (eMask & eEF_INPUT) iEvent = unsigned(POLLIN | POLLPRI);
+		if (eMask & eEF_OUTPUT) iEvent |= unsigned(POLLOUT);
+		if (eMask & eEF_ERROR) iEvent |= unsigned(POLLERR | POLLHUP | POLLNVAL);
+		PollFD.events |= iEvent;
+	}
 	return true;
+}
+
+void cConnPoll::OptOut(tSocket Socket, tEventFlag eMask) {
+	cPollFD & PollFD = mvFD[Socket];
+ 	unsigned iEvent = ~(0u);
+	if(eMask & eEF_INPUT) iEvent = ~unsigned(POLLIN | POLLPRI);
+	if(eMask & eEF_OUTPUT) iEvent &= ~unsigned(POLLOUT);
+	if(eMask & eEF_ERROR) iEvent &= ~unsigned(POLLERR | POLLHUP | POLLNVAL);
+	if(!(PollFD.events &= iEvent)) PollFD.reset();
+}
+
+int cConnPoll::OptGet(tSocket Socket) {
+	cPollFD & PollFD = mvFD[Socket];
+	unsigned iEvent = PollFD.events;
+	int eMask = 0;
+	if(!iEvent && (PollFD.fd == Socket)) eMask = eEF_CLOSE;
+	else {
+		if (iEvent & (POLLIN | POLLPRI)) eMask |= eEF_INPUT;
+		if (iEvent & POLLOUT) eMask |= eEF_OUTPUT;
+		if (iEvent & (POLLERR | POLLHUP | POLLNVAL)) eMask |= eEF_ERROR;
+	}
+	return eMask;
+}
+
+int cConnPoll::RevGet(tSocket Socket) {
+	cPollFD & PollFD = mvFD[Socket];
+	unsigned iEvent = PollFD.revents;
+	int eMask = 0;
+	if(!PollFD.events && (PollFD.fd == Socket)) eMask = eEF_CLOSE;
+	if(iEvent & (POLLIN | POLLPRI)) eMask |= eEF_INPUT;
+	if(iEvent & POLLOUT) eMask |= eEF_OUTPUT;
+	if(iEvent & (POLLERR | POLLHUP | POLLNVAL)) eMask |= eEF_ERROR;
+	return eMask;
+}
+
+bool cConnPoll::RevTest(tSocket Socket) {
+	cPollFD & PollFD = mvFD[Socket];
+ 	if(SOCK_INVALID(PollFD.fd)) return false;
+	if(!PollFD.events) return true;
+ 	unsigned iEvent = PollFD.revents;
+ 	if(!iEvent) return false;
+	if(iEvent & (POLLIN | POLLPRI | POLLOUT | POLLERR | POLLHUP | POLLNVAL)) return true;
+	return false;
 }
 
 }; // nServer

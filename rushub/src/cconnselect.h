@@ -52,18 +52,18 @@ protected:
 	tResList mResList; /** Res list */
 
 public:
-	cConnSelect() : cConnChoose(), cObj("cConnSelect"){};
+	cConnSelect() : cConnChoose(), cObj("cConnSelect") {};
 	virtual ~cConnSelect();
 
-	virtual unsigned Size() { return mResList.Size(); }
+	unsigned Size() { return mResList.Size(); }
 
-	virtual bool OptIn(tSocket, tEventFlag);
-	virtual void OptOut(tSocket, tEventFlag);
-	virtual int OptGet(tSocket);
-	virtual int RevGet(tSocket);
-	virtual bool RevTest(tSocket);
-	virtual inline int Choose(cTime &tmout){ return this->Select(tmout); }
+	int Choose(cTime &);
 
+	bool OptIn(tSocket, tEventFlag);
+	void OptOut(tSocket, tEventFlag);
+	int OptGet(tSocket);
+	int RevGet(tSocket);
+	bool RevTest(tSocket);
 
 	struct cSelectFD : public fd_set {
 		cSelectFD() {
@@ -80,10 +80,8 @@ public:
 			#endif
 			return *this;
 		}
-		bool IsSet(tSocket sock){ return FD_ISSET(sock, this) != 0; }
-
-		void Clr(tSocket sock){ FD_CLR(sock, this); }
-
+		bool IsSet(tSocket sock) { return FD_ISSET(sock, this) != 0; }
+		void Clr(tSocket sock) { FD_CLR(sock, this); }
 		bool Set(tSocket sock) {
 			#ifdef _WIN32
 				if(fd_count >= FD_SETSIZE) return false;
@@ -109,30 +107,31 @@ public:
 		}
 		bool operator != (const iterator &it){ return mIt != it.mIt; }
 		sChooseRes & operator *() {
+			sChooseRes *ChR;
 #ifdef _WIN32
 			__try {
-				if((*mIt)->mConnBase == NULL)
-					(*mIt)->mConnBase = mSel->operator[]((*mIt)->mFd);
+				if((ChR = (*mIt))->mConnBase == NULL)
+					ChR->mConnBase = mSel->operator[](ChR->mFd);
 			} __except(1) {
 				if(mSel->ErrLog(0)) mSel->LogStream() << "Fatal error: " << endl
 					<< "error in operator *()" << endl
 					<< "Item = " << mIt.mItem << endl
 					<< "Hash = " << mIt.i.i << endl
 					<< "End = " << mIt.i.end << endl;
-				if(mSel->ErrLog(0)) mSel->LogStream()	<< "ConnBase = " << (*mIt)->mConnBase << endl
-					<< "Socket = " << (*mIt)->mFd << endl;
+				if(mSel->ErrLog(0)) mSel->LogStream()	<< "ConnBase = " << ChR->mConnBase << endl
+					<< "Socket = " << ChR->mFd << endl;
 			}
 #else
-			if((*mIt)->mConnBase == NULL)
-				(*mIt)->mConnBase = (*mSel)[(*mIt)->mFd];
+		if((ChR = (*mIt))->mConnBase == NULL)
+			ChR->mConnBase = mSel->operator[](ChR->mFd);
 #endif
-			return *(*mIt);
+			return *ChR;
 		}
 
 		iterator & operator ++() {
 #ifdef _WIN32
 			__try {
-				while(!(++mIt).IsEnd() && !(*mIt)->mRevents && !((*mIt)->mEvents & eEF_CLOSE)){}
+				while(!(++mIt).IsEnd() && !(*mIt)->mRevents && !((*mIt)->mEvents & eEF_CLOSE)) {}
 			} __except(1) {
 				if(mSel->ErrLog(0)) mSel->LogStream() << "Fatal error: " << endl
 					<< "error in operator ++()" << endl
@@ -142,7 +141,7 @@ public:
 					<< "Socket = " << (*mIt)->mFd << endl; 
 			}
 #else
-			while(!(++mIt).IsEnd() && !(*mIt)->mRevents){}
+			while(!(++mIt).IsEnd() && !(*mIt)->mRevents && !((*mIt)->mEvents & eEF_CLOSE)) {}
 #endif
 			return *this;
 		}
@@ -171,11 +170,6 @@ protected:
 	cSelectFD mResReadFS;
 	cSelectFD mResWriteFS;
 	cSelectFD mResExceptFS;
-
-protected:
-
-	/** Do select */
-	int Select(cTime &tmout);
 
 }; // cConnSelect
 
