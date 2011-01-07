@@ -1,7 +1,7 @@
 /*
  * RusHub - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2009-2010 by Setuper
+ * Copyright (C) 2009-2011 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
 
  * This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 #define CFUNCS_H
 
 #include "cplugin.h" /** nDCServer */
-#include "lua.hpp"
+#include "lua/lua.hpp"
 
 using namespace ::nDCServer;
 
