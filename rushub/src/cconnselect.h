@@ -151,6 +151,8 @@ public:
 	iterator begin() {
 		static iterator sBegin(this, mResList.begin());
 		sBegin.mIt = mResList.begin();
+		if(!sBegin.mIt.IsEnd() && !(*sBegin.mIt)->mRevents && !((*sBegin.mIt)->mEvents & eEF_CLOSE))
+			++sBegin;
 		return sBegin;
 	}
 	iterator end() {
