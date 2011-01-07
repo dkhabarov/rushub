@@ -727,28 +727,36 @@ int GetUsers(lua_State *L) {
 	lua_newtable(L);
 	int iTopTab = lua_gettop(L), i = 1;
 	if(lua_type(L, 1) == LUA_TSTRING) {
+		bool all = false;
+		if (lua_isboolean(L, 2) && lua_toboolean(L, 2) == 1) all = true;
 		const vector<cDCConnBase *> & v = cLua::mCurServer->GetDCConnBase(lua_tostring(L, 1));
 		for(vector<cDCConnBase *>::const_iterator it = v.begin(); it != v.end(); ++it) {
-			lua_pushnumber(L, i);
-			void ** userdata = (void**) lua_newuserdata(L, sizeof(void*));
-			*userdata = (void*)(*it);
-			luaL_getmetatable(L, MT_USER_CONN);
-			lua_setmetatable(L, -2);
-			lua_rawset(L, iTopTab);
-			++i;
+			if (all || ((*it)->mDCUserBase && (*it)->mDCUserBase->IsInUserList())) {
+				lua_pushnumber(L, i);
+				void ** userdata = (void**) lua_newuserdata(L, sizeof(void*));
+				*userdata = (void*)(*it);
+				luaL_getmetatable(L, MT_USER_CONN);
+				lua_setmetatable(L, -2);
+				lua_rawset(L, iTopTab);
+				++i;
+			}
 		}
 	} else {
+		bool all = false;
+		if (lua_isboolean(L, 1) && lua_toboolean(L, 1) == 1) all = true;
 		cDCConnListIterator * it = cLua::mCurServer->GetDCConnListIterator();
 		cDCConnBase * Conn;
 		while((Conn = it->operator ()()) != NULL) {
 			if(Conn->mType != eT_DC_CLIENT) continue;
-			lua_pushnumber(L, i);
-			void ** userdata = (void**) lua_newuserdata(L, sizeof(void*));
-			*userdata = (void*)Conn;
-			luaL_getmetatable(L, MT_USER_CONN);
-			lua_setmetatable(L, -2);
-			lua_rawset(L, iTopTab);
-			++i;
+			if (all || (Conn->mDCUserBase && Conn->mDCUserBase->IsInUserList())) {
+				lua_pushnumber(L, i);
+				void ** userdata = (void**) lua_newuserdata(L, sizeof(void*));
+				*userdata = (void*)Conn;
+				luaL_getmetatable(L, MT_USER_CONN);
+				lua_setmetatable(L, -2);
+				lua_rawset(L, iTopTab);
+				++i;
+			}
 		}
 		delete it;
 	}
@@ -1021,17 +1029,22 @@ int SetCmd(lua_State *L) {
 		if(iType != cLua::mCurLua->mCurDCParser->GetType() ||
 			(
 				iType == eDC_MYNIFO && 
-				cLua::mCurLua->mCurDCConn && 
-				cLua::mCurLua->mCurDCConn->mDCUserBase->GetNick() != cLua::mCurLua->mCurDCParser->ChunkString(eCH_MI_NICK)
+				cLua::mCurLua->mCurDCConn && (
+					!cLua::mCurLua->mCurDCConn->mDCUserBase ||
+					cLua::mCurLua->mCurDCConn->mDCUserBase->GetNick() != cLua::mCurLua->mCurDCParser->ChunkString(eCH_MI_NICK)
+				)
 			)
 		) {
 			luaL_argerror(L, 1, "wrong syntax");
 			return 0;
 		}
+		cLua::mCurLua->mCurDCParser->msStr = sData;
+		lua_settop(L, 0);
+		lua_pushboolean(L, 1);
+		return 1;
 	}
-	cLua::mCurLua->mCurDCParser->msStr = sData;
 	lua_settop(L, 0);
-	lua_pushboolean(L, 1);
+	lua_pushboolean(L, 0);
 	return 1;
 }
 

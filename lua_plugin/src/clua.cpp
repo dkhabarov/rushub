@@ -337,7 +337,7 @@ int cLua::Clear() {
 
 void cLua::Save() {
 	TiXmlDocument file((this->GetPluginDir() + "scripts.xml").c_str());
-	file.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
+	file.InsertEndChild(TiXmlDeclaration("1.0", "windows-1251", "yes"));
 	TiXmlElement MainItem("Scripts");
 	MainItem.SetAttribute("Version", PLUGIN_VERSION);
 	tvLuaInterpreter::iterator it;
