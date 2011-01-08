@@ -58,7 +58,7 @@ void * dlsym(void *handle, const char *symbol) {
 	return ptr;
 }
 
-void * dlopen(const char *path, int mode) {
+void * dlopen(const char *path, int) {
 	HMODULE h;
 	int prevmode;
 	/* Disable popup error messages when loading DLLs */

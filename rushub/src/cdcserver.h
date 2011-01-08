@@ -142,6 +142,7 @@ public:
 public:
 	cDCServer(const string & sConfPath, const string &sExPath);
 	virtual ~cDCServer();
+	virtual cDCServer & operator=(const cDCServer &) { return *this; }
 
 	const string & GetMainDir() const { return mMainPath.GetConfPath(); }
 	const string & GetTime() { stringstream oss; oss << mTime.AsDate(); mTimeBuf = oss.str(); return mTimeBuf; }

@@ -31,6 +31,10 @@
 #ifdef _WIN32
 	#include <Iphlpapi.h> /** mac address */
 	#pragma comment(lib, "Iphlpapi.lib") /** mac address */
+	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+		//#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
+		#define sprintf(a,b,...) sprintf_s(a,sizeof(a),b,__VA_ARGS__)
+	#endif
 #endif
 
 using namespace nUtils; /** ShrinkStringToFit, StrCutLeft */
@@ -95,7 +99,7 @@ cConn::~cConn() {
 
 /** MakeSocket */
 tSocket cConn::MakeSocket(int port, const char * ip, bool udp) {
-	if(mSocket > 0) return -1; /** Socket is already created */
+	if(mSocket > 0) return INVALID_SOCKET; /** Socket is already created */
 	mSocket = SocketCreate(udp); /** Create socket */
 	mSocket = SocketBind(mSocket, port, ip); /** Bind */
 	if(!udp) {
@@ -113,16 +117,16 @@ tSocket cConn::SocketCreate(bool bUDP) {
 	tSocket sock;
 	if(!bUDP) { /* Create socket TCP */
 		if(SOCK_INVALID(sock = socket(AF_INET, SOCK_STREAM, 0)))
-			return -1;
+			return INVALID_SOCKET;
 		sockoptval_t yes = 1;
 
 		/* TIME_WAIT after close conn. Reuse address after disconn */
 		if(SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(sockoptval_t))))
-			return -1;
+			return INVALID_SOCKET;
 	}
 	else /* Create socket UDP */
 		if(SOCK_INVALID(sock = socket(AF_INET, SOCK_DGRAM, 0)))
-			return -1;
+			return INVALID_SOCKET;
 
 	++iConnCounter;
 	if(Log(3)) LogStream() << "Created new socket: " << sock << endl;
@@ -137,11 +141,11 @@ tSocket cConn::SocketCreate(bool bUDP) {
 	mAddrIN.sin_zero = 0x00000000;
 */
 tSocket cConn::SocketBind(tSocket sock, int iPort, const char *sIp) {
-	if(sock < 0) return -1;
+	if(sock == INVALID_SOCKET) return INVALID_SOCKET;
 	string sIP(sIp);
 	memset(&mAddrIN, 0, sizeof(struct sockaddr_in));
 	mAddrIN.sin_family = AF_INET;
-	mAddrIN.sin_port = htons(iPort);
+	mAddrIN.sin_port = htons((u_short)iPort);
 
 	if(!CheckIp(sIP)) {
 		struct hostent *host = gethostbyname(sIp);
@@ -160,25 +164,25 @@ tSocket cConn::SocketBind(tSocket sock, int iPort, const char *sIp) {
 
 	/** Bind */
 	if(SOCK_ERROR(bind(sock, (struct sockaddr *)&mAddrIN, sizeof(mAddrIN))))
-		return -1;
+		return INVALID_SOCKET;
 
 	return sock;
 }
 
 /** Listen TCP socket */
 tSocket cConn::SocketListen(tSocket sock) {
-	if(sock < 0) return -1;
+	if(sock == INVALID_SOCKET) return INVALID_SOCKET;
 	if(SOCK_ERROR(listen(sock, SOCK_BACKLOG))) {
 		SOCK_CLOSE(sock);
 		if(ErrLog(1)) LogStream() << "Error listening" << endl;
-		return -1;
+		return INVALID_SOCKET;
 	}
 	return sock;
 }
 
 /** Set non-block socket */
 tSocket cConn::SocketNonBlock(tSocket sock) {
-	if(sock < 0) return -1;
+	if(sock == INVALID_SOCKET) return INVALID_SOCKET;
 	SOCK_NON_BLOCK(sock);
 	return sock;
 }
@@ -247,7 +251,7 @@ void cConn::CloseNow(int iReason /* = 0 */) {
 /** CreateNewConn */
 cConn * cConn::CreateNewConn() {
 	tSocket sock;
-	if((sock = Accept()) < 0) return NULL;
+	if((sock = Accept()) == INVALID_SOCKET) return NULL;
 
 	cConnFactory *Factory = NULL;
 	cConn *new_conn = NULL;
@@ -288,7 +292,7 @@ tSocket cConn::Accept() {
 	}
 	if(SOCK_INVALID(sock)) {
 		if(ErrLog(1)) LogStream() << "Socket not accept: " << SockErr << endl;
-		return -1;
+		return INVALID_SOCKET;
 	}
 
 	static sockoptval_t yes = 1;
@@ -303,13 +307,13 @@ tSocket cConn::Accept() {
 #endif
 		{ if(Log(2)) LogStream() << "Couldn't set keepalive flag for accepted socket" << endl; }
 		else if(ErrLog(1)) LogStream() << "Socket not closed" << endl;
-		return -1;
+		return INVALID_SOCKET;
 	}
 
 	/** Non-block socket */
-	if(SocketNonBlock(sock) < 0) {
+	if(SocketNonBlock(sock) == INVALID_SOCKET) {
 		if(ErrLog(1)) LogStream() << "Couldn't set non-block flag for accepted socket" << endl;
-		return -1;
+		return INVALID_SOCKET;
 	}
 
 	/** Accept new socket */
@@ -569,30 +573,21 @@ int cConn::Send(const char *buf, size_t &len) {
 	bool bUDP = (this->mConnType == eCT_SERVERUDP);
 	#endif
 	while(total < len) { // EMSGSIZE (WSAEMSGSIZE)
-		try {
-			#ifdef USE_UDP
-			if(!bUDP) {
+		#ifdef USE_UDP
+		if(!bUDP) {
+		#endif
+			n = send(mSocket, buf + total, bytesleft, 
+			#ifndef _WIN32
+				MSG_NOSIGNAL | MSG_DONTWAIT);
+			#else
+				0);
 			#endif
-				n = send(mSocket, buf + total, bytesleft, 
-				#ifndef _WIN32
-					MSG_NOSIGNAL | MSG_DONTWAIT);
-				#else
-					0);
-				#endif
-			#ifdef USE_UDP
-			} else {
-				static int tolen = sizeof(struct sockaddr);
-				n = sendto(mSocket, buf + total, bytesleft, 0, (struct sockaddr *)&mAddrIN, tolen);
-			}
-			#endif
-		} catch(...) {
-			if(ErrLog(1))
-				LogStream() << "exception in Send(buf," << len
-					<< ") total=" << total
-					<< " left=" << bytesleft
-					<< " n=" << n << endl;
-			return -1;
+		#ifdef USE_UDP
+		} else {
+			static int tolen = sizeof(struct sockaddr);
+			n = sendto(mSocket, buf + total, bytesleft, 0, (struct sockaddr *)&mAddrIN, tolen);
 		}
+		#endif
 /*		if(Log(5))
 				LogStream() << "len = " << len
 					<< " total=" << total

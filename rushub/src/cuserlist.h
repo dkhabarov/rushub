@@ -58,6 +58,7 @@ public:
 		unsigned long miProfile;
 		ufSend(string &sData) : msData(sData), mbProfile(false) {}
 		ufSend(string &sData, unsigned long iProfile) : msData(sData), mbProfile(true), miProfile(iProfile) {}
+		ufSend & operator=(const ufSend &) { return *this; }
 		void operator()(cUserBase *); /** Sending operator */
 	};
 
@@ -77,6 +78,7 @@ public:
 			mbProfile(true),
 			miProfile(iProfile)
 		{}
+		ufSendWithNick & operator=(const ufSendWithNick &) { return *this; }
 		void operator()(cUserBase *); /** Sending operator */
 	};
 
@@ -88,6 +90,7 @@ public:
 
 		ufDoNickList(string &sList) : msList(sList){}
 		virtual ~ufDoNickList() {}
+		virtual ufDoNickList & operator=(const ufDoNickList &) { return *this; }
 		virtual void Clear() { /** Clear var and record prefix */
 			msList.erase(0, msList.size());
 			msList.append(msStart.c_str(), msStart.size());
@@ -115,6 +118,7 @@ public:
 
 	cUserList(string sName, bool bKeepNickList = false);
 	virtual ~cUserList() {}
+	virtual cUserList & operator=(const cUserList &) { return *this; }
 
 	tKeyType Nick2Key(const string &sNick) {
 		string sKey;
@@ -191,6 +195,7 @@ public:
 			msListComplete(sListComplete)
 		{msSep = DC_SEPARATOR; msStart = "";}
 		virtual ~ufDoINFOList(){}
+		virtual ufDoINFOList & operator=(const ufDoINFOList &) { return *this; }
 		virtual void Clear(){ /** Clear var and record prefix */
 			ufDoNickList::Clear();
 			msListComplete.erase(0, msListComplete.size());
@@ -204,6 +209,7 @@ public:
 		ufDoIpList(string &sList) : ufDoNickList(sList)
 		{msSep = "$$"; msStart = "$UserIP ";}
 		virtual ~ufDoIpList(){}
+		virtual ufDoIpList & operator=(const ufDoIpList &) { return *this; }
 		virtual void operator()(cUserBase *User);
 	};
 

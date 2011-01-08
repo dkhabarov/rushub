@@ -24,8 +24,11 @@
 #include "cdcserver.h"
 #include "cstrtoarg.h" // for cStrToArg.String2Arg
 
-// C4996
 #define stricmp _stricmp
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+	#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
+#endif
 
 using nDCServer::cDCServer;
 

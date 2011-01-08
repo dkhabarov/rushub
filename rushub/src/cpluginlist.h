@@ -65,6 +65,7 @@ public:
 public:
 	cPluginList(const string & sPath);
 	virtual ~cPluginList() {}
+	virtual cPluginList & operator=(const cPluginList &) { return *this; }
 	void SetServer(cDCServerBase *);
 
 	virtual const string & GetPluginDir() const { return msPluginDir; }

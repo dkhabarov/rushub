@@ -26,9 +26,6 @@
 
 namespace nServer {
 
-cConnChoose::iterator cConnChoose::sBegin;
-cConnChoose::iterator cConnChoose::sEnd;
-
 /** Adding in mConnBaseList */
 bool cConnChoose::AddConn(cConnBase *conn) {
 	if(!conn) return false;

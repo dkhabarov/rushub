@@ -101,7 +101,6 @@ public:
 	inline bool RevTest(cConnBase *);
 
 	inline cConnBase * operator [] (tSocket);
-	inline tSocket operator [] (cConnBase *);
 
 	/** The Structure of the result of the choice, which returns the iterator.
 	Contains the structure, which defines the type socket and pointer on structure, prestored in structure of the choice */
@@ -159,10 +158,6 @@ public:
 		return sEnd;
 	}
 
-protected:
-	static iterator sBegin;
-	static iterator sEnd;
-
 }; // cConnBaseChoose
 
 bool cConnChoose::OptIn(cConnBase *conn, cConnChoose::tEventFlag eMask) {
@@ -188,11 +183,6 @@ int cConnChoose::RevGet(cConnBase *conn) {
 bool cConnChoose::RevTest(cConnBase *conn) {
 	if(!conn) return false;
 	return this->RevTest(tSocket(*conn));
-}
-
-tSocket cConnChoose::operator [] (cConnBase *conn) {
-	if(!conn) return -1;
-	return (tSocket)(*conn);
 }
 
 cConnBase * cConnChoose::operator [] (tSocket sock) {

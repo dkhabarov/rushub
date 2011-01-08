@@ -51,6 +51,7 @@ public:
 
 	cAntiFlood(unsigned &iCount, double &Time) : mList(NULL), miCount(iCount), mTime(Time) {}
 	~cAntiFlood(){}
+	cAntiFlood & operator=(const cAntiFlood &) { return *this; }
 	bool Check(HashType_t Hash, cTime now);
 	void Del(cTime &now);
 

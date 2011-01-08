@@ -25,6 +25,13 @@
 #include "cdcserver.h"
 #include "cwebconn.h"
 
+#ifdef _WIN32
+	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+		//#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
+		#define sprintf(a,b,...) sprintf_s(a,sizeof(a),b,__VA_ARGS__)
+	#endif
+#endif
+
 using namespace nWebServer;
 
 namespace nDCServer {
@@ -1100,7 +1107,7 @@ int cDCServer::UnregBot(const string & sNick) {
 #ifdef _WIN32
 bool cDCServer::GetSysVersion() {
 	OSVERSIONINFOEX osvi;
-	bool bOsVersionInfoEx;
+	int bOsVersionInfoEx;
 	if (!msSysVersion.empty()) return true;
 
 	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));

@@ -34,7 +34,7 @@ using namespace std;
 	#ifndef __int64
 		#define __int64 long long
 	#endif
-	void gettimeofday(struct timeval *tv, struct timezone *tz) {
+	void gettimeofday(struct timeval *tv, struct timezone *) {
 		union {
 			FILETIME ft;
 			unsigned __int64 ns100;

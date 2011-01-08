@@ -69,6 +69,7 @@
 	#define SOCK_EINTR EINTR
 	#define SOCK_INVALID(SOCK) (SOCK) < 0
 	#define SOCK_ERROR(SOCK) (SOCK) < 0
+	#define INVALID_SOCKET -1
 	typedef int tSocket;
 #endif
 
@@ -83,13 +84,13 @@
 	#define SOCK_CLOSE(SOCK) ::closesocket(SOCK)
 	#define SOCK_NON_BLOCK(SOCK) \
 		static unsigned long one = 1; \
-		if(ioctlsocket(SOCK, FIONBIO, &one) == SOCKET_ERROR) return -1;
+		if(ioctlsocket(SOCK, FIONBIO, &one) == SOCKET_ERROR) return INVALID_SOCKET;
 #else
 	#define SOCK_CLOSE(SOCK) ::close(SOCK)
 	#define SOCK_NON_BLOCK(SOCK) \
 		static int flags; \
-		if((flags = fcntl(SOCK, F_GETFL, 0)) < 0) return -1; \
-		if(fcntl(SOCK, F_SETFL, flags | O_NONBLOCK) < 0) return -1;
+		if((flags = fcntl(SOCK, F_GETFL, 0)) < 0) return INVALID_SOCKET; \
+		if(fcntl(SOCK, F_SETFL, flags | O_NONBLOCK) < 0) return INVALID_SOCKET;
 #endif
 
 #ifndef TEMP_FAILURE_RETRY

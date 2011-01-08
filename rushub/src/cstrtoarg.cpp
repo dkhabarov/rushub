@@ -21,6 +21,11 @@
 
 namespace nUtils {
 
+#ifdef _WIN32
+	#define strdup _strdup
+	#pragma warning(disable:4127) // Disable "conditional expression is constant"
+#endif
+
 int cStrToArg::String2Arg(char const * str, int * argc_p, char *** argv_p) {
 	int argc = 0, act = 10, err;
 	char **res = (char **)malloc(sizeof(char *) * 10);

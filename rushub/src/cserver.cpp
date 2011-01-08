@@ -141,7 +141,7 @@ cConn *cServer::Listen(const string & sIP, int iPort, bool bUDP) {
 cConn *cServer::AddListen(cConn *conn, const string & sIP, int iPort, bool bUDP) {
 	/** Socket object was created */
 	if(conn) {
-		if(conn->MakeSocket(iPort, sIP.c_str(), bUDP) < 0) {
+		if(conn->MakeSocket(iPort, sIP.c_str(), bUDP) == INVALID_SOCKET) {
 			if(ErrLog(0))
 				LogStream() << "Fatal error: Can't listen on " << sIP << ":" << iPort << (bUDP ? " UDP" : " TCP") << endl;
 			return NULL;

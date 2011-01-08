@@ -22,6 +22,10 @@
 
 #ifdef _WIN32
 
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+	#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
+#endif
+
 struct DIR {
 	long                handle; /* -1 for failed rewind */
 	struct _finddata_t  info;
@@ -38,7 +42,8 @@ DIR *opendir(const char *name) {
 		if((dir = (DIR *) malloc(sizeof *dir)) != 0 &&
 			(dir->name = (char *) malloc(base_length + strlen(all) + 1)) != 0)
 		{
-			strcat(strcpy(dir->name, name), all);
+			strcpy(dir->name, name);
+			strcat(dir->name, all);
 			if((dir->handle = (long) _findfirst(dir->name, &dir->info)) != -1) {
 				dir->result.d_name = 0;
 			} else { /* rollback */

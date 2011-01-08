@@ -61,7 +61,7 @@ using namespace ::std;
 #endif // REG_PLUGIN
 
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10008  //< Internal plugin version
+	#define INTERNAL_PLUGIN_VERSION 10009  //< Internal plugin version
 #endif
 
 #ifndef DC_SEPARATOR
@@ -217,7 +217,8 @@ public:
 public:
 
 	cDCConnBase(int type) : mDCUserBase(NULL), mType(type) {}
-	~cDCConnBase() {}
+	virtual ~cDCConnBase() {}
+	virtual cDCConnBase & operator=(const cDCConnBase &) { return *this; }
 
 	virtual int Send(const string & sData, bool bAddSep = false, bool bFlush = true) = 0; //< Sending RAW cmd to the client
 	virtual int GetPort() const = 0;                 //< Get real clients port
@@ -252,6 +253,7 @@ public:
 
 	cDCUserBase() {}
 	virtual ~cDCUserBase() {}
+	virtual cDCUserBase & operator=(const cDCUserBase &) { return *this; }
 
 	virtual const string & GetNick() const = 0;        //< Get user's nick
 	virtual const string & GetMyINFO() const = 0;      //< Get user's MyINFO cmd
@@ -303,6 +305,7 @@ public:
 	cDCConnListIterator() {}
 	virtual ~cDCConnListIterator() {}
 	virtual cDCConnBase * operator() (void) = 0;
+	virtual cDCConnListIterator & operator=(const cDCConnListIterator &) { return *this; }
 
 }; // cDCConnListIterator
 
@@ -367,6 +370,8 @@ public:
 public:
 
 	cDCParserBase(string & sStr) : msStr(sStr) {}
+	virtual ~cDCParserBase() {}
+	virtual cDCParserBase & operator=(const cDCParserBase &) { return *this; }
 	virtual string & ChunkString(unsigned int n) = 0; //< Get string address for the chunk of command
 	virtual int GetType() const = 0;                  //< Get command type
 
@@ -391,6 +396,8 @@ public:
 public:
 
 	cWebParserBase(string & sStr) : msStr(sStr) {}
+	virtual ~cWebParserBase() {}
+	virtual cWebParserBase & operator=(const cWebParserBase &) { return *this; }
 
 }; // cWebParserBase
 
@@ -416,6 +423,7 @@ public:
 
 	cPluginListBase() {}
 	virtual ~cPluginListBase() {}
+	virtual cPluginListBase & operator=(const cPluginListBase &) { return *this; }
 
 	virtual const string & GetPluginDir() const = 0;                   //< Get plugins path
 	virtual bool RegCallList(const char * sId, cPlugin *) = 0;   //< Reg plugin in list with id
@@ -444,6 +452,7 @@ public:
 	{}
 
 	virtual ~cPlugin() {}
+	virtual cPlugin & operator=(const cPlugin &) { return *this; }
 
 	virtual bool RegAll(cPluginListBase *) = 0; //< Reg function in all call lists
 	virtual void OnLoad(cDCServerBase * DCServer) { mDCServer = DCServer; } //< OnLoad plugin function

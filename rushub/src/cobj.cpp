@@ -123,8 +123,13 @@ ostream & cObj::Log() {
 			char buf[64];
 			time_t rawtime;
 			time(&rawtime);
-			struct tm * tmr = localtime(&rawtime);
-			strftime(buf, 64, LOG_FILE, tmr);
+			struct tm tmr;
+			#ifndef _WIN32
+				tmr = *localtime(&rawtime);
+			#else
+				localtime_s(&tmr, &rawtime);
+			#endif
+			strftime(buf, 64, LOG_FILE, &tmr);
 
 			sPath.append(buf);
 			mOfs.open(sPath.c_str(), ios_base::app);
@@ -152,8 +157,13 @@ ostream & cObj::ErrLog() {
 			char buf[64];
 			time_t rawtime;
 			time(&rawtime);
-			struct tm * tmr = localtime(&rawtime);
-			strftime(buf, 64, LOG_FILE, tmr);
+			struct tm tmr;
+			#ifndef _WIN32
+				tmr = *localtime(&rawtime);
+			#else
+				localtime_s(&tmr, &rawtime);
+			#endif
+			strftime(buf, 64, LOG_FILE, &tmr);
 
 			sPath.append(buf);
 			mOfs.open(sPath.c_str(), ios_base::app);
@@ -169,8 +179,8 @@ ostream & cObj::LogStream() {
 }
 
 /** Return level for syslog */
+#ifndef _WIN32
 int cObj::SysLogLevel(int iLevel, bool bIsError /* = false */) {
-	#ifndef _WIN32
 	if (bIsError) {
 		switch(iLevel) {
 			case 0:
@@ -196,6 +206,10 @@ int cObj::SysLogLevel(int iLevel, bool bIsError /* = false */) {
 				return 0;
 		}
 	}
-	#endif
 	return 0;
 }
+#else
+int cObj::SysLogLevel(int, bool) {
+	return 0;
+}
+#endif

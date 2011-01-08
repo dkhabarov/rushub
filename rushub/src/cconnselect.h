@@ -35,6 +35,8 @@
 #ifndef _WIN32
 	#include <sys/select.h>
 	#include <memory.h>
+#else
+	#pragma warning(disable:4127) // Disable "conditional expression is constant"
 #endif
 
 namespace nServer {
@@ -107,7 +109,7 @@ public:
 		}
 		bool operator != (const iterator &it){ return mIt != it.mIt; }
 		sChooseRes & operator *() {
-			sChooseRes *ChR;
+			sChooseRes *ChR = NULL;
 #ifdef _WIN32
 			__try {
 				if((ChR = (*mIt))->mConnBase == NULL)
@@ -118,8 +120,8 @@ public:
 					<< "Item = " << mIt.mItem << endl
 					<< "Hash = " << mIt.i.i << endl
 					<< "End = " << mIt.i.end << endl;
-				if(mSel->ErrLog(0)) mSel->LogStream()	<< "ConnBase = " << ChR->mConnBase << endl
-					<< "Socket = " << ChR->mFd << endl;
+				if(mSel->ErrLog(0)) mSel->LogStream()	<< "ConnBase = " << (*mIt)->mConnBase << endl
+					<< "Socket = " << (*mIt)->mFd << endl;
 			}
 #else
 		if((ChR = (*mIt))->mConnBase == NULL)

@@ -27,6 +27,11 @@
 
 #pragma comment(lib, "Dbghelp.lib")
 
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+	#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
+	#define sprintf(a,b,...) sprintf_s(a,sizeof(b),b,__VA_ARGS__)
+#endif
+
 int cException::recursion = 0;
 bool cException::first = true;
 
@@ -56,7 +61,9 @@ long __stdcall cException::ExceptionFilter(LPEXCEPTION_POINTERS e) {
 	char tm[BUFFERSIZE];
 	time_t now;
 	time(&now);
-	strftime(tm, BUFFERSIZE, "%Y-%m-%d %H:%M:%S", localtime(&now));
+	struct tm Tm;
+	localtime_s(&Tm, &now);
+	strftime(tm, BUFFERSIZE, "%Y-%m-%d %H:%M:%S", &Tm);
 
 	char code[BUFFERSIZE];
 	sprintf(code, "%x", e->ExceptionRecord->ExceptionCode);

@@ -151,16 +151,16 @@ int cDCProtocol::DC_Supports(cDCParser *dcparser, cDCConn *dcconn) {
 	istringstream is(dcparser->mStr);
 	is >> sFeature;
 	dcconn->mFeatures = 0;
-	while(true) {
-		sFeature.clear();
-		is >> sFeature;
-		if(!sFeature.size()) break;
+	is >> sFeature;
+	while(sFeature.size()) {
 		if(sFeature      == "UserCommand") dcconn->mFeatures |= eSF_USERCOMMAND;
 		else if(sFeature == "NoGetINFO")   dcconn->mFeatures |= eSF_NOGETINFO;
 		else if(sFeature == "NoHello")     dcconn->mFeatures |= eSF_NOHELLO;
 		else if(sFeature == "UserIP2")     dcconn->mFeatures |= eSF_USERIP2;
 		else if(sFeature == "TTHSearch")   dcconn->mFeatures |= eSF_TTHSEARCH;
 		else if(sFeature == "QuickList")   dcconn->mFeatures |= eSF_QUICKLIST;
+		sFeature.clear();
+		is >> sFeature;
 	}
 	dcconn->msSupports.assign(dcparser->mStr, 10, dcparser->mStr.size() - 10);
 
@@ -347,9 +347,10 @@ int cDCProtocol::DC_MyINFO(cDCParser *dcparser, cDCConn *dcconn) {
 
 	/** Check existence user, otherwise check support QuickList */
 	if(!dcconn->mDCUser) {
-		if(0) { // if(QuickList)
-			dcconn->mDCUser->msNick = sNick;
-		} else {
+		//if(QuickList)
+		//	dcconn->mDCUser->msNick = sNick;
+		//} else
+		{
 			if(dcconn->Log(2)) dcconn->LogStream() << "Myinfo without user: " << dcparser->mStr << endl;
 			mDCServer->SendToUser(dcconn, mDCServer->mDCLang.msBadLoginSequence.c_str(), (char*)mDCServer->mDCConfig.msHubBot.c_str());
 			dcconn->CloseNice(9000, eCR_MYINFO_WITHOUT_USER);
