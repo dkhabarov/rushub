@@ -82,21 +82,17 @@ public:
 	/** virtual function for select limit detect */
 	virtual unsigned Size() { return 0; }
 
-	/** Add conn in mConnBaseList */
 	virtual bool AddConn(cConnBase *);
-
-	/** Del conn from mConnBaseList */
 	virtual bool DelConn(cConnBase *);
-
-	/** HaConn in mConnBaseList */
 	virtual bool HasConn(cConnBase *);
 
-	inline cConnBase * operator [] (tSocket);
-	inline tSocket operator [] (cConnBase *);
-
-	/** Choose */
 	virtual int Choose(cTime &) = 0;
 
+	virtual bool OptIn(tSocket, tEventFlag) = 0;
+	virtual void OptOut(tSocket, tEventFlag) = 0;
+	virtual int OptGet(tSocket) = 0;
+	virtual int RevGet(tSocket) = 0;
+	virtual bool RevTest(tSocket) = 0;
 
 	inline bool OptIn(cConnBase *, tEventFlag);
 	inline void OptOut(cConnBase *, tEventFlag);
@@ -104,20 +100,8 @@ public:
 	inline int RevGet(cConnBase *);
 	inline bool RevTest(cConnBase *);
 
-	/** OptIn */
-	virtual bool OptIn(tSocket, tEventFlag) = 0;
-
-	/** OptOut */
-	virtual void OptOut(tSocket, tEventFlag) = 0;
-
-	/** OptGet */
-	virtual int OptGet(tSocket) = 0;
-
-	/** RevGet */
-	virtual int RevGet(tSocket) = 0;
-
-	/** RevTest */
-	virtual bool RevTest(tSocket) = 0;
+	inline cConnBase * operator [] (tSocket);
+	inline tSocket operator [] (cConnBase *);
 
 	/** The Structure of the result of the choice, which returns the iterator.
 	Contains the structure, which defines the type socket and pointer on structure, prestored in structure of the choice */
@@ -151,14 +135,8 @@ public:
 			mRes.mConnBase = mChoose->operator[](mRes.mFd);
 			return mRes;
 		};
-
-		bool operator != (const iterator &it) const {
-			return mRes.mFd != it.mRes.mFd;
-		}
-
-		bool operator == (const iterator &it) const {
-			return mRes.mFd == it.mRes.mFd;
-		}
+		bool operator != (const iterator &it) const { return mRes.mFd != it.mRes.mFd; }
+		bool operator == (const iterator &it) const { return mRes.mFd == it.mRes.mFd; }
 
 		iterator &operator = (const iterator &it) {
 			mRes.mFd = it.mRes.mFd;
@@ -192,30 +170,25 @@ bool cConnChoose::OptIn(cConnBase *conn, cConnChoose::tEventFlag eMask) {
 	return this->OptIn(tSocket(*conn), eMask);
 }
 
-
 void cConnChoose::OptOut(cConnBase *conn, cConnChoose::tEventFlag eMask) {
 	if(!conn) return;
 	this->OptOut(tSocket(*conn), eMask);
 }
-
 
 int cConnChoose::OptGet(cConnBase *conn) {
 	if(!conn) return 0;
 	return this->OptGet(tSocket(*conn));
 }
 
-
 int cConnChoose::RevGet(cConnBase *conn) {
 	if(!conn) return 0;
 	return this->RevGet(tSocket(*conn));
 }
 
-
 bool cConnChoose::RevTest(cConnBase *conn) {
 	if(!conn) return false;
 	return this->RevTest(tSocket(*conn));
 }
-
 
 tSocket cConnChoose::operator [] (cConnBase *conn) {
 	if(!conn) return -1;

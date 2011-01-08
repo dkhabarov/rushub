@@ -63,7 +63,7 @@ bool cCallList::Unreg(cPlugin *Plugin) {
 int cCallList::CallAll() {
 	/** 0 - default, 1 - lock, 2, 3 */
 	mCallOne.miCall = 0;
-	return For_each(mPlugins.begin(), mPlugins.end(), mCallOne).miCall;
+	return for_each(mPlugins.begin(), mPlugins.end(), mCallOne).miCall;
 }
 
 /** Show plugins list for this call */

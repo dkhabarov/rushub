@@ -29,6 +29,21 @@
 
 namespace nDCServer {
 
+#ifdef _WIN32
+#define For_each for_each
+//template<class T1, class T2> inline
+//	T2 For_each(T1 first, T1 last, T2 f) {
+//		for(; first != last; ++first) f(*first);
+//		return f;
+//	}
+#else
+#define For_each for_each
+//template<class T1, class T2> inline
+//	T2 For_each(T1 first, T1 last, T2 f) {
+//		return for_each(first, last, f);
+//	}
+#endif // _WIN32
+
 void cUserList::ufSend::operator()(cUserBase *User) {
 	if(User && User->CanSend()) {
 		if(!mbProfile) {

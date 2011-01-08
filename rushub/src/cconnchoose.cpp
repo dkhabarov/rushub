@@ -32,12 +32,9 @@ cConnChoose::iterator cConnChoose::sEnd;
 /** Adding in mConnBaseList */
 bool cConnChoose::AddConn(cConnBase *conn) {
 	if(!conn) return false;
-
 	tSocket s = (tSocket)(*conn);
-
 	if(mConnBaseList.Contain(s)) return false;
 	if(s >= mMaxSocket) mMaxSocket = s + 1;
-
 	bool ret = mConnBaseList.Add(s, conn);
 	return ret;
 }
@@ -48,7 +45,7 @@ bool cConnChoose::DelConn(cConnBase *conn) {
 	return mConnBaseList.Remove((tSocket)(*conn));
 }
 
-/** HasConn */
+/** Has conn */
 bool cConnChoose::HasConn(cConnBase *conn) {
 	return mConnBaseList.Contain((tSocket)(*conn));
 }

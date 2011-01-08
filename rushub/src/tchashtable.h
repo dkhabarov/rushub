@@ -82,13 +82,13 @@ public:
 
 	/** Iterator for container */
 	struct iterator {
+		tDataType *mData;
 		unsigned i;
 		unsigned end;
-		tDataType *mData;
 
 		iterator() : i(0), end(0), mData((tDataType*)NULL) {}
-		iterator(tDataType *Data, unsigned _i, unsigned _end) : i(_i), end(_end), mData(Data) {}
-		iterator & operator = (const iterator &it) { i = it.i; end = it.end; mData = it.mData; return *this; }
+		iterator(tDataType *Data, unsigned _i, unsigned _end) : mData(Data), i(_i), end(_end) {}
+		iterator & operator = (const iterator &it) { mData = it.mData; i = it.i; end = it.end; return *this; }
 		iterator(const iterator &it) { (*this) = it; }
 		bool operator == (const iterator &it) { return i == it.i; }
 		bool operator != (const iterator &it) { return i != it.i; }
@@ -283,7 +283,7 @@ protected:
 
 public:
 
-	tcHashTable(unsigned iCapacity = 2048) : 
+	tcHashTable(unsigned iCapacity = 1024) : 
 		miSize(0),
 		mbIsResizing(false)
 	{
@@ -386,7 +386,11 @@ public:
 
 
 	/** Iterator through all NON-NULL elements of the container */
-	class iterator {
+	class iterator 
+	#ifdef _WIN32
+		: public _Iterator_with_base<std::forward_iterator_tag, tDataType> // for_each algorithm
+	#endif
+	{
 	public:
 		typename tData::iterator i; /** Iterator of array (type tItem*) */
 		tItem * mItem; /** Pointer to array element */

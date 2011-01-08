@@ -36,22 +36,6 @@
 
 using namespace std;
 
-#ifdef _WIN32
-template<class T1, class T2> inline
-	T2 For_each(T1 first, T1 last, T2 func) {
-		try {
-			for( ; first != last; ++first) func(*first);
-		} catch(...) { throw "for_each fatal error"; }
-		return func;
-	}
-#else
-template<class T1, class T2> inline
-	T2 For_each(T1 first, T1 last, T2 func) {
-		return for_each(first, last, func);
-	}
-#endif // _WIN32
-
-
 /** Main object class (log class) */
 class cObj {
 
