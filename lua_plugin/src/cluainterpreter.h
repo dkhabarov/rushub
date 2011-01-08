@@ -66,6 +66,7 @@ private:
 public:
 	cLuaInterpreter(const string & sName, string & sFullName);
 	~cLuaInterpreter();
+	cLuaInterpreter & operator=(const cLuaInterpreter &) { return *this; }
 
 	int Start(); // (-1 - run already)
 	int Stop();

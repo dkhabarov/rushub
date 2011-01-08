@@ -24,6 +24,11 @@
 #include <vector>
 #ifndef _WIN32
 	#include <string.h> // strlen
+#else
+	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+		//#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
+		#define sprintf(a,b,...) sprintf_s(a,sizeof(b),b,__VA_ARGS__)
+	#endif
 #endif
 using namespace std;
 
@@ -1190,7 +1195,7 @@ int RegBot(lua_State *L) {
 			if(iType != LUA_TNIL)
 				sMyINFO = luaL_checklstring(L, 3, &iLen);
 		case 2:
-			bKey = lua_toboolean(L, 2);
+			bKey = (lua_toboolean(L, 2) != 0);
 		case 1:
 			iType = lua_type(L, 1);
 			if(iType != LUA_TNIL) {
