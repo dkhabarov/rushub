@@ -20,10 +20,6 @@
 #ifndef CLUAINTERPRETER_H
 #define CLUAINTERPRETER_H
 
-#include "lua/lua.hpp"
-
-#define HAVE_LUA_5_1
-
 #include "cplugin.h" /** nDCServer */
 #include "api.h"
 #include "ctimerlist.h"
