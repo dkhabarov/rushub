@@ -23,8 +23,6 @@
 #include "cplugin.h" /** nDCServer */
 #include "lua/lua.hpp"
 
-#define HAVE_LUA_5_1
-
 using namespace ::nDCServer;
 
 namespace nLua {

@@ -21,6 +21,8 @@
 #include "clua.h" /** for dirs */
 #include <string.h>
 
+#define HAVE_LUA_5_1
+
 using namespace std;
 
 namespace nLua {
