@@ -48,7 +48,7 @@ enum {
 }
 #define CHECK_COUNT(NARG) \
 if(lua_gettop(L) != NARG) { \
-	char sBuf[32]; \
+	char sBuf[32] = { '\0' }; \
 	sprintf(sBuf, "%d", NARG); \
 	ERR_COUNT(sBuf); \
 }
@@ -87,7 +87,7 @@ cDCConnBase * GetDCConnBase(lua_State *L, int indx) {
 }
 
 int Tostring(lua_State *L) {
-	char buf[9];
+	char buf[9] = { '\0' };
 	sprintf(buf, "%p", *((void**)lua_touserdata(L, 1)));
 	lua_pushfstring(L, "%s (%s)", lua_tostring(L, lua_upvalueindex(1)), buf);
 	return 1;

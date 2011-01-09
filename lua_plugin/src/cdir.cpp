@@ -135,7 +135,7 @@ bool FileExists(const char * sName) {
 void ExecPath(string & sPath) {
 	#ifdef _WIN32
 		char * sExPath = NULL;
-		char sBuf[MAX_PATH+1];
+		char sBuf[MAX_PATH+1] = { '\0' };
 		::GetModuleFileName(NULL, sBuf, MAX_PATH);
 		sExPath = sBuf;
 		char * sSlash = strrchr(sExPath, '\\');
