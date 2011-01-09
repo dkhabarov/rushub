@@ -89,24 +89,19 @@ cTime & cTime::Normalize() {
 }
 
 std::ostream &operator << (std::ostream &os, const cTime &t) {
-	#if !defined(_WIN32)
-		char * buf;
-		static char buff[26];
-	#elif defined(_WIN32) && !defined(_MSC_VER) || (_MSC_VER < 1400)
+	#if defined(_WIN32) && defined(_MSC_VER) && (_MSC_VER >= 1400)
+		char buf[26] = { '\0' };
+	#elif defined(_WIN32)
 		char * buf;
 	#else
-		static char buf[26];
+		char * buf;
+		char buff[26] = { '\0' };
 	#endif
 	long n, rest;
-
 	switch (t.mPrintType) {
 	case 4: /** AsDateMS */
 	case 1: /** AsDate */
-		#ifndef _WIN32
-			const time_t * ta;
-			ta = (time_t*)&t.tv_sec;
-			buf = ctime_r(ta, buff);
-		#else
+		#ifdef _WIN32
 			time_t ta;
 			ta = (time_t)t.tv_sec;
 			#if defined(_MSC_VER) && (_MSC_VER >= 1400)
@@ -114,6 +109,10 @@ std::ostream &operator << (std::ostream &os, const cTime &t) {
 			#else
 				buf = ctime(&ta);
 			#endif
+		#else
+			const time_t * ta;
+			ta = (time_t*)&t.tv_sec;
+			buf = ctime_r(ta, buff);
 		#endif
 		buf[strlen(buf) - 1] = 0;
 		os << buf;

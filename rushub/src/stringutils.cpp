@@ -140,7 +140,7 @@ string ReplaceSp(const string &sStr, bool bTo) {
 
 /** Typecasting __int64 to string */
 string Int64ToString(__int64 const &ll) {
-	char sBuf[32];
+	char sBuf[32] = { '\0' };
 #ifdef _WIN32
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
 		sprintf_s(sBuf, 32, "%I64d", ll);

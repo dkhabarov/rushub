@@ -660,7 +660,7 @@ bool cConn::CheckIp(const string &ip) {
 
 void cConn::GetMac() {
 #ifdef _WIN32
-	static char buf[17];
+	char buf[17] = { '\0' };
 	unsigned long ip = Ip2Num(msIp.c_str()), iSize = 0xFFFF;
 	MIB_IPNETTABLE * pT = (MIB_IPNETTABLE *) new char[0xFFFF];
 	if(0L == ::GetIpNetTable(pT, &iSize, 1)) {

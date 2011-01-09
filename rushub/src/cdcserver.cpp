@@ -1120,6 +1120,7 @@ bool cDCServer::GetSysVersion() {
 			return false;
 	}
 
+	char buf[256] = { '\0' };
 	switch(osvi.dwPlatformId) {
 
 		case VER_PLATFORM_WIN32_NT: // Windows NT
@@ -1176,7 +1177,7 @@ bool cDCServer::GetSysVersion() {
 
 			} else {
 				HKEY hKey;
-				char szProductType[80];
+				char szProductType[80] = { '\0' };
 				DWORD dwBufLen = 80;
 				LONG lRet = RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\ProductOptions", 0, KEY_QUERY_VALUE, &hKey);
 
@@ -1200,12 +1201,10 @@ bool cDCServer::GetSysVersion() {
 
 			// Version, service pack, number of the build
 			if(osvi.dwMajorVersion <= 4) {
-				char buf[256];
 				sprintf(buf, "version %d.%d %s (Build %d)", 
 					osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
 				msSysVersion.append(buf);
 			} else {
-				char buf[256];
 				sprintf(buf, "%s (Build %d)", osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
 				msSysVersion.append(buf);
 			}

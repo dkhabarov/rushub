@@ -88,7 +88,7 @@ bool cPluginLoader::LoadSym() {
 	if(!mDelPluginFunc) mDelPluginFunc = tDelPluginFunc(LoadSym("del_plugin"));
 	if(!mGetPluginFunc || !mDelPluginFunc || ((mPlugin = mGetPluginFunc()) == NULL)) return false;
 	if(mPlugin->miVersion != INTERNAL_PLUGIN_VERSION) {
-		char buf[128];
+		char buf[128] = { '\0' };
 		sprintf(buf, VERSION_ERROR, INTERNAL_PLUGIN_VERSION, mPlugin->miVersion);
 		msError = buf;
 		return false;

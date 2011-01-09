@@ -116,7 +116,7 @@ protected:
 
 public:
 
-	cUserList(string sName, bool bKeepNickList = false);
+	explicit cUserList(string sName, bool bKeepNickList = false);
 	virtual ~cUserList() {}
 	virtual cUserList & operator=(const cUserList &) { return *this; }
 
@@ -234,7 +234,7 @@ protected:
 
 public:
 
-	cFullUserList(string sName, bool bKeepNickList = false, bool bKeepInfoList = false, bool bKeepIpList = false);
+	explicit cFullUserList(string sName, bool bKeepNickList = false, bool bKeepInfoList = false, bool bKeepIpList = false);
 	virtual ~cFullUserList() {}
 
 	virtual string &GetNickList();

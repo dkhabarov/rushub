@@ -40,7 +40,7 @@ long __stdcall cException::ExceptionFilter(LPEXCEPTION_POINTERS e) {
 	if(++recursion > MAX_RECURSIONS) exit(-1);
 
 	string path;
-	char sBuf[MAX_PATH+1];
+	char sBuf[MAX_PATH+1] = { '\0' };
 	::GetModuleFileName(NULL, sBuf, MAX_PATH);
 	char * sExPath = sBuf;
 	char * sSlash = strrchr(sExPath, '\\');
@@ -58,14 +58,14 @@ long __stdcall cException::ExceptionFilter(LPEXCEPTION_POINTERS e) {
 		first = false;
 	}
 
-	char tm[BUFFERSIZE];
+	char tm[BUFFERSIZE] = { '\0' };
 	time_t now;
 	time(&now);
 	struct tm Tm;
 	localtime_s(&Tm, &now);
 	strftime(tm, BUFFERSIZE, "%Y-%m-%d %H:%M:%S", &Tm);
 
-	char code[BUFFERSIZE];
+	char code[BUFFERSIZE] = { '\0' };
 	sprintf(code, "%x", e->ExceptionRecord->ExceptionCode);
 
 	ofstream f;
@@ -104,7 +104,7 @@ long __stdcall cException::ExceptionFilter(LPEXCEPTION_POINTERS e) {
 int cException::Init(const char * path) {
 	SymSetOptions(SYMOPT_DEFERRED_LOADS | SYMOPT_FAIL_CRITICAL_ERRORS | SYMOPT_LOAD_LINES );
 
-	char buf[BUFFERSIZE];
+	char buf[BUFFERSIZE] = { '\0' };
 	string symbolPath(".");
 	if(GetEnvironmentVariableA("_NT_SYMBOL_PATH", buf, BUFFERSIZE)) {
 		symbolPath.append(";", 1);

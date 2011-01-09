@@ -53,7 +53,7 @@ int cService::InstallService(char * sName, const char * sConfPath) {
 	}
 
 	// Service path
-	char sBuf[MAX_PATH+1];
+	char sBuf[MAX_PATH+1] = { '\0' };
 	if(!GetModuleFileName(NULL, sBuf, MAX_PATH))
 		cout << "Error in GetModuleFileName (" << GetLastError() << ")" << endl;
 

@@ -120,7 +120,7 @@ ostream & cObj::Log() {
 			else
 				sPath = *msPath;
 
-			char buf[64];
+			char buf[64] = { '\0' };
 			time_t rawtime;
 			time(&rawtime);
 			struct tm tmr;
@@ -154,7 +154,7 @@ ostream & cObj::ErrLog() {
 			else
 				sPath = *msPath;
 
-			char buf[64];
+			char buf[64] = { '\0' };
 			time_t rawtime;
 			time(&rawtime);
 			struct tm tmr;
