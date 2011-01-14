@@ -258,12 +258,12 @@ public:
 	virtual const string & GetNick() const = 0;        //< Get user's nick
 	virtual const string & GetMyINFO() const = 0;      //< Get user's MyINFO cmd
 
-	virtual bool IsInUserList() const = 0;             //< User in user-list
-	virtual bool IsInOpList() const = 0;               //< User in op-list (has op-key)
-	virtual bool IsInIpList() const = 0;               //< User in ip-list (can receive ip addresses of users)
-	virtual bool IsHide() const = 0;                   //< User is hidden
-	virtual bool IsForceMove() const = 0;              //< User can redirect
-	virtual bool IsKick() const = 0;                   //< User can kick
+	virtual bool GetInUserList() const = 0;            //< User in user-list
+	virtual bool GetInOpList() const = 0;              //< User in op-list (has op-key)
+	virtual bool GetInIpList() const = 0;              //< User in ip-list (can receive ip addresses of users)
+	virtual bool GetHide() const = 0;                  //< User is hidden
+	virtual bool GetForceMove() const = 0;             //< User can redirect
+	virtual bool GetKick() const = 0;                  //< User can kick
 
 	virtual bool SetMyINFO(const string &sMyINFO, const string & sNick) = 0; //< Set user's MyINFO cmd
 	virtual void SetOpList(bool) = 0;                  //< Add user in op-list

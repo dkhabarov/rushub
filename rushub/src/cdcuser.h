@@ -26,6 +26,11 @@
 #include "cplugin.h"
 
 #include <string>
+#ifndef _WIN32
+	#ifndef __int64
+		#define __int64 long long
+	#endif
+#endif
 
 using namespace std;
 using namespace nUtils;
@@ -36,18 +41,52 @@ class cDCConn;
 class cDCServer; /** for mDCServer */
 
 /** Extended class of the user */
-class cDCUser : public cObj, public cUserBase, public cDCUserBase {
+class cDCUser : public cObj, public cDCUserBase, public cUserBase {
 
 public:
 	cDCServer * mDCServer;
 	cDCConn * mDCConn; /** Connection for current user */
 
+	string msNick; /** User's nick */
+
 	cTime mTimeEnter;
+
+	bool mbInUserList; /** User in user-list */
+	bool mbInOpList; /** User in op-list */
+	bool mbInIpList; /** User in ip-list */
+	bool mbHide; /** User was hide */
+	bool mbForceMove; /** User can redirect other users */
+	bool mbKick; /** User can kick other users */
 
 private:
 
 	string msIp; /** IP address of user/bot */
 	char mTagSep; /** Tag separator */
+
+protected:
+
+	string msMyINFO;
+
+	string msDesc; /** User's description */
+	string msEmail; /** User's e-mail */
+	string msConnection; /** User's connection */
+	unsigned miByte; /** User's magic byte */
+	bool mbPassive; /** Passive mode flag */
+	__int64 miShare; /** Share size */
+
+	string msTag;
+	string msClient;
+	string msVersion;
+	int miUnRegHubs;
+	int miRegHubs;
+	int miOpHubs;
+	int miSlots;
+	int miLimit;
+	int miOpen;
+	int miBandwidth;
+	int miDownload;
+	string msFraction;
+	string msMode;
 
 public:
 
@@ -55,16 +94,19 @@ public:
 	cDCUser(const string & sNick);
 	virtual ~cDCUser();
 	bool CanSend();
-	void Send(string & sData, bool bAddSep = false, bool bFlush = true);
+	void Send(const string & sData, bool bAddSep = false, bool bFlush = true);
 	const string & GetIp() const { return msIp; } /** Get IP address of user */
 	const string & GetNick() const { return msNick; } /** Get nick (for plugins) */
-	const string & GetMyINFO() const { return msMyINFO; } /** Get MyINFO (for plugins) */
-	bool IsInUserList() const { return mbInUserList; } /** (for plugins) */
-	bool IsInOpList() const { return mbInOpList; } /** (for plugins) */
-	bool IsInIpList() const { return mbInIpList; } /** (for plugins) */
-	bool IsHide() const { return mbHide; } /** (for plugins) */
-	bool IsForceMove() const { return mbForceMove; } /** (for plugins) */
-	bool IsKick() const { return mbKick; } /** (for plugins) */
+	const string & Nick() const { return msNick; }
+	const string & GetMyINFO() const { return msMyINFO; } /** Get MyINFO */
+	const string & MyINFO() const { return msMyINFO; }
+	bool GetInUserList() const { return mbInUserList; } /** (for plugins) */
+	bool GetInOpList() const { return mbInOpList; } /** (for plugins) */
+	bool GetInIpList() const { return mbInIpList; } /** (for plugins) */
+	bool GetHide() const { return mbHide; } /** (for plugins) */
+	bool Hide() const { return mbHide; }
+	bool GetForceMove() const { return mbForceMove; } /** (for plugins) */
+	bool GetKick() const { return mbKick; } /** (for plugins) */
 	int GetProfile() const;
 	void SetIp(const string & sIP);
 

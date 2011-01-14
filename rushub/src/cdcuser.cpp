@@ -25,26 +25,59 @@ namespace nDCServer {
 
 cDCUser::cDCUser() :
 	cObj("cDCUser"),
-	cUserBase(),
 	cDCUserBase(),
 	mDCServer(NULL),
-	mTagSep(',')
+	mDCConn(NULL),
+	mbInUserList(false),
+	mbInOpList(false),
+	mbInIpList(false),
+	mbHide(false),
+	mbForceMove(false),
+	mbKick(false),
+	mTagSep(','),
+	miByte(0),
+	mbPassive(false),
+	miShare(0),
+	miUnRegHubs(0),
+	miRegHubs(0),
+	miOpHubs(0),
+	miSlots(0),
+	miLimit(0),
+	miOpen(0),
+	miBandwidth(0),
+	miDownload(0)
 {
-	mDCConn = NULL;
 	mDCConnBase = NULL;
+	mNil = 0;
 }
 
 cDCUser::cDCUser(const string & sNick) :
 	cObj("cDCUser"),
-	cUserBase(),
 	cDCUserBase(),
 	mDCServer(NULL),
-	mTagSep(',')
+	mDCConn(NULL),
+	mbInUserList(false),
+	mbInOpList(false),
+	mbInIpList(false),
+	mbHide(false),
+	mbForceMove(false),
+	mbKick(false),
+	mTagSep(','),
+	miByte(0),
+	mbPassive(false),
+	miShare(0),
+	miUnRegHubs(0),
+	miRegHubs(0),
+	miOpHubs(0),
+	miSlots(0),
+	miLimit(0),
+	miOpen(0),
+	miBandwidth(0),
+	miDownload(0)
 {
-	mDCConn = NULL;
 	mDCConnBase = NULL;
-	msNick = sNick;
 	mNil = 0;
+	msNick = sNick;
 }
 
 cDCUser::~cDCUser() {
@@ -57,13 +90,13 @@ bool cDCUser::CanSend() {
 	return mbInUserList && mDCConn && mDCConn->mbOk;
 }
 
-void cDCUser::Send(string & sData, bool bAddSep, bool bFlush) {
+void cDCUser::Send(const string & sData, bool bAddSep, bool bFlush) {
 	if(mDCConn) mDCConn->Send(sData, bAddSep, bFlush);
 }
 
 int cDCUser::GetProfile() const {
 	if(mDCConn) return mDCConn->miProfile;
-	else return cUserBase::GetProfile();
+	else return 30; // 30 profile for bot
 }
 
 void cDCUser::SetIp(const string & sIP) {

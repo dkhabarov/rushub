@@ -62,7 +62,7 @@ void cUserList::ufSendWithNick::operator()(cUserBase *User) {
 	if(User && User->CanSend()) { 
 		if(!mbProfile) {
 			User->Send(msDataStart, false, false);
-			User->Send(User->msNick, false, false);
+			User->Send(User->Nick(), false, false);
 			User->Send(msDataEnd, true); // newPolitic
 		} else {
 			int iProfile = User->GetProfile() + 1;
@@ -70,7 +70,7 @@ void cUserList::ufSendWithNick::operator()(cUserBase *User) {
 			if(iProfile > 31) iProfile = (iProfile % 32) - 1;
 			if(miProfile & (1 << iProfile)) {
 				User->Send(msDataStart, false, false);
-				User->Send(User->msNick, false, false);
+				User->Send(User->Nick(), false, false);
 				User->Send(msDataEnd, true); // newPolitic
 			}
 		}
@@ -78,15 +78,15 @@ void cUserList::ufSendWithNick::operator()(cUserBase *User) {
 }
 
 void cUserList::ufDoNickList::operator()(cUserBase *User) {
-	if(!User->mbHide) {
-		msList.append(User->msNick);
+	if(!User->Hide()) {
+		msList.append(User->Nick());
 		msList.append(msSep);
 	}
 }
 
 cUserList::cUserList(string sName, bool bKeepNickList) :
 	cObj("cUserList"),
-	tcHashTable<cUserBase*>(2048), // 2048 for big hubs and big check interval of resize
+	tcHashTable<cUserBase*>(1024), // 1024 for big hubs and big check interval of resize
 	msName(sName),
 	mNickListMaker(msNickList),
 	mbKeepNickList(bKeepNickList),
@@ -96,12 +96,12 @@ cUserList::cUserList(string sName, bool bKeepNickList) :
 }
 
 bool cUserList::Add(cUserBase *User) {
-	if(User) return List_t::Add(Nick2Key(User->msNick), User);
+	if(User) return List_t::Add(Nick2Key(User->Nick()), User);
 	else return false;
 }
 
 bool cUserList::Remove(cUserBase *User) {
-	if(User) return List_t::Remove(Nick2Key(User->msNick));
+	if(User) return List_t::Remove(Nick2Key(User->Nick()));
 	else return false;
 }
 
@@ -140,8 +140,8 @@ void cUserList::SendToProfiles(unsigned long iProfile, const string &sData, bool
 	if(Log(4)) LogStream() << "SendToProfiles end" << endl;
 }
 
-/** Sending data sStart+msNick+sEnd to all
-    msNick - user's nick
+/** Sending data sStart+Nick+sEnd to all
+    Nick - user's nick
     Use for private send to all */
 void cUserList::SendToWithNick(string &sStart, string &sEnd) {
 	For_each(begin(), end(), ufSendWithNick(sStart, sEnd));
@@ -175,15 +175,15 @@ int cUserList::StrLog(ostream & ostr, int iLevel, int iMaxLevel, bool bIsError /
 
 
 void cFullUserList::ufDoINFOList::operator()(cUserBase *User) {
-	if(!User->mbHide) {
+	if(!User->Hide()) {
 		msListComplete.append(User->MyINFO());
 		msListComplete.append(msSep);
 	}
 }
 
 void cFullUserList::ufDoIpList::operator()(cUserBase *User) {
-	if(!User->mbHide && User->GetIp().size()) {
-		msList.append(User->msNick);
+	if(!User->Hide() && User->GetIp().size()) {
+		msList.append(User->Nick());
 		msList.append(" ");
 		msList.append(User->GetIp());
 		msList.append(msSep);

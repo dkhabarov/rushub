@@ -147,9 +147,9 @@ public:
 	void SendToAll(const string &sData, bool bUseCache = false, bool bAddSep = true);
 	/** Sending data to profiles */
 	void SendToProfiles(unsigned long iProfile, const string &sData, bool bAddSep = true);
-	/** Sending data sStart+msNick+sEnd to all list */
+	/** Sending data sStart+Nick+sEnd to all list */
 	void SendToWithNick(string &sStart, string &sEnd);
-	/** Sending data sStart+msNick+sEnd to profiles */
+	/** Sending data sStart+Nick+sEnd to profiles */
 	void SendToWithNick(string &sStart, string &sEnd, unsigned long iProfile);
 	/** Sending data from cache to user */
 	void FlushForUser(cUserBase *User);

@@ -608,7 +608,7 @@ bool cDCServer::AddToUserList(cDCUser * User) {
 	if(mDCUserList.Log(4)) mDCUserList.LogStream() << "Before add: " << User->msNick << " Size: " << mDCUserList.Size() << endl;
 
 	if(!mDCUserList.AddWithKey(Key, User)) {
-		if(Log(1)) LogStream() << "Adding twice user with same nick " << User->msNick << " (" << mDCUserList.Find(Key)->msNick << ")" << endl;
+		if(Log(1)) LogStream() << "Adding twice user with same nick " << User->msNick << " (" << mDCUserList.Find(Key)->Nick() << ")" << endl;
 		User->mbInUserList = false;
 		return false;
 	}
@@ -667,7 +667,7 @@ bool cDCServer::RemoveFromDCUserList(cDCUser *User) {
 	if(User->mbInUserList) {
 		User->mbInUserList = false;
 
-		if(!User->IsHide()) {
+		if(!User->GetHide()) {
 			string sMsg;
 			cDCProtocol::Append_DC_Quit(sMsg, User->msNick);
 
@@ -910,10 +910,10 @@ bool cDCServer::SendToIP(const char *sIP, const char *sData, unsigned long iProf
 bool cDCServer::SendToAllExceptNicks(const vector<string> & NickList, const char *sData, const char *sNick, const char *sFrom) {
 	if(!sData) return false;
 
-	cUserBase * User;
-	vector<cUserBase *> ul;
+	cDCUser * User;
+	vector<cDCUser *> ul;
 	for(List_t::const_iterator it = NickList.begin(); it != NickList.end(); ++it) {
-		User = mDCUserList.GetUserBaseByNick(*it);
+		User = (cDCUser*)mDCUserList.GetUserBaseByNick(*it);
 		if(User && User->mbInUserList) {
 			User->mbInUserList = false;
 			ul.push_back(User);
@@ -933,7 +933,7 @@ bool cDCServer::SendToAllExceptNicks(const vector<string> & NickList, const char
 		mDCUserList.SendToAll(sMsg, false, false);
 	}
 
-	for(vector<cUserBase *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it)
+	for(vector<cDCUser *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it)
 		(*ul_it)->mbInUserList = true;
 
 	return true;

@@ -38,7 +38,6 @@ namespace nDCServer {
 
 class cDCServer;
 class cDCConn;
-class cUserBase;
 class cUserList;
 
 namespace nProtocol {

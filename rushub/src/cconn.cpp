@@ -497,16 +497,19 @@ int cConn::WriteData(const string &sData, bool bFlush) {
 	if(Send(send_buf, size) < 0) {
 
 		if((SockErr != SOCK_EAGAIN) /*&& (SockErr != SOCK_EINTR)*/) {
-			if(Log(2)) LogStream() << "Error in sending: " << SockErr << "(not EAGAIN), closing" << endl;
+			if(Log(2)) {
+				LogStream() << "Error in sending: " << SockErr << "(not EAGAIN), closing" << endl;
+			}
 			CloseNow(eCR_ERROR_SEND);
 			return -1;
 		}
 
 		if(Log(3)) LogStream() << "Block sent. Was sent " << size << " bytes" << endl;
-		if(!appended)
+		if(!appended) {
 			StrCutLeft(sData, msSendBuf, size);
-		else
+		} else {
 			StrCutLeft(msSendBuf, size); /** del from buf sent data */
+		}
 
 		if(bool(mCloseTime)) {
 			CloseNow();
@@ -517,20 +520,28 @@ int cConn::WriteData(const string &sData, bool bFlush) {
 			if(mbBlockOutput) {
 				mbBlockOutput = false;
 				mServer->mConnChooser.cConnChoose::OptIn(this, cConnChoose::eEF_OUTPUT);
-				if(Log(3)) LogStream() << "Unblock output channel" << endl;
+				if(Log(3)) {
+					LogStream() << "Unblock output channel" << endl;
+				}
 			}
 
 			bufLen = msSendBuf.size();
 			if(mbBlockInput && bufLen < MAX_SEND_UNBLOCK_SIZE) { /** Unset block of input */
 				mServer->mConnChooser.cConnChoose::OptIn(this, cConnChoose::eEF_INPUT);
-				if(Log(3)) LogStream() << "Unblock input channel" << endl;
+				if(Log(3)) {
+					LogStream() << "Unblock input channel" << endl;
+				}
 			} else if(!mbBlockInput && bufLen >= MAX_SEND_BLOCK_SIZE) { /** Set block of input */
 				mServer->mConnChooser.cConnChoose::OptOut(this, cConnChoose::eEF_INPUT);
-				if(Log(3)) LogStream() << "Block input channel" << endl;
+				if(Log(3)) {
+					LogStream() << "Block input channel" << endl;
+				}
 			}
 		}
 	} else {
-		if(appended) msSendBuf.erase(0, msSendBuf.size());
+		if(appended) {
+			msSendBuf.erase(0, msSendBuf.size());
+		}
 		ShrinkStringToFit(msSendBuf);
 
 		if(bool(mCloseTime)) {
@@ -541,7 +552,9 @@ int cConn::WriteData(const string &sData, bool bFlush) {
 		if(mServer && mbOk && !mbBlockOutput) {
 			mbBlockOutput = true;
 			mServer->mConnChooser.cConnChoose::OptOut(this, cConnChoose::eEF_OUTPUT);
-			if(Log(3)) LogStream() << "Block output channel" << endl;
+			if(Log(3)) {
+				LogStream() << "Block output channel" << endl;
+			}
 		}
 		OnFlush();
 	}
@@ -555,7 +568,9 @@ void cConn::OnFlush() {
 /** Flush */
 void cConn::Flush() {
 	static string empty("");
-	if(msSendBuf.length()) WriteData(empty, true);
+	if(msSendBuf.length()) {
+		WriteData(empty, true);
+	}
 }
 
 /** Send len byte from buf */
@@ -576,12 +591,25 @@ int cConn::Send(const char *buf, size_t &len) {
 		#ifdef USE_UDP
 		if(!bUDP) {
 		#endif
-			n = send(mSocket, buf + total, bytesleft, 
-			#ifndef _WIN32
-				MSG_NOSIGNAL | MSG_DONTWAIT);
-			#else
-				0);
-			#endif
+			int count = 0;
+			//do {
+				n = send(mSocket, buf + total, bytesleft, 
+				#ifndef _WIN32
+					MSG_NOSIGNAL | MSG_DONTWAIT);
+				#else
+					0);
+				#endif
+			/*	if (SockErr == SOCK_EAGAIN) {
+					#ifdef _WIN32
+						Sleep(5);
+					#else
+						usleep(5000);
+					#endif
+				} else {
+					break;
+				}
+			} while ( ++count < 5 );
+			*/
 		#ifdef USE_UDP
 		} else {
 			static int tolen = sizeof(struct sockaddr);
