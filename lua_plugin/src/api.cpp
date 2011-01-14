@@ -182,12 +182,12 @@ int UserIndex(lua_State *L) {
 		case ePH_BANDWIDTH:  if(Conn->mDCUserBase && (Conn->mDCUserBase->mNil & eMYINFO_BANDWIDTH))lua_pushnumber(L, Conn->mDCUserBase->GetBandwidth());else lua_pushnil(L); break;
 		case ePH_DOWNLOAD:   if(Conn->mDCUserBase && (Conn->mDCUserBase->mNil & eMYINFO_DOWNLOAD))lua_pushnumber(L, Conn->mDCUserBase->GetDownload());else lua_pushnil(L); break;
 		case ePH_FRACTION:   if(Conn->mDCUserBase && (Conn->mDCUserBase->mNil & eMYINFO_FRACTION))lua_pushstring(L, Conn->mDCUserBase->GetFraction().c_str());else lua_pushnil(L); break;
-		case ePH_INOPLIST:   if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->IsInOpList() ? 1 : 0);else lua_pushnil(L); break;
-		case ePH_INIPLIST:   if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->IsInIpList() ? 1 : 0);else lua_pushnil(L); break;
-		case ePH_INUSERLIST: if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->IsInUserList() ? 1 : 0);else lua_pushnil(L); break;
-		case ePH_KICK:       if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->IsKick() ? 1 : 0);else lua_pushnil(L); break;
-		case ePH_REDIRECT:   if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->IsForceMove() ? 1 : 0);else lua_pushnil(L); break;
-		case ePH_HIDE:       if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->IsHide() ? 1 : 0);else lua_pushnil(L); break;
+		case ePH_INOPLIST:   if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->GetInOpList() ? 1 : 0);else lua_pushnil(L); break;
+		case ePH_INIPLIST:   if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->GetInIpList() ? 1 : 0);else lua_pushnil(L); break;
+		case ePH_INUSERLIST: if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->GetInUserList() ? 1 : 0);else lua_pushnil(L); break;
+		case ePH_KICK:       if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->GetKick() ? 1 : 0);else lua_pushnil(L); break;
+		case ePH_REDIRECT:   if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->GetForceMove() ? 1 : 0);else lua_pushnil(L); break;
+		case ePH_HIDE:       if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->GetHide() ? 1 : 0);else lua_pushnil(L); break;
 		case ePH_PORT:       lua_pushnumber(L, Conn->GetPort()); break;
 		case ePH_PORTCONN:   lua_pushnumber(L, Conn->GetPortConn()); break;
 		case ePH_IPCONN:     lua_pushstring(L, Conn->GetIpConn().c_str()); break;
@@ -736,7 +736,7 @@ int GetUsers(lua_State *L) {
 		if (lua_isboolean(L, 2) && lua_toboolean(L, 2) == 1) all = true;
 		const vector<cDCConnBase *> & v = cLua::mCurServer->GetDCConnBase(lua_tostring(L, 1));
 		for(vector<cDCConnBase *>::const_iterator it = v.begin(); it != v.end(); ++it) {
-			if (all || ((*it)->mDCUserBase && (*it)->mDCUserBase->IsInUserList())) {
+			if (all || ((*it)->mDCUserBase && (*it)->mDCUserBase->GetInUserList())) {
 				lua_pushnumber(L, i);
 				void ** userdata = (void**) lua_newuserdata(L, sizeof(void*));
 				*userdata = (void*)(*it);
@@ -753,7 +753,7 @@ int GetUsers(lua_State *L) {
 		cDCConnBase * Conn;
 		while((Conn = it->operator ()()) != NULL) {
 			if(Conn->mType != eT_DC_CLIENT) continue;
-			if (all || (Conn->mDCUserBase && Conn->mDCUserBase->IsInUserList())) {
+			if (all || (Conn->mDCUserBase && Conn->mDCUserBase->GetInUserList())) {
 				lua_pushnumber(L, i);
 				void ** userdata = (void**) lua_newuserdata(L, sizeof(void*));
 				*userdata = (void*)Conn;
