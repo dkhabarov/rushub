@@ -17,6 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <string.h> // strlen
+
 #include "uid.h"
 
 namespace nLua {
