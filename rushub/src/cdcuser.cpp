@@ -136,7 +136,7 @@ void cDCUser::SetKick(bool bKick) {
 
 
 /** Get MyINFO */
-const string & cDCUser::GetMyINFO(/*bool real /* = false */) const {
+const string & cDCUser::GetMyINFO(/*bool real = false */) const {
 	return myInfo.getMyInfo();
 }
 
@@ -159,27 +159,27 @@ bool cDCUser::SetMyINFO(cDCParserBase * parser) {
 
 
 /** Get description (for plugins) */
-const string & cDCUser::GetDesc(/*bool real /* = false */) const {
+const string & cDCUser::GetDesc(/*bool real = false */) const {
 	return myInfo.getDescription();
 }
 
 /** Get e-mail (for plugins) */
-const string & cDCUser::GetEmail(/*bool real /* = false */) const {
+const string & cDCUser::GetEmail(/*bool real = false */) const {
 	return myInfo.getEmail();
 }
 
 /** Get connection (for plugins) */
-const string & cDCUser::GetConnection(/*bool real /* = false */) const {
+const string & cDCUser::GetConnection(/*bool real = false */) const {
 	return myInfo.getConnection();
 }
 
 /** Get byte (for plugins) */
-unsigned cDCUser::GetByte(/*bool real /* = false */) const {
+unsigned cDCUser::GetByte(/*bool real = false */) const {
 	return myInfo.getMagicByte();
 }
 
 /** Get share (for plugins) */
-__int64 cDCUser::GetShare(/*bool real /* = false */) const {
+__int64 cDCUser::GetShare(/*bool real = false */) const {
 	// !!!
 	return myInfo.getShare();
 }
@@ -189,59 +189,59 @@ bool cDCUser::IsPassive() const {
 	return myInfo.dcTag.IsPassive();
 }
 
-const string & cDCUser::GetTag(/*bool real /* = false */) const {
+const string & cDCUser::GetTag(/*bool real = false */) const {
 	return myInfo.dcTag.getTag();
 }
 
-const string & cDCUser::GetClient(/*bool real /* = false */) const {
+const string & cDCUser::GetClient(/*bool real = false */) const {
 	return myInfo.dcTag.getClientName();
 }
 
-const string & cDCUser::GetVersion(/*bool real /* = false */) const {
+const string & cDCUser::GetVersion(/*bool real = false */) const {
 	return myInfo.dcTag.getClientVersion();
 }
 
-unsigned cDCUser::GetUnRegHubs(/*bool real /* = false */) const {
+unsigned cDCUser::GetUnRegHubs(/*bool real = false */) const {
 	return myInfo.dcTag.getUnregHubs();
 }
 
-unsigned cDCUser::GetRegHubs(/*bool real /* = false */) const {
+unsigned cDCUser::GetRegHubs(/*bool real = false */) const {
 	return myInfo.dcTag.getRegHubs();
 }
 
-unsigned cDCUser::GetOpHubs(/*bool real /* = false */) const {
+unsigned cDCUser::GetOpHubs(/*bool real = false */) const {
 	return myInfo.dcTag.getOpHubs();
 }
 
-unsigned cDCUser::GetSlots(/*bool real /* = false */) const {
+unsigned cDCUser::GetSlots(/*bool real = false */) const {
 	return myInfo.dcTag.getSlots();
 }
 
-unsigned cDCUser::GetLimit(/*bool real /* = false */) const {
+unsigned cDCUser::GetLimit(/*bool real = false */) const {
 	return myInfo.dcTag.getLimit();
 }
 
-unsigned cDCUser::GetOpen(/*bool real /* = false */) const {
+unsigned cDCUser::GetOpen(/*bool real = false */) const {
 	return myInfo.dcTag.getOpen();
 }
 
-unsigned cDCUser::GetBandwidth(/*bool real /* = false */) const {
+unsigned cDCUser::GetBandwidth(/*bool real = false */) const {
 	return myInfo.dcTag.getBandwidth();
 }
 
-unsigned cDCUser::GetDownload(/*bool real /* = false */) const {
+unsigned cDCUser::GetDownload(/*bool real = false */) const {
 	return myInfo.dcTag.getDownload();
 }
 
-const string & cDCUser::GetFraction(/*bool real /* = false */) const {
+const string & cDCUser::GetFraction(/*bool real = false */) const {
 	return myInfo.dcTag.getFraction();
 }
 
-const string & cDCUser::GetMode(/*bool real /* = false */) const {
+const string & cDCUser::GetMode(/*bool real = false */) const {
 	return myInfo.dcTag.getMode();
 }
 
-unsigned int cDCUser::getTagNil(/*bool real /* = false */) const {
+unsigned int cDCUser::getTagNil(/*bool real = false */) const {
 	return myInfo.dcTag.getNil();
 }
 

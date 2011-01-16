@@ -20,6 +20,8 @@
 #ifndef CSTRTOARG_H
 #define CSTRTOARG_H
 
+#ifdef _WIN32
+
 #include <string>
 
 using namespace std;
@@ -43,5 +45,7 @@ public:
 }; // cStrToArg
 
 }; // nUtils
+
+#endif // _WIN32
 
 #endif // CSTRTOARG_H

@@ -86,7 +86,7 @@ public:
 		unsigned i;
 		unsigned end;
 
-		iterator() : i(0), end(0), mData((tDataType*)NULL) {}
+		iterator() : mData((tDataType*)NULL), i(0), end(0) {}
 		iterator(tDataType *Data, unsigned _i, unsigned _end) : mData(Data), i(_i), end(_end) {}
 		iterator & operator = (const iterator &it) { mData = it.mData; i = it.i; end = it.end; return *this; }
 		iterator(const iterator &it) { (*this) = it; }

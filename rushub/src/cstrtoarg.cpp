@@ -19,12 +19,13 @@
 
 #include "cstrtoarg.h"
 
+#ifdef _WIN32
+
 namespace nUtils {
 
-#ifdef _WIN32
-	#define strdup _strdup
-	#pragma warning(disable:4127) // Disable "conditional expression is constant"
-#endif
+#define strdup _strdup
+#pragma warning(disable:4127) // Disable "conditional expression is constant"
+
 
 int cStrToArg::String2Arg(char const * str, int * argc_p, char *** argv_p) {
 	int argc = 0, act = 10, err;
@@ -120,3 +121,5 @@ int cStrToArg::CopyCookedString(char ** dest, char ** src) {
 }
 
 }; // nUtils
+
+#endif // _WIN32
