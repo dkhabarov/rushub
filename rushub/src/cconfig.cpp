@@ -29,8 +29,7 @@
 	#include <memory.h>
 #else
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
-		//#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
-		#define sprintf(a,b,...) sprintf_s(a,sizeof(a),b,__VA_ARGS__)
+		#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
 	#endif
 #endif
 

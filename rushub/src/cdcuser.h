@@ -20,20 +20,22 @@
 #ifndef CUSER_H
 #define CUSER_H
 
+#include <string>
+
 #include "cobj.h"
 #include "ctime.h"
 #include "cuserbase.h"
 #include "cplugin.h"
+#include "cmyinfo.h"
 
-#include <string>
+using namespace std;
+using namespace nUtils;
+
 #ifndef _WIN32
 	#ifndef __int64
 		#define __int64 long long
 	#endif
 #endif
-
-using namespace std;
-using namespace nUtils;
 
 namespace nDCServer {
 
@@ -44,6 +46,7 @@ class cDCServer; /** for mDCServer */
 class cDCUser : public cObj, public cDCUserBase, public cUserBase {
 
 public:
+
 	cDCServer * mDCServer;
 	cDCConn * mDCConn; /** Connection for current user */
 
@@ -58,48 +61,18 @@ public:
 	bool mbForceMove; /** User can redirect other users */
 	bool mbKick; /** User can kick other users */
 
-private:
-
-	string msIp; /** IP address of user/bot */
-	char mTagSep; /** Tag separator */
-
-protected:
-
-	string msMyINFO;
-
-	string msDesc; /** User's description */
-	string msEmail; /** User's e-mail */
-	string msConnection; /** User's connection */
-	unsigned miByte; /** User's magic byte */
-	bool mbPassive; /** Passive mode flag */
-	__int64 miShare; /** Share size */
-
-	string msTag;
-	string msClient;
-	string msVersion;
-	int miUnRegHubs;
-	int miRegHubs;
-	int miOpHubs;
-	int miSlots;
-	int miLimit;
-	int miOpen;
-	int miBandwidth;
-	int miDownload;
-	string msFraction;
-	string msMode;
-
 public:
 
 	cDCUser();
 	cDCUser(const string & sNick);
 	virtual ~cDCUser();
+
 	bool CanSend();
 	void Send(const string & sData, bool bAddSep = false, bool bFlush = true);
 	const string & GetIp() const { return msIp; } /** Get IP address of user */
 	const string & GetNick() const { return msNick; } /** Get nick (for plugins) */
 	const string & Nick() const { return msNick; }
-	const string & GetMyINFO() const { return msMyINFO; } /** Get MyINFO */
-	const string & MyINFO() const { return msMyINFO; }
+	const string & MyINFO() const { return myInfo.getMyInfo(); }
 	bool GetInUserList() const { return mbInUserList; } /** (for plugins) */
 	bool GetInOpList() const { return mbInOpList; } /** (for plugins) */
 	bool GetInIpList() const { return mbInIpList; } /** (for plugins) */
@@ -110,42 +83,49 @@ public:
 	int GetProfile() const;
 	void SetIp(const string & sIP);
 
-	const string & GetDesc() const { return msDesc; } /** Get description (for plugins) */
-	const string & GetEmail() const { return msEmail; } /** Get e-mail (for plugins) */
-	const string & GetConnection() const { return msConnection; } /** Get connection (for plugins) */
-	unsigned GetByte() const { return miByte; } /** Get byte (for plugins) */
-	__int64 GetShare() const { return miShare; } /** Get share (for plugins) */
-	bool IsPassive() const { return mbPassive; }
-
-	const string & GetTag() const { return msTag; }
-	const string & GetClient() const { return msClient; }
-	const string & GetVersion() const { return msVersion; }
-	unsigned GetUnRegHubs() const { return miUnRegHubs; }
-	unsigned GetRegHubs() const { return miRegHubs; }
-	unsigned GetOpHubs() const { return miOpHubs; }
-	unsigned GetSlots() const { return miSlots; }
-	unsigned GetLimit() const { return miLimit; }
-	unsigned GetOpen() const { return miOpen; }
-	unsigned GetBandwidth() const { return miBandwidth; }
-	unsigned GetDownload() const { return miDownload; }
-	const string & GetFraction() const { return msFraction; }
-	const string & GetMode() const { return msMode; }
-
-	// check myinfo format
-	bool SetMyINFO(const string & sMyINFO, const string & sNick); /** (for plugins) */
-	bool SetMyINFO(cDCParserBase * Parser);
-	void ParseMyINFO(cDCParserBase * Parser);
-
 	void SetOpList(bool bInOpList); /** (for plugins) */
 	void SetIpList(bool bInIpList); /** (for plugins) */
 	void SetHide(bool bHide); /** (for plugins) */
 	void SetForceMove(bool bForceMove); /** (for plugins) */
 	void SetKick(bool bKick); /** (for plugins) */
 
+
+
+	const string & GetMyINFO(/*bool real = false*/) const;
+	bool SetMyINFO(const string & myInfo, const string & nick); /** (for plugins) */
+	bool SetMyINFO(cDCParserBase * parser);
+
+	const string & GetDesc(/*bool real = false*/) const;
+	const string & GetEmail(/*bool real = false*/) const;
+	const string & GetConnection(/*bool real = false*/) const;
+	unsigned GetByte(/*bool real = false*/) const;
+
+	// setShare ?
+	__int64 GetShare(/*bool real = false*/) const;
+
+	// setPassive ?
+	bool IsPassive() const;
+
+	const string & GetTag(/*bool real = false*/) const;
+	const string & GetClient(/*bool real = false*/) const;
+	const string & GetVersion(/*bool real = false*/) const;
+	unsigned GetUnRegHubs(/*bool real = false*/) const;
+	unsigned GetRegHubs(/*bool real = false*/) const;
+	unsigned GetOpHubs(/*bool real = false*/) const;
+	unsigned GetSlots(/*bool real = false*/) const;
+	unsigned GetLimit(/*bool real = false*/) const;
+	unsigned GetOpen(/*bool real = false*/) const;
+	unsigned GetBandwidth(/*bool real = false*/) const;
+	unsigned GetDownload(/*bool real = false*/) const;
+	const string & GetFraction(/*bool real = false*/) const;
+	const string & GetMode(/*bool real = false*/) const;
+
+	unsigned int getTagNil(/*bool real = false*/) const;
+
 private:
 
-	inline void FindIntParam(const string find, int & param, unsigned);
-	inline void ParseTag();
+	MyInfo myInfo;
+	string msIp; /** IP address of user/bot */
 
 }; // cDCUser
 

@@ -32,8 +32,7 @@
 	#include <Iphlpapi.h> /** mac address */
 	#pragma comment(lib, "Iphlpapi.lib") /** mac address */
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
-		//#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
-		#define sprintf(a,b,...) sprintf_s(a,sizeof(a),b,__VA_ARGS__)
+		#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
 	#endif
 #endif
 
@@ -591,7 +590,7 @@ int cConn::Send(const char *buf, size_t &len) {
 		#ifdef USE_UDP
 		if(!bUDP) {
 		#endif
-			int count = 0;
+			//int count = 0;
 			//do {
 				n = send(mSocket, buf + total, bytesleft, 
 				#ifndef _WIN32

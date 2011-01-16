@@ -29,7 +29,6 @@
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1400)
 	#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
-	#define sprintf(a,b,...) sprintf_s(a,sizeof(b),b,__VA_ARGS__)
 #endif
 
 int cException::recursion = 0;

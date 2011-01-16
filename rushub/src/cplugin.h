@@ -61,7 +61,7 @@ using namespace ::std;
 #endif // REG_PLUGIN
 
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10009  //< Internal plugin version
+	#define INTERNAL_PLUGIN_VERSION 10010  //< Internal plugin version
 #endif
 
 #ifndef DC_SEPARATOR
@@ -81,21 +81,23 @@ enum {
 	eT_WEB_CLIENT
 };
 
-typedef enum { /** Params with null values flags */
-	eMYINFO_TAG       = 1 << 0,   //< Tag
-	eMYINFO_CLIENT    = 1 << 1,   //< Client name
-	eMYINFO_VERSION   = 1 << 2,   //< Client version
-	eMYINFO_MODE      = 1 << 3,   //< Mode
-	eMYINFO_UNREG     = 1 << 4,   //< Usual hubs
-	eMYINFO_REG       = 1 << 5,   //< Reg hubs
-	eMYINFO_OP        = 1 << 6,   //< Op hubs
-	eMYINFO_SLOT      = 1 << 7,   //< Slots
-	eMYINFO_LIMIT     = 1 << 8,   //< Limit
-	eMYINFO_OPEN      = 1 << 9,   //< Open
-	eMYINFO_BANDWIDTH = 1 << 10,  //< Bandwidth
-	eMYINFO_DOWNLOAD  = 1 << 11,  //< Download
-	eMYINFO_FRACTION  = 1 << 12,  //< Fraction
-} tMYINFONilType;
+/** Params with null values flags */
+enum TagNil {
+	TAGNIL_NO        = 0,        //< No
+	TAGNIL_TAG       = 1 << 0,   //< Tag
+	TAGNIL_CLIENT    = 1 << 1,   //< Client name
+	TAGNIL_VERSION   = 1 << 2,   //< Client version
+	TAGNIL_MODE      = 1 << 3,   //< Mode
+	TAGNIL_UNREG     = 1 << 4,   //< Usual hubs
+	TAGNIL_REG       = 1 << 5,   //< Reg hubs
+	TAGNIL_OP        = 1 << 6,   //< Op hubs
+	TAGNIL_SLOT      = 1 << 7,   //< Slots
+	TAGNIL_LIMIT     = 1 << 8,   //< Limit
+	TAGNIL_OPEN      = 1 << 9,   //< Open
+	TAGNIL_BANDWIDTH = 1 << 10,  //< Bandwidth
+	TAGNIL_DOWNLOAD  = 1 << 11,  //< Download
+	TAGNIL_FRACTION  = 1 << 12,  //< Fraction
+};
 
 namespace nProtoEnums {
 
@@ -247,7 +249,6 @@ class cDCUserBase {
 public:
 
 	cDCConnBase * mDCConnBase;  //< Connection
-	unsigned int mNil;          //< Empty MyINFO command parameters
 
 public:
 
@@ -256,41 +257,48 @@ public:
 	virtual cDCUserBase & operator=(const cDCUserBase &) { return *this; }
 
 	virtual const string & GetNick() const = 0;        //< Get user's nick
-	virtual const string & GetMyINFO() const = 0;      //< Get user's MyINFO cmd
 
 	virtual bool GetInUserList() const = 0;            //< User in user-list
-	virtual bool GetInOpList() const = 0;              //< User in op-list (has op-key)
-	virtual bool GetInIpList() const = 0;              //< User in ip-list (can receive ip addresses of users)
-	virtual bool GetHide() const = 0;                  //< User is hidden
-	virtual bool GetForceMove() const = 0;             //< User can redirect
-	virtual bool GetKick() const = 0;                  //< User can kick
 
-	virtual bool SetMyINFO(const string &sMyINFO, const string & sNick) = 0; //< Set user's MyINFO cmd
+	virtual bool GetInOpList() const = 0;              //< User in op-list (has op-key)
 	virtual void SetOpList(bool) = 0;                  //< Add user in op-list
+
+	virtual bool GetInIpList() const = 0;              //< User in ip-list (can receive ip addresses of users)
 	virtual void SetIpList(bool) = 0;                  //< Add user in ip-list
+
+	virtual bool GetHide() const = 0;                  //< User is hidden
 	virtual void SetHide(bool) = 0;                    //< Hide the user
+
+	virtual bool GetForceMove() const = 0;             //< User can redirect
 	virtual void SetForceMove(bool) = 0;               //< Redirect flag (user can redirect)
+
+	virtual bool GetKick() const = 0;                  //< User can kick
 	virtual void SetKick(bool) = 0;                    //< Kick flag (user can kick)
 
-	virtual const string & GetDesc() const = 0;        //< Get user's description
-	virtual const string & GetEmail() const = 0;       //< Get user's email address
-	virtual const string & GetConnection() const = 0;  //< Get user's connection flag
-	virtual unsigned GetByte() const = 0;              //< Get user's magic byte
-	virtual __int64 GetShare() const = 0;              //< Get user's share size
+	virtual const string & GetMyINFO(/*bool real = false*/) const = 0;      //< Get user's MyINFO cmd
+	virtual bool SetMyINFO(const string &sMyINFO, const string & sNick) = 0; //< Set user's MyINFO cmd
 
-	virtual const string & GetTag() const = 0;         //< Get user's tag
-	virtual const string & GetClient() const = 0;      //< Get user's client
-	virtual const string & GetVersion() const = 0;     //< Get user's client version
-	virtual const string & GetMode() const = 0;        //< Get user's mode
-	virtual unsigned GetUnRegHubs() const = 0;         //< Get user's unreg-hubs
-	virtual unsigned GetRegHubs() const = 0;           //< Get user's reg-hubs
-	virtual unsigned GetOpHubs() const = 0;            //< Get user's op-hubs
-	virtual unsigned GetSlots() const = 0;             //< Get user's slots
-	virtual unsigned GetLimit() const = 0;             //< Get user's L-limit
-	virtual unsigned GetOpen() const = 0;              //< Get user's O-limit
-	virtual unsigned GetBandwidth() const = 0;         //< Get user's B-limit
-	virtual unsigned GetDownload() const = 0;          //< Get user's D-limit
-	virtual const string & GetFraction() const = 0;    //< Get user's F-limit
+	virtual const string & GetDesc(/*bool real = false*/) const = 0;        //< Get user's description
+	virtual const string & GetEmail(/*bool real = false*/) const = 0;       //< Get user's email address
+	virtual const string & GetConnection(/*bool real = false*/) const = 0;  //< Get user's connection flag
+	virtual unsigned GetByte(/*bool real = false*/) const = 0;              //< Get user's magic byte
+	virtual __int64 GetShare(/*bool real = false*/) const = 0;              //< Get user's share size
+
+	virtual const string & GetTag(/*bool real = false*/) const = 0;         //< Get user's tag
+	virtual const string & GetClient(/*bool real = false*/) const = 0;      //< Get user's client
+	virtual const string & GetVersion(/*bool real = false*/) const = 0;     //< Get user's client version
+	virtual const string & GetMode(/*bool real = false*/) const = 0;        //< Get user's mode
+	virtual unsigned GetUnRegHubs(/*bool real = false*/) const = 0;         //< Get user's unreg-hubs
+	virtual unsigned GetRegHubs(/*bool real = false*/) const = 0;           //< Get user's reg-hubs
+	virtual unsigned GetOpHubs(/*bool real = false*/) const = 0;            //< Get user's op-hubs
+	virtual unsigned GetSlots(/*bool real = false*/) const = 0;             //< Get user's slots
+	virtual unsigned GetLimit(/*bool real = false*/) const = 0;             //< Get user's L-limit
+	virtual unsigned GetOpen(/*bool real = false*/) const = 0;              //< Get user's O-limit
+	virtual unsigned GetBandwidth(/*bool real = false*/) const = 0;         //< Get user's B-limit
+	virtual unsigned GetDownload(/*bool real = false*/) const = 0;          //< Get user's D-limit
+	virtual const string & GetFraction(/*bool real = false*/) const = 0;    //< Get user's F-limit
+
+	virtual unsigned int getTagNil(/*bool real = false*/) const = 0;              //< Get user's tagNil param
 
 }; // cDCUserBase
 
