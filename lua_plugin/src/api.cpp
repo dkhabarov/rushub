@@ -30,6 +30,7 @@
 #include "api.h"
 #include "clua.h"
 #include "uid.h"
+#include "cdir.h"
 
 using namespace std;
 
@@ -141,12 +142,17 @@ int ConfigNewindex(lua_State *L) {
 }
 
 void LogError(const char *sMsg) {
-	static string s(cLua::mCurServer->GetMainDir() + "luaerr.log");
-	ofstream Ofs(s.c_str(), ios_base::app);
-	if(sMsg){
+	string sLogs (cLua::mCurServer->GetMainDir() + "logs/");
+	if(!DirExists (sLogs.c_str())) {
+		mkDir (sLogs.c_str());
+	}
+	string logFile (sLogs + "luaerr.log");
+	ofstream Ofs (logFile.c_str(), ios_base::app);
+	if (sMsg) {
 		Ofs << "[" << cLua::mCurServer->GetTime() << "] " << string(sMsg) << endl;
-	}else{
-		Ofs << "[" << cLua::mCurServer->GetTime() << "] unknown LUA error" << endl;}
+	} else {
+		Ofs << "[" << cLua::mCurServer->GetTime() << "] unknown LUA error" << endl;
+	}
 	Ofs.flush();
 	Ofs.close();
 }

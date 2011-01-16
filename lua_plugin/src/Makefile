@@ -17,7 +17,7 @@ OBJS = $(CURDIR)/api.o $(CURDIR)/cdir.o $(CURDIR)/clua.o $(CURDIR)/cluainterpret
 lib: $(OBJS)
 	$(CXX) -llua5.1 -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/tinyxml.a
 
-$(CURDIR)/api.o: $(CURDIR)/api.cpp $(CURDIR)/cplugin.h $(CURDIR)/api.h $(CURDIR)/clist.h $(CURDIR)/ctimerlist.h $(CURDIR)/cluainterpreter.h $(CURDIR)/ctaskslist.h $(CURDIR)/clua.h $(CURDIR)/uid.h
+$(CURDIR)/api.o: $(CURDIR)/api.cpp $(CURDIR)/cplugin.h $(CURDIR)/api.h $(CURDIR)/clist.h $(CURDIR)/ctimerlist.h $(CURDIR)/cluainterpreter.h $(CURDIR)/ctaskslist.h $(CURDIR)/clua.h $(CURDIR)/uid.h $(CURDIR)/cdir.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(CURDIR)/cdir.o: $(CURDIR)/cdir.cpp $(CURDIR)/cdir.h
