@@ -17,19 +17,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "api.h"
-#include "clua.h"
-
 #include <fstream>
 #include <vector>
 #ifndef _WIN32
 	#include <string.h> // strlen
 #else
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
-		//#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
-		#define sprintf(a,b,...) sprintf_s(a,sizeof(b),b,__VA_ARGS__)
+		#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
 	#endif
 #endif
+
+#include "api.h"
+#include "clua.h"
+#include "uid.h"
+
 using namespace std;
 
 enum {
@@ -37,6 +38,8 @@ enum {
 	eHS_RESTART
 };
 
+// lua 5.1
+#define luaL_typeerror luaL_typerror
 
 #define MAX_TIMERS 100 // max count timers per script
 #define ERR_COUNT(SARG) { \
@@ -51,10 +54,6 @@ if(lua_gettop(L) != NARG) { \
 	char sBuf[32] = { '\0' }; \
 	sprintf(sBuf, "%d", NARG); \
 	ERR_COUNT(sBuf); \
-}
-
-#define ERR_TYPEMETA(NARG, OBJ, SARG) { \
-	return luaL_error(L, "bad argument #%d to " LUA_QS " (%s expected, got %s)", NARG, OBJ, SARG, luaL_typename(L, NARG)); \
 }
 
 #define REDIRECT_REASON_MAX_LEN 1024
@@ -73,8 +72,6 @@ for(it = cLua::mCurLua->mLua.begin(); it != cLua::mCurLua->mLua.end(); ++it) { \
 } \
 if(!LIP || !LIP->mL) ERR("script was not found");
 
-// lua 5.1
-#define luaL_typeerror luaL_typerror
 
 namespace nLua {
 
@@ -86,9 +83,9 @@ cDCConnBase * GetDCConnBase(lua_State *L, int indx) {
 	return Conn;
 }
 
-int Tostring(lua_State *L) {
+int ConfigTostring(lua_State *L) {
 	char buf[9] = { '\0' };
-	sprintf(buf, "%p", *((void**)lua_touserdata(L, 1)));
+	sprintf(buf, "%p", lua_touserdata(L, 1));
 	lua_pushfstring(L, "%s (%s)", lua_tostring(L, lua_upvalueindex(1)), buf);
 	return 1;
 }
@@ -103,123 +100,6 @@ int ConfigTable(lua_State *L) {
 		lua_rawset(L, -3);
 	}
 	return 1;
-}
-
-unsigned int GetHash(const char * s) {
-	size_t i, l = strlen(s);
-	unsigned h = l;
-	for(i = l; i > 0;)
-		h ^= ((h << 5) + (h >> 2) + (unsigned char)(s[--i]));
-	return h / 2;
-}
-
-typedef enum { /** Param's hash */
-	ePH_IP         = 90709,      //< "sIP"
-	ePH_UID        = 92355,      //< "UID"
-	ePH_TAG        = 4321573,    //< "sTag"
-	ePH_IPCONN     = 73645412,   //< "sIPConn"
-	ePH_KICK       = 136610353,  //< "bKick"
-	ePH_NICK       = 136635514,  //< "sNick"
-	ePH_CONN       = 137104726,  //< "sConn"
-	ePH_OPEN       = 137319447,  //< "iOpen"
-	ePH_HIDE       = 141759876,  //< "bHide"
-	ePH_MODE       = 141762382,  //< "sMode"
-	ePH_BYTE       = 142044234,  //< "iByte"
-	ePH_DATA       = 143784544,  //< "sData"
-	ePH_PORT       = 148797436,  //< "iPort"
-	ePH_DESC       = 149333075,  //< "sDesc"
-	ePH_FRACTION   = 227502190,  //< "sFraction"
-	ePH_REGHUBS    = 376863999,  //< "iRegHubs"
-	ePH_INUSERLIST = 353254788,  //< "bInUserList"
-	ePH_REDIRECT   = 355925330,  //< "bRedirect"
-	ePH_ENTERTIME  = 381948915,  //< "iEnterTime"
-	ePH_SUPPORTS   = 404020597,  //< "sSupports"
-	ePH_PORTCONN   = 491785156,  //< "iPortConn"
-	ePH_INOPLIST   = 549773767, //< "bInOpList"
-	ePH_INIPLIST   = 549865865, //< "bInIpList"
-	ePH_BANDWIDTH  = 568949422, //< "iBandwidth"
-	ePH_SHARE      = 632724080, //< "iShare"
-	ePH_CLIENTV    = 885079029, //< "sClientVersion"
-	ePH_PROFILE    = 970292741, //< "iProfile"
-	ePH_SLOTS      = 1035743627, //< "iSlots"
-	ePH_VERSION    = 1055480429, //< "sVersion"
-	ePH_EMAIL      = 1106490266, //< "sEmail"	
-	ePH_DOWNLOAD   = 1180934250, //< "iDownload"
-	ePH_LIMIT      = 1231291461, //< "iLimit"
-	ePH_MACADDRESS = 1643104854, //< "sMacAddress"
-	ePH_MYINFO     = 1652447804, //< "sMyINFO"
-	ePH_CLIENTN    = 1719639115, //< "sClientName"
-	ePH_USHUBS     = 1868311651, //< "iUsHubs"
-	ePH_OPHUBS     = 1868312482, //< "iOpHubs"
-} tParamHash;
-
-int UserIndex(lua_State *L) {
-	cDCConnBase * Conn = GetDCConnBase(L, 1);
-	if(!Conn) ERR_TYPEMETA(1, "UID", "userdata");
-	const char * s = lua_tostring(L, 2);
-	if(!s) ERR_TYPEMETA(2, "UID", "string");
-	void ** userdata;
-	switch(GetHash(s)) {
-		case ePH_NICK:       if(Conn->mDCUserBase)lua_pushstring(L, Conn->mDCUserBase->GetNick().c_str());else lua_pushnil(L); break;
-		case ePH_IP:         lua_pushstring (L, Conn->GetIp().c_str()); break;
-		case ePH_PROFILE:    lua_pushnumber (L, Conn->GetProfile()); break;
-		case ePH_MYINFO:     if(Conn->mDCUserBase)lua_pushstring(L, Conn->mDCUserBase->GetMyINFO().c_str());else lua_pushnil(L); break;
-		case ePH_SHARE:      if(Conn->mDCUserBase)lua_pushnumber(L, (double)Conn->mDCUserBase->GetShare());else lua_pushnil(L); break;
-		case ePH_MODE:       if(Conn->mDCUserBase && (Conn->mDCUserBase->mNil & eMYINFO_MODE))lua_pushstring(L, Conn->mDCUserBase->GetMode().c_str());else lua_pushnil(L); break;
-		case ePH_DESC:       if(Conn->mDCUserBase)lua_pushstring(L, Conn->mDCUserBase->GetDesc().c_str());else lua_pushnil(L); break;
-		case ePH_EMAIL:      if(Conn->mDCUserBase)lua_pushstring(L, Conn->mDCUserBase->GetEmail().c_str());else lua_pushnil(L); break;
-		case ePH_TAG:        if(Conn->mDCUserBase && (Conn->mDCUserBase->mNil & eMYINFO_TAG))lua_pushstring(L, Conn->mDCUserBase->GetTag().c_str());else lua_pushnil(L); break;
-		case ePH_CONN:       if(Conn->mDCUserBase)lua_pushstring(L, Conn->mDCUserBase->GetConnection().c_str());else lua_pushnil(L); break;
-		case ePH_BYTE:       if(Conn->mDCUserBase)lua_pushnumber(L, Conn->mDCUserBase->GetByte());else lua_pushnil(L); break;
-		case ePH_CLIENTN:    if(Conn->mDCUserBase && (Conn->mDCUserBase->mNil & eMYINFO_CLIENT))lua_pushstring(L, Conn->mDCUserBase->GetClient().c_str());else lua_pushnil(L); break;
-		case ePH_CLIENTV:    if(Conn->mDCUserBase && (Conn->mDCUserBase->mNil & eMYINFO_VERSION))lua_pushstring(L, Conn->mDCUserBase->GetVersion().c_str());else lua_pushnil(L); break;
-		case ePH_SLOTS:      if(Conn->mDCUserBase && (Conn->mDCUserBase->mNil & eMYINFO_SLOT))lua_pushnumber(L, Conn->mDCUserBase->GetSlots());else lua_pushnil(L); break;
-		case ePH_USHUBS:     if(Conn->mDCUserBase && (Conn->mDCUserBase->mNil & eMYINFO_UNREG))lua_pushnumber(L, Conn->mDCUserBase->GetUnRegHubs());else lua_pushnil(L); break;
-		case ePH_REGHUBS:    if(Conn->mDCUserBase && (Conn->mDCUserBase->mNil & eMYINFO_REG))lua_pushnumber(L, Conn->mDCUserBase->GetRegHubs());else lua_pushnil(L); break;
-		case ePH_OPHUBS:     if(Conn->mDCUserBase && (Conn->mDCUserBase->mNil & eMYINFO_OP))lua_pushnumber(L, Conn->mDCUserBase->GetOpHubs());else lua_pushnil(L); break;
-		case ePH_LIMIT:      if(Conn->mDCUserBase && (Conn->mDCUserBase->mNil & eMYINFO_LIMIT))lua_pushnumber(L, Conn->mDCUserBase->GetLimit());else lua_pushnil(L); break;
-		case ePH_OPEN:       if(Conn->mDCUserBase && (Conn->mDCUserBase->mNil & eMYINFO_OPEN))lua_pushnumber(L, Conn->mDCUserBase->GetOpen());else lua_pushnil(L); break;
-		case ePH_BANDWIDTH:  if(Conn->mDCUserBase && (Conn->mDCUserBase->mNil & eMYINFO_BANDWIDTH))lua_pushnumber(L, Conn->mDCUserBase->GetBandwidth());else lua_pushnil(L); break;
-		case ePH_DOWNLOAD:   if(Conn->mDCUserBase && (Conn->mDCUserBase->mNil & eMYINFO_DOWNLOAD))lua_pushnumber(L, Conn->mDCUserBase->GetDownload());else lua_pushnil(L); break;
-		case ePH_FRACTION:   if(Conn->mDCUserBase && (Conn->mDCUserBase->mNil & eMYINFO_FRACTION))lua_pushstring(L, Conn->mDCUserBase->GetFraction().c_str());else lua_pushnil(L); break;
-		case ePH_INOPLIST:   if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->GetInOpList() ? 1 : 0);else lua_pushnil(L); break;
-		case ePH_INIPLIST:   if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->GetInIpList() ? 1 : 0);else lua_pushnil(L); break;
-		case ePH_INUSERLIST: if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->GetInUserList() ? 1 : 0);else lua_pushnil(L); break;
-		case ePH_KICK:       if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->GetKick() ? 1 : 0);else lua_pushnil(L); break;
-		case ePH_REDIRECT:   if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->GetForceMove() ? 1 : 0);else lua_pushnil(L); break;
-		case ePH_HIDE:       if(Conn->mDCUserBase)lua_pushboolean(L, Conn->mDCUserBase->GetHide() ? 1 : 0);else lua_pushnil(L); break;
-		case ePH_PORT:       lua_pushnumber(L, Conn->GetPort()); break;
-		case ePH_PORTCONN:   lua_pushnumber(L, Conn->GetPortConn()); break;
-		case ePH_IPCONN:     lua_pushstring(L, Conn->GetIpConn().c_str()); break;
-		case ePH_MACADDRESS: lua_pushstring(L, Conn->GetMacAddr().size() ? Conn->GetMacAddr().c_str() : "n/a"); break;
-		case ePH_SUPPORTS:   lua_pushstring(L, Conn->GetSupports().c_str()); break;
-		case ePH_VERSION:    lua_pushstring(L, Conn->GetVersion().c_str()); break;
-		case ePH_DATA:       lua_pushstring(L, Conn->GetData().c_str()); break;
-		case ePH_ENTERTIME:  lua_pushnumber(L, (lua_Number)Conn->GetEnterTime()); break;
-		case ePH_UID:        userdata = (void**)lua_newuserdata(L, sizeof(void*)); *userdata = (void*)Conn; luaL_getmetatable(L, MT_USER_CONN); lua_setmetatable(L, -2); break;
-		default:             lua_pushnil(L); break;
-	}
-	return 1;
-}
-
-int UserNewindex(lua_State *L) {
-	cDCConnBase * Conn = GetDCConnBase(L, 1);
-	if(!Conn) ERR_TYPEMETA(1, "UID", "userdata");
-	const char * s = lua_tostring(L, 2);
-	if(!s) ERR_TYPEMETA(2, "UID", "string");
-	switch(GetHash(s)) {
-		case ePH_PROFILE:   Conn->SetProfile(luaL_checkint(L, 3)); break;
-		case ePH_MYINFO:    if(Conn->mDCUserBase){ s = lua_tostring(L, 3); if(!s) ERR_TYPEMETA(3, "UID", "string"); Conn->mDCUserBase->SetMyINFO(s, Conn->mDCUserBase->GetNick()); }else lua_pushnil(L); break;
-		case ePH_INOPLIST:  if(Conn->mDCUserBase){ if(lua_type(L, 3) != LUA_TBOOLEAN) ERR_TYPEMETA(3, "UID", "boolean"); Conn->mDCUserBase->SetOpList(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
-		case ePH_INIPLIST:  if(Conn->mDCUserBase){ if(lua_type(L, 3) != LUA_TBOOLEAN) ERR_TYPEMETA(3, "UID", "boolean"); Conn->mDCUserBase->SetIpList(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
-		case ePH_HIDE:      if(Conn->mDCUserBase){ if(lua_type(L, 3) != LUA_TBOOLEAN) ERR_TYPEMETA(3, "UID", "boolean"); Conn->mDCUserBase->SetHide(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
-		case ePH_KICK:      if(Conn->mDCUserBase){ if(lua_type(L, 3) != LUA_TBOOLEAN) ERR_TYPEMETA(3, "UID", "boolean"); Conn->mDCUserBase->SetKick(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
-		case ePH_REDIRECT:  if(Conn->mDCUserBase){ if(lua_type(L, 3) != LUA_TBOOLEAN) ERR_TYPEMETA(3, "UID", "boolean"); Conn->mDCUserBase->SetForceMove(lua_toboolean(L, 3) != 0); }else lua_pushnil(L); break;
-		case ePH_DATA:      s = lua_tostring(L, 3); if(!s) ERR_TYPEMETA(3, "UID", "string"); Conn->SetData(s); break;
-		default:            break;
-	}
-	lua_settop(L, 0);
-	return 0;
 }
 
 int ConfigIndex(lua_State *L) {

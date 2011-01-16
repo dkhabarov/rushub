@@ -20,29 +20,12 @@
 #ifndef CFUNCS_H
 #define CFUNCS_H
 
-#include "cplugin.h" /** nDCServer */
 #include "lua/lua.hpp"
+#include "cplugin.h" /** nDCServer */
 
 using namespace ::nDCServer;
 
 namespace nLua {
-
-typedef enum {
-	eUD_sNick       = 1 << 0,
-	eUD_sIP         = 1 << 1,
-	eUD_UID         = 1 << 2,
-	eUD_iProfile    = 1 << 3,
-	eUD_sMyINFO     = 1 << 4,
-	eUD_sData       = 1 << 5,
-	eUD_bOpList     = 1 << 6,
-	eUD_bInList     = 1 << 7,
-	eUD_iPort       = 1 << 8,
-	eUD_iPortConn   = 1 << 9,
-	eUD_sMacAddress = 1 << 10,
-	eUD_sVersion    = 1 << 11,
-	eUD_bHide       = 1 << 12,
-	eUD_bIpList     = 1 << 13
-} tUserData; /** tUserData */
 
 typedef enum {
 	eUV_iProfile = 1,
@@ -59,10 +42,8 @@ typedef struct {
 
 cDCConnBase * GetDCConnBase(lua_State *L, int indx);
 
-int Tostring(lua_State *L);
+int ConfigTostring(lua_State *L);
 int ConfigTable(lua_State *L);
-int UserIndex(lua_State *L);
-int UserNewindex(lua_State *L);
 int ConfigIndex(lua_State *L);
 int ConfigNewindex(lua_State *L);
 

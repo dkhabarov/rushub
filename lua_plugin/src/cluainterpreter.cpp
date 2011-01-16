@@ -17,9 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <string.h>
+
 #include "cluainterpreter.h"
 #include "clua.h" /** for dirs */
-#include <string.h>
+#include "uid.h"
 
 #define HAVE_LUA_5_1
 
@@ -319,7 +321,7 @@ void cLuaInterpreter::CreateUserMT() {
 
 	lua_pushliteral(mL, "__tostring");
 	lua_pushstring(mL, MT_USER_CONN);
-	lua_pushcclosure(mL, Tostring, 1);
+	lua_pushcclosure(mL, UidTostring, 1);
 	lua_settable(mL, -3);
 
 	lua_pushliteral(mL, "__metatable");
@@ -344,7 +346,7 @@ void cLuaInterpreter::CreateConfigMT() {
 
 	lua_pushliteral(mL, "__tostring");
 	lua_pushstring(mL, MT_CONFIG);
-	lua_pushcclosure(mL, Tostring, 1);
+	lua_pushcclosure(mL, ConfigTostring, 1);
 	lua_settable(mL, -3);
 
 	lua_pushliteral(mL, "__metatable");

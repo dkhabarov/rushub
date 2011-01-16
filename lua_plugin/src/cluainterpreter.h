@@ -29,7 +29,6 @@ using namespace std;
 
 namespace nLua {
 
-#define MT_USER_CONN "User object"
 #define MT_CONFIG "Config object"
 
 class cLuaInterpreter {
