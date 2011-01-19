@@ -186,9 +186,9 @@ bool LimitLines(const string &sStr, int iMax) {
 }
 
 void StringSplit(const string & sStr, char sDelim, vector<string> & vRes) {
-	unsigned i,j = 0;
+	size_t i, j = 0;
 	while( (i = sStr.find_first_of(sDelim, j)) != sStr.npos ) {
-		vRes.push_back(sStr.substr(j,i - j));
+		vRes.push_back(sStr.substr(j, i - j));
 		j = i + 1;
 	}
 	vRes.push_back(sStr.substr(j));
