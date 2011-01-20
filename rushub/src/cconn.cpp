@@ -432,7 +432,7 @@ int cConn::ReadFromRecvBuf() {
 		throw "Fatal error: ReadFromBuf with null string pointer";
 	}
 	char *buf = msRecvBuf + miRecvBufRead;
-	unsigned pos, len = (miRecvBufEnd - miRecvBufRead);
+	size_t pos, len = (miRecvBufEnd - miRecvBufRead);
 	if((pos = string(buf).find(msSeparator)) == string::npos) {
 		if(msStr->size() + len > miStrSizeMax) {
 			CloseNow(eCR_MAXSIZE_RECV);
@@ -657,12 +657,12 @@ int cConn::OnTimerBase(cTime &now) {
 		return 0;
 	}
 	Flush();
-	OnTimer(now);
+	onTimer(now);
 	return 0;
 }
 
 /** Main timer */
-int cConn::OnTimer(cTime &) {
+int cConn::onTimer(cTime &) {
 	return 0;
 }
 

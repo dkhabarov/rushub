@@ -133,7 +133,7 @@ public:
 	int OnTimerBase(cTime &now);
 
 	/** Main timer */
-	virtual int OnTimer(cTime &now);
+	virtual int onTimer(cTime &now);
 
 	/** InputData */
 	int InputData(cConn *);

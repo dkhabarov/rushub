@@ -49,7 +49,7 @@ void cUserList::ufSend::operator()(cUserBase *User) {
 		if(!mbProfile) {
 			User->Send(msData, false); // newPolitic
 		} else {
-			int iProfile = User->GetProfile() + 1;
+			int iProfile = User->getProfile() + 1;
 			if(iProfile < 0) iProfile = -iProfile;
 			if(iProfile > 31) iProfile = (iProfile % 32) - 1;
 			if(miProfile & (1 << iProfile))
@@ -65,7 +65,7 @@ void cUserList::ufSendWithNick::operator()(cUserBase *User) {
 			User->Send(User->Nick(), false, false);
 			User->Send(msDataEnd, true); // newPolitic
 		} else {
-			int iProfile = User->GetProfile() + 1;
+			int iProfile = User->getProfile() + 1;
 			if(iProfile < 0) iProfile = -iProfile;
 			if(iProfile > 31) iProfile = (iProfile % 32) - 1;
 			if(miProfile & (1 << iProfile)) {
@@ -182,10 +182,10 @@ void cFullUserList::ufDoINFOList::operator()(cUserBase *User) {
 }
 
 void cFullUserList::ufDoIpList::operator()(cUserBase *User) {
-	if(!User->Hide() && User->GetIp().size()) {
+	if(!User->Hide() && User->getIp().size()) {
 		msList.append(User->Nick());
 		msList.append(" ");
-		msList.append(User->GetIp());
+		msList.append(User->getIp());
 		msList.append(msSep);
 	}
 }

@@ -105,7 +105,7 @@ int cDCConn::CheckTimeOut(tTimeOut to, cTime &now) {
 }
 
 /** Timer for the current connection */
-int cDCConn::OnTimer(cTime &now) {
+int cDCConn::onTimer(cTime &now) {
 	cDCServer * dcserver = Server();
 
 	/** Check timeouts. For entering only */
@@ -203,7 +203,7 @@ void cDCConnFactory::DelConn(cConn * &conn) {
 		if(dcconn->GetLSFlag(eLS_ALOWED)) {
 			dcserver->miTotalUserCount --;
 			if(dcconn->mDCUser)
-				dcserver->miTotalShare -= dcconn->mDCUser->GetShare();
+				dcserver->miTotalShare -= dcconn->mDCUser->getShare();
 			else
 				if(conn->Log(3)) conn->LogStream() << "Del conn without user" << endl;
 		} else {
@@ -213,7 +213,7 @@ void cDCConnFactory::DelConn(cConn * &conn) {
 			if(dcconn->mDCUser->mbInUserList)
 				dcserver->RemoveFromDCUserList((cDCUser*)dcconn->mDCUser);
 			else // remove from enter list, if user was already added in it, but user was not added in user list
-				dcserver->mEnterList.RemoveByNick(dcconn->mDCUser->GetNick());
+				dcserver->mEnterList.RemoveByNick(dcconn->mDCUser->getNick());
 			delete dcconn->mDCUser;
 			dcconn->mDCUser = NULL;
 			dcconn->mDCUserBase = NULL;

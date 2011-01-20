@@ -932,7 +932,7 @@ void cDCProtocol::SendMode(cDCConn *dcconn, const string & sStr, int iMode, cUse
 	} else if(iMode == 4) { /** Send to all except users with ip of the current user */
 		cDCConn * conn;
 		vector<cDCConn*> ul;
-		for(cDCIPList::iterator mit = mDCServer->mIPListConn->begin(cDCConn::Ip2Num(dcconn->GetIp().c_str())); mit != mDCServer->mIPListConn->end(); ++mit) {
+		for(cDCIPList::iterator mit = mDCServer->mIPListConn->begin(cDCConn::Ip2Num(dcconn->getIp().c_str())); mit != mDCServer->mIPListConn->end(); ++mit) {
 			conn = (cDCConn*)(*mit);
 			if(conn->mDCUser && conn->mDCUser->mbInUserList) {
 				conn->mDCUser->mbInUserList = false;

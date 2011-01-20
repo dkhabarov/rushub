@@ -100,7 +100,7 @@ class cDCServer : public cServer, public cDCServerBase {
 
 	friend class ::nDCServer::cDCListIterator; /** for mConnList */
 	friend class ::nDCServer::nProtocol::cDCProtocol; /** for BeforeUserEnter in cDCProtocol::DC_MyINFO */
-	friend class ::nDCServer::cDCConn; /** for DoUserEnter in cDCConn::OnFlush and MinDelay in cDCConn::OnTimer */
+	friend class ::nDCServer::cDCConn; /** for DoUserEnter in cDCConn::OnFlush and MinDelay in cDCConn::onTimer */
 	friend class ::nDCServer::cDCConnFactory; /** for RemoveFromDCUserList in cDCConnFactory::DelConn */
 	friend class ::nWebServer::cWebConnFactory; /** for call plugins */
 
@@ -167,7 +167,7 @@ public:
 	int Listening(int iPort = 0);
 
 	/** Main timer */
-	int OnTimer(cTime &now);
+	int onTimer(cTime &now);
 
 	/** Function checks min interval */
 	bool MinDelay(cTime &then, double sec);
@@ -273,32 +273,32 @@ private:
 
 	struct sCalls {
 		sCalls(cPluginList * List) :
-			mOnUserConnected(List, "Conn", &cPlugin::OnUserConnected),
-			mOnUserDisconnected(List, "Disconn", &cPlugin::OnUserDisconnected),
-			mOnUserEnter(List, "Enter", &cPlugin::OnUserEnter),
-			mOnUserExit(List, "Exit", &cPlugin::OnUserExit),
-			mOnSupports(List, "Supports", &cPlugin::OnSupports),
-			mOnKey(List, "Key", &cPlugin::OnKey),
-			mOnValidateNick(List, "Validate", &cPlugin::OnValidateNick),
-			mOnMyPass(List, "MyPass", &cPlugin::OnMyPass),
-			mOnVersion(List, "Version", &cPlugin::OnVersion),
-			mOnGetNickList(List, "GetNickList", &cPlugin::OnGetNickList),
-			mOnMyINFO(List, "MyINFO", &cPlugin::OnMyINFO),
-			mOnChat(List, "Chat", &cPlugin::OnChat),
-			mOnTo(List, "To", &cPlugin::OnTo),
-			mOnConnectToMe(List, "CTM", &cPlugin::OnConnectToMe),
-			mOnRevConnectToMe(List, "RCTM", &cPlugin::OnRevConnectToMe),
-			mOnSearch(List, "Search", &cPlugin::OnSearch),
-			mOnSR(List, "SR", &cPlugin::OnSR),
-			mOnKick(List, "Kick", &cPlugin::OnKick),
-			mOnOpForceMove(List, "OpForce", &cPlugin::OnOpForceMove),
-			mOnGetINFO(List, "GetINFO", &cPlugin::OnGetINFO),
-			mOnMCTo(List, "MCTo", &cPlugin::OnMCTo),
-			mOnTimer(List, "Timer", &cPlugin::OnTimer),
-			mOnAny(List, "Any", &cPlugin::OnAny),
-			mOnUnknown(List, "Unknown", &cPlugin::OnUnknown),
-			mOnFlood(List, "Flood", &cPlugin::OnFlood),
-			mOnWebData(List, "WebData", &cPlugin::OnWebData)
+			mOnUserConnected(List, "Conn", &cPlugin::onUserConnected),
+			mOnUserDisconnected(List, "Disconn", &cPlugin::onUserDisconnected),
+			mOnUserEnter(List, "Enter", &cPlugin::onUserEnter),
+			mOnUserExit(List, "Exit", &cPlugin::onUserExit),
+			mOnSupports(List, "Supports", &cPlugin::onSupports),
+			mOnKey(List, "Key", &cPlugin::onKey),
+			mOnValidateNick(List, "Validate", &cPlugin::onValidateNick),
+			mOnMyPass(List, "MyPass", &cPlugin::onMyPass),
+			mOnVersion(List, "Version", &cPlugin::onVersion),
+			mOnGetNickList(List, "GetNickList", &cPlugin::onGetNickList),
+			mOnMyINFO(List, "MyINFO", &cPlugin::onMyINFO),
+			mOnChat(List, "Chat", &cPlugin::onChat),
+			mOnTo(List, "To", &cPlugin::onTo),
+			mOnConnectToMe(List, "CTM", &cPlugin::onConnectToMe),
+			mOnRevConnectToMe(List, "RCTM", &cPlugin::onRevConnectToMe),
+			mOnSearch(List, "Search", &cPlugin::onSearch),
+			mOnSR(List, "SR", &cPlugin::onSR),
+			mOnKick(List, "Kick", &cPlugin::onKick),
+			mOnOpForceMove(List, "OpForce", &cPlugin::onOpForceMove),
+			mOnGetINFO(List, "GetINFO", &cPlugin::onGetINFO),
+			mOnMCTo(List, "MCTo", &cPlugin::onMCTo),
+			mOnTimer(List, "Timer", &cPlugin::onTimer),
+			mOnAny(List, "Any", &cPlugin::onAny),
+			mOnUnknown(List, "Unknown", &cPlugin::onUnknown),
+			mOnFlood(List, "Flood", &cPlugin::onFlood),
+			mOnWebData(List, "WebData", &cPlugin::onWebData)
 		{};
 		cCL_Connection     mOnUserConnected;
 		cCL_Connection     mOnUserDisconnected;

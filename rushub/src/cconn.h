@@ -198,7 +198,7 @@ public:
 	int OnTimerBase(cTime &now);
 
 	/** Main timer */
-	virtual int OnTimer(cTime &now);
+	virtual int onTimer(cTime &now);
 
 	virtual int StrLog(ostream & ostr, int level, int maxLevel, bool isError = false);
 

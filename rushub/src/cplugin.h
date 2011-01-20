@@ -99,7 +99,7 @@ enum TagNil {
 	TAGNIL_FRACTION  = 1 << 12,  //< Fraction
 };
 
-namespace nProtoEnums {
+namespace protoenums {
 
 typedef enum { /** Types of the commands */
 	eDC_NO = -1,
@@ -200,7 +200,7 @@ enum { eCH_SR_ALL, eCH_SR_FROM, eCH_SR_PATH, eCH_SR_SIZE, eCH_SR_SLOTS, eCH_SR_S
 */
 enum { eCH_MC_ALL, eCH_MC_TO, eCH_MC_FROM, eCH_MC_MSG };
 
-}; // nProtoEnums
+}; // protoenums
 
 
 class cDCUserBase;
@@ -222,21 +222,21 @@ public:
 	virtual ~cDCConnBase() {}
 	virtual cDCConnBase & operator=(const cDCConnBase &) { return *this; }
 
-	virtual int Send(const string & sData, bool bAddSep = false, bool bFlush = true) = 0; //< Sending RAW cmd to the client
-	virtual int GetPort() const = 0;                 //< Get real clients port
-	virtual int GetPortConn() const = 0;             //< Get connection port
-	virtual int GetProfile() const = 0;              //< Get client profile
-	virtual long GetEnterTime() const = 0;           //< Get enter time
-	virtual unsigned long GetNetIp() const = 0;      //< Get numeric IP
-	virtual void SetProfile(int) = 0;                //< Set client profile
-	virtual void SetData(const string &) = 0;        //< Set some client data
-	virtual void Disconnect() = 0;                   //< Disconnect this client
-	virtual const string & GetVersion() const = 0;   //< Client's protocol version
-	virtual const string & GetIp() const = 0;        //< Get string of IP
-	virtual const string & GetIpConn() const = 0;    //< Get string of server ip (host)
-	virtual const string & GetData() const = 0;      //< Get some client data
-	virtual const string & GetMacAddr() const = 0;   //< Get mac address
-	virtual const string & GetSupports() const = 0;  //< Get all support cmd parameters, except of cmd name
+	virtual int Send(const string & data, bool addSep = false, bool flush = true) = 0; //< Sending RAW cmd to the client
+	virtual int getPort() const = 0;                 //< Get real clients port
+	virtual int getPortConn() const = 0;             //< Get connection port
+	virtual int getProfile() const = 0;              //< Get client profile
+	virtual long getEnterTime() const = 0;           //< Get enter time
+	virtual unsigned long getNetIp() const = 0;      //< Get numeric IP
+	virtual void setProfile(int) = 0;                //< Set client profile
+	virtual void setData(const string &) = 0;        //< Set some client data
+	virtual void disconnect() = 0;                   //< Disconnect this client
+	virtual const string & getVersion() const = 0;   //< Client's protocol version
+	virtual const string & getIp() const = 0;        //< Get string of IP
+	virtual const string & getIpConn() const = 0;    //< Get string of server ip (host)
+	virtual const string & getData() const = 0;      //< Get some client data
+	virtual const string & getMacAddress() const = 0;//< Get mac address
+	virtual const string & getSupports() const = 0;  //< Get all support cmd parameters, except of cmd name
 
 }; // cDCConnBase
 
@@ -256,47 +256,47 @@ public:
 	virtual ~cDCUserBase() {}
 	virtual cDCUserBase & operator=(const cDCUserBase &) { return *this; }
 
-	virtual const string & GetNick() const = 0;        //< Get user's nick
+	virtual const string & getNick() const = 0; //< Get user's nick
 
-	virtual bool GetInUserList() const = 0;            //< User in user-list
+	virtual bool getInUserList() const = 0;     //< User in user-list
 
-	virtual bool GetInOpList() const = 0;              //< User in op-list (has op-key)
-	virtual void SetOpList(bool) = 0;                  //< Add user in op-list
+	virtual bool getInOpList() const = 0;       //< User in op-list (has op-key)
+	virtual void setInOpList(bool) = 0;         //< Add user in op-list
 
-	virtual bool GetInIpList() const = 0;              //< User in ip-list (can receive ip addresses of users)
-	virtual void SetIpList(bool) = 0;                  //< Add user in ip-list
+	virtual bool getInIpList() const = 0;       //< User in ip-list (can receive ip addresses of users)
+	virtual void setInIpList(bool) = 0;         //< Add user in ip-list
 
-	virtual bool GetHide() const = 0;                  //< User is hidden
-	virtual void SetHide(bool) = 0;                    //< Hide the user
+	virtual bool getHide() const = 0;           //< User is hidden
+	virtual void setHide(bool) = 0;             //< Hide the user
 
-	virtual bool GetForceMove() const = 0;             //< User can redirect
-	virtual void SetForceMove(bool) = 0;               //< Redirect flag (user can redirect)
+	virtual bool getForceMove() const = 0;      //< User can redirect
+	virtual void setForceMove(bool) = 0;        //< Redirect flag (user can redirect)
 
-	virtual bool GetKick() const = 0;                  //< User can kick
-	virtual void SetKick(bool) = 0;                    //< Kick flag (user can kick)
+	virtual bool getKick() const = 0;           //< User can kick
+	virtual void setKick(bool) = 0;             //< Kick flag (user can kick)
 
 	virtual const string & GetMyINFO(/*bool real = false*/) const = 0;      //< Get user's MyINFO cmd
-	virtual bool SetMyINFO(const string &sMyINFO, const string & sNick) = 0; //< Set user's MyINFO cmd
+	virtual bool SetMyINFO(const string & myInfo, const string & nick) = 0; //< Set user's MyINFO cmd
 
-	virtual const string & GetDesc(/*bool real = false*/) const = 0;        //< Get user's description
-	virtual const string & GetEmail(/*bool real = false*/) const = 0;       //< Get user's email address
-	virtual const string & GetConnection(/*bool real = false*/) const = 0;  //< Get user's connection flag
-	virtual unsigned GetByte(/*bool real = false*/) const = 0;              //< Get user's magic byte
-	virtual __int64 GetShare(/*bool real = false*/) const = 0;              //< Get user's share size
+	virtual const string & getDesc(/*bool real = false*/) const = 0;        //< Get user's description
+	virtual const string & getEmail(/*bool real = false*/) const = 0;       //< Get user's email address
+	virtual const string & getConnection(/*bool real = false*/) const = 0;  //< Get user's connection flag
+	virtual unsigned getByte(/*bool real = false*/) const = 0;              //< Get user's magic byte
+	virtual __int64 getShare(/*bool real = false*/) const = 0;              //< Get user's share size
 
-	virtual const string & GetTag(/*bool real = false*/) const = 0;         //< Get user's tag
-	virtual const string & GetClient(/*bool real = false*/) const = 0;      //< Get user's client
-	virtual const string & GetVersion(/*bool real = false*/) const = 0;     //< Get user's client version
-	virtual const string & GetMode(/*bool real = false*/) const = 0;        //< Get user's mode
-	virtual unsigned GetUnRegHubs(/*bool real = false*/) const = 0;         //< Get user's unreg-hubs
-	virtual unsigned GetRegHubs(/*bool real = false*/) const = 0;           //< Get user's reg-hubs
-	virtual unsigned GetOpHubs(/*bool real = false*/) const = 0;            //< Get user's op-hubs
-	virtual unsigned GetSlots(/*bool real = false*/) const = 0;             //< Get user's slots
-	virtual unsigned GetLimit(/*bool real = false*/) const = 0;             //< Get user's L-limit
-	virtual unsigned GetOpen(/*bool real = false*/) const = 0;              //< Get user's O-limit
-	virtual unsigned GetBandwidth(/*bool real = false*/) const = 0;         //< Get user's B-limit
-	virtual unsigned GetDownload(/*bool real = false*/) const = 0;          //< Get user's D-limit
-	virtual const string & GetFraction(/*bool real = false*/) const = 0;    //< Get user's F-limit
+	virtual const string & getTag(/*bool real = false*/) const = 0;         //< Get user's tag
+	virtual const string & getClient(/*bool real = false*/) const = 0;      //< Get user's client
+	virtual const string & getVersion(/*bool real = false*/) const = 0;     //< Get user's client version
+	virtual const string & getMode(/*bool real = false*/) const = 0;        //< Get user's mode
+	virtual unsigned getUnregHubs(/*bool real = false*/) const = 0;         //< Get user's unreg-hubs
+	virtual unsigned getRegHubs(/*bool real = false*/) const = 0;           //< Get user's reg-hubs
+	virtual unsigned getOpHubs(/*bool real = false*/) const = 0;            //< Get user's op-hubs
+	virtual unsigned getSlots(/*bool real = false*/) const = 0;             //< Get user's slots
+	virtual unsigned getLimit(/*bool real = false*/) const = 0;             //< Get user's L-limit
+	virtual unsigned getOpen(/*bool real = false*/) const = 0;              //< Get user's O-limit
+	virtual unsigned getBandwidth(/*bool real = false*/) const = 0;         //< Get user's B-limit
+	virtual unsigned getDownload(/*bool real = false*/) const = 0;          //< Get user's D-limit
+	virtual const string & getFraction(/*bool real = false*/) const = 0;    //< Get user's F-limit
 
 	virtual unsigned int getTagNil(/*bool real = false*/) const = 0;              //< Get user's tagNil param
 
@@ -416,7 +416,7 @@ public:
 namespace nPlugin {
 
 using namespace ::nDCServer;
-using namespace nProtoEnums;
+using namespace protoenums;
 using namespace nWebServer;
 
 class cPlugin;
@@ -463,42 +463,42 @@ public:
 	virtual cPlugin & operator=(const cPlugin &) { return *this; }
 
 	virtual bool RegAll(cPluginListBase *) = 0; //< Reg function in all call lists
-	virtual void OnLoad(cDCServerBase * DCServer) { mDCServer = DCServer; } //< OnLoad plugin function
+	virtual void onLoad(cDCServerBase * DCServer) { mDCServer = DCServer; } //< OnLoad plugin function
 
 	/** Events */
-	virtual int OnUserConnected(cDCConnBase *) { return 1; }
-	virtual int OnUserDisconnected(cDCConnBase *) { return 1; }
-	virtual int OnUserEnter(cDCConnBase *) { return 1; }
-	virtual int OnUserExit(cDCConnBase *) { return 1; }
-	virtual int OnSupports(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnKey(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnValidateNick(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnMyPass(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnVersion(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnGetNickList(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnMyINFO(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnChat(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnTo(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnConnectToMe(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnRevConnectToMe(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnSearch(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnSR(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnKick(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnOpForceMove(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnGetINFO(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnMCTo(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnTimer() { return 1; }
-	virtual int OnAny(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnUnknown(cDCConnBase *, cDCParserBase *) { return 1; }
-	virtual int OnFlood(cDCConnBase *, int, int) { return 1; }
-	virtual int OnWebData(cDCConnBase *, cWebParserBase *) { return 1; }
+	virtual int onUserConnected(cDCConnBase *) { return 1; }
+	virtual int onUserDisconnected(cDCConnBase *) { return 1; }
+	virtual int onUserEnter(cDCConnBase *) { return 1; }
+	virtual int onUserExit(cDCConnBase *) { return 1; }
+	virtual int onSupports(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onKey(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onValidateNick(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onMyPass(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onVersion(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onGetNickList(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onMyINFO(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onChat(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onTo(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onConnectToMe(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onRevConnectToMe(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onSearch(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onSR(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onKick(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onOpForceMove(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onGetINFO(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onMCTo(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onTimer() { return 1; }
+	virtual int onAny(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onUnknown(cDCConnBase *, cDCParserBase *) { return 1; }
+	virtual int onFlood(cDCConnBase *, int, int) { return 1; }
+	virtual int onWebData(cDCConnBase *, cWebParserBase *) { return 1; }
 
 
 	const string &Name() const { return msName; }       //< Get name of plugin
 	const string &Version() const { return msVersion; } //< Get version of plugin
 	void Suicide() { mbIsAlive = false; }               //< Destruction of plugin
 	bool IsAlive() const { return mbIsAlive; }          //< Check state
-	void SetPluginList(cPluginListBase * PluginList) { mPluginList = PluginList; } //< Set plugin-list for plugin
+	void SetPluginList(cPluginListBase * pluginList) { mPluginList = pluginList; } //< Set plugin-list for plugin
 	virtual const string & GetPluginDir() const { return mPluginList->GetPluginDir(); }  //< Get plugins path
 
 private:

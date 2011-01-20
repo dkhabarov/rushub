@@ -182,7 +182,7 @@ cPlugin * cPluginList::GetPluginByLib(const string &sLib) {
 /** OnPluginLoad */
 void cPluginList::OnPluginLoad(cPlugin *Plugin) {
 	if(Log(1)) LogStream() << "OnPluginLoad: " << Plugin->Name() << endl;
-	((cPlugin *)Plugin)->OnLoad(mDCServer);
+	((cPlugin *)Plugin)->onLoad(mDCServer);
 }
 
 }; // nPlugin

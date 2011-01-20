@@ -69,25 +69,25 @@ public:
 
 	bool CanSend();
 	void Send(const string & sData, bool bAddSep = false, bool bFlush = true);
-	const string & GetIp() const { return msIp; } /** Get IP address of user */
-	const string & GetNick() const { return msNick; } /** Get nick (for plugins) */
+	const string & getIp() const { return msIp; } /** Get IP address of user */
+	const string & getNick() const { return msNick; } /** Get nick (for plugins) */
 	const string & Nick() const { return msNick; }
 	const string & MyINFO() const { return myInfo.getMyInfo(); }
-	bool GetInUserList() const { return mbInUserList; } /** (for plugins) */
-	bool GetInOpList() const { return mbInOpList; } /** (for plugins) */
-	bool GetInIpList() const { return mbInIpList; } /** (for plugins) */
-	bool GetHide() const { return mbHide; } /** (for plugins) */
+	bool getInUserList() const { return mbInUserList; } /** (for plugins) */
+	bool getInOpList() const { return mbInOpList; } /** (for plugins) */
+	bool getInIpList() const { return mbInIpList; } /** (for plugins) */
+	bool getHide() const { return mbHide; } /** (for plugins) */
 	bool Hide() const { return mbHide; }
-	bool GetForceMove() const { return mbForceMove; } /** (for plugins) */
-	bool GetKick() const { return mbKick; } /** (for plugins) */
-	int GetProfile() const;
+	bool getForceMove() const { return mbForceMove; } /** (for plugins) */
+	bool getKick() const { return mbKick; } /** (for plugins) */
+	int getProfile() const;
 	void SetIp(const string & sIP);
 
-	void SetOpList(bool bInOpList); /** (for plugins) */
-	void SetIpList(bool bInIpList); /** (for plugins) */
-	void SetHide(bool bHide); /** (for plugins) */
-	void SetForceMove(bool bForceMove); /** (for plugins) */
-	void SetKick(bool bKick); /** (for plugins) */
+	void setInOpList(bool inOpList); /** (for plugins) */
+	void setInIpList(bool inIpList); /** (for plugins) */
+	void setHide(bool hide); /** (for plugins) */
+	void setForceMove(bool forceMove); /** (for plugins) */
+	void setKick(bool kick); /** (for plugins) */
 
 
 
@@ -95,30 +95,30 @@ public:
 	bool SetMyINFO(const string & myInfo, const string & nick); /** (for plugins) */
 	bool SetMyINFO(cDCParserBase * parser);
 
-	const string & GetDesc(/*bool real = false*/) const;
-	const string & GetEmail(/*bool real = false*/) const;
-	const string & GetConnection(/*bool real = false*/) const;
-	unsigned GetByte(/*bool real = false*/) const;
+	const string & getDesc(/*bool real = false*/) const;
+	const string & getEmail(/*bool real = false*/) const;
+	const string & getConnection(/*bool real = false*/) const;
+	unsigned getByte(/*bool real = false*/) const;
 
 	// setShare ?
-	__int64 GetShare(/*bool real = false*/) const;
+	__int64 getShare(/*bool real = false*/) const;
 
 	// setPassive ?
 	bool IsPassive() const;
 
-	const string & GetTag(/*bool real = false*/) const;
-	const string & GetClient(/*bool real = false*/) const;
-	const string & GetVersion(/*bool real = false*/) const;
-	unsigned GetUnRegHubs(/*bool real = false*/) const;
-	unsigned GetRegHubs(/*bool real = false*/) const;
-	unsigned GetOpHubs(/*bool real = false*/) const;
-	unsigned GetSlots(/*bool real = false*/) const;
-	unsigned GetLimit(/*bool real = false*/) const;
-	unsigned GetOpen(/*bool real = false*/) const;
-	unsigned GetBandwidth(/*bool real = false*/) const;
-	unsigned GetDownload(/*bool real = false*/) const;
-	const string & GetFraction(/*bool real = false*/) const;
-	const string & GetMode(/*bool real = false*/) const;
+	const string & getTag(/*bool real = false*/) const;
+	const string & getClient(/*bool real = false*/) const;
+	const string & getVersion(/*bool real = false*/) const;
+	unsigned getUnregHubs(/*bool real = false*/) const;
+	unsigned getRegHubs(/*bool real = false*/) const;
+	unsigned getOpHubs(/*bool real = false*/) const;
+	unsigned getSlots(/*bool real = false*/) const;
+	unsigned getLimit(/*bool real = false*/) const;
+	unsigned getOpen(/*bool real = false*/) const;
+	unsigned getBandwidth(/*bool real = false*/) const;
+	unsigned getDownload(/*bool real = false*/) const;
+	const string & getFraction(/*bool real = false*/) const;
+	const string & getMode(/*bool real = false*/) const;
 
 	unsigned int getTagNil(/*bool real = false*/) const;
 

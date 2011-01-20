@@ -483,7 +483,7 @@ int cServer::OutputData(cConn *conn) {
 
 /** Main mase timer */
 int cServer::OnTimerBase(cTime &now) {
-	OnTimer(now);
+	onTimer(now);
 	if(abs(int(now - mTimes.mConn)) >= miTimerConnPeriod) {
 		mTimes.mConn = now;
 		tCLIt it_e = mConnList.end();
@@ -494,7 +494,7 @@ int cServer::OnTimerBase(cTime &now) {
 }
 
 /** Main timer */
-int cServer::OnTimer(cTime &) {
+int cServer::onTimer(cTime &) {
 	return 0;
 }
 

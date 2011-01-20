@@ -34,9 +34,9 @@ public:
 	virtual void Send(const string &msg, bool sep = false, bool flush = true) = 0;
 	virtual const string & Nick() const = 0;
 	virtual const string & MyINFO() const = 0;
-	virtual const string & GetIp() const = 0;
+	virtual const string & getIp() const = 0;
 	virtual bool Hide() const = 0;
-	virtual int GetProfile() const = 0;
+	virtual int getProfile() const = 0;
 
 }; // cUserBase
 

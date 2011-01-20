@@ -36,7 +36,7 @@ namespace nDCServer {
 namespace nProtocol { class cDCProtocol; };
 
 using nProtocol::cDCProtocol;
-using nProtoEnums::eDC_UNKNOWN;
+using protoenums::eDC_UNKNOWN;
 
 
 class cDCServer;

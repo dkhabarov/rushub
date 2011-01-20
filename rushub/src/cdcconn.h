@@ -204,19 +204,19 @@ public:
 
 	cDCConn(int type, tSocket sock = 0, cServer *s = NULL);
 	virtual ~cDCConn();
-	virtual const string & GetVersion() const { return msVersion; }  //< Client's protocol version
-	virtual const string & GetIp() const { return msIp; }            //< Get string of IP
-	virtual const string & GetIpConn() const { return msIpConn; }    //< Get string of server IP (host)
-	virtual const string & GetData() const { return msData; }        //< Get some user data
-	virtual const string & GetMacAddr() const { return msMAC; }      //< Get mac address
-	virtual const string & GetSupports() const { return msSupports; }
-	virtual int GetPort() const { return miPort; }             //< Get real port
-	virtual int GetPortConn() const { return miPortConn; }     //< Get connection port
-	virtual int GetProfile() const { return miProfile; }       //< Get profile
-	virtual unsigned long GetNetIp() const { return miNetIp; }       //< Get numeric IP
-	virtual void SetProfile(int iProfile) { miProfile = iProfile; }
-	virtual void SetData(const string & sData){ msData = sData; }
-	virtual long GetEnterTime() const { return mTimes.mKey.Sec(); }
+	virtual const string & getVersion() const { return msVersion; }  //< Client's protocol version
+	virtual const string & getIp() const { return msIp; }            //< Get string of IP
+	virtual const string & getIpConn() const { return msIpConn; }    //< Get string of server IP (host)
+	virtual const string & getData() const { return msData; }        //< Get some user data
+	virtual const string & getMacAddress() const { return msMAC; }      //< Get mac address
+	virtual const string & getSupports() const { return msSupports; }
+	virtual int getPort() const { return miPort; }             //< Get real port
+	virtual int getPortConn() const { return miPortConn; }     //< Get connection port
+	virtual int getProfile() const { return miProfile; }       //< Get profile
+	virtual unsigned long getNetIp() const { return miNetIp; }       //< Get numeric IP
+	virtual void setProfile(int iProfile) { miProfile = iProfile; }
+	virtual void setData(const string & sData){ msData = sData; }
+	virtual long getEnterTime() const { return mTimes.mKey.Sec(); }
 
 	/** Sending RAW command to the client */
 	virtual int Send(const string & sData, bool bAddSep = false, bool bFlush = true);
@@ -231,11 +231,11 @@ public:
 	void ClearTimeOut(tTimeOut); //< Clear timeout
 	int CheckTimeOut(tTimeOut t, cTime &now); // Check timeout
 
-	virtual int OnTimer(cTime &now); //< Timer for current connection
+	virtual int onTimer(cTime &now); //< Timer for current connection
 
 	virtual void CloseNow(int iReason = 0);
 	virtual void CloseNice(int msec, int iReason = 0);
-	virtual void Disconnect(){ CloseNice(9000, eCR_PLUGIN); } // for plugins
+	virtual void disconnect(){ CloseNice(9000, eCR_PLUGIN); } // for plugins
 
 	/** Pointer to the server */
 	inline cDCServer * Server(){ return (cDCServer*) mServer; }

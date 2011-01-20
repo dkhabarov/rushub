@@ -28,7 +28,7 @@ namespace nDCServer {
 
 namespace nProtocol {
 
-using namespace ::nDCServer::nProtoEnums;
+using namespace ::nDCServer::protoenums;
 
 /** Основные ключевые слова команд */
 cProtocolCmd aDC_Commands[] = {

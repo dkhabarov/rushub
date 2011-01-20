@@ -54,16 +54,16 @@ public:
 	cWebConn(tSocket sock = 0, cServer *s = NULL);
 	virtual ~cWebConn();
 
-	virtual int OnTimer(cTime &now); /** Timer of the connection */
+	virtual int onTimer(cTime &now); /** Timer of the connection */
 
-	virtual const string & GetIp() { return msIp; } /** Get string of ip */
-	virtual const string & GetIpConn() const { return msIpConn; } /** Get string of server IP (host) */
-	virtual const string & GetMacAddr() { return msMAC; } /** Get mac address */
-	virtual int GetPort() { return miPort; } /** Get real port */
-	virtual int GetPortConn() { return miPortConn; } /** Get conn port */
-	virtual unsigned long GetNetIp() { return miNetIp; }
+	virtual const string & getIp() { return msIp; } /** Get string of ip */
+	virtual const string & getIpConn() const { return msIpConn; } /** Get string of server IP (host) */
+	virtual const string & getMacAddress() { return msMAC; } /** Get mac address */
+	virtual int getPort() { return miPort; } /** Get real port */
+	virtual int getPortConn() { return miPortConn; } /** Get conn port */
+	virtual unsigned long getNetIp() { return miNetIp; }
 	virtual int Send(const string & sData, bool bFlush = true);
-	virtual void Disconnect() { CloseNice(9000, eCR_WEB); }
+	virtual void disconnect() { CloseNice(9000, eCR_WEB); }
 
 }; // cWebConn
 

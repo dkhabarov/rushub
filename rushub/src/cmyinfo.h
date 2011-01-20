@@ -25,7 +25,7 @@
 #include "cdctag.h"
 
 using namespace std;
-using namespace nDCServer::nProtoEnums;
+using namespace nDCServer::protoenums;
 
 #ifndef _WIN32
 	#ifndef __int64

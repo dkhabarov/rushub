@@ -36,7 +36,7 @@ namespace nDCServer {
 
 namespace nProtocol {
 
-using namespace nDCServer::nProtoEnums;
+using namespace nDCServer::protoenums;
 
 class cDCParser : public cParser, public cDCParserBase {
 public:

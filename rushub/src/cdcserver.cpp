@@ -202,7 +202,7 @@ int cDCServer::Listening(int iPort) {
 	return 0;
 }
 
-int cDCServer::OnTimer(cTime &now) {
+int cDCServer::onTimer(cTime &now) {
 
 	/** Execute each second */
 	if(abs(int(now - mChecker)) >= miTimerServPeriod) {
@@ -263,7 +263,7 @@ int cDCServer::OnNewConn(cConn *conn) {
 	}
 
 	/** Checking flood-entry (by ip) */
-	if(mIPEnterFlood.Check(dcconn->GetNetIp(), mTime)) {
+	if(mIPEnterFlood.Check(dcconn->getNetIp(), mTime)) {
 		dcconn->CloseNow(eCR_IP_FLOOD);
 		return 2;
 	}
@@ -393,7 +393,7 @@ void cDCServer::DelFromOps(cDCUser * User) {
 					User->Send(cDCProtocol::Append_DC_Hello(sMsg2, User->msNick), false, false);
 
 				if((User->mDCConn->mFeatures & eSF_USERIP2) || User->mbInIpList)
-					User->Send(cDCProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->GetIp()));
+					User->Send(cDCProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->getIp()));
 				else {
 					s.clear();
 					User->Send(s);
@@ -404,7 +404,7 @@ void cDCServer::DelFromOps(cDCUser * User) {
 				mHelloList.SendToAll(cDCProtocol::Append_DC_Hello(sMsg2, User->msNick), true/*mDCConfig.mbDelayedMyINFO*/, false);
 				mDCUserList.SendToAll(User->GetMyINFO(), true/*mDCConfig.mbDelayedMyINFO*/);
 				mEnterList.SendToAll(User->GetMyINFO(), true/*mDCConfig.mbDelayedMyINFO*/);
-				mIpList.SendToAll(cDCProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->GetIp()), true, false);
+				mIpList.SendToAll(cDCProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->getIp()), true, false);
 			}
 		}
 	}
@@ -455,14 +455,14 @@ void cDCServer::DelFromHide(cDCUser * User) {
 				sMsg2 = string(User->GetMyINFO()).append(DC_SEPARATOR);
 				mDCUserList.SendToAll(cDCProtocol::Append_DC_OpList(sMsg2, User->msNick), false/*mDCConfig.mbDelayedMyINFO*/, false);
 				mEnterList.SendToAll(sMsg2, false/*mDCConfig.mbDelayedMyINFO*/, false);
-				mIpList.SendToAll(cDCProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->GetIp()), false, false);
+				mIpList.SendToAll(cDCProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->getIp()), false, false);
 				User->mbInUserList = true;
 			} else {
 				User->mbInUserList = false;
 				mHelloList.SendToAll(cDCProtocol::Append_DC_Hello(sMsg1, User->msNick), false/*mDCConfig.mbDelayedMyINFO*/, false);
 				mDCUserList.SendToAll(User->GetMyINFO(), false/*mDCConfig.mbDelayedMyINFO*/);
 				mEnterList.SendToAll(User->GetMyINFO(), false/*mDCConfig.mbDelayedMyINFO*/);
-				mIpList.SendToAll(cDCProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->GetIp()), false, false);
+				mIpList.SendToAll(cDCProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->getIp()), false, false);
 				User->mbInUserList = true;
 			}
 			mOpList.Remake();
@@ -505,9 +505,9 @@ bool cDCServer::CheckNick(cDCConn *dcconn) {
 		string sMsg;
 		cDCUser * us = (cDCUser*)mDCUserList.Find(Key);
 
-		if(!us->mDCConn || (us->GetProfile() == -1 && us->GetIp() != dcconn->Ip())) {
+		if(!us->mDCConn || (us->getProfile() == -1 && us->getIp() != dcconn->Ip())) {
 			if(dcconn->Log(2)) dcconn->LogStream() << "Bad nick (used): '" << dcconn->mDCUser->msNick << "'["
-				<< dcconn->Ip() << "] vs '" << us->msNick << "'[" << us->GetIp() << "]" << endl;
+				<< dcconn->Ip() << "] vs '" << us->msNick << "'[" << us->getIp() << "]" << endl;
 			SendToUser(dcconn, StringReplace(mDCLang.msUsedNick, string("nick"), sMsg, dcconn->mDCUser->msNick).c_str(), (char*)mDCConfig.msHubBot.c_str());
 			dcconn->Send(cDCProtocol::Append_DC_ValidateDenide(sMsg.erase(), dcconn->mDCUser->msNick));
 			return false;
@@ -666,7 +666,7 @@ bool cDCServer::RemoveFromDCUserList(cDCUser *User) {
 	if(User->mbInUserList) {
 		User->mbInUserList = false;
 
-		if(!User->GetHide()) {
+		if(!User->getHide()) {
 			string sMsg;
 			cDCProtocol::Append_DC_Quit(sMsg, User->msNick);
 
@@ -720,7 +720,7 @@ bool cDCServer::ShowUserToAll(cDCUser *User) {
 	if(mDCConfig.mbSendUserIp) {
 		string sStr;
 		User->mbInUserList = false;
-		cDCProtocol::Append_DC_UserIP(sStr, User->msNick, User->GetIp());
+		cDCProtocol::Append_DC_UserIP(sStr, User->msNick, User->getIp());
 		if(sStr.length()) mIpList.SendToAll(sStr, true);
 		User->mbInUserList = true;
 
@@ -782,7 +782,7 @@ bool cDCServer::SendToUser(cDCConnBase *DCConn, const char *sData, const char *s
 	if(sFrom && sNick) {
 		string sTo("<unknown>"), sStr;
 		if(DCConn->mDCUserBase)
-			sTo = DCConn->mDCUserBase->GetNick();
+			sTo = DCConn->mDCUserBase->getNick();
 		DCConn->Send(cDCProtocol::Append_DC_PM(sStr, sTo, sFrom, sNick, sData));
 		return true;
 	}

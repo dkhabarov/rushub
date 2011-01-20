@@ -35,7 +35,7 @@ cWebConn::~cWebConn() {
 }
 
 /** Timer of the connection */
-int cWebConn::OnTimer(cTime &) {
+int cWebConn::onTimer(cTime &) {
 	cDCServer * dcserver = Server();
 	cTime lastRecv(mLastRecv);
 	if(dcserver->MinDelay(lastRecv, dcserver->mDCConfig.miWebTimeout)) {

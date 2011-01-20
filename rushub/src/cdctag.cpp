@@ -44,7 +44,7 @@ void DcTag::parse(string & description) {
 
 	size_t l = description.size();
 	if (l) { // optimization
-		unsigned int i = description.find_last_of('<');
+		size_t i = description.find_last_of('<');
 		if (i != description.npos && description[--l] == '>') {
 			nil |= TAGNIL_TAG;
 			string sOldTag = tag;
