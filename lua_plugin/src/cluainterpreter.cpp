@@ -102,7 +102,7 @@ int cLuaInterpreter::Start() {
 	RegFunc("GetUsersCount",        &GetUsersCount);
 	RegFunc("GetTotalShare",        &GetTotalShare);
 	RegFunc("GetUpTime",            &GetUpTime);
-	RegFunc("Disconnect",           &Disconnect);
+	RegFunc("Disconnect",           &disconnect);
 	RegFunc("DisconnectIP",         &DisconnectIP);
 	RegFunc("RestartScripts",       &RestartScripts);
 	RegFunc("RestartScript",        &RestartScript);

@@ -56,7 +56,7 @@ cTimerList::~cTimerList() {
 static void Checker(void * val) {
 	((cTimer*)val)->Check(cLua::mCurServer->GetMSec());
 }
-void cTimerList::OnTimer() {
+void cTimerList::onTimer() {
 	mList.Loop(Checker);
 }
 

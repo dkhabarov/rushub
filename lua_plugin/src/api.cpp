@@ -588,25 +588,25 @@ int SetUser(lua_State *L) {
 
 	unsigned iNum = (unsigned)luaL_checkinteger(L, 2);
 	if(iNum == eUV_iProfile) {
-		Conn->SetProfile(luaL_checkint(L, 3));
+		Conn->setProfile(luaL_checkint(L, 3));
 	} else if(iNum == eUV_sMyINFO) {
 		if(!Conn->mDCUserBase) ERR("user was not found");
 		string sMyINFO(luaL_checkstring(L, 3));
-		if(!Conn->mDCUserBase->SetMyINFO(sMyINFO, Conn->mDCUserBase->GetNick())) ERR("wrong syntax");
+		if(!Conn->mDCUserBase->SetMyINFO(sMyINFO, Conn->mDCUserBase->getNick())) ERR("wrong syntax");
 	} else if(iNum == eUV_sData) {
-		Conn->SetData(luaL_checkstring(L, 3));
+		Conn->setData(luaL_checkstring(L, 3));
 	} else if(iNum == eUV_bOpList) {
 		luaL_checktype(L, 3, LUA_TBOOLEAN);
 		if(!Conn->mDCUserBase) ERR("user was not found");
-		Conn->mDCUserBase->SetOpList(lua_toboolean(L, 3) != 0);
+		Conn->mDCUserBase->setInOpList(lua_toboolean(L, 3) != 0);
 	} else if(iNum == eUV_bHide) {
 		luaL_checktype(L, 3, LUA_TBOOLEAN);
 		if(!Conn->mDCUserBase) ERR("user was not found");
-		Conn->mDCUserBase->SetHide(lua_toboolean(L, 3) != 0);
+		Conn->mDCUserBase->setHide(lua_toboolean(L, 3) != 0);
 	} else if(iNum == eUV_bIpList) {
 		luaL_checktype(L, 3, LUA_TBOOLEAN);
 		if(!Conn->mDCUserBase) ERR("user was not found");
-		Conn->mDCUserBase->SetIpList(lua_toboolean(L, 3) != 0);
+		Conn->mDCUserBase->setInIpList(lua_toboolean(L, 3) != 0);
 	}
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
@@ -622,7 +622,7 @@ int GetUsers(lua_State *L) {
 		if (lua_isboolean(L, 2) && lua_toboolean(L, 2) == 1) all = true;
 		const vector<cDCConnBase *> & v = cLua::mCurServer->GetDCConnBase(lua_tostring(L, 1));
 		for(vector<cDCConnBase *>::const_iterator it = v.begin(); it != v.end(); ++it) {
-			if (all || ((*it)->mDCUserBase && (*it)->mDCUserBase->GetInUserList())) {
+			if (all || ((*it)->mDCUserBase && (*it)->mDCUserBase->getInUserList())) {
 				lua_pushnumber(L, i);
 				void ** userdata = (void**) lua_newuserdata(L, sizeof(void*));
 				*userdata = (void*)(*it);
@@ -639,7 +639,7 @@ int GetUsers(lua_State *L) {
 		cDCConnBase * Conn;
 		while((Conn = it->operator ()()) != NULL) {
 			if(Conn->mType != eT_DC_CLIENT) continue;
-			if (all || (Conn->mDCUserBase && Conn->mDCUserBase->GetInUserList())) {
+			if (all || (Conn->mDCUserBase && Conn->mDCUserBase->getInUserList())) {
 				lua_pushnumber(L, i);
 				void ** userdata = (void**) lua_newuserdata(L, sizeof(void*));
 				*userdata = (void*)Conn;
@@ -673,20 +673,20 @@ int GetUpTime(lua_State *L) {
 }
 
 /// Disconnect(sNick/UID)
-int Disconnect(lua_State *L) {
+int disconnect(lua_State *L) {
 	CHECK_COUNT(1);
 	int iType = lua_type(L, 1);
 	if(iType == LUA_TUSERDATA) {
 		cDCConnBase * Conn = GetDCConnBase(L, 1);
 		if(!Conn) ERR("user was not found");
-		Conn->Disconnect();
+		Conn->disconnect();
 	} else if(iType == LUA_TSTRING) {
 		size_t iLen;
 		const char * sNick = lua_tolstring(L, 1, &iLen);
 		NICKLEN(iLen);
 		cDCUserBase * User = cLua::mCurServer->GetDCUserBase(sNick);
 		if(!User || !User->mDCConnBase) ERR("user was not found");
-		User->mDCConnBase->Disconnect();
+		User->mDCConnBase->disconnect();
 	} else return luaL_typeerror(L, 1, "userdata or string");
 
 	lua_settop(L, 0);
@@ -729,15 +729,15 @@ int DisconnectIP(lua_State *L) {
 	vector<cDCConnBase *>::const_iterator it;
 	if(!iProfile)
 		for(it = v.begin(); it != v.end(); ++it)
-			(*it)->Disconnect();
+			(*it)->disconnect();
 	else {
 		int iPrf;
 		for(it = v.begin(); it != v.end(); ++it) {
-			iPrf = (*it)->GetProfile() + 1;
+			iPrf = (*it)->getProfile() + 1;
 			if(iPrf < 0) iPrf = -iPrf;
 			if(iPrf > 31) iPrf = (iPrf % 32) - 1;
 			if(iProfile & (1 << iPrf))
-				(*it)->Disconnect();
+				(*it)->disconnect();
 		}
 	}
 	lua_settop(L, 0);
@@ -922,7 +922,7 @@ int SetCmd(lua_State *L) {
 				iType == eDC_MYNIFO && 
 				cLua::mCurLua->mCurDCConn && (
 					!cLua::mCurLua->mCurDCConn->mDCUserBase ||
-					cLua::mCurLua->mCurDCConn->mDCUserBase->GetNick() != cLua::mCurLua->mCurDCParser->ChunkString(eCH_MI_NICK)
+					cLua::mCurLua->mCurDCConn->mDCUserBase->getNick() != cLua::mCurLua->mCurDCParser->ChunkString(eCH_MI_NICK)
 				)
 			)
 		) {

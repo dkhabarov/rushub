@@ -75,7 +75,7 @@ public:
 	void NewCallParam(void * data, int type = 0);
 	void NewCallParam(lua_Number data, int type = 0);
 
-	inline void OnTimer() { mTimerList.OnTimer(); }
+	inline void onTimer() { mTimerList.onTimer(); }
 	inline int AddTmr(cTimer * timer) { return mTimerList.AddTimer(timer); }
 	inline int Size() { return mTimerList.Size(); }
 	inline int DelTmr(int tm) { return mTimerList.DelTimer(tm); }

@@ -55,7 +55,7 @@ public:
 	cTimerList();
 	~cTimerList();
 
-	void OnTimer();
+	void onTimer();
 	int AddTimer(cTimer *);
 	int DelTimer(int);
 	void DelTimer();

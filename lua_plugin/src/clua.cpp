@@ -49,10 +49,10 @@ cLua::~cLua() {
 }
 
 /** Actions when loading plugin */
-void cLua::OnLoad(cDCServerBase *DCServer) {
+void cLua::onLoad(cDCServerBase *DCServer) {
 	//setlocale(LC_ALL, DCServer->GetLocale().c_str());
 	mCurServer = DCServer;
-	cPlugin::OnLoad(DCServer);
+	cPlugin::onLoad(DCServer);
 
 	string sMainDir(DCServer->GetMainDir());
 
@@ -417,10 +417,10 @@ int cLua::CallAll(const char* sFuncName, cDCConnBase * conn, cDCParserBase * DCP
 // //////////////////////////////////////////Events///////////////////////////
 
 /** Executed on each step of the timer of the server (100 msec) */
-int cLua::OnTimer() {
+int cLua::onTimer() {
 	mTasksList.CheckTasks();
 	for(tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
-		(*it)->OnTimer();
+		(*it)->onTimer();
 	}
 	return 1;
 }
@@ -438,8 +438,8 @@ int cLua::OnConfigChange(const char * sName, const char * sValue) {
 	return 0;
 }
 
-/** OnFlood event */
-int cLua::OnFlood(cDCConnBase * DCConn, int iType1, int iType2) {
+/** onFlood event */
+int cLua::onFlood(cDCConnBase * DCConn, int iType1, int iType2) {
 	if(DCConn != NULL) {
 		int iRet = 0, iBlock = 0; // On defaults don't block
 		cLuaInterpreter * Script;
@@ -457,12 +457,12 @@ int cLua::OnFlood(cDCConnBase * DCConn, int iType1, int iType2) {
 			iBlock = iRet;
 		}
 		return iBlock;
-	} else LogError("Error in cLua::OnFlood");
+	} else LogError("Error in cLua::onFlood");
 	return 1;
 }
 
-/// OnWebData(WebID, sData)
-int cLua::OnWebData(cDCConnBase * Conn, cWebParserBase * Parser) {
+/// onWebData(WebID, sData)
+int cLua::onWebData(cDCConnBase * Conn, cWebParserBase * Parser) {
 	if((Conn != NULL) && (Parser != NULL)) {
 		int iRet = 0, iBlock = 0; // On defaults don't block
 		cLuaInterpreter * Script;
@@ -478,7 +478,7 @@ int cLua::OnWebData(cDCConnBase * Conn, cWebParserBase * Parser) {
 		}
 		return iBlock;
 	}
-	LogError("Error in cLua::OnWebData");
+	LogError("Error in cLua::onWebData");
 	return 1;
 }
 
@@ -511,8 +511,8 @@ int cLua::OnScriptError(cLuaInterpreter * Current, const char* sScriptName, cons
 	return 1;
 }
 
-/** OnAny event */
-int cLua::OnAny(cDCConnBase * DCConn, cDCParserBase * DCParser) {
+/** onAny event */
+int cLua::onAny(cDCConnBase * DCConn, cDCParserBase * DCParser) {
 	if((DCConn != NULL) && (DCParser != NULL)) {
 		int iRet = 0, iBlock = 0; // On defaults don't block
 		cLuaInterpreter * Script;
@@ -528,7 +528,7 @@ int cLua::OnAny(cDCConnBase * DCConn, cDCParserBase * DCParser) {
 			iBlock = iRet;
 		}
 		return iBlock;
-	} else LogError("Error in cLua::OnAny");
+	} else LogError("Error in cLua::onAny");
 	return 1;
 }
 
@@ -556,29 +556,29 @@ int cLua::FUNC(cDCConnBase * Conn, cDCParserBase * DCParser) { \
 	return 1; \
 }
 
-DC_ACTION_1(OnUserConnected,    "OnUserConnected"   ); // OnUserConnected(tUser)
-DC_ACTION_1(OnUserDisconnected, "OnUserDisconnected"); // OnUserDisconnected(tUser)
-DC_ACTION_1(OnUserEnter,        "OnUserEnter"       ); // OnUserEnter(tUser)
-DC_ACTION_1(OnUserExit,         "OnUserExit"        ); // OnUserExit(tUser)
+DC_ACTION_1(onUserConnected,    "OnUserConnected"   ); // OnUserConnected(tUser)
+DC_ACTION_1(onUserDisconnected, "OnUserDisconnected"); // OnUserDisconnected(tUser)
+DC_ACTION_1(onUserEnter,        "OnUserEnter"       ); // OnUserEnter(tUser)
+DC_ACTION_1(onUserExit,         "OnUserExit"        ); // OnUserExit(tUser)
 
-DC_ACTION_2(OnSupports,         "OnSupports"        ); // OnSupports(tUser, sData)
-DC_ACTION_2(OnKey,              "OnKey"             ); // OnKey(tUser, sData)
-DC_ACTION_2(OnUnknown,          "OnUnknown"         ); // OnUnknown(tUser, sData)
+DC_ACTION_2(onSupports,         "OnSupports"        ); // OnSupports(tUser, sData)
+DC_ACTION_2(onKey,              "OnKey"             ); // OnKey(tUser, sData)
+DC_ACTION_2(onUnknown,          "OnUnknown"         ); // OnUnknown(tUser, sData)
 
-DC_ACTION_3(OnValidateNick,     "OnValidateNick"    ); // OnValidateNick(tUser, sData)
-DC_ACTION_3(OnMyPass,           "OnMyPass"          ); // OnMyPass(tUser, sData)
-DC_ACTION_3(OnVersion,          "OnVersion"         ); // OnVersion(tUser, sData)
-DC_ACTION_3(OnGetNickList,      "OnGetNickList"     ); // OnGetNickList(tUser, sData)
-DC_ACTION_3(OnMyINFO,           "OnMyINFO"          ); // OnMyINFO(tUser, sData)
-DC_ACTION_3(OnChat,             "OnChat"            ); // OnChat(tUser, sData)
-DC_ACTION_3(OnTo,               "OnTo"              ); // OnTo(tUser, sData)
-DC_ACTION_3(OnConnectToMe,      "OnConnectToMe"     ); // OnConnectToMe(tUser, sData)
-DC_ACTION_3(OnRevConnectToMe,   "OnRevConnectToMe"  ); // OnRevConnectToMe(tUser, sData)
-DC_ACTION_3(OnSearch,           "OnSearch"          ); // OnSearch(tUser, sData)
-DC_ACTION_3(OnSR,               "OnSR"              ); // OnSR(tUser, sData)
-DC_ACTION_3(OnKick,             "OnKick"            ); // OnKick(tUser, sData)
-DC_ACTION_3(OnOpForceMove,      "OnOpForceMove"     ); // OnOpForceMove(tUser, sData)
-DC_ACTION_3(OnGetINFO,          "OnGetINFO"         ); // OnGetINFO(tUser, sData)
-DC_ACTION_3(OnMCTo,             "OnMCTo"            ); // OnMCTo(tUser, sData)
+DC_ACTION_3(onValidateNick,     "OnValidateNick"    ); // OnValidateNick(tUser, sData)
+DC_ACTION_3(onMyPass,           "OnMyPass"          ); // OnMyPass(tUser, sData)
+DC_ACTION_3(onVersion,          "OnVersion"         ); // OnVersion(tUser, sData)
+DC_ACTION_3(onGetNickList,      "OnGetNickList"     ); // OnGetNickList(tUser, sData)
+DC_ACTION_3(onMyINFO,           "OnMyINFO"          ); // OnMyINFO(tUser, sData)
+DC_ACTION_3(onChat,             "OnChat"            ); // OnChat(tUser, sData)
+DC_ACTION_3(onTo,               "OnTo"              ); // OnTo(tUser, sData)
+DC_ACTION_3(onConnectToMe,      "OnConnectToMe"     ); // OnConnectToMe(tUser, sData)
+DC_ACTION_3(onRevConnectToMe,   "OnRevConnectToMe"  ); // OnRevConnectToMe(tUser, sData)
+DC_ACTION_3(onSearch,           "OnSearch"          ); // OnSearch(tUser, sData)
+DC_ACTION_3(onSR,               "OnSR"              ); // OnSR(tUser, sData)
+DC_ACTION_3(onKick,             "OnKick"            ); // OnKick(tUser, sData)
+DC_ACTION_3(onOpForceMove,      "OnOpForceMove"     ); // OnOpForceMove(tUser, sData)
+DC_ACTION_3(onGetINFO,          "OnGetINFO"         ); // OnGetINFO(tUser, sData)
+DC_ACTION_3(onMCTo,             "OnMCTo"            ); // OnMCTo(tUser, sData)
 
 REG_PLUGIN(cLua);

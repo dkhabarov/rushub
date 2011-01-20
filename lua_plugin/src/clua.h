@@ -38,7 +38,7 @@ namespace nDCServer{class cDCServerBase;}
 using namespace std;
 using namespace ::nPlugin;
 using namespace ::nDCServer;
-using namespace ::nDCServer::nProtoEnums;
+using namespace ::nDCServer::protoenums;
 using namespace ::nLua;
 
 
@@ -75,36 +75,36 @@ public:
 
 	virtual const string & GetScriptsDir(){ return msScriptsDir; }
 
-	virtual void OnLoad(cDCServerBase *); /** Actions when loading plugin */
+	virtual void onLoad(cDCServerBase *); /** Actions when loading plugin */
 	virtual bool RegAll(cPluginListBase* PluginList); /** Registration all events for this plugin */
 
 // events
-	virtual int OnUserConnected(cDCConnBase *);
-	virtual int OnUserDisconnected(cDCConnBase *);
-	virtual int OnUserEnter(cDCConnBase *);
-	virtual int OnUserExit(cDCConnBase *);
-	virtual int OnSupports(cDCConnBase *, cDCParserBase *);
-	virtual int OnKey(cDCConnBase *, cDCParserBase *);
-	virtual int OnValidateNick(cDCConnBase *, cDCParserBase *);
-	virtual int OnMyPass(cDCConnBase *, cDCParserBase *);
-	virtual int OnVersion(cDCConnBase *, cDCParserBase *);
-	virtual int OnGetNickList(cDCConnBase *, cDCParserBase *);
-	virtual int OnMyINFO(cDCConnBase *, cDCParserBase *);
-	virtual int OnChat(cDCConnBase *, cDCParserBase *);
-	virtual int OnTo(cDCConnBase *, cDCParserBase *);
-	virtual int OnConnectToMe(cDCConnBase *, cDCParserBase *);
-	virtual int OnRevConnectToMe(cDCConnBase *, cDCParserBase *);
-	virtual int OnSearch(cDCConnBase *, cDCParserBase *);
-	virtual int OnSR(cDCConnBase *, cDCParserBase *);
-	virtual int OnKick(cDCConnBase *, cDCParserBase *);
-	virtual int OnOpForceMove(cDCConnBase *, cDCParserBase *);
-	virtual int OnGetINFO(cDCConnBase *, cDCParserBase *);
-	virtual int OnMCTo(cDCConnBase *, cDCParserBase *);
-	virtual int OnTimer();
-	virtual int OnAny(cDCConnBase *, cDCParserBase *);
-	virtual int OnUnknown(cDCConnBase *, cDCParserBase *);
-	virtual int OnFlood(cDCConnBase *, int, int);
-	virtual int OnWebData(cDCConnBase *, cWebParserBase *);
+	virtual int onUserConnected(cDCConnBase *);
+	virtual int onUserDisconnected(cDCConnBase *);
+	virtual int onUserEnter(cDCConnBase *);
+	virtual int onUserExit(cDCConnBase *);
+	virtual int onSupports(cDCConnBase *, cDCParserBase *);
+	virtual int onKey(cDCConnBase *, cDCParserBase *);
+	virtual int onValidateNick(cDCConnBase *, cDCParserBase *);
+	virtual int onMyPass(cDCConnBase *, cDCParserBase *);
+	virtual int onVersion(cDCConnBase *, cDCParserBase *);
+	virtual int onGetNickList(cDCConnBase *, cDCParserBase *);
+	virtual int onMyINFO(cDCConnBase *, cDCParserBase *);
+	virtual int onChat(cDCConnBase *, cDCParserBase *);
+	virtual int onTo(cDCConnBase *, cDCParserBase *);
+	virtual int onConnectToMe(cDCConnBase *, cDCParserBase *);
+	virtual int onRevConnectToMe(cDCConnBase *, cDCParserBase *);
+	virtual int onSearch(cDCConnBase *, cDCParserBase *);
+	virtual int onSR(cDCConnBase *, cDCParserBase *);
+	virtual int onKick(cDCConnBase *, cDCParserBase *);
+	virtual int onOpForceMove(cDCConnBase *, cDCParserBase *);
+	virtual int onGetINFO(cDCConnBase *, cDCParserBase *);
+	virtual int onMCTo(cDCConnBase *, cDCParserBase *);
+	virtual int onTimer();
+	virtual int onAny(cDCConnBase *, cDCParserBase *);
+	virtual int onUnknown(cDCConnBase *, cDCParserBase *);
+	virtual int onFlood(cDCConnBase *, int, int);
+	virtual int onWebData(cDCConnBase *, cWebParserBase *);
 
 	virtual int OnScriptError(cLuaInterpreter * Current, const char* sScriptName, const char* sErrMsg, bool bStoped = true);
 	virtual int OnScriptAction(const char * sScriptName, const char * sAction);
