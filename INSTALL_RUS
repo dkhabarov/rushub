@@ -1,0 +1,190 @@
+
+Установка RusHub в различных Операционных системах
+
+
+
+--------------------------------
+Установка RusHub в Windows
+--------------------------------
+
+Качаем и распаковываем текущую версию rushub*.rar
+
+Запускаем хаб файлом rushub.exe и тут же останавливаем, закрывая консоль.
+Пусть это называется перезапуск.
+
+В созданную хабом папку plugins помещаем файл lua.dll из архива lua_plugin.rar
+
+	* Перезапускаем хаб
+
+Закачиваем FirstRusHubBot и и распаковываем в папке scripts
+
+	* Перезапускаем хаб
+
+Делаем предварительные сетевые настройки в config.xml
+
+В папке scripts/FirstRusHubBot создаем файл RegUsers.dat с записью:
+
+tRegUsers = {
+	["ник_админа"] = {
+		["sPass"] = "пароль",
+		["iProfile"] = 0,
+	},
+}
+
+Лезем в папку plugins и в файле scripts.xml 
+для активации скрипта меняем "0" на "1":
+
+<script Name="FirstRusHubBot.lua" Enabled="1" />
+
+Запускаем хаб, теперь Вы админ и имеете начальные функции управления хабом!
+
+
+
+--------------------------------
+Установка RusHub в Ubuntu 10.04
+--------------------------------
+
+Качаем из репозитория файлы:
+
+sudo su echo 'deb http://mydc.ru/ubuntu binary/' > /etc/apt/sources.list.d/mydc.list 
+aptitude update
+
+Устанавливаем RusHub и lua_plugin:
+
+aptitude install rushub 
+aptitude install rushub-lua 
+su ваш_ник
+
+Файлы RusHub'a сохраняются в каталоге /etc/rushub.
+
+	* Перезапускаем хаб:
+
+sudo service rushub start
+sudo service rushub stop
+
+Меняем права на папку rushub и вложенные в нее файлы:
+
+sudo chown -R ваш_ник:ваш_ник /etc/rushub
+
+Устанавливаем кодировку windows-1251 для редактора.
+
+Устанавливаем архиватор:
+
+sudo aptitude install rar
+
+Выбрав в браузере (Правка-Настройки) путь для сохранения файлов 
+/etc/rushub/scripts, скачиваем FirstRusHubBot,
+
+Распаковываем:
+
+cd /etc/rushub/scripts
+rar x FirstRusHubBot_v0.2.rar
+
+	* Перезапускаем хаб:
+
+sudo service rushub start
+sudo service rushub stop
+
+Делаем предварительные сетевые настройки в config.xml:
+
+cd ..
+gedit config.xml
+
+Создаем и открываем для редактирования файл RegUsers.dat:
+
+cd scripts/FirstRusHubBot
+touch RegUsers.dat
+gedit RegUsers.dat
+
+Записываем:
+
+tRegUsers = {
+    ["ник_админа"] = {
+        ["sPass"] = "пароль",
+        ["iProfile"] = 0,
+    },
+}
+
+Открываем файл scripts.xml в папке plugins:
+
+cd ../../plugins
+gedit scripts.xml
+
+и для активации скрипта меняем "0" на "1":
+
+<script Name="FirstRusHubBot.lua" Enabled="1" />
+
+Запускаем хаб:
+
+sudo service rushub start
+
+Примечание: На самом деле после всех манипуляций может понадобится 
+отредактировать ник админа в RegUser.dat из-за сбоя кодировки.
+
+
+--------------------------------
+Сборка Lua плагина для Ubuntu 10.10
+--------------------------------
+
+Шаг 1, начинаем...
+
+	Устанавливаем пакеты liblua5.1-dev и build-essential:
+
+		apt-get install build-essential liblua5.1-dev
+
+Шаг 2
+
+	Скачиваем исходники с SVN:
+
+		cd ~
+		svn co https://rushub.svn.sourceforge.net/svnroot/rushub/trunk/ rushub
+
+Шаг 3
+
+	Идём в дерикторию с tinyxml
+
+		cd ~/rushub/trunk/rushub/src/tinyxml
+
+	Собираем:
+
+		make
+
+	Выходим с дериктории:
+
+		cd
+
+Шаг 4
+
+	Копируем cplugin.h и папку tinyxml в дерикторию с исходниками Lua плагина.
+
+	Идём в дерикторию с исходниками Lua плагина:
+
+		cd ~/rushub/trunk/lua_plugin/src/
+
+	Собираем:
+
+		make
+
+Шаг 5
+
+	Переходим в дерикторию с исходниками хаба
+
+		cd ~/rushub/trunk/rushub/src
+
+	Собираем:
+
+		make
+
+Шаг 6, завершение!
+
+	После чего в дериктории ~/rushub/ появятся дериктории logs,plugins 
+	и файлы lang.xml, config.xml.
+
+	Идём в дерикторию ~/rushub/trunk/rushub/src
+
+	В ней должен появится бинарник RusHub, переносим его в ~/rushub/.
+
+	Идём в дерикторию ~/rushub/trunk/lua_plugin/src и находим файл 'lua.so' 
+	и после чего копируем его в дерикторию ~/rushub/plugins.
+
+	Перезапускаем хаб - готово.
