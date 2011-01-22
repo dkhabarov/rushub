@@ -1,2 +1,2 @@
-ChangeLog for RusHub
+﻿ChangeLog for RusHub
 --------------------
