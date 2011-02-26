@@ -17,24 +17,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLUAINTERPRETER_H
-#define CLUAINTERPRETER_H
+#ifndef LUA_INTERPRETER_H
+#define LUA_INTERPRETER_H
 
-#include "cplugin.h" /** nDCServer */
+#include "Plugin.h" // ::dcserver
+#include "TimerList.h"
 #include "api.h"
-#include "ctimerlist.h"
+
 #include <list>
 #include <iostream>
-using namespace std;
 
-namespace nLua {
+using namespace ::std;
+
+namespace luaplugin {
 
 #define MT_CONFIG "Config object"
 
-class cLuaInterpreter {
+class LuaInterpreter {
 
 public:
-	string msName;
+
+	string mName;
 	string & msPath;
 	lua_State * mL;
 	bool mbEnabled;
@@ -42,26 +45,11 @@ public:
 	typedef list<string> tBotList;
 	tBotList mBotList;
 
-private:
-	struct sParam {
-		void * data;
-		lua_Number num;
-		int type;
-		sParam(void * d, int t):data(d),type(t){}
-		sParam(lua_Number n, int t):num(n),type(t){}
-	};
-	typedef vector<sParam*> tvCallParams;
-	tvCallParams mCallParams;
-
-	void CreateUserMT();
-	void CreateConfigMT();
-
-	cTimerList mTimerList;
-
 public:
-	cLuaInterpreter(const string & sName, string & sFullName);
-	~cLuaInterpreter();
-	cLuaInterpreter & operator=(const cLuaInterpreter &) { return *this; }
+
+	LuaInterpreter(const string & sName, string & sFullName);
+	~LuaInterpreter();
+	LuaInterpreter & operator=(const LuaInterpreter &) { return *this; }
 
 	int Start(); // (-1 - run already)
 	int Stop();
@@ -81,8 +69,25 @@ public:
 	inline int DelTmr(int tm) { return mTimerList.DelTimer(tm); }
 	inline void DelTmr() { mTimerList.DelTimer(); }
 
-}; // cLuaInterpreter
+private:
 
-}; // nLua
+	struct sParam {
+		void * data;
+		lua_Number num;
+		int type;
+		sParam(void * d, int t):data(d),type(t){}
+		sParam(lua_Number n, int t):num(n),type(t){}
+	};
+	typedef vector<sParam*> tvCallParams;
+	tvCallParams mCallParams;
 
-#endif // CLUAINTERPRETER_H
+	void CreateUserMT();
+	void CreateConfigMT();
+
+	cTimerList mTimerList;
+
+}; // class LuaInterpreter
+
+}; // namespace luaplugin
+
+#endif // LUA_INTERPRETER_H

@@ -17,18 +17,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CTIMERLIST_H
-#define CTIMERLIST_H
+#ifndef TIMER_LIST_H
+#define TIMER_LIST_H
 
-#include "clist.h"
+#include "List.h"
+
 #include <string>
 
-class cLua;
+using namespace ::std;
 
-using namespace std;
-namespace nLua {
+class LuaPlugin;
 
-class cLuaInterpreter;
+namespace luaplugin {
+
+class LuaInterpreter;
 
 class cTimer {
 
@@ -38,10 +40,10 @@ private:
 
 public:
 	int miId;
-	cLuaInterpreter * mScript;
+	LuaInterpreter * mScript;
 
 public:
-	cTimer(int iId, int iInterval, const char * sFunc, cLuaInterpreter * Script);
+	cTimer(int iId, int iInterval, const char * sFunc, LuaInterpreter * Script);
 	~cTimer();
 	void Check(int iTime);
 
@@ -49,7 +51,7 @@ public:
 
 class cTimerList {
 
-	cList mList;
+	cList<cTimer> mList;
 
 public:
 	cTimerList();
@@ -61,7 +63,7 @@ public:
 	void DelTimer();
 	int Size() { return mList.Size(); }
 
-}; // cTimerList
+}; // class cTimerList
 
 class cTmrCnt {
 
@@ -76,8 +78,8 @@ public:
 		++ miCount;
 		return true;
 	}
-}; // cTmrCnt
+}; // class cTmrCnt
 
-}; // nLua
+}; // namespace luaplugin
 
-#endif // CTIMERLIST_H
+#endif // TIMER_LIST_H

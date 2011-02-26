@@ -17,15 +17,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CDIR_H
-#define CDIR_H
+#ifndef DIR_H
+#define DIR_H
 
 /**
 	Functions for work with dirs like unix systems
 */
 
 #include <string>
-using namespace std;
+
+using namespace ::std;
 
 #ifdef _WIN32
 
@@ -35,11 +36,16 @@ using namespace std;
 
 	#include <windows.h>
 
-	typedef struct DIR DIR;
-
 	struct dirent {
 		char *d_name;
 	};
+
+	typedef struct DIR {
+		long                handle; /* -1 for failed rewind */
+		struct _finddata_t  info;
+		struct dirent       result; /* d_name null iff first time */
+		char                *name;  /* null-terminated char string */
+	} DIR; // struct DIR
 
 	DIR           *opendir(const char *);
 	int           closedir(DIR *);
@@ -60,16 +66,28 @@ using namespace std;
 
 #endif // _WIN32
 
-/** Create dir */
-int mkDir(const char * path);
+namespace utils {
 
-/** Check exists of the dir */
-bool DirExists(const char* sName);
+class Dir {
 
-bool FileExists(const char * sName);
+public:
 
-void ExecPath(string &);
-void CheckEndSlash(string &);
-void CheckPath(string &);
+	/** Create dir */
+	static int mkDir(const char * path);
 
-#endif // CDIR_H
+	/** Check exists of the path */
+	static bool isPathExist(const char* sName);
+
+	static bool isFileExist(const char * sName);
+
+	static void execPath(string &);
+
+	static void checkEndSlash(string &);
+
+	static bool checkPath(string &);
+
+}; // class Dir
+
+}; // namespace utils
+
+#endif // DIR_H

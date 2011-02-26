@@ -17,24 +17,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ctimerlist.h"
-#include "clua.h"
+#include "TimerList.h"
+#include "LuaPlugin.h"
 
 #ifndef _WIN32
 	#include <cstdlib> // abs
 #endif
 
-namespace nLua {
+namespace luaplugin {
 
 int cTmrCnt::miCount = 0;
 
-cTimer::cTimer(int iId, int iInterval, const char * sFunc, cLuaInterpreter * Script) :
+cTimer::cTimer(int iId, int iInterval, const char * sFunc, LuaInterpreter * Script) :
 	miInterval(iInterval),
 	msFunc(sFunc),
 	miId(iId),
 	mScript(Script)
 {
-	miTime = cLua::mCurServer->GetMSec();
+	miTime = LuaPlugin::mCurServer->getMSec();
 }
 
 cTimer::~cTimer() {
@@ -54,7 +54,7 @@ cTimerList::~cTimerList() {
 }
 
 static void Checker(void * val) {
-	((cTimer*)val)->Check(cLua::mCurServer->GetMSec());
+	((cTimer*)val)->Check(LuaPlugin::mCurServer->getMSec());
 }
 void cTimerList::onTimer() {
 	mList.Loop(Checker);
@@ -75,4 +75,4 @@ void cTimerList::DelTimer() {
 	mList.Clear();
 }
 
-}; // nLua
+}; // namespace luaplugin

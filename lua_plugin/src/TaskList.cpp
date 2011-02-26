@@ -17,36 +17,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ctaskslist.h"
-#include "clua.h"
+#include "TaskList.h"
+#include "LuaPlugin.h"
 
-namespace nLua {
+namespace luaplugin {
 
 /** Do tasks */
 void Tasks(void * val) {
-	cTasksList::cTask * task = (cTasksList::cTask *) val;
-	cLuaInterpreter * Param = (cLuaInterpreter *)(task->mParam);
+	TasksList::cTask * task = (TasksList::cTask *) val;
+	LuaInterpreter * Param = (LuaInterpreter *)(task->mParam);
 	switch(task->miType) {
 		case eT_RestartScript:
-			cLua::mCurLua->RestartScript(Param); break;
+			LuaPlugin::mCurLua->RestartScript(Param); break;
 		case eT_StopScript:
-			cLua::mCurLua->StopScript(Param); break;
+			LuaPlugin::mCurLua->StopScript(Param); break;
 		case eT_MoveUp:
-			cLua::mCurLua->MoveUp(Param); break;
+			LuaPlugin::mCurLua->MoveUp(Param); break;
 		case eT_MoveDown:
-			cLua::mCurLua->MoveDown(Param); break;
+			LuaPlugin::mCurLua->MoveDown(Param); break;
 		case eT_ScriptError:
 		default: break;
 	}
 }
 
-void cTasksList::CommonTasks() {
-	if(miTackChecker & eTB_Save) cLua::mCurLua->Save();
+void TasksList::CommonTasks() {
+	if(miTackChecker & eTB_Save) LuaPlugin::mCurLua->save();
 	miTackChecker = 0;
 }
 
 /** Add task */
-void cTasksList::AddTask(void * Param, tTask iType) {
+void TasksList::AddTask(void * Param, tTask iType) {
 	if(!Param) miTackChecker = miTackChecker | (1 << iType); /** Common task */
 	else {
 		cTask * Task = new cTask(iType);
@@ -55,10 +55,10 @@ void cTasksList::AddTask(void * Param, tTask iType) {
 	}
 }
 
-void cTasksList::CheckTasks() {
+void TasksList::CheckTasks() {
 	mList.Loop(Tasks);
 	mList.Clear();
 	if(miTackChecker) CommonTasks();
 }
 
-}; // nLua
+}; // namespace luaplugin

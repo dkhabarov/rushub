@@ -17,12 +17,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CTASKSLIST_H
-#define CTASKSLIST_H
+#ifndef TASKS_LIST_H
+#define TASKS_LIST_H
 
-#include "clist.h"
+#include "List.h"
 
-namespace nLua {
+namespace luaplugin {
 
 enum {
 	eTB_Save           = 1 << 1,
@@ -39,10 +39,7 @@ typedef enum {
 } tTask; /** tTask */
 
 
-class cTasksList {
-
-	int miTackChecker; /** Bits of the common tasks */
-	cList mList;
+class TasksList {
 
 public:
 	struct cTask {
@@ -53,17 +50,23 @@ public:
 		void * mParam;
 	}; // cTasks
 
-	cTasksList() : miTackChecker(0) {}
-	~cTasksList() {}
+	TasksList() : miTackChecker(0) {}
+	~TasksList() {}
 
 	void AddTask(void * Param, tTask iType = eT_No); /** Adding tasks */
 	void CheckTasks();
 
 private:
+
+	int miTackChecker; /** Bits of the common tasks */
+	cList<cTask> mList;
+
+private:
+
 	void CommonTasks(); /** Common tasks */
 
-}; // cTasksList
+}; // class TasksList
 
-}; // nLua
+}; // namespace luaplugin
 
-#endif // CTASKLIST_H
+#endif // TASKS_LIST_H

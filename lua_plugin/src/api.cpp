@@ -17,6 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "api.h"
+#include "LuaPlugin.h"
+#include "Uid.h"
+#include "Dir.h"
+
 #include <fstream>
 #include <vector>
 #ifndef _WIN32
@@ -27,12 +32,8 @@
 	#endif
 #endif
 
-#include "api.h"
-#include "clua.h"
-#include "uid.h"
-#include "cdir.h"
-
-using namespace std;
+using namespace ::std;
+using namespace ::utils;
 
 enum {
 	eHS_STOP,
@@ -65,23 +66,23 @@ if(lua_gettop(L) != NARG) { \
 #define ERR(MSG) { lua_settop(L, 0); lua_pushnil(L); lua_pushstring(L, MSG); return 2; }
 #define CHECKSCRIPTNAME() size_t iFileSize = sScriptName.size(); FILELEN(iFileSize); if(iFileSize <= 4 || (0 != sScriptName.compare(iFileSize - 4, 4, ".lua"))) sScriptName.append(".lua");
 #define FINDINTERPRETER() \
-cLua::tvLuaInterpreter::iterator it; \
-for(it = cLua::mCurLua->mLua.begin(); it != cLua::mCurLua->mLua.end(); ++it) { \
-	if((*it)->msName == sScriptName) { \
+LuaPlugin::tvLuaInterpreter::iterator it; \
+for(it = LuaPlugin::mCurLua->mLua.begin(); it != LuaPlugin::mCurLua->mLua.end(); ++it) { \
+	if((*it)->mName == sScriptName) { \
 		LIP = *it; break; \
 	} \
 } \
 if(!LIP || !LIP->mL) ERR("script was not found");
 
 
-namespace nLua {
+namespace luaplugin {
 
-cDCConnBase * GetDCConnBase(lua_State *L, int indx) {
+DcConnBase * getDcConnBase(lua_State *L, int indx) {
 	void ** userdata = (void**) lua_touserdata(L, indx);
-	cDCConnBase * Conn = (cDCConnBase*)*userdata;
-	if(Conn->mType != eT_DC_CLIENT && Conn->mType != eT_WEB_CLIENT)
+	DcConnBase * conn = (DcConnBase*)*userdata;
+	if(conn->mType != CLIENT_TYPE_NMDC && conn->mType != CLIENT_TYPE_WEB)
 		return NULL;
-	return Conn;
+	return conn;
 }
 
 int ConfigTostring(lua_State *L) {
@@ -92,7 +93,7 @@ int ConfigTostring(lua_State *L) {
 }
 
 int ConfigTable(lua_State *L) {
-	static const vector<string> & vConf = cLua::mCurServer->GetConfig();
+	static const vector<string> & vConf = LuaPlugin::mCurServer->getConfig();
 	int indx = 1;
 	lua_newtable(L);
 	for(vector<string>::const_iterator it = vConf.begin(); it != vConf.end(); ++it) {
@@ -104,8 +105,8 @@ int ConfigTable(lua_State *L) {
 }
 
 int ConfigIndex(lua_State *L) {
-	cConfig * Config = (cConfig *)lua_touserdata(L, 1);
-	if(Config->isExist != 1) {
+	Config * config = (Config *)lua_touserdata(L, 1);
+	if(config->isExist != 1) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
 		return 1;
@@ -117,7 +118,7 @@ int ConfigIndex(lua_State *L) {
 		lua_pushcfunction(L, &ConfigTable);
 		return 1;
 	}
-	const char * sConfig = cLua::mCurServer->GetConfig(sName);
+	const char * sConfig = LuaPlugin::mCurServer->getConfig(sName);
 	lua_settop(L, 0);
 	if(!sConfig) lua_pushnil(L);
 	else lua_pushstring(L, sConfig);
@@ -125,8 +126,8 @@ int ConfigIndex(lua_State *L) {
 }
 
 int ConfigNewindex(lua_State *L) {
-	cConfig * Config = (cConfig *)lua_touserdata(L, 1);
-	if(Config->isExist != 1) {
+	Config * config = (Config *)lua_touserdata(L, 1);
+	if(config->isExist != 1) {
 		lua_settop(L, 0);
 		return 0;
 	}
@@ -135,23 +136,23 @@ int ConfigNewindex(lua_State *L) {
 	char * sValue = (char *)lua_tostring(L, 3);
 	if(!sValue) sValue = (char *)lua_toboolean(L, 3);
 	if(!sValue) ERR_TYPEMETA(3, "Config", "string or boolean");
-	cLua::mCurServer->SetConfig(sName, sValue);
-	cLua::mCurLua->OnConfigChange(sName, sValue);
+	LuaPlugin::mCurServer->setConfig(sName, sValue);
+	LuaPlugin::mCurLua->OnConfigChange(sName, sValue);
 	lua_settop(L, 0);
 	return 0;
 }
 
 void LogError(const char *sMsg) {
-	string sLogs (cLua::mCurServer->GetMainDir() + "logs/");
-	if(!DirExists (sLogs.c_str())) {
-		mkDir (sLogs.c_str());
-	}
-	string logFile (sLogs + "luaerr.log");
-	ofstream Ofs (logFile.c_str(), ios_base::app);
+	string sLogs(LuaPlugin::mCurServer->getMainDir() + "logs/");
+
+	Dir::checkPath(sLogs);
+
+	string logFile(sLogs + "lua_errors.log");
+	ofstream Ofs(logFile.c_str(), ios_base::app);
 	if (sMsg) {
-		Ofs << "[" << cLua::mCurServer->GetTime() << "] " << string(sMsg) << endl;
+		Ofs << "[" << LuaPlugin::mCurServer->getTime() << "] " << string(sMsg) << endl;
 	} else {
-		Ofs << "[" << cLua::mCurServer->GetTime() << "] unknown LUA error" << endl;
+		Ofs << "[" << LuaPlugin::mCurServer->getTime() << "] unknown LUA error" << endl;
 	}
 	Ofs.flush();
 	Ofs.close();
@@ -189,7 +190,7 @@ void CopyValue(lua_State *From, lua_State *To, int idx) {
 			lua_pushlightuserdata(To, lua_touserdata(From, idx));
 			break;
 		case LUA_TUSERDATA:
-			udata = (void *)GetDCConnBase(From, idx);
+			udata = (void *)getDcConnBase(From, idx);
 			if(udata) {
 				userdata = (void**) lua_newuserdata(To, sizeof(void*));
 				*userdata = udata;
@@ -211,7 +212,7 @@ int GetGVal(lua_State *L) {
 	size_t iLen;
 	string sScriptName(luaL_checklstring(L, 1, &iLen));
 	FILELEN(iLen);
-	cLuaInterpreter * LIP = NULL;
+	LuaInterpreter * LIP = NULL;
 	CHECKSCRIPTNAME();
 	FINDINTERPRETER();
 
@@ -231,7 +232,7 @@ int SetGVal(lua_State *L) {
 	size_t iLen;
 	string sScriptName(luaL_checklstring(L, 1, &iLen));
 	FILELEN(iLen);
-	cLuaInterpreter * LIP = NULL;
+	LuaInterpreter * LIP = NULL;
 	CHECKSCRIPTNAME();
 	FINDINTERPRETER();
 
@@ -249,7 +250,7 @@ int SetGVal(lua_State *L) {
 }
 
 /// SendToUser(UID/sToNick/tNicks, sData, sNick, sFrom)
-int SendToUser(lua_State *L) {
+int sendToUser(lua_State *L) {
 	size_t iLen;
 	int iType;
 	const char *sNick = NULL, *sFrom = NULL, *sN;
@@ -278,26 +279,26 @@ int SendToUser(lua_State *L) {
 	MSGLEN(iLen);
 
 	if(iType == LUA_TUSERDATA) {
-		cDCConnBase * Conn = GetDCConnBase(L, 1);
-		if(!Conn) ERR("user was not found");
-		if(Conn->mType == eT_WEB_CLIENT) {
-			if(!Conn->Send(sData)) // not newPolitic fot timers only
+		DcConnBase * conn = getDcConnBase(L, 1);
+		if(!conn) ERR("user was not found");
+		if(conn->mType == CLIENT_TYPE_WEB) {
+			if(!conn->send(sData)) // not newPolitic fot timers only
 				ERR("data was not sent");
 		} else {
-			if(!cLua::mCurServer->SendToUser(Conn, sData, sNick, sFrom))
+			if(!LuaPlugin::mCurServer->sendToUser(conn, sData, sNick, sFrom))
 				ERR("user was not found");
 		}
 	} else if (iType == LUA_TSTRING) {
 		const char *sTo = lua_tolstring(L, 1, &iLen);
 		NICKLEN(iLen);
-		if(!cLua::mCurServer->SendToNick(sTo, sData, sNick, sFrom))
+		if(!LuaPlugin::mCurServer->sendToNick(sTo, sData, sNick, sFrom))
 			ERR("user was not found");
 	} else if (iType == LUA_TTABLE) {
 		lua_pushnil(L);
 		while(lua_next(L, 1) != 0) {
 			sN = luaL_checklstring(L, -1, &iLen);
 			NICKLEN(iLen);
-			cLua::mCurServer->SendToNick(sN, sData, sNick, sFrom);
+			LuaPlugin::mCurServer->sendToNick(sN, sData, sNick, sFrom);
 			lua_pop(L, 1);
 		}
 	} else {
@@ -333,7 +334,7 @@ int SendToNicks(lua_State *L) {
 			while(lua_next(L, 1) != 0) {
 				sN = luaL_checklstring(L, -1, &iLen);
 				NICKLEN(iLen);
-				cLua::mCurServer->SendToNick(sN, sData, sNick, sFrom);
+				LuaPlugin::mCurServer->sendToNick(sN, sData, sNick, sFrom);
 				lua_pop(L, 1);
 			}
 			break;
@@ -347,7 +348,7 @@ int SendToNicks(lua_State *L) {
 
 
 /// SendToAll(sData, sNick, sFrom)
-int SendToAll(lua_State *L) {
+int sendToAll(lua_State *L) {
 	size_t iLen;
 	const char *sData, *sNick = NULL, *sFrom = NULL;
 	switch(lua_gettop(L)) {
@@ -368,7 +369,7 @@ int SendToAll(lua_State *L) {
 		default:
 			ERR_COUNT("1, 2 or 3");
 	}
-	if(!cLua::mCurServer->SendToAll(sData, sNick, sFrom))
+	if(!LuaPlugin::mCurServer->sendToAll(sData, sNick, sFrom))
 		ERR("data was not found");
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
@@ -414,7 +415,7 @@ int SendToProfile(lua_State *L) {
 		default:
 			ERR_COUNT("2, 3 or 4");
 	}
-	if(!cLua::mCurServer->SendToProfiles(iProfile, sData, sNick, sFrom))
+	if(!LuaPlugin::mCurServer->sendToProfiles(iProfile, sData, sNick, sFrom))
 		ERR("data was not found");
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
@@ -422,7 +423,7 @@ int SendToProfile(lua_State *L) {
 }
 
 /// SendToIP(sIP, sData, sNick, sFrom, iProfile/tProfiles)
-int SendToIP(lua_State *L) {
+int sendToIp(lua_State *L) {
 	size_t iLen;
 	unsigned long iProfile = 0, iPrf;
 	int iType, iProf;
@@ -462,7 +463,7 @@ int SendToIP(lua_State *L) {
 			ERR_COUNT("2, 3, 4 or 5");
 	}
 	sIP = luaL_checklstring(L, 1, &iLen);
-	if(sIP && !cLua::mCurServer->SendToIP(sIP, sData, iProfile, sNick, sFrom))
+	if(sIP && !LuaPlugin::mCurServer->sendToIp(sIP, sData, iProfile, sNick, sFrom))
 		ERR("wrong ip format");
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
@@ -470,7 +471,7 @@ int SendToIP(lua_State *L) {
 }
 
 /// SendToAllExceptNicks(tExcept, sData, sNick, sFrom)
-int SendToAllExceptNicks(lua_State *L) {
+int sendToAllExceptNicks(lua_State *L) {
 	size_t iLen;
 	vector<string> NickList;
 	const char *sData, *sNick = NULL, *sFrom = NULL, *sN;
@@ -502,15 +503,15 @@ int SendToAllExceptNicks(lua_State *L) {
 		default:
 			ERR_COUNT("2, 3 or 4");
 	}
-	if(!cLua::mCurServer->SendToAllExceptNicks(NickList, sData, sNick, sFrom))
+	if(!LuaPlugin::mCurServer->sendToAllExceptNicks(NickList, sData, sNick, sFrom))
 		ERR("data was not found");
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
 	return 1;
 }
 
-/// SendToAllExceptIps(tExcept, sData, sNick, sFrom)
-int SendToAllExceptIps(lua_State *L) {
+/// SendToAllExceptIPs(tExcept, sData, sNick, sFrom)
+int sendToAllExceptIps(lua_State *L) {
 	size_t iLen;
 	vector<string> IPList;
 	const char *sData, *sNick = NULL, *sFrom = NULL, *sN;
@@ -542,7 +543,7 @@ int SendToAllExceptIps(lua_State *L) {
 		default:
 			ERR_COUNT("2, 3 or 4");
 	}
-	if(!cLua::mCurServer->SendToAllExceptIps(IPList, sData, sNick, sFrom))
+	if(!LuaPlugin::mCurServer->sendToAllExceptIps(IPList, sData, sNick, sFrom))
 		ERR("wrong ip format");
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
@@ -559,10 +560,10 @@ int GetUser(lua_State *L) {
 		size_t iLen;
 		const char * sNick = lua_tolstring(L, 1, &iLen);
 		NICKLEN(iLen);
-		cDCUserBase * User = cLua::mCurServer->GetDCUserBase(sNick);
-		if(!User || !User->mDCConnBase) ERR("user was not found");
+		DcUserBase * User = LuaPlugin::mCurServer->getDcUserBase(sNick);
+		if(!User || !User->mDcConnBase) ERR("user was not found");
 		void ** userdata = (void**) lua_newuserdata(L, sizeof(void*));
-		*userdata = (void*)User->mDCConnBase;
+		*userdata = (void*)User->mDcConnBase;
 		luaL_getmetatable(L, MT_USER_CONN);
 		lua_setmetatable(L, -2);
 	} else return luaL_typeerror(L, 1, "userdata or string");
@@ -573,40 +574,40 @@ int GetUser(lua_State *L) {
 /// SetUser(UID/sNick, iType, Value)
 int SetUser(lua_State *L) {
 	CHECK_COUNT(3);
-	cDCConnBase * Conn;
+	DcConnBase * conn;
 	if(lua_type(L, 1) == LUA_TUSERDATA) {
-		Conn = GetDCConnBase(L, 1);
-		if(!Conn || Conn->mType != eT_DC_CLIENT) ERR("user was not found");
+		conn = getDcConnBase(L, 1);
+		if(!conn || conn->mType != CLIENT_TYPE_NMDC) ERR("user was not found");
 	} else if(lua_isstring(L, 1)) {
 		size_t iLen;
 		const char * sNick = lua_tolstring(L, 1, &iLen);
 		NICKLEN(iLen);
-		cDCUserBase * User = cLua::mCurServer->GetDCUserBase(sNick);
-		if(!User || !User->mDCConnBase) ERR("user was not found");
-		Conn = User->mDCConnBase;
+		DcUserBase * User = LuaPlugin::mCurServer->getDcUserBase(sNick);
+		if(!User || !User->mDcConnBase) ERR("user was not found");
+		conn = User->mDcConnBase;
 	} else return luaL_typeerror(L, 1, "userdata or string");
 
 	unsigned iNum = (unsigned)luaL_checkinteger(L, 2);
 	if(iNum == eUV_iProfile) {
-		Conn->setProfile(luaL_checkint(L, 3));
+		conn->setProfile(luaL_checkint(L, 3));
 	} else if(iNum == eUV_sMyINFO) {
-		if(!Conn->mDCUserBase) ERR("user was not found");
+		if(!conn->mDcUserBase) ERR("user was not found");
 		string sMyINFO(luaL_checkstring(L, 3));
-		if(!Conn->mDCUserBase->SetMyINFO(sMyINFO, Conn->mDCUserBase->getNick())) ERR("wrong syntax");
+		if(!conn->mDcUserBase->setMyINFO(sMyINFO, conn->mDcUserBase->getNick())) ERR("wrong syntax");
 	} else if(iNum == eUV_sData) {
-		Conn->setData(luaL_checkstring(L, 3));
+		conn->setData(luaL_checkstring(L, 3));
 	} else if(iNum == eUV_bOpList) {
 		luaL_checktype(L, 3, LUA_TBOOLEAN);
-		if(!Conn->mDCUserBase) ERR("user was not found");
-		Conn->mDCUserBase->setInOpList(lua_toboolean(L, 3) != 0);
+		if(!conn->mDcUserBase) ERR("user was not found");
+		conn->mDcUserBase->setInOpList(lua_toboolean(L, 3) != 0);
 	} else if(iNum == eUV_bHide) {
 		luaL_checktype(L, 3, LUA_TBOOLEAN);
-		if(!Conn->mDCUserBase) ERR("user was not found");
-		Conn->mDCUserBase->setHide(lua_toboolean(L, 3) != 0);
+		if(!conn->mDcUserBase) ERR("user was not found");
+		conn->mDcUserBase->setHide(lua_toboolean(L, 3) != 0);
 	} else if(iNum == eUV_bIpList) {
 		luaL_checktype(L, 3, LUA_TBOOLEAN);
-		if(!Conn->mDCUserBase) ERR("user was not found");
-		Conn->mDCUserBase->setInIpList(lua_toboolean(L, 3) != 0);
+		if(!conn->mDcUserBase) ERR("user was not found");
+		conn->mDcUserBase->setInIpList(lua_toboolean(L, 3) != 0);
 	}
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
@@ -620,9 +621,9 @@ int GetUsers(lua_State *L) {
 	if(lua_type(L, 1) == LUA_TSTRING) {
 		bool all = false;
 		if (lua_isboolean(L, 2) && lua_toboolean(L, 2) == 1) all = true;
-		const vector<cDCConnBase *> & v = cLua::mCurServer->GetDCConnBase(lua_tostring(L, 1));
-		for(vector<cDCConnBase *>::const_iterator it = v.begin(); it != v.end(); ++it) {
-			if (all || ((*it)->mDCUserBase && (*it)->mDCUserBase->getInUserList())) {
+		const vector<DcConnBase *> & v = LuaPlugin::mCurServer->getDcConnBase(lua_tostring(L, 1));
+		for(vector<DcConnBase *>::const_iterator it = v.begin(); it != v.end(); ++it) {
+			if (all || ((*it)->mDcUserBase && (*it)->mDcUserBase->getInUserList())) {
 				lua_pushnumber(L, i);
 				void ** userdata = (void**) lua_newuserdata(L, sizeof(void*));
 				*userdata = (void*)(*it);
@@ -635,14 +636,14 @@ int GetUsers(lua_State *L) {
 	} else {
 		bool all = false;
 		if (lua_isboolean(L, 1) && lua_toboolean(L, 1) == 1) all = true;
-		cDCConnListIterator * it = cLua::mCurServer->GetDCConnListIterator();
-		cDCConnBase * Conn;
-		while((Conn = it->operator ()()) != NULL) {
-			if(Conn->mType != eT_DC_CLIENT) continue;
-			if (all || (Conn->mDCUserBase && Conn->mDCUserBase->getInUserList())) {
+		DcConnListIterator * it = LuaPlugin::mCurServer->getDcConnListIterator();
+		DcConnBase * conn;
+		while((conn = it->operator ()()) != NULL) {
+			if(conn->mType != CLIENT_TYPE_NMDC) continue;
+			if (all || (conn->mDcUserBase && conn->mDcUserBase->getInUserList())) {
 				lua_pushnumber(L, i);
 				void ** userdata = (void**) lua_newuserdata(L, sizeof(void*));
-				*userdata = (void*)Conn;
+				*userdata = (void*)conn;
 				luaL_getmetatable(L, MT_USER_CONN);
 				lua_setmetatable(L, -2);
 				lua_rawset(L, iTopTab);
@@ -655,20 +656,20 @@ int GetUsers(lua_State *L) {
 }
 
 /// GetUsersCount()
-int GetUsersCount(lua_State *L) {
-	lua_pushnumber(L, cLua::mCurServer->GetUsersCount());
+int getUsersCount(lua_State *L) {
+	lua_pushnumber(L, LuaPlugin::mCurServer->getUsersCount());
 	return 1;
 }
 
 /// GetTotalShare()
-int GetTotalShare(lua_State *L) {
-	lua_pushnumber(L, (lua_Number)cLua::mCurServer->GetTotalShare());
+int getTotalShare(lua_State *L) {
+	lua_pushnumber(L, (lua_Number)LuaPlugin::mCurServer->getTotalShare());
 	return 1;
 }
 
 /// GetUpTime()
-int GetUpTime(lua_State *L) {
-	lua_pushnumber(L, (lua_Number)cLua::mCurServer->GetUpTime());
+int getUpTime(lua_State *L) {
+	lua_pushnumber(L, (lua_Number)LuaPlugin::mCurServer->getUpTime());
 	return 1;
 }
 
@@ -677,16 +678,16 @@ int disconnect(lua_State *L) {
 	CHECK_COUNT(1);
 	int iType = lua_type(L, 1);
 	if(iType == LUA_TUSERDATA) {
-		cDCConnBase * Conn = GetDCConnBase(L, 1);
-		if(!Conn) ERR("user was not found");
-		Conn->disconnect();
+		DcConnBase * conn = getDcConnBase(L, 1);
+		if(!conn) ERR("user was not found");
+		conn->disconnect();
 	} else if(iType == LUA_TSTRING) {
 		size_t iLen;
 		const char * sNick = lua_tolstring(L, 1, &iLen);
 		NICKLEN(iLen);
-		cDCUserBase * User = cLua::mCurServer->GetDCUserBase(sNick);
-		if(!User || !User->mDCConnBase) ERR("user was not found");
-		User->mDCConnBase->disconnect();
+		DcUserBase * User = LuaPlugin::mCurServer->getDcUserBase(sNick);
+		if(!User || !User->mDcConnBase) ERR("user was not found");
+		User->mDcConnBase->disconnect();
 	} else return luaL_typeerror(L, 1, "userdata or string");
 
 	lua_settop(L, 0);
@@ -725,8 +726,8 @@ int DisconnectIP(lua_State *L) {
 		} else if(iType != LUA_TNIL) return luaL_typeerror(L, 1, "number or table");
 	}
 
-	const vector<cDCConnBase *> & v = cLua::mCurServer->GetDCConnBase(sIP);
-	vector<cDCConnBase *>::const_iterator it;
+	const vector<DcConnBase *> & v = LuaPlugin::mCurServer->getDcConnBase(sIP);
+	vector<DcConnBase *>::const_iterator it;
 	if(!iProfile)
 		for(it = v.begin(); it != v.end(); ++it)
 			(*it)->disconnect();
@@ -752,7 +753,7 @@ int RestartScripts(lua_State *L) {
 		iType = luaL_checkint(L, 1);
 		if(iType < 0 || iType > 2) iType = 0;
 	}
-	cLua::mCurLua->RestartScripts(cLua::mCurLua->mCurScript, iType);
+	LuaPlugin::mCurLua->RestartScripts(LuaPlugin::mCurLua->mCurScript, iType);
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
 	return 1;
@@ -764,40 +765,40 @@ int RestartScript(lua_State *L) {
 	if(!lua_isnoneornil(L, 1)) {
 		string sScriptName(luaL_checkstring(L, 1));
 		CHECKSCRIPTNAME();
-		cLuaInterpreter * Script = cLua::mCurLua->FindScript(sScriptName);
+		LuaInterpreter * Script = LuaPlugin::mCurLua->FindScript(sScriptName);
 		if(Script)
-			st = cLua::mCurLua->RestartScript(Script, Script->mL == L);
+			st = LuaPlugin::mCurLua->RestartScript(Script, Script->mL == L);
 		else
 			st = LUA_ERRFILE;
 	} else
-		st = cLua::mCurLua->RestartScript(cLua::mCurLua->mCurScript, true);
+		st = LuaPlugin::mCurLua->RestartScript(LuaPlugin::mCurLua->mCurScript, true);
 
 	if(st == 0) { lua_settop(L, 0); lua_pushboolean(L, 1); return 1; } // script was restarted
 	if(st == LUA_ERRFILE) { lua_settop(L, 0); lua_pushnil(L); return 1; } // script was not found
 	if(st == -1) ERR("script was started already");
 	if(st == LUA_ERRMEM) ERR("memory error");
 	if(st == LUA_ERRSYNTAX || st == LUA_YIELD || st == LUA_ERRRUN || st == LUA_ERRERR)
-		ERR(cLua::mCurLua->msLastError.c_str());
+		ERR(LuaPlugin::mCurLua->msLastError.c_str());
 	ERR("unknown error");
 }
 
 /// StopScript(sScriptName)
 int StopScript(lua_State *L) {
 	int st;
-	cLuaInterpreter * Script = cLua::mCurLua->mCurScript;
+	LuaInterpreter * Script = LuaPlugin::mCurLua->mCurScript;
 	if(!lua_isnoneornil(L, 1)) {
 		string sScriptName(luaL_checkstring(L, 1));
 		CHECKSCRIPTNAME();
-		Script = cLua::mCurLua->FindScript(sScriptName);
+		Script = LuaPlugin::mCurLua->FindScript(sScriptName);
 		if(Script)
-			st = cLua::mCurLua->StopScript(Script, Script->mL == L);
+			st = LuaPlugin::mCurLua->StopScript(Script, Script->mL == L);
 		else
 			st = LUA_ERRFILE;
 	} else
-		st = cLua::mCurLua->StopScript(Script, true);
+		st = LuaPlugin::mCurLua->StopScript(Script, true);
 
 	if(st == 0) { // script was stopped
-		cLua::mCurLua->OnScriptAction(Script->msName.c_str(), "OnScriptStop");
+		LuaPlugin::mCurLua->OnScriptAction(Script->mName.c_str(), "OnScriptStop");
 		lua_settop(L, 0); lua_pushboolean(L, 1); return 1;
 	}
 	if(st == LUA_ERRFILE) { lua_settop(L, 0); lua_pushnil(L); return 1; } // script was not found
@@ -809,17 +810,17 @@ int StopScript(lua_State *L) {
 int StartScript(lua_State *L) {
 	string sScriptName(luaL_checkstring(L, 1));
 	CHECKSCRIPTNAME();
-	int st = cLua::mCurLua->StartScript(sScriptName);
+	int st = LuaPlugin::mCurLua->StartScript(sScriptName);
 
 	if(st == 0) { // script was started
-		cLua::mCurLua->OnScriptAction(sScriptName.c_str(), "OnScriptStart");
+		LuaPlugin::mCurLua->OnScriptAction(sScriptName.c_str(), "OnScriptStart");
 		lua_settop(L, 0); lua_pushboolean(L, 1); return 1;
 	}
 	if(st == LUA_ERRFILE) { lua_settop(L, 0); lua_pushnil(L); return 1; } // script was not found
 	if(st == -1) ERR("script was started already");
 	if(st == LUA_ERRMEM) ERR("memory error");
 	if(st == LUA_ERRSYNTAX || st == LUA_YIELD || st == LUA_ERRRUN || st == LUA_ERRERR)
-		ERR(cLua::mCurLua->msLastError.c_str());
+		ERR(LuaPlugin::mCurLua->msLastError.c_str());
 	ERR("unknown error");
 }
 
@@ -827,12 +828,12 @@ int StartScript(lua_State *L) {
 int GetScripts(lua_State *L) {
 	lua_newtable(L);
 	int i = 1, iTop = lua_gettop(L);
-	cLua::tvLuaInterpreter::iterator it;
-	for(it = cLua::mCurLua->mLua.begin(); it != cLua::mCurLua->mLua.end(); ++it) {
+	LuaPlugin::tvLuaInterpreter::iterator it;
+	for(it = LuaPlugin::mCurLua->mLua.begin(); it != LuaPlugin::mCurLua->mLua.end(); ++it) {
 		lua_pushnumber(L, i);
 		lua_newtable(L);
 		lua_pushliteral(L, "sName");
-		lua_pushstring(L, (*it)->msName.c_str());
+		lua_pushstring(L, (*it)->mName.c_str());
 		lua_rawset(L, iTop + 2);
 		lua_pushliteral(L, "bEnabled");
 		lua_pushboolean(L, ((*it)->mbEnabled == false) ? 0 : 1);
@@ -851,19 +852,19 @@ int GetScripts(lua_State *L) {
 int GetScript(lua_State *L) {
 	int iTop = lua_gettop(L);
 	if(iTop > 1) ERR_COUNT("0 or 1");
-	cLuaInterpreter * Script;
+	LuaInterpreter * Script;
 	if(!lua_isnoneornil(L, 1)) {
 		string sScriptName(luaL_checkstring(L, 1));
 		CHECKSCRIPTNAME();
-		Script = cLua::mCurLua->FindScript(sScriptName);
+		Script = LuaPlugin::mCurLua->FindScript(sScriptName);
 		if(!Script) ERR("script was not found");
 	} else {
-		Script = cLua::mCurLua->mCurScript;
+		Script = LuaPlugin::mCurLua->mCurScript;
 	}
 	lua_newtable(L);
 	++iTop;
 	lua_pushliteral(L, "sName");
-	lua_pushstring(L, Script->msName.c_str());
+	lua_pushstring(L, Script->mName.c_str());
 	lua_rawset(L, iTop);
 	lua_pushliteral(L, "bEnabled");
 	lua_pushboolean(L, (Script->mbEnabled == false) ? 0 : 1);
@@ -880,14 +881,14 @@ int MoveUpScript(lua_State *L) {
 	if(!lua_isnoneornil(L, 1)) {
 		string sScriptName(luaL_checkstring(L, 1));
 		CHECKSCRIPTNAME();
-		cLuaInterpreter * Script = cLua::mCurLua->FindScript(sScriptName);
+		LuaInterpreter * Script = LuaPlugin::mCurLua->FindScript(sScriptName);
 		if(Script) {
-			cLua::mCurLua->mTasksList.AddTask((void*)Script, eT_MoveUp);
+			LuaPlugin::mCurLua->mTasksList.AddTask((void*)Script, eT_MoveUp);
 		} else ERR("script was not found");
 	} else
-		cLua::mCurLua->mTasksList.AddTask((void*)cLua::mCurLua->mCurScript, eT_MoveUp);
+		LuaPlugin::mCurLua->mTasksList.AddTask((void*)LuaPlugin::mCurLua->mCurScript, eT_MoveUp);
 
-	cLua::mCurLua->mTasksList.AddTask(NULL, eT_Save);
+	LuaPlugin::mCurLua->mTasksList.AddTask(NULL, eT_Save);
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
 	return 1;
@@ -898,14 +899,14 @@ int MoveDownScript(lua_State *L) {
 	if(!lua_isnoneornil(L, 1)) {
 		string sScriptName(luaL_checkstring(L, 1));
 		CHECKSCRIPTNAME();
-		cLuaInterpreter * Script = cLua::mCurLua->FindScript(sScriptName);
+		LuaInterpreter * Script = LuaPlugin::mCurLua->FindScript(sScriptName);
 		if(Script) {
-			cLua::mCurLua->mTasksList.AddTask((void*)Script, eT_MoveDown);
+			LuaPlugin::mCurLua->mTasksList.AddTask((void*)Script, eT_MoveDown);
 		} else ERR("script was not found");
 	} else
-		cLua::mCurLua->mTasksList.AddTask((void*)cLua::mCurLua->mCurScript, eT_MoveDown);
+		LuaPlugin::mCurLua->mTasksList.AddTask((void*)LuaPlugin::mCurLua->mCurScript, eT_MoveDown);
 
-	cLua::mCurLua->mTasksList.AddTask(NULL, eT_Save);
+	LuaPlugin::mCurLua->mTasksList.AddTask(NULL, eT_Save);
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
 	return 1;
@@ -915,21 +916,21 @@ int MoveDownScript(lua_State *L) {
 int SetCmd(lua_State *L) {
 	CHECK_COUNT(1);
 	const char * sData = luaL_checkstring(L, 1);
-	if(cLua::mCurLua->mCurDCParser) {
-		int iType = cLua::mCurServer->CheckCmd(sData);
-		if(iType != cLua::mCurLua->mCurDCParser->GetType() ||
+	if(LuaPlugin::mCurLua->mCurDCParser) {
+		int iType = LuaPlugin::mCurServer->checkCmd(sData);
+		if(iType != LuaPlugin::mCurLua->mCurDCParser->getCommandType() ||
 			(
-				iType == eDC_MYNIFO && 
-				cLua::mCurLua->mCurDCConn && (
-					!cLua::mCurLua->mCurDCConn->mDCUserBase ||
-					cLua::mCurLua->mCurDCConn->mDCUserBase->getNick() != cLua::mCurLua->mCurDCParser->ChunkString(eCH_MI_NICK)
+				iType == NMDC_TYPE_MYNIFO && 
+				LuaPlugin::mCurLua->mCurDCConn && (
+					!LuaPlugin::mCurLua->mCurDCConn->mDcUserBase ||
+					LuaPlugin::mCurLua->mCurDCConn->mDcUserBase->getNick() != LuaPlugin::mCurLua->mCurDCParser->chunkString(CHUNK_MI_NICK)
 				)
 			)
 		) {
 			luaL_argerror(L, 1, "wrong syntax");
 			return 0;
 		}
-		cLua::mCurLua->mCurDCParser->msStr = sData;
+		LuaPlugin::mCurLua->mCurDCParser->mParseString = sData;
 		lua_settop(L, 0);
 		lua_pushboolean(L, 1);
 		return 1;
@@ -951,11 +952,11 @@ int AddTimer(lua_State *L) {
 	lua_getglobal(L, sFunc.c_str());
 	if(lua_isnil(L, lua_gettop(L)) || lua_type(L, -1) != LUA_TFUNCTION) ERR("timer function was not found");
 
-	if(cLua::mCurLua->mCurScript->Size() > MAX_TIMERS)
+	if(LuaPlugin::mCurLua->mCurScript->Size() > MAX_TIMERS)
 		return luaL_error(L, "bad count timers for this script (max %d)", MAX_TIMERS);
-	cTimer * timer = new cTimer(iId, iInterval, sFunc.c_str(), cLua::mCurLua->mCurScript);
+	cTimer * timer = new cTimer(iId, iInterval, sFunc.c_str(), LuaPlugin::mCurLua->mCurScript);
 	lua_settop(L, 0);
-	lua_pushinteger(L, cLua::mCurLua->mCurScript->AddTmr(timer));
+	lua_pushinteger(L, LuaPlugin::mCurLua->mCurScript->AddTmr(timer));
 	return 1;
 }
 
@@ -964,15 +965,15 @@ int DelTimer(lua_State *L) {
 	CHECK_COUNT(1);
 	int iNum = luaL_checkint(L, 1);
 	lua_settop(L, 0);
-	lua_pushinteger(L, cLua::mCurLua->mCurScript->DelTmr(iNum));
+	lua_pushinteger(L, LuaPlugin::mCurLua->mCurScript->DelTmr(iNum));
 	return 1;
 }
 
 //! deprecated
 /// GetConfig(sName)
-int GetConfig(lua_State *L) {
+int getConfig(lua_State *L) {
 	CHECK_COUNT(1);
-	const char * sConfig = cLua::mCurServer->GetConfig(luaL_checkstring(L, 1));
+	const char * sConfig = LuaPlugin::mCurServer->getConfig(luaL_checkstring(L, 1));
 	if(!sConfig) ERR("config was not found");
 	lua_settop(L, 0);
 	lua_pushstring(L, sConfig);
@@ -981,11 +982,11 @@ int GetConfig(lua_State *L) {
 
 //! deprecated
 /// SetConfig(sName, sValue)
-int SetConfig(lua_State *L) {
+int setConfig(lua_State *L) {
 	CHECK_COUNT(2);
 	char * sVal = (char *)lua_tostring(L, 2);
 	if(!sVal) sVal = (char *)lua_toboolean(L, 2);
-	bool bRes = cLua::mCurServer->SetConfig(luaL_checkstring(L, 1), sVal);
+	bool bRes = LuaPlugin::mCurServer->setConfig(luaL_checkstring(L, 1), sVal);
 	if(!bRes) ERR("config was not found");
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
@@ -993,9 +994,9 @@ int SetConfig(lua_State *L) {
 }
 
 /// GetLang(sName)
-int GetLang(lua_State *L) {
+int getLang(lua_State *L) {
 	CHECK_COUNT(1);
-	const char * sConfig = cLua::mCurServer->GetLang(luaL_checkstring(L, 1));
+	const char * sConfig = LuaPlugin::mCurServer->getLang(luaL_checkstring(L, 1));
 	if(!sConfig) ERR("config was not found");
 	lua_settop(L, 0);
 	lua_pushstring(L, sConfig);
@@ -1003,11 +1004,11 @@ int GetLang(lua_State *L) {
 }
 
 /// SetLang(sName, sValue)
-int SetLang(lua_State *L) {
+int setLang(lua_State *L) {
 	CHECK_COUNT(2);
 	char * sVal = (char *)lua_tostring(L, 2);
 	if(!sVal) sVal = (char *)lua_toboolean(L, 2);
-	bool bRes = cLua::mCurServer->SetLang(luaL_checkstring(L, 1), sVal);
+	bool bRes = LuaPlugin::mCurServer->setLang(luaL_checkstring(L, 1), sVal);
 	if(!bRes) ERR("config was not found");
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
@@ -1020,7 +1021,7 @@ int Call(lua_State *L) {
 	int iTop = lua_gettop(L);
 	if(iTop < 2) ERR_COUNT("more 1");
 	string sScriptName(luaL_checkstring(L, 1));
-	cLuaInterpreter * LIP = NULL;
+	LuaInterpreter * LIP = NULL;
 	CHECKSCRIPTNAME();
 	FINDINTERPRETER();
 
@@ -1065,7 +1066,7 @@ int Call(lua_State *L) {
 }
 
 /// RegBot(sNick, bKey, sMyINFO, sIP)
-int RegBot(lua_State *L) {
+int regBot(lua_State *L) {
 	size_t iLen;
 	int iType;
 	string sNick, sMyINFO, sIP;
@@ -1093,7 +1094,7 @@ int RegBot(lua_State *L) {
 			ERR_COUNT("1, 2, 3 or 4");
 	}
 
-	int iRes = cLua::mCurServer->RegBot(sNick, sMyINFO, sIP, bKey);
+	int iRes = LuaPlugin::mCurServer->regBot(sNick, sMyINFO, sIP, bKey);
 	if(iRes < 0) {
 		if(iRes == -1) ERR("bad nick");
 		if(iRes == -2) ERR("bad MyINFO");
@@ -1101,27 +1102,27 @@ int RegBot(lua_State *L) {
 		ERR("unknown error");
 	}
 
-	cLua::mCurLua->mCurScript->mBotList.push_back(sNick);
+	LuaPlugin::mCurLua->mCurScript->mBotList.push_back(sNick);
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
 	return 1;
 }
 
 /// UnregBot(sNick)
-int UnregBot(lua_State *L) {
+int unregBot(lua_State *L) {
 	CHECK_COUNT(1);
 	size_t iLen;
 	const char * sNick = luaL_checklstring(L, 1, &iLen);
 	NICKLEN(iLen);
-	if(cLua::mCurServer->UnregBot(sNick) == -1) ERR("bot was not found");
-	cLua::mCurLua->mCurScript->mBotList.remove(sNick);
+	if(LuaPlugin::mCurServer->unregBot(sNick) == -1) ERR("bot was not found");
+	LuaPlugin::mCurLua->mCurScript->mBotList.remove(sNick);
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
 	return 1;
 }
 
 /// Redirect(UID/sNick, sAddress, [sReason])
-int Redirect(lua_State *L) {
+int redirect(lua_State *L) {
 	size_t iLen;
 	int iType;
 	const char *sAddress = NULL, *sReason = NULL;
@@ -1142,19 +1143,19 @@ int Redirect(lua_State *L) {
 	}
 
 	iType = lua_type(L, 1);
-	cDCConnBase * Conn = NULL;
+	DcConnBase * conn = NULL;
 	if(iType != LUA_TUSERDATA) {
 		if(iType != LUA_TSTRING) return luaL_typeerror(L, 1, "userdata or string");
-		cDCUserBase * User = cLua::mCurServer->GetDCUserBase(lua_tostring(L, 1));
-		if(!User || !User->mDCConnBase) ERR("user was not found");
-		Conn = User->mDCConnBase;
+		DcUserBase * User = LuaPlugin::mCurServer->getDcUserBase(lua_tostring(L, 1));
+		if(!User || !User->mDcConnBase) ERR("user was not found");
+		conn = User->mDcConnBase;
 	} else {
-		Conn = GetDCConnBase(L, 1);
+		conn = getDcConnBase(L, 1);
 	}
 
-	if(!Conn || (Conn->mType != eT_DC_CLIENT)) ERR("user was not found");
+	if(!conn || (conn->mType != CLIENT_TYPE_NMDC)) ERR("user was not found");
 
-	cLua::mCurServer->ForceMove(Conn, sAddress, sReason);
+	LuaPlugin::mCurServer->forceMove(conn, sAddress, sReason);
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
 	return 1;
@@ -1166,15 +1167,15 @@ int SetHubState(lua_State *L) {
 	if(iTop > 1) ERR_COUNT("0 or 1");
 
 	if(iTop == 0 || lua_isnil(L, 1))
-		cLua::mCurServer->StopHub(); // stoping
+		LuaPlugin::mCurServer->stopHub(); // stoping
 	else {
 		int iNum(luaL_checkint(L, 1));
 		if(iNum == eHS_STOP)
-			cLua::mCurServer->StopHub(); // stoping
+			LuaPlugin::mCurServer->stopHub(); // stoping
 		else if(iNum == eHS_RESTART)
-			cLua::mCurServer->RestartHub(); // restarting
+			LuaPlugin::mCurServer->restartHub(); // restarting
 	}
 	return 0;
 }
 
-}; // nLua
+}; // namespace luaplugin

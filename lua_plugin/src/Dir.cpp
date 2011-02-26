@@ -17,7 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "cdir.h"
+#include "Dir.h"
+
 #include <string.h>
 
 #ifdef _WIN32
@@ -26,14 +27,9 @@
 	#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
 #endif
 
-struct DIR {
-	long                handle; /* -1 for failed rewind */
-	struct _finddata_t  info;
-	struct dirent       result; /* d_name null iff first time */
-	char                *name;  /* null-terminated char string */
-};
 
-DIR *opendir(const char *name) {
+
+DIR * opendir(const char *name) {
 	DIR *dir = 0;
 	if(name && name[0]) {
 		size_t base_length = strlen(name);
@@ -62,6 +58,8 @@ DIR *opendir(const char *name) {
 	return dir;
 }
 
+
+
 int closedir(DIR *dir) {
 	int result = -1;
 	if(dir)	{
@@ -77,7 +75,9 @@ int closedir(DIR *dir) {
 	return result;
 }
 
-struct dirent *readdir(DIR *dir) {
+
+
+struct dirent * readdir(DIR *dir) {
 	struct dirent *result = 0;
 	if(dir && dir->handle != -1) {
 		if(!dir->result.d_name || _findnext(dir->handle, &dir->info) != -1) {
@@ -89,6 +89,8 @@ struct dirent *readdir(DIR *dir) {
 	}
 	return result;
 }
+
+
 
 void rewinddir(DIR *dir) {
 	if(dir && dir->handle != -1) {
@@ -102,83 +104,115 @@ void rewinddir(DIR *dir) {
 
 #endif // _WIN32
 
-int mkDir(const char * path) {
+
+
+namespace utils {
+
+int Dir::mkDir(const char * path) {
 	#ifdef _WIN32
-		if(CreateDirectoryA(path, NULL))
+		if(CreateDirectory(path, NULL)) {
 			return 0;
+		}
 		return -1;
 	#else
 		return mkdir(path, S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP);
 	#endif
 }
 
+
+
 /** Check exists of the dir */
-bool DirExists(const char* sName)	{
+bool Dir::isPathExist(const char * name)	{
 	DIR *dir;
-	dir = opendir(sName);
+	dir = opendir(name);
 	if(dir == NULL) return false;
 	closedir(dir);
 	return true;
 }
 
-bool FileExists(const char * sName) {
-#ifdef _WIN32
-	DWORD code = GetFileAttributesA(sName);
-	if(code != INVALID_FILE_ATTRIBUTES && code != FILE_ATTRIBUTE_DIRECTORY) return true;
-#else
-	struct stat st;
-	if(stat(sName, &st) == 0 && S_ISDIR(st.st_mode) == 0) return true;
-#endif
+
+
+bool Dir::isFileExist(const char * name) {
+	#ifdef _WIN32
+		DWORD code = GetFileAttributes(name);
+		if(code != INVALID_FILE_ATTRIBUTES && code != FILE_ATTRIBUTE_DIRECTORY) return true;
+	#else
+		struct stat st;
+		if(stat(name, &st) == 0 && S_ISDIR(st.st_mode) == 0) return true;
+	#endif
 	return false;
 }
 
-void ExecPath(string & sPath) {
+
+
+void Dir::execPath(string & path) {
+
 	#ifdef _WIN32
-		char * sExPath = NULL;
-		char sBuf[MAX_PATH+1] = { '\0' };
-		::GetModuleFileName(NULL, sBuf, MAX_PATH);
-		sExPath = sBuf;
-		char * sSlash = strrchr(sExPath, '\\');
-		if(sSlash) sPath = string(sExPath, sSlash - sExPath);
-		else sPath = sExPath;
-		size_t iPos = sPath.find("\\");
-		while(iPos != sPath.npos) {
-			sPath.replace(iPos, 1, "/");
-			iPos = sPath.find("\\", iPos);
-		}
-		sPath.append("/");
-	#else
-		char * sHomeDir = getenv("HOME");
-		if(sHomeDir) {
-			sPath = sHomeDir;
-			sPath.append("/rushub");
+
+		char * exPath = NULL;
+		char buf[MAX_PATH + 1] = { '\0' };
+
+		::GetModuleFileName(NULL, buf, MAX_PATH);
+		exPath = buf;
+
+		char * slash = strrchr(exPath, '\\');
+		if (slash) {
+			path = string(exPath, slash - exPath);
 		} else {
-			sPath = "./.rushub";
+			path = exPath;
 		}
+
+	#else
+
+		char * home = getenv("HOME");
+		if (home) {
+			path = home;
+			path.append("/rushub");
+		} else {
+			path = "./.rushub";
+		}
+
 	#endif
 
-	/* A check to existing path */
-	const char * sDir = sPath.c_str();
-	if(!DirExists(sDir))
-		mkDir(sDir);
+	checkPath(path);
+
 }
 
-void CheckEndSlash(string & sPath) {
-	size_t iPos = sPath.find("\\");
-	while(iPos != sPath.npos) {
-		sPath.replace(iPos, 1, "/");
-		iPos = sPath.find("\\", iPos);
+
+
+void Dir::checkEndSlash(string & path) {
+
+	size_t pos = path.find("\\");
+	while (pos != path.npos) {
+		path.replace(pos, 1, "/");
+		pos = path.find("\\", pos);
 	}
-	if(sPath.substr(sPath.size()-1, 1) != "/")
-		sPath.append("/");
+
+	if (path.substr(path.size() - 1, 1) != "/") {
+		path.append("/");
+	}
+
 }
 
-void CheckPath(string & sPath) {
+
+
+bool Dir::checkPath(string & path) {
+
 	// Check MAX_PATH size
-	if(sPath.size() >= MAX_PATH) {
-		sPath = sPath.substr(0, MAX_PATH - 1);
-		CheckEndSlash(sPath);
+	if (path.size() >= MAX_PATH) {
+		path = path.substr(0, MAX_PATH - 1);
 	}
-	const char * sDir = sPath.c_str();
-	if(!DirExists(sDir)) mkDir(sDir);
+
+	checkEndSlash(path);
+
+	const char * dir = path.c_str();
+	if (!isPathExist(dir)) {
+		if (mkDir(dir) < 0) {
+			return false;
+		}
+	}
+
+	return true;
 }
+
+}; // namespace utils

@@ -17,32 +17,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <string.h>
+#include "LuaInterpreter.h"
+#include "LuaPlugin.h" // for dirs
+#include "Uid.h"
 
-#include "cluainterpreter.h"
-#include "clua.h" /** for dirs */
-#include "uid.h"
+#include <string.h>
 
 #define HAVE_LUA_5_1
 
-using namespace std;
+using namespace ::std;
 
-namespace nLua {
+namespace luaplugin {
 
-cLuaInterpreter::cLuaInterpreter(const string & sName, string & sPath) : 
-	msName(sName),
+LuaInterpreter::LuaInterpreter(const string & sName, string & sPath) : 
+	mName(sName),
 	msPath(sPath),
 	mL(NULL),
 	mbEnabled(false)
 {
 }
 
-cLuaInterpreter::~cLuaInterpreter() {
+LuaInterpreter::~LuaInterpreter() {
 	Stop();
 }
 
 /** On start script (-1 - run already)*/
-int cLuaInterpreter::Start() {
+int LuaInterpreter::Start() {
 	if(mL) return -1;
 	mbEnabled = true;
 	mL = luaL_newstate();
@@ -63,26 +63,26 @@ int cLuaInterpreter::Start() {
 	lua_pushliteral(mL, "package");
 	lua_gettable(mL, LUA_GLOBALSINDEX);
 
-	if(!cLua::mCurLua->mbSetLuaPath) {
+	if(!LuaPlugin::mCurLua->mbSetLuaPath) {
 		lua_pushliteral(mL, "path");
 		lua_rawget(mL, -2);
-		cLua::mCurLua->msLuaPath.append(lua_tostring(mL, -1));
+		LuaPlugin::mCurLua->msLuaPath.append(lua_tostring(mL, -1));
 		lua_pop(mL, 1);
 
 		lua_pushliteral(mL, "cpath");
 		lua_rawget(mL, -2);
-		cLua::mCurLua->msLuaCPath.append(lua_tostring(mL, -1));
+		LuaPlugin::mCurLua->msLuaCPath.append(lua_tostring(mL, -1));
 		lua_pop(mL, 1);
 
-		cLua::mCurLua->mbSetLuaPath = true;
+		LuaPlugin::mCurLua->mbSetLuaPath = true;
 	}
 
 	lua_pushliteral(mL, "path");
-	lua_pushstring(mL, cLua::mCurLua->msLuaPath.c_str());
+	lua_pushstring(mL, LuaPlugin::mCurLua->msLuaPath.c_str());
 	lua_settable(mL, -3);
 
 	lua_pushliteral(mL, "cpath");
-	lua_pushstring(mL, cLua::mCurLua->msLuaCPath.c_str());
+	lua_pushstring(mL, LuaPlugin::mCurLua->msLuaCPath.c_str());
 	lua_settable(mL, -3);
 
 	lua_settop(mL, 0);
@@ -91,17 +91,18 @@ int cLuaInterpreter::Start() {
 	lua_newtable(mL);
 	RegFunc("GetGVal",              &GetGVal);
 	RegFunc("SetGVal",              &SetGVal);
-	RegFunc("SendToUser",           &SendToUser);
-	RegFunc("SendToAll",            &SendToAll);
-	RegFunc("SendToAllExceptNicks", &SendToAllExceptNicks);
+	RegFunc("SendToUser",           &sendToUser);
+	RegFunc("SendToAll",            &sendToAll);
+	RegFunc("SendToAllExceptNicks", &sendToAllExceptNicks);
+	RegFunc("SendToAllExceptIPs",   &sendToAllExceptIps);
 	RegFunc("SendToProfile",        &SendToProfile);
-	RegFunc("SendToIP",             &SendToIP);
+	RegFunc("SendToIP",             &sendToIp);
 	RegFunc("SendToNicks",          &SendToNicks);
 	RegFunc("GetUser",              &GetUser);
 	RegFunc("SetUser",              &SetUser);
-	RegFunc("GetUsersCount",        &GetUsersCount);
-	RegFunc("GetTotalShare",        &GetTotalShare);
-	RegFunc("GetUpTime",            &GetUpTime);
+	RegFunc("GetUsersCount",        &getUsersCount);
+	RegFunc("GetTotalShare",        &getTotalShare);
+	RegFunc("GetUpTime",            &getUpTime);
 	RegFunc("Disconnect",           &disconnect);
 	RegFunc("DisconnectIP",         &DisconnectIP);
 	RegFunc("RestartScripts",       &RestartScripts);
@@ -116,57 +117,57 @@ int cLuaInterpreter::Start() {
 	RegFunc("GetUsers",             &GetUsers);
 	RegFunc("AddTimer",             &AddTimer);
 	RegFunc("DelTimer",             &DelTimer);
-	RegFunc("GetConfig",            &GetConfig);
-	RegFunc("SetConfig",            &SetConfig);
-	RegFunc("GetLang",              &GetLang);
-	RegFunc("SetLang",              &SetLang);
+	RegFunc("GetConfig",            &getConfig);
+	RegFunc("SetConfig",            &setConfig);
+	RegFunc("GetLang",              &getLang);
+	RegFunc("SetLang",              &setLang);
 	RegFunc("Call",                 &Call);
-	RegFunc("RegBot",               &RegBot);
-	RegFunc("UnregBot",             &UnregBot);
+	RegFunc("RegBot",               &regBot);
+	RegFunc("UnregBot",             &unregBot);
 	RegFunc("SetHubState",          &SetHubState);
-	RegFunc("Redirect",             &Redirect);
+	RegFunc("Redirect",             &redirect);
 
 	RegStrField("sLuaPluginVersion", PLUGIN_NAME" "PLUGIN_VERSION);
-	RegStrField("sHubVersion", cLua::mCurServer->GetHubInfo().c_str());
-	RegStrField("sMainDir", cLua::mCurServer->GetMainDir().c_str());
-	RegStrField("sScriptsDir", cLua::mCurLua->GetScriptsDir().c_str());
-	RegStrField("sSystem", cLua::mCurServer->GetSystemVersion().c_str());
+	RegStrField("sHubVersion", LuaPlugin::mCurServer->getHubInfo().c_str());
+	RegStrField("sMainDir", LuaPlugin::mCurServer->getMainDir().c_str());
+	RegStrField("sScriptsDir", LuaPlugin::mCurLua->GetScriptsDir().c_str());
+	RegStrField("sSystem", LuaPlugin::mCurServer->getSystemVersion().c_str());
 
 	lua_setglobal(mL, "Core");
 
 	CreateConfigMT();
-	cConfig * Config = (cConfig*)lua_newuserdata(mL, sizeof(cConfig));
-	Config->isExist = 1;
+	Config * config = (Config*)lua_newuserdata(mL, sizeof(Config));
+	config->isExist = 1;
 	luaL_getmetatable(mL, MT_CONFIG);
 	lua_setmetatable(mL, -2);
 	lua_setglobal(mL, "Config");
 
-	cLuaInterpreter * Old = cLua::mCurLua->mCurScript;
-	cLua::mCurLua->mCurScript = this;
+	LuaInterpreter * Old = LuaPlugin::mCurLua->mCurScript;
+	LuaPlugin::mCurLua->mCurScript = this;
 	#ifdef HAVE_LUA_5_1
-		int iStatus = luaL_dofile(mL, (char *)(msPath + msName).c_str());
+		int iStatus = luaL_dofile(mL, (char *)(msPath + mName).c_str());
 	#else
-		int iStatus = lua_dofile(mL, (char *)(msPath + msName).c_str());
+		int iStatus = lua_dofile(mL, (char *)(msPath + mName).c_str());
 	#endif
 	if(iStatus) {
 		OnError("OnError", lua_tostring(mL, -1), true);
-		cLua::mCurLua->mCurScript = Old;
+		LuaPlugin::mCurLua->mCurScript = Old;
 		return iStatus;
 	}
 	CreateUserMT();
 	CallFunc("OnStartup");
-	cLua::mCurLua->mCurScript = Old;
+	LuaPlugin::mCurLua->mCurScript = Old;
 	return 0;
 }
 
 
 /** On stop script */
-int cLuaInterpreter::Stop() {
+int LuaInterpreter::Stop() {
 	if(mL) {
 		DelTmr();
 
 		for(tBotList::iterator it = mBotList.begin(); it != mBotList.end(); ++it)
-			cLua::mCurServer->UnregBot(*it);
+			LuaPlugin::mCurServer->unregBot(*it);
 		mBotList.clear();
 
 		CallFunc("OnExit");
@@ -180,13 +181,13 @@ int cLuaInterpreter::Stop() {
 }
 
 
-void cLuaInterpreter::RegFunc(const char* sFuncName, int (*fncptr)(lua_State*)) {
+void LuaInterpreter::RegFunc(const char* sFuncName, int (*fncptr)(lua_State*)) {
 	lua_pushstring(mL, sFuncName);
 	lua_pushcfunction(mL, fncptr);
 	lua_rawset(mL, -3);
 }
 
-void cLuaInterpreter::RegStrField(const char* sName, const char* sVal) {
+void LuaInterpreter::RegStrField(const char* sName, const char* sVal) {
 	lua_pushstring(mL, sName);
 	lua_pushstring(mL, sVal);
 	lua_rawset(mL, -3);
@@ -194,7 +195,7 @@ void cLuaInterpreter::RegStrField(const char* sName, const char* sVal) {
 
 
 /** 1 - lock! */
-int cLuaInterpreter::CallFunc(const char* sFunc) {
+int LuaInterpreter::CallFunc(const char* sFunc) {
 	tvCallParams::iterator it;
 	lua_settop(mL, 0);
 	int iBase = lua_gettop(mL);
@@ -245,15 +246,15 @@ int cLuaInterpreter::CallFunc(const char* sFunc) {
 	const int iLen = mCallParams.size();
 	mCallParams.clear();
 
-	cLuaInterpreter * Old = cLua::mCurLua->mCurScript;
-	cLua::mCurLua->mCurScript = this;
+	LuaInterpreter * Old = LuaPlugin::mCurLua->mCurScript;
+	LuaPlugin::mCurLua->mCurScript = this;
 
 	if(lua_pcall(mL, iLen, 1, iBase)) {
 		if(!OnError(sFunc, lua_tostring(mL, -1))) {
 			lua_pop(mL, 1);
 			lua_remove(mL, iBase); // remove _TRACEBACK
 		}
-		cLua::mCurLua->mCurScript = Old;
+		LuaPlugin::mCurLua->mCurScript = Old;
 		return 0;
 	}
 
@@ -266,62 +267,62 @@ int cLuaInterpreter::CallFunc(const char* sFunc) {
 	lua_pop(mL, 1);
 	lua_remove(mL, iBase); // remove _TRACEBACK
 
-	cLua::mCurLua->mCurScript = Old;
+	LuaPlugin::mCurLua->mCurScript = Old;
 	return iVal;
 }
 
-bool cLuaInterpreter::OnError(const char* sFunc, const char* sErrMsg, bool bStop) {
+bool LuaInterpreter::OnError(const char* sFunc, const char* sErrMsg, bool bStop) {
 	bool bStoped = true;
-	cLua::mCurLua->msLastError = sErrMsg;
+	LuaPlugin::mCurLua->msLastError = sErrMsg;
 	LogError(sErrMsg);
 	if(strcmp(sFunc, "OnError")) {
 		NewCallParam((void *)sErrMsg, LUA_TSTRING);
 		bStoped = !CallFunc("OnError");
 	}
 	bStoped = bStoped || bStop;
-	cLua::mCurLua->OnScriptError(this, msName.c_str(), sErrMsg, bStoped);
-	if(bStoped) return !cLua::mCurLua->StopScript(this, true);
+	LuaPlugin::mCurLua->OnScriptError(this, mName.c_str(), sErrMsg, bStoped);
+	if(bStoped) return !LuaPlugin::mCurLua->StopScript(this, true);
 	return false;
 }
 
-void cLuaInterpreter::Timer(int iId, const char * sFunc) {
+void LuaInterpreter::Timer(int iId, const char * sFunc) {
 	lua_getglobal(mL, sFunc);
 	lua_pushnumber(mL, iId);
-	cLuaInterpreter * Old = cLua::mCurLua->mCurScript;
-	cLua::mCurLua->mCurScript = this;
+	LuaInterpreter * Old = LuaPlugin::mCurLua->mCurScript;
+	LuaPlugin::mCurLua->mCurScript = this;
 	if(lua_pcall(mL, 1, 0, 0)) {
 		if(!OnError("OnTimer", lua_tostring(mL, -1), true))
 			lua_pop(mL, 1);
 	}
-	cLua::mCurLua->mCurScript = Old;
+	LuaPlugin::mCurLua->mCurScript = Old;
 }
 
-void cLuaInterpreter::NewCallParam(void * Data, int iType) {
+void LuaInterpreter::NewCallParam(void * Data, int iType) {
 	sParam * Param = new sParam(Data, iType);
 	mCallParams.push_back(Param);
 }
 
-void cLuaInterpreter::NewCallParam(lua_Number Data, int iType) {
+void LuaInterpreter::NewCallParam(lua_Number Data, int iType) {
 	sParam * Param = new sParam(Data, iType);
 	mCallParams.push_back(Param);
 }
 
-void cLuaInterpreter::CreateUserMT() {
+void LuaInterpreter::CreateUserMT() {
 	if(!luaL_newmetatable(mL, MT_USER_CONN)) return;
 
 	lua_pushliteral(mL, "__index");
-	lua_pushstring(mL, "UserIndex");
-	lua_pushcclosure(mL, UserIndex, 1);
+	lua_pushstring(mL, "userIndex");
+	lua_pushcclosure(mL, Uid::userIndex, 1);
 	lua_settable(mL, -3);
 
 	lua_pushliteral(mL, "__newindex");
-	lua_pushstring(mL, "UserNewindex");
-	lua_pushcclosure(mL, UserNewindex, 1);
+	lua_pushstring(mL, "userNewIndex");
+	lua_pushcclosure(mL, Uid::userNewIndex, 1);
 	lua_settable(mL, -3);
 
 	lua_pushliteral(mL, "__tostring");
 	lua_pushstring(mL, MT_USER_CONN);
-	lua_pushcclosure(mL, UidTostring, 1);
+	lua_pushcclosure(mL, Uid::uidToString, 1);
 	lua_settable(mL, -3);
 
 	lua_pushliteral(mL, "__metatable");
@@ -331,7 +332,7 @@ void cLuaInterpreter::CreateUserMT() {
 	lua_settop(mL, 0);
 }
 
-void cLuaInterpreter::CreateConfigMT() {
+void LuaInterpreter::CreateConfigMT() {
 	if(!luaL_newmetatable(mL, MT_CONFIG)) return;
 
 	lua_pushliteral(mL, "__index");
@@ -356,4 +357,4 @@ void cLuaInterpreter::CreateConfigMT() {
 	lua_settop(mL, 0);
 }
 
-}; // nLua
+}; // namespace luaplugin
