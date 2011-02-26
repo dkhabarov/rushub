@@ -5,123 +5,120 @@ CXXFLAGS = -O2 -Wall -Wextra -pipe
 
 INCLUDE = -I/usr/include -I/usr/local/include
 
-OBJS = $(CURDIR)/cantiflood.o $(CURDIR)/ccalllist.o $(CURDIR)/ccli.o $(CURDIR)/cconfig.o $(CURDIR)/cconfiglist.o $(CURDIR)/cconfigloader.o $(CURDIR)/cconn.o $(CURDIR)/cconnchoose.o $(CURDIR)/cconnpoll.o $(CURDIR)/cconnselect.o $(CURDIR)/cdcconfig.o $(CURDIR)/cdcconn.o $(CURDIR)/cdciplist.o $(CURDIR)/cdcparser.o $(CURDIR)/cdcprotocol.o $(CURDIR)/cdcserver.o $(CURDIR)/cdctag.o $(CURDIR)/cdcuser.o $(CURDIR)/cdir.o $(CURDIR)/cexception.o $(CURDIR)/cmainpath.o $(CURDIR)/cmyinfo.o $(CURDIR)/cobj.o $(CURDIR)/cpluginlist.o $(CURDIR)/cpluginloader.o $(CURDIR)/cprotocol.o $(CURDIR)/cprotocolcmd.o $(CURDIR)/cserver.o $(CURDIR)/cservice.o $(CURDIR)/cstrtoarg.o $(CURDIR)/ctime.o $(CURDIR)/cuserlist.o $(CURDIR)/cwebconn.o $(CURDIR)/cwebparser.o $(CURDIR)/cwebprotocol.o $(CURDIR)/dlfcn.o $(CURDIR)/main.o $(CURDIR)/stringutils.o
+OBJS = $(CURDIR)/AntiFlood.o $(CURDIR)/CallList.o $(CURDIR)/Cli.o $(CURDIR)/Config.o $(CURDIR)/ConfigList.o $(CURDIR)/Conn.o $(CURDIR)/ConnChoose.o $(CURDIR)/ConnPoll.o $(CURDIR)/ConnSelect.o $(CURDIR)/DcConfig.o $(CURDIR)/DcConfigLoader.o $(CURDIR)/DcConn.o $(CURDIR)/DcIpList.o $(CURDIR)/DcParser.o $(CURDIR)/DcProtocol.o $(CURDIR)/DcServer.o $(CURDIR)/DcTag.o $(CURDIR)/DcUser.o $(CURDIR)/Dir.o $(CURDIR)/dlfcn.o $(CURDIR)/Exception.o $(CURDIR)/main.o $(CURDIR)/MyInfo.o $(CURDIR)/Obj.o $(CURDIR)/PluginList.o $(CURDIR)/PluginLoader.o $(CURDIR)/Protocol.o $(CURDIR)/ProtocolCommand.o $(CURDIR)/Server.o $(CURDIR)/Service.o $(CURDIR)/StringToArg.o $(CURDIR)/stringutils.o $(CURDIR)/Times.o $(CURDIR)/UserList.o $(CURDIR)/WebConn.o $(CURDIR)/WebParser.o $(CURDIR)/WebProtocol.o
 
 RusHub: $(OBJS)
 	$(CXX) -lrt -ldl -o RusHub $(OBJS) $(CURDIR)/tinyxml/tinyxml.a
 
-$(CURDIR)/cantiflood.o: $(CURDIR)/cantiflood.cpp $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/tchashtable.h $(CURDIR)/cantiflood.h
+$(CURDIR)/AntiFlood.o: $(CURDIR)/AntiFlood.cpp $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/HashTable.h $(CURDIR)/AntiFlood.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/ccalllist.o: $(CURDIR)/ccalllist.cpp $(CURDIR)/cobj.h $(CURDIR)/ccalllist.h $(CURDIR)/cplugin.h $(CURDIR)/tchashtable.h $(CURDIR)/tchashmap.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/cprotocol.h $(CURDIR)/cconn.h $(CURDIR)/cuserbase.h $(CURDIR)/stringutils.h $(CURDIR)/cdctag.h $(CURDIR)/cmyinfo.h $(CURDIR)/cdcuser.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/cconnchoose.h $(CURDIR)/cmeanfrequency.h $(CURDIR)/cconnselect.h $(CURDIR)/cconnpoll.h $(CURDIR)/cserver.h $(CURDIR)/cwebconn.h $(CURDIR)/cpluginlist.h
+$(CURDIR)/CallList.o: $(CURDIR)/CallList.cpp $(CURDIR)/Obj.h $(CURDIR)/CallList.h $(CURDIR)/Plugin.h $(CURDIR)/HashTable.h $(CURDIR)/HashMap.h $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/Protocol.h $(CURDIR)/Conn.h $(CURDIR)/UserBase.h $(CURDIR)/stringutils.h $(CURDIR)/DcTag.h $(CURDIR)/MyInfo.h $(CURDIR)/DcUser.h $(CURDIR)/TimeOut.h $(CURDIR)/DcConn.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/WebConn.h $(CURDIR)/PluginList.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/ccli.o: $(CURDIR)/ccli.cpp $(CURDIR)/cobj.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/tchashtable.h $(CURDIR)/cconnchoose.h $(CURDIR)/cmeanfrequency.h $(CURDIR)/cconnselect.h $(CURDIR)/cconnpoll.h $(CURDIR)/cserver.h $(CURDIR)/cplugin.h $(CURDIR)/cprotocol.h $(CURDIR)/cconn.h $(CURDIR)/cuserbase.h $(CURDIR)/stringutils.h $(CURDIR)/cdctag.h $(CURDIR)/cmyinfo.h $(CURDIR)/cdcuser.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/cprotocolcmd.h $(CURDIR)/cdcparser.h $(CURDIR)/cdcprotocol.h $(CURDIR)/tchashmap.h $(CURDIR)/cconfig.h $(CURDIR)/cconfiglist.h $(CURDIR)/cdcconfig.h $(CURDIR)/cuserlist.h $(CURDIR)/ccalllist.h $(CURDIR)/cwebconn.h $(CURDIR)/cpluginlist.h $(CURDIR)/cconfigloader.h $(CURDIR)/cantiflood.h $(CURDIR)/cdciplist.h $(CURDIR)/cmainpath.h $(CURDIR)/cdcserver.h $(CURDIR)/ccli.h
+$(CURDIR)/Cli.o: $(CURDIR)/Cli.cpp $(CURDIR)/Obj.h $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/Plugin.h $(CURDIR)/Protocol.h $(CURDIR)/Conn.h $(CURDIR)/UserBase.h $(CURDIR)/stringutils.h $(CURDIR)/DcTag.h $(CURDIR)/MyInfo.h $(CURDIR)/DcUser.h $(CURDIR)/TimeOut.h $(CURDIR)/DcConn.h $(CURDIR)/ProtocolCommand.h $(CURDIR)/DcParser.h $(CURDIR)/DcProtocol.h $(CURDIR)/HashMap.h $(CURDIR)/Config.h $(CURDIR)/ConfigList.h $(CURDIR)/ConfigLoader.h $(CURDIR)/DcConfig.h $(CURDIR)/UserList.h $(CURDIR)/CallList.h $(CURDIR)/WebConn.h $(CURDIR)/PluginList.h $(CURDIR)/DcConfigLoader.h $(CURDIR)/AntiFlood.h $(CURDIR)/DcIpList.h $(CURDIR)/DcServer.h $(CURDIR)/Cli.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/cconfig.o: $(CURDIR)/cconfig.cpp $(CURDIR)/cconfig.h $(CURDIR)/stringutils.h
+$(CURDIR)/Config.o: $(CURDIR)/Config.cpp $(CURDIR)/Config.h $(CURDIR)/stringutils.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/cconfiglist.o: $(CURDIR)/cconfiglist.cpp $(CURDIR)/cobj.h $(CURDIR)/tchashtable.h $(CURDIR)/tchashmap.h $(CURDIR)/cconfig.h $(CURDIR)/cconfiglist.h
+$(CURDIR)/ConfigList.o: $(CURDIR)/ConfigList.cpp $(CURDIR)/Obj.h $(CURDIR)/HashTable.h $(CURDIR)/HashMap.h $(CURDIR)/Config.h $(CURDIR)/ConfigList.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/cconfigloader.o: $(CURDIR)/cconfigloader.cpp $(CURDIR)/cobj.h $(CURDIR)/cconfigloader.h $(CURDIR)/stringutils.h $(CURDIR)/tchashtable.h $(CURDIR)/tchashmap.h $(CURDIR)/cconfig.h $(CURDIR)/cconfiglist.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/cconnchoose.h $(CURDIR)/cmeanfrequency.h $(CURDIR)/cconnselect.h $(CURDIR)/cconnpoll.h $(CURDIR)/cserver.h $(CURDIR)/tinyxml/tinyxml.h
+$(CURDIR)/Conn.o: $(CURDIR)/Conn.cpp $(CURDIR)/Obj.h $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/Protocol.h $(CURDIR)/Plugin.h $(CURDIR)/Conn.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/stringutils.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/cconn.o: $(CURDIR)/cconn.cpp $(CURDIR)/cobj.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/cprotocol.h $(CURDIR)/cplugin.h $(CURDIR)/cconn.h $(CURDIR)/tchashtable.h $(CURDIR)/cconnchoose.h $(CURDIR)/cmeanfrequency.h $(CURDIR)/cconnselect.h $(CURDIR)/cconnpoll.h $(CURDIR)/cserver.h $(CURDIR)/stringutils.h
+$(CURDIR)/ConnChoose.o: $(CURDIR)/ConnChoose.cpp $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/cconnchoose.o: $(CURDIR)/cconnchoose.cpp $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/tchashtable.h $(CURDIR)/cconnchoose.h
+$(CURDIR)/ConnPoll.o: $(CURDIR)/ConnPoll.cpp $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/ConnPoll.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/cconnpoll.o: $(CURDIR)/cconnpoll.cpp $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/tchashtable.h $(CURDIR)/cconnchoose.h $(CURDIR)/cconnpoll.h
+$(CURDIR)/ConnSelect.o: $(CURDIR)/ConnSelect.cpp $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/Obj.h $(CURDIR)/ConnSelect.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/cconnselect.o: $(CURDIR)/cconnselect.cpp $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/tchashtable.h $(CURDIR)/cconnchoose.h $(CURDIR)/cobj.h $(CURDIR)/cconnselect.h
+$(CURDIR)/DcConfig.o: $(CURDIR)/DcConfig.cpp $(CURDIR)/Obj.h $(CURDIR)/HashTable.h $(CURDIR)/HashMap.h $(CURDIR)/Config.h $(CURDIR)/ConfigList.h $(CURDIR)/ConfigLoader.h $(CURDIR)/Protocol.h $(CURDIR)/ProtocolCommand.h $(CURDIR)/Plugin.h $(CURDIR)/DcParser.h $(CURDIR)/DcConfig.h $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/Conn.h $(CURDIR)/UserBase.h $(CURDIR)/stringutils.h $(CURDIR)/DcTag.h $(CURDIR)/MyInfo.h $(CURDIR)/DcUser.h $(CURDIR)/TimeOut.h $(CURDIR)/DcConn.h $(CURDIR)/DcProtocol.h $(CURDIR)/UserList.h $(CURDIR)/CallList.h $(CURDIR)/WebConn.h $(CURDIR)/PluginList.h $(CURDIR)/DcConfigLoader.h $(CURDIR)/AntiFlood.h $(CURDIR)/DcIpList.h $(CURDIR)/DcServer.h $(CURDIR)/Dir.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/cdcconfig.o: $(CURDIR)/cdcconfig.cpp $(CURDIR)/cobj.h $(CURDIR)/tchashtable.h $(CURDIR)/tchashmap.h $(CURDIR)/cconfig.h $(CURDIR)/cconfiglist.h $(CURDIR)/cprotocol.h $(CURDIR)/cprotocolcmd.h $(CURDIR)/cplugin.h $(CURDIR)/cdcparser.h $(CURDIR)/cdcconfig.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/cconnchoose.h $(CURDIR)/cmeanfrequency.h $(CURDIR)/cconnselect.h $(CURDIR)/cconnpoll.h $(CURDIR)/cserver.h $(CURDIR)/cconn.h $(CURDIR)/cuserbase.h $(CURDIR)/stringutils.h $(CURDIR)/cdctag.h $(CURDIR)/cmyinfo.h $(CURDIR)/cdcuser.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/cdcprotocol.h $(CURDIR)/cuserlist.h $(CURDIR)/ccalllist.h $(CURDIR)/cwebconn.h $(CURDIR)/cpluginlist.h $(CURDIR)/cconfigloader.h $(CURDIR)/cantiflood.h $(CURDIR)/cdciplist.h $(CURDIR)/cmainpath.h $(CURDIR)/cdcserver.h
+$(CURDIR)/DcConfigLoader.o: $(CURDIR)/DcConfigLoader.cpp $(CURDIR)/Obj.h $(CURDIR)/ConfigLoader.h $(CURDIR)/DcConfigLoader.h $(CURDIR)/HashTable.h $(CURDIR)/HashMap.h $(CURDIR)/Config.h $(CURDIR)/ConfigList.h $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/stringutils.h $(CURDIR)/tinyxml/tinyxml.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/cdcconn.o: $(CURDIR)/cdcconn.cpp $(CURDIR)/cplugin.h $(CURDIR)/cobj.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/cprotocol.h $(CURDIR)/cconn.h $(CURDIR)/cuserbase.h $(CURDIR)/stringutils.h $(CURDIR)/cdctag.h $(CURDIR)/cmyinfo.h $(CURDIR)/cdcuser.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/tchashtable.h $(CURDIR)/cconnchoose.h $(CURDIR)/cmeanfrequency.h $(CURDIR)/cconnselect.h $(CURDIR)/cconnpoll.h $(CURDIR)/cserver.h $(CURDIR)/cprotocolcmd.h $(CURDIR)/cdcparser.h $(CURDIR)/cdcprotocol.h $(CURDIR)/tchashmap.h $(CURDIR)/cconfig.h $(CURDIR)/cconfiglist.h $(CURDIR)/cdcconfig.h $(CURDIR)/cuserlist.h $(CURDIR)/ccalllist.h $(CURDIR)/cwebconn.h $(CURDIR)/cpluginlist.h $(CURDIR)/cconfigloader.h $(CURDIR)/cantiflood.h $(CURDIR)/cdciplist.h $(CURDIR)/cmainpath.h $(CURDIR)/cdcserver.h
+$(CURDIR)/DcConn.o: $(CURDIR)/DcConn.cpp $(CURDIR)/Plugin.h $(CURDIR)/Obj.h $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/Protocol.h $(CURDIR)/Conn.h $(CURDIR)/UserBase.h $(CURDIR)/stringutils.h $(CURDIR)/DcTag.h $(CURDIR)/MyInfo.h $(CURDIR)/DcUser.h $(CURDIR)/TimeOut.h $(CURDIR)/DcConn.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/ProtocolCommand.h $(CURDIR)/DcParser.h $(CURDIR)/DcProtocol.h $(CURDIR)/HashMap.h $(CURDIR)/Config.h $(CURDIR)/ConfigList.h $(CURDIR)/ConfigLoader.h $(CURDIR)/DcConfig.h $(CURDIR)/UserList.h $(CURDIR)/CallList.h $(CURDIR)/WebConn.h $(CURDIR)/PluginList.h $(CURDIR)/DcConfigLoader.h $(CURDIR)/AntiFlood.h $(CURDIR)/DcIpList.h $(CURDIR)/DcServer.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/cdciplist.o: $(CURDIR)/cdciplist.cpp $(CURDIR)/tchashtable.h $(CURDIR)/cplugin.h $(CURDIR)/cobj.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/cprotocol.h $(CURDIR)/cconn.h $(CURDIR)/cuserbase.h $(CURDIR)/stringutils.h $(CURDIR)/cdctag.h $(CURDIR)/cmyinfo.h $(CURDIR)/cdcuser.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/cdciplist.h
+$(CURDIR)/DcIpList.o: $(CURDIR)/DcIpList.cpp $(CURDIR)/HashTable.h $(CURDIR)/Plugin.h $(CURDIR)/Obj.h $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/Protocol.h $(CURDIR)/Conn.h $(CURDIR)/UserBase.h $(CURDIR)/stringutils.h $(CURDIR)/DcTag.h $(CURDIR)/MyInfo.h $(CURDIR)/DcUser.h $(CURDIR)/TimeOut.h $(CURDIR)/DcConn.h $(CURDIR)/DcIpList.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/cdcparser.o: $(CURDIR)/cdcparser.cpp $(CURDIR)/cobj.h $(CURDIR)/cprotocol.h $(CURDIR)/cprotocolcmd.h $(CURDIR)/cplugin.h $(CURDIR)/cdcparser.h
+$(CURDIR)/DcParser.o: $(CURDIR)/DcParser.cpp $(CURDIR)/Obj.h $(CURDIR)/Protocol.h $(CURDIR)/ProtocolCommand.h $(CURDIR)/Plugin.h $(CURDIR)/DcParser.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/cdcprotocol.o: $(CURDIR)/cdcprotocol.cpp $(CURDIR)/cobj.h $(CURDIR)/cprotocol.h $(CURDIR)/cprotocolcmd.h $(CURDIR)/cplugin.h $(CURDIR)/cdcparser.h $(CURDIR)/cdcprotocol.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/tchashtable.h $(CURDIR)/cconnchoose.h $(CURDIR)/cmeanfrequency.h $(CURDIR)/cconnselect.h $(CURDIR)/cconnpoll.h $(CURDIR)/cserver.h $(CURDIR)/cconn.h $(CURDIR)/cuserbase.h $(CURDIR)/stringutils.h $(CURDIR)/cdctag.h $(CURDIR)/cmyinfo.h $(CURDIR)/cdcuser.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/tchashmap.h $(CURDIR)/cconfig.h $(CURDIR)/cconfiglist.h $(CURDIR)/cdcconfig.h $(CURDIR)/cuserlist.h $(CURDIR)/ccalllist.h $(CURDIR)/cwebconn.h $(CURDIR)/cpluginlist.h $(CURDIR)/cconfigloader.h $(CURDIR)/cantiflood.h $(CURDIR)/cdciplist.h $(CURDIR)/cmainpath.h $(CURDIR)/cdcserver.h
+$(CURDIR)/DcProtocol.o: $(CURDIR)/DcProtocol.cpp $(CURDIR)/Obj.h $(CURDIR)/Protocol.h $(CURDIR)/ProtocolCommand.h $(CURDIR)/Plugin.h $(CURDIR)/DcParser.h $(CURDIR)/DcProtocol.h $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/Conn.h $(CURDIR)/UserBase.h $(CURDIR)/stringutils.h $(CURDIR)/DcTag.h $(CURDIR)/MyInfo.h $(CURDIR)/DcUser.h $(CURDIR)/TimeOut.h $(CURDIR)/DcConn.h $(CURDIR)/HashMap.h $(CURDIR)/Config.h $(CURDIR)/ConfigList.h $(CURDIR)/ConfigLoader.h $(CURDIR)/DcConfig.h $(CURDIR)/UserList.h $(CURDIR)/CallList.h $(CURDIR)/WebConn.h $(CURDIR)/PluginList.h $(CURDIR)/DcConfigLoader.h $(CURDIR)/AntiFlood.h $(CURDIR)/DcIpList.h $(CURDIR)/DcServer.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/cdcserver.o: $(CURDIR)/cdcserver.cpp $(CURDIR)/cobj.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/tchashtable.h $(CURDIR)/cconnchoose.h $(CURDIR)/cmeanfrequency.h $(CURDIR)/cconnselect.h $(CURDIR)/cconnpoll.h $(CURDIR)/cserver.h $(CURDIR)/cplugin.h $(CURDIR)/cprotocol.h $(CURDIR)/cconn.h $(CURDIR)/cuserbase.h $(CURDIR)/stringutils.h $(CURDIR)/cdctag.h $(CURDIR)/cmyinfo.h $(CURDIR)/cdcuser.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/cprotocolcmd.h $(CURDIR)/cdcparser.h $(CURDIR)/cdcprotocol.h $(CURDIR)/tchashmap.h $(CURDIR)/cconfig.h $(CURDIR)/cconfiglist.h $(CURDIR)/cdcconfig.h $(CURDIR)/cuserlist.h $(CURDIR)/ccalllist.h $(CURDIR)/cwebconn.h $(CURDIR)/cpluginlist.h $(CURDIR)/cconfigloader.h $(CURDIR)/cantiflood.h $(CURDIR)/cdciplist.h $(CURDIR)/cmainpath.h $(CURDIR)/cdcserver.h
+$(CURDIR)/DcServer.o: $(CURDIR)/DcServer.cpp $(CURDIR)/Obj.h $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/Plugin.h $(CURDIR)/Protocol.h $(CURDIR)/Conn.h $(CURDIR)/UserBase.h $(CURDIR)/stringutils.h $(CURDIR)/DcTag.h $(CURDIR)/MyInfo.h $(CURDIR)/DcUser.h $(CURDIR)/TimeOut.h $(CURDIR)/DcConn.h $(CURDIR)/ProtocolCommand.h $(CURDIR)/DcParser.h $(CURDIR)/DcProtocol.h $(CURDIR)/HashMap.h $(CURDIR)/Config.h $(CURDIR)/ConfigList.h $(CURDIR)/ConfigLoader.h $(CURDIR)/DcConfig.h $(CURDIR)/UserList.h $(CURDIR)/CallList.h $(CURDIR)/WebConn.h $(CURDIR)/PluginList.h $(CURDIR)/DcConfigLoader.h $(CURDIR)/AntiFlood.h $(CURDIR)/DcIpList.h $(CURDIR)/DcServer.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/cdctag.o: $(CURDIR)/cdctag.cpp $(CURDIR)/cplugin.h $(CURDIR)/stringutils.h $(CURDIR)/cdctag.h
+$(CURDIR)/DcTag.o: $(CURDIR)/DcTag.cpp $(CURDIR)/Plugin.h $(CURDIR)/stringutils.h $(CURDIR)/DcTag.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/cdcuser.o: $(CURDIR)/cdcuser.cpp $(CURDIR)/cobj.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cuserbase.h $(CURDIR)/cplugin.h $(CURDIR)/stringutils.h $(CURDIR)/cdctag.h $(CURDIR)/cmyinfo.h $(CURDIR)/cdcuser.h $(CURDIR)/cconnbase.h $(CURDIR)/cprotocol.h $(CURDIR)/cconn.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/tchashtable.h $(CURDIR)/cconnchoose.h $(CURDIR)/cmeanfrequency.h $(CURDIR)/cconnselect.h $(CURDIR)/cconnpoll.h $(CURDIR)/cserver.h $(CURDIR)/cprotocolcmd.h $(CURDIR)/cdcparser.h $(CURDIR)/cdcprotocol.h $(CURDIR)/tchashmap.h $(CURDIR)/cconfig.h $(CURDIR)/cconfiglist.h $(CURDIR)/cdcconfig.h $(CURDIR)/cuserlist.h $(CURDIR)/ccalllist.h $(CURDIR)/cwebconn.h $(CURDIR)/cpluginlist.h $(CURDIR)/cconfigloader.h $(CURDIR)/cantiflood.h $(CURDIR)/cdciplist.h $(CURDIR)/cmainpath.h $(CURDIR)/cdcserver.h
+$(CURDIR)/DcUser.o: $(CURDIR)/DcUser.cpp $(CURDIR)/Obj.h $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/UserBase.h $(CURDIR)/Plugin.h $(CURDIR)/stringutils.h $(CURDIR)/DcTag.h $(CURDIR)/MyInfo.h $(CURDIR)/DcUser.h $(CURDIR)/ConnBase.h $(CURDIR)/Protocol.h $(CURDIR)/Conn.h $(CURDIR)/TimeOut.h $(CURDIR)/DcConn.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/ProtocolCommand.h $(CURDIR)/DcParser.h $(CURDIR)/DcProtocol.h $(CURDIR)/HashMap.h $(CURDIR)/Config.h $(CURDIR)/ConfigList.h $(CURDIR)/ConfigLoader.h $(CURDIR)/DcConfig.h $(CURDIR)/UserList.h $(CURDIR)/CallList.h $(CURDIR)/WebConn.h $(CURDIR)/PluginList.h $(CURDIR)/DcConfigLoader.h $(CURDIR)/AntiFlood.h $(CURDIR)/DcIpList.h $(CURDIR)/DcServer.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/cdir.o: $(CURDIR)/cdir.cpp $(CURDIR)/cdir.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
-
-$(CURDIR)/cexception.o: $(CURDIR)/cexception.cpp $(CURDIR)/cobj.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/tchashtable.h $(CURDIR)/cconnchoose.h $(CURDIR)/cmeanfrequency.h $(CURDIR)/cconnselect.h $(CURDIR)/cconnpoll.h $(CURDIR)/cserver.h $(CURDIR)/cplugin.h $(CURDIR)/cprotocol.h $(CURDIR)/cconn.h $(CURDIR)/cuserbase.h $(CURDIR)/stringutils.h $(CURDIR)/cdctag.h $(CURDIR)/cmyinfo.h $(CURDIR)/cdcuser.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/cprotocolcmd.h $(CURDIR)/cdcparser.h $(CURDIR)/cdcprotocol.h $(CURDIR)/tchashmap.h $(CURDIR)/cconfig.h $(CURDIR)/cconfiglist.h $(CURDIR)/cdcconfig.h $(CURDIR)/cuserlist.h $(CURDIR)/ccalllist.h $(CURDIR)/cwebconn.h $(CURDIR)/cpluginlist.h $(CURDIR)/cconfigloader.h $(CURDIR)/cantiflood.h $(CURDIR)/cdciplist.h $(CURDIR)/cmainpath.h $(CURDIR)/cdcserver.h $(CURDIR)/cexception.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
-
-$(CURDIR)/cmainpath.o: $(CURDIR)/cmainpath.cpp $(CURDIR)/cobj.h $(CURDIR)/cplugin.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/cprotocol.h $(CURDIR)/cconn.h $(CURDIR)/cuserbase.h $(CURDIR)/stringutils.h $(CURDIR)/cdctag.h $(CURDIR)/cmyinfo.h $(CURDIR)/cdcuser.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/cmainpath.h $(CURDIR)/cdir.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
-
-$(CURDIR)/cmyinfo.o: $(CURDIR)/cmyinfo.cpp $(CURDIR)/cplugin.h $(CURDIR)/stringutils.h $(CURDIR)/cdctag.h $(CURDIR)/cmyinfo.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
-
-$(CURDIR)/cobj.o: $(CURDIR)/cobj.cpp $(CURDIR)/cobj.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cdir.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
-
-$(CURDIR)/cpluginlist.o: $(CURDIR)/cpluginlist.cpp $(CURDIR)/tchashtable.h $(CURDIR)/cobj.h $(CURDIR)/tchashmap.h $(CURDIR)/ccalllist.h $(CURDIR)/cplugin.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/cprotocol.h $(CURDIR)/cconn.h $(CURDIR)/cuserbase.h $(CURDIR)/stringutils.h $(CURDIR)/cdctag.h $(CURDIR)/cmyinfo.h $(CURDIR)/cdcuser.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/cconnchoose.h $(CURDIR)/cmeanfrequency.h $(CURDIR)/cconnselect.h $(CURDIR)/cconnpoll.h $(CURDIR)/cserver.h $(CURDIR)/cwebconn.h $(CURDIR)/cpluginlist.h $(CURDIR)/cdir.h $(CURDIR)/dlfcn.h $(CURDIR)/cpluginloader.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
-
-$(CURDIR)/cpluginloader.o: $(CURDIR)/cpluginloader.cpp $(CURDIR)/cobj.h $(CURDIR)/dlfcn.h $(CURDIR)/cpluginloader.h $(CURDIR)/cplugin.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
-
-$(CURDIR)/cprotocol.o: $(CURDIR)/cprotocol.cpp $(CURDIR)/cobj.h $(CURDIR)/cprotocol.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
-
-$(CURDIR)/cprotocolcmd.o: $(CURDIR)/cprotocolcmd.cpp $(CURDIR)/cprotocolcmd.h $(CURDIR)/stringutils.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
-
-$(CURDIR)/cserver.o: $(CURDIR)/cserver.cpp $(CURDIR)/cobj.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/tchashtable.h $(CURDIR)/cconnchoose.h $(CURDIR)/cmeanfrequency.h $(CURDIR)/cconnselect.h $(CURDIR)/cconnpoll.h $(CURDIR)/cserver.h $(CURDIR)/cprotocol.h $(CURDIR)/cplugin.h $(CURDIR)/cconn.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
-
-$(CURDIR)/cservice.o: $(CURDIR)/cservice.cpp $(CURDIR)/cobj.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/tchashtable.h $(CURDIR)/cconnchoose.h $(CURDIR)/cmeanfrequency.h $(CURDIR)/cconnselect.h $(CURDIR)/cconnpoll.h $(CURDIR)/cserver.h $(CURDIR)/cservice.h $(CURDIR)/cdir.h $(CURDIR)/cplugin.h $(CURDIR)/cprotocol.h $(CURDIR)/cconn.h $(CURDIR)/cuserbase.h $(CURDIR)/stringutils.h $(CURDIR)/cdctag.h $(CURDIR)/cmyinfo.h $(CURDIR)/cdcuser.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/cprotocolcmd.h $(CURDIR)/cdcparser.h $(CURDIR)/cdcprotocol.h $(CURDIR)/tchashmap.h $(CURDIR)/cconfig.h $(CURDIR)/cconfiglist.h $(CURDIR)/cdcconfig.h $(CURDIR)/cuserlist.h $(CURDIR)/ccalllist.h $(CURDIR)/cwebconn.h $(CURDIR)/cpluginlist.h $(CURDIR)/cconfigloader.h $(CURDIR)/cantiflood.h $(CURDIR)/cdciplist.h $(CURDIR)/cmainpath.h $(CURDIR)/cdcserver.h $(CURDIR)/cstrtoarg.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
-
-$(CURDIR)/cstrtoarg.o: $(CURDIR)/cstrtoarg.cpp $(CURDIR)/cstrtoarg.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
-
-$(CURDIR)/ctime.o: $(CURDIR)/ctime.cpp $(CURDIR)/conndef.h $(CURDIR)/ctime.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
-
-$(CURDIR)/cuserlist.o: $(CURDIR)/cuserlist.cpp $(CURDIR)/cuserbase.h $(CURDIR)/cobj.h $(CURDIR)/tchashtable.h $(CURDIR)/cplugin.h $(CURDIR)/cuserlist.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
-
-$(CURDIR)/cwebconn.o: $(CURDIR)/cwebconn.cpp $(CURDIR)/cplugin.h $(CURDIR)/cobj.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/cprotocol.h $(CURDIR)/cconn.h $(CURDIR)/cuserbase.h $(CURDIR)/stringutils.h $(CURDIR)/cdctag.h $(CURDIR)/cmyinfo.h $(CURDIR)/cdcuser.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/tchashtable.h $(CURDIR)/cconnchoose.h $(CURDIR)/cmeanfrequency.h $(CURDIR)/cconnselect.h $(CURDIR)/cconnpoll.h $(CURDIR)/cserver.h $(CURDIR)/cwebconn.h $(CURDIR)/cwebparser.h $(CURDIR)/cwebprotocol.h $(CURDIR)/cprotocolcmd.h $(CURDIR)/cdcparser.h $(CURDIR)/cdcprotocol.h $(CURDIR)/tchashmap.h $(CURDIR)/cconfig.h $(CURDIR)/cconfiglist.h $(CURDIR)/cdcconfig.h $(CURDIR)/cuserlist.h $(CURDIR)/ccalllist.h $(CURDIR)/cpluginlist.h $(CURDIR)/cconfigloader.h $(CURDIR)/cantiflood.h $(CURDIR)/cdciplist.h $(CURDIR)/cmainpath.h $(CURDIR)/cdcserver.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
-
-$(CURDIR)/cwebparser.o: $(CURDIR)/cwebparser.cpp $(CURDIR)/cobj.h $(CURDIR)/cprotocol.h $(CURDIR)/cplugin.h $(CURDIR)/cwebparser.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
-
-$(CURDIR)/cwebprotocol.o: $(CURDIR)/cwebprotocol.cpp $(CURDIR)/cobj.h $(CURDIR)/cprotocol.h $(CURDIR)/cplugin.h $(CURDIR)/cwebparser.h $(CURDIR)/cwebprotocol.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/tchashtable.h $(CURDIR)/cconnchoose.h $(CURDIR)/cmeanfrequency.h $(CURDIR)/cconnselect.h $(CURDIR)/cconnpoll.h $(CURDIR)/cserver.h $(CURDIR)/cconn.h $(CURDIR)/cuserbase.h $(CURDIR)/stringutils.h $(CURDIR)/cdctag.h $(CURDIR)/cmyinfo.h $(CURDIR)/cdcuser.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/cwebconn.h
+$(CURDIR)/Dir.o: $(CURDIR)/Dir.cpp $(CURDIR)/Dir.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(CURDIR)/dlfcn.o: $(CURDIR)/dlfcn.cpp $(CURDIR)/dlfcn.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/main.o: $(CURDIR)/main.cpp $(CURDIR)/cobj.h $(CURDIR)/conndef.h $(CURDIR)/ctime.h $(CURDIR)/cconnbase.h $(CURDIR)/tchashtable.h $(CURDIR)/cconnchoose.h $(CURDIR)/cmeanfrequency.h $(CURDIR)/cconnselect.h $(CURDIR)/cconnpoll.h $(CURDIR)/cserver.h $(CURDIR)/cplugin.h $(CURDIR)/cprotocol.h $(CURDIR)/cconn.h $(CURDIR)/cuserbase.h $(CURDIR)/stringutils.h $(CURDIR)/cdctag.h $(CURDIR)/cmyinfo.h $(CURDIR)/cdcuser.h $(CURDIR)/ctimeout.h $(CURDIR)/cdcconn.h $(CURDIR)/cprotocolcmd.h $(CURDIR)/cdcparser.h $(CURDIR)/cdcprotocol.h $(CURDIR)/tchashmap.h $(CURDIR)/cconfig.h $(CURDIR)/cconfiglist.h $(CURDIR)/cdcconfig.h $(CURDIR)/cuserlist.h $(CURDIR)/ccalllist.h $(CURDIR)/cwebconn.h $(CURDIR)/cpluginlist.h $(CURDIR)/cconfigloader.h $(CURDIR)/cantiflood.h $(CURDIR)/cdciplist.h $(CURDIR)/cmainpath.h $(CURDIR)/cdcserver.h $(CURDIR)/cdir.h $(CURDIR)/cservice.h $(CURDIR)/cexception.h $(CURDIR)/ccli.h
+$(CURDIR)/Exception.o: $(CURDIR)/Exception.cpp $(CURDIR)/Obj.h $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/Plugin.h $(CURDIR)/Protocol.h $(CURDIR)/Conn.h $(CURDIR)/UserBase.h $(CURDIR)/stringutils.h $(CURDIR)/DcTag.h $(CURDIR)/MyInfo.h $(CURDIR)/DcUser.h $(CURDIR)/TimeOut.h $(CURDIR)/DcConn.h $(CURDIR)/ProtocolCommand.h $(CURDIR)/DcParser.h $(CURDIR)/DcProtocol.h $(CURDIR)/HashMap.h $(CURDIR)/Config.h $(CURDIR)/ConfigList.h $(CURDIR)/ConfigLoader.h $(CURDIR)/DcConfig.h $(CURDIR)/UserList.h $(CURDIR)/CallList.h $(CURDIR)/WebConn.h $(CURDIR)/PluginList.h $(CURDIR)/DcConfigLoader.h $(CURDIR)/AntiFlood.h $(CURDIR)/DcIpList.h $(CURDIR)/DcServer.h $(CURDIR)/Exception.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(CURDIR)/main.o: $(CURDIR)/main.cpp $(CURDIR)/Obj.h $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/Plugin.h $(CURDIR)/Protocol.h $(CURDIR)/Conn.h $(CURDIR)/UserBase.h $(CURDIR)/stringutils.h $(CURDIR)/DcTag.h $(CURDIR)/MyInfo.h $(CURDIR)/DcUser.h $(CURDIR)/TimeOut.h $(CURDIR)/DcConn.h $(CURDIR)/ProtocolCommand.h $(CURDIR)/DcParser.h $(CURDIR)/DcProtocol.h $(CURDIR)/HashMap.h $(CURDIR)/Config.h $(CURDIR)/ConfigList.h $(CURDIR)/ConfigLoader.h $(CURDIR)/DcConfig.h $(CURDIR)/UserList.h $(CURDIR)/CallList.h $(CURDIR)/WebConn.h $(CURDIR)/PluginList.h $(CURDIR)/DcConfigLoader.h $(CURDIR)/AntiFlood.h $(CURDIR)/DcIpList.h $(CURDIR)/DcServer.h $(CURDIR)/Service.h $(CURDIR)/Dir.h $(CURDIR)/Exception.h $(CURDIR)/Cli.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(CURDIR)/MyInfo.o: $(CURDIR)/MyInfo.cpp $(CURDIR)/Plugin.h $(CURDIR)/stringutils.h $(CURDIR)/DcTag.h $(CURDIR)/MyInfo.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(CURDIR)/Obj.o: $(CURDIR)/Obj.cpp $(CURDIR)/Obj.h $(CURDIR)/conndefine.h $(CURDIR)/Times.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(CURDIR)/PluginList.o: $(CURDIR)/PluginList.cpp $(CURDIR)/HashTable.h $(CURDIR)/Obj.h $(CURDIR)/HashMap.h $(CURDIR)/CallList.h $(CURDIR)/Plugin.h $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/Protocol.h $(CURDIR)/Conn.h $(CURDIR)/UserBase.h $(CURDIR)/stringutils.h $(CURDIR)/DcTag.h $(CURDIR)/MyInfo.h $(CURDIR)/DcUser.h $(CURDIR)/TimeOut.h $(CURDIR)/DcConn.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/WebConn.h $(CURDIR)/PluginList.h $(CURDIR)/dlfcn.h $(CURDIR)/PluginLoader.h $(CURDIR)/Dir.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(CURDIR)/PluginLoader.o: $(CURDIR)/PluginLoader.cpp $(CURDIR)/Obj.h $(CURDIR)/dlfcn.h $(CURDIR)/PluginLoader.h $(CURDIR)/Plugin.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(CURDIR)/Protocol.o: $(CURDIR)/Protocol.cpp $(CURDIR)/Obj.h $(CURDIR)/Protocol.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(CURDIR)/ProtocolCommand.o: $(CURDIR)/ProtocolCommand.cpp $(CURDIR)/ProtocolCommand.h $(CURDIR)/stringutils.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(CURDIR)/Server.o: $(CURDIR)/Server.cpp $(CURDIR)/Obj.h $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/Protocol.h $(CURDIR)/Plugin.h $(CURDIR)/Conn.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(CURDIR)/Service.o: $(CURDIR)/Service.cpp $(CURDIR)/Obj.h $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/Service.h $(CURDIR)/Plugin.h $(CURDIR)/Protocol.h $(CURDIR)/Conn.h $(CURDIR)/UserBase.h $(CURDIR)/stringutils.h $(CURDIR)/DcTag.h $(CURDIR)/MyInfo.h $(CURDIR)/DcUser.h $(CURDIR)/TimeOut.h $(CURDIR)/DcConn.h $(CURDIR)/ProtocolCommand.h $(CURDIR)/DcParser.h $(CURDIR)/DcProtocol.h $(CURDIR)/HashMap.h $(CURDIR)/Config.h $(CURDIR)/ConfigList.h $(CURDIR)/ConfigLoader.h $(CURDIR)/DcConfig.h $(CURDIR)/UserList.h $(CURDIR)/CallList.h $(CURDIR)/WebConn.h $(CURDIR)/PluginList.h $(CURDIR)/DcConfigLoader.h $(CURDIR)/AntiFlood.h $(CURDIR)/DcIpList.h $(CURDIR)/DcServer.h $(CURDIR)/StringToArg.h $(CURDIR)/Dir.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(CURDIR)/StringToArg.o: $(CURDIR)/StringToArg.cpp $(CURDIR)/StringToArg.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(CURDIR)/stringutils.o: $(CURDIR)/stringutils.cpp $(CURDIR)/stringutils.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(CURDIR)/Times.o: $(CURDIR)/Times.cpp $(CURDIR)/conndefine.h $(CURDIR)/Times.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(CURDIR)/UserList.o: $(CURDIR)/UserList.cpp $(CURDIR)/UserBase.h $(CURDIR)/Obj.h $(CURDIR)/HashTable.h $(CURDIR)/Plugin.h $(CURDIR)/UserList.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(CURDIR)/WebConn.o: $(CURDIR)/WebConn.cpp $(CURDIR)/Plugin.h $(CURDIR)/Obj.h $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/Protocol.h $(CURDIR)/Conn.h $(CURDIR)/UserBase.h $(CURDIR)/stringutils.h $(CURDIR)/DcTag.h $(CURDIR)/MyInfo.h $(CURDIR)/DcUser.h $(CURDIR)/TimeOut.h $(CURDIR)/DcConn.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/WebConn.h $(CURDIR)/WebParser.h $(CURDIR)/WebProtocol.h $(CURDIR)/ProtocolCommand.h $(CURDIR)/DcParser.h $(CURDIR)/DcProtocol.h $(CURDIR)/HashMap.h $(CURDIR)/Config.h $(CURDIR)/ConfigList.h $(CURDIR)/ConfigLoader.h $(CURDIR)/DcConfig.h $(CURDIR)/UserList.h $(CURDIR)/CallList.h $(CURDIR)/PluginList.h $(CURDIR)/DcConfigLoader.h $(CURDIR)/AntiFlood.h $(CURDIR)/DcIpList.h $(CURDIR)/DcServer.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(CURDIR)/WebParser.o: $(CURDIR)/WebParser.cpp $(CURDIR)/Obj.h $(CURDIR)/Protocol.h $(CURDIR)/Plugin.h $(CURDIR)/WebParser.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(CURDIR)/WebProtocol.o: $(CURDIR)/WebProtocol.cpp $(CURDIR)/Obj.h $(CURDIR)/Protocol.h $(CURDIR)/Plugin.h $(CURDIR)/WebParser.h $(CURDIR)/WebProtocol.h $(CURDIR)/conndefine.h $(CURDIR)/Times.h $(CURDIR)/ConnBase.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/Conn.h $(CURDIR)/UserBase.h $(CURDIR)/stringutils.h $(CURDIR)/DcTag.h $(CURDIR)/MyInfo.h $(CURDIR)/DcUser.h $(CURDIR)/TimeOut.h $(CURDIR)/DcConn.h $(CURDIR)/WebConn.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
 clean:

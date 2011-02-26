@@ -22,9 +22,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "cdcserver.h"
-#include "cdir.h"
-#include "cservice.h"
+#include "DcServer.h"
+#include "Service.h"
+#include "Dir.h"
 
 #include <signal.h>
 
@@ -39,106 +39,121 @@
 		#pragma comment(lib, "plugin.lib")
 		#pragma comment(lib, "tinyxml.lib")
 	#endif
-	#include "cexception.h"
+	#include "Exception.h"
 #else
-	#include "ccli.h"
+	#include "Cli.h"
 #endif
 
-using nDCServer::cDCServer;
-using namespace nServer;
+using ::dcserver::DcServer;
+using namespace ::server;
 
-static void SigHandler(int iSig) {
-	switch(iSig) {
-		case SIGINT:
-		case SIGTERM:
-		case SIGQUIT:
-		case SIGHUP:
+static void sigHandler(int sig) {
+	switch (sig) {
+		case SIGINT :
+			// Fallthrough
 
-			if(cDCServer::sCurrentServer->Log(0))
-				cDCServer::sCurrentServer->LogStream() << "Received a " << iSig << " signal, quiting" << endl;
+		case SIGTERM :
+			// Fallthrough
 
-			cout << "Received a " << iSig << " signal, quiting" << endl;
+		case SIGQUIT :
+			// Fallthrough
 
-			cDCServer::sCurrentServer->Stop(0);
+		case SIGHUP :
+			if (DcServer::currentDcServer->Log(0)) {
+				DcServer::currentDcServer->LogStream() << "Received a " << sig << " signal, quiting" << endl;
+			}
+			cout << "Received a " << sig << " signal, quiting" << endl;
+			DcServer::currentDcServer->Stop(0);
 			break;
-		default:
 
-			if(cDCServer::sCurrentServer->Log(0))
-				cDCServer::sCurrentServer->LogStream() << "Received a " << iSig << " signal, ignoring it" << endl;
-
-			signal(iSig, SigHandler);
+		default :
+			if (DcServer::currentDcServer->Log(0)) {
+				DcServer::currentDcServer->LogStream() << "Received a " << sig << " signal, ignoring it" << endl;
+			}
+			signal(sig, sigHandler);
 			break;
 	}
 }
 
-int runHub(int argc, char **argv, bool bService /*= false*/) {
+int runHub(int argc, char ** argv, bool isService /*= false*/) {
 
-	int iResult = 1;
+	int result = 1;
 
 	#ifndef _WIN32
-		cCli Cli;
-		Cli.detectArgs(argc, argv);
-		bService = false; // for used
+		Cli cli;
+		cli.detectArgs(argc, argv);
+		isService = false; // for used
+		umask(077); // Setting umask for daemon
 	#endif
 
-	while(iResult == 1) {
+	while(result == 1) {
 
-		string sConfPath, sExPath;
+		string confPath, exPath;
 		#ifndef _WIN32
-			if(Cli.getMainDir().empty())
-				ExecPath(sConfPath);
-			else
-				sConfPath = Cli.getMainDir();
+			if (cli.getMainDir().empty()) {
+				Dir::execPath(confPath);
+			} else {
+				confPath = cli.getMainDir();
+			}
 
-			sExPath = sConfPath;
-			if(Cli.getDaemon()) Cli.demonizeServer(sConfPath);
-			if((chdir(sConfPath.c_str())) < 0) {
-				fprintf(stderr, "Can not go to the work directory %s. Error: %s\n", sConfPath.c_str(), strerror(errno));
+			exPath = confPath;
+			if (cli.getDaemon()) {
+				cli.demonizeServer(confPath);
+			}
+			if ((chdir(confPath.c_str())) < 0) {
+				fprintf(stderr, "Can not go to the work directory %s. Error: %s\n", confPath.c_str(), strerror(errno));
 				return -1;
 			}
 		#else
-			ExecPath(sConfPath);
-			sExPath = sConfPath;
+			Dir::execPath(confPath);
+			exPath = confPath;
 
-			cService Service;
-			if(Service.Cli(argc, argv, sConfPath, sExPath) <= 0) return -1;
+			Service service;
+			if (service.cli(argc, argv, confPath, exPath) <= 0) {
+				return -1;
+			}
 		#endif
 
 		/** Creating the server */
-		cDCServer Server(sConfPath, sExPath);
+		DcServer server(confPath, exPath);
 
 		/** Listening all ports */
-		if(Server.Listening(0) != 0) {
-			if(Server.ErrLog(0))
-				Server.LogStream() << "Listening failed" << endl;
+		if (server.Listening(0) != 0) {
+			if (server.ErrLog(0)) {
+				server.LogStream() << "Listening failed" << endl;
+			}
 			return -2;
 		}
 
 		#ifdef _WIN32
-			if(bService && Service.Start() < 0) return -3;
+			if (isService && service.Start() < 0) {
+				return -3;
+			}
 		#endif
 
-		iResult = Server.Run(); // 1 = restart
+		result = server.Run(); // 1 = restart
 
 		#ifdef _WIN32
-			if(bService && Service.Stop() < 0) return -4;
+			if (isService && service.Stop() < 0) {
+				return -4;
+			}
 		#endif
 
 	}
-	return iResult;
+	return result;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char ** argv) {
 
-	signal(SIGINT, SigHandler);
-	signal(SIGTERM, SigHandler);
+	signal(SIGINT, sigHandler);
+	signal(SIGTERM, sigHandler);
 	#ifndef _WIN32
-		signal(SIGQUIT, SigHandler);
-		signal(SIGHUP, SigHandler);
-		signal(SIGPIPE, SigHandler);
-		signal(SIGIO, SigHandler);
+		signal(SIGQUIT, sigHandler);
+		signal(SIGHUP, sigHandler);
+		signal(SIGPIPE, sigHandler);
+		signal(SIGIO, sigHandler);
 	#else
-		SetUnhandledExceptionFilter(&cException::ExceptionFilter);
+		SetUnhandledExceptionFilter(&Exception::ExceptionFilter);
 	#endif
 
 	return runHub(argc, argv);
