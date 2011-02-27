@@ -113,7 +113,12 @@ DcServer::DcServer(const string &, const string &):
 	nmdc = "$ActiveList ";
 	mActiveList.SetNickListStart(nmdc);
 
-	if (mDcConfig.mbRegMainBot) { /** Регистрация основного бота */
+	if (mDcConfig.mbRegMainBot) { /** Main bot registration */
+
+		if (Log(3)) {
+			LogStream() << "Reg main bot '" << mDcConfig.msHubBot << "'" << endl;
+		}
+
 		if (
 			regBot(
 				mDcConfig.msHubBot,
@@ -139,6 +144,13 @@ DcServer::~DcServer() {
 		LogStream() << "Destruct DcServer" << endl;
 	}
 
+	if (mDcConfig.mbRegMainBot) { /** Main bot unreg */
+		if (Log(3)) {
+			LogStream() << "Unreg main bot '" << mDcConfig.msHubBot << "'" << endl;
+		}
+		unregBot(mDcConfig.msHubBot);
+	}
+
 	DcUser * Us = NULL;
 	UserList::iterator it, it_e = mDCUserList.end();	
 	for (it = mDCUserList.begin(); it != it_e;) {
@@ -147,7 +159,9 @@ DcServer::~DcServer() {
 		if (Us->mDCConn) {
 			DelConnection(Us->mDCConn);
 		} else {
+			cout << "11" << endl;
 			if (Us->mbInUserList) {
+				cout << "22" << endl;
 				this->RemoveFromDCUserList(Us);
 			}
 			delete Us;
@@ -887,17 +901,19 @@ bool DcServer::RemoveFromDCUserList(DcUser *User) {
 /** Show user to all */
 bool DcServer::ShowUserToAll(DcUser *User) {
 	string sMsg1, sMsg2;
-	if(User->mbHide && User->mDCConn) {
-		if(User->mDCConn->mFeatures & SUPPORT_FEATUER_NOHELLO)
+	if (User->mbHide && User->mDCConn) {
+		if (User->mDCConn->mFeatures & SUPPORT_FEATUER_NOHELLO) {
 			User->mDCConn->send(string(User->getMyINFO()), true, false);
-		else if(User->mDCConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
+		} else if (User->mDCConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
 			User->mDCConn->send(DcProtocol::Append_DC_Hello(sMsg1, User->msNick), false, false);
 			User->mDCConn->send(string(User->getMyINFO()), true, false);
-		} else
+		} else {
 			User->mDCConn->send(DcProtocol::Append_DC_Hello(sMsg1, User->msNick), false, false);
+		}
 
-		if(User->mbInOpList)
+		if (User->mbInOpList) {
 			User->mDCConn->send(DcProtocol::Append_DC_OpList(sMsg2, User->msNick), false, false);
+		}
 	} else {
 
 		/** Sending the greeting for all users, not supporting feature NoHello (except enterring users) */
@@ -910,32 +926,38 @@ bool DcServer::ShowUserToAll(DcUser *User) {
 		mEnterList.sendToAll(User->getMyINFO(), true/*mDcConfig.mbDelayedMyINFO*/);
 
 		/** Op entry */
-		if(User->mbInOpList) {
+		if (User->mbInOpList) {
 			mDCUserList.sendToAll(DcProtocol::Append_DC_OpList(sMsg2, User->msNick), true/*mDcConfig.mbDelayedMyINFO*/, false);
 			mEnterList.sendToAll(sMsg2, true/*mDcConfig.mbDelayedMyINFO*/, false);
 		}
 	}
 
+	bool inUserList = User->mbInUserList;
+
 	/** Prevention of the double sending MyINFO string */
-	if(!mDcConfig.mbDelayedLogin) {
-		User->mbInUserList = false;
-		mDCUserList.FlushCache();
-		mEnterList.FlushCache();
-		User->mbInUserList = true;
+	if (!mDcConfig.mbDelayedLogin) {
+			User->mbInUserList = false;
+			mDCUserList.FlushCache();
+			mEnterList.FlushCache();
+			User->mbInUserList = inUserList;
 	}
 
-	if(mDcConfig.mbSendUserIp) {
+	if (mDcConfig.mbSendUserIp) {
 		string sStr;
 		User->mbInUserList = false;
 		DcProtocol::Append_DC_UserIP(sStr, User->msNick, User->getIp());
-		if(sStr.length()) mIpList.sendToAll(sStr, true);
-		User->mbInUserList = true;
+		if (sStr.length()) {
+			mIpList.sendToAll(sStr, true);
+		}
+		User->mbInUserList = inUserList;
 
-		if(User->mbInIpList)
+		if (User->mbInIpList) {
 			User->send(mDCUserList.GetIpList(), true, false);
-		else if(User->mDCConn && (User->mDCConn->mFeatures & SUPPORT_FEATUER_USERIP2)) // UserIP2
+		} else if (User->mDCConn && (User->mDCConn->mFeatures & SUPPORT_FEATUER_USERIP2)) { // UserIP2
 			User->send(sStr, false, false);
+		}
 	}
+
 	static string s;
 	User->send(s, false, true);
 	return true;
@@ -944,7 +966,9 @@ bool DcServer::ShowUserToAll(DcUser *User) {
 
 
 void DcServer::AfterUserEnter(DcConn *dcconn) {
-	if(dcconn->Log(3)) dcconn->LogStream() << "Entered the hub." << endl;
+	if(dcconn->Log(3)) {
+		dcconn->LogStream() << "Entered the hub." << endl;
+	}
 	#ifndef WITHOUT_PLUGINS
 		mCalls.mOnUserEnter.CallAll(dcconn);
 	#endif
@@ -955,14 +979,17 @@ void DcServer::AfterUserEnter(DcConn *dcconn) {
 /** Get user by nick (or NULL) */
 DcUser * DcServer::GetDCUser(const char *sNick) {
 	string sN(sNick);
-	if(sN.size()) {
+	if (sN.size()) {
 		UserBase * User = mDCUserList.GetUserBaseByNick(sN);
-		if(User) return (DcUser *)User;
+		if (User) {
+			return (DcUser *)User;
+		}
 		DcConn * dcconn;
-		for(tCLIt it = mConnList.begin(); it != mConnList.end(); ++it) {
+		for (tCLIt it = mConnList.begin(); it != mConnList.end(); ++it) {
 			dcconn = (DcConn *)(*it);
-			if(dcconn && dcconn->mType == CLIENT_TYPE_NMDC && dcconn->mDCUser && dcconn->mDCUser->msNick == sN)
+			if (dcconn && dcconn->mType == CLIENT_TYPE_NMDC && dcconn->mDCUser && dcconn->mDCUser->msNick == sN) {
 				return (DcUser *)dcconn->mDCUser;
+			}
 		}
 	}
 	return NULL;
@@ -972,7 +999,9 @@ DcUser * DcServer::GetDCUser(const char *sNick) {
 
 DcUserBase * DcServer::getDcUserBase(const char *sNick) {
 	DcUser * User = GetDCUser(sNick);
-	if(User) return (DcUserBase *)User;
+	if(User) {
+		return (DcUserBase *)User;
+	}
 	return NULL;
 }
 
@@ -981,10 +1010,11 @@ DcUserBase * DcServer::getDcUserBase(const char *sNick) {
 const vector<DcConnBase*> & DcServer::getDcConnBase(const char * sIP) {
 	DcIpList::iterator it;
 	mvIPConn.clear();
-	for(it = mIPListConn->begin(DcConn::Ip2Num(sIP)); it != mIPListConn->end(); ++it) {
+	for (it = mIPListConn->begin(DcConn::Ip2Num(sIP)); it != mIPListConn->end(); ++it) {
 		DcConn * dcconn = (DcConn *)(*it);
-		if(dcconn->mType == CLIENT_TYPE_NMDC)
+		if (dcconn->mType == CLIENT_TYPE_NMDC) {
 			mvIPConn.push_back(dcconn);
+		}
 	}
 	return mvIPConn;
 }
@@ -993,19 +1023,22 @@ const vector<DcConnBase*> & DcServer::getDcConnBase(const char * sIP) {
 
 /** Send data to user */
 bool DcServer::sendToUser(DcConnBase *dcConn, const char *sData, const char *sNick, const char *sFrom) {
-	if(!dcConn || !sData) return false;
+	if (!dcConn || !sData) {
+		return false;
+	}
 
 	// PM
-	if(sFrom && sNick) {
+	if (sFrom && sNick) {
 		string sTo("<unknown>"), sStr;
-		if(dcConn->mDcUserBase)
+		if (dcConn->mDcUserBase) {
 			sTo = dcConn->mDcUserBase->getNick();
+		}
 		dcConn->send(DcProtocol::Append_DC_PM(sStr, sTo, sFrom, sNick, sData));
 		return true;
 	}
 
 	// Chat
-	if(sNick) {
+	if (sNick) {
 		string sStr;
 		dcConn->send(DcProtocol::Append_DC_Chat(sStr, sNick, sData));
 		return true;
@@ -1013,7 +1046,9 @@ bool DcServer::sendToUser(DcConnBase *dcConn, const char *sData, const char *sNi
 
 	// Simple Msg
 	string sMsg(sData);
-	if(dcConn->mType == CLIENT_TYPE_NMDC && sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) sMsg.append(NMDC_SEPARATOR);
+	if (dcConn->mType == CLIENT_TYPE_NMDC && sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
+		sMsg.append(NMDC_SEPARATOR);
+	}
 	dcConn->send(sMsg);
 	return true;
 }
@@ -1022,19 +1057,23 @@ bool DcServer::sendToUser(DcConnBase *dcConn, const char *sData, const char *sNi
 
 /** Send data to nick */
 bool DcServer::sendToNick(const char *sTo, const char *sData, const char *sNick, const char *sFrom) {
-	if(!sTo || !sData) return false;
+	if (!sTo || !sData) {
+		return false;
+	}
 	DcUser *User = GetDCUser(sTo);
-	if(!User || !User->mDCConn) return false;
+	if (!User || !User->mDCConn) {
+		return false;
+	}
 
 	// PM
-	if(sFrom && sNick) {
+	if (sFrom && sNick) {
 		string sStr;
 		User->mDCConn->send(DcProtocol::Append_DC_PM(sStr, sTo, sFrom, sNick, sData));
 		return true;
 	}
 
 	// Chat
-	if(sNick) {
+	if (sNick) {
 		string sStr;
 		User->mDCConn->send(DcProtocol::Append_DC_Chat(sStr, sNick, sData));
 		return true;
@@ -1042,7 +1081,9 @@ bool DcServer::sendToNick(const char *sTo, const char *sData, const char *sNick,
 
 	// Simple Msg
 	string sMsg(sData);
-	if(sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) sMsg.append(NMDC_SEPARATOR);
+	if (sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
+		sMsg.append(NMDC_SEPARATOR);
+	}
 	User->mDCConn->send(sMsg);
 	return true;
 }
@@ -1051,10 +1092,12 @@ bool DcServer::sendToNick(const char *sTo, const char *sData, const char *sNick,
 
 /** Send data to all */
 bool DcServer::sendToAll(const char *sData, const char *sNick, const char *sFrom) {
-	if(!sData) return false;
+	if (!sData) {
+		return false;
+	}
 
 	// PM
-	if(sFrom && sNick) {
+	if (sFrom && sNick) {
 		string sStart, sEnd;
 		DcProtocol::Append_DC_PMToAll(sStart, sEnd, sFrom, sNick, sData);
 		mDCUserList.SendToWithNick(sStart, sEnd);
@@ -1062,7 +1105,7 @@ bool DcServer::sendToAll(const char *sData, const char *sNick, const char *sFrom
 	}
 
 	// Chat
-	if(sNick) {
+	if (sNick) {
 		string sStr;
 		mDCUserList.sendToAll(DcProtocol::Append_DC_Chat(sStr, sNick, sData), false, false);
 		return true;
@@ -1070,7 +1113,9 @@ bool DcServer::sendToAll(const char *sData, const char *sNick, const char *sFrom
 
 	// Simple Msg
 	string sMsg(sData);
-	if(sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) sMsg.append(NMDC_SEPARATOR);
+	if (sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
+		sMsg.append(NMDC_SEPARATOR);
+	}
 	mDCUserList.sendToAll(sMsg, false, false);
 	return true;
 }
@@ -1079,10 +1124,12 @@ bool DcServer::sendToAll(const char *sData, const char *sNick, const char *sFrom
 
 /** Send data to profiles */
 bool DcServer::sendToProfiles(unsigned long iProfile, const char *sData, const char *sNick, const char *sFrom) {
-	if(!sData) return false;
+	if (!sData) {
+		return false;
+	}
 
 	// PM
-	if(sFrom && sNick) {
+	if (sFrom && sNick) {
 		string sStart, sEnd;
 		DcProtocol::Append_DC_PMToAll(sStart, sEnd, sFrom, sNick, sData);
 		mDCUserList.SendToWithNick(sStart, sEnd, iProfile);
@@ -1090,7 +1137,7 @@ bool DcServer::sendToProfiles(unsigned long iProfile, const char *sData, const c
 	}
 
 	// Chat
-	if(sNick) {
+	if (sNick) {
 		string sStr;
 		mDCUserList.sendToProfiles(iProfile, DcProtocol::Append_DC_Chat(sStr, sNick, sData), false);
 		return true;
@@ -1098,7 +1145,9 @@ bool DcServer::sendToProfiles(unsigned long iProfile, const char *sData, const c
 
 	// Simple Msg
 	string sMsg(sData);
-	if(sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) sMsg.append(NMDC_SEPARATOR);
+	if (sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
+		sMsg.append(NMDC_SEPARATOR);
+	}
 	mDCUserList.sendToProfiles(iProfile, sMsg, false);
 	return true;
 }
@@ -1106,10 +1155,12 @@ bool DcServer::sendToProfiles(unsigned long iProfile, const char *sData, const c
 
 
 bool DcServer::sendToIp(const char *sIP, const char *sData, unsigned long iProfile, const char *sNick, const char *sFrom) {
-	if(!sIP || !sData || !Conn::CheckIp(sIP)) return false;
+	if (!sIP || !sData || !Conn::CheckIp(sIP)) {
+		return false;
+	}
 
 	// PM
-	if(sFrom && sNick) {
+	if (sFrom && sNick) {
 		string sStart, sEnd;
 		DcProtocol::Append_DC_PMToAll(sStart, sEnd, sFrom, sNick, sData);
 		mIPListConn->SendToIPWithNick(sIP, sStart, sEnd, iProfile);
@@ -1117,7 +1168,7 @@ bool DcServer::sendToIp(const char *sIP, const char *sData, unsigned long iProfi
 	}
 
 	// Chat
-	if(sNick) {
+	if (sNick) {
 		string sStr;
 		mIPListConn->sendToIp(sIP, DcProtocol::Append_DC_Chat(sStr, sNick, sData), iProfile); // newPolitic
 		return true;
@@ -1125,7 +1176,9 @@ bool DcServer::sendToIp(const char *sIP, const char *sData, unsigned long iProfi
 
 	// Simple Msg
 	string sMsg(sData);
-	if(sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) sMsg.append(NMDC_SEPARATOR);
+	if (sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
+		sMsg.append(NMDC_SEPARATOR);
+	}
 	mIPListConn->sendToIp(sIP, sMsg, iProfile); // newPolitic
 	return true;
 }
@@ -1134,33 +1187,38 @@ bool DcServer::sendToIp(const char *sIP, const char *sData, unsigned long iProfi
 
 /** Send data to all except nick list */
 bool DcServer::sendToAllExceptNicks(const vector<string> & NickList, const char *sData, const char *sNick, const char *sFrom) {
-	if(!sData) return false;
+	if (!sData) {
+		return false;
+	}
 
 	DcUser * User;
 	vector<DcUser *> ul;
-	for(List_t::const_iterator it = NickList.begin(); it != NickList.end(); ++it) {
+	for (List_t::const_iterator it = NickList.begin(); it != NickList.end(); ++it) {
 		User = (DcUser*)mDCUserList.GetUserBaseByNick(*it);
-		if(User && User->mbInUserList) {
+		if (User && User->mbInUserList) {
 			User->mbInUserList = false;
 			ul.push_back(User);
 		}
 	}
 
-	if(sFrom && sNick) { // PM
+	if (sFrom && sNick) { // PM
 		string sStart, sEnd;
 		DcProtocol::Append_DC_PMToAll(sStart, sEnd, sFrom, sNick, sData);
 		mDCUserList.SendToWithNick(sStart, sEnd);
-	} else if(sNick) { // Chat
+	} else if (sNick) { // Chat
 		string sStr;
 		mDCUserList.sendToAll(DcProtocol::Append_DC_Chat(sStr, sNick, sData), false, false);
 	} else { // Simple Msg
 		string sMsg(sData);
-		if(sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) sMsg.append(NMDC_SEPARATOR);
+		if (sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
+			sMsg.append(NMDC_SEPARATOR);
+		}
 		mDCUserList.sendToAll(sMsg, false, false);
 	}
 
-	for(vector<DcUser *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it)
+	for (vector<DcUser *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
 		(*ul_it)->mbInUserList = true;
+	}
 
 	return true;
 }
@@ -1168,39 +1226,46 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & NickList, const char 
 
 
 bool DcServer::sendToAllExceptIps(const vector<string> & IPList, const char *sData, const char *sNick, const char *sFrom) {
-	if(!sData) return false;
+	if (!sData) {
+		return false;
+	}
 
 	DcConn * dcconn;
 	vector<DcConn*> ul;
 	bool bBadIP = false;
-	for(List_t::const_iterator it = IPList.begin(); it != IPList.end(); ++it) {
-		if(!DcConn::CheckIp(*it)) bBadIP = true;
-		for(DcIpList::iterator mit = mIPListConn->begin(DcConn::Ip2Num((*it).c_str())); mit != mIPListConn->end(); ++mit) {
+	for (List_t::const_iterator it = IPList.begin(); it != IPList.end(); ++it) {
+		if (!DcConn::CheckIp(*it)) {
+			bBadIP = true;
+		}
+		for (DcIpList::iterator mit = mIPListConn->begin(DcConn::Ip2Num((*it).c_str())); mit != mIPListConn->end(); ++mit) {
 			dcconn = (DcConn*)(*mit);
-			if(dcconn->mDCUser && dcconn->mDCUser->mbInUserList) {
+			if (dcconn->mDCUser && dcconn->mDCUser->mbInUserList) {
 				dcconn->mDCUser->mbInUserList = false;
 				ul.push_back(dcconn);
 			}
 		}
 	}
 
-	if(!bBadIP) {
-		if(sFrom && sNick) { // PM
+	if (!bBadIP) {
+		if (sFrom && sNick) { // PM
 			string sStart, sEnd;
 			DcProtocol::Append_DC_PMToAll(sStart, sEnd, sFrom, sNick, sData);
 			mDCUserList.SendToWithNick(sStart, sEnd);
-		} else if(sNick) { // Chat
+		} else if (sNick) { // Chat
 			string sStr;
 			mDCUserList.sendToAll(DcProtocol::Append_DC_Chat(sStr, sNick, sData), false, false);
 		} else { // Simple Msg
 			string sMsg(sData);
-			if(sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) sMsg.append(NMDC_SEPARATOR);
+			if (sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
+				sMsg.append(NMDC_SEPARATOR);
+			}
 			mDCUserList.sendToAll(sMsg, false, false);
 		}
 	}
 
-	for(vector<DcConn*>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it)
+	for (vector<DcConn*>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
 		(*ul_it)->mDCUser->mbInUserList = true;
+	}
 
 	return (bBadIP == true) ? false : true;
 }
@@ -1211,19 +1276,27 @@ int DcServer::checkCmd(const string & sData) {
 	mDCParser.ReInit();
 	mDCParser.mCommand = sData;
 	mDCParser.Parse();
-	if(mDCParser.SplitChunks()) return -1;
-	if(mDCParser.miType > 0 && mDCParser.miType < 3) return 3;
+	if (mDCParser.SplitChunks()) {
+		return -1;
+	}
+	if (mDCParser.miType > 0 && mDCParser.miType < 3) {
+		return 3;
+	}
 	return mDCParser.miType;
 }
 
 
 
 void DcServer::forceMove(DcConnBase *dcConn, const char *sAddress, const char *sReason /* = NULL */) {
-	if(!dcConn || !sAddress) return;
+	if (!dcConn || !sAddress) {
+		return;
+	}
 	DcConn * dcconn = (DcConn *) dcConn;
 
 	string sMsg, sForce, sNick("<unknown>");
-	if(dcconn->mDCUser) sNick = dcconn->mDCUser->msNick;
+	if (dcconn->mDCUser) {
+		sNick = dcconn->mDCUser->msNick;
+	}
 
 	StringReplace(mDCLang.msForceMove, string("address"), sForce, string(sAddress));
 	StringReplace(sForce, string("reason"), sForce, string(sReason != NULL ? sReason : ""));
@@ -1236,8 +1309,8 @@ void DcServer::forceMove(DcConnBase *dcConn, const char *sAddress, const char *s
 
 
 const vector<string> & DcServer::getConfig() {
-	if(mvConfigNames.empty()) {
-		for(ConfigListBase::tHLMIt it = mDcConfig.mList.begin(); it != mDcConfig.mList.end(); ++it) {
+	if (mvConfigNames.empty()) {
+		for (ConfigListBase::tHLMIt it = mDcConfig.mList.begin(); it != mDcConfig.mList.end(); ++it) {
 			mvConfigNames.push_back((*it)->mName);
 		}
 	}
@@ -1248,7 +1321,9 @@ const vector<string> & DcServer::getConfig() {
 
 const char * DcServer::getConfig(const string & sName) {
 	Config * config = mDcConfig[sName];
-	if(!config) return NULL;
+	if (!config) {
+		return NULL;
+	}
 	config->convertTo(sBuf);
 	return sBuf.c_str();
 }
@@ -1257,7 +1332,9 @@ const char * DcServer::getConfig(const string & sName) {
 
 const char * DcServer::getLang(const string & sName) {
 	Config * config = mDCLang[sName];
-	if(!config) return NULL;
+	if (!config) {
+		return NULL;
+	}
 	config->convertTo(sBuf);
 	return sBuf.c_str();
 }
@@ -1265,36 +1342,44 @@ const char * DcServer::getLang(const string & sName) {
 
 
 bool DcServer::setConfig(const string & sName, const string & sValue) {
-	if(sName == "sAddresses") return false;
+	if (sName == "sAddresses") {
+		return false;
+	}
 
-	if(sName == "sLocale" && 
-		!setlocale(LC_ALL, sValue.c_str())
-	) return false;
+	if (sName == "sLocale" && !setlocale(LC_ALL, sValue.c_str())) {
+		return false;
+	}
 
 	Config * config = mDcConfig[sName];
-	if(!config) return false;
+	if (!config) {
+		return false;
+	}
 
-	if(sName == "sHubBot") {
+	if (sName == "sHubBot") {
 		unregBot(mDcConfig.msHubBot);
-	} else if(sName == "bRegMainBot") {
-		if(sValue == "true" || 0 != atoi(sValue.c_str()) ) {
-			if(regBot(mDcConfig.msHubBot, mDcConfig.msMainBotMyINFO, 
-				mDcConfig.msMainBotIP, mDcConfig.mbMainBotKey) == -2)
+	} else if (sName == "bRegMainBot") {
+		if (sValue == "true" || 0 != atoi(sValue.c_str()) ) {
+			if (regBot(mDcConfig.msHubBot, mDcConfig.msMainBotMyINFO, 
+				mDcConfig.msMainBotIP, mDcConfig.mbMainBotKey) == -2) {
 					regBot(mDcConfig.msHubBot, string("$ $$$0$"), 
 						mDcConfig.msMainBotIP, mDcConfig.mbMainBotKey);
-		} else
+			}
+		} else {
 			unregBot(mDcConfig.msHubBot);
+		}
 	}
 
 	config->convertFrom(sValue);
 
-	if(sName == "sHubBot") {
-		if(mDcConfig.mbRegMainBot) /** Регистрация основного бота */
-			if(regBot(mDcConfig.msHubBot, mDcConfig.msMainBotMyINFO, 
-				mDcConfig.msMainBotIP, mDcConfig.mbMainBotKey) == -2)
+	if (sName == "sHubBot") {
+		if (mDcConfig.mbRegMainBot) { /** Registration bot */
+			if (regBot(mDcConfig.msHubBot, mDcConfig.msMainBotMyINFO, 
+				mDcConfig.msMainBotIP, mDcConfig.mbMainBotKey) == -2) {
 					regBot(mDcConfig.msHubBot, string("$ $$$0$"), 
 						mDcConfig.msMainBotIP, mDcConfig.mbMainBotKey);
-	} else if(sName == "sHubName" || sName == "sTopic") {
+			}
+		}
+	} else if (sName == "sHubName" || sName == "sTopic") {
 		string sMsg;
 		sendToAll(DcProtocol::Append_DC_HubName(sMsg, mDcConfig.msHubName, mDcConfig.msTopic).c_str()); // use cache ?
 	}
@@ -1307,7 +1392,9 @@ bool DcServer::setConfig(const string & sName, const string & sValue) {
 
 bool DcServer::setLang(const string & sName, const string & sValue) {
 	Config * config = mDCLang[sName];
-	if(!config) return false;
+	if (!config) {
+		return false;
+	}
 	config->convertFrom(sValue);
 	mDCLang.save();
 	return true;
@@ -1316,19 +1403,27 @@ bool DcServer::setLang(const string & sName, const string & sValue) {
 
 
 int DcServer::regBot(const string & sNick, const string & sMyINFO, const string & sIP, bool bKey) {
-	if(!sNick.length() || sNick.length() > 64 || sNick.find_first_of(" |$") != sNick.npos) return -1;
+	if (!sNick.length() || sNick.length() > 64 || sNick.find_first_of(" |$") != sNick.npos) {
+		return -1;
+	}
 
 	string sINFO(sMyINFO);
 	DcUser *User = new DcUser(sNick);
 	User->mDcServer = this;
 	User->mbInOpList = bKey;
 	User->SetIp(sIP);
-	if(!sINFO.length()) sINFO = "$ $$$0$";
-	if(!User->setMyINFO(string("$MyINFO $ALL ") + sNick + " " + sINFO, sNick)) return -2;
+	if (!sINFO.length()) {
+		sINFO = "$ $$$0$";
+	}
+	if (!User->setMyINFO(string("$MyINFO $ALL ") + sNick + " " + sINFO, sNick)) {
+		return -2;
+	}
 
-	if(Log(3)) LogStream() << "Reg bot: " << sNick << endl;
+	if (Log(3)) {
+		LogStream() << "Reg bot: " << sNick << endl;
+	}
 
-	if(!AddToUserList(User)) {
+	if (!AddToUserList(User)) {
 		delete User;
 		return -3;
 	}
@@ -1341,10 +1436,20 @@ int DcServer::regBot(const string & sNick, const string & sMyINFO, const string 
 
 int DcServer::unregBot(const string & sNick) {
 
-	if(Log(3)) LogStream() << "Unreg bot: " << sNick << endl;
+	if (Log(3)) {
+		LogStream() << "Unreg bot: " << sNick << endl;
+	}
 
 	DcUser * User = (DcUser*)mDCUserList.GetUserBaseByNick(sNick);
-	if(!User || User->mDCConn) return -1;
+	if (!User) {
+		return -1;
+	}
+	if (User->mDCConn) {
+		if(Log(3)) {
+			LogStream() << "Attempt delete user" << endl;
+		}
+		return -2;
+	}
 	RemoveFromDCUserList(User);
 	delete User;
 	return 0;
@@ -1357,70 +1462,80 @@ int DcServer::unregBot(const string & sNick) {
 bool DcServer::GetSysVersion() {
 	OSVERSIONINFOEX osvi;
 	int bOsVersionInfoEx;
-	if (!msSysVersion.empty()) return true;
+	if (!msSysVersion.empty()) {
+		return true;
+	}
 
 	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
 	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 
 	bOsVersionInfoEx = GetVersionEx((OSVERSIONINFO *) &osvi);
-	if(!bOsVersionInfoEx) {
+	if (!bOsVersionInfoEx) {
 		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-		if(!GetVersionEx((OSVERSIONINFO *) &osvi))
+		if (!GetVersionEx((OSVERSIONINFO *) &osvi)) {
 			return false;
+		}
 	}
 
 	char buf[256] = { '\0' };
-	switch(osvi.dwPlatformId) {
+	switch (osvi.dwPlatformId) {
 
-		case VER_PLATFORM_WIN32_NT: // Windows NT
+		case VER_PLATFORM_WIN32_NT : // Windows NT
 
-			if(osvi.dwMajorVersion <= 4)
+			if (osvi.dwMajorVersion <= 4) {
 				msSysVersion.append("Microsoft Windows NT ");
-			if(osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0)
+			}
+			if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0) {
 				msSysVersion.append("Microsoft Windows 2000 ");
+			}
 
-			if(bOsVersionInfoEx) {
+			if (bOsVersionInfoEx) {
 
 				// Check workstation type
-				if(osvi.wProductType == VER_NT_WORKSTATION) {
+				if (osvi.wProductType == VER_NT_WORKSTATION) {
 
-					if(osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1)
+					if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1) {
 						msSysVersion.append("Microsoft Windows XP ");
-					else if(osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0)
+					} else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0) {
 						msSysVersion.append("Microsoft Windows Vista ");
-					else if(osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 1)
+					} else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 1) {
 						msSysVersion.append("Microsoft Windows 7 ");
-					else
+					} else {
 						msSysVersion.append("Microsoft Windows (unknown version) ");
+					}
 
 
-					if(osvi.wSuiteMask & VER_SUITE_PERSONAL)
+					if (osvi.wSuiteMask & VER_SUITE_PERSONAL) {
 						msSysVersion.append("Home Edition ");
-					else
+					} else {
 						msSysVersion.append("Professional ");
+					}
 
-				} else if(osvi.wProductType == VER_NT_SERVER) { // Check server type
+				} else if (osvi.wProductType == VER_NT_SERVER) { // Check server type
 
-					if(osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2)
+					if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2) {
 						msSysVersion.append("Microsoft Windows 2003 ");
-					else if(osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0)
+					} else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0) {
 						msSysVersion.append("Microsoft Windows Server 2008 ");
-					else if(osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 1)
+					} else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 1) {
 						msSysVersion.append("Microsoft Windows Server 2008 R2 ");
-					else
+					} else {
 						msSysVersion.append("Microsoft Windows (unknown version) ");
+					}
 
-					if(osvi.wSuiteMask & VER_SUITE_DATACENTER)
+					if (osvi.wSuiteMask & VER_SUITE_DATACENTER) {
 						msSysVersion.append("DataCenter Server ");
-					else if(osvi.wSuiteMask & VER_SUITE_ENTERPRISE)
-						if(osvi.dwMajorVersion == 4)
+					} else if (osvi.wSuiteMask & VER_SUITE_ENTERPRISE) {
+						if (osvi.dwMajorVersion == 4) {
 							msSysVersion.append("Advanced Server ");
-						else
+						} else {
 							msSysVersion.append("Enterprise Server ");
-					else if(osvi.wSuiteMask == VER_SUITE_BLADE)
+						}
+					} else if (osvi.wSuiteMask == VER_SUITE_BLADE) {
 						msSysVersion.append("Web Server ");
-					else
+					} else {
 						msSysVersion.append("Server ");
+					}
 
 				}
 
@@ -1430,26 +1545,31 @@ bool DcServer::GetSysVersion() {
 				DWORD dwBufLen = 80;
 				LONG lRet = RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\ProductOptions", 0, KEY_QUERY_VALUE, &hKey);
 
-				if(lRet != ERROR_SUCCESS)
+				if (lRet != ERROR_SUCCESS) {
 					return false;
+				}
 
 				lRet = RegQueryValueExA( hKey, "ProductType", NULL, NULL, (LPBYTE) szProductType, &dwBufLen);
 
-				if((lRet != ERROR_SUCCESS) || (dwBufLen > 80))
+				if ((lRet != ERROR_SUCCESS) || (dwBufLen > 80)) {
 					return false;
+				}
 
 				RegCloseKey(hKey);
 
-				if(lstrcmpiA("WINNT", szProductType) == 0)
+				if (lstrcmpiA("WINNT", szProductType) == 0) {
 					msSysVersion.append("Professional ");
-				if(lstrcmpiA("LANMANNT", szProductType) == 0)
+				}
+				if (lstrcmpiA("LANMANNT", szProductType) == 0) {
 					msSysVersion.append("Server ");
-				if(lstrcmpiA( "SERVERNT", szProductType) == 0)
+				}
+				if (lstrcmpiA( "SERVERNT", szProductType) == 0) {
 					msSysVersion.append("Advanced Server ");
+				}
 			}
 
 			// Version, service pack, number of the build
-			if(osvi.dwMajorVersion <= 4) {
+			if (osvi.dwMajorVersion <= 4) {
 				sprintf(buf, "version %d.%d %s (Build %d)", 
 					osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
 				msSysVersion.append(buf);
@@ -1460,30 +1580,32 @@ bool DcServer::GetSysVersion() {
 
 			break;
 
-		case VER_PLATFORM_WIN32_WINDOWS: // Windows 95
+		case VER_PLATFORM_WIN32_WINDOWS : // Windows 95
 
-			if(osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 0) {
+			if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 0) {
 				msSysVersion.append("Microsoft Windows 95 ");
-				if(osvi.szCSDVersion[1] == 'C' || osvi.szCSDVersion[1] == 'B')
+				if (osvi.szCSDVersion[1] == 'C' || osvi.szCSDVersion[1] == 'B') {
 					msSysVersion.append("OSR2 ");
+				}
 			} 
 
-			if(osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 10) {
+			if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 10) {
 				msSysVersion.append("Microsoft Windows 98 ");
-				if(osvi.szCSDVersion[1] == 'A')
+				if (osvi.szCSDVersion[1] == 'A') {
 					msSysVersion.append("SE ");
+				}
 			} 
 
-			if(osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 90) {
+			if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 90) {
 				msSysVersion.append("Microsoft Windows Millennium Edition ");
 			} 
 			break;
 
-		case VER_PLATFORM_WIN32s: // Windows
+		case VER_PLATFORM_WIN32s : // Windows
 			msSysVersion.append("Microsoft Win32s ");
 			break;
 
-		default:
+		default :
 			break;
 	}
 	return true; 

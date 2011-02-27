@@ -71,9 +71,11 @@ Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 	if (mSocket) {
 		static struct sockaddr saddr;
 		static socklen_t saddr_size = sizeof(saddr);
-		struct sockaddr_in *saddr_in;
-		if(getpeername(mSocket, &saddr, &saddr_size) < 0) {
-			if(Log(2)) LogStream() << "Error in getpeername, closing" << endl;
+		struct sockaddr_in * saddr_in;
+		if (getpeername(mSocket, &saddr, &saddr_size) < 0) {
+			if (Log(2)) {
+				LogStream() << "Error in getpeername, closing" << endl;
+			}
 			CloseNow(CLOSE_REASON_GETPEERNAME);
 		}
 		saddr_in = (struct sockaddr_in *)&saddr;
@@ -82,12 +84,18 @@ Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 		msIp = inet_ntoa(saddr_in->sin_addr); /** String ip */
 		miPort = ntohs(saddr_in->sin_port); /** Port */
 
-		if(mServer->mbMAC) GetMac();
+		saddr_in = NULL;
+
+		if (mServer->mbMAC) {
+			GetMac();
+		}
 	}
 }
 
 Conn::~Conn() {
-	if(mParser) this->DeleteParser(mParser);
+	if (mParser) {
+		this->DeleteParser(mParser);
+	}
 	mParser = NULL;
 	mListenFactory = NULL;
 	mConnFactory = NULL;
@@ -98,12 +106,14 @@ Conn::~Conn() {
 
 /** MakeSocket */
 tSocket Conn::MakeSocket(int port, const char * ip, bool udp) {
-	if(mSocket > 0) return INVALID_SOCKET; /** Socket is already created */
+	if (mSocket > 0) {
+		return INVALID_SOCKET; /** Socket is already created */
+	}
 	mSocket = SocketCreate(udp); /** Create socket */
 	mSocket = SocketBind(mSocket, port, ip); /** Bind */
-	if(!udp) {
-			mSocket = SocketListen(mSocket);
-			mSocket = SocketNonBlock(mSocket);
+	if (!udp) {
+		mSocket = SocketListen(mSocket);
+		mSocket = SocketNonBlock(mSocket);
 	}
 	miPort = port; /** Set port */
 	msIp = ip; /** Set ip (host) */
@@ -114,21 +124,26 @@ tSocket Conn::MakeSocket(int port, const char * ip, bool udp) {
 /** Create socket (default TCP) */
 tSocket Conn::SocketCreate(bool bUDP) {
 	tSocket sock;
-	if(!bUDP) { /* Create socket TCP */
-		if(SOCK_INVALID(sock = socket(AF_INET, SOCK_STREAM, 0)))
+	if (!bUDP) { /* Create socket TCP */
+		if (SOCK_INVALID(sock = socket(AF_INET, SOCK_STREAM, 0))) {
 			return INVALID_SOCKET;
+		}
 		sockoptval_t yes = 1;
 
 		/* TIME_WAIT after close conn. Reuse address after disconn */
-		if(SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(sockoptval_t))))
+		if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(sockoptval_t)))) {
 			return INVALID_SOCKET;
+		}
+	} else {/* Create socket UDP */
+		if (SOCK_INVALID(sock = socket(AF_INET, SOCK_DGRAM, 0))) {
+			return INVALID_SOCKET;
+		}
 	}
-	else /* Create socket UDP */
-		if(SOCK_INVALID(sock = socket(AF_INET, SOCK_DGRAM, 0)))
-			return INVALID_SOCKET;
 
 	++iConnCounter;
-	if(Log(3)) LogStream() << "Created new socket: " << sock << endl;
+	if (Log(3)) {
+		LogStream() << "Created new socket: " << sock << endl;
+	}
 	return sock;
 }
 
@@ -140,40 +155,50 @@ tSocket Conn::SocketCreate(bool bUDP) {
 	mAddrIN.sin_zero = 0x00000000;
 */
 tSocket Conn::SocketBind(tSocket sock, int iPort, const char *sIp) {
-	if(sock == INVALID_SOCKET) return INVALID_SOCKET;
+	if (sock == INVALID_SOCKET) {
+		return INVALID_SOCKET;
+	}
 	string sIP(sIp);
 	memset(&mAddrIN, 0, sizeof(struct sockaddr_in));
 	mAddrIN.sin_family = AF_INET;
 	mAddrIN.sin_port = htons((u_short)iPort);
 
-	if(!CheckIp(sIP)) {
-		struct hostent *host = gethostbyname(sIp);
-		if(host)
+	if (!CheckIp(sIP)) {
+		struct hostent * host = gethostbyname(sIp);
+		if (host) {
 			mAddrIN.sin_addr = *((struct in_addr *)host->h_addr);
+			host = NULL;
+		}
 	} else {
 		mAddrIN.sin_addr.s_addr = INADDR_ANY; /* INADDR_ANY == 0 */
-		if(sIp)
+		if (sIp) {
 			#ifdef _WIN32
 				mAddrIN.sin_addr.s_addr = inet_addr(sIp);
 			#else
 				inet_aton(sIp, &mAddrIN.sin_addr);
 			#endif
+		}
 	}
 	memset(&(mAddrIN.sin_zero), '\0', 8);
 
 	/** Bind */
-	if(SOCK_ERROR(bind(sock, (struct sockaddr *)&mAddrIN, sizeof(mAddrIN))))
+	if (SOCK_ERROR(bind(sock, (struct sockaddr *)&mAddrIN, sizeof(mAddrIN)))) {
 		return INVALID_SOCKET;
+	}
 
 	return sock;
 }
 
 /** Listen TCP socket */
 tSocket Conn::SocketListen(tSocket sock) {
-	if(sock == INVALID_SOCKET) return INVALID_SOCKET;
-	if(SOCK_ERROR(listen(sock, SOCK_BACKLOG))) {
+	if (sock == INVALID_SOCKET) {
+		return INVALID_SOCKET;
+	}
+	if (SOCK_ERROR(listen(sock, SOCK_BACKLOG))) {
 		SOCK_CLOSE(sock);
-		if(ErrLog(1)) LogStream() << "Error listening" << endl;
+		if (ErrLog(1)) {
+			LogStream() << "Error listening" << endl;
+		}
 		return INVALID_SOCKET;
 	}
 	return sock;
@@ -181,7 +206,9 @@ tSocket Conn::SocketListen(tSocket sock) {
 
 /** Set non-block socket */
 tSocket Conn::SocketNonBlock(tSocket sock) {
-	if(sock == INVALID_SOCKET) return INVALID_SOCKET;
+	if (sock == INVALID_SOCKET) {
+		return INVALID_SOCKET;
+	}
 	SOCK_NON_BLOCK(sock);
 	return sock;
 }
@@ -190,22 +217,30 @@ tSocket Conn::SocketNonBlock(tSocket sock) {
 ////////////////////////////////////////////////////////
 /** Close socket */
 void Conn::close() {
-	if(mSocket <= 0) return;
+	if (mSocket <= 0) {
+		return;
+	}
 	mbWritable = mbOk = false;
 
 	/** OnClose */
-	if(mServer) mServer->OnClose(this);
+	if (mServer) {
+		mServer->OnClose(this);
+	}
 
 #ifndef _WIN32
 	TEMP_FAILURE_RETRY(SOCK_CLOSE(mSocket));
-	if(SockErr != SOCK_EINTR || (mServer && !mServer->mbRun)) { // Interrupted system call on exit
+	if (SockErr != SOCK_EINTR || (mServer && !mServer->mbRun)) { // Interrupted system call on exit
 #else
 	int err = TEMP_FAILURE_RETRY(SOCK_CLOSE(mSocket));
-	if(!(SOCK_ERROR(err))) {
+	if (!(SOCK_ERROR(err))) {
 #endif
 		--iConnCounter;
-		if(Log(3)) LogStream() << "Closing socket: " << mSocket << endl;
-	} else if(ErrLog(1)) LogStream() << "Socket not closed: " << SockErr << endl;
+		if (Log(3)) {
+			LogStream() << "Closing socket: " << mSocket << endl;
+		}
+	} else if (ErrLog(1)) {
+		LogStream() << "Socket not closed: " << SockErr << endl;
+	}
 
 	mSocket = 0;
 }
@@ -213,8 +248,13 @@ void Conn::close() {
 /** CloseNice */
 void Conn::CloseNice(int imsec /* = 0 */, int iReason /* = 0 */) {
 	mbWritable = false;
-	if(iReason) miCloseReason = iReason;
-	if((imsec <= 0) || (!msSendBuf.size())) { CloseNow(iReason); return; }
+	if (iReason) {
+		miCloseReason = iReason;
+	}
+	if ((imsec <= 0) || (!msSendBuf.size())) {
+		CloseNow(iReason);
+		return;
+	}
 	mCloseTime.Get();
 	mCloseTime += int(imsec);
 }
@@ -222,13 +262,17 @@ void Conn::CloseNice(int imsec /* = 0 */, int iReason /* = 0 */) {
 /** CloseNow */
 void Conn::CloseNow(int iReason /* = 0 */) {
 	mbWritable = mbOk = false;
-	if(mServer) {
-		if(!(mServer->mConnChooser.ConnChoose::OptGet((ConnBase*)this) & ConnChoose::eEF_CLOSE)) {
+	if (mServer) {
+		if (!(mServer->mConnChooser.ConnChoose::OptGet((ConnBase*)this) & ConnChoose::eEF_CLOSE)) {
 			++ mServer->miNumCloseConn;
 			mbClosed = true; // poll conflict
 
-			if(iReason) miCloseReason = iReason;
-			if(Log(3)) LogStream() << "CloseNow (reason " << miCloseReason << ")" << endl;
+			if (iReason) {
+				miCloseReason = iReason;
+			}
+			if (Log(3)) {
+				LogStream() << "CloseNow (reason " << miCloseReason << ")" << endl;
+			}
 
 #if USE_SELECT
 			mServer->mConnChooser.ConnChoose::OptIn((ConnBase*)this, ConnChoose::eEF_CLOSE);
@@ -240,28 +284,40 @@ void Conn::CloseNow(int iReason /* = 0 */) {
 #endif
 			
 		} else {
-			if(Log(3)) LogStream() << "Re-closure (reason " << iReason << ")" << endl;
+			if (Log(3)) {
+				LogStream() << "Re-closure (reason " << iReason << ")" << endl;
+			}
 		}
 	} else {
-		if(ErrLog(0)) LogStream() << "Close conn without Server" << endl;
+		if (ErrLog(0)) {
+			LogStream() << "Close conn without Server" << endl;
+		}
 	}
 }
 
 /** CreateNewConn */
 Conn * Conn::CreateNewConn() {
 	tSocket sock;
-	if((sock = Accept()) == INVALID_SOCKET) return NULL;
+	if ((sock = Accept()) == INVALID_SOCKET) {
+		return NULL;
+	}
 
 	ConnFactory *Factory = NULL;
 	Conn *new_conn = NULL;
 
 	/** Presence of the factory for listen socket without fall! */
-	if(mListenFactory) Factory = mListenFactory->connFactory();
-	//if(mServer && mServer->mConnFactory) Factory = mServer->mConnFactory;
+	if(mListenFactory) {
+		Factory = mListenFactory->connFactory();
+	}
+	//if (mServer && mServer->mConnFactory) {Factory = mServer->mConnFactory;}
 
-	if(Factory != NULL) new_conn = Factory->CreateConn(sock); /** Create CONN_TYPE_CLIENTTCP conn */
-	if(!new_conn) {
-		if(ErrLog(0)) LogStream() << "Fatal error: Can't create new connection object" << endl;
+	if (Factory != NULL) {
+		new_conn = Factory->CreateConn(sock); /** Create CONN_TYPE_CLIENTTCP conn */
+	}
+	if (!new_conn) {
+		if (ErrLog(0)) {
+			LogStream() << "Fatal error: Can't create new connection object" << endl;
+		}
 		throw "Fatal error: Can't create new connection object";
 	}
 
@@ -280,7 +336,7 @@ tSocket Conn::Accept() {
 	int i = 0;
 	memset(&client, 0, namelen);
 	sock = accept(mSocket, (struct sockaddr *)&client, (socklen_t*)&namelen);
-	while(SOCK_INVALID(sock) && ((SockErr == SOCK_EAGAIN) || (SockErr == SOCK_EINTR)) && (i++ < 10)) {
+	while (SOCK_INVALID(sock) && ((SockErr == SOCK_EAGAIN) || (SockErr == SOCK_EINTR)) && (i++ < 10)) {
 		/** Try to accept connection not more than 10 once */
 		sock = ::accept(mSocket, (struct sockaddr *)&client, (socklen_t*)&namelen);
 		#ifdef _WIN32
@@ -289,34 +345,45 @@ tSocket Conn::Accept() {
 			usleep(50);
 		#endif
 	}
-	if(SOCK_INVALID(sock)) {
-		if(ErrLog(1)) LogStream() << "Socket not accept: " << SockErr << endl;
+	if (SOCK_INVALID(sock)) {
+		if (ErrLog(1)) {
+			LogStream() << "Socket not accept: " << SockErr << endl;
+		}
 		return INVALID_SOCKET;
 	}
 
 	static sockoptval_t yes = 1;
 	static socklen_t yeslen = sizeof(yes);
-	if(SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &yes, yeslen))) {
+	if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &yes, yeslen))) {
 #ifdef _WIN32
 		int err = TEMP_FAILURE_RETRY(SOCK_CLOSE(sock));
-		if(SOCK_ERROR(err))
+		if (SOCK_ERROR(err))
 #else
 		TEMP_FAILURE_RETRY(SOCK_CLOSE(sock));
-		if(SockErr != SOCK_EINTR)
+		if (SockErr != SOCK_EINTR)
 #endif
-		{ if(Log(2)) LogStream() << "Couldn't set keepalive flag for accepted socket" << endl; }
-		else if(ErrLog(1)) LogStream() << "Socket not closed" << endl;
+		{
+			if (Log(2)) {
+				LogStream() << "Couldn't set keepalive flag for accepted socket" << endl;
+			}
+		} else if (ErrLog(1)) {
+			LogStream() << "Socket not closed" << endl;
+		}
 		return INVALID_SOCKET;
 	}
 
 	/** Non-block socket */
-	if(SocketNonBlock(sock) == INVALID_SOCKET) {
-		if(ErrLog(1)) LogStream() << "Couldn't set non-block flag for accepted socket" << endl;
+	if (SocketNonBlock(sock) == INVALID_SOCKET) {
+		if (ErrLog(1)) {
+			LogStream() << "Couldn't set non-block flag for accepted socket" << endl;
+		}
 		return INVALID_SOCKET;
 	}
 
 	/** Accept new socket */
-	if(Log(3)) LogStream() << "Accept new socket: " << sock << endl;
+	if (Log(3)) {
+		LogStream() << "Accept new socket: " << sock << endl;
+	}
 
 	++iConnCounter;
 	return sock;

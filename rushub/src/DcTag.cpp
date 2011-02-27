@@ -24,6 +24,15 @@ namespace dcserver {
 
 DcTag::DcTag() :
 	nil(TAGNIL_NO),
+	passive(false),
+	unregHubs(0),
+	regHubs(0),
+	opHubs(0),
+	slots(0),
+	limit(0),
+	open(0),
+	bandwidth(0),
+	download(0),
 	tagSep(',')
 {
 }
