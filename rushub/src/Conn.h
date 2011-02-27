@@ -255,7 +255,7 @@ protected:
 	string msMAC; /** mac address */
 	string msHost; /** DNS */
 
-	static char * msRecvBuf; /** Recv buffer */
+	static char msRecvBuf[MAX_RECV_SIZE + 1]; /** Recv buffer */
 	string msSeparator; /** Separator */
 	unsigned long mStrSizeMax; /** (10240) Max msg size */
 

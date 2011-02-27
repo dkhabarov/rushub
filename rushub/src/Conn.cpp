@@ -41,7 +41,7 @@ using namespace ::utils; // ShrinkStringToFit, StrCutLeft
 namespace server {
 
 unsigned long Conn::iConnCounter = 0;
-char *Conn::msRecvBuf = new char[MAX_RECV_SIZE + 1];
+char Conn::msRecvBuf[MAX_RECV_SIZE + 1];
 
 Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 	Obj("Conn"),
@@ -68,7 +68,7 @@ Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 	ClearStr(); /** Clear params */
 	memset(&mCloseTime, 0, sizeof(mCloseTime));
 
-	if(mSocket) {
+	if (mSocket) {
 		static struct sockaddr saddr;
 		static socklen_t saddr_size = sizeof(saddr);
 		struct sockaddr_in *saddr_in;
