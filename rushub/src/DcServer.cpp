@@ -29,6 +29,8 @@
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
 		#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
 	#endif
+#else
+	#include <sys/utsname.h> // for utsname
 #endif
 
 
@@ -48,7 +50,7 @@ DcListIterator::DcListIterator(DcServer * dcServer) :
 
 
 DcServer * DcServer::currentDcServer = NULL;
-string DcServer::msSysVersion = "";
+string DcServer::msSysVersion;
 
 
 
@@ -78,6 +80,11 @@ DcServer::DcServer(const string &, const string &):
 
 	/** Current server */
 	currentDcServer = this;
+
+	/** Define OS */
+	if (!GetSysVersion()) {
+		msSysVersion = "unknown";
+	}
 
 	/** ConnFactory */
 	mConnFactory = new DcConnFactory(&mDCProtocol, this);
@@ -122,10 +129,6 @@ DcServer::DcServer(const string &, const string &):
 				mDcConfig.mbMainBotKey
 			);
 		}
-	}
-
-	if (!GetSysVersion()) {
-		msSysVersion = "unknown";
 	}
 }
 
@@ -1489,7 +1492,12 @@ bool DcServer::GetSysVersion() {
 #else
 
 bool DcServer::GetSysVersion() {
-	msSysVersion = "UNIX System";
+	utsname osname;
+	if (uname(&osname) == 0) {
+		msSysVersion = string(osname.sysname) + " " + 
+			string(osname.release) + " (" + 
+			string(osname.machine) + ")";
+	}
 	return true;
 }
 
