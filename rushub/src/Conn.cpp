@@ -70,7 +70,7 @@ Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 
 	if (mSocket) {
 		struct sockaddr saddr;
-		static socklen_t saddr_size = sizeof(saddr);
+		socklen_t saddr_size = sizeof(saddr);
 		struct sockaddr_in * saddr_in;
 		if (getpeername(mSocket, &saddr, &saddr_size) < 0) {
 			if (Log(2)) {
@@ -83,8 +83,6 @@ Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 		miNetIp = saddr_in->sin_addr.s_addr; /** Numeric ip */
 		msIp = inet_ntoa(saddr_in->sin_addr); /** String ip */
 		miPort = ntohs(saddr_in->sin_port); /** Port */
-
-		saddr_in = NULL;
 
 		if (mServer->mbMAC) {
 			GetMac();
