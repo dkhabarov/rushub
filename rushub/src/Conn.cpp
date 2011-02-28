@@ -69,7 +69,7 @@ Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 	memset(&mCloseTime, 0, sizeof(mCloseTime));
 
 	if (mSocket) {
-		struct sockaddr_in saddr;
+		struct sockaddr_in saddr = { 0 };
 		socklen_t saddr_size = sizeof(saddr);
 		if (getpeername(mSocket, (struct sockaddr *)&saddr, &saddr_size) < 0) {
 			if (Log(2)) {
