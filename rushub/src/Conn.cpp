@@ -69,20 +69,18 @@ Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 	memset(&mCloseTime, 0, sizeof(mCloseTime));
 
 	if (mSocket) {
-		struct sockaddr saddr;
+		struct sockaddr_in saddr;
 		socklen_t saddr_size = sizeof(saddr);
-		struct sockaddr_in * saddr_in;
-		if (getpeername(mSocket, &saddr, &saddr_size) < 0) {
+		if (getpeername(mSocket, (struct sockaddr *)&saddr, &saddr_size) < 0) {
 			if (Log(2)) {
 				LogStream() << "Error in getpeername, closing" << endl;
 			}
 			CloseNow(CLOSE_REASON_GETPEERNAME);
 		}
-		saddr_in = (struct sockaddr_in *)&saddr;
 
-		miNetIp = saddr_in->sin_addr.s_addr; /** Numeric ip */
-		msIp = inet_ntoa(saddr_in->sin_addr); /** String ip */
-		miPort = ntohs(saddr_in->sin_port); /** Port */
+		miNetIp = saddr.sin_addr.s_addr; /** Numeric ip */
+		msIp = inet_ntoa(saddr.sin_addr); /** String ip */
+		miPort = ntohs(saddr.sin_port); /** Port */
 
 		if (mServer->mbMAC) {
 			GetMac();
