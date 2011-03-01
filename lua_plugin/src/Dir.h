@@ -37,20 +37,20 @@ using namespace ::std;
 	#include <windows.h>
 
 	struct dirent {
-		char *d_name;
+		char * d_name;
 	};
 
 	typedef struct DIR {
-		long                handle; /* -1 for failed rewind */
+		long handle; /* -1 for failed rewind */
 		struct _finddata_t  info;
-		struct dirent       result; /* d_name null iff first time */
-		char                *name;  /* null-terminated char string */
+		struct dirent  result; /* d_name null iff first time */
+		char * name;  /* null-terminated char string */
 	} DIR; // struct DIR
 
-	DIR           *opendir(const char *);
-	int           closedir(DIR *);
-	struct dirent *readdir(DIR *);
-	void          rewinddir(DIR *);
+	DIR * opendir(const char *);
+	int closedir(DIR *);
+	struct dirent * readdir(DIR *);
+	void rewinddir(DIR *);
 
 #else
 
@@ -76,9 +76,9 @@ public:
 	static int mkDir(const char * path);
 
 	/** Check exists of the path */
-	static bool isPathExist(const char* sName);
+	static bool isPathExist(const char * name);
 
-	static bool isFileExist(const char * sName);
+	static bool isFileExist(const char * name);
 
 	static void execPath(string &);
 
