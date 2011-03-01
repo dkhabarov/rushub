@@ -48,12 +48,12 @@ PluginList::PluginList(const string & path) :
 
 PluginList::~PluginList() {
 	// Removing plugins
-	for(vector<Hash_t>::iterator it = mPluginLoaderHash.begin(); it != mPluginLoaderHash.end(); ++it) {
+	for (vector<Hash_t>::iterator it = mPluginLoaderHash.begin(); it != mPluginLoaderHash.end(); ++it) {
 		mPluginLoaders.Remove(*it);
 	}
 
 	// Removing call lists
-	for(vector<Hash_t>::iterator it = mKeyList.begin(); it != mKeyList.end(); ++it) {
+	for (vector<Hash_t>::iterator it = mKeyList.begin(); it != mKeyList.end(); ++it) {
 		mCallLists.Remove(*it);
 	}
 }

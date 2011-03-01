@@ -69,25 +69,22 @@ bool DcUser::CanSend() {
 }
 
 
-void DcUser::send(const string & sData, bool bAddSep, bool bFlush) {
-	if(mDCConn) {
-		mDCConn->send(sData, bAddSep, bFlush);
+void DcUser::send(const string & data, bool addSep, bool flush) {
+	if (mDCConn) {
+		mDCConn->send(data, addSep, flush);
 	}
 }
 
 
 int DcUser::getProfile() const {
-	if (mDCConn) {
-		return mDCConn->miProfile;
-	} else {
-		return 30; // 30 profile for bot
-	}
+	// 30 profile for bot
+	return mDCConn != NULL ? mDCConn->miProfile : 30;
 }
 
 
-void DcUser::SetIp(const string & sIP) {
-	if (sIP.size() && DcConn::CheckIp(sIP)) {
-		msIp = sIP;
+void DcUser::SetIp(const string & ip) {
+	if (ip.size() && DcConn::CheckIp(ip)) {
+		msIp = ip;
 	}
 }
 

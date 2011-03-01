@@ -44,11 +44,17 @@ public:
 
 	DcParser();
 	virtual ~DcParser();
-	int Parse(); /** Do parse for command and return type of this command */
-	string & chunkString(unsigned int n); /** Get string address for the chunk of command */
+
+	int getCommandType() const;
+	
+	/** Do parse for command and return type of this command */
+	int Parse();
+	
+	/** Get string address for the chunk of command */
+	string & chunkString(unsigned int n);
+	
 	bool SplitChunks();
-	int getCommandType() const { return miType; }
-	static bool IsPassive(const string & sDesc);
+	static bool IsPassive(const string & description);
 
 }; // class DcParser
 

@@ -50,13 +50,16 @@ public:
 
 	Cli();
 	~Cli();
-	void printUsage(FILE *stream, int exitStatus);
-	void printVersion(FILE *stream, int exitStatus);
-	bool getDaemon() const { return bDaemon; }
-	bool getSyslog() const { return bSyslog; }
-	const string & getMainDir() const { return sMainDir; }
-	pid_t demonizeServer(string sMainDir);
-	void detectArgs(int argc, char **argv);
+
+	bool getDaemon() const;
+	bool getSyslog() const;
+	const string & getMainDir() const;
+
+	void detectArgs(int argc, char ** argv);
+	pid_t demonizeServer(string mainDir);
+
+	void printUsage(FILE * stream, int exitStatus);
+	void printVersion(FILE * stream, int exitStatus);
 
 }; // Cli
 

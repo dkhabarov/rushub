@@ -140,10 +140,12 @@ public:
 	virtual ~Conn();
 
 	/** Get socket */
-	virtual operator tSocket() const { return mSocket; }
+	virtual operator tSocket() const;
 
 	/** Get type connection */
-	inline ConnType GetConnType() const { return mConnType; }
+	inline ConnType GetConnType() const {
+		return mConnType;
+	}
 
 	/** Create, bind and listen socket */
 	tSocket MakeSocket(int port, const char * ip = NULL, bool udp = false);
@@ -159,10 +161,10 @@ public:
 	virtual int Recv();
 
 	/** Check empty recv buf */
-	int RecvBufIsEmpty() const { return miRecvBufEnd == miRecvBufRead; }
+	int RecvBufIsEmpty() const;
 
 	/** Check empty recv buf */
-	int SendBufIsEmpty() const { return msSendBuf.length() == 0; }
+	int SendBufIsEmpty() const;
 
 	/** Remaining (for web-server) */
 	virtual int Remaining();
@@ -171,7 +173,7 @@ public:
 	void ClearStr();
 
 	/** Get status */
-	int StrStatus() const { return meStrStatus; }
+	int StrStatus() const;
 
 	/** Installing the string, in which will be recorded received data, 
 	and installation main parameter */
@@ -190,7 +192,7 @@ public:
 	virtual void DeleteParser(Parser *);
 
 	/** Get pointer for string with data */
-	string * getCommand(){ return mCommand; }
+	string * getCommand();
 
 	/** Write data in sending buffer */
 	virtual int WriteData(const string & data, bool flush);
@@ -200,16 +202,32 @@ public:
 
 	void Flush(); /** Flush buffer */
 
-	static inline unsigned long Ip2Num(const char * ip) { return inet_addr(ip); }
-	static inline char* Num2Ip(unsigned long ip) { struct in_addr in; in.s_addr = ip; return inet_ntoa(in); }
-	const string & Ip() const { return msIp; } /** Get string ip */
-	int Port() const { return miPort; } /** Get port */
+	static inline unsigned long Ip2Num(const char * ip) {
+		return inet_addr(ip);
+	}
+	
+	static inline char* Num2Ip(unsigned long ip) {
+		struct in_addr in;
+		in.s_addr = ip;
+		return inet_ntoa(in);
+	}
+	
+	/** Get string ip */
+	const string & Ip() const;
+	
+	/** Get port */
+	int Port() const;
 
 	void GetMac();
 
-	bool Host(); /** Get host */
-	static unsigned long IpByHost(const string & host); /** Get ip by host */
-	static bool HostByIp(const string & ip, string & host); /** Get host by ip */
+	/** Get host */
+	bool Host();
+	
+	/** Get ip by host */
+	static unsigned long IpByHost(const string & host);
+	
+	/** Get host by ip */
+	static bool HostByIp(const string & ip, string & host);
 
 	/** Main base timer */
 	int OnTimerBase(Time &now);
@@ -221,7 +239,9 @@ public:
 
 	static bool CheckIp(const string &ip);
 
-	bool IsClosed() { return mbClosed; }
+	inline bool IsClosed() {
+		return mbClosed;
+	}
 
 private:
 

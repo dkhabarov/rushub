@@ -57,19 +57,44 @@ private:
 
 public:
 
-	HashMap() : Obj("HashMap") {}
-	~HashMap() {}
-	size_t Size() const { return mHashMap.size(); } /** Number element in container HashMap */
+	HashMap() : Obj("HashMap") {
+	}
 
-	iterator begin() { return mList.begin(); } /** Befin iterator of data list */
-	iterator end() { return mList.end(); } /** End iterator of data list */
+	~HashMap() {
+	}
 
-	bool Add(const K & hash, V Data); /** Adding data and hash-key (true - ok, false - fail) */
-	bool Remove(const K & hash); /** Removing data by hash-key (true - ok, false - fail) */
-	bool Contain(const K & hash); /** Check existed this hash-key (true - yes, false - no) */
-	V Find(const K & hash); /** Return data by hash-key. Return val else NULL */
-	virtual void OnAdd(V) {};
-	virtual void OnRemove(V) {};
+	/** Number element in container HashMap */
+	size_t Size() const {
+		return mHashMap.size();
+	}
+
+	/** Befin iterator of data list */
+	iterator begin() {
+		return mList.begin();
+	}
+
+	/** End iterator of data list */
+	iterator end() {
+		return mList.end();
+	}
+
+	/** Adding data and hash-key (true - ok, false - fail) */
+	bool Add(const K & hash, V Data);
+
+	/** Removing data by hash-key (true - ok, false - fail) */
+	bool Remove(const K & hash);
+
+	/** Check existed this hash-key (true - yes, false - no) */
+	bool Contain(const K & hash);
+
+	/** Return data by hash-key. Return val else NULL */
+	V Find(const K & hash);
+
+	virtual void OnAdd(V) {
+	}
+
+	virtual void OnRemove(V) {
+	}
 
 }; // HashMap
 
@@ -79,19 +104,33 @@ template <class V, class K>
 bool HashMap<V, K>::Add(const K & hash, V Data) {
 
 	/** Check */
-	if(Contain(hash)) { if(Log(1)) LogStream() << "Hash " << hash << " is contains already" << endl; return false; }
+	if (Contain(hash)) {
+		if (Log(1)) {
+			LogStream() << "Hash " << hash << " is contains already" << endl;
+		}
+		return false;
+	}
 
 	/** Insert data */
 	iterator ulit = mList.insert(mList.begin(), Data); /** Insert in begin list */
-	if(ulit == mList.end()) { if(Log(1)) LogStream() << "Don't add " << hash << " into the list" << endl; return false; }
+	if (ulit == mList.end()) {
+		if (Log(1)) {
+			LogStream() << "Don't add " << hash << " into the list" << endl;
+		}
+		return false;
+	}
 
 	/** Insert hash-key */
 	pair<tUHIt, bool> P = mHashMap.insert(tHashPair(hash, ulit));
-	if(P.second) {
+	if (P.second) {
 		OnAdd(Data);
-		if(Log(4)) LogStream() << "Added: " << hash << " (size: " << mHashMap.size() << ")" << endl;
+		if (Log(4)) {
+			LogStream() << "Added: " << hash << " (size: " << mHashMap.size() << ")" << endl;
+		}
 	} else {
-		if(Log(1)) LogStream() << "Don't add " << hash << endl;
+		if (Log(1)) {
+			LogStream() << "Don't add " << hash << endl;
+		}
 		mList.erase(ulit); /** Removing data fron list */
 		return false;
 	}
@@ -102,14 +141,18 @@ bool HashMap<V, K>::Add(const K & hash, V Data) {
 template <class V, class K>
 bool HashMap<V, K>::Remove(const K & hash) {
 	tUHIt uhit = mHashMap.find(hash);
-	if( uhit != mHashMap.end()) {
+	if (uhit != mHashMap.end()) {
 		OnRemove(*(uhit->second));
 		mList.erase(uhit->second); /** Remove data */
 		mHashMap.erase(uhit); /** Remove key */
-		if(Log(4)) LogStream() << "Removed: " << hash << " (size: " << mHashMap.size() << ")" << endl;
+		if (Log(4)) {
+			LogStream() << "Removed: " << hash << " (size: " << mHashMap.size() << ")" << endl;
+		}
 		return true;
 	}
-	if(Log(3)) LogStream() << "Don't exist: " << hash << endl;
+	if (Log(3)) {
+		LogStream() << "Don't exist: " << hash << endl;
+	}
 	return false;
 }
 
@@ -123,7 +166,9 @@ bool HashMap<V, K>::Contain(const K & hash) {
 template <class V, class K>
 V HashMap<V, K>::Find(const K & hash) {
 	tUHIt uhit = mHashMap.find(hash);
-	if(uhit != mHashMap.end()) return *(uhit->second); /** Pointer to iterator = val */
+	if (uhit != mHashMap.end()) {
+		return *(uhit->second); /** Pointer to iterator = val */
+	}
 	return NULL;
 }
 

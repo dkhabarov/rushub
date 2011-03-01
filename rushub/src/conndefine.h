@@ -81,16 +81,24 @@
 #define MAX_SEND_BLOCK_SIZE   0x28FFFF /** Max size (send) block input chanel */
 
 #ifdef _WIN32
-	#define SOCK_CLOSE(SOCK) ::closesocket(SOCK)
+	#define SOCK_CLOSE(SOCK) \
+		::closesocket(SOCK)
 	#define SOCK_NON_BLOCK(SOCK) \
 		static unsigned long one = 1; \
-		if(ioctlsocket(SOCK, FIONBIO, &one) == SOCKET_ERROR) return INVALID_SOCKET;
+		if (ioctlsocket(SOCK, FIONBIO, &one) == SOCKET_ERROR) { \
+			return INVALID_SOCKET; \
+		}
 #else
-	#define SOCK_CLOSE(SOCK) ::close(SOCK)
+	#define SOCK_CLOSE(SOCK) \
+		::close(SOCK)
 	#define SOCK_NON_BLOCK(SOCK) \
 		static int flags; \
-		if((flags = fcntl(SOCK, F_GETFL, 0)) < 0) return INVALID_SOCKET; \
-		if(fcntl(SOCK, F_SETFL, flags | O_NONBLOCK) < 0) return INVALID_SOCKET;
+		if ((flags = fcntl(SOCK, F_GETFL, 0)) < 0) { \
+			return INVALID_SOCKET; \
+		} \
+		if (fcntl(SOCK, F_SETFL, flags | O_NONBLOCK) < 0) { \
+			return INVALID_SOCKET; \
+		}
 #endif
 
 #ifndef TEMP_FAILURE_RETRY
@@ -102,11 +110,16 @@
 			#define __extension__
 		#endif
 		#define TEMP_FAILURE_RETRY(expression) \
-			(__extension__ ({ long int __result; \
-			while ((__result = (long int) (expression)) == -1L && SockErr == SOCK_EINTR){}; __result; }))
+			(__extension__ ({ \
+			long int __result; \
+			while ((__result = (long int) (expression)) == -1L && SockErr == SOCK_EINTR){ \
+			}; \
+			__result; \
+			}))
 	#else
 		#define TEMP_FAILURE_RETRY(expression) \
-			while ((long int) (expression) == -1L && SockErr == SOCK_EINTR){}
+			while ((long int) (expression) == -1L && SockErr == SOCK_EINTR){ \
+			}
 	#endif
 #endif
 

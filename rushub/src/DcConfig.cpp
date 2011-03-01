@@ -144,7 +144,7 @@ void DcConfig::addVars(Server * server) {
 	Add("bWebServer",           mbWebServer,                  false);
 
 	/* Timeouts of the protocol commands */
-	const char * sTimeoutName[] = {
+	const char * timeoutName[] = {
 		"Key",
 		"Nick",
 		"Login",
@@ -152,7 +152,7 @@ void DcConfig::addVars(Server * server) {
 		"Getpass"
 	};
 
-	double iTimeoutDefault[] = {
+	double timeoutDefault[] = {
 		60.0,
 		30.0,
 		600.0,
@@ -161,10 +161,10 @@ void DcConfig::addVars(Server * server) {
 	};
 
 	for (int i = 0; i < 5; ++i) {
-		miTimeout[i] = iTimeoutDefault[i];
+		miTimeout[i] = timeoutDefault[i];
 		string s("iTimeout");
-		s.append(sTimeoutName[i]);
-		Add(s, miTimeout[i], iTimeoutDefault[i]);
+		s.append(timeoutName[i]);
+		Add(s, miTimeout[i], timeoutDefault[i]);
 	}
 
 	Add("iTimeoutAny",          miTimeoutAny,                 600.);
@@ -264,15 +264,15 @@ DcLang::DcLang(ConfigLoader * configLoader, ConfigListBase * configListBase) :
 	mConfigLoader(configLoader)
 {
 
-	Config * langConfig = configListBase->operator[]("sLang");
-	Config * langPathConfig = configListBase->operator[]("sLangPath");
+	Config * langConfig = configListBase->operator[] ("sLang");
+	Config * langPathConfig = configListBase->operator[] ("sLangPath");
 	if (langConfig && langPathConfig) {
 		string path, lang;
 		langPathConfig->convertTo(path);
 		langConfig->convertTo(lang);
 
 		// set xml file for lang
-		if(Dir::checkPath(path)) {
+		if (Dir::checkPath(path)) {
 			mConfigStore.mPath = path;
 			mConfigStore.mName = lang + ".xml";
 		}
@@ -321,7 +321,7 @@ void DcLang::addVars() {
 	Add("sFloodPing", msFloodPing, string("Ваш клиент слишком часто пингует хаб."));
 	Add("sFloodUnknown", msFloodUnknown, string("Не флудите неизвестными командами."));
 
-	const char *sReason[] = {
+	const char * reason[] = {
 		"получения ключа",
 		"валидации ника",
 		"входа",
@@ -329,7 +329,7 @@ void DcLang::addVars() {
 		"получения пароля"
 	};
 
-	const char *sName[] = {
+	const char * name[] = {
 		"Key",
 		"Nick",
 		"Login",
@@ -337,13 +337,13 @@ void DcLang::addVars() {
 		"Getpass"
 	};
 
-	for(int i = 0; i < 5; ++i) {
+	for (int i = 0; i < 5; ++i) {
 		string s("sTimeout");
-		s.append(sName[i]);
-		Add(s, msTimeoutCmd[i], sReason[i]);
+		s.append(name[i]);
+		Add(s, msTimeoutCmd[i], reason[i]);
 	}
 
-	const char *sUnits[] = {
+	const char * units[] = {
 		"B",
 		"KB",
 		"MB",
@@ -353,7 +353,7 @@ void DcLang::addVars() {
 		"EB"
 	};
 
-	const char *sUnitsDef[] = {
+	const char * unitsDef[] = {
 		"Б",
 		"КБ",
 		"МБ",
@@ -364,13 +364,13 @@ void DcLang::addVars() {
 	};
 
 	for (int i = 0; i < 7; ++i) {
-		msUnits[i] = sUnitsDef[i];
+		msUnits[i] = unitsDef[i];
 		string s("sUnit");
-		s.append(sUnits[i]);
-		Add(s, msUnits[i], sUnitsDef[i]);
+		s.append(units[i]);
+		Add(s, msUnits[i], unitsDef[i]);
 	}
 
-	const char *sTimes[] = {
+	const char * times[] = {
 		"Weeks",
 		"Days",
 		"Hours",
@@ -378,7 +378,7 @@ void DcLang::addVars() {
 		"Sec"
 	};
 
-	const char *sTimesDef[] = {
+	const char * timesDef[] = {
 		"нед.",
 		"дн.",
 		"ч.",
@@ -387,10 +387,10 @@ void DcLang::addVars() {
 	};
 
 	for (int i = 0; i < 5; ++i) {
-		msTimes[i] = sTimesDef[i];
+		msTimes[i] = timesDef[i];
 		string s("sTimes");
-		s.append(sTimes[i]);
-		Add(s, msTimes[i], sTimesDef[i]);
+		s.append(times[i]);
+		Add(s, msTimes[i], timesDef[i]);
 	}
 
 }

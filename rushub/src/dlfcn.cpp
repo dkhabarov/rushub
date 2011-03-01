@@ -26,7 +26,7 @@
 
 static void set_dl_error(void) {
 	DWORD err = GetLastError();
-	if(FormatMessageA(FORMAT_MESSAGE_IGNORE_INSERTS |
+	if (FormatMessageA(FORMAT_MESSAGE_IGNORE_INSERTS |
 		FORMAT_MESSAGE_FROM_SYSTEM,
 		NULL,
 		err,
@@ -34,24 +34,25 @@ static void set_dl_error(void) {
 		last_dyn_error,
 		sizeof(last_dyn_error) - 1,
 		NULL) == 0
-	)
-	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
-		sprintf_s(last_dyn_error, sizeof(last_dyn_error) - 1, "unknown error %lu", err);
-	#else
-		sprintf(last_dyn_error, "unknown error %lu", err);
-	#endif
+	) {
+		#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+			sprintf_s(last_dyn_error, sizeof(last_dyn_error) - 1, "unknown error %lu", err);
+		#else
+			sprintf(last_dyn_error, "unknown error %lu", err);
+		#endif
+	}
 }
 
 char * dlerror(void) {
-	if(last_dyn_error[0])
+	if (last_dyn_error[0]) {
 		return last_dyn_error;
+	}
 	return NULL;
 }
 
-void * dlsym(void *handle, const char *symbol) {
-	void *ptr;
-	ptr = GetProcAddress((HMODULE)handle, symbol);
-	if(!ptr) {
+void * dlsym(void * handle, const char * symbol) {
+	void * ptr = GetProcAddress((HMODULE)handle, symbol);
+	if (!ptr) {
 		set_dl_error();
 		return NULL;
 	}
@@ -59,14 +60,14 @@ void * dlsym(void *handle, const char *symbol) {
 	return ptr;
 }
 
-void * dlopen(const char *path, int) {
+void * dlopen(const char * path, int) {
 	HMODULE h;
 	int prevmode;
 	/* Disable popup error messages when loading DLLs */
 	prevmode = SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX);
 	h = LoadLibraryA(path);
 	SetErrorMode(prevmode);
-	if(!h) {
+	if (!h) {
 		set_dl_error();
 		return NULL;
 	}
@@ -74,8 +75,8 @@ void * dlopen(const char *path, int) {
 	return (void *)h;
 }
 
-int dlclose(void *handle) {
-	if(!FreeLibrary((HMODULE)handle)) {
+int dlclose(void * handle) {
+	if (!FreeLibrary((HMODULE)handle)) {
 		set_dl_error();
 		return 1;
 	}

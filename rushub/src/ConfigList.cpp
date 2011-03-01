@@ -35,55 +35,59 @@ ConfigListBase::ConfigListBase() : Obj("ConfigListBase") {
 
 ConfigListBase::~ConfigListBase() {
 	Hash_t hash;
-	Config *config; /** Pointer on object */
-	for(tVIt it = mKeyList.begin(); it != mKeyList.end(); ++it) {
+	Config * config = NULL; /** Pointer on object */
+	for (tVIt it = mKeyList.begin(); it != mKeyList.end(); ++it) {
 		hash = *it; /** Get hash from vector */
 		config = mList.Find(hash); /** Get object by hash */
 		mList.Remove(hash); /** Del object from list by hash */
 		this->mFactory->Delete(config); /** Del object */
 	}
-	if(mFactory != NULL) delete mFactory;
+	if (mFactory != NULL) {
+		delete mFactory;
+	}
 	mFactory = NULL;
 }
 
 
 
 /** Adding config */
-Config * ConfigListBase::Add(const string &sKey, Config *cbi) {
-	Hash_t hash = mList.mHash(sKey);
-	if(!mList.Add(hash, cbi)) { /** Add */
-		if(Log(1)) {
-			Config *other = mList.Find(hash);
-			LogStream() << "Don't add " << sKey << " because of " << (other ? other->mName.c_str() : "NULL") << endl;
+Config * ConfigListBase::Add(const string & key, Config * config) {
+	Hash_t hash = mList.mHash(key);
+	if (!mList.Add(hash, config)) { /** Add */
+		if (Log(1)) {
+			Config * other = mList.Find(hash);
+			LogStream() << "Don't add " << key << " because of " << (other ? other->mName.c_str() : "NULL") << endl;
 			return NULL;
 		}
 	}
 	mKeyList.push_back(hash); /** Push back of vector */
-	cbi->mName = sKey; /** Record name */
-	return cbi;
+	config->mName = key; /** Record name */
+	return config;
 }
 
 
 
 /** Get config by name */
-Config * ConfigListBase::operator[](const char * sName) {
-	return mList.Find(mList.mHash(sName));
+Config * ConfigListBase::operator[](const char * name) {
+	return mList.Find(mList.mHash(name));
 }
 
 
 
 /** Get config by name */
-Config * ConfigListBase::operator[](const string &sName) {
-	return mList.Find(mList.mHash(sName));
+Config * ConfigListBase::operator[](const string & name) {
+	return mList.Find(mList.mHash(name));
 }
 
 
 
 /** Set new address */
-void ConfigListBase::SetBaseTo(void *new_base) {
-	if(mBase)
-		for(tVIt it = mKeyList.begin(); it != mKeyList.end(); ++it)
-			mList.Find(*it)->mAddress = (void*)(long(mList.Find(*it)->mAddress) + (long(new_base) - long(mBase)));
+void ConfigListBase::SetBaseTo(void * new_base) {
+	if (mBase) {
+		for (tVIt it = mKeyList.begin(); it != mKeyList.end(); ++it) {
+			mList.Find(*it)->mAddress = (void *)(long(mList.Find(*it)->mAddress) + (long(new_base) - long(mBase)));
+		}
+	}
 	mBase = new_base;
 }
 
@@ -91,27 +95,27 @@ void ConfigListBase::SetBaseTo(void *new_base) {
 
 /** Creating and adding configs */
 #define ADDVAL(TYPE) \
-Config * ConfigList::Add(const string &sName, TYPE &Var) { \
-	Config * cbi = this->mFactory->Add(Var); \
-	return this->ConfigListBase::Add(sName, cbi); \
+Config * ConfigList::Add(const string & name, TYPE & var) { \
+	Config * config = this->mFactory->Add(var); \
+	return this->ConfigListBase::Add(name, config); \
 } \
-Config * ConfigList::Add(const string &sName, TYPE &Var, TYPE const &Def) { \
-	Config * cbi = this->Add(sName, Var); \
-	*cbi = Def; \
-	return cbi; \
+Config * ConfigList::Add(const string & name, TYPE & var, TYPE const & def) { \
+	Config * config = this->Add(name, var); \
+	*config = def; \
+	return config; \
 }
 
 
 
 #define ADDPVAL(TYPE) \
-Config * ConfigList::Add(const string &sName, TYPE* &Var) { \
-	Config * cbi = this->mFactory->Add(Var); \
-	return this->ConfigListBase::Add(sName, cbi); \
+Config * ConfigList::Add(const string & name, TYPE* & var) { \
+	Config * config = this->mFactory->Add(var); \
+	return this->ConfigListBase::Add(name, config); \
 } \
-Config * ConfigList::Add(const string &sName, TYPE* &Var, TYPE const &Def) { \
-	Config * cbi = this->Add(sName, Var); \
-	*cbi = &Def; \
-	return cbi; \
+Config * ConfigList::Add(const string & name, TYPE* & var, TYPE const & def) { \
+	Config * config = this->Add(name, var); \
+	*config = &def; \
+	return config; \
 }
 
 
@@ -121,7 +125,7 @@ ADDVAL(TYPE); \
 ADDPVAL(TYPE);
 
 ADDVAL(char);
-ADDVAL(char*);
+ADDVAL(char *);
 ADDVALUES(bool);
 ADDVALUES(int);
 ADDVALUES(double);

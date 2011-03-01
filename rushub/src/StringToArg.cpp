@@ -29,40 +29,66 @@ namespace utils {
 
 int StringToArg::String2Arg(char const * str, int * argc_p, char *** argv_p) {
 	int argc = 0, act = 10, err;
-	char **res = (char **)malloc(sizeof(char *) * 10);
-	char **argv = res;
+	char ** res = (char **)malloc(sizeof(char *) * 10);
+	char ** argv = res;
 	char *scan, *dest;
-	while(isspace((unsigned char)*str)) str++;
+	while (isspace((unsigned char)*str)) {
+		str++;
+	}
 	str = scan = strdup(str);
-	while(true) {
-		while(isspace((unsigned char)*scan)) scan++;
-		if(*scan == '\0')
+	while (true) {
+		while (isspace((unsigned char)*scan)) {
+			scan++;
+		}
+		if (*scan == '\0') {
 			break;
-		if(++argc >= act) {
+		}
+		if (++argc >= act) {
 			act += act / 2;
 			res = (char **) realloc(res, act * sizeof(char *));
 			argv = res + (argc - 1);
 		}
 		*(argv++) = dest = scan;
-		while(true) {
+		while (true) {
 			char ch = *(scan++);
 			switch (ch) {
-			case '\0': goto done;
-			case '\\': *(dest++) = ch;
-				if((*dest = *scan) == '\0') goto done;
-				break;
-			case '\'':
-				err = CopyRawString(&dest, &scan);
-				if (err != 0) goto error_leave;
-				break;
-			case '"':
-				err = CopyCookedString(&dest, &scan);
-				if(err != 0) goto error_leave;
-				break;
-			case ' ': case '\t': case '\n': case '\f':
-			case '\r': case '\v': case '\b': goto token_done;
-			default:
-				*(dest++) = ch;
+
+				case '\0' :
+					goto done;
+
+				case '\\' :
+					*(dest++) = ch;
+					if ((*dest = *scan) == '\0') {
+						goto done;
+					}
+					break;
+
+				case '\'':
+					err = CopyRawString(&dest, &scan);
+					if (err != 0) {
+						goto error_leave;
+					}
+					break;
+
+				case '"':
+					err = CopyCookedString(&dest, &scan);
+					if (err != 0) {
+						goto error_leave;
+					}
+					break;
+
+				case ' ':
+				case '\t':
+				case '\n':
+				case '\f':
+				case '\r':
+				case '\v':
+				case '\b':
+					goto token_done;
+
+				default:
+					*(dest++) = ch;
+
 			}
 		}
 
@@ -74,7 +100,9 @@ done:
 	*argv_p = res;
 	*argc_p = argc;
 	*argv = NULL;
-	if(argc == 0) free((void *)str);
+	if (argc == 0) {
+		free((void *)str);
+	}
 	return 0;
 
 error_leave:
@@ -84,39 +112,65 @@ error_leave:
 }
 
 int StringToArg::CopyRawString(char ** dest, char ** src) {
-	while(true) {
+
+	while (true) {
 		char ch = *((*src)++);
-		switch(ch) {
-			case '\0': return -1;
-			case '\'': *(*dest) = '\0';
+
+		switch (ch) {
+
+			case '\0' :
+				return -1;
+
+			case '\'' :
+				*(*dest) = '\0';
 				return 0;
-			case '\\': ch = *((*src)++);
+
+			case '\\' :
+				ch = *((*src)++);
+
 				switch (ch) {
-					case '\0': return -1;
+
+					case '\0' :
+						return -1;
+
 					default:
 						*((*dest)++) = '\\';
 						break;
-					case '\\':
-					case '\'':
+
+					case '\\' :
+					case '\'' :
 						break;
+
 				}
-			default:
+
+			default :
 				*((*dest)++) = ch;
 				break;
+
 		}
 	}
 }
 
 int StringToArg::CopyCookedString(char ** dest, char ** src) {
-	while(true) {
+
+	while (true) {
 		char ch = *((*src)++);
-		switch(ch) {
-			case '\0': return -1;
-			case '"': *(*dest) = '\0';
+
+		switch (ch) {
+
+			case '\0' :
+				return -1;
+
+			case '"' :
+				*(*dest) = '\0';
 				return 0;
-			default: *((*dest)++) = ch;
+
+			default :
+				*((*dest)++) = ch;
 				break;
+
 		}
+
 	}
 }
 

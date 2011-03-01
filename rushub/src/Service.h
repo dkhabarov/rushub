@@ -20,7 +20,7 @@
 #ifndef SERVICE_H
 #define SERVICE_H
 
-int runHub(int argc, char **argv, bool bService = false);
+int runHub(int argc, char ** argv, bool bService = false);
 
 #ifdef _WIN32
 
@@ -37,7 +37,7 @@ enum {
 };
 
 static const struct {
-	const char* val;
+	const char * val;
 	int id;
 } arg_list[] = {
 	{"-s", eService},
@@ -64,23 +64,28 @@ static const struct {
 static SERVICE_STATUS_HANDLE ssh;
 static SERVICE_STATUS ss;
 
+
+
 class Service : public Obj {
+
 public:
+
 	static Service * mCurService;
 	static bool IsService;
 
 public:
+
 	Service();
 	~Service();
 
 	static void WINAPI CtrlHandler(DWORD dwCtrl);
-	static void WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv);
+	static void WINAPI ServiceMain(DWORD dwArgc, LPTSTR * lpszArgv);
 
-	static int InstallService(char * sName = NULL, const char * sConfPath = NULL);
-	static int UninstallService(char * sName = NULL);
-	static int ServiceStop(char * sName = NULL);
-	static int ServiceStart(char * sName = NULL);
-	static int cli(int argc, char* argv[], string & sConfPath, const string & sExPath);
+	static int InstallService(char * name = NULL, const char * confPath = NULL);
+	static int UninstallService(char * name = NULL);
+	static int ServiceStop(char * name = NULL);
+	static int ServiceStart(char * name = NULL);
+	static int cli(int argc, char* argv[], string & confPath, const string & exPath);
 	static int Start();
 	static int Stop();
 

@@ -46,7 +46,6 @@ class WebProtocol : public Protocol {
 public:
 
 	WebProtocol();
-
 	virtual ~WebProtocol();
 
 	void SetServer(Server *);
@@ -66,7 +65,9 @@ protected:
 
 }; // class WebProtocol
 
+
 }; // namespace protocol
+
 }; // namespace webserver
 
 #endif // WEB_PROTOCOL_H

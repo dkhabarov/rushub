@@ -156,18 +156,21 @@ class DcConnFactory : public ConnFactory {
 
 public:
 
-	DcConnFactory(Protocol *protocol, Server *s);
+	DcConnFactory(Protocol * protocol, Server * server);
 	virtual ~DcConnFactory();
 	virtual Conn * CreateConn(tSocket sock = 0);
 	virtual void DelConn(Conn * &);
 
 }; // DcConnFactory
 
+
+
 class DcConn : public Conn, public DcConnBase {
 
 	friend class protocol::DcProtocol; /** for miSRCounter from DcProtocol::DC_SR */
 
 public:
+
 	unsigned mFeatures;         //< Features
 	string msSupports;          //< Support cmd param
 	string mVersion;           //< DC version
@@ -234,7 +237,7 @@ public:
 
 public:
 
-	DcConn(int type, tSocket sock = 0, Server *s = NULL);
+	DcConn(int type, tSocket sock = 0, Server * server = NULL);
 	virtual ~DcConn();
 
 	//< Sending RAW command to the client
@@ -286,22 +289,43 @@ public:
 	/** Flush sending buffer */
 	virtual void OnFlush();
 
-	inline void SetLSFlag(unsigned int s){mLoginStatus |= s;}               //< Setting entry status flag
-	inline void ReSetLSFlag(unsigned int s){mLoginStatus = s;}              //< Reset flag
-	inline unsigned int GetLSFlag(unsigned int s){return mLoginStatus & s;} //< Get flag
+	//< Setting entry status flag
+	inline void SetLSFlag(unsigned int s) {
+		mLoginStatus |= s;
+	}
+	
+	//< Reset flag
+	inline void ReSetLSFlag(unsigned int s) {
+		mLoginStatus = s;
+	}
+	
+	//< Get flag
+	inline unsigned int GetLSFlag(unsigned int s) {
+		return mLoginStatus & s;
+	}
 
-	void SetTimeOut(HubTimeOut, double Sec, Time &now); //< Set timeout
-	void ClearTimeOut(HubTimeOut); //< Clear timeout
-	int CheckTimeOut(HubTimeOut t, Time &now); // Check timeout
+	//< Set timeout
+	void SetTimeOut(HubTimeOut, double Sec, Time & now);
+	
+	//< Clear timeout
+	void ClearTimeOut(HubTimeOut);
+	
+	// Check timeout
+	int CheckTimeOut(HubTimeOut t, Time & now);
 
-	virtual int onTimer(Time &now); //< Timer for current connection
+	//< Timer for current connection
+	virtual int onTimer(Time & now);
 
 	virtual void CloseNow(int iReason = 0);
 	virtual void CloseNice(int msec, int iReason = 0);
 
 	/** Pointer to the server */
-	inline DcServer * server(){ return (DcServer*) mServer; }
-	bool SetUser(DcUser * User); /** Set user object for current connection */
+	inline DcServer * server() {
+		return (DcServer *) mServer;
+	}
+	
+	/** Set user object for current connection */
+	bool SetUser(DcUser * User);
 
 protected:
 

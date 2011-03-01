@@ -24,19 +24,43 @@
 #include "Cli.h"
 #include "Server.h"
 
+
+
 Cli::Cli() : bDaemon(false), bSyslog(false) {
 }
+
+
 
 Cli::~Cli() {
 }
 
+
+
+bool Cli::getDaemon() const {
+	return bDaemon;
+}
+
+
+
+bool Cli::getSyslog() const {
+	return bSyslog;
+}
+
+
+
+const string & Cli::getMainDir() const {
+	return sMainDir;
+}
+
+
+
 /** Code to parce cli arguments */
-void Cli::detectArgs(int argc, char **argv) {
+void Cli::detectArgs(int argc, char ** argv) {
 
 	int next_option;
 
 	/** Define arguments */
-	const char* short_options = "hc:sc:c:vc:dc";
+	const char * short_options = "hc:sc:c:vc:dc";
 	struct option long_options[] = {
 		{ "help",			0, NULL, 'h' },
 		{ "daemon",		0, NULL, 'd' },
@@ -49,45 +73,55 @@ void Cli::detectArgs(int argc, char **argv) {
 	/** Detect arguments */
 	do {
 		next_option = getopt_long(argc, argv, short_options, long_options, NULL);
-		switch(next_option) {
-			case 'h':
+		switch (next_option) {
+			case 'h' :
 				printUsage(stdout, EXIT_SUCCESS);
 				break;
-			case 'c':
+
+			case 'c' :
 				sMainDir.clear();
 				sMainDir = optarg;
 				break;
-			case 's':
+
+			case 's' :
 				Obj::mbSysLogOn = true;
 				break;
-			case '?':
+
+			case '?' :
 				printUsage(stdout, EXIT_SUCCESS);
 				break;
+
 			case -1 :
 				break;
-			case 'd':
+
+			case 'd' :
 				bDaemon = true;
 				break;
-			case 'v':
+
+			case 'v' :
 				printVersion(stdout, EXIT_SUCCESS);
 				break;
+
 			default :
 				exit(EXIT_SUCCESS);
+
 		}
-	} while(next_option != -1);
+	} while (next_option != -1);
 }
 
+
+
 /** Code for demonization */
-pid_t Cli::demonizeServer(string sDir) {
+pid_t Cli::demonizeServer(string mainDir) {
 
 	/** Create new process */
 	pid_t pid;
 
-	if(bDaemon) {
+	if (bDaemon) {
 		pid = fork();
 
 		/** Checking pid creation */
-		if(pid < 0) {
+		if (pid < 0) {
 			fprintf(stderr, "Cannot create process %s\n", strerror(errno));
 			exit(EXIT_FAILURE);
 		}
@@ -96,19 +130,19 @@ pid_t Cli::demonizeServer(string sDir) {
 		setsid();
 
 		/** Closing parent process */
-		if(pid > 0) {
+		if (pid > 0) {
 			fprintf(stdout, "Process created with PID: %d\n", pid);
 			exit(EXIT_SUCCESS);
 		}
 
 		/** Checking directory */
-		if((chdir(sDir.c_str())) < 0) {
-			fprintf(stderr, "Can not go to the work directory %s. Error: %s\n", sDir.c_str(), strerror(errno));
+		if ((chdir(mainDir.c_str())) < 0) {
+			fprintf(stderr, "Can not go to the work directory %s. Error: %s\n", mainDir.c_str(), strerror(errno));
 			exit(EXIT_FAILURE);
 		}
 
 		/** Reopen standart streams */
-		if(freopen("/dev/null", "r", stdin) == NULL || freopen("/dev/null", "w", stdout) == NULL || freopen("/dev/null", "w", stderr) == NULL) {
+		if (freopen("/dev/null", "r", stdin) == NULL || freopen("/dev/null", "w", stdout) == NULL || freopen("/dev/null", "w", stderr) == NULL) {
 			fprintf(stderr, "Unable to detach from terminal\n");
 			exit(EXIT_FAILURE);
 		}
@@ -116,14 +150,19 @@ pid_t Cli::demonizeServer(string sDir) {
 	return pid;
 }
 
-void Cli::printUsage(FILE *stream, int exitStatus) {
+
+
+void Cli::printUsage(FILE * stream, int exitStatus) {
 	fprintf(stream, "This is help for Rushub.\n\t-h,\t-help\t Show this text\n\t-v,\t-version Show application version\n\t-d,\t-daemon\t Run application in daemon-mode\n\t-c,\t-config\t Setup config directory\n\t-s,\t-syslog\t Use syslog facility for logging\n");
 	exit(exitStatus);
 }
 
-void Cli::printVersion(FILE *stream, int exitStatus) {
+
+
+void Cli::printVersion(FILE * stream, int exitStatus) {
 	fprintf(stream, "You running  " INTERNALNAME " " INTERNALVERSION ".\nType -help (-h) to see more arguments.\n");
 	exit(exitStatus);
 }
+
 
 #endif // _WIN32

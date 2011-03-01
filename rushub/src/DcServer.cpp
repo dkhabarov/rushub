@@ -368,7 +368,7 @@ int DcServer::onTimer(Time & now) {
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if(mCalls.mOnTimer.CallAll()) {
+		if (mCalls.mOnTimer.CallAll()) {
 			return 1;
 		}
 	#endif
@@ -667,7 +667,7 @@ bool DcServer::CheckNickLength(DcConn * dcconn, const unsigned iLen) {
 	if (dcconn->miProfile == -1 && (iLen > mDcConfig.miMaxNickLen || iLen < mDcConfig.miMinNickLen)) {
 		string sMsg;
 
-		if(dcconn->Log(2)) {
+		if (dcconn->Log(2)) {
 			dcconn->LogStream() << "Bad nick len: " 
 				<< iLen << " (" << dcconn->mDCUser->msNick 
 				<< ") [" << mDcConfig.miMinNickLen << ", " 
@@ -777,7 +777,7 @@ void DcServer::DoUserEnter(DcConn * dcconn) {
 		return;
 	}
 
-	if(!CheckNick(dcconn)) {
+	if (!CheckNick(dcconn)) {
 		dcconn->CloseNice(9000, CLOSE_REASON_INVALID_NICK);
 		return;
 	}
@@ -785,14 +785,14 @@ void DcServer::DoUserEnter(DcConn * dcconn) {
 	UserKey key = mDCUserList.Nick2Key(dcconn->mDCUser->msNick);
 
 	/** User is already considered came */
-	if(mEnterList.ContainsKey(key)) {
+	if (mEnterList.ContainsKey(key)) {
 		/** We send user contents of cache without clear this cache */
 		mEnterList.FlushForUser(dcconn->mDCUser);
 		mEnterList.RemoveByKey(key);
 	}
 
 	/** Adding user to the user list */
-	if(!AddToUserList((DcUser *)dcconn->mDCUser)) {
+	if (!AddToUserList((DcUser *)dcconn->mDCUser)) {
 		dcconn->CloseNow(CLOSE_REASON_ADD_USER);
 		return;
 	}
@@ -810,39 +810,61 @@ void DcServer::DoUserEnter(DcConn * dcconn) {
 
 /** Adding user in the user list */
 bool DcServer::AddToUserList(DcUser * User) {
-	if(!User) {
-		if(ErrLog(1)) LogStream() << "Adding a NULL user to userlist" << endl;
+	if (!User) {
+		if (ErrLog(1)) {
+			LogStream() << "Adding a NULL user to userlist" << endl;
+		}
 		return false;
 	}
-	if(User->mbInUserList) {
-		if(ErrLog(2)) LogStream() << "User is already in the user list" << endl;
+	if (User->mbInUserList) {
+		if (ErrLog(2)) {
+			LogStream() << "User is already in the user list" << endl;
+		}
 		return false;
 	}
 
 	UserKey key = mDCUserList.Nick2Key(User->msNick);
 
-	if(mDCUserList.Log(4)) mDCUserList.LogStream() << "Before add: " << User->msNick << " Size: " << mDCUserList.Size() << endl;
+	if (mDCUserList.Log(4)) {
+		mDCUserList.LogStream() << "Before add: " << User->msNick << " Size: " << mDCUserList.Size() << endl;
+	}
 
-	if(!mDCUserList.AddWithKey(key, User)) {
-		if(Log(1)) LogStream() << "Adding twice user with same nick " << User->msNick << " (" << mDCUserList.Find(key)->Nick() << ")" << endl;
+	if (!mDCUserList.AddWithKey(key, User)) {
+		if (Log(1)) {
+			LogStream() << "Adding twice user with same nick " << User->msNick << " (" << mDCUserList.Find(key)->Nick() << ")" << endl;
+		}
 		User->mbInUserList = false;
 		return false;
 	}
 
-	if(mDCUserList.Log(4)) mDCUserList.LogStream() << "After add: " << User->msNick << " Size: " << mDCUserList.Size() << endl;
+	if (mDCUserList.Log(4)) {
+		mDCUserList.LogStream() << "After add: " << User->msNick << " Size: " << mDCUserList.Size() << endl;
+	}
 
 	User->mbInUserList = true;
-	if(!User->IsPassive()) mActiveList.AddWithKey(key, User);
-	if(User->mbInOpList) mOpList.AddWithKey(key, User);
-	if(User->mbInIpList) mIpList.AddWithKey(key, User);
+	if (!User->IsPassive()) {
+		mActiveList.AddWithKey(key, User);
+	}
+	if (User->mbInOpList) {
+		mOpList.AddWithKey(key, User);
+	}
+	if (User->mbInIpList) {
+		mIpList.AddWithKey(key, User);
+	}
 
-	if(User->mDCConn) {
+	if (User->mDCConn) {
 		User->mDCConn->mbIpRecv = true; /** Installing the permit on reception of the messages on ip */
 		mChatList.AddWithKey(key, User);
 
-		if(!(User->mDCConn->mFeatures & SUPPORT_FEATUER_NOHELLO)) mHelloList.AddWithKey(key, User);
-		if(User->mDCConn->Log(3)) User->mDCConn->LogStream() << "Adding at the end of Nicklist" << endl;
-		if(User->mDCConn->Log(3)) User->mDCConn->LogStream() << "Becomes in list" << endl;
+		if (!(User->mDCConn->mFeatures & SUPPORT_FEATUER_NOHELLO)) {
+			mHelloList.AddWithKey(key, User);
+		}
+		if (User->mDCConn->Log(3)) {
+			User->mDCConn->LogStream() << "Adding at the end of Nicklist" << endl;
+		}
+		if (User->mDCConn->Log(3)) {
+			User->mDCConn->LogStream() << "Becomes in list" << endl;
+		}
 	}
 	return true;
 }
@@ -852,23 +874,30 @@ bool DcServer::AddToUserList(DcUser * User) {
 /** Removing user from the user list */
 bool DcServer::RemoveFromDCUserList(DcUser *User) {
 	UserKey key = mDCUserList.Nick2Key(User->msNick);
-	if(mDCUserList.Log(4)) mDCUserList.LogStream() << "Before leave: " << User->msNick << " Size: " << mDCUserList.Size() << endl;
-	if(mDCUserList.ContainsKey(key)) {
+	if (mDCUserList.Log(4)) {
+		mDCUserList.LogStream() << "Before leave: " << User->msNick << " Size: " << mDCUserList.Size() << endl;
+	}
+	if (mDCUserList.ContainsKey(key)) {
 		#ifndef WITHOUT_PLUGINS
-			if(User->mDCConn) mCalls.mOnUserExit.CallAll(User->mDCConn);
+			if (User->mDCConn) {
+				mCalls.mOnUserExit.CallAll(User->mDCConn);
+			}
 		#endif
 
 		/** We make sure that user with such nick one! */
 		DcUser *other = (DcUser *)mDCUserList.GetUserBaseByNick(User->msNick);
-		if(!User->mDCConn) {/** Removing the bot */
+		if (!User->mDCConn) { /** Removing the bot */
 			mDCUserList.RemoveByKey(key);
-		}
-		else if(other && other->mDCConn && User->mDCConn && other->mDCConn == User->mDCConn) {
+		} else if (other && other->mDCConn && User->mDCConn && other->mDCConn == User->mDCConn) {
 			mDCUserList.RemoveByKey(key);
-			if(mDCUserList.Log(4)) mDCUserList.LogStream() << "After leave: " << User->msNick << " Size: " << mDCUserList.Size() << endl;
+			if (mDCUserList.Log(4)) {
+				mDCUserList.LogStream() << "After leave: " << User->msNick << " Size: " << mDCUserList.Size() << endl;
+			}
 		} else {
 			/** Such can happen only for users without connection or with different connection */
-			if(User->ErrLog(1)) User->LogStream() << "Not found the correct user for nick: " << User->msNick << endl;
+			if (User->ErrLog(1)) {
+				User->LogStream() << "Not found the correct user for nick: " << User->msNick << endl;
+			}
 			return false;
 		}
 	}
@@ -882,10 +911,10 @@ bool DcServer::RemoveFromDCUserList(DcUser *User) {
 	mActiveList.RemoveByKey(key);
 	mDCBotList.RemoveByKey(key);
 
-	if(User->mbInUserList) {
+	if (User->mbInUserList) {
 		User->mbInUserList = false;
 
-		if(!User->getHide()) {
+		if (!User->getHide()) {
 			string sMsg;
 			DcProtocol::Append_DC_Quit(sMsg, User->msNick);
 
@@ -966,7 +995,7 @@ bool DcServer::ShowUserToAll(DcUser *User) {
 
 
 void DcServer::AfterUserEnter(DcConn *dcconn) {
-	if(dcconn->Log(3)) {
+	if (dcconn->Log(3)) {
 		dcconn->LogStream() << "Entered the hub." << endl;
 	}
 	#ifndef WITHOUT_PLUGINS
@@ -999,7 +1028,7 @@ DcUser * DcServer::GetDCUser(const char *sNick) {
 
 DcUserBase * DcServer::getDcUserBase(const char *sNick) {
 	DcUser * User = GetDCUser(sNick);
-	if(User) {
+	if (User) {
 		return (DcUserBase *)User;
 	}
 	return NULL;
@@ -1445,7 +1474,7 @@ int DcServer::unregBot(const string & sNick) {
 		return -1;
 	}
 	if (User->mDCConn) {
-		if(Log(3)) {
+		if (Log(3)) {
 			LogStream() << "Attempt delete user" << endl;
 		}
 		return -2;

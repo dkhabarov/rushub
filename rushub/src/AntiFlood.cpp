@@ -21,12 +21,15 @@
 
 #include <math.h>
 
+
 namespace utils {
 
-void AntiFlood::Del(Time &now) {
-	if(mList) {
-		List_t *Item = NULL;
-		if(mList->mData && double(now - mList->mData->mTime) > mTime) {
+
+
+void AntiFlood::Del(Time & now) {
+	if (mList) {
+		List_t * Item = NULL;
+		if (mList->mData && double(now - mList->mData->mTime) > mTime) {
 			sItem * Data = mList->Remove(mList->mKey, Item);
 			delete Data;
 			delete mList;
@@ -34,10 +37,10 @@ void AntiFlood::Del(Time &now) {
 			Del(now);
 		} else {
 			List_t * list = mList;
-			while(list->mNext) {
+			while (list->mNext) {
 				Item = list;
 				list = list->mNext;
-				if(list->mData && double(now - list->mData->mTime) > mTime) {
+				if (list->mData && double(now - list->mData->mTime) > mTime) {
 					sItem * Data = mList->Remove(list->mKey, Item);
 					delete Data;
 					list = Item;
@@ -47,22 +50,27 @@ void AntiFlood::Del(Time &now) {
 	}
 }
 
+
+
 bool AntiFlood::Check(HashType_t hash, Time now) {
-	sItem * Item;
-	if(!mList) {
+	sItem * Item = NULL;
+	if (!mList) {
 		Item = new sItem();
 		mList = new List_t(hash, Item);
 		return false;
 	}
+
 	Item = mList->Find(hash);
-	if(!Item) {
+	if (!Item) {
 		Item = new sItem();
 		mList->Add(hash, Item);
 		return false;
 	}
-	if(Item->miCount < miCount) ++Item->miCount;
-	else {
-		if(::fabs(double(now - Item->mTime)) < mTime) {
+
+	if (Item->miCount < miCount) {
+		++Item->miCount;
+	} else {
+		if (::fabs(double(now - Item->mTime)) < mTime) {
 			Item->mTime = now;
 			Item->miCount = 0;
 			return true;
@@ -72,5 +80,6 @@ bool AntiFlood::Check(HashType_t hash, Time now) {
 	}
 	return false;
 }
+
 
 }; // namespace utils

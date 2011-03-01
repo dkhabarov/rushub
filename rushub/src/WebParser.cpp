@@ -20,6 +20,7 @@
 #include "WebParser.h"
 
 namespace webserver {
+
 namespace protocol {
 
 
@@ -51,4 +52,5 @@ bool WebParser::SplitChunks() {
 }
 
 }; // namespace protocol
+
 }; // namespace webserver

@@ -29,42 +29,74 @@
 
 namespace utils {
 
+
+
 /** Controller with minimum and maximum delay */
 class TimeOut {
 
-private:
-	Time mMinDelay; /** Minimum delay between events */
-	Time mMaxDelay; /** Maximum delay between events */
-	Time mLast; /** Time of the last event */
-
 public: 
-	TimeOut() : mMinDelay(0l), mMaxDelay(0l), mLast(0l) {}
-	TimeOut(double iMin, double iMax, const Time &now) : mMinDelay(iMin), mMaxDelay(iMax), mLast(now) {}
-	~TimeOut() {}
 
-	inline void SetMinDelay(double iMin) { mMinDelay = iMin; }
-	inline void SetMaxDelay(double iMax) { mMaxDelay = iMax; }
+	TimeOut() : mMinDelay(0l), mMaxDelay(0l), mLast(0l) {
+	}
+
+	TimeOut(double min, double max, const Time & now) : mMinDelay(min), mMaxDelay(max), mLast(now) {
+	}
+
+	~TimeOut() {
+	}
+
+	inline void SetMinDelay(double min) {
+		mMinDelay = min;
+	}
+
+	inline void SetMaxDelay(double max) {
+		mMaxDelay = max;
+	}
 
 	/** Set time of the last event */
-	inline void Reset(const Time & now) { mLast = now; }
-	inline void Disable() { mLast = 0.; }
+	inline void Reset(const Time & now) {
+		mLast = now;
+	}
+
+	inline void Disable() {
+		mLast = 0.;
+	}
 
 	/** Check enent
 	0 - ok (event is absent or in interval);
 	-1 - event not in interval (< min);
 	-2 - event was beyond the scope of interval (> max).
-	Flag bEvent checks lower verge and reset timer */
-	int Check(const Time &now, bool bEvent = 0) {
-		if(!bool(mLast)) return 0;
+	Flag event checks lower verge and reset timer */
+	int Check(const Time & now, bool event = false) {
+		if (!bool(mLast)) {
+			return 0;
+		}
 		Time diff(now);
 		diff -= mLast;
-		if(bEvent && (bool)mMinDelay && (mMinDelay > diff)) return -1;
-		if(bool(mMaxDelay) && (mMaxDelay < diff)) return -2;
-		if(bEvent) Reset(now);
+		if (event && (bool)mMinDelay && (mMinDelay > diff)) {
+			return -1;
+		}
+		if (bool(mMaxDelay) && (mMaxDelay < diff)) {
+			return -2;
+		}
+		if (event) {
+			Reset(now);
+		}
 		return 0;
 	}
 
-}; // TimeOut
+private:
+
+	/** Minimum delay between events */
+	Time mMinDelay;
+
+	/** Maximum delay between events */
+	Time mMaxDelay;
+
+	/** Time of the last event */
+	Time mLast;
+
+}; // class TimeOut
 
 }; // namespace utils
 

@@ -36,24 +36,33 @@ public:
 	struct sItem {
 		Time mTime;
 		unsigned miCount;
-		sItem() : miCount(0) {}
+		sItem() : miCount(0) {
+		}
 	};
 
 	typedef unsigned long HashType_t;
-	typedef List<HashType_t, sItem*> List_t;
+	typedef List<HashType_t, sItem *> List_t;
 	List_t * mList;
 
 private:
+
 	unsigned & miCount;
 	double & mTime;
 
 public:
 
-	AntiFlood(unsigned &iCount, double & time) : mList(NULL), miCount(iCount), mTime(time) {}
-	~AntiFlood(){}
-	AntiFlood & operator=(const AntiFlood &) { return *this; }
+	AntiFlood(unsigned & iCount, double & time) : mList(NULL), miCount(iCount), mTime(time) {
+	}
+
+	~AntiFlood(){
+	}
+
+	AntiFlood & operator = (const AntiFlood &) {
+		return *this;
+	}
+
 	bool Check(HashType_t hash, Time now);
-	void Del(Time &now);
+	void Del(Time & now);
 
 }; // AntiFlood
 

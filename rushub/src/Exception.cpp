@@ -34,23 +34,39 @@
 int Exception::recursion = 0;
 bool Exception::first = true;
 
+
+
+Exception::Exception() {
+}
+
+
+
+Exception::~Exception() {
+}
+
+
+
 long __stdcall Exception::ExceptionFilter(LPEXCEPTION_POINTERS e) {
 
-	if(++recursion > MAX_RECURSIONS) exit(-1);
+	if (++recursion > MAX_RECURSIONS) {
+		exit(-1);
+	}
 
 	string path;
 	char sBuf[MAX_PATH+1] = { '\0' };
 	::GetModuleFileName(NULL, sBuf, MAX_PATH);
 	char * sExPath = sBuf;
 	char * sSlash = strrchr(sExPath, '\\');
-	if(sSlash) path = string(sExPath, sSlash - sExPath);
+	if (sSlash) {
+		path = string(sExPath, sSlash - sExPath);
+	}
 
 	// Loads dll and pdb
 	#ifndef _DEBUG
 		Init(path.c_str());
 	#endif
 
-	if(first) {
+	if (first) {
 		ofstream f;
 		f.open(FILE_NAME);
 		f.close();
@@ -76,7 +92,7 @@ long __stdcall Exception::ExceptionFilter(LPEXCEPTION_POINTERS e) {
 		<< "Time: " << tm << endl << endl;
 
 	WIN32_FIND_DATA fd;
-	if(FindFirstFile(path.append("\\rushub.pdb").c_str(), &fd) == INVALID_HANDLE_VALUE) {
+	if (FindFirstFile(path.append("\\rushub.pdb").c_str(), &fd) == INVALID_HANDLE_VALUE) {
 		#ifndef _DEBUG
 			f << "Debug symbols was not found" << endl;
 			f.close();
@@ -105,22 +121,22 @@ int Exception::Init(const char * path) {
 
 	char buf[BUFFERSIZE] = { '\0' };
 	string symbolPath(".");
-	if(GetEnvironmentVariableA("_NT_SYMBOL_PATH", buf, BUFFERSIZE)) {
+	if (GetEnvironmentVariableA("_NT_SYMBOL_PATH", buf, BUFFERSIZE)) {
 		symbolPath.append(";", 1);
 		symbolPath.append(buf);
 	}
-	if(GetEnvironmentVariableA("_NT_ALTERNATE_SYMBOL_PATH", buf, BUFFERSIZE)) {
+	if (GetEnvironmentVariableA("_NT_ALTERNATE_SYMBOL_PATH", buf, BUFFERSIZE)) {
 		symbolPath.append(";", 1);
 		symbolPath.append(buf);
 	}
-	if(GetEnvironmentVariableA( "SYSTEMROOT", buf, BUFFERSIZE)) {
+	if (GetEnvironmentVariableA( "SYSTEMROOT", buf, BUFFERSIZE)) {
 		symbolPath.append(";", 1);
 		symbolPath.append(buf);
 		symbolPath.append(";", 1);
 		symbolPath.append(buf);
 		symbolPath.append("\\System32");
 	}
-	if(path != NULL && path[0] != '\0') {
+	if (path != NULL && path[0] != '\0') {
 		symbolPath.append(";", 1);
 		symbolPath.append(path);
 	}
@@ -143,7 +159,7 @@ int Exception::GetFunctionInfo(unsigned long functionAddress, unsigned long stac
 
 	strcpy(buff, "?");
 
-	if(SymFromAddr(GetCurrentProcess(), (unsigned long)functionAddress, &disp, pSym)) {
+	if (SymFromAddr(GetCurrentProcess(), (unsigned long)functionAddress, &disp, pSym)) {
 
 		char buf[BUFFERSIZE] = "?";
 		char * pbuf = buf;
@@ -158,30 +174,33 @@ int Exception::GetFunctionInfo(unsigned long functionAddress, unsigned long stac
 			UNDNAME_NO_ACCESS_SPECIFIERS
 		);
 
-		if(strcmp(buf, "_WinMain@16") == 0)
+		if (strcmp(buf, "_WinMain@16") == 0) {
 			strcpy(buf, "WinMain(HINSTANCE,HINSTANCE,LPCTSTR,int)");
-		else if(strcmp(buf, "main") == 0 || strcmp(buf, "_main") == 0 )
+		} else if (strcmp(buf, "main") == 0 || strcmp(buf, "_main") == 0 ) {
 			strcpy(buf, "main(int,char**)");
-		else if(strcmp(buf, "_mainCRTStartup") == 0)
+		} else if (strcmp(buf, "_mainCRTStartup") == 0) {
 			strcpy(buf, "mainCRTStartup()");
-		else if(strcmp(buf, "_wmain") == 0)
+		} else if (strcmp(buf, "_wmain") == 0) {
 			strcpy(buf, "wmain(int,char**,char**)");
-		else if(strcmp(buf, "_wmainCRTStartup") == 0)
+		} else if (strcmp(buf, "_wmainCRTStartup") == 0) {
 			strcpy(buf, "wmainCRTStartup()");
+		}
 		buff[0] = '\0';
 
-		if(strstr(buf, "(void)") == NULL && strstr(buf, "()") == NULL) {
+		if (strstr(buf, "(void)") == NULL && strstr(buf, "()") == NULL) {
 			unsigned long i = 0;
-			for(; ; ++i) {
+			for (; ; ++i) {
 				pSep = strchr(pbuf, ',');
-				if(pSep == NULL) break;
+				if (pSep == NULL) {
+					break;
+				}
 				*pSep = '\0';
 				strcat(buff, pbuf);
 				sprintf(buff + strlen(buff), " = 0x%08lX,", *((unsigned long*)(stackAddress) + 2 + i));
 				pbuf = pSep + 1;
 			}
 			pSep = strchr(pbuf, ')');
-			if(pSep != NULL) {
+			if (pSep != NULL) {
 				*pSep = '\0';
 				strcat(buff, pbuf);
 				sprintf(buff + strlen(buff), " = 0x%08lX)", *((unsigned long*)(stackAddress) + 2 + i));
@@ -201,7 +220,7 @@ int Exception::GetModuleName(unsigned address, char * buff) {
 	IMAGEHLP_MODULE moduleInfo;
 	::ZeroMemory(&moduleInfo, sizeof(moduleInfo));
 	moduleInfo.SizeOfStruct = sizeof(moduleInfo);
-	if(SymGetModuleInfo(GetCurrentProcess(), (unsigned long)address, &moduleInfo)) {
+	if (SymGetModuleInfo(GetCurrentProcess(), (unsigned long)address, &moduleInfo)) {
 		strcpy(buff, moduleInfo.ModuleName);
 		return 1;
 	}
@@ -221,17 +240,18 @@ int Exception::GetSourceInfo(unsigned address, char * buff) {
 	lineInfo.SizeOfStruct = sizeof(lineInfo);
 	strcpy(buff, "?(?)");
 
-	if(SymGetLineFromAddr(GetCurrentProcess(), address, &disp, &lineInfo)) {
+	if (SymGetLineFromAddr(GetCurrentProcess(), address, &disp, &lineInfo)) {
 		strcpy(fileName, lineInfo.FileName);
 		sprintf(buff, "%s(%d)", fileName, lineInfo.LineNumber);
 		return 1;
 	}
 
 	GetModuleName(address, moduleInfo);
-	if(moduleInfo[0] == '?' || moduleInfo[0] == '\0')
+	if (moduleInfo[0] == '?' || moduleInfo[0] == '\0') {
 		sprintf(buff, "0x%08X", address);
-	else
+	} else {
 		sprintf(buff, "%s|0x%08X", moduleInfo, address);
+	}
 	return 0;
 }
 
@@ -246,7 +266,7 @@ void Exception::StackTrace(void * hThread, char * msg, std::ostream & f, unsigne
 	void * hProcess = GetCurrentProcess();
 	STACKFRAME callStack;
 
-	if(hThread != GetCurrentThread() && SuspendThread(hThread) == -1) {
+	if (hThread != GetCurrentThread() && SuspendThread(hThread) == -1) {
 		f << "No call stack" << endl;
 		return;
 	}
@@ -266,7 +286,7 @@ void Exception::StackTrace(void * hThread, char * msg, std::ostream & f, unsigne
 
 	f << srcInfo << ": " << symInfo << endl;
 
-	for(unsigned long i = 0; i < 1000; ++i) {
+	for (unsigned long i = 0; i < 1000; ++i) {
 		bResult = StackWalk(
 			IMAGE_FILE_MACHINE_I386,
 			hProcess,
@@ -278,15 +298,21 @@ void Exception::StackTrace(void * hThread, char * msg, std::ostream & f, unsigne
 			SymGetModuleBase,
 			NULL);
 
-		if(i == 0) continue;
-		if(!bResult || callStack.AddrFrame.Offset == 0) break;
+		if (i == 0) {
+			continue;
+		}
+		if (!bResult || callStack.AddrFrame.Offset == 0) {
+			break;
+		}
 
 		GetFunctionInfo(callStack.AddrPC.Offset, callStack.AddrFrame.Offset, symInfo);
 		GetSourceInfo(callStack.AddrPC.Offset, srcInfo);
 
 		f << srcInfo << ": " << symInfo << endl;
 	}
-	if(hThread != GetCurrentThread()) ResumeThread(hThread);
+	if (hThread != GetCurrentThread()) {
+		ResumeThread(hThread);
+	}
 }
 
 #endif // _WIN32

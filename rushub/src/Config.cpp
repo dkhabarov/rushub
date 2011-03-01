@@ -194,7 +194,8 @@ READFROMSTREAM(PInt64);
 
 /** Write in stream */
 #define WRITETOSTREAM(SUFFIX) \
-ostream & Config##SUFFIX::writeToStream(ostream & os) { string str; \
+ostream & Config##SUFFIX::writeToStream(ostream & os) { \
+	string str; \
 	this->convertTo(str); \
 	os << str; \
 	return os; \

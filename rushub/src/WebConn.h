@@ -34,13 +34,10 @@ class WebConnFactory : public ConnFactory {
 public:
 
 	WebConnFactory(Protocol *, Server *, string separator, int max);
-
 	virtual ~WebConnFactory();
 
 	Conn * CreateConn(tSocket sock = 0);
-
 	void DelConn(Conn * &);
-
 	void OnNewData(Conn *, string *);
 
 }; // class WebConnFactory
@@ -52,11 +49,9 @@ class WebListenFactory : public ListenFactory {
 public:
 
 	WebListenFactory(Server *);
-
 	virtual ~WebListenFactory();
 
 	ConnFactory * connFactory();
-
 	int OnNewConn(Conn *);
 
 protected:
@@ -72,7 +67,6 @@ class WebConn : public DcConn {
 public:
 
 	WebConn(tSocket sock = 0, Server * server = NULL);
-
 	virtual ~WebConn();
 
 	/** Timer of the connection */

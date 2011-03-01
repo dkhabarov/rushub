@@ -75,8 +75,9 @@ int DcConfigLoader::loadFromXml(ConfigListBase * configListBase, const char * fi
 
 	TiXmlHandle MainHandle(&file);
 	TiXmlElement * mainItem = MainHandle.FirstChild(INTERNALNAME).Element();
-	if (mainItem == NULL)
+	if (mainItem == NULL) {
 		return -2;
+	}
 
 	/** Check version */
 	const char * version;

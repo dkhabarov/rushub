@@ -42,6 +42,8 @@ namespace dcserver {
 class DcConn;
 class DcServer; /** for mDcServer */
 
+
+
 /** Extended class of the user */
 class DcUser : public Obj, public DcUserBase, public UserBase {
 
@@ -64,35 +66,71 @@ public:
 public:
 
 	DcUser();
-	DcUser(const string & sNick);
+	DcUser(const string & nick);
 	virtual ~DcUser();
 
 	bool CanSend();
-	void send(const string & sData, bool bAddSep = false, bool bFlush = true);
-	const string & getIp() const { return msIp; } /** Get IP address of user */
-	const string & getNick() const { return msNick; } /** Get nick (for plugins) */
-	const string & Nick() const { return msNick; }
-	const string & MyINFO() const { return myInfo.getMyInfo(); }
-	bool getInUserList() const { return mbInUserList; } /** (for plugins) */
-	bool getInOpList() const { return mbInOpList; } /** (for plugins) */
-	bool getInIpList() const { return mbInIpList; } /** (for plugins) */
-	bool getHide() const { return mbHide; } /** (for plugins) */
-	bool Hide() const { return mbHide; }
-	bool getForceMove() const { return mbForceMove; } /** (for plugins) */
-	bool getKick() const { return mbKick; } /** (for plugins) */
-	int getProfile() const;
-	void SetIp(const string & sIP);
+	void send(const string & data, bool addSep = false, bool flush = true);
 
-	void setInOpList(bool inOpList); /** (for plugins) */
-	void setInIpList(bool inIpList); /** (for plugins) */
-	void setHide(bool hide); /** (for plugins) */
-	void setForceMove(bool forceMove); /** (for plugins) */
-	void setKick(bool kick); /** (for plugins) */
+	/** Get IP address of user */
+	const string & getIp() const {
+		return msIp;
+	}
+
+	/** Get nick (for plugins) */
+	const string & getNick() const {
+		return msNick;
+	}
+
+	const string & Nick() const {
+		return msNick;
+	}
+	
+	const string & MyINFO() const {
+		return myInfo.getMyInfo();
+	}
+	
+	bool getInUserList() const {
+		return mbInUserList;
+	}
+
+	bool getInOpList() const {
+		return mbInOpList;
+	}
+
+	bool getInIpList() const {
+		return mbInIpList;
+	}
+
+	bool getHide() const {
+		return mbHide;
+	}
+
+	bool Hide() const {
+		return mbHide;
+	}
+
+	bool getForceMove() const {
+		return mbForceMove;
+	}
+
+	bool getKick() const {
+		return mbKick;
+	}
+	
+	int getProfile() const;
+	void SetIp(const string & ip);
+
+	void setInOpList(bool inOpList);
+	void setInIpList(bool inIpList);
+	void setHide(bool hide);
+	void setForceMove(bool forceMove);
+	void setKick(bool kick);
 
 
 
 	const string & getMyINFO(/*bool real = false*/) const;
-	bool setMyINFO(const string & myInfo, const string & nick); /** (for plugins) */
+	bool setMyINFO(const string & myInfo, const string & nick);
 	bool setMyINFO(DcParserBase * parser);
 
 	const string & getDesc(/*bool real = false*/) const;

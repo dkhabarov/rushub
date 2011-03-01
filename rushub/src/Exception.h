@@ -43,11 +43,8 @@ public:
 
 public:
 
-	Exception() {
-	}
-
-	~Exception() {
-	}
+	Exception();
+	~Exception();
 
 	static long __stdcall ExceptionFilter(LPEXCEPTION_POINTERS e);
 	static int Init(const char * path);

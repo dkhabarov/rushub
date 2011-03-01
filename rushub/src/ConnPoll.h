@@ -47,25 +47,29 @@ using std::vector;
 
 namespace server {
 
+
+
 /** ConnPoll */
 class ConnPoll : public ConnChoose {
 
 public:
 
-	struct cPollFD: public pollfd {
-		cPollFD() { reset(); }
+	struct PollFd: public pollfd {
+		PollFd() {
+			reset();
+		}
 		void reset() {
 			fd = -1;
 			events = revents = 0;
 		}
-	}; // cPollFD
+	}; // PollFd
 
-	typedef vector<cPollFD> tFDArray;
+	typedef vector<PollFd> tFDArray;
 
 public:
 
-	ConnPoll() { mvFD.reserve(16384); }
-	~ConnPoll() {}
+	ConnPoll();
+	~ConnPoll();
 
 	bool AddConn(ConnBase *);
 

@@ -26,10 +26,10 @@
 #define RTLD_NOW 0x002 /** Immediate function call binding. */
 #define RTLD_BINDING_MASK 0x3 /** Mask of binding time value. */
 
-char *dlerror(void);
-void *dlsym(void *handle, const char *symbol);
-void *dlopen(const char *path, int mode);
-int dlclose(void *handle);
+char * dlerror(void);
+void * dlsym(void * handle, const char * symbol);
+void * dlopen(const char * path, int mode);
+int dlclose(void * handle);
 
 static char last_dyn_error[512];
 

@@ -45,29 +45,41 @@ namespace protocol {
 class DcProtocol : public Protocol {
 
 public:
+
 	DcProtocol();
-	virtual ~DcProtocol(){};
+	virtual ~DcProtocol();
+	
 	void SetServer(DcServer *);
 	virtual int DoCmd(Parser *, Conn *); /** Do command */
-	virtual Parser * CreateParser(){return new DcParser;} /** Creating protocol parser */
-	virtual void DeleteParser(Parser *parser){if(parser != NULL) delete parser;} /** Removing protocol parser */
+	
+	/** Creating protocol parser */
+	virtual Parser * CreateParser() {
+		return new DcParser;
+	}
+	
+	/** Removing protocol parser */
+	virtual void DeleteParser(Parser * parser) {
+		if (parser != NULL) {
+			delete parser;
+		}
+	}
 
-	static string & Append_DC_Lock(string &sStr);
-	static string & Append_DC_Hello(string &sStr, const string &sNick);
-	static string & Append_DC_HubIsFull(string &sStr);
-	static string & Append_DC_GetPass(string &sStr);
-	static string & Append_DC_ValidateDenide(string &sStr, const string &sNick);
-	static string & Append_DC_HubName(string &sStr, const string &sHubName, const string &sTopic);
-	static string & Append_DC_HubTopic(string &sStr, const string &sHubTopic);
-	static string & Append_DC_Chat(string &sStr, const string &sNick, const string &sMsg);
-	static string & Append_DC_PM(string &sStr, const string &sTo, const string &sFrom, const string &sNick, const string &sMsg);
-	static string & Append_DC_Quit(string &sStr, const string &sNick);
-	static string & Append_DC_OpList(string &sStr, const string &sNick);
-	static string & Append_DC_UserIP(string &sStr, const string &sNick, const string &sIP);
-	static string & Append_DC_ForceMove(string &sStr, const string &sAddress);
-	static void Append_DC_PMToAll(string &sStart, string &sEnd, const string &sFrom, const string &sNick, const string &sMsg);
+	static string & Append_DC_Lock(string & str);
+	static string & Append_DC_Hello(string & str, const string & nick);
+	static string & Append_DC_HubIsFull(string & str);
+	static string & Append_DC_GetPass(string & str);
+	static string & Append_DC_ValidateDenide(string & str, const string & nick);
+	static string & Append_DC_HubName(string & str, const string & hubName, const string & topic);
+	static string & Append_DC_HubTopic(string & str, const string & hubTopic);
+	static string & Append_DC_Chat(string & str, const string & nick, const string & msg);
+	static string & Append_DC_PM(string & str, const string & to, const string & from, const string & nick, const string & msg);
+	static string & Append_DC_Quit(string & str, const string & nick);
+	static string & Append_DC_OpList(string & str, const string & nick);
+	static string & Append_DC_UserIP(string & str, const string & nick, const string & ip);
+	static string & Append_DC_ForceMove(string & str, const string & address);
+	static void Append_DC_PMToAll(string & start, string & end, const string & from, const string & nick, const string & msg);
 
-	void SendMode(DcConn *dcconn, const string & sStr, int iMode, UserList &, bool bUseCache = false);
+	void SendMode(DcConn * dcconn, const string & str, int mode, UserList &, bool useCache = false);
 	int SendNickList(DcConn *); /** Sending user-list and op-list */
 	static string GetNormalShare(__int64); /** Get normal share size */
 

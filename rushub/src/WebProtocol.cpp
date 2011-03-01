@@ -22,6 +22,7 @@
 #include "WebConn.h" // for WebConn
 
 namespace webserver {
+
 namespace protocol {
 
 
@@ -69,4 +70,5 @@ void WebProtocol::DeleteParser(Parser * parser) {
 
 
 }; // namespace protocol
+
 }; // namespace webserver

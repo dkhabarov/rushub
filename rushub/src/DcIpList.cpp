@@ -36,7 +36,7 @@ DcIpList::~DcIpList() {
 	}
 }
 
-bool DcIpList::Add(DcConn* conn) {
+bool DcIpList::Add(DcConn * conn) {
 	IpList * ipList = mIpTable.Find(conn->getNetIp());
 	if (ipList == NULL) {
 		mIpTable.Add(conn->getNetIp(), new IpList((tSocket)(*conn), conn));
@@ -46,83 +46,100 @@ bool DcIpList::Add(DcConn* conn) {
 	return true;
 }
 
-bool DcIpList::Remove(DcConn* dcConn) {
+bool DcIpList::Remove(DcConn * dcConn) {
 	IpList * ipList = NULL, * ipLists = mIpTable.Find(dcConn->getNetIp());
-	if(ipLists == NULL) return false;
+	if (ipLists == NULL) {
+		return false;
+	}
 	ipList = ipLists;
 	Conn * conn = ipLists->Remove((tSocket)(*dcConn), ipList);
-	if(ipList != ipLists) {
-		if(ipList) mIpTable.Update(dcConn->getNetIp(), ipList);
-		else mIpTable.Remove(dcConn->getNetIp()); /** Removing the list from hash-table */
+	if (ipList != ipLists) {
+		if (ipList) {
+			mIpTable.Update(dcConn->getNetIp(), ipList);
+		} else {
+			mIpTable.Remove(dcConn->getNetIp()); /** Removing the list from hash-table */
+		}
 		delete ipLists; /** removing old start element in the list */
 		ipLists = NULL;
 	}
-	if(conn == NULL) return false;
-	return true;
+	return conn != NULL;
 }
 
-void DcIpList::sendToIp(const char *sIP, string &sData, unsigned long iProfile, bool bAddSep, bool bFlush) {
-	sendToIp(Conn::Ip2Num(sIP), sData, iProfile, bAddSep, bFlush);
+void DcIpList::sendToIp(const char * ip, string & data, unsigned long profile, bool addSep, bool flush) {
+	sendToIp(Conn::Ip2Num(ip), data, profile, addSep, flush);
 }
 
-void DcIpList::SendToIPWithNick(const char *sIP, string &sStart, string &sEnd, unsigned long iProfile, bool bAddSep, bool bFlush) {
-	SendToIPWithNick(Conn::Ip2Num(sIP), sStart, sEnd, iProfile, bAddSep, bFlush);
+void DcIpList::SendToIPWithNick(const char * ip, string & start, string & end, unsigned long profile, bool addSep, bool flush) {
+	SendToIPWithNick(Conn::Ip2Num(ip), start, end, profile, addSep, flush);
 }
 
-void DcIpList::sendToIp(unsigned long iIP, string &sData, unsigned long iProfile, bool bAddSep, bool bFlush) {
-	miProfile = iProfile;
-	msData1 = sData;
-	mFlush = bFlush;
-	mAddSep = bAddSep;
-	IpList * ipList = mIpTable.Find(iIP);
-	while(ipList != NULL) {
+void DcIpList::sendToIp(unsigned long ip, string & data, unsigned long profile, bool addSep, bool flush) {
+	miProfile = profile;
+	msData1 = data;
+	mFlush = flush;
+	mAddSep = addSep;
+	IpList * ipList = mIpTable.Find(ip);
+	while (ipList != NULL) {
 		send(ipList->mData);
 		ipList = ipList->mNext;
 	}
 }
 
-void DcIpList::SendToIPWithNick(unsigned long iIP, string &sStart, string &sEnd, unsigned long iProfile, bool bAddSep, bool bFlush) {
-	miProfile = iProfile;
-	msData1 = sStart;
-	msData2 = sEnd;
-	mFlush = bFlush;
-	mAddSep = bAddSep;
-	IpList * ipList = mIpTable.Find(iIP);
-	while(ipList != NULL) {
+void DcIpList::SendToIPWithNick(unsigned long ip, string & start, string & end, unsigned long profile, bool addSep, bool flush) {
+	miProfile = profile;
+	msData1 = start;
+	msData2 = end;
+	mFlush = flush;
+	mAddSep = addSep;
+	IpList * ipList = mIpTable.Find(ip);
+	while (ipList != NULL) {
 		SendWithNick(ipList->mData);
 		ipList = ipList->mNext;
 	}
 }
 
-int DcIpList::send(DcConn * conn) {
-	if(!conn || !conn->mbIpRecv) return 0;
-	if(miProfile) {
-		int iProfile = conn->miProfile + 1;
-		if(iProfile < 0) iProfile = -iProfile;
-		if(iProfile > 31) iProfile = (iProfile % 32) - 1;
-		if(miProfile & (1 << iProfile))
-			return conn->send(msData1, mAddSep, mFlush);
+int DcIpList::send(DcConn * dcConn) {
+	if (!dcConn || !dcConn->mbIpRecv) {
+		return 0;
+	}
+	if (miProfile) {
+		int profile = dcConn->miProfile + 1;
+		if (profile < 0) {
+			profile = -profile;
+		}
+		if (profile > 31) {
+			profile = (profile % 32) - 1;
+		}
+		if (miProfile & (1 << profile)) {
+			return dcConn->send(msData1, mAddSep, mFlush);
+		}
 	} else {
-		return conn->send(msData1, mAddSep, mFlush);
+		return dcConn->send(msData1, mAddSep, mFlush);
 	}
 	return 0;
 }
 
-int DcIpList::SendWithNick(DcConn * conn) {
-	if(!conn || !conn->mDCUser || !conn->mbIpRecv) return 0;
-	string sStr(msData1);
-	sStr.append(conn->mDCUser->msNick);
-	if(miProfile) {
-		int iProfile = conn->miProfile + 1;
-		if(iProfile < 0) iProfile = -iProfile;
-		if(iProfile > 31) iProfile = (iProfile % 32) - 1;
-		if(miProfile & (1 << iProfile)) {
-			string sStr(msData1);
-			sStr.append(conn->mDCUser->msNick);
-			return conn->send(sStr.append(msData2), mAddSep, mFlush);
+int DcIpList::SendWithNick(DcConn * dcConn) {
+	if (!dcConn || !dcConn->mDCUser || !dcConn->mbIpRecv) {
+		return 0;
+	}
+	string str(msData1);
+	str.append(dcConn->mDCUser->msNick);
+	if (miProfile) {
+		int profile = dcConn->miProfile + 1;
+		if (profile < 0) {
+			profile = -profile;
+		}
+		if (profile > 31) {
+			profile = (profile % 32) - 1;
+		}
+		if (miProfile & (1 << profile)) {
+			string str(msData1);
+			str.append(dcConn->mDCUser->msNick);
+			return dcConn->send(str.append(msData2), mAddSep, mFlush);
 		}
 	} else {
-		return conn->send(sStr.append(msData2), mAddSep, mFlush);
+		return dcConn->send(str.append(msData2), mAddSep, mFlush);
 	}
 	return 0;
 }

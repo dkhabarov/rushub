@@ -48,7 +48,9 @@ DcConn::DcConn(int type, tSocket sock, Server *s) :
 
 
 DcConn::~DcConn() {
-	if(mDCUser) delete mDCUser;
+	if (mDCUser) {
+		delete mDCUser;
+	}
 	mDCUser = NULL;
 	mDcUserBase = NULL;
 }
@@ -57,7 +59,9 @@ DcConn::~DcConn() {
 
 int DcConn::send(const string & data, bool addSep, bool flush) {
 	int iRet;
-	if (!mbWritable) return 0;
+	if (!mbWritable) {
+		return 0;
+	}
 
 	if (data.size() >= miSendBufMax) {
 		string msg(data);
@@ -179,13 +183,17 @@ void DcConn::setData(const string & sData) {
 
 /** OnFlush sending buffer */
 void DcConn::OnFlush() {
-	if(mbNickListInProgress) {
+	if (mbNickListInProgress) {
 		SetLSFlag(LOGIN_STATUS_NICKLST);
 		mbNickListInProgress = false;
-		if(!mbOk || !mbWritable) {
-			if(Log(2)) LogStream() << "Connection closed during nicklist" << endl;
+		if (!mbOk || !mbWritable) {
+			if (Log(2)) {
+				LogStream() << "Connection closed during nicklist" << endl;
+			}
 		} else {
-			if(Log(3)) LogStream() << "Enter after nicklist" << endl;
+			if (Log(3)) {
+				LogStream() << "Enter after nicklist" << endl;
+			}
 			server()->DoUserEnter(this);
 		}
 	}
@@ -212,11 +220,13 @@ int DcConn::onTimer(Time &now) {
 	DcServer * dcServer = server();
 
 	/** Check timeouts. For entering only */
-	if(!mDCUser || !mDCUser->mbInUserList) { // Optimisation
-		for(int i = 0; i < HUB_TIME_OUT_MAX; ++i) {
-			if(!CheckTimeOut(HubTimeOut(i), now)) {
+	if (!mDCUser || !mDCUser->mbInUserList) { // Optimisation
+		for (int i = 0; i < HUB_TIME_OUT_MAX; ++i) {
+			if (!CheckTimeOut(HubTimeOut(i), now)) {
 				string sMsg;
-				if(Log(2)) LogStream() << "Operation timeout (" << HubTimeOut(i) << ")" << endl;
+				if (Log(2)) {
+					LogStream() << "Operation timeout (" << HubTimeOut(i) << ")" << endl;
+				}
 				StringReplace(dcServer->mDCLang.msTimeout, string("reason"), sMsg, dcServer->mDCLang.msTimeoutCmd[i]);
 				dcServer->sendToUser(this, sMsg.c_str(), (char*)dcServer->mDcConfig.msHubBot.c_str());
 				this->CloseNice(9000, CLOSE_REASON_TIMEOUT);
@@ -226,8 +236,10 @@ int DcConn::onTimer(Time &now) {
 	}
 
 	/*Time lastRecv(mLastRecv);
-	if(dcServer->MinDelay(lastRecv, dcServer->mDcConfig.miTimeoutAny)) {
-		if(Log(2)) LogStream() << "Any action timeout..." << endl;
+	if (dcServer->MinDelay(lastRecv, dcServer->mDcConfig.miTimeoutAny)) {
+		if (Log(2)) {
+			LogStream() << "Any action timeout..." << endl;
+		}
 		dcServer->sendToUser(this, dcServer->mDCLang.msTimeoutAny.c_str(), (char*)dcServer->mDcConfig.msHubBot.c_str());
 		CloseNice(9000, CLOSE_REASON_TO_ANYACTION);
 		return 2;
@@ -239,7 +251,7 @@ int DcConn::onTimer(Time &now) {
 	*/
 	Time Ago(now);
 	Ago -= dcServer->mDcConfig.miStartPing;
-	if(
+	if (
 		dcServer->MinDelay(mTimes.mPingServer, dcServer->mDcConfig.miPingInterval) &&
 		mDCUser && mDCUser->mbInUserList && mDCUser->mTimeEnter < Ago
 	) {
@@ -259,12 +271,16 @@ void DcConn::CloseNow(int iReason) {
 
 /** Set user object for current connection */
 bool DcConn::SetUser(DcUser * User) {
-	if(!User) {
-		if(ErrLog(1)) LogStream() << "Trying to add a NULL user" << endl;
+	if (!User) {
+		if (ErrLog(1)) {
+			LogStream() << "Trying to add a NULL user" << endl;
+		}
 		return false;
 	}
-	if(mDCUser) {
-		if(ErrLog(1)) LogStream() << "Trying to add user when it's actually done" << endl;
+	if (mDCUser) {
+		if (ErrLog(1)) {
+			LogStream() << "Trying to add user when it's actually done" << endl;
+		}
 		delete User;
 		return false;
 	}
@@ -274,7 +290,9 @@ bool DcConn::SetUser(DcUser * User) {
 	User->mDCConn = this;
 	User->mDcConnBase = this;
 	User->mDcServer = server();
-	if(Log(3)) LogStream() << "User " << User->msNick << " connected ... " << endl;
+	if (Log(3)) {
+		LogStream() << "User " << User->msNick << " connected ... " << endl;
+	}
 	return true;
 }
 
@@ -285,14 +303,18 @@ DcConnFactory::~DcConnFactory() {
 }
 
 Conn *DcConnFactory::CreateConn(tSocket sock) {
-	if(!mServer) return NULL;
+	if (!mServer) {
+		return NULL;
+	}
 
 	DcConn * dcconn = new DcConn(CLIENT_TYPE_NMDC, sock, mServer);
 	dcconn->mConnFactory = this; /** Connection factory for current connection (DcConnFactory) */
 	dcconn->mProtocol = mProtocol; /** Protocol pointer (DcProtocol) */
 
 	DcServer * dcServer = (DcServer *) mServer;
-	if(!dcServer) return NULL;
+	if (!dcServer) {
+		return NULL;
+	}
 	dcServer->mIPListConn->Add(dcconn); /** Adding connection in IP-list */
 
 	return (Conn *)dcconn;
@@ -301,22 +323,24 @@ Conn *DcConnFactory::CreateConn(tSocket sock) {
 void DcConnFactory::DelConn(Conn * &conn) {
 	DcConn * dcconn = (DcConn *) conn;
 	DcServer * dcServer = (DcServer *) mServer;
-	if(dcconn && dcServer) {
+	if (dcconn && dcServer) {
 		dcServer->mIPListConn->Remove(dcconn);
-		if(dcconn->GetLSFlag(LOGIN_STATUS_ALOWED)) {
+		if (dcconn->GetLSFlag(LOGIN_STATUS_ALOWED)) {
 			dcServer->miTotalUserCount --;
-			if(dcconn->mDCUser)
+			if (dcconn->mDCUser) {
 				dcServer->miTotalShare -= dcconn->mDCUser->getShare();
-			else
-				if(conn->Log(3)) conn->LogStream() << "Del conn without user" << endl;
-		} else {
-			if(conn->Log(3)) conn->LogStream() << "Del conn without ALOWED flag: " << dcconn->GetLSFlag(LOGIN_STATUS_LOGIN_DONE) << endl;
+			} else if (conn->Log(3)) {
+					conn->LogStream() << "Del conn without user" << endl;
+			}
+		} else if (conn->Log(3)) {
+			conn->LogStream() << "Del conn without ALOWED flag: " << dcconn->GetLSFlag(LOGIN_STATUS_LOGIN_DONE) << endl;
 		}
-		if(dcconn->mDCUser) {
-			if(dcconn->mDCUser->mbInUserList)
+		if (dcconn->mDCUser) {
+			if (dcconn->mDCUser->mbInUserList) {
 				dcServer->RemoveFromDCUserList((DcUser*)dcconn->mDCUser);
-			else // remove from enter list, if user was already added in it, but user was not added in user list
+			} else { // remove from enter list, if user was already added in it, but user was not added in user list
 				dcServer->mEnterList.RemoveByNick(dcconn->mDCUser->getNick());
+			}
 			delete dcconn->mDCUser;
 			dcconn->mDCUser = NULL;
 			dcconn->mDcUserBase = NULL;
@@ -324,10 +348,10 @@ void DcConnFactory::DelConn(Conn * &conn) {
 		#ifndef WITHOUT_PLUGINS
 			dcServer->mCalls.mOnUserDisconnected.CallAll(dcconn);
 		#endif
-	} else {
-		if(conn->ErrLog(0)) conn->LogStream() << "Fail error in DelConn: dcconn = " <<
-			(dcconn == NULL ? "NULL" : "not NULL") << ", dcServer = " << 
-			(dcServer == NULL ? "NULL" : "not NULL") << endl;
+	} else if (conn->ErrLog(0)) {
+		conn->LogStream() << "Fail error in DelConn: dcconn = " <<
+		(dcconn == NULL ? "NULL" : "not NULL") << ", dcServer = " << 
+		(dcServer == NULL ? "NULL" : "not NULL") << endl;
 	}
 	ConnFactory::DelConn(conn);
 }

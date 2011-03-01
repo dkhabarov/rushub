@@ -26,24 +26,27 @@
 using namespace ::server; // NMDC_TYPE_UNPARSED
 
 namespace webserver {
+
 namespace protocol {
+
+
 
 class WebParser : public Parser, public WebParserBase {
 
 public:
 
 	WebParser();
-
 	virtual ~WebParser();
 
 	/** Parse cmd and return type */
 	int Parse();
-
 	bool SplitChunks();
 
 }; // class WebParser
 
+
 }; // namespace protocol
+
 }; // namespace webserver
 
 #endif // WEB_PARSER_H

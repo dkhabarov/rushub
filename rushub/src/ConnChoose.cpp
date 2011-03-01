@@ -27,24 +27,32 @@
 namespace server {
 
 /** Adding in mConnBaseList */
-bool ConnChoose::AddConn(ConnBase *conn) {
-	if(!conn) return false;
-	tSocket s = (tSocket)(*conn);
-	if(mConnBaseList.Contain(s)) return false;
-	if(s >= mMaxSocket) mMaxSocket = s + 1;
-	bool ret = mConnBaseList.Add(s, conn);
-	return ret;
+bool ConnChoose::AddConn(ConnBase * connBase) {
+	if (!connBase) {
+		return false;
+	}
+
+	tSocket sock = (tSocket) (*connBase);
+	if (mConnBaseList.Contain(sock)) {
+		return false;
+	}
+
+	if (sock >= mMaxSocket) {
+		mMaxSocket = sock + 1;
+	}
+
+	return mConnBaseList.Add(sock, connBase);
 }
 
 /** Del from mConnBaseList */
-bool ConnChoose::DelConn(ConnBase *conn) {
-	OptOut(conn, eEF_ALL_AND_CLOSE);
-	return mConnBaseList.Remove((tSocket)(*conn));
+bool ConnChoose::DelConn(ConnBase * connBase) {
+	OptOut(connBase, eEF_ALL_AND_CLOSE);
+	return mConnBaseList.Remove((tSocket) (*connBase));
 }
 
 /** Has conn */
-bool ConnChoose::HasConn(ConnBase *conn) {
-	return mConnBaseList.Contain((tSocket)(*conn));
+bool ConnChoose::HasConn(ConnBase * connBase) {
+	return mConnBaseList.Contain((tSocket) (*connBase));
 }
 
 }; // server

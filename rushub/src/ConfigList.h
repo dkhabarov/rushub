@@ -46,17 +46,20 @@ class ConfigFactory {
 
 public:
 
-  ConfigFactory() {}
-	NEWITEM(bool, Bool);            /** virtual ConfigBool    * Add(bool &var){return new ConfigBool(var)} */
-	NEWITEM(double, Double);        /** virtual ConfigDouble  * Add(double &var){return new ConfigDouble(var)} */
-	NEWITEM(int, Int);              /** virtual ConfigInt     * Add(int &var){return new ConfigInt(var)} */
-	NEWITEM(long, Long);            /** virtual ConfigLong    * Add(long &var){return new ConfigLong(var)} */
-	NEWITEM(unsigned int, UInt);    /** virtual ConfigUInt    * Add(unsigned int &var){return new ConfigUInt(var)} */
-	NEWITEM(unsigned long, ULong);  /** virtual ConfigULong   * Add(unsigned long &var){return new ConfigULong(var)} */
-	NEWITEM(__int64, Int64);        /** virtual ConfigInt64   * Add(__int64 &var){return new ConfigInt64(var)} */
-	NEWITEM(char, Char);            /** virtual ConfigChar    * Add(char &var){return new ConfigChar(var)} */
-	NEWITEM(string, String);        /** virtual ConfigString  * Add(string &var){return new ConfigString(var)} */
-	virtual void Delete(Config *Item) { delete Item; } /** Удаление объекта настройки */
+  ConfigFactory() {
+	}
+	NEWITEM(bool, Bool);            /** virtual ConfigBool    * Add(bool & var) { return new ConfigBool(var) } */
+	NEWITEM(double, Double);        /** virtual ConfigDouble  * Add(double & var) { return new ConfigDouble(var) } */
+	NEWITEM(int, Int);              /** virtual ConfigInt     * Add(int & var) { return new ConfigInt(var) } */
+	NEWITEM(long, Long);            /** virtual ConfigLong    * Add(long & var) { return new ConfigLong(var) } */
+	NEWITEM(unsigned int, UInt);    /** virtual ConfigUInt    * Add(unsigned int & var) { return new ConfigUInt(var) } */
+	NEWITEM(unsigned long, ULong);  /** virtual ConfigULong   * Add(unsigned long & var) { return new ConfigULong(var) } */
+	NEWITEM(__int64, Int64);        /** virtual ConfigInt64   * Add(__int64 & var) { return new ConfigInt64(var) } */
+	NEWITEM(char, Char);            /** virtual ConfigChar    * Add(char & var) { return new ConfigChar(var) } */
+	NEWITEM(string, String);        /** virtual ConfigString  * Add(string & var) { return new ConfigString(var) } */
+	virtual void Delete(Config * config) { /** Removing config */
+		delete config;
+	}
 }; // ConfigFactory
 
 /** Base config class (Config Base Base) */
@@ -120,8 +123,8 @@ public:
 	ConfigListBase();
 	virtual ~ConfigListBase();
 
-	Config * operator[](const char *); /** Get config by name */
-	Config * operator[](const string &); /** Get config by name */
+	Config * operator[] (const char *); /** Get config by name */
+	Config * operator[] (const string &); /** Get config by name */
 	Config * Add(const string &, Config *); /** Add config object in list */
 	void SetBaseTo(void * newBase); /** Set base pointer in address */
 

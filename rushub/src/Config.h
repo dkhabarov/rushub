@@ -36,7 +36,11 @@ using namespace ::std;
 	#define __int64 long long
 #endif
 
+
+
 namespace configuration {
+
+
 
 typedef enum {
 	ITEM_TYPE_VOID,     // void
@@ -59,6 +63,8 @@ typedef enum {
 	ITEM_TYPE_PLLONG,   // __int64*
 	ITEM_TYPE_PSTRING,  // string*
 } ItemType;
+
+
 
 /** Abstract class of the element configuration (Config) */
 class Config {
@@ -122,7 +128,9 @@ protected:
 protected:
 
 	/** Function returns address */
-	virtual void * Address() { return mAddress; }
+	virtual void * Address() {
+		return mAddress;
+	}
 
 }; // class Config
 

@@ -50,13 +50,16 @@ public:
 	int mStartIdx; /** Current index to positions */
 	int mNumFill; /** Amount filled period */
 
-	void Dump(void) {
+	void Dump() {
 		cout << "mOverPeriod: " << mOverPeriod.AsPeriod() << endl
 			<< " mStart, mEnd: " << mStart.AsDate() << ", " << mEnd.AsDate() << endl
 			<< " mPart, mPeriodPart: " << mPart.AsDate() << ", " << mPeriodPart.AsPeriod() << endl
 			<< " mResolution:" << mResolution << endl
 			<< " mCounts[" ;
-		for(int i = 0; i < max_size; ++i) cout << mCounts[i] << ", ";
+
+		for (int i = 0; i < max_size; ++i) {
+			cout << mCounts[i] << ", ";
+		}
 		cout << "] " << endl << "mStartIdx:" << mStartIdx << ", mNumFill:" << mNumFill << endl << endl;
 	}
 
@@ -68,13 +71,13 @@ public:
 		Reset(now);
 	}
 
-	MeanFrequency(const Time &now) {
+	MeanFrequency(const Time & now) {
 		mResolution = max_size;
 		SetPeriod(1.);
 		Reset(now);
 	};
 
-	MeanFrequency(const Time &now, double per, int res):
+	MeanFrequency(const Time & now, double per, int res):
 		mOverPeriod(per),
 		mPeriodPart(per/res),
 		mResolution(res)
@@ -82,38 +85,47 @@ public:
 		Reset(now);
 	};
 
-	void Insert(const Time &now, T data = 1) {
+	void Insert(const Time & now, T data = 1) {
 		Adjust(now);
 		mCounts[(mStartIdx + mNumFill) % mResolution] += data;
 	};
 
-	double GetMean(const Time &now) {
+	double GetMean(const Time & now) {
 		double Sum = CountAll(now);
-		if(!mNumFill) return 0.;
+		if (!mNumFill) {
+			return 0.;
+		}
 		Sum *= mResolution / mNumFill;
 		Sum /= double(mOverPeriod);
 		return Sum;
 	}
 
-	T CountAll(const Time &now) {
+	T CountAll(const Time & now) {
 		Adjust(now);
 		T sum = 0;
 		int i, j = mStartIdx;
-		for(i = 0; i < mNumFill; ++i) {
+		for (i = 0; i < mNumFill; ++i) {
 			sum += mCounts[j++];
-			if(j >= mResolution) j = 0;
+			if (j >= mResolution) {
+				j = 0;
+			}
 		}
 		return sum;
 	};
 
-	void Adjust(const Time &now) {
-		if(mEnd < now) {
+	void Adjust(const Time & now) {
+		if (mEnd < now) {
 			Time t(mEnd);
 			t += mOverPeriod;
-			if(t < now){ Reset(now); return; }
-			while(mEnd < now) Shift();
-		} else if(mNumFill < mResolution) {
-			while((mPart < now) && (mNumFill < mResolution)) {
+			if (t < now) {
+				Reset(now);
+				return;
+			}
+			while (mEnd < now) {
+				Shift();
+			}
+		} else if (mNumFill < mResolution) {
+			while ((mPart < now) && (mNumFill < mResolution)) {
 				mPart += mPeriodPart;
 				++mNumFill;
 			}
@@ -124,9 +136,13 @@ public:
 		mEnd += mPeriodPart;
 		mStart += mPeriodPart;
 		mCounts[mStartIdx] = 0;
-		if(mNumFill > 0) --mNumFill;
+		if (mNumFill > 0) {
+			--mNumFill;
+		}
 		++mStartIdx;
-		if(mStartIdx >= mResolution) mStartIdx -= mResolution;
+		if (mStartIdx >= mResolution) {
+			mStartIdx -= mResolution;
+		}
 	};
 
 	void Reset(const Time &now) {

@@ -196,7 +196,8 @@ protected:
 	virtual void OnNewData(Conn *, string *);
 
 	/** Close server */
-	virtual void close(){}
+	virtual void close() {
+	}
 
 private:
 

@@ -48,7 +48,9 @@ using ::dcserver::DcServer;
 using namespace ::server;
 
 static void sigHandler(int sig) {
+
 	switch (sig) {
+
 		case SIGINT :
 			// Fallthrough
 
@@ -86,7 +88,7 @@ int runHub(int argc, char ** argv, bool isService /*= false*/) {
 		umask(077); // Setting umask for daemon
 	#endif
 
-	while(result == 1) {
+	while (result == 1) {
 
 		string confPath, exPath;
 		#ifndef _WIN32

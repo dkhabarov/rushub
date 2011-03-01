@@ -39,7 +39,7 @@ using std::string;
 
 #ifdef _WIN32
 	#include "conndefine.h" // for class timeval
-	void gettimeofday(struct timeval*, struct timezone*);
+	void gettimeofday(struct timeval *, struct timezone *);
 #else
 	#include <sys/time.h> // for gettimeofday
 #endif
@@ -49,61 +49,63 @@ namespace utils {
 /** Class of time with microsecond decision and arithmetical operation */
 class Time : public timeval {
 public:
-	~Time(){}
-	Time(): mPrintType(0){Get();}
-	Time(double sec): mPrintType(0){tv_sec = (long)sec; tv_usec = long((sec - tv_sec) * 1000000);};
-	Time(long sec, long usec = 0): mPrintType(0){tv_sec = sec; tv_usec = usec;};
-	Time(const Time &t) : mPrintType(0){tv_sec = t.tv_sec; tv_usec = t.tv_usec;};
 
-	int operator>  (const Time &t) const{if(tv_sec > t.tv_sec) return 1; if(tv_sec < t.tv_sec) return 0; return (tv_usec > t.tv_usec);}
-	int operator>= (const Time &t) const{if(tv_sec > t.tv_sec) return 1; if(tv_sec < t.tv_sec) return 0; return (tv_usec >= t.tv_usec);}
-	int operator<  (const Time &t) const{if(tv_sec < t.tv_sec) return 1; if(tv_sec > t.tv_sec) return 0; return (tv_usec < t.tv_usec);}
-	int operator<= (const Time &t) const{if(tv_sec < t.tv_sec) return 1; if(tv_sec > t.tv_sec) return 0; return (tv_usec <= t.tv_usec);}
-	int operator== (const Time &t) const{return ((tv_usec == t.tv_usec) && (tv_sec == t.tv_sec));}
-	//int & operator/ (const Time &t){long sec = tv_sec / i; long usec = tv_usec + 1000000 * (tv_sec % i); usec /= i; return Time(sec, usec).Normalize();}
-	Time & operator= (const Time &t){tv_usec = t.tv_usec; tv_sec = t.tv_sec; return *this;}
-	Time   operator+ (const Time &t) const {long sec = tv_sec + t.tv_sec; long usec = tv_usec + t.tv_usec; return Time(sec, usec).Normalize();}
-	Time   operator- (const Time &t) const {long sec = tv_sec - t.tv_sec; long usec = tv_usec - t.tv_usec; return Time(sec, usec).Normalize();}
-	Time   operator+ (int msec) const {long _usec = tv_usec + msec * 1000; return Time(tv_sec, _usec).Normalize();}
-	Time   operator- (int sec) const {long _sec = tv_sec - sec; return Time(_sec, tv_usec).Normalize();}
-	Time & operator+= (const Time &t){tv_sec += t.tv_sec; tv_usec += t.tv_usec; Normalize(); return *this;}
-	Time & operator-= (const Time &t){tv_sec -= t.tv_sec; tv_usec -= t.tv_usec; Normalize(); return *this;}
-	Time & operator-= (int sec){tv_sec -= sec; Normalize(); return *this;}
-	Time & operator+= (int msec){tv_usec += 1000 * msec; Normalize(); return *this;}
-	Time & operator+= (long usec){tv_usec += usec; Normalize(); return *this;}
-	Time & operator/= (int i){long sec = tv_sec / i; tv_usec += 1000000 * (tv_sec % i); tv_usec /= i; tv_sec = sec; Normalize(); return *this;}
-	Time & operator*= (int i){tv_sec *= i; tv_usec *= i; Normalize(); return *this;}
-	Time   operator/  (int i) const {long sec = tv_sec / i; long usec = tv_usec + 1000000 * (tv_sec % i); usec /= i; return Time(sec, usec).Normalize();}
-	Time   operator*  (int i) const {long sec = tv_sec * i; long usec = tv_usec * i; return Time(sec, usec).Normalize();}
-	operator double(){return double(tv_sec) + double(tv_usec) / 1000000.;}
-	operator long()  {return long(tv_sec) * 1000000 + long(tv_usec);}
-	operator int()   {return int(tv_sec * 1000 + double(tv_usec) / 1000.);}
-	operator bool()  {return !(!tv_sec && !tv_usec);}
-	int operator! () {return !tv_sec && !tv_usec;}
+	Time();
+	Time(double sec);
+	Time(long sec, long usec = 0);
+	Time(const Time &);
+	~Time();
+	
+	int operator > (const Time &) const;
+	int operator >= (const Time &) const;
+	int operator < (const Time &) const;
+	int operator <= (const Time &) const;
+	int operator == (const Time &) const;
+	//int & operator / (const Time &);
+	Time & operator = (const Time &);
+	Time operator + (const Time &) const;
+	Time operator - (const Time &) const;
+	Time operator + (int msec) const;
+	Time operator - (int sec) const;
+	Time & operator += (const Time &);
+	Time & operator -= (const Time &);
+	Time & operator -= (int sec);
+	Time & operator += (int msec);
+	Time & operator += (long usec);
+	Time & operator /= (int i);
+	Time & operator *= (int i);
+	Time operator / (int i) const;
+	Time operator * (int i) const;
+
+	operator double();
+	operator long();
+	operator int();
+	operator bool();
+	int operator ! ();
 
 	/** Get seconds */
-	long Sec() const {return tv_sec;}
+	long Sec() const;
 
 	/** Get milisec */
-	unsigned long MiliSec() const { return (unsigned long)(tv_sec) * 1000 + (unsigned long)(tv_usec) / 1000; }
+	unsigned long MiliSec() const;
 
 	/*bool LocalTime(struct tm &result){ return localtime_r(this, &result) == &result;}*/
-	Time &Get();
-	Time &Normalize();
-	void Null() { tv_sec = tv_usec = 0; }
+	Time & Get();
+	Time & Normalize();
+	void Null();
 	string AsString() const;
-	void AsTimeVals(int &w, int &d, int &h, int &m) const;
-	friend std::ostream &operator << (std::ostream &os, const Time &t);
+	void AsTimeVals(int & w, int & d, int & h, int & m) const;
+	friend std::ostream & operator << (std::ostream & os, const Time & t);
+
+	const Time & AsDate() const;
+	const Time & AsPeriod() const;
+	const Time & AsFullPeriod() const;
+	const Time & AsDateMS() const;
 
 private:
+
 	/** print-type of the time */
 	mutable int mPrintType;
-
-public:
-	const Time &AsDate() const { mPrintType = 1; return *this; }
-	const Time &AsPeriod() const { mPrintType = 2; return *this; }
-	const Time &AsFullPeriod() const { mPrintType = 3; return *this; }
-	const Time &AsDateMS() const { mPrintType = 4; return *this; }
 
 }; // Time
 

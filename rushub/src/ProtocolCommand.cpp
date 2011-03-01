@@ -32,13 +32,16 @@ namespace server {
 ProtocolCommand::ProtocolCommand() {
 }
 
-ProtocolCommand::ProtocolCommand(string sKey) : mKey(sKey) { mLength = mKey.length(); }
+ProtocolCommand::ProtocolCommand(string sKey) : mKey(sKey) {
+	mLength = mKey.length();
+}
 
 ProtocolCommand::~ProtocolCommand() {
 }
 
-bool ProtocolCommand::Check(const string &sStr) { /** Checking that string contains command */
-	return 0 == StrCompare(sStr, 0, mLength, mKey);
+/** Checking that string contains command */
+bool ProtocolCommand::Check(const string & str) {
+	return 0 == StrCompare(str, 0, mLength, mKey);
 }
 
 };

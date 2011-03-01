@@ -41,13 +41,13 @@ WebConnFactory::WebConnFactory(Protocol * protocol, Server * server, string sepa
 WebConnFactory::~WebConnFactory() {
 	if (mProtocol) {
 		delete mProtocol; // only for WebProtocol!
+		mProtocol = NULL;
 	}
-	mProtocol = NULL;
 }
 
 
 
-Conn *WebConnFactory::CreateConn(tSocket sock) {
+Conn * WebConnFactory::CreateConn(tSocket sock) {
 
 	if (!mServer) {
 		return NULL;
@@ -57,7 +57,7 @@ Conn *WebConnFactory::CreateConn(tSocket sock) {
 	webconn->mConnFactory = this; /** Fuctory current connection (WebConnFactory) */
 	webconn->mProtocol = mProtocol; /** Protocol (WebProtocol) */
 
-	return (Conn *)webconn;
+	return (Conn *) webconn;
 
 }
 
@@ -100,7 +100,7 @@ void WebConnFactory::OnNewData(Conn * conn, string * str) {
 
 WebListenFactory::WebListenFactory(Server * server) : ListenFactory(server) {
 	WebProtocol * webProtocol = new WebProtocol;
-	mWebConnFactory = new WebConnFactory(webProtocol, server, "\r\n\r\n", ((DcServer*)server)->mDcConfig.miWebStrSizeMax);
+	mWebConnFactory = new WebConnFactory(webProtocol, server, "\r\n\r\n", ((DcServer *)server)->mDcConfig.miWebStrSizeMax);
 }
 
 

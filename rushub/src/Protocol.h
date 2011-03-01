@@ -45,13 +45,17 @@ enum {
   * Main proto class
   */
 class Protocol : public Obj {
+
 public:
+
 	Protocol();
 	virtual ~Protocol();
 	virtual int DoCmd(Parser *, Conn *) = 0; /** DoCmd */
 	virtual Parser * CreateParser() = 0; /** CreateParser */
 	virtual void DeleteParser(Parser *) = 0; /** DeleteParser */
+
 }; // Protocol
+
 
 
 /** Parser class
@@ -69,7 +73,7 @@ public:
 	typedef pair<int, int> tChunk; /** Pair for chunk (begin, end) */
 	typedef vector<tChunk> tChunkList; /** Chunks list */
 	tChunkList mChunks; /** List */
-	string *mStrings; /** String array for chunks */
+	string * mStrings; /** String array for chunks */
 	unsigned long mStrMap; /** Chunk already existed */
 
 public:
@@ -92,12 +96,12 @@ protected:
 	bool SplitOnTwo(size_t start, const string & lim, int cn1, int cn2, size_t len = 0, bool left = true);
 	bool SplitOnTwo(size_t start, const char lim, int cn1, int cn2, size_t len = 0, bool left = true);
 
-	bool SplitOnTwo(const string & lim, int ch, int cn1, int cn2, bool left = true);
-	bool SplitOnTwo(const char lim, int ch, int cn1, int cn2, bool left = true);
+	bool SplitOnTwo(const string & lim, int chunk, int cn1, int cn2, bool left = true);
+	bool SplitOnTwo(const char lim, int chunk, int cn1, int cn2, bool left = true);
 
-	bool ChunkRedRight(int cn, int amount);
+	bool ChunkRedRight(int chunk, int amount);
 
-	bool ChunkRedLeft(int cn, int amount);
+	bool ChunkRedLeft(int chunk, int amount);
 
 }; // Parser
 

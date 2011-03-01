@@ -37,8 +37,8 @@ private:
 
 public:
 
-	static int String2Arg(char const *str, int *argc, char ***argv);
-	static int String2Arg(string str, int *argc, char ***argv) {
+	static int String2Arg(char const * str, int * argc, char *** argv);
+	static int String2Arg(string str, int * argc, char *** argv) {
 		return String2Arg(str.c_str(), argc, argv);
 	}
 

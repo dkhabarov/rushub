@@ -44,19 +44,19 @@ public:
 	DcIpList();
 	virtual ~DcIpList();
 
-	bool Add(DcConn*);
-	bool Remove(DcConn*);
+	bool Add(DcConn *);
+	bool Remove(DcConn *);
 
-	void sendToIp(unsigned long iIP, string &sData, unsigned long iProfile = 0, bool bAddSep = false, bool bFlush = true);
-	void sendToIp(const char *sIP, string &sData, unsigned long iProfile = 0, bool bAddSep = false, bool bFlush = true);
-	void SendToIPWithNick(unsigned long iIP, string &sStart, string &sEnd, unsigned long iProfile = 0, bool bAddSep = false, bool bFlush = true);
-	void SendToIPWithNick(const char *sIP, string &sStart, string &sEnd, unsigned long iProfile = 0, bool bAddSep = false, bool bFlush = true);
+	void sendToIp(unsigned long ip, string & data, unsigned long profile = 0, bool addSep = false, bool flush = true);
+	void sendToIp(const char * ip, string & data, unsigned long profile = 0, bool addSep = false, bool flush = true);
+	void SendToIPWithNick(unsigned long ip, string & start, string & end, unsigned long profile = 0, bool addSep = false, bool flush = true);
+	void SendToIPWithNick(const char * ip, string & start, string & end, unsigned long profile = 0, bool addSep = false, bool flush = true);
 
 	bool AutoResize() {
 		unsigned size, capacity, newSize;
-		if(mIpTable.AutoResize(size, capacity, newSize) && Log(3)) {
+		if (mIpTable.AutoResize(size, capacity, newSize) && Log(3)) {
 			LogStream() << "Autoresizing: size = " << size << 
-			", capacity = " << capacity << " -> " + newSize << endl;
+				", capacity = " << capacity << " -> " + newSize << endl;
 			return true;
 		}
 		return false;
@@ -67,25 +67,39 @@ public:
 	public:
 
 		IpList * mIpList; /** Pointer on element of the array */
-		iterator() : mIpList(NULL){}
-		iterator & operator = (const iterator &it){ mIpList = it.mIpList; return *this; }
-		iterator(const iterator &it){ (*this) = it; }
-		bool operator == (const iterator & it){ return mIpList == it.mIpList; }
-		bool operator != (const iterator & it){ return mIpList != it.mIpList; }
-		iterator & operator ++() {
-			if(mIpList != NULL) mIpList = mIpList->mNext;
+		iterator() : mIpList(NULL){
+		}
+		iterator & operator = (const iterator & it) {
+			mIpList = it.mIpList;
 			return *this;
 		}
-		Conn* operator *(){ return mIpList->mData; }
+		iterator(const iterator & it) {
+			(*this) = it;
+		}
+		bool operator == (const iterator & it) {
+			return mIpList == it.mIpList;
+		}
+		bool operator != (const iterator & it) {
+			return mIpList != it.mIpList;
+		}
+		iterator & operator ++() {
+			if (mIpList != NULL) {
+				mIpList = mIpList->mNext;
+			}
+			return *this;
+		}
+		Conn * operator * () {
+			return mIpList->mData;
+		}
 
 	}; // iterator
 
-	iterator begin(const char * sIP) {
-		return begin(Conn::Ip2Num(sIP));
+	iterator begin(const char * ip) {
+		return begin(Conn::Ip2Num(ip));
 	}
-	iterator begin(unsigned long iIP) {
+	iterator begin(unsigned long ip) {
 		iterator it;
-		it.mIpList = mIpTable.Find(iIP);
+		it.mIpList = mIpTable.Find(ip);
 		return it;
 	}
 	iterator end() {

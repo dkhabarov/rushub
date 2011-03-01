@@ -58,23 +58,17 @@ void StrCutLeft(const string &, string &, size_t);
 bool LoadFileInString(const string &, string &);
 
 string & StringReplace(const string &, const string &, string &, const string &, bool b = false);
-
 string & StringReplace(const string &, const string &, string &, double, bool b = false);
-
 string & StringReplace(const string &, const string &, string &, int, bool b = false);
-
 string & StringReplace(const string &, const string &, string &, long, bool b = false);
-
 string & StringReplace(const string &, const string &, string &, __int64, bool b = false);
 
 string ReplaceSp(const string &, bool bTo = false);
 
 string Int64ToString(__int64 const &);
-
 __int64 StringToInt64(const string &);
 
 int CountLines(const string &);
-
 bool LimitLines(const string &, int);
 
 void StringSplit(const string &, char sDelim, vector<string> &);

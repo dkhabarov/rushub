@@ -48,9 +48,10 @@ Parser::Parser(int max) :
 
 Parser::~Parser() {
 	mChunks.clear();
-	if(mStrings != NULL) 
+	if (mStrings != NULL) {
 		delete[] mStrings;
-	mStrings = NULL;
+		mStrings = NULL;
+	}
 }
 
 /** getCommand() */
@@ -72,20 +73,26 @@ void Parser::ReInit() {
 }
 
 void Parser::SetChunk(int n, int start, int len) {
-	tChunk &c = mChunks[n];
-	c.first = start;
-	c.second = len;
+	tChunk & chunk = mChunks[n];
+	chunk.first = start;
+	chunk.second = len;
 }
 
-bool Parser::SplitOnTwo(size_t start, const string &lim, int cn1, int cn2, size_t len, bool left) {
-	size_t i;
-	if(!len) len = miLen;
-	if(left) { 
+bool Parser::SplitOnTwo(size_t start, const string & lim, int cn1, int cn2, size_t len, bool left) {
+	size_t i = 0;
+	if (len == 0) {
+		len = miLen;
+	}
+	if (left) { 
 		i = mCommand.find(lim, start); 
-		if(i == mCommand.npos || i - start >= len) return false;
+		if (i == mCommand.npos || i - start >= len) {
+			return false;
+		}
 	} else { 
 		i = mCommand.rfind(lim, start + len - lim.length()); 
-		if(i == mCommand.npos || i < start) return false;
+		if (i == mCommand.npos || i < start) {
+			return false;
+		}
 	}
 	SetChunk(cn1, (int)start, int(i - start));
 	SetChunk(cn2, int(i + lim.length()), int(miLen - i - lim.length()));
@@ -93,14 +100,20 @@ bool Parser::SplitOnTwo(size_t start, const string &lim, int cn1, int cn2, size_
 }
 
 bool Parser::SplitOnTwo(size_t start, const char lim, int cn1, int cn2, size_t len, bool left) {
-	size_t i;
-	if(!len) len = miLen;
-	if(left) { 
+	size_t i = 0;
+	if (len == 0) {
+		len = miLen;
+	}
+	if (left) { 
 		i = mCommand.find_first_of(lim, start); 
-		if(i == mCommand.npos || i - start >= len) return false;
+		if (i == mCommand.npos || i - start >= len) {
+			return false;
+		}
 	} else { 
 		i = mCommand.find_last_of(lim, start + len - 1);
-		if(i == mCommand.npos || i < start) return false;
+		if (i == mCommand.npos || i < start) {
+			return false;
+		}
 	}
 	SetChunk(cn1, (int)start, int(i - start));
 	SetChunk(cn2, int(i + 1), int(miLen - i - 1));
@@ -108,13 +121,13 @@ bool Parser::SplitOnTwo(size_t start, const char lim, int cn1, int cn2, size_t l
 }
 
 bool Parser::SplitOnTwo(const string &lim, int ch, int cn1, int cn2, bool left) {
-	tChunk &chu = mChunks[ch];
-	return SplitOnTwo(chu.first, lim, cn1, cn2, chu.second, left);
+	tChunk & chunk = mChunks[ch];
+	return SplitOnTwo(chunk.first, lim, cn1, cn2, chunk.second, left);
 }
 
 bool Parser::SplitOnTwo(const char lim, int ch, int cn1, int cn2, bool left) {
-	tChunk &chu = mChunks[ch];
-	return SplitOnTwo(chu.first, lim, cn1, cn2, chu.second, left);
+	tChunk & chunk = mChunks[ch];
+	return SplitOnTwo(chunk.first, lim, cn1, cn2, chunk.second, left);
 }
 
 
@@ -124,12 +137,13 @@ bool Parser::ChunkRedRight(int cn, int amount) {
 }
 
 bool Parser::ChunkRedLeft(int cn, int amount) {
-	tChunk &ch = mChunks[cn];
-	if(unsigned(ch.first + amount) < miLen) {
-		ch.first += amount;
-		ch.second -= amount;
+	tChunk & chunk = mChunks[cn];
+	if (unsigned(chunk.first + amount) < miLen) {
+		chunk.first += amount;
+		chunk.second -= amount;
 		return true;
-	} else return false;
+	}
+	return false;
 }
 
 };

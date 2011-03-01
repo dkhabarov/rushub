@@ -30,53 +30,57 @@ namespace utils {
 
 /** Function of the comparison of the substring from string str1 with string str2
   (0 - equal, 1 - not equal, -1 - not is faithfully given size of the substring str1) */
-int StrCompare(const string &str1, int start, int count, const string &str2) {
+int StrCompare(const string & str1, int start, int count, const string & str2) {
 	return str1.compare(start, count, str2);
 }
 
 
 
 /** Removing the spare reserved place in internal buffer of the string */
-void ShrinkStringToFit(string &str) {
+void ShrinkStringToFit(string & str) {
 	string(str.data(), str.size()).swap(str);
 }
 
 
 
 /** Removing symbols on the left */
-void StrCutLeft(string &sStr, size_t iCut) {
-	if (iCut > sStr.length()) {
-		iCut = sStr.length();
+void StrCutLeft(string & str, size_t iCut) {
+	if (iCut > str.length()) {
+		iCut = str.length();
 	}
-	string(sStr, iCut, sStr.size() - iCut).swap(sStr);
+	string(str, iCut, str.size() - iCut).swap(str);
 }
 
 
 
 /** Removing symbols on the left and record result in other string */
-void StrCutLeft(const string &sStr1, string &sStr2, size_t iCut) {
-	if (iCut > sStr1.size()) {
-		iCut = sStr1.size();
+void StrCutLeft(const string & str1, string & str2, size_t cut) {
+	if (cut > str1.size()) {
+		cut = str1.size();
 	}
-	string(sStr1, iCut, sStr1.size() - iCut).swap(sStr2);
+	string(str1, cut, str1.size() - cut).swap(str2);
 }
 
 
 
 /** Record from the file to the string */
-bool LoadFileInString(const string &sFileName, string &sStr) {
-	string sBuf;
-	bool bAddLine = false;
-	ifstream ifs(sFileName.c_str());
+bool LoadFileInString(const string & fileName, string & str) {
+	string buf;
+	bool addLine = false;
+	ifstream ifs(fileName.c_str());
 
 	if (!ifs.is_open()) {
 		return false;
 	}
+
 	while (!ifs.eof()) {
-		getline(ifs, sBuf);
-		if(bAddLine) sStr += "\r\n";
-		else bAddLine = true;
-		sStr += sBuf;
+		getline(ifs, buf);
+		if (addLine) {
+			str += "\r\n";
+		} else {
+			addLine = true;
+		}
+		str += buf;
 	}
 	ifs.close();
 	return true;
@@ -84,92 +88,94 @@ bool LoadFileInString(const string &sFileName, string &sStr) {
 
 
 
-/** Searching for in string sStr substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & StringReplace(const string &sStr, const string &sVarname, string &sDest, const string &sBy, bool b) {
-	string sSearchvar;
+/** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
+string & StringReplace(const string & str, const string & varname, string & dest, const string & by, bool b) {
+	string search;
 	if (!b) {
-		sSearchvar = "%[";
-		sSearchvar += sVarname;
-		sSearchvar += "]";
-	} else sSearchvar = sVarname;
-	sDest = sStr;
-	size_t iPos = sDest.find(sSearchvar);
-	while (iPos != sDest.npos) {
-		sDest.replace(iPos, sSearchvar.size(), sBy);
-		iPos = sDest.find(sSearchvar, iPos);
-	}
-	return sDest;
-}
-
-
-
-/** Searching for in string sStr substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & StringReplace(const string &sStr, const string &sVarname, string &sDest, int iBy, bool b) {
-	ostringstream os;
-	os << iBy;
-	return StringReplace(sStr, sVarname, sDest, os.str(), b);
-}
-
-
-
-/** Searching for in string sStr substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & StringReplace(const string &sStr, const string &sVarname, string &sDest, double iBy, bool b) {
-	ostringstream os;
-	os << iBy;
-	return StringReplace(sStr, sVarname, sDest, os.str(), b);
-}
-
-
-
-/** Searching for in string sStr substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & StringReplace(const string &sStr, const string &sVarname, string &sDest, long iBy, bool b) {
-	ostringstream os;
-	os << iBy;
-	return StringReplace(sStr, sVarname, sDest, os.str(), b);
-}
-
-
-
-/** Searching for in string sStr substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & StringReplace(const string &sStr, const string &sVarname, string &sDest, __int64 iBy, bool b) {
-	return StringReplace(sStr, sVarname, sDest, Int64ToString(iBy), b);
-}
-
-
-
-string ReplaceSp(const string &sStr, bool bTo) {
-	string sDest(sStr), sSearch, sRep;
-	if (bTo) {
-		sSearch = "\\n";
-		sRep = "\n";
+		search = "%[";
+		search += varname;
+		search += "]";
 	} else {
-		sSearch = "\n";
-		sRep = "\\n";
+		search = varname;
 	}
-	size_t iPos = sDest.find(sSearch);
-	while (iPos != sDest.npos) {
-		sDest.replace(iPos, sSearch.size(), sRep);
-		iPos = sDest.find(sSearch, iPos);
+	dest = str;
+	size_t pos = dest.find(search);
+	while (pos != dest.npos) {
+		dest.replace(pos, search.size(), by);
+		pos = dest.find(search, pos);
 	}
-	if (bTo) {
-		sSearch = "\\t";
-		sRep = "\t";
+	return dest;
+}
+
+
+
+/** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
+string & StringReplace(const string & str, const string & varname, string & dest, int by, bool b) {
+	ostringstream os;
+	os << by;
+	return StringReplace(str, varname, dest, os.str(), b);
+}
+
+
+
+/** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
+string & StringReplace(const string & str, const string & varname, string & dest, double by, bool b) {
+	ostringstream os;
+	os << by;
+	return StringReplace(str, varname, dest, os.str(), b);
+}
+
+
+
+/** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
+string & StringReplace(const string & str, const string & varname, string & dest, long by, bool b) {
+	ostringstream os;
+	os << by;
+	return StringReplace(str, varname, dest, os.str(), b);
+}
+
+
+
+/** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
+string & StringReplace(const string & str, const string & varname, string & dest, __int64 by, bool b) {
+	return StringReplace(str, varname, dest, Int64ToString(by), b);
+}
+
+
+
+string ReplaceSp(const string & str, bool to) {
+	string dest(str), search, rep;
+	if (to) {
+		search = "\\n";
+		rep = "\n";
 	} else {
-		sSearch = "\t";
-		sRep = "\\t";
+		search = "\n";
+		rep = "\\n";
 	}
-	iPos = sDest.find(sSearch);
-	while (iPos != sDest.npos) {
-		sDest.replace(iPos, sSearch.size(), sRep);
-		iPos = sDest.find(sSearch, iPos);
+	size_t pos = dest.find(search);
+	while (pos != dest.npos) {
+		dest.replace(pos, search.size(), rep);
+		pos = dest.find(search, pos);
 	}
-	return sDest;
+	if (to) {
+		search = "\\t";
+		rep = "\t";
+	} else {
+		search = "\t";
+		rep = "\\t";
+	}
+	pos = dest.find(search);
+	while (pos != dest.npos) {
+		dest.replace(pos, search.size(), rep);
+		pos = dest.find(search, pos);
+	}
+	return dest;
 }
 
 
 
 /** Typecasting __int64 to string */
-string Int64ToString(__int64 const &ll) {
+string Int64ToString(__int64 const & ll) {
 	char sBuf[32] = { '\0' };
 #ifdef _WIN32
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
@@ -186,39 +192,39 @@ string Int64ToString(__int64 const &ll) {
 
 
 /** Typecasting string to __int64 */
-__int64 StringToInt64(const string &sStr) {
+__int64 StringToInt64(const string & str) {
 #ifdef _WIN32
-	__int64 iResult = 0;
+	__int64 result = 0;
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
-		sscanf_s(sStr.c_str(), "%I64d", &iResult);
+		sscanf_s(str.c_str(), "%I64d", &result);
 	#else
-		sscanf(sStr.c_str(), "%I64d", &iResult);
+		sscanf(str.c_str(), "%I64d", &result);
 	#endif
-	return iResult;
+	return result;
 #else
-	return strtoll(sStr.c_str(), NULL, 10);
+	return strtoll(str.c_str(), NULL, 10);
 #endif
 }
 
 
 
-int CountLines(const string &sStr) {
-	int iLines = 1;
-	size_t iPos = 0;
-	while (sStr.npos != (iPos = sStr.find_first_of("\n", iPos ? iPos + 1 : 0))) {
-		++iLines;
+int CountLines(const string & str) {
+	int lines = 1;
+	size_t pos = 0;
+	while (str.npos != (pos = str.find_first_of("\n", pos ? pos + 1 : 0))) {
+		++lines;
 	}
-	return iLines;
+	return lines;
 }
 
 
 
-/** Function will return true, if number of the strings less than iMax */
-bool LimitLines(const string &sStr, int iMax) {
-	int iLines = 1;
-	size_t iPos = 0;
-	while (sStr.npos != (iPos = sStr.find_first_of("\n", iPos ? iPos + 1 : 0))) {
-		if (++iLines > iMax) {
+/** Function will return true, if number of the strings less than max */
+bool LimitLines(const string & str, int max) {
+	int lines = 1;
+	size_t pos = 0;
+	while (str.npos != (pos = str.find_first_of("\n", pos ? pos + 1 : 0))) {
+		if (++lines > max) {
 			return false;
 		}
 	}
@@ -227,26 +233,26 @@ bool LimitLines(const string &sStr, int iMax) {
 
 
 
-void StringSplit(const string & sStr, char sDelim, vector<string> & vRes) {
+void StringSplit(const string & str, char sDelim, vector<string> & vRes) {
 	size_t i, j = 0;
-	while ( (i = sStr.find_first_of(sDelim, j)) != sStr.npos ) {
-		vRes.push_back(sStr.substr(j, i - j));
+	while ((i = str.find_first_of(sDelim, j)) != str.npos) {
+		vRes.push_back(str.substr(j, i - j));
 		j = i + 1;
 	}
-	vRes.push_back(sStr.substr(j));
+	vRes.push_back(str.substr(j));
 }
 
 
 
-string & trim(string & sStr) {
-	int iBeg = 0, iLen = sStr.size();
-	while (iLen && sStr[iLen - 1] == ' ') {
+string & trim(string & str) {
+	int begin = 0, iLen = str.size();
+	while (iLen && str[iLen - 1] == ' ') {
 		--iLen;
 	}
-	while (sStr[iBeg] == ' ') {
-		++iBeg;
+	while (str[begin] == ' ') {
+		++begin;
 	}
-	return sStr.assign(sStr, iBeg, iLen - iBeg);
+	return str.assign(str, begin, iLen - begin);
 }
 
 

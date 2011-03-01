@@ -58,7 +58,9 @@ PluginLoader::~PluginLoader() {
 /** Is error? */
 bool PluginLoader::isError() {
 	const char * error = dlerror();
-	if (!error) return false;
+	if (!error) {
+		return false;
+	}
 	mError = error;
 	return true;
 }

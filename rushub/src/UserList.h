@@ -56,13 +56,21 @@ public:
 
 	/** Unary function for sending data to users */
 	struct ufSend : public unary_function<void, iterator> {
-		string &msData; /** Data for sending */
+		string & msData; /** Data for sending */
 		bool mbProfile;
 		unsigned long miProfile;
-		ufSend(string & sData) : msData(sData), mbProfile(false) {}
-		ufSend(string & sData, unsigned long iProfile) : msData(sData), mbProfile(true), miProfile(iProfile) {}
-		ufSend & operator=(const ufSend &) { return *this; }
-		void operator()(UserBase *); /** Sending operator */
+
+		ufSend(string & sData) : msData(sData), mbProfile(false) {
+		}
+
+		ufSend(string & sData, unsigned long iProfile) : msData(sData), mbProfile(true), miProfile(iProfile) {
+		}
+
+		ufSend & operator = (const ufSend &) {
+			return *this;
+		}
+
+		void operator() (UserBase *); /** Sending operator */
 	};
 
 	/** Unary function for sending data sDataS+sNick+sDataE to each user */
@@ -74,14 +82,21 @@ public:
 			msDataStart(sDataS),
 			msDataEnd(sDataE),
 			mbProfile(false)
-		{}
+		{
+		}
+
 		ufSendWithNick(string & sDataS, string & sDataE, unsigned long iProfile) : 
 			msDataStart(sDataS),
 			msDataEnd(sDataE),
 			mbProfile(true),
 			miProfile(iProfile)
-		{}
-		ufSendWithNick & operator = (const ufSendWithNick &) { return *this; }
+		{
+		}
+
+		ufSendWithNick & operator = (const ufSendWithNick &) {
+			return *this;
+		}
+
 		void operator() (UserBase *); /** Sending operator */
 	};
 
@@ -91,14 +106,22 @@ public:
 		string msStart; /** Prefix */
 		string msSep; /** Separator */
 
-		ufDoNickList(string &sList) : msList(sList){}
-		virtual ~ufDoNickList() {}
-		virtual ufDoNickList & operator=(const ufDoNickList &) { return *this; }
+		ufDoNickList(string & sList) : msList(sList){
+		}
+
+		virtual ~ufDoNickList() {
+		}
+
+		virtual ufDoNickList & operator = (const ufDoNickList &) {
+			return *this;
+		}
+
 		virtual void Clear() { /** Clear var and record prefix */
 			msList.erase(0, msList.size());
 			msList.append(msStart.c_str(), msStart.size());
 		}
-		virtual void operator()(UserBase *User);
+
+		virtual void operator() (UserBase *User);
 	};
 
 private:
@@ -135,21 +158,52 @@ public:
 		return List_t::mHash(key);
 	}
 
-	UserBase* GetUserBaseByNick(const string & nick) { return List_t::Find(Nick2Key(nick)); }
-	UserBase* GetUserBaseByKey(const Key & key) { return List_t::Find(key); }
-	bool ContainsNick(const string & nick) { return List_t::Contain(Nick2Key(nick)); }
-	bool ContainsKey(const Key &key) { return List_t::Contain(key); }
-	bool AddWithNick(const string & nick, UserBase * userBase) { return List_t::Add(Nick2Key(nick), userBase); }
-	bool AddWithKey(const Key & key, UserBase * userBase) { return List_t::Add(key, userBase); }
-	bool RemoveByNick(const string & nick) { return List_t::Remove(Nick2Key(nick)); }
-	bool RemoveByKey(const Key & key) { return List_t::Remove(key); }
+	UserBase * GetUserBaseByNick(const string & nick) {
+		return List_t::Find(Nick2Key(nick));
+	}
+
+	UserBase * GetUserBaseByKey(const Key & key) {
+		return List_t::Find(key);
+	}
+
+	bool ContainsNick(const string & nick) {
+		return List_t::Contain(Nick2Key(nick));
+	}
+
+	bool ContainsKey(const Key &key) {
+		return List_t::Contain(key);
+	}
+
+	bool AddWithNick(const string & nick, UserBase * userBase) {
+		return List_t::Add(Nick2Key(nick), userBase);
+	}
+
+	bool AddWithKey(const Key & key, UserBase * userBase) {
+		return List_t::Add(key, userBase);
+	}
+
+	bool RemoveByNick(const string & nick) {
+		return List_t::Remove(Nick2Key(nick));
+	}
+
+	bool RemoveByKey(const Key & key) {
+		return List_t::Remove(key);
+	}
+
 	bool Add(UserBase * userBase);
+
 	bool Remove(UserBase * userBase);
 
 	virtual string & GetNickList();
 
-	void SetNickListStart(const string & start) { mNickListMaker.msStart = start; }
-	void SetNickListSeparator(const string & sep) { mNickListMaker.msSep = sep; }
+	void SetNickListStart(const string & start) {
+		mNickListMaker.msStart = start;
+	}
+
+	void SetNickListSeparator(const string & sep) {
+		mNickListMaker.msSep = sep;
+	}
+	
 	void Remake() {
 		mbRemakeNextNickList = (!mbOptRemake);
 	}
@@ -207,28 +261,46 @@ public:
 
 	/** Unary function for constructing MyINFO list */
 	struct ufDoINFOList : public UserList::ufDoNickList {
-		string &msListComplete;
-		ufDoINFOList(string &sList, string &sListComplete) :
+		string & msListComplete;
+		ufDoINFOList(string & sList, string & sListComplete) :
 			ufDoNickList(sList),
 			msListComplete(sListComplete)
-		{msSep = NMDC_SEPARATOR; msStart = "";}
-		virtual ~ufDoINFOList(){}
-		virtual ufDoINFOList & operator=(const ufDoINFOList &) { return *this; }
-		virtual void Clear(){ /** Clear var and record prefix */
+		{
+			msSep = NMDC_SEPARATOR;
+			msStart = "";
+		}
+
+		virtual ~ufDoINFOList() {
+		}
+
+		virtual ufDoINFOList & operator = (const ufDoINFOList &) {
+			return *this;
+		}
+
+		virtual void Clear() { /** Clear var and record prefix */
 			ufDoNickList::Clear();
 			msListComplete.erase(0, msListComplete.size());
 			msListComplete.append(msStart.data(), msStart.size());
 		}
-		virtual void operator()(UserBase*);
+
+		virtual void operator() (UserBase *);
 	};
 
 	/** Unary function for constructing ip-list */
 	struct ufDoIpList : public UserList::ufDoNickList {
-		ufDoIpList(string &sList) : ufDoNickList(sList)
-		{msSep = "$$"; msStart = "$UserIP ";}
-		virtual ~ufDoIpList(){}
-		virtual ufDoIpList & operator=(const ufDoIpList &) { return *this; }
-		virtual void operator()(UserBase *User);
+		ufDoIpList(string & sList) : ufDoNickList(sList) {
+			msSep = "$$";
+			msStart = "$UserIP ";
+		}
+
+		virtual ~ufDoIpList() {
+		}
+
+		virtual ufDoIpList & operator = (const ufDoIpList &) {
+			return *this;
+		}
+
+		virtual void operator() (UserBase * userBase);
 	};
 
 private:
@@ -253,29 +325,33 @@ protected:
 public:
 
 	explicit FullUserList(string sName, bool bKeepNickList = false, bool bKeepInfoList = false, bool bKeepIpList = false);
-	virtual ~FullUserList() {}
 
-	virtual string &GetNickList();
-	virtual string &GetInfoList(bool bComplete = false);
-	virtual string &GetIpList();
+	virtual ~FullUserList() {
+	}
+
+	virtual string & GetNickList();
+	virtual string & GetInfoList(bool bComplete = false);
+	virtual string & GetIpList();
 
 	inline void Remake() {
-		if(!mbOptRemake)
+		if (!mbOptRemake) {
 			mbRemakeNextNickList = mbRemakeNextInfoList = mbRemakeNextIpList = true;
-		else
+		} else {
 			mbRemakeNextNickList = mbRemakeNextInfoList = mbRemakeNextIpList = false;
+		}
 	}
 
 
 	/** OnAdd */
-	virtual void OnAdd(UserBase *User) {
-		UserList::OnAdd(User);
-		if(!mbRemakeNextInfoList && mbKeepInfoList) mINFOListMaker(User);
-		if(!mbRemakeNextIpList && mbKeepIpList) mIpListMaker(User);
+	virtual void OnAdd(UserBase * userBase) {
+		UserList::OnAdd(userBase);
+		if(!mbRemakeNextInfoList && mbKeepInfoList) mINFOListMaker(userBase);
+		if(!mbRemakeNextIpList && mbKeepIpList) mIpListMaker(userBase);
 	}
+
 	/** OnRemove */
-	virtual void OnRemove(UserBase *User) {
-		UserList::OnRemove(User);
+	virtual void OnRemove(UserBase * userBase) {
+		UserList::OnRemove(userBase);
 		mbRemakeNextInfoList = mbKeepInfoList;
 		mbRemakeNextIpList = mbKeepIpList;
 	}

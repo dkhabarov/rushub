@@ -71,12 +71,12 @@ vector<Obj::Pair> Obj::mLoadBuf;
 
 
 
-Obj::Obj(const char *name) :
+Obj::Obj(const char * name) :
 	mClassName(name),
 	mToLog(&cout)
 {
 	++mCounterObj;
-	//if(Log(0)) LogStream() << "+ " << mClassName << endl;
+	//if (Log(0)) LogStream() << "+ " << mClassName << endl;
 }
 
 
@@ -86,14 +86,14 @@ Obj::Obj() :
 	mToLog(&cout)
 {
 	++mCounterObj;
-	//if(Log(0)) LogStream() << "+ " << mClassName << endl;
+	//if (Log(0)) LogStream() << "+ " << mClassName << endl;
 }
 
 
 
 Obj::~Obj() {
 	--mCounterObj;
-	//if(string(mClassName) != "DcServer" && Log(0)) LogStream() << "- " << mClassName << endl;
+	//if (string(mClassName) != "DcServer" && Log(0)) LogStream() << "- " << mClassName << endl;
 }
 
 
@@ -106,10 +106,10 @@ int Obj::GetCount() {
 
 
 /** Return log straem */
-int Obj::Log(int iLevel) {
-	if(iLevel <= miMaxLevel) {
-		mToLog = &Log();
-		miLevel = iLevel;
+int Obj::Log(int level) {
+	if (level <= miMaxLevel) {
+		mToLog = &log();
+		miLevel = level;
 		mbIsErrorLog = false;
 		return StrLog();
 	}
@@ -119,10 +119,10 @@ int Obj::Log(int iLevel) {
 
 
 /** Return errlog stream */
-int Obj::ErrLog(int iLevel) {
-	if(iLevel <= miMaxErrLevel) {
-		mToLog = &ErrLog();
-		miLevel = iLevel;
+int Obj::ErrLog(int level) {
+	if (level <= miMaxErrLevel) {
+		mToLog = &errLog();
+		miLevel = level;
 		mbIsErrorLog = true;
 		return StrLog();
 	}
@@ -139,9 +139,9 @@ ostream & Obj::LogStream() {
 
 
 /** Set class name */
-void Obj::SetClassName(const char *sName) {
-	//if(Log(0)) LogStream() << "r " << mClassName << " -> " << sName << endl;
-	mClassName = sName;
+void Obj::SetClassName(const char * name) {
+	//if (Log(0)) LogStream() << "r " << mClassName << " -> " << name << endl;
+	mClassName = name;
 }
 
 
@@ -157,16 +157,16 @@ bool Obj::StrLog() {
 
 
 /** Log function. Return log straem */
-ostream & Obj::Log() {
+ostream & Obj::log() {
 
 #ifndef _WIN32
-	if(mbSysLogOn) {
+	if (mbSysLogOn) {
 		if (saveInBuf()) {
 			loadFromBuf(mSysLogOss);
 		}
 		const string & buf = mSysLogOss.str();
-		if(!buf.empty()) {
-			syslog(SysLogLevel(miLevel, mbIsErrorLog), buf.c_str());
+		if (!buf.empty()) {
+			syslog(sysLogLevel(miLevel, mbIsErrorLog), buf.c_str());
 			mSysLogOss.str("");
 		}
 		return mSysLogOss;
@@ -189,8 +189,8 @@ ostream & Obj::Log() {
 
 
 /** Errlog function. Return errlog straem */
-ostream & Obj::ErrLog() {
-	return Log();
+ostream & Obj::errLog() {
+	return log();
 }
 
 
@@ -251,30 +251,50 @@ void Obj::loadFromBuf(ostream & os) {
 /** Return level for syslog */
 #ifndef _WIN32
 
-int Obj::SysLogLevel(int iLevel, bool bIsError /* = false */) {
-	if (bIsError) {
-		switch(iLevel) {
-			case 0:
+int Obj::sysLogLevel(int level, bool isError /* = false */) {
+	if (isError) {
+
+		switch (level) {
+
+			case 0 :
 				return LOG_USER | LOG_CRIT;
-			case 1:
+
+			case 1 :
 				return LOG_USER | LOG_ERR;
-			default:
+
+			default :
 				return 0;
+
 		}
+
 	} else {
-		switch(iLevel) {
-			case 0:
-			case 1:
-			case 2:
+
+		switch (level) {
+
+			case 0 :
+				// Fallthrough
+
+			case 1 :
+				// Fallthrough
+
+			case 2 :
 				return LOG_USER | LOG_NOTICE;
-			case 3:
-			case 4:
+
+			case 3 :
+				// Fallthrough
+
+			case 4 :
 				return LOG_USER | LOG_INFO;
-			case 5:
-			case 6:
+
+			case 5 :
+				// Fallthrough
+
+			case 6 :
 				return LOG_USER | LOG_DEBUG;
-			default:
+
+			default :
 				return 0;
+
 		}
 	}
 	return 0;
@@ -282,7 +302,7 @@ int Obj::SysLogLevel(int iLevel, bool bIsError /* = false */) {
 
 #else
 
-int Obj::SysLogLevel(int, bool) {
+int Obj::sysLogLevel(int, bool) {
 	return 0;
 }
 

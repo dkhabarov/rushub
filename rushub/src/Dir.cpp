@@ -29,18 +29,18 @@
 
 
 
-DIR * opendir(const char *name) {
-	DIR *dir = 0;
-	if(name && name[0]) {
+DIR * opendir(const char * name) {
+	DIR * dir = 0;
+	if (name && name[0]) {
 		size_t base_length = strlen(name);
-		const char *all = /* search pattern must end with suitable wildcard */
+		const char * all = /* search pattern must end with suitable wildcard */
 		strchr("/\\", name[base_length - 1]) ? "*" : "/*";
-		if((dir = (DIR *) malloc(sizeof *dir)) != 0 &&
+		if ((dir = (DIR *) malloc(sizeof *dir)) != 0 &&
 			(dir->name = (char *) malloc(base_length + strlen(all) + 1)) != 0)
 		{
 			strcpy(dir->name, name);
 			strcat(dir->name, all);
-			if((dir->handle = (long) _findfirst(dir->name, &dir->info)) != -1) {
+			if ((dir->handle = (long) _findfirst(dir->name, &dir->info)) != -1) {
 				dir->result.d_name = 0;
 			} else { /* rollback */
 				free(dir->name);
@@ -52,7 +52,7 @@ DIR * opendir(const char *name) {
 			dir = 0;
 			errno = ENOMEM;
 		}
-	}	else	{
+	}	else {
 		errno = EINVAL;
 	}
 	return dir;
@@ -60,16 +60,16 @@ DIR * opendir(const char *name) {
 
 
 
-int closedir(DIR *dir) {
+int closedir(DIR * dir) {
 	int result = -1;
-	if(dir)	{
-		if(dir->handle != -1)	{
+	if (dir)	{
+		if (dir->handle != -1)	{
 			result = _findclose(dir->handle);
 		}
 		free(dir->name);
 		free(dir);
 	}
-	if(result == -1) { /* map all errors to EBADF */
+	if (result == -1) { /* map all errors to EBADF */
 		errno = EBADF;
 	}
 	return result;
@@ -77,10 +77,10 @@ int closedir(DIR *dir) {
 
 
 
-struct dirent * readdir(DIR *dir) {
-	struct dirent *result = 0;
-	if(dir && dir->handle != -1) {
-		if(!dir->result.d_name || _findnext(dir->handle, &dir->info) != -1) {
+struct dirent * readdir(DIR * dir) {
+	struct dirent * result = 0;
+	if (dir && dir->handle != -1) {
+		if (!dir->result.d_name || _findnext(dir->handle, &dir->info) != -1) {
 			result = &dir->result;
 			result->d_name = dir->info.name;
 		}
@@ -92,8 +92,8 @@ struct dirent * readdir(DIR *dir) {
 
 
 
-void rewinddir(DIR *dir) {
-	if(dir && dir->handle != -1) {
+void rewinddir(DIR * dir) {
+	if (dir && dir->handle != -1) {
 		_findclose(dir->handle);
 		dir->handle = (long) _findfirst(dir->name, &dir->info);
 		dir->result.d_name = 0;
@@ -123,9 +123,11 @@ int Dir::mkDir(const char * path) {
 
 /** Check exists of the dir */
 bool Dir::isPathExist(const char * name)	{
-	DIR *dir;
+	DIR * dir;
 	dir = opendir(name);
-	if(dir == NULL) return false;
+	if (dir == NULL) {
+		return false;
+	}
 	closedir(dir);
 	return true;
 }
@@ -135,10 +137,14 @@ bool Dir::isPathExist(const char * name)	{
 bool Dir::isFileExist(const char * name) {
 	#ifdef _WIN32
 		DWORD code = GetFileAttributes(name);
-		if(code != INVALID_FILE_ATTRIBUTES && code != FILE_ATTRIBUTE_DIRECTORY) return true;
+		if (code != INVALID_FILE_ATTRIBUTES && code != FILE_ATTRIBUTE_DIRECTORY) {
+			return true;
+		}
 	#else
 		struct stat st;
-		if(stat(name, &st) == 0 && S_ISDIR(st.st_mode) == 0) return true;
+		if (stat(name, &st) == 0 && S_ISDIR(st.st_mode) == 0) {
+			return true;
+		}
 	#endif
 	return false;
 }

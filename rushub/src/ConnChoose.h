@@ -78,11 +78,16 @@ public:
 
 public:
 
-	ConnChoose() : mMaxSocket(0) {}
-	virtual ~ConnChoose() {}
+	ConnChoose() : mMaxSocket(0) {
+	}
+
+	virtual ~ConnChoose() {
+	}
 
 	/** virtual function for select limit detect */
-	virtual unsigned Size() { return 0; }
+	virtual unsigned Size() {
+		return 0;
+	}
 
 	virtual bool AddConn(ConnBase *);
 	virtual bool DelConn(ConnBase *);
@@ -165,7 +170,7 @@ public:
 			return mRes.mFd == it.mRes.mFd;
 		}
 
-		iterator & operator = (const iterator &it) {
+		iterator & operator = (const iterator & it) {
 			mRes.mFd = it.mRes.mFd;
 			mMax = it.mMax;
 			mChoose = it.mChoose;
@@ -190,39 +195,39 @@ public:
 
 }; // class ConnChoose
 
-bool ConnChoose::OptIn(ConnBase * conn, ConnChoose::tEventFlag eMask) {
-	if (!conn) {
+bool ConnChoose::OptIn(ConnBase * connBase, ConnChoose::tEventFlag eMask) {
+	if (!connBase) {
 		return false;
 	}
-	return this->OptIn(tSocket(*conn), eMask);
+	return this->OptIn(tSocket(*connBase), eMask);
 }
 
-void ConnChoose::OptOut(ConnBase * conn, ConnChoose::tEventFlag eMask) {
-	if (!conn) {
+void ConnChoose::OptOut(ConnBase * connBase, ConnChoose::tEventFlag eMask) {
+	if (!connBase) {
 		return;
 	}
-	this->OptOut(tSocket(*conn), eMask);
+	this->OptOut(tSocket(*connBase), eMask);
 }
 
-int ConnChoose::OptGet(ConnBase * conn) {
-	if (!conn) {
+int ConnChoose::OptGet(ConnBase * connBase) {
+	if (!connBase) {
 		return 0;
 	}
-	return this->OptGet(tSocket(*conn));
+	return this->OptGet(tSocket(*connBase));
 }
 
-int ConnChoose::RevGet(ConnBase * conn) {
-	if (!conn) {
+int ConnChoose::RevGet(ConnBase * connBase) {
+	if (!connBase) {
 		return 0;
 	}
-	return this->RevGet(tSocket(*conn));
+	return this->RevGet(tSocket(*connBase));
 }
 
-bool ConnChoose::RevTest(ConnBase * conn) {
-	if (!conn) {
+bool ConnChoose::RevTest(ConnBase * connBase) {
+	if (!connBase) {
 		return false;
 	}
-	return this->RevTest(tSocket(*conn));
+	return this->RevTest(tSocket(*connBase));
 }
 
 ConnBase * ConnChoose::operator [] (tSocket sock) {

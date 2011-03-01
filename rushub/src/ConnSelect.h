@@ -50,13 +50,14 @@ public:
 
 protected:
 
-	tResList mResList; /** Res list */
+	/** Res list */
+	tResList mResList;
 
 public:
-	ConnSelect() : ConnChoose(), Obj("ConnSelect") {};
+	ConnSelect();
 	virtual ~ConnSelect();
 
-	unsigned Size() { return mResList.Size(); }
+	unsigned Size();
 
 	int Choose(Time &);
 
@@ -81,11 +82,17 @@ public:
 			#endif
 			return *this;
 		}
-		bool IsSet(tSocket sock) { return FD_ISSET(sock, this) != 0; }
-		void Clr(tSocket sock) { FD_CLR(sock, this); }
+		bool IsSet(tSocket sock) {
+			return FD_ISSET(sock, this) != 0;
+		}
+		void Clr(tSocket sock) {
+			FD_CLR(sock, this);
+		}
 		bool Set(tSocket sock) {
 			#ifdef _WIN32
-				if(fd_count >= FD_SETSIZE) return false;
+				if(fd_count >= FD_SETSIZE) {
+					return false;
+				}
 			#endif
 			FD_SET(sock, this);
 			return true;
@@ -93,79 +100,114 @@ public:
 	};
 
 	void ClearRevents();
-	void SetRevents(cSelectFD &fdset, unsigned eMask);
+	void SetRevents(cSelectFD & fdset, unsigned eMask);
 
 	struct iterator {
-		ConnSelect *mSel; /** for operator [] */
+		ConnSelect * mSel; /** for operator [] */
 		tResList::iterator mIt; /** iterator for list */
-		iterator() {}
-		iterator(ConnSelect *sel, tResList::iterator it) : mSel(sel), mIt(it) {}
+		iterator() {
+		}
+		iterator(ConnSelect * sel, tResList::iterator it) : mSel(sel), mIt(it) {
+		}
 
-		iterator & operator = (const iterator &it) {
+		iterator & operator = (const iterator & it) {
 			mSel= it.mSel;
 			mIt = it.mIt;
 			return *this;
 		}
-		bool operator != (const iterator &it){ return mIt != it.mIt; }
-		sChooseRes & operator *() {
-			sChooseRes *ChR = NULL;
-#ifdef _WIN32
-			__try {
-				if((ChR = (*mIt))->mConnBase == NULL)
-					ChR->mConnBase = mSel->operator[](ChR->mFd);
-			} __except(1) {
-				if(mSel->ErrLog(0)) mSel->LogStream() << "Fatal error: " << endl
-					<< "error in operator *()" << endl
-					<< "item = " << mIt.mItem << endl
-					<< "hash = " << mIt.i.i << endl
-					<< "end = " << mIt.i.end << endl;
-				if(mSel->ErrLog(0)) mSel->LogStream()	<< "connBase = " << (*mIt)->mConnBase << endl
-					<< "socket = " << (*mIt)->mFd << endl;
-			}
-#else
-		if((ChR = (*mIt))->mConnBase == NULL)
-			ChR->mConnBase = mSel->operator[](ChR->mFd);
-#endif
+		bool operator != (const iterator & it){ return mIt != it.mIt; }
+		sChooseRes & operator * () {
+			sChooseRes * ChR = NULL;
+			
+			#ifdef _WIN32
+				__try {
+					ChR = (*mIt);
+					if (ChR->mConnBase == NULL) {
+						ChR->mConnBase = mSel->operator[] (ChR->mFd);
+					}
+				} __except(1) {
+					if (mSel->ErrLog(0)) {
+						mSel->LogStream() << "Fatal error: " << endl
+							<< "error in operator *()" << endl
+							<< "item = " << mIt.mItem << endl
+							<< "hash = " << mIt.i.i << endl
+							<< "end = " << mIt.i.end << endl;
+					}
+					if (mSel->ErrLog(0)) {
+						mSel->LogStream()	<< "connBase = " << (*mIt)->mConnBase << endl
+							<< "socket = " << (*mIt)->mFd << endl;
+					}
+				}
+			#else
+				ChR = (*mIt);
+				if (ChR->mConnBase == NULL) {
+					ChR->mConnBase = mSel->operator[] (ChR->mFd);
+				}
+			#endif
 			return *ChR;
 		}
 
 		iterator & operator ++() {
-#ifdef _WIN32
-			__try {
-				while(!(++mIt).IsEnd() && !(*mIt)->mRevents && !((*mIt)->mEvents & eEF_CLOSE)) {}
-			} __except(1) {
-				if(mSel->ErrLog(0)) mSel->LogStream() << "Fatal error: " << endl
-					<< "error in operator ++()" << endl
-					<< "item = " << mIt.mItem << endl
-					<< "hash = " << mIt.i.i << endl
-					<< "end = " << mIt.i.end << endl
-					<< "socket = " << (*mIt)->mFd << endl; 
-			}
-#else
-			while(!(++mIt).IsEnd() && !(*mIt)->mRevents && !((*mIt)->mEvents & eEF_CLOSE)) {}
-#endif
+			#ifdef _WIN32
+				__try {
+					while (
+						!(++mIt).IsEnd() &&
+						!(*mIt)->mRevents &&
+						!((*mIt)->mEvents & eEF_CLOSE)
+					) {
+					}
+				} __except(1) {
+					if(mSel->ErrLog(0)) {
+						mSel->LogStream() << "Fatal error: " << endl
+							<< "error in operator ++()" << endl
+							<< "item = " << mIt.mItem << endl
+							<< "hash = " << mIt.i.i << endl
+							<< "end = " << mIt.i.end << endl
+							<< "socket = " << (*mIt)->mFd << endl;
+					}
+				}
+			#else
+				while (
+					!(++mIt).IsEnd() &&
+					!(*mIt)->mRevents &&
+					!((*mIt)->mEvents & eEF_CLOSE)
+				) {
+				}
+			#endif
 			return *this;
 		}
 	}; // iterator
 
 	iterator begin() {
-		static iterator sBegin(this, mResList.begin());
-		sBegin.mIt = mResList.begin();
-		if(!sBegin.mIt.IsEnd() && !(*sBegin.mIt)->mRevents && !((*sBegin.mIt)->mEvents & eEF_CLOSE))
-			++sBegin;
-		return sBegin;
+		static iterator begin_it(this, mResList.begin());
+		begin_it.mIt = mResList.begin();
+		if (
+			!begin_it.mIt.IsEnd() &&
+			!(*begin_it.mIt)->mRevents &&
+			!((*begin_it.mIt)->mEvents & eEF_CLOSE)
+		) {
+			++begin_it;
+		}
+		return begin_it;
 	}
 	iterator end() {
-		static iterator sEnd(this, mResList.end());
-		return sEnd;
+		static iterator end_it(this, mResList.end());
+		return end_it;
 	}
 
 protected:
 
-	cSelectFD mReadFS; /** For read */
-	cSelectFD mWriteFS; /** For write */
-	cSelectFD mExceptFS; /** Errors */
-	cSelectFD mCloseFS; /** Closed */
+	/** For read */
+	cSelectFD mReadFS;
+
+	/** For write */
+	cSelectFD mWriteFS;
+
+	/** Errors */
+	cSelectFD mExceptFS;
+
+	/** Closed */
+	cSelectFD mCloseFS;
 
 	// select results
 	cSelectFD mResReadFS;

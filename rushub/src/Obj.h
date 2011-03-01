@@ -37,6 +37,8 @@
 
 using namespace ::std;
 
+
+
 /** Main object class (log class) */
 class Obj {
 
@@ -47,7 +49,7 @@ public:
 public:
 
 	Obj();
-	Obj(const char *name);
+	Obj(const char * name);
 	virtual ~Obj();
 
 	/** Get counts of objects */
@@ -60,12 +62,12 @@ public:
 	int ErrLog(int level);
 
 	/** Return current log stream */
-	ostream &LogStream();
+	ostream & LogStream();
 
 protected:
 
 	/** Class name */
-	const char *mClassName;
+	const char * mClassName;
 
 	/** Max log level of events */
 	static int miMaxLevel;
@@ -79,7 +81,7 @@ protected:
 protected:
 
 	/** Set class name */
-	void SetClassName(const char *name);
+	void SetClassName(const char * name);
 
 	/** Main function putting log in stream */
 	virtual bool StrLog();
@@ -92,7 +94,7 @@ private:
 	static bool mbIsErrorLog;
 
 	/** output log stream */
-	ostream *mToLog;
+	ostream * mToLog;
 
 	static ostringstream mSysLogOss;
 	static ostringstream mBufOss;
@@ -104,17 +106,17 @@ private:
 private:
 
 	/** Log function */
-	ostream &Log();
+	ostream & log();
 
 	/** Errlog function */
-	ostream &ErrLog();
+	ostream & errLog();
 
 	ostream & openLog();
 	bool saveInBuf();
 	void loadFromBuf(ostream &);
 
 	/** Return level for syslog */
-	int SysLogLevel(int iLevel, bool bIsError = false);
+	int sysLogLevel(int iLevel, bool bIsError = false);
 
 }; // class Obj
 
