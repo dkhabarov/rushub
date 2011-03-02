@@ -376,12 +376,12 @@ int DcProtocol::DC_ValidateNick(DcParser * dcparser, DcConn * dcconn) {
 	dcconn->SetTimeOut(HUB_TIME_OUT_MYINFO, mDcServer->mDcConfig.miTimeout[HUB_TIME_OUT_MYINFO], mDcServer->mTime);
 	dcconn->SetLSFlag(LOGIN_STATUS_PASSWD); /** Does not need password */
 
-	dcconn->send(Append_DC_Hello(sMsg, dcconn->mDCUser->msNick)); /** Protection from change the command */
+	dcconn->send(Append_DC_Hello(sMsg, dcconn->mDcUser->msNick)); /** Protection from change the command */
 	return 0;
 }
 
 int DcProtocol::DC_MyPass(DcParser * dcparser, DcConn * dcconn) {
-	if (!dcconn->mDCUser) { /* Check of existence of the user for current connection */
+	if (!dcconn->mDcUser) { /* Check of existence of the user for current connection */
 		if (dcconn->Log(2)) {
 			dcconn->LogStream() << "Mypass before validatenick" << endl;
 		}
@@ -399,15 +399,15 @@ int DcProtocol::DC_MyPass(DcParser * dcparser, DcConn * dcconn) {
 		bOp = (mDcServer->mCalls.mOnMyPass.CallAll(dcconn, dcparser));
 	#endif
 
-	if (!mDcServer->CheckNickLength(dcconn, dcconn->mDCUser->msNick.length())) {
+	if (!mDcServer->CheckNickLength(dcconn, dcconn->mDcUser->msNick.length())) {
 		dcconn->CloseNice(9000, CLOSE_REASON_NICK_LEN);
 	}
 	string sMsg;
 	dcconn->SetLSFlag(LOGIN_STATUS_PASSWD); /** Password is accepted */
-	Append_DC_Hello(sMsg, dcconn->mDCUser->msNick);
+	Append_DC_Hello(sMsg, dcconn->mDcUser->msNick);
 	if (bOp) { /** If entered operator, that sends command LoggedIn ($LogedIn !) */
 		sMsg.append("$LogedIn ");
-		sMsg.append(dcconn->mDCUser->msNick);
+		sMsg.append(dcconn->mDcUser->msNick);
 		sMsg.append(NMDC_SEPARATOR);
 	}
 	dcconn->send(sMsg);
@@ -475,9 +475,9 @@ int DcProtocol::DC_MyINFO(DcParser * dcparser, DcConn * dcconn) {
 	const string & sNick = dcparser->chunkString(CHUNK_MI_NICK);
 
 	/** Check existence user, otherwise check support QuickList */
-	if (!dcconn->mDCUser) {
+	if (!dcconn->mDcUser) {
 		//if (QuickList)
-		//	dcconn->mDCUser->msNick = sNick;
+		//	dcconn->mDcUser->msNick = sNick;
 		//} else
 		{
 			if (dcconn->Log(2)) {
@@ -487,7 +487,7 @@ int DcProtocol::DC_MyINFO(DcParser * dcparser, DcConn * dcconn) {
 			dcconn->CloseNice(9000, CLOSE_REASON_MYINFO_WITHOUT_USER);
 			return -2;
 		}
-	} else if (sNick != dcconn->mDCUser->msNick) { /** Проверка ника */
+	} else if (sNick != dcconn->mDcUser->msNick) { /** Проверка ника */
 		if (dcconn->Log(2)) {
 			dcconn->LogStream() << "Bad nick in MyINFO, closing" << endl;
 		}
@@ -496,24 +496,24 @@ int DcProtocol::DC_MyINFO(DcParser * dcparser, DcConn * dcconn) {
 		return -1;
 	}
 
-	string sOldMyINFO = dcconn->mDCUser->getMyINFO();
-	dcconn->mDCUser->setMyINFO(dcparser);
+	string sOldMyINFO = dcconn->mDcUser->getMyINFO();
+	dcconn->mDcUser->setMyINFO(dcparser);
 
 	int iMode = 0;
 	#ifndef WITHOUT_PLUGINS
 		iMode = mDcServer->mCalls.mOnMyINFO.CallAll(dcconn, dcparser);
 	#endif
 
-	if (iMode != 1 && dcconn->mDCUser->mbInUserList) {
-		if (sOldMyINFO != dcconn->mDCUser->getMyINFO()) {
-			if (dcconn->mDCUser->mbHide) {
+	if (iMode != 1 && dcconn->mDcUser->getInUserList()) {
+		if (sOldMyINFO != dcconn->mDcUser->getMyINFO()) {
+			if (dcconn->mDcUser->mbHide) {
 				dcconn->send(dcparser->mCommand, true); // Send to self only
 			} else {
 				SendMode(dcconn, dcparser->mCommand, iMode, mDcServer->mDCUserList, true); // Use cache for send to all
 				//mDcServer->mDCUserList.sendToAll(dcparser->mCommand, true/*mDcServer->mDcConfig.mbDelayedMyINFO*/); // Send to all
 			}
 		}
-	} else if (!dcconn->mDCUser->mbInUserList) {
+	} else if (!dcconn->mDcUser->getInUserList()) {
 		dcconn->SetLSFlag(LOGIN_STATUS_MYINFO);
 		if (!mDcServer->BeforeUserEnter(dcconn)) {
 			return -1;
@@ -534,21 +534,21 @@ int DcProtocol::DC_Chat(DcParser * dcparser, DcConn * dcconn) {
 
 	ANTIFLOOD(Chat, FLOOD_TYPE_CHAT);
 
-	if (!dcconn->mDCUser) {
+	if (!dcconn->mDcUser) {
 		return -2;
 	}
-	if (!dcconn->mDCUser->mbInUserList) {
+	if (!dcconn->mDcUser->getInUserList()) {
 		return -3;
 	}
 
 	/** Check chat nick */
-	if ((dcparser->chunkString(CHUNK_CH_NICK) != dcconn->mDCUser->msNick) ) {
+	if ((dcparser->chunkString(CHUNK_CH_NICK) != dcconn->mDcUser->msNick) ) {
 		if (dcconn->Log(2)) {
 			dcconn->LogStream() << "Bad nick in chat, closing" << endl;
 		}
 		string sMsg = mDcServer->mDCLang.msBadChatNick;
 		StringReplace(sMsg, string("nick"), sMsg, dcparser->chunkString(CHUNK_CH_NICK));
-		StringReplace(sMsg, string("real_nick"), sMsg, dcconn->mDCUser->msNick);
+		StringReplace(sMsg, string("real_nick"), sMsg, dcconn->mDcUser->msNick);
 		mDcServer->sendToUser(dcconn, sMsg.c_str(), (char*)mDcServer->mDcConfig.msHubBot.c_str());
 		dcconn->CloseNice(9000, CLOSE_REASON_CHAT_NICK);
 		return -2;
@@ -578,16 +578,16 @@ int DcProtocol::DC_To(DcParser * dcparser, DcConn * dcconn) {
 
 	ANTIFLOOD(To, FLOOD_TYPE_TO);
 
-	if (!dcconn->mDCUser) {
+	if (!dcconn->mDcUser) {
 		return -2;
 	}
-	if (!dcconn->mDCUser->mbInUserList) {
+	if (!dcconn->mDcUser->getInUserList()) {
 		return -3;
 	}
 	string & sNick = dcparser->chunkString(CHUNK_PM_TO);
 
 	/** Checking the coincidence nicks in command */
-	if (dcparser->chunkString(CHUNK_PM_FROM) != dcconn->mDCUser->msNick || dcparser->chunkString(CHUNK_PM_NICK) != dcconn->mDCUser->msNick) {
+	if (dcparser->chunkString(CHUNK_PM_FROM) != dcconn->mDcUser->msNick || dcparser->chunkString(CHUNK_PM_NICK) != dcconn->mDcUser->msNick) {
 		if (dcconn->Log(2)) {
 			dcconn->LogStream() << "Bad nick in PM, closing" <<endl;
 		}
@@ -622,17 +622,17 @@ int DcProtocol::DC_MCTo(DcParser * dcparser, DcConn * dcconn) {
 
 	ANTIFLOOD(MCTo, FLOOD_TYPE_MCTO);
 
-	if (!dcconn->mDCUser) {
+	if (!dcconn->mDcUser) {
 		return -2;
 	}
-	if (!dcconn->mDCUser->mbInUserList) {
+	if (!dcconn->mDcUser->getInUserList()) {
 		return -3;
 	}
 
 	string & sNick = dcparser->chunkString(CHUNK_MC_TO);
 
 	/** Checking the coincidence nicks in command */
-	if (dcparser->chunkString(CHUNK_MC_FROM) != dcconn->mDCUser->msNick) {
+	if (dcparser->chunkString(CHUNK_MC_FROM) != dcconn->mDcUser->msNick) {
 		if (dcconn->Log(2)) {
 			dcconn->LogStream() << "Bad nick in MCTo, closing" <<endl;
 		}
@@ -653,8 +653,8 @@ int DcProtocol::DC_MCTo(DcParser * dcparser, DcConn * dcconn) {
 	}
 
 	string msg;
-	User->send(Append_DC_Chat(msg, dcconn->mDCUser->msNick, dcparser->chunkString(CHUNK_MC_MSG)));
-	if (dcconn->mDCUser->msNick != sNick) {
+	User->send(Append_DC_Chat(msg, dcconn->mDcUser->msNick, dcparser->chunkString(CHUNK_MC_MSG)));
+	if (dcconn->mDcUser->msNick != sNick) {
 		dcconn->send(msg);
 	}
 	return 0;
@@ -677,7 +677,7 @@ int DcProtocol::DC_Search(DcParser * dcparser, DcConn * dcconn) {
 
 	ANTIFLOOD(Search, FLOOD_TYPE_SEARCH);
 
-	if (!dcconn->mDCUser || !dcconn->mDCUser->mbInUserList) {
+	if (!dcconn->mDcUser || !dcconn->mDcUser->getInUserList()) {
 		return -2;
 	}
 
@@ -755,18 +755,18 @@ int DcProtocol::DC_SR(DcParser * dcparser, DcConn * dcconn) {
 
 	ANTIFLOOD(SR, FLOOD_TYPE_SR);
 
-	if (!dcconn->mDCUser || !dcconn->mDCUser->mbInUserList) {
+	if (!dcconn->mDcUser || !dcconn->mDcUser->getInUserList()) {
 		return -2;
 	}
 
 	/** Check same nick in cmd (PROTOCOL NMDC) */
-	if (mDcServer->mDcConfig.mbCheckSRNick && (dcconn->mDCUser->msNick != dcparser->chunkString(CHUNK_SR_FROM))) {
+	if (mDcServer->mDcConfig.mbCheckSRNick && (dcconn->mDcUser->msNick != dcparser->chunkString(CHUNK_SR_FROM))) {
 		string sMsg = mDcServer->mDCLang.msBadSRNick;
 		if (dcconn->Log(2)) {
 			dcconn->LogStream() << "Bad nick in search response, closing" << endl;
 		}
 		StringReplace(sMsg, "nick", sMsg, dcparser->chunkString(CHUNK_SR_FROM));
-		StringReplace(sMsg, "real_nick", sMsg, dcconn->mDCUser->msNick);
+		StringReplace(sMsg, "real_nick", sMsg, dcconn->mDcUser->msNick);
 		mDcServer->sendToUser(dcconn, sMsg.c_str(), (char*)mDcServer->mDcConfig.msHubBot.c_str());
 		dcconn->CloseNice(9000, CLOSE_REASON_NICK_SR);
 		return -1;
@@ -775,7 +775,7 @@ int DcProtocol::DC_SR(DcParser * dcparser, DcConn * dcconn) {
 	DcUser * User = (DcUser *)mDcServer->mDCUserList.GetUserBaseByNick(dcparser->chunkString(CHUNK_SR_TO));
 
 	/** Is user exist? */
-	if (!User || !User->mDCConn) {
+	if (!User || !User->mDcConn) {
 		return -2;
 	}
 
@@ -787,9 +787,9 @@ int DcProtocol::DC_SR(DcParser * dcparser, DcConn * dcconn) {
 	#endif
 
 	/** Sending cmd */
-	if (!mDcServer->mDcConfig.miMaxPassiveRes || (++User->mDCConn->miSRCounter <= unsigned(mDcServer->mDcConfig.miMaxPassiveRes))) {
+	if (!mDcServer->mDcConfig.miMaxPassiveRes || (++User->mDcConn->miSRCounter <= unsigned(mDcServer->mDcConfig.miMaxPassiveRes))) {
 		string sStr(dcparser->mCommand, 0, dcparser->mChunks[CHUNK_SR_TO].first - 1); /** Remove nick on the end of cmd */
-		User->mDCConn->send(sStr, true, false);
+		User->mDcConn->send(sStr, true, false);
 	}
 	return 0;
 }
@@ -806,7 +806,7 @@ int DcProtocol::DC_ConnectToMe(DcParser * dcparser, DcConn * dcconn) {
 
 	ANTIFLOOD(CTM, FLOOD_TYPE_CTM);
 
-	if (!dcconn->mDCUser || !dcconn->mDCUser->mbInUserList) {
+	if (!dcconn->mDcUser || !dcconn->mDcUser->getInUserList()) {
 		return -1;
 	}
 
@@ -845,15 +845,15 @@ int DcProtocol::DC_RevConnectToMe(DcParser * dcparser, DcConn * dcconn) {
 
 	ANTIFLOOD(RCTM, FLOOD_TYPE_RCTM);
 
-	if (!dcconn->mDCUser || !dcconn->mDCUser->mbInUserList) {
+	if (!dcconn->mDcUser || !dcconn->mDcUser->getInUserList()) {
 		return -1;
 	}
 
 	/** Checking the nick */
-	if (mDcServer->mDcConfig.mbCheckRctmNick && (dcparser->chunkString(CHUNK_RC_NICK) != dcconn->mDCUser->msNick)) {
+	if (mDcServer->mDcConfig.mbCheckRctmNick && (dcparser->chunkString(CHUNK_RC_NICK) != dcconn->mDcUser->msNick)) {
 		string sMsg = mDcServer->mDCLang.msBadRevConNick;
 		StringReplace(sMsg, string("nick"), sMsg, dcparser->chunkString(CHUNK_RC_NICK));
-		StringReplace(sMsg, string("real_nick"), sMsg, dcconn->mDCUser->msNick);
+		StringReplace(sMsg, string("real_nick"), sMsg, dcconn->mDcUser->msNick);
 		mDcServer->sendToUser(dcconn, sMsg.c_str(), (char *) mDcServer->mDcConfig.msHubBot.c_str());
 		dcconn->CloseNice(9000, CLOSE_REASON_NICK_RCTM);
 		return -1;
@@ -895,18 +895,18 @@ int DcProtocol::DC_Kick(DcParser * dcparser, DcConn * dcconn) {
 		}
 	#endif
 
-	if (!dcconn->mDCUser || !dcconn->mDCUser->mbKick) {
+	if (!dcconn->mDcUser || !dcconn->mDcUser->mbKick) {
 		return -2;
 	}
 
 	DcUser * User = (DcUser *)mDcServer->mDCUserList.GetUserBaseByNick(dcparser->chunkString(CHUNK_1_PARAM));
 
 	/** Is user exist? */
-	if (!User || !User->mDCConn) {
+	if (!User || !User->mDcConn) {
 		return -3;
 	}
 
-	User->mDCConn->CloseNice(9000, CLOSE_REASON_KICK);
+	User->mDcConn->CloseNice(9000, CLOSE_REASON_KICK);
 	return 0;
 }
 
@@ -925,18 +925,18 @@ int DcProtocol::DC_OpForceMove(DcParser * dcparser, DcConn * dcconn) {
 		}
 	#endif
 
-	if (!dcconn->mDCUser || !dcconn->mDCUser->mbForceMove) {
+	if (!dcconn->mDcUser || !dcconn->mDcUser->mbForceMove) {
 		return -2;
 	}
 
 	DcUser * User = (DcUser *)mDcServer->mDCUserList.GetUserBaseByNick(dcparser->chunkString(CHUNK_FM_NICK));
 
 	/** Is user exist? */
-	if (!User || !User->mDCConn || !dcparser->chunkString(CHUNK_FM_DEST).size()) {
+	if (!User || !User->mDcConn || !dcparser->chunkString(CHUNK_FM_DEST).size()) {
 		return -3;
 	}
 
-	mDcServer->forceMove(User->mDCConn, dcparser->chunkString(CHUNK_FM_DEST).c_str(), dcparser->chunkString(CHUNK_FM_REASON).c_str());
+	mDcServer->forceMove(User->mDcConn, dcparser->chunkString(CHUNK_FM_DEST).c_str(), dcparser->chunkString(CHUNK_FM_REASON).c_str());
 	return 0;
 }
 
@@ -948,7 +948,7 @@ int DcProtocol::DC_GetINFO(DcParser * dcparser, DcConn * dcconn) {
 		dcconn->CloseNow(CLOSE_REASON_SYNTAX_GETINFO);
 		return -1;
 	}
-	if (!dcconn->mDCUser || !dcconn->mDCUser->mbInUserList) {
+	if (!dcconn->mDcUser || !dcconn->mDcUser->getInUserList()) {
 		return -1;
 	}
 
@@ -957,7 +957,7 @@ int DcProtocol::DC_GetINFO(DcParser * dcparser, DcConn * dcconn) {
 		return -2;
 	}
 
-	if (dcconn->mDCUser->mTimeEnter < User->mTimeEnter && Time() < (User->mTimeEnter + 60000)) {
+	if (dcconn->mDcUser->mTimeEnter < User->mTimeEnter && Time() < (User->mTimeEnter + 60000)) {
 		return 0;
 	}
 
@@ -1163,24 +1163,24 @@ void DcProtocol::SendMode(DcConn * dcconn, const string & str, int iMode, UserLi
 	if (iMode == 0) { /** Send to all */
 		UL.sendToAll(str, bUseCache, bAddSep);
 	} else if (iMode == 3) { /** Send to all except current user */
-		if (dcconn->mDCUser->mbInUserList) {
-			dcconn->mDCUser->mbInUserList = false;
+		if (dcconn->mDcUser->getInUserList()) {
+			dcconn->mDcUser->setInUserList(false);
 			UL.sendToAll(str, bUseCache, bAddSep);
-			dcconn->mDCUser->mbInUserList = true;
+			dcconn->mDcUser->setInUserList(true);
 		}
 	} else if (iMode == 4) { /** Send to all except users with ip of the current user */
 		DcConn * conn = NULL;
 		vector<DcConn *> ul;
 		for (DcIpList::iterator mit = mDcServer->mIPListConn->begin(DcConn::Ip2Num(dcconn->getIp().c_str())); mit != mDcServer->mIPListConn->end(); ++mit) {
 			conn = (DcConn *)(*mit);
-			if(conn->mDCUser && conn->mDCUser->mbInUserList) {
-				conn->mDCUser->mbInUserList = false;
+			if(conn->mDcUser && conn->mDcUser->getInUserList()) {
+				conn->mDcUser->setInUserList(false);
 				ul.push_back(conn);
 			}
 		}
 		UL.sendToAll(str, bUseCache, bAddSep);
 		for (vector<DcConn *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
-			(*ul_it)->mDCUser->mbInUserList = true;
+			(*ul_it)->mDcUser->setInUserList(true);
 		}
 	}
 }
@@ -1222,7 +1222,7 @@ int DcProtocol::SendNickList(DcConn * dcconn) {
 			dcconn->send(mDcServer->mOpList.GetNickList(), true, false);
 		}
 
-		if (dcconn->mDCUser->mbInUserList && dcconn->mDCUser->mbInIpList) {
+		if (dcconn->mDcUser->getInUserList() && dcconn->mDcUser->mbInIpList) {
 			if (dcconn->Log(3)) {
 				dcconn->LogStream() << "Sending Iplist" << endl;
 			}

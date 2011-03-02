@@ -50,13 +50,12 @@ class DcUser : public Obj, public DcUserBase, public UserBase {
 public:
 
 	DcServer * mDcServer;
-	DcConn * mDCConn; /** Connection for current user */
+	DcConn * mDcConn; /** Connection for current user */
 
 	string msNick; /** User's nick */
 
 	Time mTimeEnter;
 
-	bool mbInUserList; /** User in user-list */
 	bool mbInOpList; /** User in op-list */
 	bool mbInIpList; /** User in ip-list */
 	bool mbHide; /** User was hide */
@@ -72,6 +71,17 @@ public:
 	bool CanSend();
 	void send(const string & data, bool addSep = false, bool flush = true);
 
+	void setInUserList(bool);
+	
+	inline bool getCanSend() {
+		return mCanSend;
+	}
+	
+	inline void setCanSend(bool canSend) {
+		mCanSend = canSend;
+	}
+	
+	
 	/** Get IP address of user */
 	const string & getIp() const {
 		return msIp;
@@ -162,8 +172,11 @@ public:
 
 private:
 
+	bool mbInUserList; /** User in user-list */
+	bool mCanSend;
 	MyInfo myInfo;
 	string msIp; /** IP address of user/bot */
+	
 
 }; // DcUser
 

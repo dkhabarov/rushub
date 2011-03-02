@@ -179,7 +179,7 @@ public:
 	bool mbSendNickList;        //< Sending user list when login
 	bool mbIpRecv;              //< Permit on reception of the messages, sending on my ip
 	bool mbNickListInProgress;  //< True while sending first nicklist
-	DcUser * mDCUser;          //< User object
+	DcUser * mDcUser;          //< User object
 
 	struct Timers { /** Timers */
 

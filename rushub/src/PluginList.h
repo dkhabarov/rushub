@@ -322,19 +322,19 @@ public:
 		CallListBase(pluginList, id),
 		mFunc(func)
 	{
-		mDCConn = NULL;
+		mDcConn = NULL;
 	}
 
 	virtual ~CallListConnection() {
 	}
 
 	virtual int CallOne(Plugin * plugin) {
-		return (plugin->*mFunc) (mDCConn);
+		return (plugin->*mFunc) (mDcConn);
 	}
 
 	virtual int CallAll(DcConnBase * dcConnBase) {
-		mDCConn = (DcConn *) dcConnBase;
-		if (mDCConn != NULL) {
+		mDcConn = (DcConn *) dcConnBase;
+		if (mDcConn != NULL) {
 			return this->CallList::CallAll();
 		} else {
 			return 1;
@@ -344,7 +344,7 @@ public:
 protected:
 
 	tpFuncConn mFunc;
-	DcConn * mDCConn;
+	DcConn * mDcConn;
 
 }; // class CallListConnection
 

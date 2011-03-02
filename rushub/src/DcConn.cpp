@@ -24,7 +24,7 @@
 
 #include "DcConn.h"
 #include "DcServer.h" // server() and UserList
-#include "DcUser.h" // for mDCUser
+#include "DcUser.h" // for mDcUser
 
 namespace dcserver {
 
@@ -37,7 +37,7 @@ DcConn::DcConn(int type, tSocket sock, Server *s) :
 	mbSendNickList(false),
 	mbIpRecv(false),
 	mbNickListInProgress(false),
-	mDCUser(NULL),
+	mDcUser(NULL),
 	miSRCounter(0),
 	mLoginStatus(0)
 {
@@ -48,10 +48,10 @@ DcConn::DcConn(int type, tSocket sock, Server *s) :
 
 
 DcConn::~DcConn() {
-	if (mDCUser) {
-		delete mDCUser;
+	if (mDcUser) {
+		delete mDcUser;
 	}
-	mDCUser = NULL;
+	mDcUser = NULL;
 	mDcUserBase = NULL;
 }
 
@@ -220,7 +220,7 @@ int DcConn::onTimer(Time &now) {
 	DcServer * dcServer = server();
 
 	/** Check timeouts. For entering only */
-	if (!mDCUser || !mDCUser->mbInUserList) { // Optimisation
+	if (!mDcUser || !mDcUser->getInUserList()) { // Optimisation
 		for (int i = 0; i < HUB_TIME_OUT_MAX; ++i) {
 			if (!CheckTimeOut(HubTimeOut(i), now)) {
 				string sMsg;
@@ -253,7 +253,7 @@ int DcConn::onTimer(Time &now) {
 	Ago -= dcServer->mDcConfig.miStartPing;
 	if (
 		dcServer->MinDelay(mTimes.mPingServer, dcServer->mDcConfig.miPingInterval) &&
-		mDCUser && mDCUser->mbInUserList && mDCUser->mTimeEnter < Ago
+		mDcUser && mDcUser->getInUserList() && mDcUser->mTimeEnter < Ago
 	) {
 		string s;
 		send(s, true, true);
@@ -277,17 +277,17 @@ bool DcConn::SetUser(DcUser * User) {
 		}
 		return false;
 	}
-	if (mDCUser) {
+	if (mDcUser) {
 		if (ErrLog(1)) {
 			LogStream() << "Trying to add user when it's actually done" << endl;
 		}
 		delete User;
 		return false;
 	}
-	mDCUser = User;
+	mDcUser = User;
 	mDcUserBase = User;
 	User->SetIp(msIp);
-	User->mDCConn = this;
+	User->mDcConn = this;
 	User->mDcConnBase = this;
 	User->mDcServer = server();
 	if (Log(3)) {
@@ -327,22 +327,22 @@ void DcConnFactory::DelConn(Conn * &conn) {
 		dcServer->mIPListConn->Remove(dcconn);
 		if (dcconn->GetLSFlag(LOGIN_STATUS_ALOWED)) {
 			dcServer->miTotalUserCount --;
-			if (dcconn->mDCUser) {
-				dcServer->miTotalShare -= dcconn->mDCUser->getShare();
+			if (dcconn->mDcUser) {
+				dcServer->miTotalShare -= dcconn->mDcUser->getShare();
 			} else if (conn->Log(3)) {
 					conn->LogStream() << "Del conn without user" << endl;
 			}
 		} else if (conn->Log(3)) {
 			conn->LogStream() << "Del conn without ALOWED flag: " << dcconn->GetLSFlag(LOGIN_STATUS_LOGIN_DONE) << endl;
 		}
-		if (dcconn->mDCUser) {
-			if (dcconn->mDCUser->mbInUserList) {
-				dcServer->RemoveFromDCUserList((DcUser*)dcconn->mDCUser);
+		if (dcconn->mDcUser) {
+			if (dcconn->mDcUser->getInUserList()) {
+				dcServer->RemoveFromDCUserList((DcUser*)dcconn->mDcUser);
 			} else { // remove from enter list, if user was already added in it, but user was not added in user list
-				dcServer->mEnterList.RemoveByNick(dcconn->mDCUser->getNick());
+				dcServer->mEnterList.RemoveByNick(dcconn->mDcUser->getNick());
 			}
-			delete dcconn->mDCUser;
-			dcconn->mDCUser = NULL;
+			delete dcconn->mDcUser;
+			dcconn->mDcUser = NULL;
 			dcconn->mDcUserBase = NULL;
 		}
 		#ifndef WITHOUT_PLUGINS

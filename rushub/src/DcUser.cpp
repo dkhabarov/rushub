@@ -28,13 +28,14 @@ DcUser::DcUser() :
 	Obj("DcUser"),
 	DcUserBase(),
 	mDcServer(NULL),
-	mDCConn(NULL),
-	mbInUserList(false),
+	mDcConn(NULL),
 	mbInOpList(false),
 	mbInIpList(false),
 	mbHide(false),
 	mbForceMove(false),
-	mbKick(false)
+	mbKick(false),
+	mbInUserList(false),
+	mCanSend(false)
 {
 	mDcConnBase = NULL;
 }
@@ -44,13 +45,14 @@ DcUser::DcUser(const string & sNick) :
 	Obj("DcUser"),
 	DcUserBase(),
 	mDcServer(NULL),
-	mDCConn(NULL),
-	mbInUserList(false),
+	mDcConn(NULL),
 	mbInOpList(false),
 	mbInIpList(false),
 	mbHide(false),
 	mbForceMove(false),
-	mbKick(false)
+	mbKick(false),
+	mbInUserList(false),
+	mCanSend(false)
 {
 	mDcConnBase = NULL;
 	msNick = sNick;
@@ -58,27 +60,32 @@ DcUser::DcUser(const string & sNick) :
 
 
 DcUser::~DcUser() {
-	mDCConn = NULL;
+	mDcConn = NULL;
 	mDcConnBase = NULL;
 	mDcServer = NULL;
 }
 
 
 bool DcUser::CanSend() {
-	return mbInUserList && mDCConn && mDCConn->mbOk;
+	return mbInUserList && mDcConn && mDcConn->mbOk;
+}
+
+
+void DcUser::setInUserList(bool inUserList) {
+	mbInUserList = inUserList;
 }
 
 
 void DcUser::send(const string & data, bool addSep, bool flush) {
-	if (mDCConn) {
-		mDCConn->send(data, addSep, flush);
+	if (mDcConn) {
+		mDcConn->send(data, addSep, flush);
 	}
 }
 
 
 int DcUser::getProfile() const {
 	// 30 profile for bot
-	return mDCConn != NULL ? mDCConn->miProfile : 30;
+	return mDcConn != NULL ? mDcConn->miProfile : 30;
 }
 
 
