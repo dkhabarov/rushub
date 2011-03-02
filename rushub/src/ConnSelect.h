@@ -57,7 +57,9 @@ public:
 	ConnSelect();
 	virtual ~ConnSelect();
 
-	unsigned Size();
+	inline unsigned Size() {
+		return mResList.Size();
+	}
 
 	int Choose(Time &);
 
@@ -82,10 +84,10 @@ public:
 			#endif
 			return *this;
 		}
-		bool IsSet(tSocket sock) {
+		inline bool IsSet(tSocket sock) {
 			return FD_ISSET(sock, this) != 0;
 		}
-		void Clr(tSocket sock) {
+		inline void Clr(tSocket sock) {
 			FD_CLR(sock, this);
 		}
 		bool Set(tSocket sock) {
@@ -110,7 +112,7 @@ public:
 		iterator(ConnSelect * sel, tResList::iterator it) : mSel(sel), mIt(it) {
 		}
 
-		iterator & operator = (const iterator & it) {
+		inline iterator & operator = (const iterator & it) {
 			mSel= it.mSel;
 			mIt = it.mIt;
 			return *this;
@@ -190,7 +192,7 @@ public:
 		}
 		return begin_it;
 	}
-	iterator end() {
+	inline iterator end() {
 		static iterator end_it(this, mResList.end());
 		return end_it;
 	}

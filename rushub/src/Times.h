@@ -84,15 +84,21 @@ public:
 	int operator ! ();
 
 	/** Get seconds */
-	long Sec() const;
+	inline long Sec() const {
+		return tv_sec;
+	}
 
 	/** Get milisec */
-	unsigned long MiliSec() const;
+	inline unsigned long MiliSec() const {
+		return (unsigned long)(tv_sec) * 1000 + (unsigned long)(tv_usec) / 1000;
+	}
 
 	/*bool LocalTime(struct tm &result){ return localtime_r(this, &result) == &result;}*/
 	Time & Get();
 	Time & Normalize();
-	void Null();
+	inline void Null() {
+		tv_sec = tv_usec = 0;
+	}
 	string AsString() const;
 	void AsTimeVals(int & w, int & d, int & h, int & m) const;
 	friend std::ostream & operator << (std::ostream & os, const Time & t);

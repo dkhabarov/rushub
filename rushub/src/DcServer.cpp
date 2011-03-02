@@ -1028,15 +1028,12 @@ DcUser * DcServer::GetDCUser(const char *sNick) {
 
 DcUserBase * DcServer::getDcUserBase(const char *sNick) {
 	DcUser * User = GetDCUser(sNick);
-	if (User) {
-		return (DcUserBase *)User;
-	}
-	return NULL;
+	return User != NULL ? (DcUserBase *)User : NULL;
 }
 
 
 
-const vector<DcConnBase*> & DcServer::getDcConnBase(const char * sIP) {
+const vector<DcConnBase *> & DcServer::getDcConnBase(const char * sIP) {
 	DcIpList::iterator it;
 	mvIPConn.clear();
 	for (it = mIPListConn->begin(DcConn::Ip2Num(sIP)); it != mIPListConn->end(); ++it) {

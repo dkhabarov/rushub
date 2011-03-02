@@ -484,33 +484,12 @@ int Conn::Recv() {
 
 
 
-/** Check empty recv buf */
-int Conn::RecvBufIsEmpty() const {
-	return miRecvBufEnd == miRecvBufRead;
-}
-
-
-
-/** Check empty recv buf */
-int Conn::SendBufIsEmpty() const {
-	return msSendBuf.length() == 0;
-}
-
-
-
 /** Clear params */
 void Conn::ClearStr() {
 	mCommand = NULL;
 	msSeparator = "\0";
 	mStrSizeMax = 0;
 	meStrStatus = STRING_STATUS_NO_STR;
-}
-
-
-
-/** Get status */
-int Conn::StrStatus() const {
-	return meStrStatus;
 }
 
 
@@ -529,16 +508,9 @@ const string & Conn::Ip() const {
 
 
 
-/** Get port */
-int Conn::Port() const {
-	return miPort;
-}
-
-
-
 /** Installing the string, in which will be recorded received data, 
 	and installation main parameter */
-void Conn::SetStrToRead(string *pStr, string separator, unsigned long iMax) {
+void Conn::SetStrToRead(string * pStr, string separator, unsigned long iMax) {
 	if (meStrStatus != STRING_STATUS_NO_STR) {
 		if (ErrLog(0)) {
 			LogStream() << "Fatal error: Bad SetStrToRead" << endl;
@@ -565,19 +537,19 @@ int Conn::ReadFromRecvBuf() {
 		}
 		throw "Fatal error: ReadFromBuf with null string pointer";
 	}
-	char *buf = msRecvBuf + miRecvBufRead;
+	char * buf = msRecvBuf + miRecvBufRead;
 	size_t pos, len = (miRecvBufEnd - miRecvBufRead);
 	if ((pos = string(buf).find(msSeparator)) == string::npos) {
 		if (mCommand->size() + len > mStrSizeMax) {
 			CloseNow(CLOSE_REASON_MAXSIZE_RECV);
 			return 0;
 		}
-		mCommand->append((char*)buf, len);
+		mCommand->append((char *)buf, len);
 		miRecvBufRead = miRecvBufEnd = 0;
 		return len;
 	}
 	len = pos + msSeparator.size();
-	mCommand->append((char*)buf, pos);
+	mCommand->append((char *)buf, pos);
 	miRecvBufRead += len;
 	meStrStatus = STRING_STATUS_STR_DONE;
 	return len;
@@ -585,19 +557,19 @@ int Conn::ReadFromRecvBuf() {
 
 /** Remaining (for web-server) */
 int Conn::Remaining() {
-	char *buf = msRecvBuf + miRecvBufRead;
+	char * buf = msRecvBuf + miRecvBufRead;
 	int len = miRecvBufEnd - miRecvBufRead;
 	if (mCommand->size() + len > mStrSizeMax) {
 		CloseNow(CLOSE_REASON_MAXSIZE_REMAINING);
 		return -1;
 	}
-	mCommand->append((char*)buf, len);
+	mCommand->append((char *)buf, len);
 	miRecvBufRead = miRecvBufEnd = 0;
 	return len;
 }
 
 /** Write data in sending buffer and send to conn */
-int Conn::WriteData(const string &sData, bool bFlush) {
+int Conn::WriteData(const string & sData, bool bFlush) {
 	size_t bufLen = msSendBuf.size();
 	if (bufLen + sData.size() >= miSendBufMax) {
 		if (Log(0)) {
@@ -613,7 +585,7 @@ int Conn::WriteData(const string &sData, bool bFlush) {
 		return 0;
 	}
 
-	const char *send_buf; 
+	const char * send_buf = NULL; 
 	size_t size; 
 	bool appended = false;
 
@@ -787,13 +759,10 @@ string * Conn::GetPtrForStr() {
 }
 
 Parser * Conn::CreateParser() {
-	if (this->mProtocol != NULL) {
-		return this->mProtocol->CreateParser();
-	}
-	return NULL;
+	return this->mProtocol != NULL ? this->mProtocol->CreateParser(): NULL;
 }
 
-void Conn::DeleteParser(Parser *OldParser) {
+void Conn::DeleteParser(Parser * OldParser) {
 	if (this->mProtocol != NULL) {
 		this->mProtocol->DeleteParser(OldParser);
 	} else {
@@ -871,7 +840,7 @@ bool Conn::Host() {
 	if (msHost.size()) {
 		return true;
 	}
-	struct hostent *h;
+	struct hostent * h;
 	if ((h = gethostbyaddr(msIp.c_str(), sizeof(msIp), AF_INET)) != NULL) {
 		msHost = h->h_name;
 	}
@@ -881,15 +850,15 @@ bool Conn::Host() {
 unsigned long Conn::IpByHost(const string &sHost) {
 	struct sockaddr_in saddr;
 	memset(&saddr, 0, sizeof(sockaddr_in));
-	struct hostent *h;
+	struct hostent * h;
 	if ((h = gethostbyname(sHost.c_str())) != NULL) {
 		saddr.sin_addr = *((struct in_addr *)h->h_addr);
 	}
 	return saddr.sin_addr.s_addr;
 }
 
-bool Conn::HostByIp(const string &sIp, string &sHost) {
-	struct hostent *h;
+bool Conn::HostByIp(const string & sIp, string &sHost) {
+	struct hostent * h;
 	struct in_addr addr;
 #ifndef _WIN32
 	if (!inet_aton(sIp.c_str(), &addr)) {
@@ -906,7 +875,7 @@ bool Conn::HostByIp(const string &sIp, string &sHost) {
 
 
 /////////////////////ConnFactory/////////////////////
-ConnFactory::ConnFactory(Protocol *protocol, Server *s) : 
+ConnFactory::ConnFactory(Protocol * protocol, Server * s) : 
 	mStrSizeMax(s->mStrSizeMax),
 	msSeparator(s->msSeparator),
 	mProtocol(protocol),

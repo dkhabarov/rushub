@@ -35,10 +35,6 @@ MyInfo & MyInfo::operator = (const MyInfo &) {
 
 
 
-const string & MyInfo::getMyInfo() const {
-	return myInfo;
-}
-
 void MyInfo::setMyInfo(const string & myInfo, DcParserBase * parser, __int64 & totalHubShare) {
 
 	if (this->myInfo != myInfo) {
@@ -64,20 +60,11 @@ void MyInfo::setMyInfo(const string & myInfo, DcParserBase * parser, __int64 & t
 
 
 
-const string & MyInfo::getDescription() const {
-	return description;
-}
-
 void MyInfo::setDescription(const string & description) {
 	this->description = description;
 	construct();
 }
 
-
-
-const string & MyInfo::getEmail() const {
-	return email;
-}
 
 void MyInfo::setEmail(const string & email) {
 	this->email = email;
@@ -85,32 +72,17 @@ void MyInfo::setEmail(const string & email) {
 }
 
 
-
-const string & MyInfo::getConnection() const {
-	return connection;
-}
-
 void MyInfo::setConnection(const string & connection) {
 	this->connection = connection;
 	construct();
 }
 
 
-
-unsigned MyInfo::getMagicByte() const {
-	return magicByte;
-}
-
 void MyInfo::setMagicByte(unsigned magicByte) {
 	this->magicByte = magicByte;
 	construct();
 }
 
-
-
-__int64 MyInfo::getShare() const {
-	return share;
-}
 
 void MyInfo::setShare(__int64 share) {
 	this->share = share;

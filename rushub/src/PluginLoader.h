@@ -56,12 +56,12 @@ public:
 	bool isError();
 
 	/** Get error msg */
-	const string & getError() {
+	inline const string & getError() {
 		return mError;
 	}
 
 	/** Get lib name of plugin */
-	const string & getFileName() {
+	inline const string & getFileName() {
 		return mFile;
 	}
 

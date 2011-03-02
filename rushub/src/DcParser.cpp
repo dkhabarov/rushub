@@ -70,12 +70,6 @@ DcParser::~DcParser() {
 
 
 
-int DcParser::getCommandType() const {
-	return miType;
-}
-
-
-
 /** Do parse for command and return type of this command */
 int DcParser::Parse() {
 	miLen = mCommand.size(); /** Set cmd len */

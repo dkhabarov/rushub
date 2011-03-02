@@ -55,23 +55,13 @@ ConnSelect::~ConnSelect() {
 
 
 
-unsigned ConnSelect::Size() {
-	return mResList.Size();
-}
-
-
-
 bool ConnSelect::OptIn(tSocket sock, tEventFlag mask) {
-	if (mask & eEF_INPUT && !mReadFS.Set(sock)) {
-		return false;
-	}
-	if (mask & eEF_OUTPUT && !mWriteFS.Set(sock)) {
-		return false;
-	}
-	if (mask & eEF_ERROR && !mExceptFS.Set(sock)) {
-		return false;
-	}
-	if (mask & eEF_CLOSE && !mCloseFS.Set(sock)) {
+	if (
+		(mask & eEF_INPUT && !mReadFS.Set(sock)) ||
+		(mask & eEF_OUTPUT && !mWriteFS.Set(sock)) ||
+		(mask & eEF_ERROR && !mExceptFS.Set(sock)) ||
+		(mask & eEF_CLOSE && !mCloseFS.Set(sock))
+	) {
 		return false;
 	}
 	sChooseRes * ChR = mResList.Find(sock);
@@ -150,19 +140,10 @@ int ConnSelect::RevGet(tSocket sock) {
 
 
 bool ConnSelect::RevTest(tSocket sock) {
-	if (mResWriteFS.IsSet(sock)) {
-		return true;
-	}
-	if (mResReadFS.IsSet(sock)) {
-		return true;
-	}
-	if (mResExceptFS.IsSet(sock)) {
-		return true;
-	}
-	if (mCloseFS.IsSet(sock)) {
-		return true;
-	}
-	return false;
+	return mResWriteFS.IsSet(sock) ||
+		mResReadFS.IsSet(sock) ||
+		mResExceptFS.IsSet(sock) ||
+		mCloseFS.IsSet(sock);
 }
 
 

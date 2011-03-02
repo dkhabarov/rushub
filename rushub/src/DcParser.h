@@ -45,7 +45,9 @@ public:
 	DcParser();
 	virtual ~DcParser();
 
-	int getCommandType() const;
+	inline int getCommandType() const {
+		return miType;
+	}
 	
 	/** Do parse for command and return type of this command */
 	int Parse();

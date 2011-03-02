@@ -99,7 +99,7 @@ public:
 			++mIterator;
 			return *this;
 		}
-		bool operator != (iterator & it) {
+		inline bool operator != (iterator & it) {
 			return mIterator != it.mIterator;
 		}
 		iterator(iterator & it) {
@@ -110,7 +110,7 @@ public:
 			mIterator = it;
 			return *this;
 		}
-		iterator &operator = (iterator & it) {
+		iterator & operator = (iterator & it) {
 			mIterator = it.mIterator;
 			mConfigListBase = it.mConfigListBase;
 			return *this;

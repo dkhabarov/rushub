@@ -36,18 +36,6 @@ Cli::~Cli() {
 
 
 
-bool Cli::getDaemon() const {
-	return bDaemon;
-}
-
-
-
-bool Cli::getSyslog() const {
-	return bSyslog;
-}
-
-
-
 const string & Cli::getMainDir() const {
 	return sMainDir;
 }

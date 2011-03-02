@@ -131,13 +131,6 @@ int Obj::ErrLog(int level) {
 
 
 
-/** Return current log stream */
-ostream & Obj::LogStream() {
-	return *mToLog;
-}
-
-
-
 /** Set class name */
 void Obj::SetClassName(const char * name) {
 	//if (Log(0)) LogStream() << "r " << mClassName << " -> " << name << endl;

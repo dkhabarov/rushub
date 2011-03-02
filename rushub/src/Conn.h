@@ -161,19 +161,25 @@ public:
 	virtual int Recv();
 
 	/** Check empty recv buf */
-	int RecvBufIsEmpty() const;
+	inline int RecvBufIsEmpty() const {
+		return miRecvBufEnd == miRecvBufRead;
+	}
 
 	/** Check empty recv buf */
-	int SendBufIsEmpty() const;
+	inline int SendBufIsEmpty() const {
+		return msSendBuf.length() == 0;
+	}
+
+	/** Get status */
+	inline int StrStatus() const {
+		return meStrStatus;
+	}
 
 	/** Remaining (for web-server) */
 	virtual int Remaining();
 
 	/** Clear params */
 	void ClearStr();
-
-	/** Get status */
-	int StrStatus() const;
 
 	/** Installing the string, in which will be recorded received data, 
 	and installation main parameter */
@@ -206,7 +212,7 @@ public:
 		return inet_addr(ip);
 	}
 	
-	static inline char* Num2Ip(unsigned long ip) {
+	static inline char * Num2Ip(unsigned long ip) {
 		struct in_addr in;
 		in.s_addr = ip;
 		return inet_ntoa(in);
@@ -216,7 +222,9 @@ public:
 	const string & Ip() const;
 	
 	/** Get port */
-	int Port() const;
+	inline int Port() const {
+		return miPort;
+	}
 
 	void GetMac();
 
@@ -254,7 +262,7 @@ private:
 	bool mbBlockInput; /** Blocking enterring channel for given conn */
 	bool mbBlockOutput; /** Blocking coming channel for given conn */
 
-	string *mCommand; /** Pointer to line, in which will be written data from buffer */
+	string * mCommand; /** Pointer to line, in which will be written data from buffer */
 
 	bool mbClosed; /** closed flag, for close counter */
 

@@ -22,6 +22,7 @@
 namespace dcserver {
 
 
+
 DcTag::DcTag() :
 	nil(TAGNIL_NO),
 	passive(false),
@@ -37,8 +38,12 @@ DcTag::DcTag() :
 {
 }
 
+
+
 DcTag::~DcTag() {
 }
+
+
 
 DcTag & DcTag::operator = (const DcTag &) {
 	return *this;
@@ -67,156 +72,6 @@ void DcTag::parse(string & description) {
 			}
 		}
 	}
-}
-
-
-
-unsigned int DcTag::getNil() const {
-	return nil;
-}
-
-void DcTag::setNil(unsigned int nil) {
-	this->nil = nil;
-}
-
-
-
-const string & DcTag::getTag() const {
-	return tag;
-}
-
-void DcTag::setTag(const string & tag) {
-	this->tag = tag;
-}
-
-
-
-const string & DcTag::getClientName() const {
-	return clientName;
-}
-
-void DcTag::setClientName(const string & clientName) {
-	this->clientName = clientName;
-}
-
-
-
-const string & DcTag::getClientVersion() const {
-	return clientVersion;
-}
-
-void DcTag::setClientVersion(const string & clientVersion) {
-	this->clientVersion = clientVersion;
-}
-
-
-
-const string & DcTag::getMode() const {
-	return mode;
-}
-
-void DcTag::setMode(const string & mode) {
-	this->mode = mode;
-}
-
-
-
-bool DcTag::IsPassive() const {
-	return passive;
-}
-
-void DcTag::setPassive(bool passive) {
-	this->passive = passive;
-}
-
-
-
-int DcTag::getUnregHubs() const {
-	return unregHubs;
-}
-
-void DcTag::setUnregHubs(int unregHubs) {
-	this->unregHubs = unregHubs;
-}
-
-
-
-int DcTag::getRegHubs() const {
-	return regHubs;
-}
-
-void DcTag::setRegHubs(int regHubs) {
-	this->regHubs = regHubs;
-}
-
-
-
-int DcTag::getOpHubs() const {
-	return opHubs;
-}
-
-void DcTag::setOpHubs(int opHubs) {
-	this->opHubs = opHubs;
-}
-
-
-
-int DcTag::getSlots() const {
-	return slots;
-}
-
-void DcTag::setSlots(int slots) {
-	this->slots = slots;
-}
-
-
-
-int DcTag::getLimit() const {
-	return limit;
-}
-
-void DcTag::setLimit(int limit) {
-	this->limit = limit;
-}
-
-
-
-int DcTag::getOpen() const {
-	return open;
-}
-
-void DcTag::setOpen(int open) {
-	this->open = open;
-}
-
-
-
-int DcTag::getBandwidth() const {
-	return bandwidth;
-}
-
-void DcTag::setBandwidth(int bandwidth) {
-	this->bandwidth = bandwidth;
-}
-
-
-
-int DcTag::getDownload() const {
-	return download;
-}
-
-void DcTag::setDownload(int download) {
-	this->download = download;
-}
-
-
-
-const string & DcTag::getFraction() const {
-	return fraction;
-}
-
-void DcTag::setFraction(const string & fraction) {
-	this->fraction = fraction;
 }
 
 

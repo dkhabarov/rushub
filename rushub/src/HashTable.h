@@ -43,7 +43,7 @@ template <class T = unsigned long> struct Hash {
 		for(; *s; ++s) h = 33 * h + *s;
 		return h;
 	}
-	T operator() (const string & s) const {
+	inline T operator() (const string & s) const {
 		return this->operator() (s.c_str());
 	}
 };
@@ -112,11 +112,11 @@ public:
 			(*this) = it;
 		}
 
-		bool operator == (const iterator &it) {
+		inline bool operator == (const iterator &it) {
 			return i == it.i;
 		}
 
-		bool operator != (const iterator &it) {
+		inline bool operator != (const iterator &it) {
 			return i != it.i;
 		}
 
@@ -133,7 +133,7 @@ public:
 			return NULL;
 		}
 
-		bool IsEnd() const {
+		inline bool IsEnd() const {
 			return i >= end;
 		}
 	};
@@ -502,11 +502,11 @@ public:
 			(*this) = it;
 		}
 
-		bool operator == (const iterator &it) {
+		inline bool operator == (const iterator &it) {
 			return mItem == it.mItem;
 		}
 
-		bool operator != (const iterator &it) {
+		inline bool operator != (const iterator &it) {
 			return mItem != it.mItem;
 		}
 
@@ -524,7 +524,7 @@ public:
 			return *this;
 		}
 
-		bool IsEnd() const {
+		inline bool IsEnd() const {
 			return mItem == NULL;
 		}
 		

@@ -48,22 +48,34 @@ public:
 	~MyInfo();
 	MyInfo & operator = (const MyInfo &);
 
-	const string & getMyInfo() const;
+	inline const string & getMyInfo() const {
+		return myInfo;
+	}
 	void setMyInfo(const string & myInfo, DcParserBase * parser, __int64 & totalHubShare);
 
-	const string & getDescription() const;
+	inline const string & getDescription() const {
+		return description;
+	}
 	void setDescription(const string & description);
 
-	const string & getEmail() const;
+	const string & getEmail() const {
+		return email;
+	}
 	void setEmail(const string & email);
 
-	const string & getConnection() const;
+	inline const string & getConnection() const {
+		return connection;
+	}
 	void setConnection(const string & connection);
 
-	unsigned getMagicByte() const;
+	inline unsigned getMagicByte() const {
+		return magicByte;
+	}
 	void setMagicByte(unsigned magicByte);
 
-	__int64 getShare() const;
+	inline __int64 getShare() const {
+		return share;
+	}
 	void setShare(__int64 share);
 
 private:

@@ -197,16 +197,6 @@ int Time::operator ! () {
 	return !tv_sec && !tv_usec;
 }
 
-/** Get seconds */
-long Time::Sec() const {
-	return tv_sec;
-}
-
-/** Get milisec */
-unsigned long Time::MiliSec() const {
-	return (unsigned long)(tv_sec) * 1000 + (unsigned long)(tv_usec) / 1000;
-}
-
 
 
 Time & Time::Get() {
@@ -230,12 +220,6 @@ Time & Time::Normalize() {
 		tv_usec += 1000000;
 	}
 	return *this;
-}
-
-
-
-void Time::Null() {
-	tv_sec = tv_usec = 0;
 }
 
 

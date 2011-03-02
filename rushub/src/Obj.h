@@ -62,7 +62,9 @@ public:
 	int ErrLog(int level);
 
 	/** Return current log stream */
-	ostream & LogStream();
+	inline ostream & LogStream() {
+		return *mToLog;
+	}
 
 protected:
 

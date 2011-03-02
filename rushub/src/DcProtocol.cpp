@@ -96,13 +96,6 @@ DcProtocol::~DcProtocol() {
 
 
 
-
-void DcProtocol::SetServer(DcServer * server) {
-	mDcServer = server;
-}
-
-
-
 int DcProtocol::DoCmd(Parser * parser, Conn * conn) {
 	DcConn * dcconn = (DcConn *)conn;
 	DcParser * dcparser = (DcParser *)parser;

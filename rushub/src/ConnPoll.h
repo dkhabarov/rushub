@@ -58,7 +58,7 @@ public:
 		PollFd() {
 			reset();
 		}
-		void reset() {
+		inline void reset() {
 			fd = -1;
 			events = revents = 0;
 		}

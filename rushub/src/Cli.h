@@ -51,8 +51,14 @@ public:
 	Cli();
 	~Cli();
 
-	bool getDaemon() const;
-	bool getSyslog() const;
+	inline bool getDaemon() const {
+		return bDaemon;
+	}
+	
+	inline bool getSyslog() const {
+		return bSyslog;
+	}
+	
 	const string & getMainDir() const;
 
 	void detectArgs(int argc, char ** argv);

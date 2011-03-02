@@ -182,33 +182,21 @@ bool PluginList::UnloadPlugin(const string & name) {
 
 /** Reload plugin by name */
 bool PluginList::ReloadPlugin(const string & name) {
-
 	PluginLoader * pluginLoader = mPluginLoaders.Find(mPluginLoaders.mHash(name));
-	if (!pluginLoader) {
+	if (
+		!pluginLoader || 
+		!UnloadPlugin(name)
+	) {
 		return false;
 	}
-
-	if (!UnloadPlugin(name)) {
-		return false;
-	}
-
-	const string & filePath = pluginLoader->getFileName();
-	if (!LoadPlugin(filePath)) {
-		return false;
-	}
-
-	return true;
+	return LoadPlugin(pluginLoader->getFileName());
 }
 
 
 
 /** Set call list */
 bool PluginList::SetCallList(string id, CallList * callList) {
-	if (!callList) {
-		return false;
-	}
-
-	if (id.size() == 0) {
+	if (!callList || id.size() == 0) {
 		return false;
 	}
 
@@ -229,11 +217,9 @@ bool PluginList::regCallList(const char * id, Plugin * plugin) {
 	}
 
 	CallList * callList = mCallLists.Find(mCallLists.mHash(id));
-	if (!callList) {
-		return false;
-	}
-
-	return callList->Reg(plugin);
+	return callList != NULL ? 
+		callList->Reg(plugin) : 
+		false;
 }
 
 
@@ -246,61 +232,50 @@ bool PluginList::unregCallList(const char * id, Plugin * plugin) {
 	}
 
 	CallList * callList = mCallLists.Find(mCallLists.mHash(id));
-	if (!callList) {
-		return false;
-	}
-
-	return callList->Unreg(plugin);
+	return callList != NULL ? 
+		callList->Unreg(plugin) : 
+		false;
 }
 
 
 
 /** Show all loading plugins and versions */
 void PluginList::list(ostream & os) {
-
 	for (PluginLoaderMap::iterator it = mPluginLoaders.begin(); it != mPluginLoaders.end(); ++it) {
 		os << (*it)->mPlugin->getName() << " " << 
 			(*it)->mPlugin->getVersion() << "\n";
 	}
-
 }
 
 
 
 /** Show all plugins for all calls */
 void PluginList::ListAll(ostream & os) {
-
 	for (CallListMap::iterator it = mCallLists.begin(); it != mCallLists.end(); ++it) {
 		os << "callList: " << (*it)->getName() << "\n";
 		(*it)->ListRegs(os, "   ");
 	}
-
 }
 
 
 
 /** Get plugin by name */
 Plugin * PluginList::GetPlugin(const string & name) {
-
 	PluginLoader * pluginLoader = mPluginLoaders.Find(mPluginLoaders.mHash(name));
-	if (pluginLoader) {
-		return pluginLoader->mPlugin;
-	}
-
-	return NULL;
+	return pluginLoader != NULL ? 
+		pluginLoader->mPlugin : 
+		NULL;
 }
 
 
 
 /** Get plugin by lib */
 Plugin * PluginList::GetPluginByLib(const string & lib) {
-	
 	for (PluginLoaderMap::iterator it = mPluginLoaders.begin(); it != mPluginLoaders.end(); ++it) {
 		if ((*it)->getFileName() == lib) {
 			return (*it)->mPlugin;
 		}
 	}
-
 	return NULL;
 }
 

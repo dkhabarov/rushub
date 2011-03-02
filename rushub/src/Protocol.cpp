@@ -54,10 +54,7 @@ Parser::~Parser() {
 	}
 }
 
-/** getCommand() */
-string & Parser::getCommand() {
-	return mCommand;
-}
+
 
 /** ReInit() */
 void Parser::ReInit() {

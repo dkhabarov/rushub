@@ -162,11 +162,11 @@ public:
 			return mRes;
 		};
 
-		bool operator != (const iterator & it) const {
+		inline bool operator != (const iterator & it) const {
 			return mRes.mFd != it.mRes.mFd;
 		}
 
-		bool operator == (const iterator & it) const {
+		inline bool operator == (const iterator & it) const {
 			return mRes.mFd == it.mRes.mFd;
 		}
 
@@ -196,10 +196,7 @@ public:
 }; // class ConnChoose
 
 bool ConnChoose::OptIn(ConnBase * connBase, ConnChoose::tEventFlag eMask) {
-	if (!connBase) {
-		return false;
-	}
-	return this->OptIn(tSocket(*connBase), eMask);
+	return connBase != NULL ? this->OptIn(tSocket(*connBase), eMask) : false;
 }
 
 void ConnChoose::OptOut(ConnBase * connBase, ConnChoose::tEventFlag eMask) {
@@ -210,24 +207,15 @@ void ConnChoose::OptOut(ConnBase * connBase, ConnChoose::tEventFlag eMask) {
 }
 
 int ConnChoose::OptGet(ConnBase * connBase) {
-	if (!connBase) {
-		return 0;
-	}
-	return this->OptGet(tSocket(*connBase));
+	return connBase != NULL ? OptGet(tSocket(*connBase)) : 0;
 }
 
 int ConnChoose::RevGet(ConnBase * connBase) {
-	if (!connBase) {
-		return 0;
-	}
-	return this->RevGet(tSocket(*connBase));
+	return connBase != NULL ? RevGet(tSocket(*connBase)) : 0;
 }
 
 bool ConnChoose::RevTest(ConnBase * connBase) {
-	if (!connBase) {
-		return false;
-	}
-	return this->RevTest(tSocket(*connBase));
+	return connBase != NULL ? RevTest(tSocket(*connBase)) : false;
 }
 
 ConnBase * ConnChoose::operator [] (tSocket sock) {

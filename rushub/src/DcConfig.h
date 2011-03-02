@@ -150,8 +150,15 @@ public:
 	DcConfig(ConfigLoader *, Server *, const char * cfgFile = NULL);
 	virtual ~DcConfig();
 	void addVars(Server *);
-	int load();
-	int save();
+
+	inline int load() {
+		return mConfigLoader->load(this, mConfigStore);
+	}
+
+	inline int save() {
+		return mConfigLoader->save(this, mConfigStore);
+	}
+
 	int reload();
 
 private:
@@ -206,8 +213,15 @@ public:
 	DcLang(ConfigLoader *, ConfigListBase *);
 	~DcLang();
 	void addVars();
-	int load();
-	int save();
+
+	inline int load() {
+		return mConfigLoader->load(this, mConfigStore);
+	}
+
+	inline int save() {
+		return mConfigLoader->save(this, mConfigStore);
+	}
+
 	int reload();
 
 private:

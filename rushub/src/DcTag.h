@@ -43,50 +43,125 @@ public:
 
 	void parse(string & description);
 
-	unsigned int getNil() const;
-	void setNil(unsigned int nil);
+	inline unsigned int getNil() const {
+		return nil;
+	}
 
-	const string & getTag() const;
-	void setTag(const string & tag);
+	inline void setNil(unsigned int nil) {
+		this->nil = nil;
+	}
 
-	const string & getClientName() const;
-	void setClientName(const string & clientName);
+	inline const string & getTag() const {
+		return tag;
+	}
 
-	const string & getClientVersion() const;
-	void setClientVersion(const string & clientVersion);
+	inline void setTag(const string & tag) {
+		this->tag = tag;
+	}
 
-	const string & getMode() const;
-	void setMode(const string & mode);
+	inline const string & getClientName() const {
+		return clientName;
+	}
 
-	bool IsPassive() const;
-	void setPassive(bool passive);
+	inline void setClientName(const string & clientName) {
+		this->clientName = clientName;
+	}
 
-	int getUnregHubs() const;
-	void setUnregHubs(int unregHubs);
+	inline const string & getClientVersion() const {
+		return clientVersion;
+	}
 
-	int getRegHubs() const;
-	void setRegHubs(int regHubs);
+	inline void setClientVersion(const string & clientVersion) {
+		this->clientVersion = clientVersion;
+	}
 
-	int getOpHubs() const;
-	void setOpHubs(int opHubs);
+	inline const string & getMode() const {
+		return mode;
+	}
 
-	int getSlots() const;
-	void setSlots(int slots);
+	inline void setMode(const string & mode) {
+		this->mode = mode;
+	}
 
-	int getLimit() const;
-	void setLimit(int limit);
+	inline bool IsPassive() const {
+		return passive;
+	}
 
-	int getOpen() const;
-	void setOpen(int open);
+	inline void setPassive(bool passive) {
+		this->passive = passive;
+	}
 
-	int getBandwidth() const;
-	void setBandwidth(int bandwidth);
+	inline int getUnregHubs() const {
+		return unregHubs;
+	}
 
-	int getDownload() const;
-	void setDownload(int download);
+	inline void setUnregHubs(int unregHubs) {
+		this->unregHubs = unregHubs;
+	}
 
-	const string & getFraction() const;
-	void setFraction(const string & fraction);
+	inline int getRegHubs() const {
+		return regHubs;
+	}
+
+	inline void setRegHubs(int regHubs) {
+		this->regHubs = regHubs;
+	}
+
+	inline int getOpHubs() const {
+		return opHubs;
+	}
+
+	inline void setOpHubs(int opHubs) {
+		this->opHubs = opHubs;
+	}
+
+	inline int getSlots() const {
+		return slots;
+	}
+
+	inline void setSlots(int slots) {
+		this->slots = slots;
+	}
+
+	inline int getLimit() const {
+		return limit;
+	}
+
+	inline void setLimit(int limit) {
+		this->limit = limit;
+	}
+
+	inline int getOpen() const {
+		return open;
+	}
+
+	inline void setOpen(int open) {
+		this->open = open;
+	}
+
+	inline int getBandwidth() const {
+		return bandwidth;
+	}
+
+	inline void setBandwidth(int bandwidth) {
+		this->bandwidth = bandwidth;
+	}
+
+	inline int getDownload() const {
+		return download;
+	}
+
+	inline void setDownload(int download) {
+		this->download = download;
+	}
+
+	inline const string & getFraction() const {
+		return fraction;
+	}
+
+	inline void setFraction(const string & fraction) {
+		this->fraction = fraction;
+	}
 
 private:
 

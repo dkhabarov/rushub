@@ -64,17 +64,17 @@ public:
 	}
 
 	/** Number element in container HashMap */
-	size_t Size() const {
+	inline size_t Size() const {
 		return mHashMap.size();
 	}
 
 	/** Befin iterator of data list */
-	iterator begin() {
+	inline iterator begin() {
 		return mList.begin();
 	}
 
 	/** End iterator of data list */
-	iterator end() {
+	inline iterator end() {
 		return mList.end();
 	}
 

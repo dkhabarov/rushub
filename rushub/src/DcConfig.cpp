@@ -236,18 +236,6 @@ void DcConfig::addVars(Server * server) {
 
 
 
-int DcConfig::load() {
-	return mConfigLoader->load(this, mConfigStore);
-}
-
-
-
-int DcConfig::save() {
-	return mConfigLoader->save(this, mConfigStore);
-}
-
-
-
 int DcConfig::reload() {
 	if (load() < 0) {
 		save();
@@ -393,18 +381,6 @@ void DcLang::addVars() {
 		Add(s, msTimes[i], timesDef[i]);
 	}
 
-}
-
-
-
-int DcLang::load() {
-	return mConfigLoader->load(this, mConfigStore);
-}
-
-
-
-int DcLang::save() {
-	return mConfigLoader->save(this, mConfigStore);
 }
 
 

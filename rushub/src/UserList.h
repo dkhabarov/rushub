@@ -102,7 +102,7 @@ public:
 
 	/** Unary function for constructing nick-list */
 	struct ufDoNickList : public unary_function<void, iterator> {
-		string &msList; /** List */
+		string & msList; /** List */
 		string msStart; /** Prefix */
 		string msSep; /** Separator */
 
@@ -121,7 +121,7 @@ public:
 			msList.append(msStart.c_str(), msStart.size());
 		}
 
-		virtual void operator() (UserBase *User);
+		virtual void operator() (UserBase *);
 	};
 
 private:
@@ -300,7 +300,7 @@ public:
 			return *this;
 		}
 
-		virtual void operator() (UserBase * userBase);
+		virtual void operator() (UserBase *);
 	};
 
 private:

@@ -84,7 +84,9 @@ public:
 	virtual int Parse() = 0; /** Parse */
 	virtual bool SplitChunks() = 0; /** SplitChunks */
 
-	string & getCommand(); /** getCommand */
+	inline string & getCommand() { /** getCommand */
+		return mCommand;
+	}
 	virtual void ReInit(); /** ReInit */
 
 protected:

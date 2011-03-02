@@ -76,10 +76,10 @@ public:
 		iterator(const iterator & it) {
 			(*this) = it;
 		}
-		bool operator == (const iterator & it) {
+		inline bool operator == (const iterator & it) {
 			return mIpList == it.mIpList;
 		}
-		bool operator != (const iterator & it) {
+		inline bool operator != (const iterator & it) {
 			return mIpList != it.mIpList;
 		}
 		iterator & operator ++() {
@@ -88,13 +88,13 @@ public:
 			}
 			return *this;
 		}
-		Conn * operator * () {
+		inline Conn * operator * () {
 			return mIpList->mData;
 		}
 
 	}; // iterator
 
-	iterator begin(const char * ip) {
+	inline iterator begin(const char * ip) {
 		return begin(Conn::Ip2Num(ip));
 	}
 	iterator begin(unsigned long ip) {
@@ -102,7 +102,7 @@ public:
 		it.mIpList = mIpTable.Find(ip);
 		return it;
 	}
-	iterator end() {
+	inline iterator end() {
 		return iterator();
 	}
 

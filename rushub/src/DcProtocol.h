@@ -49,7 +49,9 @@ public:
 	DcProtocol();
 	virtual ~DcProtocol();
 	
-	void SetServer(DcServer *);
+	inline void SetServer(DcServer * dcServer) {
+		mDcServer = dcServer;
+	}
 	virtual int DoCmd(Parser *, Conn *); /** Do command */
 	
 	/** Creating protocol parser */
