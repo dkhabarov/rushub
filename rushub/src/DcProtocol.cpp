@@ -787,7 +787,7 @@ int DcProtocol::DC_SR(DcParser * dcparser, DcConn * dcconn) {
 	#endif
 
 	/** Sending cmd */
-	if (!mDcServer->mDcConfig.miMaxPassiveRes || (User->mDCConn->miSRCounter++ < unsigned(mDcServer->mDcConfig.miMaxPassiveRes))) {
+	if (!mDcServer->mDcConfig.miMaxPassiveRes || (++User->mDCConn->miSRCounter <= unsigned(mDcServer->mDcConfig.miMaxPassiveRes))) {
 		string sStr(dcparser->mCommand, 0, dcparser->mChunks[CHUNK_SR_TO].first - 1); /** Remove nick on the end of cmd */
 		User->mDCConn->send(sStr, true, false);
 	}

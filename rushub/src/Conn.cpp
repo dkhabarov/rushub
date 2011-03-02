@@ -343,7 +343,7 @@ tSocket Conn::Accept() {
 	int i = 0;
 	memset(&client, 0, namelen);
 	sock = accept(mSocket, (struct sockaddr *)&client, (socklen_t*)&namelen);
-	while (SOCK_INVALID(sock) && ((SockErr == SOCK_EAGAIN) || (SockErr == SOCK_EINTR)) && (i++ < 10)) {
+	while (SOCK_INVALID(sock) && ((SockErr == SOCK_EAGAIN) || (SockErr == SOCK_EINTR)) && (++i <= 10)) {
 		/** Try to accept connection not more than 10 once */
 		sock = ::accept(mSocket, (struct sockaddr *)&client, (socklen_t*)&namelen);
 		#ifdef _WIN32
@@ -411,7 +411,7 @@ int Conn::Recv() {
 		while (
 			(SOCK_ERROR(iBufLen = recv(mSocket, msRecvBuf, MAX_RECV_SIZE, 0))) &&
 			((SockErr == SOCK_EAGAIN) || (SockErr == SOCK_EINTR))
-			&& (i++ <= 100)
+			&& (++i <= 100)
 		) {
 			#ifndef _WIN32
 				usleep(5);
@@ -425,7 +425,7 @@ int Conn::Recv() {
 		static int iAddrLen = sizeof(struct sockaddr);
 		while (
 			(SOCK_ERROR(iBufLen = recvfrom(mSocket, msRecvBuf, MAX_RECV_SIZE, 0, (struct sockaddr *)&mAddrIN, (socklen_t *)&iAddrLen))) &&
-			(i++ <= 100)
+			(++i <= 100)
 		) {
 			#ifndef _WIN32
 				usleep(5);

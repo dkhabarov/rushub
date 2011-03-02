@@ -231,7 +231,7 @@ bool Obj::saveInBuf() {
 
 
 void Obj::loadFromBuf(ostream & os) {
-	for (vector<Pair>::iterator it = mLoadBuf.begin(); it != mLoadBuf.end(); it++) {
+	for (vector<Pair>::iterator it = mLoadBuf.begin(); it != mLoadBuf.end(); ++it) {
 		Pair & p = (*it);
 		if ((!p.first.second && p.first.first <= miMaxLevel) || (p.first.second && p.first.first <= miMaxErrLevel)) {
 			os << p.second;
