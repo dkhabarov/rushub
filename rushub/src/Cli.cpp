@@ -103,7 +103,7 @@ void Cli::detectArgs(int argc, char ** argv) {
 pid_t Cli::demonizeServer(string mainDir) {
 
 	/** Create new process */
-	pid_t pid;
+	pid_t pid = 0;
 
 	if (bDaemon) {
 		pid = fork();
