@@ -285,6 +285,7 @@ void Server::Step() {
 
 	ConnChoose::sChooseRes res;
 	int activity;
+	int forDel = miNumCloseConn;
 
 	for (tChIt it = mConnChooser.begin(); it != mConnChooser.end();) {
 		res = (*it);
@@ -376,6 +377,8 @@ void Server::Step() {
 
 			if (!bOk || (activity & (ConnChoose::eEF_ERROR | ConnChoose::eEF_CLOSE))) {
 
+				forDel = 0; // tmp
+
 				if (mNowConn->IsClosed()) { // check close flag
 					--miNumCloseConn;
 				}
@@ -405,10 +408,11 @@ void Server::Step() {
 		}
 	}
 
-	if (miNumCloseConn) {
-		/*if (Log(3)) {
+	if (miNumCloseConn && forDel) {
+		if (ErrLog(1)) {
 			LogStream() << "Control not closed connections: " << miNumCloseConn << endl;
-		}*/
+		}
+		--miNumCloseConn;
 	}
 }
 
