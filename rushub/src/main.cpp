@@ -99,7 +99,6 @@ int runHub(int argc, char ** argv, bool isService /*= false*/) {
 			if (cli.getConfigFile().empty()) {
 				configFile = Dir::pathForFile(argv[0]);
 				configFile.append("RusHub.xml");
-				cout << configFile << endl;
 			} else {
 				configFile = cli.getConfigFile();
 			}
