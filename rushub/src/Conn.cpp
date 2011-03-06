@@ -188,6 +188,9 @@ tSocket Conn::SocketBind(tSocket sock, int iPort, const char *sIp) {
 
 	/** Bind */
 	if (SOCK_ERROR(bind(sock, (struct sockaddr *)&mAddrIN, sizeof(mAddrIN)))) {
+		if (ErrLog(0)) {
+			LogStream() << "Error bind: " << SockErrMsg << endl;
+		}
 		return INVALID_SOCKET;
 	}
 

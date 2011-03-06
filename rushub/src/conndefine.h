@@ -52,6 +52,7 @@
 	#define EHOSTUNREACH WSAEHOSTUNREACH
 	#define EWOULDBLOCK WSAEWOULDBLOCK
 	#define SockErr WSAGetLastError()
+	#define SockErrMsg WSAGetLastError()
 	#define SOCK_EAGAIN WSAEWOULDBLOCK
 	#define SOCK_EINTR WSAEINTR
 	#define SOCK_INVALID(SOCK) (SOCK) == INVALID_SOCKET
@@ -65,6 +66,7 @@
 	#include <fcntl.h>      /** for nonblock flags F_GETFL & etc. */
 	#define sockoptval_t int
 	#define SockErr errno
+	#define SockErrMsg strerror(errno)
 	#define SOCK_EAGAIN EAGAIN
 	#define SOCK_EINTR EINTR
 	#define SOCK_INVALID(SOCK) (SOCK) < 0
