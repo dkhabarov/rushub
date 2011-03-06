@@ -31,6 +31,7 @@
 #ifdef _WIN32
 	#define SIGQUIT 1000
 	#define SIGHUP 1001
+	#define SIGTSTP 1002
 	#ifdef MODULAR
 		#pragma comment(lib, "config.lib")
 		#pragma comment(lib, "utils.lib")
@@ -58,6 +59,9 @@ static void sigHandler(int sig) {
 			// Fallthrough
 
 		case SIGQUIT :
+			// Fallthrough
+
+		case SIGTSTP :
 			// Fallthrough
 
 		case SIGHUP :
@@ -150,10 +154,11 @@ int main(int argc, char ** argv) {
 	signal(SIGINT, sigHandler);
 	signal(SIGTERM, sigHandler);
 	#ifndef _WIN32
-		signal(SIGQUIT, sigHandler);
-		signal(SIGHUP, sigHandler);
-		signal(SIGPIPE, sigHandler);
 		signal(SIGIO, sigHandler);
+		signal(SIGHUP, sigHandler);
+		signal(SIGQUIT, sigHandler);
+		signal(SIGPIPE, sigHandler);
+		signal(SIGTSTP, sigHandler);
 	#else
 		SetUnhandledExceptionFilter(&Exception::ExceptionFilter);
 	#endif
