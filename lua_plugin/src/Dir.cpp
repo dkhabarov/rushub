@@ -163,25 +163,29 @@ void Dir::execPath(string & path) {
 
 		char * slash = strrchr(exPath, '\\');
 		if (slash) {
-			path = string(exPath, slash - exPath);
+			path = string(exPath, slash - exPath + 1);
 		} else {
 			path = exPath;
 		}
 
 	#else
 
-		char * home = getenv("HOME");
-		if (home) {
-			path = home;
-			path.append("/rushub");
-		} else {
-			path = "./.rushub";
-		}
+		path = "./";
 
 	#endif
 
 	checkPath(path);
 
+}
+
+
+
+string Dir::pathForFile(const char * filePath) {
+	const char * slash = strrchr(filePath, '/');
+	if (!slash) {
+		slash = strrchr(filePath, '\\');
+	}
+	return slash ? string(filePath, slash - filePath + 1) : ".";
 }
 
 
@@ -194,7 +198,7 @@ void Dir::checkEndSlash(string & path) {
 		pos = path.find("\\", pos);
 	}
 
-	if (path.substr(path.size() - 1, 1) != "/") {
+	if (path.size() == 0 || path.substr(path.size() - 1, 1) != "/") {
 		path.append("/");
 	}
 
