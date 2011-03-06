@@ -61,11 +61,6 @@ int DcConfigLoader::save(ConfigListBase * configListBase, const ConfigStore & co
 int DcConfigLoader::loadFromXml(ConfigListBase * configListBase, const char * fileName) {
 	TiXmlDocument file(fileName);
 	if (!file.LoadFile()) {
-
-		// Set default log levels
-		miMaxErrLevel = 2;
-		miMaxLevel = 0;
-
 		if (Log(0)) {
 			LogStream() << "Can't open file '" << fileName <<
 			"' for reading." << endl;

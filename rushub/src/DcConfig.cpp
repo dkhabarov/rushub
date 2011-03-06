@@ -36,18 +36,31 @@ namespace dcserver {
 
 
 
-DcConfig::DcConfig(ConfigLoader * configLoader, Server * server, const char * cfgFile /* = NULL */) : 
+DcConfig::DcConfig(ConfigLoader * configLoader, Server * server, const char * cfgFile) : 
 	mConfigLoader(configLoader)
 {
 
+	mConfigStore.mPath = cfgFile;
+	mConfigStore.mName = "";
+
 	addVars(server);
-
-	if (cfgFile && Dir::isFileExist(cfgFile)) {
-		mConfigStore.mPath = cfgFile;
-		mConfigStore.mName = "";
-	}
-
 	reload();
+
+	Dir::checkPath(mMainPath);
+	Dir::checkPath(mLogPath);
+	Dir::checkPath(mLangPath);
+	Dir::checkPath(mPluginPath);
+
+	msPath = &mLogPath; // Set log point path
+
+	#ifndef _WIN32
+		// Go to the work directory
+		if ((chdir(mMainPath.c_str())) < 0) {
+			if (ErrLog(1)) {
+				LogStream() << "Can not go to the work directory '" << mMainPath << "'. Error: " << strerror(errno) << endl;
+			}
+		}
+	#endif
 }
 
 
@@ -208,16 +221,11 @@ void DcConfig::addVars(Server * server) {
 		#endif
 	);
 
-	string mainPath;
-	Dir::execPath(mainPath);
+	string mainPath(Dir::pathForFile(mConfigStore.mPath.c_str()));
 
 	string langPath(mainPath + "lang/");
 	string logPath(mainPath + "logs/");
 	string pluginPath(mainPath + "plugins/");
-
-	Dir::checkPath(langPath);
-	Dir::checkPath(logPath);
-	Dir::checkPath(pluginPath);
 
 	// TODO: auto detect lang
 	Add("sLang",       mLang,       string("Russian") );
@@ -225,19 +233,17 @@ void DcConfig::addVars(Server * server) {
 	Add("sLogPath",    mLogPath,    logPath);
 	Add("sPluginPath", mPluginPath, pluginPath);
 	Add("sMainPath",   mMainPath,   mainPath);
-
-
-	msPath = &mLogPath; // Set log point path
-
-	mConfigStore.mPath = mMainPath;
-	mConfigStore.mName = "RusHub.xml";
-
 }
 
 
 
 int DcConfig::reload() {
 	if (load() < 0) {
+
+		// Set default log levels
+		miMaxErrLevel = 2;
+		miMaxLevel = 0;
+
 		save();
 		return 1;
 	}
@@ -263,6 +269,8 @@ DcLang::DcLang(ConfigLoader * configLoader, ConfigListBase * configListBase) :
 		if (Dir::checkPath(path)) {
 			mConfigStore.mPath = path;
 			mConfigStore.mName = lang + ".xml";
+		} else {
+			mConfigStore.mPath = "./";
 		}
 	}
 

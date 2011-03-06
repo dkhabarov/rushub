@@ -172,7 +172,7 @@ public:
 
 public:
 
-	DcServer(const string & sConfPath, const string &sExPath);
+	DcServer(const string & configFile, const string & execFile);
 
 	virtual ~DcServer();
 

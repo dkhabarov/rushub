@@ -33,7 +33,7 @@
 using ::dcserver::DcServer;
 
 Service * Service::mCurService = NULL;
-bool Service::IsService = false;
+bool Service::isService = false;
 
 Service::Service() : Obj("Service") {
 	mCurService = this;
@@ -43,7 +43,7 @@ Service::~Service() {
 }
 
 /** InstallService */
-int Service::InstallService(char * name, const char * confPath) {
+int Service::InstallService(char * name, const char * configFile) {
 
 	// Open SC Manager
 	SC_HANDLE Manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
@@ -53,8 +53,8 @@ int Service::InstallService(char * name, const char * confPath) {
 	}
 
 	// Service path
-	char sBuf[MAX_PATH+1] = { '\0' };
-	if (!GetModuleFileName(NULL, sBuf, MAX_PATH)) {
+	char buf[MAX_PATH+1] = { '\0' };
+	if (!GetModuleFileName(NULL, buf, MAX_PATH)) {
 		cout << "Error in GetModuleFileName (" << GetLastError() << ")" << endl;
 	}
 
@@ -64,11 +64,11 @@ int Service::InstallService(char * name, const char * confPath) {
 	}
 
 	// Service path + name
-	string sCmd = "\"" + string(sBuf) + "\" -s \"" + string(name) + "\"";
+	string cmd = "\"" + string(buf) + "\" -s \"" + string(name) + "\"";
 
 	// Service config path
-	if (confPath) {
-		sCmd += " -c \"" + string(confPath) + "\"";
+	if (configFile) {
+		cmd += " -c \"" + string(configFile) + "\"";
 	}
 
 	// Create service
@@ -80,7 +80,7 @@ int Service::InstallService(char * name, const char * confPath) {
 		SERVICE_WIN32_OWN_PROCESS,
 		SERVICE_AUTO_START,
 		SERVICE_ERROR_NORMAL,
-		sCmd.c_str(),
+		cmd.c_str(),
 		NULL,
 		NULL,
 		NULL,
@@ -232,15 +232,15 @@ int Service::Stop() {
 }
 
 
-int Service::cli(int argc, char * argv[], string & sConfPath, const string &) {
+int Service::cli(int argc, char * argv[], string & configFile) {
 
 	// Simple start
 	if (argc < 2) {
 		return 1;
 	}
 
-	char *sStartName = NULL, *sConfigDir = NULL, *sInstallName = NULL;
-	string sPath;
+	char *startName = NULL, *config = NULL, *installName = NULL;
+	string path;
 
 	for (int i = 1; i < argc; ++i) {
 
@@ -262,15 +262,15 @@ int Service::cli(int argc, char * argv[], string & sConfPath, const string &) {
 					}
 					return -1;
 				}
-				sStartName = argv[i];
+				startName = argv[i];
 				break;
 
 			case eConfig :
 				if (++i >= argc) {
-					cout << "Please, set directory." << endl;
+					cout << "Please, set config name." << endl;
 					return -2;
 				}
-				sConfigDir = argv[i];
+				config = argv[i];
 				break;
 
 			case eInstall :
@@ -278,7 +278,7 @@ int Service::cli(int argc, char * argv[], string & sConfPath, const string &) {
 					cout << "Please, set service name." << endl;
 					return -3;
 				}
-				sInstallName = argv[i];
+				installName = argv[i];
 				break;
 
 			case eUninstall :
@@ -302,7 +302,7 @@ int Service::cli(int argc, char * argv[], string & sConfPath, const string &) {
 					"Usage: rushub [OPTIONS] ..." << endl << endl <<
 					"Options:" << endl <<
 					"  -s,\t--service <name>\tstart hub as service" << endl <<
-					"  -c,\t--config <dir>\t\tset main config directory for hub" << endl <<
+					"  -c,\t--config <dir>\t\tset main config file for hub" << endl <<
 					"  -i,\t--install <name>\tinstall service" << endl <<
 					"  -u,\t--uninstall <name>\tuninstall service, then exit" << endl <<
 					"  -q,\t--quit <name>\tstop service, then exit" << endl <<
@@ -315,54 +315,52 @@ int Service::cli(int argc, char * argv[], string & sConfPath, const string &) {
 		}
 	}
 
-	if (sConfigDir) {
+	if (config) {
 
-		size_t iLen = strlen(sConfigDir);
+		size_t iLen = strlen(config);
 		if (!iLen) {
-			cout << "Please, set directory." << endl;
+			cout << "Please, set config file." << endl;
 			return -5;
 		}
 
-		if (sConfigDir[0] != '\\' && sConfigDir[0] != '/' && 
-			(iLen < 4 || (sConfigDir[1] != ':' || (sConfigDir[2] != '\\' && sConfigDir[2] != '/')))
-		) {
-			cout << "Directory must be absolute path." << endl;
+		if (iLen < 4 || (config[1] != ':' || (config[2] != '\\' && config[2] != '/'))) {
+			cout << "Cinfig file must have absolute path." << endl;
 			return -6;
 		}
 
-		string path(sConfigDir);
-		if (!Dir::checkPath(path)) {
-			cout << "Directory not exist and can't be created." << endl;
+		string configPath(Dir::pathForFile(config));
+		if (!Dir::checkPath(configPath)) {
+			cout << "Directory for config file not exist and can't be created." << endl;
 			return -7;
 		}
 
-		sConfPath = path;
+		configFile = config;
 	}
 
-	if (sInstallName) {
-		InstallService(sInstallName, sConfigDir);
+	if (installName) {
+		InstallService(installName, config);
 	}
 
-	if (IsService) { // Service!
+	if (isService) { // Service!
 		return 1;
 	}
 
-	if (sStartName) {
+	if (startName) {
 		SERVICE_TABLE_ENTRY DispatchTable[] = {
-			{ sStartName, (LPSERVICE_MAIN_FUNCTION)Service::ServiceMain },
+			{ startName, (LPSERVICE_MAIN_FUNCTION)Service::ServiceMain },
 			{ NULL, NULL }
 		};
 		if (::StartServiceCtrlDispatcher(DispatchTable) == 0) {
 			if (GetLastError() == ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) {
 				// attempt to start service from console
-				mCurService->ServiceStart(sStartName);
+				mCurService->ServiceStart(startName);
 			}
 			return -2;
 		}
 		return 0;
 	}
 
-	return 0;
+	return 2; // Simple start
 }
 
 void WINAPI Service::CtrlHandler(DWORD dwCtrl) {
@@ -464,7 +462,7 @@ void WINAPI Service::ServiceMain(DWORD, LPTSTR *lpszArgv) {
 	char ** argv;
 	StringToArg::String2Arg(sBinaryPathName, &argc, &argv);
 
-	IsService = true;
+	isService = true;
 	runHub(argc, argv, true);
 }
 

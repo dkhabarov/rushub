@@ -42,9 +42,9 @@ class Cli {
 
 private:
 
-	bool bDaemon;
-	bool bSyslog;
-	string sMainDir;
+	bool mDaemon;
+	bool mSyslog;
+	string mConfigFile;
 
 public:
 
@@ -52,17 +52,17 @@ public:
 	~Cli();
 
 	inline bool getDaemon() const {
-		return bDaemon;
+		return mDaemon;
 	}
 	
 	inline bool getSyslog() const {
-		return bSyslog;
+		return mSyslog;
 	}
 	
-	const string & getMainDir() const;
+	const string & getConfigFile() const;
 
 	void detectArgs(int argc, char ** argv);
-	pid_t demonizeServer(string mainDir);
+	pid_t demonizeServer();
 
 	void printUsage(FILE * stream, int exitStatus);
 	void printVersion(FILE * stream, int exitStatus);

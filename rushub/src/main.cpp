@@ -94,34 +94,29 @@ int runHub(int argc, char ** argv, bool isService /*= false*/) {
 
 	while (result == 1) {
 
-		string confPath, exPath;
+		string configFile;
 		#ifndef _WIN32
-			if (cli.getMainDir().empty()) {
-				Dir::execPath(confPath);
+			if (cli.getConfigFile().empty()) {
+				configFile = Dir::pathForFile(argv[0]);
+				configFile.append("RusHub.xml");
+				cout << configFile << endl;
 			} else {
-				confPath = cli.getMainDir();
+				configFile = cli.getConfigFile();
 			}
-
-			exPath = confPath;
 			if (cli.getDaemon()) {
-				cli.demonizeServer(confPath);
-			}
-			if ((chdir(confPath.c_str())) < 0) {
-				fprintf(stderr, "Can not go to the work directory %s. Error: %s\n", confPath.c_str(), strerror(errno));
-				return -1;
+				cli.demonizeServer();
 			}
 		#else
-			Dir::execPath(confPath);
-			exPath = confPath;
-
 			Service service;
-			if (service.cli(argc, argv, confPath, exPath) <= 0) {
+			Dir::execPath(configFile);
+			configFile.append("RusHub.xml");
+			if (service.cli(argc, argv, configFile) <= 0) {
 				return -1;
 			}
 		#endif
 
 		/** Creating the server */
-		DcServer server(confPath, exPath);
+		DcServer server(configFile, argv[0]);
 
 		/** Listening all ports */
 		if (server.Listening(0) != 0) {

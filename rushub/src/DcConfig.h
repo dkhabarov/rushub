@@ -147,7 +147,7 @@ public:
 
 public:
 
-	DcConfig(ConfigLoader *, Server *, const char * cfgFile = NULL);
+	DcConfig(ConfigLoader *, Server *, const char * cfgFile);
 	virtual ~DcConfig();
 	void addVars(Server *);
 

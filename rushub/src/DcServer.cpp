@@ -54,9 +54,9 @@ string DcServer::msSysVersion;
 
 
 
-DcServer::DcServer(const string &, const string &):
+DcServer::DcServer(const string & configFile, const string &):
 	Server(NMDC_SEPARATOR),
-	mDcConfig(&mDcConfigLoader, mServer, NULL), // TODO: cfg
+	mDcConfig(&mDcConfigLoader, mServer, configFile.c_str()),
 	mDCLang(&mDcConfigLoader, &mDcConfig),
 	mSystemLoad(SYSTEM_LOAD_OK),
 	mDCUserList("UserList", true, true, true),

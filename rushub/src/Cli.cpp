@@ -26,7 +26,7 @@
 
 
 
-Cli::Cli() : bDaemon(false), bSyslog(false) {
+Cli::Cli() : mDaemon(false), mSyslog(false) {
 }
 
 
@@ -36,8 +36,8 @@ Cli::~Cli() {
 
 
 
-const string & Cli::getMainDir() const {
-	return sMainDir;
+const string & Cli::getConfigFile() const {
+	return mConfigFile;
 }
 
 
@@ -67,8 +67,7 @@ void Cli::detectArgs(int argc, char ** argv) {
 				break;
 
 			case 'c' :
-				sMainDir.clear();
-				sMainDir = optarg;
+				mConfigFile = optarg;
 				break;
 
 			case 's' :
@@ -83,7 +82,7 @@ void Cli::detectArgs(int argc, char ** argv) {
 				break;
 
 			case 'd' :
-				bDaemon = true;
+				mDaemon = true;
 				break;
 
 			case 'v' :
@@ -100,12 +99,12 @@ void Cli::detectArgs(int argc, char ** argv) {
 
 
 /** Code for demonization */
-pid_t Cli::demonizeServer(string mainDir) {
+pid_t Cli::demonizeServer() {
 
 	/** Create new process */
 	pid_t pid = 0;
 
-	if (bDaemon) {
+	if (mDaemon) {
 		pid = fork();
 
 		/** Checking pid creation */
@@ -123,12 +122,6 @@ pid_t Cli::demonizeServer(string mainDir) {
 			exit(EXIT_SUCCESS);
 		}
 
-		/** Checking directory */
-		if ((chdir(mainDir.c_str())) < 0) {
-			fprintf(stderr, "Can not go to the work directory %s. Error: %s\n", mainDir.c_str(), strerror(errno));
-			exit(EXIT_FAILURE);
-		}
-
 		/** Reopen standart streams */
 		if (freopen("/dev/null", "r", stdin) == NULL || freopen("/dev/null", "w", stdout) == NULL || freopen("/dev/null", "w", stderr) == NULL) {
 			fprintf(stderr, "Unable to detach from terminal\n");
@@ -141,7 +134,7 @@ pid_t Cli::demonizeServer(string mainDir) {
 
 
 void Cli::printUsage(FILE * stream, int exitStatus) {
-	fprintf(stream, "This is help for Rushub.\n\t-h,\t-help\t Show this text\n\t-v,\t-version Show application version\n\t-d,\t-daemon\t Run application in daemon-mode\n\t-c,\t-config\t Setup config directory\n\t-s,\t-syslog\t Use syslog facility for logging\n");
+	fprintf(stream, "This is help for Rushub.\n\t-h,\t-help\t Show this text\n\t-v,\t-version Show application version\n\t-d,\t-daemon\t Run application in daemon-mode\n\t-c,\t-config\t Setup config file\n\t-s,\t-syslog\t Use syslog facility for logging\n");
 	exit(exitStatus);
 }
 

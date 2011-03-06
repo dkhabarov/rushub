@@ -71,7 +71,7 @@ class Service : public Obj {
 public:
 
 	static Service * mCurService;
-	static bool IsService;
+	static bool isService;
 
 public:
 
@@ -81,11 +81,11 @@ public:
 	static void WINAPI CtrlHandler(DWORD dwCtrl);
 	static void WINAPI ServiceMain(DWORD dwArgc, LPTSTR * lpszArgv);
 
-	static int InstallService(char * name = NULL, const char * confPath = NULL);
+	static int InstallService(char * name = NULL, const char * configFile = NULL);
 	static int UninstallService(char * name = NULL);
 	static int ServiceStop(char * name = NULL);
 	static int ServiceStart(char * name = NULL);
-	static int cli(int argc, char* argv[], string & confPath, const string & exPath);
+	static int cli(int argc, char * argv[], string & configFile);
 	static int Start();
 	static int Stop();
 
