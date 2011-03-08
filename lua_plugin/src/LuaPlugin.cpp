@@ -389,12 +389,12 @@ int LuaPlugin::MoveDown(LuaInterpreter * Script) {
 
 
 /** 1 - blocked */
-int LuaPlugin::CallAll(const char* sFuncName, DcConnBase * conn, DcParserBase * dcParserBase) {
+int LuaPlugin::CallAll(const char* sFuncName, DcConnBase * dcConnBase, DcParserBase * dcParserBase) {
 	int iRet = 0;
 	int iBlock = 0; // On defaults don't block
 	if(dcParserBase) mCurDCParser = dcParserBase;
 	else mCurDCParser = NULL;
-	mCurDCConn = conn;
+	mCurDCConn = dcConnBase;
 
 	LuaInterpreter * Script;
 	for(tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
@@ -402,7 +402,7 @@ int LuaPlugin::CallAll(const char* sFuncName, DcConnBase * conn, DcParserBase * 
 		Script = *it;
 		if(!Script->mL) continue;
 
-		Script->NewCallParam((void *)conn, LUA_TLIGHTUSERDATA);
+		Script->NewCallParam((void *)dcConnBase, LUA_TLIGHTUSERDATA);
 		if(mCurDCParser) Script->NewCallParam((void *)mCurDCParser->mParseString.c_str(), LUA_TSTRING);
 
 		iRet = Script->CallFunc(sFuncName);
@@ -444,14 +444,14 @@ int LuaPlugin::OnConfigChange(const char * sName, const char * sValue) {
 }
 
 /** onFlood event */
-int LuaPlugin::onFlood(DcConnBase * dcConn, int iType1, int iType2) {
-	if(dcConn != NULL) {
+int LuaPlugin::onFlood(DcConnBase * dcConnBase, int iType1, int iType2) {
+	if(dcConnBase != NULL) {
 		int iRet = 0, iBlock = 0; // On defaults don't block
 		LuaInterpreter * Script;
 		for(tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
 			Script = *it;
 			if(!Script->mL) continue;
-			Script->NewCallParam((void *)dcConn, LUA_TLIGHTUSERDATA);
+			Script->NewCallParam((void *)dcConnBase, LUA_TLIGHTUSERDATA);
 			Script->NewCallParam(lua_Number(iType1), LUA_TNUMBER);
 			Script->NewCallParam(lua_Number(iType2), LUA_TNUMBER);
 			iRet = Script->CallFunc("OnFlood");
@@ -467,14 +467,14 @@ int LuaPlugin::onFlood(DcConnBase * dcConn, int iType1, int iType2) {
 }
 
 /// onWebData(WebID, sData)
-int LuaPlugin::onWebData(DcConnBase * conn, WebParserBase * webParserBase) {
-	if((conn != NULL) && (webParserBase != NULL)) {
+int LuaPlugin::onWebData(DcConnBase * dcConnBase, WebParserBase * webParserBase) {
+	if((dcConnBase != NULL) && (webParserBase != NULL)) {
 		int iRet = 0, iBlock = 0; // On defaults don't block
 		LuaInterpreter * Script;
 		for(tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
 			Script = *it;
 			if(!Script->mL) continue;
-			Script->NewCallParam((void *)conn, LUA_TLIGHTUSERDATA);
+			Script->NewCallParam((void *)dcConnBase, LUA_TLIGHTUSERDATA);
 			Script->NewCallParam((void *)webParserBase->mParseString.c_str(), LUA_TSTRING);
 			iRet = Script->CallFunc("OnWebData");
 			if(iRet == 1) return 1; // 1 - blocked
@@ -517,14 +517,14 @@ int LuaPlugin::OnScriptError(LuaInterpreter * Current, const char* sScriptName, 
 }
 
 /** onAny event */
-int LuaPlugin::onAny(DcConnBase * dcConn, DcParserBase * dcParserBase) {
-	if((dcConn != NULL) && (dcParserBase != NULL)) {
+int LuaPlugin::onAny(DcConnBase * dcConnBase, DcParserBase * dcParserBase) {
+	if((dcConnBase != NULL) && (dcParserBase != NULL)) {
 		int iRet = 0, iBlock = 0; // On defaults don't block
 		LuaInterpreter * Script;
 		for(tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
 			Script = *it;
 			if(!Script->mL) continue;
-			Script->NewCallParam((void *)dcConn, LUA_TLIGHTUSERDATA);
+			Script->NewCallParam((void *)dcConnBase, LUA_TLIGHTUSERDATA);
 			Script->NewCallParam((void *)dcParserBase->mParseString.c_str(), LUA_TSTRING);
 			Script->NewCallParam(lua_Number((double)dcParserBase->getCommandType()), LUA_TNUMBER);
 			iRet = Script->CallFunc("OnAny");
@@ -538,25 +538,25 @@ int LuaPlugin::onAny(DcConnBase * dcConn, DcParserBase * dcParserBase) {
 }
 
 #define DC_ACTION_1(FUNC, NAME) \
-int LuaPlugin::FUNC(DcConnBase * conn) { \
-	if(conn != NULL) \
-		return CallAll(NAME, conn); \
+int LuaPlugin::FUNC(DcConnBase * dcConnBase) { \
+	if(dcConnBase != NULL) \
+		return CallAll(NAME, dcConnBase); \
 	LogError("Error in LuaPlugin::" NAME); \
 	return 1; \
 }
 
 #define DC_ACTION_2(FUNC, NAME) \
-int LuaPlugin::FUNC(DcConnBase * conn, DcParserBase * dcParserBase) { \
-	if((conn != NULL) && (dcParserBase != NULL)) \
-		return CallAll(NAME, conn, dcParserBase); \
+int LuaPlugin::FUNC(DcConnBase * dcConnBase, DcParserBase * dcParserBase) { \
+	if((dcConnBase != NULL) && (dcParserBase != NULL)) \
+		return CallAll(NAME, dcConnBase, dcParserBase); \
 	LogError("Error in LuaPlugin::" NAME); \
 	return 1; \
 }
 
 #define DC_ACTION_3(FUNC, NAME) \
-int LuaPlugin::FUNC(DcConnBase * conn, DcParserBase * dcParserBase) { \
-	if((conn != NULL) && (conn->mDcUserBase != NULL) && (dcParserBase != NULL)) \
-		return CallAll(NAME, conn, dcParserBase); \
+int LuaPlugin::FUNC(DcConnBase * dcConnBase, DcParserBase * dcParserBase) { \
+	if((dcConnBase != NULL) && (dcConnBase->mDcUserBase != NULL) && (dcParserBase != NULL)) \
+		return CallAll(NAME, dcConnBase, dcParserBase); \
 	LogError("Error in LuaPlugin::" NAME); \
 	return 1; \
 }

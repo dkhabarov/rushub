@@ -115,7 +115,7 @@ public:
 
 	int OnConfigChange(const char *, const char *);
 
-	int CallAll(const char *, DcConnBase * conn = NULL, DcParserBase * dcParserBase = NULL); /** Calling event for all scripts */
+	int CallAll(const char *, DcConnBase * dcConnBase = NULL, DcParserBase * dcParserBase = NULL); /** Calling event for all scripts */
 
 	LuaInterpreter * FindScript(const string & sScriptName);
 	LuaInterpreter * AddScript(const string & sScriptName, bool bOnlyNew = false);

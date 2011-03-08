@@ -78,11 +78,11 @@ if(!LIP || !LIP->mL) ERR("script was not found");
 namespace luaplugin {
 
 DcConnBase * getDcConnBase(lua_State *L, int indx) {
-	void ** userdata = (void**) lua_touserdata(L, indx);
-	DcConnBase * conn = (DcConnBase*)*userdata;
-	if(conn->mType != CLIENT_TYPE_NMDC && conn->mType != CLIENT_TYPE_WEB)
+	void ** userdata = (void **) lua_touserdata(L, indx);
+	DcConnBase * dcConnBase = (DcConnBase *)*userdata;
+	if(dcConnBase->mType != CLIENT_TYPE_NMDC && dcConnBase->mType != CLIENT_TYPE_WEB)
 		return NULL;
-	return conn;
+	return dcConnBase;
 }
 
 int ConfigTostring(lua_State *L) {
@@ -279,13 +279,13 @@ int sendToUser(lua_State *L) {
 	MSGLEN(iLen);
 
 	if(iType == LUA_TUSERDATA) {
-		DcConnBase * conn = getDcConnBase(L, 1);
-		if(!conn) ERR("user was not found");
-		if(conn->mType == CLIENT_TYPE_WEB) {
-			if(!conn->send(sData)) // not newPolitic fot timers only
+		DcConnBase * dcConnBase = getDcConnBase(L, 1);
+		if(!dcConnBase) ERR("user was not found");
+		if(dcConnBase->mType == CLIENT_TYPE_WEB) {
+			if(!dcConnBase->send(sData)) // not newPolitic fot timers only
 				ERR("data was not sent");
 		} else {
-			if(!LuaPlugin::mCurServer->sendToUser(conn, sData, sNick, sFrom))
+			if(!LuaPlugin::mCurServer->sendToUser(dcConnBase, sData, sNick, sFrom))
 				ERR("user was not found");
 		}
 	} else if (iType == LUA_TSTRING) {
@@ -574,40 +574,40 @@ int GetUser(lua_State *L) {
 /// SetUser(UID/sNick, iType, Value)
 int SetUser(lua_State *L) {
 	CHECK_COUNT(3);
-	DcConnBase * conn;
+	DcConnBase * dcConnBase = NULL;
 	if(lua_type(L, 1) == LUA_TUSERDATA) {
-		conn = getDcConnBase(L, 1);
-		if(!conn || conn->mType != CLIENT_TYPE_NMDC) ERR("user was not found");
+		dcConnBase = getDcConnBase(L, 1);
+		if(!dcConnBase || dcConnBase->mType != CLIENT_TYPE_NMDC) ERR("user was not found");
 	} else if(lua_isstring(L, 1)) {
 		size_t iLen;
 		const char * sNick = lua_tolstring(L, 1, &iLen);
 		NICKLEN(iLen);
 		DcUserBase * User = LuaPlugin::mCurServer->getDcUserBase(sNick);
 		if(!User || !User->mDcConnBase) ERR("user was not found");
-		conn = User->mDcConnBase;
+		dcConnBase = User->mDcConnBase;
 	} else return luaL_typeerror(L, 1, "userdata or string");
 
 	unsigned iNum = (unsigned)luaL_checkinteger(L, 2);
 	if(iNum == eUV_iProfile) {
-		conn->setProfile(luaL_checkint(L, 3));
+		dcConnBase->setProfile(luaL_checkint(L, 3));
 	} else if(iNum == eUV_sMyINFO) {
-		if(!conn->mDcUserBase) ERR("user was not found");
+		if(!dcConnBase->mDcUserBase) ERR("user was not found");
 		string sMyINFO(luaL_checkstring(L, 3));
-		if(!conn->mDcUserBase->setMyINFO(sMyINFO, conn->mDcUserBase->getNick())) ERR("wrong syntax");
+		if(!dcConnBase->mDcUserBase->setMyINFO(sMyINFO, dcConnBase->mDcUserBase->getNick())) ERR("wrong syntax");
 	} else if(iNum == eUV_sData) {
-		conn->setData(luaL_checkstring(L, 3));
+		dcConnBase->setData(luaL_checkstring(L, 3));
 	} else if(iNum == eUV_bOpList) {
 		luaL_checktype(L, 3, LUA_TBOOLEAN);
-		if(!conn->mDcUserBase) ERR("user was not found");
-		conn->mDcUserBase->setInOpList(lua_toboolean(L, 3) != 0);
+		if(!dcConnBase->mDcUserBase) ERR("user was not found");
+		dcConnBase->mDcUserBase->setInOpList(lua_toboolean(L, 3) != 0);
 	} else if(iNum == eUV_bHide) {
 		luaL_checktype(L, 3, LUA_TBOOLEAN);
-		if(!conn->mDcUserBase) ERR("user was not found");
-		conn->mDcUserBase->setHide(lua_toboolean(L, 3) != 0);
+		if(!dcConnBase->mDcUserBase) ERR("user was not found");
+		dcConnBase->mDcUserBase->setHide(lua_toboolean(L, 3) != 0);
 	} else if(iNum == eUV_bIpList) {
 		luaL_checktype(L, 3, LUA_TBOOLEAN);
-		if(!conn->mDcUserBase) ERR("user was not found");
-		conn->mDcUserBase->setInIpList(lua_toboolean(L, 3) != 0);
+		if(!dcConnBase->mDcUserBase) ERR("user was not found");
+		dcConnBase->mDcUserBase->setInIpList(lua_toboolean(L, 3) != 0);
 	}
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
@@ -637,13 +637,13 @@ int GetUsers(lua_State *L) {
 		bool all = false;
 		if (lua_isboolean(L, 1) && lua_toboolean(L, 1) == 1) all = true;
 		DcConnListIterator * it = LuaPlugin::mCurServer->getDcConnListIterator();
-		DcConnBase * conn;
-		while((conn = it->operator ()()) != NULL) {
-			if(conn->mType != CLIENT_TYPE_NMDC) continue;
-			if (all || (conn->mDcUserBase && conn->mDcUserBase->getInUserList())) {
+		DcConnBase * dcConnBase = NULL;
+		while((dcConnBase = it->operator ()()) != NULL) {
+			if(dcConnBase->mType != CLIENT_TYPE_NMDC) continue;
+			if (all || (dcConnBase->mDcUserBase && dcConnBase->mDcUserBase->getInUserList())) {
 				lua_pushnumber(L, i);
-				void ** userdata = (void**) lua_newuserdata(L, sizeof(void*));
-				*userdata = (void*)conn;
+				void ** userdata = (void **) lua_newuserdata(L, sizeof(void*));
+				*userdata = (void *)dcConnBase;
 				luaL_getmetatable(L, MT_USER_CONN);
 				lua_setmetatable(L, -2);
 				lua_rawset(L, iTopTab);
@@ -678,9 +678,9 @@ int disconnect(lua_State *L) {
 	CHECK_COUNT(1);
 	int iType = lua_type(L, 1);
 	if(iType == LUA_TUSERDATA) {
-		DcConnBase * conn = getDcConnBase(L, 1);
-		if(!conn) ERR("user was not found");
-		conn->disconnect();
+		DcConnBase * dcConnBase = getDcConnBase(L, 1);
+		if(!dcConnBase) ERR("user was not found");
+		dcConnBase->disconnect();
 	} else if(iType == LUA_TSTRING) {
 		size_t iLen;
 		const char * sNick = lua_tolstring(L, 1, &iLen);
@@ -1143,19 +1143,19 @@ int redirect(lua_State *L) {
 	}
 
 	iType = lua_type(L, 1);
-	DcConnBase * conn = NULL;
+	DcConnBase * dcConnBase = NULL;
 	if(iType != LUA_TUSERDATA) {
 		if(iType != LUA_TSTRING) return luaL_typeerror(L, 1, "userdata or string");
 		DcUserBase * User = LuaPlugin::mCurServer->getDcUserBase(lua_tostring(L, 1));
 		if(!User || !User->mDcConnBase) ERR("user was not found");
-		conn = User->mDcConnBase;
+		dcConnBase = User->mDcConnBase;
 	} else {
-		conn = getDcConnBase(L, 1);
+		dcConnBase = getDcConnBase(L, 1);
 	}
 
-	if(!conn || (conn->mType != CLIENT_TYPE_NMDC)) ERR("user was not found");
+	if(!dcConnBase || (dcConnBase->mType != CLIENT_TYPE_NMDC)) ERR("user was not found");
 
-	LuaPlugin::mCurServer->forceMove(conn, sAddress, sReason);
+	LuaPlugin::mCurServer->forceMove(dcConnBase, sAddress, sReason);
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
 	return 1;
