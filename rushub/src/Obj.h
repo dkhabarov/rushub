@@ -86,7 +86,7 @@ protected:
 	void SetClassName(const char * name);
 
 	/** Main function putting log in stream */
-	virtual bool StrLog();
+	virtual bool strLog();
 
 private:
 

@@ -45,7 +45,7 @@ bool ConnChoose::AddConn(ConnBase * connBase) {
 }
 
 /** Del from mConnBaseList */
-bool ConnChoose::DelConn(ConnBase * connBase) {
+bool ConnChoose::deleteConn(ConnBase * connBase) {
 	OptOut(connBase, eEF_ALL_AND_CLOSE);
 	return mConnBaseList.Remove((tSocket) (*connBase));
 }

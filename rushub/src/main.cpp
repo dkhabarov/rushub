@@ -118,7 +118,7 @@ int runHub(int argc, char ** argv, bool isService /*= false*/) {
 		DcServer server(configFile, argv[0]);
 
 		/** Listening all ports */
-		if (server.Listening(0) != 0) {
+		if (server.Listening() != 0) {
 			if (server.ErrLog(0)) {
 				server.LogStream() << "Listening failed" << endl;
 			}

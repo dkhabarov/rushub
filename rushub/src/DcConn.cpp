@@ -59,30 +59,30 @@ DcConn::~DcConn() {
 
 int DcConn::send(const string & data, bool addSep, bool flush) {
 	int iRet;
-	if (!mbWritable) {
+	if (!mWritable) {
 		return 0;
 	}
 
-	if (data.size() >= miSendBufMax) {
+	if (data.size() >= mSendBufMax) {
 		string msg(data);
 		if (Log(0)) {
 			LogStream() << "Too long message. Size: " << msg.size() << ". Max size: "
-				<< miSendBufMax << " Message starts with: " << msg.substr(0, 25) << endl;
+				<< mSendBufMax << " Message starts with: " << msg.substr(0, 25) << endl;
 		}
-		msg.resize(miSendBufMax - 1);
+		msg.resize(mSendBufMax - 1);
 
 		if (addSep) {
-			WriteData(msg, false);
-			iRet = WriteData(NMDC_SEPARATOR, flush);
+			writeData(msg, false);
+			iRet = writeData(NMDC_SEPARATOR, flush);
 		} else {
-			iRet = WriteData(msg, flush);
+			iRet = writeData(msg, flush);
 		}
 	} else {
 		if (addSep) {
-			WriteData(data, false);
-			iRet = WriteData(NMDC_SEPARATOR, flush);
+			writeData(data, false);
+			iRet = writeData(NMDC_SEPARATOR, flush);
 		} else {
-			iRet = WriteData(data, flush);
+			iRet = writeData(data, flush);
 		}
 	}
 	return iRet;
@@ -91,47 +91,47 @@ int DcConn::send(const string & data, bool addSep, bool flush) {
 
 
 void DcConn::disconnect() {
-	CloseNice(9000, CLOSE_REASON_PLUGIN);
+	closeNice(9000, CLOSE_REASON_PLUGIN);
 }
 
 //< Get real port
 int DcConn::getPort() const {
-	return miPort;
+	return mPort;
 }
 
 
 
 //< Get connection port
 int DcConn::getPortConn() const {
-	return miPortConn;
+	return mPortConn;
 }
 
 
 
 //< Get numeric IP
 unsigned long DcConn::getNetIp() const {
-	return miNetIp;
+	return mNetIp;
 }
 
 
 
 //< Get string of IP
 const string & DcConn::getIp() const {
-	return msIp;
+	return mIp;
 }
 
 
 
 //< Get string of server IP (host)
 const string & DcConn::getIpConn() const {
-	return msIpConn;
+	return mIpConn;
 }
 
 
 
 //< Get mac address
 const string & DcConn::getMacAddress() const {
-	return msMAC;
+	return mMac;
 }
 
 
@@ -181,12 +181,12 @@ void DcConn::setData(const string & sData) {
 
 
 
-/** OnFlush sending buffer */
-void DcConn::OnFlush() {
+/** onFlush sending buffer */
+void DcConn::onFlush() {
 	if (mbNickListInProgress) {
 		SetLSFlag(LOGIN_STATUS_NICKLST);
 		mbNickListInProgress = false;
-		if (!mbOk || !mbWritable) {
+		if (!mOk || !mWritable) {
 			if (Log(2)) {
 				LogStream() << "Connection closed during nicklist" << endl;
 			}
@@ -227,32 +227,32 @@ int DcConn::onTimer(Time &now) {
 				if (Log(2)) {
 					LogStream() << "Operation timeout (" << HubTimeOut(i) << ")" << endl;
 				}
-				StringReplace(dcServer->mDCLang.msTimeout, string("reason"), sMsg, dcServer->mDCLang.msTimeoutCmd[i]);
-				dcServer->sendToUser(this, sMsg.c_str(), (char*)dcServer->mDcConfig.msHubBot.c_str());
-				this->CloseNice(9000, CLOSE_REASON_TIMEOUT);
+				StringReplace(dcServer->mDCLang.mTimeout, string("reason"), sMsg, dcServer->mDCLang.mTimeoutCmd[i]);
+				dcServer->sendToUser(this, sMsg.c_str(), (char*)dcServer->mDcConfig.mHubBot.c_str());
+				this->closeNice(9000, CLOSE_REASON_TIMEOUT);
 				return 1;
 			}
 		}
 	}
 
 	/*Time lastRecv(mLastRecv);
-	if (dcServer->MinDelay(lastRecv, dcServer->mDcConfig.miTimeoutAny)) {
+	if (dcServer->MinDelay(lastRecv, dcServer->mDcConfig.mTimeoutAny)) {
 		if (Log(2)) {
 			LogStream() << "Any action timeout..." << endl;
 		}
-		dcServer->sendToUser(this, dcServer->mDCLang.msTimeoutAny.c_str(), (char*)dcServer->mDcConfig.msHubBot.c_str());
-		CloseNice(9000, CLOSE_REASON_TO_ANYACTION);
+		dcServer->sendToUser(this, dcServer->mDCLang.mTimeoutAny.c_str(), (char*)dcServer->mDcConfig.mHubBot.c_str());
+		closeNice(9000, CLOSE_REASON_TIMEOUT_ANYACTION);
 		return 2;
 	}*/
 
 	/** Check user on freeze.
-		Sending void msg to all users, starting on miStartPing sec after entry,
-		every miPingInterval sec
+		Sending void msg to all users, starting on mStartPing sec after entry,
+		every mPingInterval sec
 	*/
 	Time Ago(now);
-	Ago -= dcServer->mDcConfig.miStartPing;
+	Ago -= dcServer->mDcConfig.mStartPing;
 	if (
-		dcServer->MinDelay(mTimes.mPingServer, dcServer->mDcConfig.miPingInterval) &&
+		dcServer->MinDelay(mTimes.mPingServer, dcServer->mDcConfig.mPingInterval) &&
 		mDcUser && mDcUser->getInUserList() && mDcUser->mTimeEnter < Ago
 	) {
 		string s;
@@ -261,12 +261,12 @@ int DcConn::onTimer(Time &now) {
 	return 0;
 }
 
-void DcConn::CloseNice(int msec, int iReason) {
-	Conn::CloseNice(msec, iReason);
+void DcConn::closeNice(int msec, int iReason) {
+	Conn::closeNice(msec, iReason);
 }
 
-void DcConn::CloseNow(int iReason) {
-	Conn::CloseNow(iReason);
+void DcConn::closeNow(int iReason) {
+	Conn::closeNow(iReason);
 }
 
 /** Set user object for current connection */
@@ -286,7 +286,7 @@ bool DcConn::SetUser(DcUser * User) {
 	}
 	mDcUser = User;
 	mDcUserBase = User;
-	User->SetIp(msIp);
+	User->SetIp(mIp);
 	User->mDcConn = this;
 	User->mDcConnBase = this;
 	User->mDcServer = server();
@@ -302,58 +302,58 @@ DcConnFactory::DcConnFactory(Protocol *protocol, Server *s) : ConnFactory(protoc
 DcConnFactory::~DcConnFactory() {
 }
 
-Conn *DcConnFactory::CreateConn(tSocket sock) {
+Conn *DcConnFactory::createConn(tSocket sock) {
 	if (!mServer) {
 		return NULL;
 	}
 
-	DcConn * dcconn = new DcConn(CLIENT_TYPE_NMDC, sock, mServer);
-	dcconn->mConnFactory = this; /** Connection factory for current connection (DcConnFactory) */
-	dcconn->mProtocol = mProtocol; /** Protocol pointer (DcProtocol) */
+	DcConn * dcConn = new DcConn(CLIENT_TYPE_NMDC, sock, mServer);
+	dcConn->mConnFactory = this; /** Connection factory for current connection (DcConnFactory) */
+	dcConn->mProtocol = mProtocol; /** Protocol pointer (DcProtocol) */
 
 	DcServer * dcServer = (DcServer *) mServer;
 	if (!dcServer) {
 		return NULL;
 	}
-	dcServer->mIPListConn->Add(dcconn); /** Adding connection in IP-list */
+	dcServer->mIPListConn->Add(dcConn); /** Adding connection in IP-list */
 
-	return (Conn *)dcconn;
+	return (Conn *)dcConn;
 }
 
-void DcConnFactory::DelConn(Conn * &conn) {
-	DcConn * dcconn = (DcConn *) conn;
+void DcConnFactory::deleteConn(Conn * &conn) {
+	DcConn * dcConn = (DcConn *) conn;
 	DcServer * dcServer = (DcServer *) mServer;
-	if (dcconn && dcServer) {
-		dcServer->mIPListConn->Remove(dcconn);
-		if (dcconn->GetLSFlag(LOGIN_STATUS_ALOWED)) {
+	if (dcConn && dcServer) {
+		dcServer->mIPListConn->Remove(dcConn);
+		if (dcConn->GetLSFlag(LOGIN_STATUS_ALOWED)) {
 			dcServer->miTotalUserCount --;
-			if (dcconn->mDcUser) {
-				dcServer->miTotalShare -= dcconn->mDcUser->getShare();
+			if (dcConn->mDcUser) {
+				dcServer->miTotalShare -= dcConn->mDcUser->getShare();
 			} else if (conn->Log(3)) {
 					conn->LogStream() << "Del conn without user" << endl;
 			}
 		} else if (conn->Log(3)) {
-			conn->LogStream() << "Del conn without ALOWED flag: " << dcconn->GetLSFlag(LOGIN_STATUS_LOGIN_DONE) << endl;
+			conn->LogStream() << "Del conn without ALOWED flag: " << dcConn->GetLSFlag(LOGIN_STATUS_LOGIN_DONE) << endl;
 		}
-		if (dcconn->mDcUser) {
-			if (dcconn->mDcUser->getInUserList()) {
-				dcServer->RemoveFromDCUserList((DcUser*)dcconn->mDcUser);
+		if (dcConn->mDcUser) {
+			if (dcConn->mDcUser->getInUserList()) {
+				dcServer->RemoveFromDCUserList((DcUser*)dcConn->mDcUser);
 			} else { // remove from enter list, if user was already added in it, but user was not added in user list
-				dcServer->mEnterList.RemoveByNick(dcconn->mDcUser->getNick());
+				dcServer->mEnterList.RemoveByNick(dcConn->mDcUser->getNick());
 			}
-			delete dcconn->mDcUser;
-			dcconn->mDcUser = NULL;
-			dcconn->mDcUserBase = NULL;
+			delete dcConn->mDcUser;
+			dcConn->mDcUser = NULL;
+			dcConn->mDcUserBase = NULL;
 		}
 		#ifndef WITHOUT_PLUGINS
-			dcServer->mCalls.mOnUserDisconnected.CallAll(dcconn);
+			dcServer->mCalls.mOnUserDisconnected.CallAll(dcConn);
 		#endif
 	} else if (conn->ErrLog(0)) {
-		conn->LogStream() << "Fail error in DelConn: dcconn = " <<
-		(dcconn == NULL ? "NULL" : "not NULL") << ", dcServer = " << 
+		conn->LogStream() << "Fail error in deleteConn: dcConn = " <<
+		(dcConn == NULL ? "NULL" : "not NULL") << ", dcServer = " << 
 		(dcServer == NULL ? "NULL" : "not NULL") << endl;
 	}
-	ConnFactory::DelConn(conn);
+	ConnFactory::deleteConn(conn);
 }
 
 }; // namespace dcserver

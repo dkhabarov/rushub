@@ -249,7 +249,7 @@ public:
 	}
 
 	/** Redefining log level function */
-	virtual bool StrLog();
+	virtual bool strLog();
 
 }; // UserList
 

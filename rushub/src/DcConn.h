@@ -85,54 +85,42 @@ enum SupportFeature {
 /** Enumeration of reasons to closing connection (CloseReason) */
 enum CloseReason {
 
-	CLOSE_REASON_BAD_FLAG = CLOSE_REASON_MAX,
-	CLOSE_REASON_BAD_CMD_PARAM,
-	CLOSE_REASON_BAD_CMD_LENGTH,
-	CLOSE_REASON_BAD_CMD_NULL,
-	CLOSE_REASON_LONG_NICK,
-	CLOSE_REASON_SETUSER,
-	CLOSE_REASON_SYNTAX_CHAT,
-	CLOSE_REASON_SYNTAX_TO,
-	CLOSE_REASON_BAD_NICK_PM,
-	CLOSE_REASON_SYNTAX_MCTO,
-	CLOSE_REASON_BAD_NICK_MCTO,
-	CLOSE_REASON_SYNTAX_SEARCH,
-	CLOSE_REASON_SYNTAX_SR,
-	CLOSE_REASON_SYNTAX_CTM,
-	CLOSE_REASON_SYNTAX_RCTM,
-	CLOSE_REASON_SYNTAX_KICK,
-	CLOSE_REASON_SYNTAX_OFM,
-	CLOSE_REASON_SYNTAX_GETINFO,
-	CLOSE_REASON_BAD_DC_CMD,
-	CLOSE_REASON_IP_FLOOD,
-	CLOSE_REASON_OLD_CLIENT,
-	CLOSE_REASON_BAD_SEQUENCE,
-	CLOSE_REASON_NOT_LOGIN_DONE,
-	CLOSE_REASON_ADD_USER,
-	CLOSE_REASON_PLUGIN,
-	CLOSE_REASON_TIMEOUT,
-	CLOSE_REASON_TO_ANYACTION,
-	CLOSE_REASON_FLOOD,
-	CLOSE_REASON_INVALID_USER,
-	CLOSE_REASON_INVALID_NICK,
-	CLOSE_REASON_USERS_LIMIT,
+	CLOSE_REASON_CMD_REPEAT = CLOSE_REASON_MAX,
+	CLOSE_REASON_CMD_LENGTH,
+	CLOSE_REASON_CMD_NULL,
+	CLOSE_REASON_CMD_QUIT,
+	CLOSE_REASON_CMD_KICK,
+	CLOSE_REASON_CMD_FORCE_MOVE,
+	CLOSE_REASON_CMD_PASSWORD_ERR,
+	CLOSE_REASON_CMD_MYINFO_WITHOUT_USER,
+	CLOSE_REASON_CMD_VERSION,
+	CLOSE_REASON_CMD_UNKNOWN,
+	CLOSE_REASON_CMD_SYNTAX,
+	CLOSE_REASON_CMD_SEQUENCE,
 	CLOSE_REASON_NICK_LEN,
-	CLOSE_REASON_LOGIN_ERR,
-	CLOSE_REASON_SYNTAX_VERSION,
-	CLOSE_REASON_SYNTAX_MYINFO,
-	CLOSE_REASON_MYINFO_WITHOUT_USER,
-	CLOSE_REASON_BAD_MYINFO_NICK,
-	CLOSE_REASON_CHAT_NICK,
+	CLOSE_REASON_NICK_LONG,
+	CLOSE_REASON_NICK_INVALID,
+	CLOSE_REASON_NICK_MYINFO,
 	CLOSE_REASON_NICK_SEARCH,
 	CLOSE_REASON_NICK_SR,
 	CLOSE_REASON_NICK_CTM,
 	CLOSE_REASON_NICK_RCTM,
-	CLOSE_REASON_UNKNOWN_CMD,
-	CLOSE_REASON_QUIT,
-	CLOSE_REASON_WEB,
-	CLOSE_REASON_HUB_LOAD, // System down, do not take new users	
-	CLOSE_REASON_FORCE_MOVE,
-	CLOSE_REASON_KICK
+	CLOSE_REASON_NICK_CHAT,
+	CLOSE_REASON_NICK_PM,
+	CLOSE_REASON_NICK_MCTO,
+	CLOSE_REASON_USER_SET,
+	CLOSE_REASON_USER_INVALID,
+	CLOSE_REASON_USER_ADD,
+	CLOSE_REASON_USER_OLD,
+	CLOSE_REASON_USERS_LIMIT,
+	CLOSE_REASON_FLOOD,
+	CLOSE_REASON_FLOOD_IP_ENTRY,
+	CLOSE_REASON_TIMEOUT,
+	CLOSE_REASON_TIMEOUT_ANYACTION,
+	CLOSE_REASON_LOGIN_NOT_DONE,
+	CLOSE_REASON_PLUGIN,
+	CLOSE_REASON_HUB_LOAD, // System down, do not take new users
+	CLOSE_REASON_WEB
 
 }; // enum CloseReason
 
@@ -158,8 +146,8 @@ public:
 
 	DcConnFactory(Protocol * protocol, Server * server);
 	virtual ~DcConnFactory();
-	virtual Conn * CreateConn(tSocket sock = 0);
-	virtual void DelConn(Conn * &);
+	virtual Conn * createConn(tSocket sock = 0);
+	virtual void deleteConn(Conn * &);
 
 }; // DcConnFactory
 
@@ -183,54 +171,14 @@ public:
 
 	struct Timers { /** Timers */
 
-		Time mSearch;
-		Time mSR;
-		Time mMyINFO;
-		Time mChat;
-		Time mNickList;
-		Time mTo;
-		Time mCTM;
-		Time mRCTM;
-		Time mMCTo;
-		Time mPing;
-		Time mUnknown;
+		Time mTime[NMDC_TYPE_UNKNOWN];
+		unsigned mCount[NMDC_TYPE_UNKNOWN];
 
-		unsigned miSearch;
-		unsigned miSR;
-		unsigned miMyINFO;
-		unsigned miChat;
-		unsigned miNickList;
-		unsigned miTo;
-		unsigned miCTM;
-		unsigned miRCTM;
-		unsigned miMCTo;
-		unsigned miPing;
-		unsigned miUnknown;
-
-		Timers() : 
-			mSearch(0l),
-			mSR(0l),
-			mMyINFO(0l),
-			mChat(0l),
-			mNickList(0l),
-			mTo(0l),
-			mCTM(0l),
-			mRCTM(0l),
-			mMCTo(0l),
-			mPing(0l),
-			mUnknown(0l),
-			miSearch(0),
-			miSR(0),
-			miMyINFO(0),
-			miChat(0),
-			miNickList(0),
-			miTo(0),
-			miCTM(0),
-			miRCTM(0),
-			miMCTo(0),
-			miPing(0),
-			miUnknown(0)
-		{
+		Timers() {
+			for (int i = 0; i <= NMDC_TYPE_UNKNOWN; ++i) {
+				mCount[i] = 0;
+				mTime[i].Null();
+			}
 		}
 
 	} mTimes1, mTimes2;
@@ -287,7 +235,7 @@ public:
 
 	
 	/** Flush sending buffer */
-	virtual void OnFlush();
+	virtual void onFlush();
 
 	//< Setting entry status flag
 	inline void SetLSFlag(unsigned int s) {
@@ -316,8 +264,8 @@ public:
 	//< Timer for current connection
 	virtual int onTimer(Time & now);
 
-	virtual void CloseNow(int iReason = 0);
-	virtual void CloseNice(int msec, int iReason = 0);
+	virtual void closeNow(int iReason = 0);
+	virtual void closeNice(int msec, int iReason = 0);
 
 	/** Pointer to the server */
 	inline DcServer * server() {

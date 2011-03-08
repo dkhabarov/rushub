@@ -30,58 +30,14 @@ namespace dcserver {
 
 namespace protocol {
 
-#define BADCMDPARAM(CMD) \
-if (dcparser->SplitChunks()) { \
-	if (dcconn->Log(1)) { \
-		dcconn->LogStream() << "Attempt to attack in " CMD " (bad cmd param)" << endl; \
-	} \
-	dcconn->CloseNow(CLOSE_REASON_BAD_CMD_PARAM); \
-	return -1; \
-}
-
 #define BADFLAG(CMD, FLAG) \
-if (dcconn->GetLSFlag(FLAG)) { \
-	if (dcconn->Log(1)) { \
-		dcconn->LogStream() << "Attempt to attack in " CMD " (repeated sending)" << endl; \
+if (dcConn->GetLSFlag(FLAG)) { \
+	if (dcConn->Log(1)) { \
+		dcConn->LogStream() << "Attempt to attack in " CMD " (repeated sending)" << endl; \
 	} \
-	dcconn->CloseNow(CLOSE_REASON_BAD_FLAG); \
+	dcConn->closeNow(CLOSE_REASON_CMD_REPEAT); \
 	return -1; \
 }
-
-/* antiflood */
-#ifndef WITHOUT_PLUGINS
-#define ANTIFLOOD(TYPE, FT) \
-	if (mDcServer->antiFlood(dcconn->mTimes1.mi##TYPE, dcconn->mTimes1.m##TYPE, \
-	mDcServer->mDcConfig.miFloodCount##TYPE, mDcServer->mDcConfig.miFloodTime##TYPE) \
-) { \
-	if (!mDcServer->mCalls.mOnFlood.CallAll(dcconn, FT, 1)) { \
-		mDcServer->sendToUser(dcconn, (mDcServer->mDCLang.msFlood##TYPE).c_str(), (char*)mDcServer->mDcConfig.msHubBot.c_str()); \
-		dcconn->CloseNice(9000, CLOSE_REASON_FLOOD); return -1; \
-	} \
-} \
-if (mDcServer->antiFlood(dcconn->mTimes2.mi##TYPE, dcconn->mTimes2.m##TYPE, \
-	mDcServer->mDcConfig.miFloodCount##TYPE##2, mDcServer->mDcConfig.miFloodTime##TYPE##2) \
-) { \
-	if (!mDcServer->mCalls.mOnFlood.CallAll(dcconn, FT, 2)) { \
-		mDcServer->sendToUser(dcconn, (mDcServer->mDCLang.msFlood##TYPE).c_str(), (char*)mDcServer->mDcConfig.msHubBot.c_str()); \
-		dcconn->CloseNice(9000, CLOSE_REASON_FLOOD); return -1; \
-	} \
-}
-#else
-#define ANTIFLOOD(TYPE, FT) \
-	if (mDcServer->antiFlood(dcconn->mTimes1.mi##TYPE, dcconn->mTimes1.m##TYPE, \
-	mDcServer->mDcConfig.miFloodCount##TYPE, mDcServer->mDcConfig.miFloodTime##TYPE) \
-) { \
-	mDcServer->sendToUser(dcconn, (mDcServer->mDCLang.msFlood##TYPE).c_str(), (char*)mDcServer->mDcConfig.msHubBot.c_str()); \
-	dcconn->CloseNice(9000, CLOSE_REASON_FLOOD); return -1; \
-} \
-if (mDcServer->antiFlood(dcconn->mTimes2.mi##TYPE, dcconn->mTimes2.m##TYPE, \
-	mDcServer->mDcConfig.miFloodCount##TYPE##2, mDcServer->mDcConfig.miFloodTime##TYPE##2) \
-) { \
-	mDcServer->sendToUser(dcconn, (mDcServer->mDCLang.msFlood##TYPE).c_str(), (char*)mDcServer->mDcConfig.msHubBot.c_str()); \
-	dcconn->CloseNice(9000, CLOSE_REASON_FLOOD); return -1; \
-}
-#endif
 
 
 
@@ -97,37 +53,21 @@ DcProtocol::~DcProtocol() {
 
 
 int DcProtocol::DoCmd(Parser * parser, Conn * conn) {
-	DcConn * dcconn = (DcConn *)conn;
+	DcConn * dcConn = (DcConn *)conn;
 	DcParser * dcparser = (DcParser *)parser;
 
-	// Checking length of command
-	if (dcparser->miLen > mDcServer->mDcConfig.mMaxCmdLen[dcparser->miType]) {
-		if (dcconn->Log(1)) {
-			dcconn->LogStream() << "Bad CMD(" << dcparser->miType << ") length: " << dcparser->miLen << endl;
-		}
-		dcconn->CloseNow(CLOSE_REASON_BAD_CMD_LENGTH);
+	if (checkCommand(dcparser, dcConn) < 0) {
 		return -1;
 	}
 
-	// Checking null chars
-	if (strlen(dcparser->mCommand.data()) < dcparser->mCommand.size()) {
-		if (dcconn->Log(1)) {
-			dcconn->LogStream() << "Sending null chars, probably attempt of an attack" << endl;
-		}
-		dcconn->CloseNow(CLOSE_REASON_BAD_CMD_NULL);
-		return -2;
-	}
-
 	#ifndef WITHOUT_PLUGINS
-		if (dcparser->miType != NMDC_TYPE_UNPARSED) {
-			if (mDcServer->mCalls.mOnAny.CallAll(dcconn, dcparser)) {
-				return 1;
-			}
+		if (mDcServer->mCalls.mOnAny.CallAll(dcConn, dcparser)) {
+			return 1;
 		}
 	#endif
 
-	if (dcconn->Log(5)) {
-		dcconn->LogStream() << "[S]Stage " << dcparser->miType << endl;
+	if (dcConn->Log(5)) {
+		dcConn->LogStream() << "[S]Stage " << dcparser->miType << endl;
 	}
 	
 	switch (parser->miType) {
@@ -142,420 +82,394 @@ int DcProtocol::DoCmd(Parser * parser, Conn * conn) {
 			// Fallthrough
 
 		case NMDC_TYPE_SEARCH :
-			DC_Search(dcparser, dcconn);
+			DC_Search(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_SR :
-			DC_SR(dcparser, dcconn);
+			DC_SR(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_MYNIFO :
-			DC_MyINFO(dcparser, dcconn);
+			DC_MyINFO(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_SUPPORTS :
-			DC_Supports(dcparser, dcconn);
+			DC_Supports(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_KEY :
-			DC_Key(dcparser, dcconn);
+			DC_Key(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_VALIDATENICK :
-			DC_ValidateNick(dcparser, dcconn);
+			DC_ValidateNick(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_VERSION :
-			DC_Version(dcparser, dcconn);
+			DC_Version(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_GETNICKLIST :
-			DC_GetNickList(dcparser, dcconn);
+			DC_GetNickList(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_CHAT :
-			DC_Chat(dcparser, dcconn);
+			DC_Chat(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_TO :
-			DC_To(dcparser, dcconn);
+			DC_To(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_MYPASS :
-			DC_MyPass(dcparser, dcconn);
+			DC_MyPass(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_CONNECTTOME :
-			DC_ConnectToMe(dcparser, dcconn);
+			DC_ConnectToMe(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_RCONNECTTOME :
-			DC_RevConnectToMe(dcparser, dcconn);
+			DC_RevConnectToMe(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_MCONNECTTOME :
-			DC_MultiConnectToMe(dcparser, dcconn);
+			DC_MultiConnectToMe(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_KICK :
-			DC_Kick(dcparser, dcconn);
+			DC_Kick(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_OPFORCEMOVE :
-			DC_OpForceMove(dcparser, dcconn);
+			DC_OpForceMove(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_GETINFO :
-			DC_GetINFO(dcparser, dcconn);
+			DC_GetINFO(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_MCTO :
-			DC_MCTo(dcparser, dcconn);
+			DC_MCTo(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_PING :
-			DC_Ping(dcparser, dcconn);
+			DC_Ping(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_UNKNOWN :
-			DC_Unknown(dcparser, dcconn);
+			DC_Unknown(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_QUIT :
-			DC_Quit(dcparser, dcconn);
+			DC_Quit(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_UNPARSED :
 			dcparser->Parse();
-			return DoCmd(parser, dcconn);
+			return DoCmd(parser, dcConn);
 
 		default :
-			if (Log(2)) {
-				LogStream() << "Incoming untreated event" << endl;
+			if (ErrLog(1)) {
+				LogStream() << "Incoming untreated event: " << parser->miType << endl;
 			}
 			break;
 
 	}
 
-	if (dcconn->Log(5)) {
-		dcconn->LogStream() << "[E]Stage " << dcparser->miType << endl;
+	if (dcConn->Log(5)) {
+		dcConn->LogStream() << "[E]Stage " << dcparser->miType << endl;
 	}
 	return 0;
 }
 
-int DcProtocol::DC_Supports(DcParser * dcparser, DcConn * dcconn) {
-	ANTIFLOOD(NickList, FLOOD_TYPE_NICKLIST);
+int DcProtocol::DC_Supports(DcParser * dcparser, DcConn * dcConn) {
 
 	string feature;
 	istringstream is(dcparser->mCommand);
 	is >> feature;
-	dcconn->mFeatures = 0;
+	dcConn->mFeatures = 0;
 	is >> feature;
 	while (feature.size()) {
 		if (feature == "UserCommand") {
-			dcconn->mFeatures |= SUPPORT_FEATUER_USERCOMMAND;
+			dcConn->mFeatures |= SUPPORT_FEATUER_USERCOMMAND;
 		} else if (feature == "NoGetINFO") {
-			dcconn->mFeatures |= SUPPORT_FEATUER_NOGETINFO;
+			dcConn->mFeatures |= SUPPORT_FEATUER_NOGETINFO;
 		} else if (feature == "NoHello") {
-			dcconn->mFeatures |= SUPPORT_FEATUER_NOHELLO;
+			dcConn->mFeatures |= SUPPORT_FEATUER_NOHELLO;
 		} else if (feature == "UserIP2") {
-			dcconn->mFeatures |= SUPPORT_FEATUER_USERIP2;
+			dcConn->mFeatures |= SUPPORT_FEATUER_USERIP2;
 		} else if (feature == "TTHSearch") {
-			dcconn->mFeatures |= SUPPORT_FEATUER_TTHSEARCH;
+			dcConn->mFeatures |= SUPPORT_FEATUER_TTHSEARCH;
 		} else if (feature == "QuickList") {
-			dcconn->mFeatures |= SUPPORT_FEATUER_QUICKLIST;
+			dcConn->mFeatures |= SUPPORT_FEATUER_QUICKLIST;
 		}
 		feature.clear();
 		is >> feature;
 	}
-	dcconn->msSupports.assign(dcparser->mCommand, 10, dcparser->mCommand.size() - 10);
+	dcConn->msSupports.assign(dcparser->mCommand, 10, dcparser->mCommand.size() - 10);
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnSupports.CallAll(dcconn, dcparser)) {
+		if (mDcServer->mCalls.mOnSupports.CallAll(dcConn, dcparser)) {
 			return -3;
 		}
 	#endif
 
 	static string msg("$Supports UserCommand NoGetINFO NoHello UserIP2 MCTo"NMDC_SEPARATOR);
-	dcconn->send(msg, false, false);
+	dcConn->send(msg, false, false);
 
 	return 0;
 }
 
-int DcProtocol::DC_Key(DcParser * dcparser, DcConn * dcconn) {
+int DcProtocol::DC_Key(DcParser * dcparser, DcConn * dcConn) {
 	BADFLAG("Key", LOGIN_STATUS_KEY);
-	BADCMDPARAM("Key");
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnKey.CallAll(dcconn, dcparser)) {
+		if (mDcServer->mCalls.mOnKey.CallAll(dcConn, dcparser)) {
 			//string sLock, sKey;
 			//sLock = Append_DC_Lock(sLock).substr(1, sLock.size() - 1);
 			//Lock2Key(sLock, sKey);
 		}
 	#endif
 
-	dcconn->SetLSFlag(LOGIN_STATUS_KEY); /** User has sent key */
-	dcconn->ClearTimeOut(HUB_TIME_OUT_KEY);
-	dcconn->SetTimeOut(HUB_TIME_OUT_VALNICK, mDcServer->mDcConfig.miTimeout[HUB_TIME_OUT_VALNICK], mDcServer->mTime);
-	dcconn->mTimes.mKey.Get();
+	dcConn->SetLSFlag(LOGIN_STATUS_KEY); /** User has sent key */
+	dcConn->ClearTimeOut(HUB_TIME_OUT_KEY);
+	dcConn->SetTimeOut(HUB_TIME_OUT_VALNICK, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_VALNICK], mDcServer->mTime);
+	dcConn->mTimes.mKey.Get();
 	return 0;
 }
 
-int DcProtocol::DC_ValidateNick(DcParser * dcparser, DcConn * dcconn) {
+int DcProtocol::DC_ValidateNick(DcParser * dcparser, DcConn * dcConn) {
 	BADFLAG("ValidateNick", LOGIN_STATUS_VALNICK);
-	BADCMDPARAM("ValidateNick");
 
 	string &sNick = dcparser->chunkString(CHUNK_1_PARAM);
 	unsigned iNickLen = sNick.length();
 
 	/** Additional checking the nick length */
 	if (iNickLen > 0xFF) {
-		if (dcconn->Log(1)) {
-			dcconn->LogStream() << "Attempt to attack by long nick" << endl;
+		if (dcConn->Log(1)) {
+			dcConn->LogStream() << "Attempt to attack by long nick" << endl;
 		}
-		dcconn->CloseNow(CLOSE_REASON_LONG_NICK);
+		dcConn->closeNow(CLOSE_REASON_NICK_LONG);
 		return -1;
 	}
 
-	if (dcconn->Log(3)) {
-		dcconn->LogStream() << "User " << sNick << " to validate nick" << endl;
+	if (dcConn->Log(3)) {
+		dcConn->LogStream() << "User " << sNick << " to validate nick" << endl;
 	}
 
 	try {
 		DcUser *NewUser = new DcUser(sNick);
-		if (!dcconn->SetUser(NewUser)) {
-			dcconn->CloseNow(CLOSE_REASON_SETUSER);
+		if (!dcConn->SetUser(NewUser)) {
+			dcConn->closeNow(CLOSE_REASON_USER_SET);
 			return -2;
 		}
 	} catch(...) {
 		if (mDcServer->ErrLog(0)) {
 			mDcServer->LogStream() << "Unhandled exception in DcProtocol::DC_ValidateNick" << endl;
 		}
-		if (dcconn->ErrLog(0)) {
-			dcconn->LogStream() << "Error in SetUser closing" << endl;
+		if (dcConn->ErrLog(0)) {
+			dcConn->LogStream() << "Error in SetUser closing" << endl;
 		}
-		dcconn->CloseNice(9000, CLOSE_REASON_SETUSER);
+		dcConn->closeNice(9000, CLOSE_REASON_USER_SET);
 		return -2;
 	}
 
 	/** Checking validate user */
-	if (!mDcServer->ValidateUser(dcconn, sNick)) {
-		dcconn->CloseNice(9000, CLOSE_REASON_INVALID_USER);
+	if (!mDcServer->ValidateUser(dcConn, sNick)) {
+		dcConn->closeNice(9000, CLOSE_REASON_USER_INVALID);
 		return -2;
 	}
 
 	/** Global user's limit */
-	if (mDcServer->mDcConfig.miUsersLimit >= 0 && mDcServer->miTotalUserCount >= mDcServer->mDcConfig.miUsersLimit) {
-		if (dcconn->Log(3)) {
-			dcconn->LogStream() << "User " << sNick << " was disconnected (user's limit: " << mDcServer->mDcConfig.miUsersLimit << ")" << endl;
+	if (mDcServer->mDcConfig.mUsersLimit >= 0 && mDcServer->miTotalUserCount >= mDcServer->mDcConfig.mUsersLimit) {
+		if (dcConn->Log(3)) {
+			dcConn->LogStream() << "User " << sNick << " was disconnected (user's limit: " << mDcServer->mDcConfig.mUsersLimit << ")" << endl;
 		}
-		mDcServer->sendToUser(dcconn, mDcServer->mDCLang.msUsersLimit.c_str(), (char*)mDcServer->mDcConfig.msHubBot.c_str());
-		dcconn->CloseNice(9000, CLOSE_REASON_USERS_LIMIT);
+		mDcServer->sendToUser(dcConn, mDcServer->mDCLang.mUsersLimit.c_str(), (char*)mDcServer->mDcConfig.mHubBot.c_str());
+		dcConn->closeNice(9000, CLOSE_REASON_USERS_LIMIT);
 		return -3;
 	}
 
-	dcconn->SetLSFlag(LOGIN_STATUS_ALOWED);
+	dcConn->SetLSFlag(LOGIN_STATUS_ALOWED);
 	++mDcServer->miTotalUserCount;
 
-	dcconn->SetLSFlag(LOGIN_STATUS_VALNICK | LOGIN_STATUS_NICKLST); /** We Install NICKLST because user can not call user list */
-	dcconn->ClearTimeOut(HUB_TIME_OUT_VALNICK);
+	dcConn->SetLSFlag(LOGIN_STATUS_VALNICK | LOGIN_STATUS_NICKLST); /** We Install NICKLST because user can not call user list */
+	dcConn->ClearTimeOut(HUB_TIME_OUT_VALNICK);
 
 	string sMsg;
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnValidateNick.CallAll(dcconn, dcparser)) {
-			dcconn->send(Append_DC_GetPass(sMsg)); /** We are sending the query for reception of the password */
-			dcconn->SetTimeOut(HUB_TIME_OUT_PASS, mDcServer->mDcConfig.miTimeout[HUB_TIME_OUT_PASS], mDcServer->mTime);
+		if (mDcServer->mCalls.mOnValidateNick.CallAll(dcConn, dcparser)) {
+			dcConn->send(Append_DC_GetPass(sMsg)); /** We are sending the query for reception of the password */
+			dcConn->SetTimeOut(HUB_TIME_OUT_PASS, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_PASS], mDcServer->mTime);
 			return -4;
 		}
 	#endif
 
-	if (!mDcServer->CheckNickLength(dcconn, iNickLen)) {
-		dcconn->CloseNice(9000, CLOSE_REASON_NICK_LEN);
+	if (!mDcServer->CheckNickLength(dcConn, iNickLen)) {
+		dcConn->closeNice(9000, CLOSE_REASON_NICK_LEN);
 	}
-	dcconn->SetTimeOut(HUB_TIME_OUT_MYINFO, mDcServer->mDcConfig.miTimeout[HUB_TIME_OUT_MYINFO], mDcServer->mTime);
-	dcconn->SetLSFlag(LOGIN_STATUS_PASSWD); /** Does not need password */
+	dcConn->SetTimeOut(HUB_TIME_OUT_MYINFO, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_MYINFO], mDcServer->mTime);
+	dcConn->SetLSFlag(LOGIN_STATUS_PASSWD); /** Does not need password */
 
-	dcconn->send(Append_DC_Hello(sMsg, dcconn->mDcUser->msNick)); /** Protection from change the command */
+	dcConn->send(Append_DC_Hello(sMsg, dcConn->mDcUser->msNick)); /** Protection from change the command */
 	return 0;
 }
 
-int DcProtocol::DC_MyPass(DcParser * dcparser, DcConn * dcconn) {
-	if (!dcconn->mDcUser) { /* Check of existence of the user for current connection */
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "Mypass before validatenick" << endl;
+int DcProtocol::DC_MyPass(DcParser * dcparser, DcConn * dcConn) {
+	if (!dcConn->mDcUser) { /* Check of existence of the user for current connection */
+		if (dcConn->Log(2)) {
+			dcConn->LogStream() << "Mypass before validatenick" << endl;
 		}
-		mDcServer->sendToUser(dcconn, mDcServer->mDCLang.msBadLoginSequence.c_str(), (char *) mDcServer->mDcConfig.msHubBot.c_str());
-		dcconn->CloseNice(9000, CLOSE_REASON_LOGIN_ERR);
+		mDcServer->sendToUser(dcConn, mDcServer->mDCLang.mBadLoginSequence.c_str(), (char *) mDcServer->mDcConfig.mHubBot.c_str());
+		dcConn->closeNice(9000, CLOSE_REASON_CMD_PASSWORD_ERR);
 		return -1;
 	}
 	BADFLAG("MyPass", LOGIN_STATUS_PASSWD);
-	BADCMDPARAM("MyPass");
 
 	// Checking the accepted password, otherwise send $BadPass|
 	// or $Hello Nick|$LogedIn Nick|
 	int bOp = 0;
 	#ifndef WITHOUT_PLUGINS
-		bOp = (mDcServer->mCalls.mOnMyPass.CallAll(dcconn, dcparser));
+		bOp = (mDcServer->mCalls.mOnMyPass.CallAll(dcConn, dcparser));
 	#endif
 
-	if (!mDcServer->CheckNickLength(dcconn, dcconn->mDcUser->msNick.length())) {
-		dcconn->CloseNice(9000, CLOSE_REASON_NICK_LEN);
+	if (!mDcServer->CheckNickLength(dcConn, dcConn->mDcUser->msNick.length())) {
+		dcConn->closeNice(9000, CLOSE_REASON_NICK_LEN);
 	}
 	string sMsg;
-	dcconn->SetLSFlag(LOGIN_STATUS_PASSWD); /** Password is accepted */
-	Append_DC_Hello(sMsg, dcconn->mDcUser->msNick);
+	dcConn->SetLSFlag(LOGIN_STATUS_PASSWD); /** Password is accepted */
+	Append_DC_Hello(sMsg, dcConn->mDcUser->msNick);
 	if (bOp) { /** If entered operator, that sends command LoggedIn ($LogedIn !) */
 		sMsg.append("$LogedIn ");
-		sMsg.append(dcconn->mDcUser->msNick);
+		sMsg.append(dcConn->mDcUser->msNick);
 		sMsg.append(NMDC_SEPARATOR);
 	}
-	dcconn->send(sMsg);
-	dcconn->ClearTimeOut(HUB_TIME_OUT_PASS);
-	dcconn->SetTimeOut(HUB_TIME_OUT_MYINFO, mDcServer->mDcConfig.miTimeout[HUB_TIME_OUT_MYINFO], mDcServer->mTime);
+	dcConn->send(sMsg);
+	dcConn->ClearTimeOut(HUB_TIME_OUT_PASS);
+	dcConn->SetTimeOut(HUB_TIME_OUT_MYINFO, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_MYINFO], mDcServer->mTime);
 	return 0;
 }
 
-int DcProtocol::DC_Version(DcParser * dcparser, DcConn * dcconn) {
+int DcProtocol::DC_Version(DcParser * dcparser, DcConn * dcConn) {
 	BADFLAG("Version", LOGIN_STATUS_VERSION);
-	BADCMDPARAM("Version");
 
 	string & sVersion = dcparser->chunkString(CHUNK_1_PARAM);
-	if (dcconn->Log(3)) {
-		dcconn->LogStream() << "Version:" << sVersion << endl;
+	if (dcConn->Log(3)) {
+		dcConn->LogStream() << "Version:" << sVersion << endl;
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnVersion.CallAll(dcconn, dcparser) && sVersion != "1,0091") {
-			dcconn->CloseNice(9000, CLOSE_REASON_SYNTAX_VERSION); /** Checking of the version */
+		if (mDcServer->mCalls.mOnVersion.CallAll(dcConn, dcparser) && sVersion != "1,0091") {
+			dcConn->closeNice(9000, CLOSE_REASON_CMD_VERSION); /** Checking of the version */
 		}
 	#endif
 
-	dcconn->SetLSFlag(LOGIN_STATUS_VERSION); /** Version was checked */
-	dcconn->mVersion = sVersion;
+	dcConn->SetLSFlag(LOGIN_STATUS_VERSION); /** Version was checked */
+	dcConn->mVersion = sVersion;
 	return 0;
 }
 
-int DcProtocol::DC_GetNickList(DcParser * dcparser, DcConn * dcconn) {
-	ANTIFLOOD(NickList, FLOOD_TYPE_NICKLIST);
+int DcProtocol::DC_GetNickList(DcParser * dcparser, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnGetNickList.CallAll(dcconn, dcparser)) {
+		if (mDcServer->mCalls.mOnGetNickList.CallAll(dcConn, dcparser)) {
 			return 3;
 		}
 	#endif
 
-	if (!dcconn->GetLSFlag(LOGIN_STATUS_MYINFO) && mDcServer->mDcConfig.mbNicklistOnLogin) {
-		if (mDcServer->mDcConfig.mbDelayedLogin) {
-			int LSFlag = dcconn->GetLSFlag(LOGIN_STATUS_LOGIN_DONE);
+	if (!dcConn->GetLSFlag(LOGIN_STATUS_MYINFO) && mDcServer->mDcConfig.mNicklistOnLogin) {
+		if (mDcServer->mDcConfig.mDelayedLogin) {
+			int LSFlag = dcConn->GetLSFlag(LOGIN_STATUS_LOGIN_DONE);
 			if (LSFlag & LOGIN_STATUS_NICKLST) {
 				LSFlag -= LOGIN_STATUS_NICKLST;
 			}
-			dcconn->ReSetLSFlag(LSFlag);
+			dcConn->ReSetLSFlag(LSFlag);
 		}
-		dcconn->mbSendNickList = true;
+		dcConn->mbSendNickList = true;
 		return 0;
 	}
-	return SendNickList(dcconn);
+	return SendNickList(dcConn);
 }
 
-int DcProtocol::DC_MyINFO(DcParser * dcparser, DcConn * dcconn) {
-	/** Check syntax of the command */
-	if (dcparser->SplitChunks()) {
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "MyINFO syntax error, closing" << endl;
-		}
-		mDcServer->sendToUser(dcconn, mDcServer->mDCLang.msMyinfoError.c_str(), (char *) mDcServer->mDcConfig.msHubBot.c_str());
-		dcconn->CloseNice(9000, CLOSE_REASON_SYNTAX_MYINFO);
-		return -1;
-	}
-
-	ANTIFLOOD(MyINFO, FLOOD_TYPE_MYNIFO);
+int DcProtocol::DC_MyINFO(DcParser * dcparser, DcConn * dcConn) {
 
 	const string & sNick = dcparser->chunkString(CHUNK_MI_NICK);
 
 	/** Check existence user, otherwise check support QuickList */
-	if (!dcconn->mDcUser) {
+	if (!dcConn->mDcUser) {
 		//if (QuickList)
-		//	dcconn->mDcUser->msNick = sNick;
+		//	dcConn->mDcUser->msNick = sNick;
 		//} else
 		{
-			if (dcconn->Log(2)) {
-				dcconn->LogStream() << "Myinfo without user: " << dcparser->mCommand << endl;
+			if (dcConn->Log(2)) {
+				dcConn->LogStream() << "Myinfo without user: " << dcparser->mCommand << endl;
 			}
-			mDcServer->sendToUser(dcconn, mDcServer->mDCLang.msBadLoginSequence.c_str(), (char *) mDcServer->mDcConfig.msHubBot.c_str());
-			dcconn->CloseNice(9000, CLOSE_REASON_MYINFO_WITHOUT_USER);
+			mDcServer->sendToUser(dcConn, mDcServer->mDCLang.mBadLoginSequence.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+			dcConn->closeNice(9000, CLOSE_REASON_CMD_MYINFO_WITHOUT_USER);
 			return -2;
 		}
-	} else if (sNick != dcconn->mDcUser->msNick) { /** Проверка ника */
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "Bad nick in MyINFO, closing" << endl;
+	} else if (sNick != dcConn->mDcUser->msNick) { /** Проверка ника */
+		if (dcConn->Log(2)) {
+			dcConn->LogStream() << "Bad nick in MyINFO, closing" << endl;
 		}
-		mDcServer->sendToUser(dcconn, mDcServer->mDCLang.msBadMyinfoNick.c_str(), (char *) mDcServer->mDcConfig.msHubBot.c_str());
-		dcconn->CloseNice(9000, CLOSE_REASON_BAD_MYINFO_NICK);
+		mDcServer->sendToUser(dcConn, mDcServer->mDCLang.mBadMyinfoNick.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+		dcConn->closeNice(9000, CLOSE_REASON_NICK_MYINFO);
 		return -1;
 	}
 
-	string sOldMyINFO = dcconn->mDcUser->getMyINFO();
-	dcconn->mDcUser->setMyINFO(dcparser);
+	string sOldMyINFO = dcConn->mDcUser->getMyINFO();
+	dcConn->mDcUser->setMyINFO(dcparser);
 
 	int iMode = 0;
 	#ifndef WITHOUT_PLUGINS
-		iMode = mDcServer->mCalls.mOnMyINFO.CallAll(dcconn, dcparser);
+		iMode = mDcServer->mCalls.mOnMyINFO.CallAll(dcConn, dcparser);
 	#endif
 
-	if (iMode != 1 && dcconn->mDcUser->getInUserList()) {
-		if (sOldMyINFO != dcconn->mDcUser->getMyINFO()) {
-			if (dcconn->mDcUser->mbHide) {
-				dcconn->send(dcparser->mCommand, true); // Send to self only
+	if (iMode != 1 && dcConn->mDcUser->getInUserList()) {
+		if (sOldMyINFO != dcConn->mDcUser->getMyINFO()) {
+			if (dcConn->mDcUser->mbHide) {
+				dcConn->send(dcparser->mCommand, true); // Send to self only
 			} else {
-				SendMode(dcconn, dcparser->mCommand, iMode, mDcServer->mDCUserList, true); // Use cache for send to all
-				//mDcServer->mDCUserList.sendToAll(dcparser->mCommand, true/*mDcServer->mDcConfig.mbDelayedMyINFO*/); // Send to all
+				SendMode(dcConn, dcparser->mCommand, iMode, mDcServer->mDCUserList, true); // Use cache for send to all
+				//mDcServer->mDCUserList.sendToAll(dcparser->mCommand, true/*mDcServer->mDcConfig.mDelayedMyinfo*/); // Send to all
 			}
 		}
-	} else if (!dcconn->mDcUser->getInUserList()) {
-		dcconn->SetLSFlag(LOGIN_STATUS_MYINFO);
-		if (!mDcServer->BeforeUserEnter(dcconn)) {
+	} else if (!dcConn->mDcUser->getInUserList()) {
+		dcConn->SetLSFlag(LOGIN_STATUS_MYINFO);
+		if (!mDcServer->BeforeUserEnter(dcConn)) {
 			return -1;
 		}
-		dcconn->ClearTimeOut(HUB_TIME_OUT_MYINFO);
+		dcConn->ClearTimeOut(HUB_TIME_OUT_MYINFO);
 	}
 	return 0;
 }
 
-int DcProtocol::DC_Chat(DcParser * dcparser, DcConn * dcconn) {
-	if (dcparser->SplitChunks()) {
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "Chat syntax error, closing" << endl;
-		}
-		dcconn->CloseNow(CLOSE_REASON_SYNTAX_CHAT);
-		return -1;
-	}
+int DcProtocol::DC_Chat(DcParser * dcparser, DcConn * dcConn) {
 
-	ANTIFLOOD(Chat, FLOOD_TYPE_CHAT);
-
-	if (!dcconn->mDcUser) {
+	if (!dcConn->mDcUser) {
 		return -2;
 	}
-	if (!dcconn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser->getInUserList()) {
 		return -3;
 	}
 
 	/** Check chat nick */
-	if ((dcparser->chunkString(CHUNK_CH_NICK) != dcconn->mDcUser->msNick) ) {
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "Bad nick in chat, closing" << endl;
+	if ((dcparser->chunkString(CHUNK_CH_NICK) != dcConn->mDcUser->msNick) ) {
+		if (dcConn->Log(2)) {
+			dcConn->LogStream() << "Bad nick in chat, closing" << endl;
 		}
-		string sMsg = mDcServer->mDCLang.msBadChatNick;
+		string sMsg = mDcServer->mDCLang.mBadChatNick;
 		StringReplace(sMsg, string("nick"), sMsg, dcparser->chunkString(CHUNK_CH_NICK));
-		StringReplace(sMsg, string("real_nick"), sMsg, dcconn->mDcUser->msNick);
-		mDcServer->sendToUser(dcconn, sMsg.c_str(), (char*)mDcServer->mDcConfig.msHubBot.c_str());
-		dcconn->CloseNice(9000, CLOSE_REASON_CHAT_NICK);
+		StringReplace(sMsg, string("real_nick"), sMsg, dcConn->mDcUser->msNick);
+		mDcServer->sendToUser(dcConn, sMsg.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+		dcConn->closeNice(9000, CLOSE_REASON_NICK_CHAT);
 		return -2;
 	}
 	int iMode = 0;
 	#ifndef WITHOUT_PLUGINS
-		iMode = mDcServer->mCalls.mOnChat.CallAll(dcconn, dcparser);
+		iMode = mDcServer->mCalls.mOnChat.CallAll(dcConn, dcparser);
 	#endif
 
 	//Hash<unsigned long> hash;
@@ -563,40 +477,31 @@ int DcProtocol::DC_Chat(DcParser * dcparser, DcConn * dcconn) {
 	//cout << key << endl;
 
 	/** Sending message */
-	SendMode(dcconn, dcparser->mCommand, iMode, mDcServer->mChatList, false); // Don't use cache for send to all
+	SendMode(dcConn, dcparser->mCommand, iMode, mDcServer->mChatList, false); // Don't use cache for send to all
 	return 0;
 }
 
-int DcProtocol::DC_To(DcParser * dcparser, DcConn * dcconn) {
-	if (dcparser->SplitChunks()) {
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "PM syntax error, closing" << endl;
-		}
-		dcconn->CloseNow(CLOSE_REASON_SYNTAX_TO);
-		return -1;
-	}
+int DcProtocol::DC_To(DcParser * dcparser, DcConn * dcConn) {
 
-	ANTIFLOOD(To, FLOOD_TYPE_TO);
-
-	if (!dcconn->mDcUser) {
+	if (!dcConn->mDcUser) {
 		return -2;
 	}
-	if (!dcconn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser->getInUserList()) {
 		return -3;
 	}
 	string & sNick = dcparser->chunkString(CHUNK_PM_TO);
 
 	/** Checking the coincidence nicks in command */
-	if (dcparser->chunkString(CHUNK_PM_FROM) != dcconn->mDcUser->msNick || dcparser->chunkString(CHUNK_PM_NICK) != dcconn->mDcUser->msNick) {
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "Bad nick in PM, closing" <<endl;
+	if (dcparser->chunkString(CHUNK_PM_FROM) != dcConn->mDcUser->msNick || dcparser->chunkString(CHUNK_PM_NICK) != dcConn->mDcUser->msNick) {
+		if (dcConn->Log(2)) {
+			dcConn->LogStream() << "Bad nick in PM, closing" <<endl;
 		}
-		dcconn->CloseNow(CLOSE_REASON_BAD_NICK_PM);
+		dcConn->closeNow(CLOSE_REASON_NICK_PM);
 		return -1;
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnTo.CallAll(dcconn, dcparser)) {
+		if (mDcServer->mCalls.mOnTo.CallAll(dcConn, dcparser)) {
 			return 0;
 		}
 	#endif
@@ -611,37 +516,28 @@ int DcProtocol::DC_To(DcParser * dcparser, DcConn * dcconn) {
 	return 0;
 }
 
-int DcProtocol::DC_MCTo(DcParser * dcparser, DcConn * dcconn) {
-	if (dcparser->SplitChunks()) {
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "MCTo syntax error, closing" << endl;
-		}
-		dcconn->CloseNow(CLOSE_REASON_SYNTAX_MCTO);
-		return -1;
-	}
+int DcProtocol::DC_MCTo(DcParser * dcparser, DcConn * dcConn) {
 
-	ANTIFLOOD(MCTo, FLOOD_TYPE_MCTO);
-
-	if (!dcconn->mDcUser) {
+	if (!dcConn->mDcUser) {
 		return -2;
 	}
-	if (!dcconn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser->getInUserList()) {
 		return -3;
 	}
 
 	string & sNick = dcparser->chunkString(CHUNK_MC_TO);
 
 	/** Checking the coincidence nicks in command */
-	if (dcparser->chunkString(CHUNK_MC_FROM) != dcconn->mDcUser->msNick) {
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "Bad nick in MCTo, closing" <<endl;
+	if (dcparser->chunkString(CHUNK_MC_FROM) != dcConn->mDcUser->msNick) {
+		if (dcConn->Log(2)) {
+			dcConn->LogStream() << "Bad nick in MCTo, closing" <<endl;
 		}
-		dcconn->CloseNow(CLOSE_REASON_BAD_NICK_MCTO);
+		dcConn->closeNow(CLOSE_REASON_NICK_MCTO);
 		return -1;
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnMCTo.CallAll(dcconn, dcparser)) {
+		if (mDcServer->mCalls.mOnMCTo.CallAll(dcConn, dcparser)) {
 			return 0;
 		}
 	#endif
@@ -653,9 +549,9 @@ int DcProtocol::DC_MCTo(DcParser * dcparser, DcConn * dcconn) {
 	}
 
 	string msg;
-	User->send(Append_DC_Chat(msg, dcconn->mDcUser->msNick, dcparser->chunkString(CHUNK_MC_MSG)));
-	if (dcconn->mDcUser->msNick != sNick) {
-		dcconn->send(msg);
+	User->send(Append_DC_Chat(msg, dcConn->mDcUser->msNick, dcparser->chunkString(CHUNK_MC_MSG)));
+	if (dcConn->mDcUser->msNick != sNick) {
+		dcConn->send(msg);
 	}
 	return 0;
 }
@@ -666,18 +562,9 @@ int DcProtocol::DC_MCTo(DcParser * dcparser, DcConn * dcconn) {
 	NMDC_TYPE_MSEARCH
 	NMDC_TYPE_MSEARCH_PAS
 */
-int DcProtocol::DC_Search(DcParser * dcparser, DcConn * dcconn) {
-	if (dcparser->SplitChunks()) {
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "Search syntax error, closing" << endl;
-		}
-		dcconn->CloseNow(CLOSE_REASON_SYNTAX_SEARCH);
-		return -1;
-	}
+int DcProtocol::DC_Search(DcParser * dcparser, DcConn * dcConn) {
 
-	ANTIFLOOD(Search, FLOOD_TYPE_SEARCH);
-
-	if (!dcconn->mDcUser || !dcconn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
 		return -2;
 	}
 
@@ -685,7 +572,7 @@ int DcProtocol::DC_Search(DcParser * dcparser, DcConn * dcconn) {
 
 	int iMode = 0;
 	#ifndef WITHOUT_PLUGINS
-		iMode = mDcServer->mCalls.mOnSearch.CallAll(dcconn, dcparser);
+		iMode = mDcServer->mCalls.mOnSearch.CallAll(dcConn, dcparser);
 	#endif
 
 	/** Sending cmd */
@@ -694,47 +581,47 @@ int DcProtocol::DC_Search(DcParser * dcparser, DcConn * dcconn) {
 	switch (dcparser->miType) {
 
 		case NMDC_TYPE_SEARCH :
-			if (mDcServer->mDcConfig.mbCheckSearchIp && dcconn->msIp != dcparser->chunkString(CHUNK_AS_IP)) {
-				sMsg = mDcServer->mDCLang.msBadSearchIp;
-				if (dcconn->Log(2)) {
-					dcconn->LogStream() << "Bad ip in active search, closing" << endl;
+			if (mDcServer->mDcConfig.mCheckSearchIp && dcConn->mIp != dcparser->chunkString(CHUNK_AS_IP)) {
+				sMsg = mDcServer->mDCLang.mBadSearchIp;
+				if (dcConn->Log(2)) {
+					dcConn->LogStream() << "Bad ip in active search, closing" << endl;
 				}
 				StringReplace(sMsg, string("ip"), sMsg, dcparser->chunkString(CHUNK_AS_IP));
-				StringReplace(sMsg, string("real_ip"), sMsg, dcconn->msIp);
-				mDcServer->sendToUser(dcconn, sMsg.c_str(), (char *) mDcServer->mDcConfig.msHubBot.c_str());
-				dcconn->CloseNice(9000, CLOSE_REASON_NICK_SEARCH);
+				StringReplace(sMsg, string("real_ip"), sMsg, dcConn->mIp);
+				mDcServer->sendToUser(dcConn, sMsg.c_str(), (char *) mDcServer->mDcConfig.mHubBot.c_str());
+				dcConn->closeNice(9000, CLOSE_REASON_NICK_SEARCH);
 				return -1;
 			}
-			SendMode(dcconn, dcparser->mCommand, iMode, mDcServer->mDCUserList, true); // Use cache for send to all
+			SendMode(dcConn, dcparser->mCommand, iMode, mDcServer->mDCUserList, true); // Use cache for send to all
 			break;
 
 		case NMDC_TYPE_SEARCH_PAS :
-			dcconn->miSRCounter = 0; /** Zeroizing result counter of the passive search */
-			SendMode(dcconn, dcparser->mCommand, iMode, mDcServer->mActiveList, true); // Use cache for send to all
+			dcConn->miSRCounter = 0; /** Zeroizing result counter of the passive search */
+			SendMode(dcConn, dcparser->mCommand, iMode, mDcServer->mActiveList, true); // Use cache for send to all
 			break;
 
 		case NMDC_TYPE_MSEARCH :
-			if (mDcServer->mDcConfig.mbCheckSearchIp && (dcconn->msIp != dcparser->chunkString(CHUNK_AS_IP))) {
-				sMsg = mDcServer->mDCLang.msBadSearchIp;
-				if (dcconn->Log(2)) {
-					dcconn->LogStream() << "Bad ip in active search, closing" << endl;
+			if (mDcServer->mDcConfig.mCheckSearchIp && (dcConn->mIp != dcparser->chunkString(CHUNK_AS_IP))) {
+				sMsg = mDcServer->mDCLang.mBadSearchIp;
+				if (dcConn->Log(2)) {
+					dcConn->LogStream() << "Bad ip in active search, closing" << endl;
 				}
 				StringReplace(sMsg, string("ip"), sMsg, dcparser->chunkString(CHUNK_AS_IP));
-				StringReplace(sMsg, string("real_ip"), sMsg, dcconn->msIp);
-				mDcServer->sendToUser(dcconn, sMsg.c_str(), (char *) mDcServer->mDcConfig.msHubBot.c_str());
-				dcconn->CloseNice(9000, CLOSE_REASON_NICK_SEARCH);
+				StringReplace(sMsg, string("real_ip"), sMsg, dcConn->mIp);
+				mDcServer->sendToUser(dcConn, sMsg.c_str(), (char *) mDcServer->mDcConfig.mHubBot.c_str());
+				dcConn->closeNice(9000, CLOSE_REASON_NICK_SEARCH);
 				return -1;
 			}
 			sMsg = "$Search ";
 			sMsg += dcparser->chunkString(CHUNK_AS_ADDR);
 			sMsg += ' ';
 			sMsg += dcparser->chunkString(CHUNK_AS_QUERY);
-			SendMode(dcconn, sMsg, iMode, mDcServer->mDCUserList, true); // Use cache for send to all
+			SendMode(dcConn, sMsg, iMode, mDcServer->mDCUserList, true); // Use cache for send to all
 			break;
 
 		case NMDC_TYPE_MSEARCH_PAS :
-			dcconn->miSRCounter = 0; /** Zeroizing result counter of the passive search */
-			SendMode(dcconn, dcparser->mCommand, iMode, mDcServer->mActiveList, true); // Use cache for send to all
+			dcConn->miSRCounter = 0; /** Zeroizing result counter of the passive search */
+			SendMode(dcConn, dcparser->mCommand, iMode, mDcServer->mActiveList, true); // Use cache for send to all
 			break;
 
 		default :
@@ -744,78 +631,64 @@ int DcProtocol::DC_Search(DcParser * dcparser, DcConn * dcconn) {
 	return 0;
 }
 
-int DcProtocol::DC_SR(DcParser * dcparser, DcConn * dcconn) {
-	if (dcparser->SplitChunks()) {
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "SR syntax error, closing" << endl;
-		}
-		dcconn->CloseNow(CLOSE_REASON_SYNTAX_SR);
-		return -1;
-	}
+int DcProtocol::DC_SR(DcParser * dcparser, DcConn * dcConn) {
 
-	ANTIFLOOD(SR, FLOOD_TYPE_SR);
-
-	if (!dcconn->mDcUser || !dcconn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
 		return -2;
 	}
 
 	/** Check same nick in cmd (PROTOCOL NMDC) */
-	if (mDcServer->mDcConfig.mbCheckSRNick && (dcconn->mDcUser->msNick != dcparser->chunkString(CHUNK_SR_FROM))) {
-		string sMsg = mDcServer->mDCLang.msBadSRNick;
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "Bad nick in search response, closing" << endl;
+	if (mDcServer->mDcConfig.mCheckSrNick && (dcConn->mDcUser->msNick != dcparser->chunkString(CHUNK_SR_FROM))) {
+		string sMsg = mDcServer->mDCLang.mBadSrNick;
+		if (dcConn->Log(2)) {
+			dcConn->LogStream() << "Bad nick in search response, closing" << endl;
 		}
 		StringReplace(sMsg, "nick", sMsg, dcparser->chunkString(CHUNK_SR_FROM));
-		StringReplace(sMsg, "real_nick", sMsg, dcconn->mDcUser->msNick);
-		mDcServer->sendToUser(dcconn, sMsg.c_str(), (char*)mDcServer->mDcConfig.msHubBot.c_str());
-		dcconn->CloseNice(9000, CLOSE_REASON_NICK_SR);
+		StringReplace(sMsg, "real_nick", sMsg, dcConn->mDcUser->msNick);
+		mDcServer->sendToUser(dcConn, sMsg.c_str(), (char*)mDcServer->mDcConfig.mHubBot.c_str());
+		dcConn->closeNice(9000, CLOSE_REASON_NICK_SR);
 		return -1;
 	}
 
-	DcUser * User = (DcUser *)mDcServer->mDCUserList.GetUserBaseByNick(dcparser->chunkString(CHUNK_SR_TO));
+	DcUser * dcUser = NULL;
+	const string & nick = dcparser->chunkString(CHUNK_SR_TO);
+	if (nick != "") {
+		dcUser = (DcUser *)mDcServer->mDCUserList.GetUserBaseByNick(nick);
 
-	/** Is user exist? */
-	if (!User || !User->mDcConn) {
-		return -2;
+		/** Is user exist? */
+		if (!dcUser || !dcUser->mDcConn) {
+			return -2;
+		}
 	}
 
 	/** != 0 - error */
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnSR.CallAll(dcconn, dcparser)) {
+		if (mDcServer->mCalls.mOnSR.CallAll(dcConn, dcparser)) {
 			return -3;
 		}
 	#endif
 
 	/** Sending cmd */
-	if (!mDcServer->mDcConfig.miMaxPassiveRes || (++User->mDcConn->miSRCounter <= unsigned(mDcServer->mDcConfig.miMaxPassiveRes))) {
+	if (dcUser && (!mDcServer->mDcConfig.mMaxPassiveRes || (++dcUser->mDcConn->miSRCounter <= unsigned(mDcServer->mDcConfig.mMaxPassiveRes)))) {
 		string sStr(dcparser->mCommand, 0, dcparser->mChunks[CHUNK_SR_TO].first - 1); /** Remove nick on the end of cmd */
-		User->mDcConn->send(sStr, true, false);
+		dcUser->mDcConn->send(sStr, true, false);
 	}
 	return 0;
 }
 
 
-int DcProtocol::DC_ConnectToMe(DcParser * dcparser, DcConn * dcconn) {
-	if (dcparser->SplitChunks()) {
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "CTM syntax error, closing" << endl;
-		}
-		dcconn->CloseNow(CLOSE_REASON_SYNTAX_CTM);
+int DcProtocol::DC_ConnectToMe(DcParser * dcparser, DcConn * dcConn) {
+
+	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
 		return -1;
 	}
 
-	ANTIFLOOD(CTM, FLOOD_TYPE_CTM);
-
-	if (!dcconn->mDcUser || !dcconn->mDcUser->getInUserList()) {
-		return -1;
-	}
-
-	if (mDcServer->mDcConfig.mbCheckCTMIp && dcconn->msIp != dcparser->chunkString(CHUNK_CM_IP)) {
-		string sMsg = mDcServer->mDCLang.msBadCTMIp;
+	if (mDcServer->mDcConfig.mCheckCtmIp && dcConn->mIp != dcparser->chunkString(CHUNK_CM_IP)) {
+		string sMsg = mDcServer->mDCLang.mBadCtmIp;
 		StringReplace(sMsg, string("ip"), sMsg, dcparser->chunkString(CHUNK_CM_IP));
-		StringReplace(sMsg, string("real_ip"), sMsg, dcconn->msIp);
-		mDcServer->sendToUser(dcconn, sMsg.c_str(), (char *) mDcServer->mDcConfig.msHubBot.c_str());
-		dcconn->CloseNice(9000, CLOSE_REASON_NICK_CTM);
+		StringReplace(sMsg, string("real_ip"), sMsg, dcConn->mIp);
+		mDcServer->sendToUser(dcConn, sMsg.c_str(), (char *) mDcServer->mDcConfig.mHubBot.c_str());
+		dcConn->closeNice(9000, CLOSE_REASON_NICK_CTM);
 		return -1;
 	}
 
@@ -825,7 +698,7 @@ int DcProtocol::DC_ConnectToMe(DcParser * dcparser, DcConn * dcconn) {
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnConnectToMe.CallAll(dcconn, dcparser)) {
+		if (mDcServer->mCalls.mOnConnectToMe.CallAll(dcConn, dcparser)) {
 			return -2;
 		}
 	#endif
@@ -834,28 +707,19 @@ int DcProtocol::DC_ConnectToMe(DcParser * dcparser, DcConn * dcconn) {
 	return 0;
 }
 
-int DcProtocol::DC_RevConnectToMe(DcParser * dcparser, DcConn * dcconn) {
-	if (dcparser->SplitChunks()) {
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "RCTM syntax error, closing" << endl;
-		}
-		dcconn->CloseNow(CLOSE_REASON_SYNTAX_RCTM);
-		return -1;
-	}
+int DcProtocol::DC_RevConnectToMe(DcParser * dcparser, DcConn * dcConn) {
 
-	ANTIFLOOD(RCTM, FLOOD_TYPE_RCTM);
-
-	if (!dcconn->mDcUser || !dcconn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
 		return -1;
 	}
 
 	/** Checking the nick */
-	if (mDcServer->mDcConfig.mbCheckRctmNick && (dcparser->chunkString(CHUNK_RC_NICK) != dcconn->mDcUser->msNick)) {
-		string sMsg = mDcServer->mDCLang.msBadRevConNick;
+	if (mDcServer->mDcConfig.mCheckRctmNick && (dcparser->chunkString(CHUNK_RC_NICK) != dcConn->mDcUser->msNick)) {
+		string sMsg = mDcServer->mDCLang.mBadRevConNick;
 		StringReplace(sMsg, string("nick"), sMsg, dcparser->chunkString(CHUNK_RC_NICK));
-		StringReplace(sMsg, string("real_nick"), sMsg, dcconn->mDcUser->msNick);
-		mDcServer->sendToUser(dcconn, sMsg.c_str(), (char *) mDcServer->mDcConfig.msHubBot.c_str());
-		dcconn->CloseNice(9000, CLOSE_REASON_NICK_RCTM);
+		StringReplace(sMsg, string("real_nick"), sMsg, dcConn->mDcUser->msNick);
+		mDcServer->sendToUser(dcConn, sMsg.c_str(), (char *) mDcServer->mDcConfig.mHubBot.c_str());
+		dcConn->closeNice(9000, CLOSE_REASON_NICK_RCTM);
 		return -1;
 	}
 
@@ -866,7 +730,7 @@ int DcProtocol::DC_RevConnectToMe(DcParser * dcparser, DcConn * dcconn) {
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnRevConnectToMe.CallAll(dcconn, dcparser)) {
+		if (mDcServer->mCalls.mOnRevConnectToMe.CallAll(dcConn, dcparser)) {
 			return -2;
 		}
 	#endif
@@ -875,27 +739,19 @@ int DcProtocol::DC_RevConnectToMe(DcParser * dcparser, DcConn * dcconn) {
 	return 0;
 }
 
-int DcProtocol::DC_MultiConnectToMe(DcParser *, DcConn * dcconn) {
-	ANTIFLOOD(CTM, FLOOD_TYPE_CTM);
+int DcProtocol::DC_MultiConnectToMe(DcParser *, DcConn *) {
 	return 0;
 }
 
-int DcProtocol::DC_Kick(DcParser * dcparser, DcConn * dcconn) {
-	if (dcparser->SplitChunks()) {
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "Kick syntax error, closing" << endl;
-		}
-		dcconn->CloseNow(CLOSE_REASON_SYNTAX_KICK);
-		return -1;
-	}
+int DcProtocol::DC_Kick(DcParser * dcparser, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnKick.CallAll(dcconn, dcparser)) {
+		if (mDcServer->mCalls.mOnKick.CallAll(dcConn, dcparser)) {
 			return -1;
 		}
 	#endif
 
-	if (!dcconn->mDcUser || !dcconn->mDcUser->mbKick) {
+	if (!dcConn->mDcUser || !dcConn->mDcUser->mbKick) {
 		return -2;
 	}
 
@@ -906,26 +762,19 @@ int DcProtocol::DC_Kick(DcParser * dcparser, DcConn * dcconn) {
 		return -3;
 	}
 
-	User->mDcConn->CloseNice(9000, CLOSE_REASON_KICK);
+	User->mDcConn->closeNice(9000, CLOSE_REASON_CMD_KICK);
 	return 0;
 }
 
-int DcProtocol::DC_OpForceMove(DcParser * dcparser, DcConn * dcconn) {
-	if (dcparser->SplitChunks()) {
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "OpForceMove syntax error, closing" << endl;
-		}
-		dcconn->CloseNow(CLOSE_REASON_SYNTAX_OFM);
-		return -1;
-	}
+int DcProtocol::DC_OpForceMove(DcParser * dcparser, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnOpForceMove.CallAll(dcconn, dcparser)) {
+		if (mDcServer->mCalls.mOnOpForceMove.CallAll(dcConn, dcparser)) {
 			return -1;
 		}
 	#endif
 
-	if (!dcconn->mDcUser || !dcconn->mDcUser->mbForceMove) {
+	if (!dcConn->mDcUser || !dcConn->mDcUser->mbForceMove) {
 		return -2;
 	}
 
@@ -940,15 +789,8 @@ int DcProtocol::DC_OpForceMove(DcParser * dcparser, DcConn * dcconn) {
 	return 0;
 }
 
-int DcProtocol::DC_GetINFO(DcParser * dcparser, DcConn * dcconn) {
-	if (dcparser->SplitChunks()) {
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "GetINFO syntax error, closing" << endl;
-		}
-		dcconn->CloseNow(CLOSE_REASON_SYNTAX_GETINFO);
-		return -1;
-	}
-	if (!dcconn->mDcUser || !dcconn->mDcUser->getInUserList()) {
+int DcProtocol::DC_GetINFO(DcParser * dcparser, DcConn * dcConn) {
+	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
 		return -1;
 	}
 
@@ -957,52 +799,40 @@ int DcProtocol::DC_GetINFO(DcParser * dcparser, DcConn * dcconn) {
 		return -2;
 	}
 
-	if (dcconn->mDcUser->mTimeEnter < User->mTimeEnter && Time() < (User->mTimeEnter + 60000)) {
+	if (dcConn->mDcUser->mTimeEnter < User->mTimeEnter && Time() < (User->mTimeEnter + 60000)) {
 		return 0;
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnGetINFO.CallAll(dcconn, dcparser)) {
+		if (mDcServer->mCalls.mOnGetINFO.CallAll(dcConn, dcparser)) {
 			return -2;
 		}
 	#endif
 
-	//if(!(dcconn->mFeatures & SUPPORT_FEATUER_NOGETINFO)){
+	//if(!(dcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO)){
 	if (!User->mbHide) {
-		dcconn->send(string(User->getMyINFO()), true, false);
+		dcConn->send(string(User->getMyINFO()), true, false);
 	}
 	return 0;
 }
 
-int DcProtocol::DC_Ping(DcParser *, DcConn * dcconn) {
-	ANTIFLOOD(Ping, FLOOD_TYPE_PING);
+int DcProtocol::DC_Ping(DcParser *, DcConn *) {
 	return 0;
 }
 
-int DcProtocol::DC_Unknown(DcParser * dcparser, DcConn * dcconn) {
-
-	// Protection from commands, not belonging to DC protocol
-	if (dcparser->mCommand.compare(0, 1, "$") && mDcServer->mDcConfig.mbDisableNoDCCmd) {
-		if (dcconn->Log(1)) {
-			dcconn->LogStream() << "Bad DC cmd: " << dcparser->mCommand.substr(0, 10) << " ..., close" << endl;
-		}
-		dcconn->CloseNow(CLOSE_REASON_BAD_DC_CMD);
-		return -1;
-	}
+int DcProtocol::DC_Unknown(DcParser * dcparser, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-	if (!mDcServer->mCalls.mOnUnknown.CallAll(dcconn, dcparser)) {
-		dcconn->CloseNice(9000, CLOSE_REASON_UNKNOWN_CMD);
+	if (!mDcServer->mCalls.mOnUnknown.CallAll(dcConn, dcparser)) {
+		dcConn->closeNice(9000, CLOSE_REASON_CMD_UNKNOWN);
 		return -2;
 	}
 	#endif
-
-	ANTIFLOOD(Unknown, FLOOD_TYPE_UNKNOWN);
 	return 0;
 }
 
-int DcProtocol::DC_Quit(DcParser *, DcConn * dcconn) {
-	dcconn->CloseNice(9000, CLOSE_REASON_QUIT);
+int DcProtocol::DC_Quit(DcParser *, DcConn * dcConn) {
+	dcConn->closeNice(9000, CLOSE_REASON_CMD_QUIT);
 	return 0;
 }
 
@@ -1154,7 +984,7 @@ string & DcProtocol::Append_DC_ForceMove(string & str, const string & address) {
 
 
 
-void DcProtocol::SendMode(DcConn * dcconn, const string & str, int iMode, UserList & UL, bool bUseCache) {
+void DcProtocol::SendMode(DcConn * dcConn, const string & str, int iMode, UserList & UL, bool bUseCache) {
 	bool bAddSep = false;
 	if (str.substr(str.size() - 1, 1) != NMDC_SEPARATOR) {
 		bAddSep = true;
@@ -1163,15 +993,15 @@ void DcProtocol::SendMode(DcConn * dcconn, const string & str, int iMode, UserLi
 	if (iMode == 0) { /** Send to all */
 		UL.sendToAll(str, bUseCache, bAddSep);
 	} else if (iMode == 3) { /** Send to all except current user */
-		if (dcconn->mDcUser->getInUserList()) {
-			dcconn->mDcUser->setInUserList(false);
+		if (dcConn->mDcUser->getInUserList()) {
+			dcConn->mDcUser->setInUserList(false);
 			UL.sendToAll(str, bUseCache, bAddSep);
-			dcconn->mDcUser->setInUserList(true);
+			dcConn->mDcUser->setInUserList(true);
 		}
 	} else if (iMode == 4) { /** Send to all except users with ip of the current user */
 		DcConn * conn = NULL;
 		vector<DcConn *> ul;
-		for (DcIpList::iterator mit = mDcServer->mIPListConn->begin(DcConn::Ip2Num(dcconn->getIp().c_str())); mit != mDcServer->mIPListConn->end(); ++mit) {
+		for (DcIpList::iterator mit = mDcServer->mIPListConn->begin(DcConn::ip2Num(dcConn->getIp().c_str())); mit != mDcServer->mIPListConn->end(); ++mit) {
 			conn = (DcConn *)(*mit);
 			if(conn->mDcUser && conn->mDcUser->getInUserList()) {
 				conn->mDcUser->setInUserList(false);
@@ -1187,58 +1017,58 @@ void DcProtocol::SendMode(DcConn * dcconn, const string & str, int iMode, UserLi
 
 
 /** Sending the user-list and op-list */
-int DcProtocol::SendNickList(DcConn * dcconn) {
+int DcProtocol::SendNickList(DcConn * dcConn) {
 	try {
-		if ((dcconn->GetLSFlag(LOGIN_STATUS_LOGIN_DONE) != LOGIN_STATUS_LOGIN_DONE) && mDcServer->mDcConfig.mbNicklistOnLogin) {
-			dcconn->mbNickListInProgress = true;
+		if ((dcConn->GetLSFlag(LOGIN_STATUS_LOGIN_DONE) != LOGIN_STATUS_LOGIN_DONE) && mDcServer->mDcConfig.mNicklistOnLogin) {
+			dcConn->mbNickListInProgress = true;
 		}
 
-		if (dcconn->mFeatures & SUPPORT_FEATUER_NOHELLO) {
-			if (dcconn->Log(3)) {
-				dcconn->LogStream() << "Sending MyINFO list" << endl;
+		if (dcConn->mFeatures & SUPPORT_FEATUER_NOHELLO) {
+			if (dcConn->Log(3)) {
+				dcConn->LogStream() << "Sending MyINFO list" << endl;
 			}
 			// seperator "|" was added in GetInfoList function
-			dcconn->send(mDcServer->mDCUserList.GetInfoList(true), false, false);
-		} else if (dcconn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
-			if (dcconn->Log(3)) {
-				dcconn->LogStream() << "Sending MyINFO list and Nicklist" << endl;
+			dcConn->send(mDcServer->mDCUserList.GetInfoList(true), false, false);
+		} else if (dcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
+			if (dcConn->Log(3)) {
+				dcConn->LogStream() << "Sending MyINFO list and Nicklist" << endl;
 			}
 			// seperator "|" was not added in GetNickList function, because seperator was "$$"
-			dcconn->send(mDcServer->mDCUserList.GetNickList(), true, false);
+			dcConn->send(mDcServer->mDCUserList.GetNickList(), true, false);
 			// seperator "|" was added in GetInfoList function
-			dcconn->send(mDcServer->mDCUserList.GetInfoList(true), false, false);
+			dcConn->send(mDcServer->mDCUserList.GetInfoList(true), false, false);
 		} else {
-			if (dcconn->Log(3)) {
-				dcconn->LogStream() << "Sending Nicklist" << endl;
+			if (dcConn->Log(3)) {
+				dcConn->LogStream() << "Sending Nicklist" << endl;
 			}
 			// seperator "|" was not added in GetNickList function, because seperator was "$$"
-			dcconn->send(mDcServer->mDCUserList.GetNickList(), true, false);
+			dcConn->send(mDcServer->mDCUserList.GetNickList(), true, false);
 		}
 		if (mDcServer->mOpList.Size()) {
-			if (dcconn->Log(3)) {
-				dcconn->LogStream() << "Sending Oplist" << endl;
+			if (dcConn->Log(3)) {
+				dcConn->LogStream() << "Sending Oplist" << endl;
 			}
 			// seperator "|" was not added in GetNickList function, because seperator was "$$"
-			dcconn->send(mDcServer->mOpList.GetNickList(), true, false);
+			dcConn->send(mDcServer->mOpList.GetNickList(), true, false);
 		}
 
-		if (dcconn->mDcUser->getInUserList() && dcconn->mDcUser->mbInIpList) {
-			if (dcconn->Log(3)) {
-				dcconn->LogStream() << "Sending Iplist" << endl;
+		if (dcConn->mDcUser->getInUserList() && dcConn->mDcUser->mbInIpList) {
+			if (dcConn->Log(3)) {
+				dcConn->LogStream() << "Sending Iplist" << endl;
 			}
 			// seperator "|" was not added in GetIpList function, because seperator was "$$"
-			dcconn->send(mDcServer->mDCUserList.GetIpList(), true);
+			dcConn->send(mDcServer->mDCUserList.GetIpList(), true);
 		} else {
-			if (!dcconn->SendBufIsEmpty()) { // buf would not flush, if it was empty
-				dcconn->Flush(); // newPolitic
+			if (!dcConn->sendBufIsEmpty()) { // buf would not flush, if it was empty
+				dcConn->flush(); // newPolitic
 			} else {
 				static string s(NMDC_SEPARATOR);
-				dcconn->send(s);
+				dcConn->send(s);
 			}
 		}
 	} catch(...) {
-		if (dcconn->ErrLog(0)) {
-			dcconn->LogStream() << "exception in SendNickList" << endl;
+		if (dcConn->ErrLog(0)) {
+			dcConn->LogStream() << "exception in SendNickList" << endl;
 		}
 		return -1;
 	}
@@ -1253,8 +1083,80 @@ string DcProtocol::GetNormalShare(__int64 iVal) {
 	for (; ((s >= 1024) && (i < 7)); ++i) {
 		s /= 1024;
 	}
-	os << ::std::floor(s * 1000 + 0.5) / 1000 << " " << DcServer::currentDcServer->mDCLang.msUnits[i];
+	os << ::std::floor(s * 1000 + 0.5) / 1000 << " " << DcServer::currentDcServer->mDCLang.mUnits[i];
 	return os.str();
+}
+
+
+
+int DcProtocol::checkCommand(DcParser * dcParser, DcConn * dcConn) {
+
+	// Checking length of command
+	if (dcParser->miLen > mDcServer->mDcConfig.mMaxCmdLen[dcParser->miType]) {
+		if (dcConn->Log(1)) {
+			dcConn->LogStream() << "Bad CMD(" << dcParser->miType << ") length: " << dcParser->miLen << endl;
+		}
+		dcConn->closeNow(CLOSE_REASON_CMD_LENGTH);
+		return -1;
+	}
+
+	// Checking null chars
+	if (strlen(dcParser->mCommand.data()) < dcParser->mCommand.size()) {
+		if (dcConn->Log(1)) {
+			dcConn->LogStream() << "Sending null chars, probably attempt an attack" << endl;
+		}
+		dcConn->closeNow(CLOSE_REASON_CMD_NULL);
+		return -2;
+	}
+
+	// Check Syntax
+	if (dcParser->SplitChunks()) {
+		// Protection from commands, not belonging to DC protocol
+		if (dcParser->miType != NMDC_TYPE_UNKNOWN || mDcServer->mDcConfig.mDisableNoDCCmd) {
+			if (dcConn->Log(1)) {
+				dcConn->LogStream() << "Wrong syntax in cmd: " << dcParser->miType << endl;
+			}
+			dcConn->closeNice(9000, CLOSE_REASON_CMD_SYNTAX);
+			return -3;
+		}
+	}
+
+	// Check flood
+	if (antiflood(dcConn, dcParser->miType)) {
+		return -4;
+	}
+
+	return 0;
+}
+
+
+
+bool DcProtocol::antiflood(DcConn * dcConn, unsigned int iType) {
+	if (mDcServer->antiFlood(dcConn->mTimes1.mCount[iType], dcConn->mTimes1.mTime[iType],
+		mDcServer->mDcConfig.mFloodCount[iType], mDcServer->mDcConfig.mFloodTime[iType])
+	) {
+		#ifndef WITHOUT_PLUGINS
+		if (!mDcServer->mCalls.mOnFlood.CallAll(dcConn, FLOOD_TYPE_MYNIFO, 1))
+		#endif
+		{
+			mDcServer->sendToUser(dcConn, (mDcServer->mDCLang.mFlood[iType]).c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+			dcConn->closeNice(9000, CLOSE_REASON_FLOOD);
+			return true;
+		}
+	}
+	if (mDcServer->antiFlood(dcConn->mTimes2.mCount[iType], dcConn->mTimes2.mTime[iType],
+		mDcServer->mDcConfig.mFloodCount2[iType], mDcServer->mDcConfig.mFloodTime2[iType])
+	) {
+		#ifndef WITHOUT_PLUGINS
+		if (!mDcServer->mCalls.mOnFlood.CallAll(dcConn, FLOOD_TYPE_MYNIFO, 2))
+		#endif
+		{
+			mDcServer->sendToUser(dcConn, (mDcServer->mDCLang.mFlood[iType]).c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+			dcConn->closeNice(9000, CLOSE_REASON_FLOOD);
+			return true;
+		}
+	}
+	return false;
 }
 
 

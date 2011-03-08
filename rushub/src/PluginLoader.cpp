@@ -147,8 +147,8 @@ void * PluginLoader::loadSym(const char * name) {
 
 
 /** Log */
-bool PluginLoader::StrLog() {
-	Obj::StrLog();
+bool PluginLoader::strLog() {
+	Obj::strLog();
 	LogStream() << "(" << mFile << ") ";
 	return true;
 }

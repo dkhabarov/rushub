@@ -44,7 +44,7 @@ namespace utils {
 
 /** Function of the comparison of the substring from string str1 with string str2
   (0 - equal, 1 - not equal, -1 - not is faithfully given size of the substring str1) */
-int StrCompare(const string &str1, int start, int count, const string &str2);
+int StrCompare(const string &str1, size_t start, size_t count, const string &str2);
 
 /** Removing the spare reserved place in internal buffer of the string */
 void ShrinkStringToFit(string &str);

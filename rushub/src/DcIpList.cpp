@@ -66,11 +66,11 @@ bool DcIpList::Remove(DcConn * dcConn) {
 }
 
 void DcIpList::sendToIp(const char * ip, string & data, unsigned long profile, bool addSep, bool flush) {
-	sendToIp(Conn::Ip2Num(ip), data, profile, addSep, flush);
+	sendToIp(Conn::ip2Num(ip), data, profile, addSep, flush);
 }
 
 void DcIpList::SendToIPWithNick(const char * ip, string & start, string & end, unsigned long profile, bool addSep, bool flush) {
-	SendToIPWithNick(Conn::Ip2Num(ip), start, end, profile, addSep, flush);
+	SendToIPWithNick(Conn::ip2Num(ip), start, end, profile, addSep, flush);
 }
 
 void DcIpList::sendToIp(unsigned long ip, string & data, unsigned long profile, bool addSep, bool flush) {

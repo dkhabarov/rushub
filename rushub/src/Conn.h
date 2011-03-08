@@ -50,18 +50,18 @@ class ConnFactory {
 
 public:
 
-	ConnFactory(Protocol *, Server *);
-	virtual ~ConnFactory();
-	virtual Conn * CreateConn(tSocket sock = 0);
-	virtual void DelConn(Conn * &);
-
-	virtual void OnNewData(Conn *, string *);
+	unsigned long mStrSizeMax;
+	string mSeparator;
+	Protocol * mProtocol; /** Protocal */
 
 public:
 
-	unsigned long mStrSizeMax;
-	string msSeparator;
-	Protocol * mProtocol; /** Protocal */
+	ConnFactory(Protocol *, Server *);
+	virtual ~ConnFactory();
+
+	virtual Conn * createConn(tSocket sock = 0);
+	virtual void deleteConn(Conn * &);
+	virtual void onNewData(Conn *, string *);
 
 protected:
 
@@ -77,8 +77,8 @@ enum ConnType {
 	CONN_TYPE_LISTEN,    //< Listen TCP
 	CONN_TYPE_CLIENTTCP, //< Client TCP
 	CONN_TYPE_CLIENTUDP, //< Client UDP
-	CONN_TYPE_SERVERTCP, //< Server TCP (hublist)
-	CONN_TYPE_SERVERUDP  //< Server UDP (multihub)
+	CONN_TYPE_SERVERTCP, //< Server TCP
+	CONN_TYPE_SERVERUDP  //< Server UDP
 
 };
 
@@ -115,24 +115,21 @@ enum {
 /** Main connection class for server */
 class Conn : public Obj, public ConnBase {
 
-	friend class Server; /* for ports */
+	friend class Server; /* for ports and mIterator */
 
 public:
 
-	static unsigned long iConnCounter; /** Conn counter */
-	bool mbOk; /** Points that given connection is registered (socket of connection is created and bound) */
-	bool mbWritable; /** Points that data can be read and be written */
-	Time mLastRecv; /** Time of the last recv action from the client */
+	static unsigned long mConnCounter; /** Conn counter */
 
-	int miCloseReason; /** Reason of close connection */
+	bool mOk; /** Points that given connection is registered (socket of connection is created and bound) */
+	bool mWritable; /** Points that data can be read and be written */
+	Time mLastRecv; /** Time of the last recv action from the client */
 
 	ConnFactory * mConnFactory; /** Conn factory */
 	ListenFactory * mListenFactory; /** Listen factory */
 	Server * mServer; /** Server */
 	Protocol * mProtocol; /** Protocol */
 	Parser * mParser; /** Parser */
-
-	list<Conn *>::iterator mIterator; /** Optimisation */
 
 public:
 
@@ -143,172 +140,181 @@ public:
 	virtual operator tSocket() const;
 
 	/** Get type connection */
-	inline ConnType GetConnType() const {
+	inline ConnType getConnType() const {
 		return mConnType;
 	}
 
 	/** Create, bind and listen socket */
-	tSocket MakeSocket(int port, const char * ip = NULL, bool udp = false);
+	tSocket makeSocket(int port, const char * ip = NULL, bool udp = false);
 
 	void close(); /** Close connection (socket) */
-	void CloseNice(int msec = 0, int reason = 0); /** Nice close conn (socket) */
-	void CloseNow(int reason = 0); /** Now close conn */
+	void closeNice(int msec = 0, int reason = 0); /** Nice close conn (socket) */
+	void closeNow(int reason = 0); /** Now close conn */
 
 	/** Creating the new object for enterring connection */
-	virtual Conn * CreateNewConn();
+	virtual Conn * createNewConn();
 
 	/** Reading all data from socket to buffer of the conn */
-	virtual int Recv();
+	virtual int recv();
 
 	/** Check empty recv buf */
-	inline int RecvBufIsEmpty() const {
-		return miRecvBufEnd == miRecvBufRead;
+	inline int recvBufIsEmpty() const {
+		return mRecvBufEnd == mRecvBufRead;
 	}
 
 	/** Check empty recv buf */
-	inline int SendBufIsEmpty() const {
-		return msSendBuf.length() == 0;
+	inline int sendBufIsEmpty() const {
+		return mSendBuf.length() == 0;
 	}
 
 	/** Get status */
-	inline int StrStatus() const {
-		return meStrStatus;
+	inline int strStatus() const {
+		return mStrStatus;
 	}
 
-	/** Remaining (for web-server) */
-	virtual int Remaining();
+	/** remaining (for web-server) */
+	virtual int remaining();
 
 	/** Clear params */
-	void ClearStr();
+	void clearStr();
 
 	/** Installing the string, in which will be recorded received data, 
 	and installation main parameter */
-	void SetStrToRead(string *, string separator, unsigned long max);
+	void setStrToRead(string *, string separator, unsigned long max);
 
 	/** Reading data from buffer and record in line of the protocol */
-	int ReadFromRecvBuf();
+	int readFromRecvBuf();
 
 	/** Get pointer for string */
-	virtual string * GetPtrForStr();
+	virtual string * getPtrForStr();
 
 	/** Create parser */
-	virtual Parser * CreateParser();
+	virtual Parser * createParser();
 
 	/** Remove parser */
-	virtual void DeleteParser(Parser *);
+	virtual void deleteParser(Parser *);
 
 	/** Get pointer for string with data */
 	string * getCommand();
 
 	/** Write data in sending buffer */
-	virtual int WriteData(const string & data, bool flush);
+	virtual int writeData(const string & data, bool flush);
 
-	/** OnFlush */
-	virtual void OnFlush();
+	/** onFlush */
+	virtual void onFlush();
 
-	void Flush(); /** Flush buffer */
+	void flush(); /** Flush buffer */
 
-	static inline unsigned long Ip2Num(const char * ip) {
+	static inline unsigned long ip2Num(const char * ip) {
 		return inet_addr(ip);
 	}
 	
-	static inline char * Num2Ip(unsigned long ip) {
+	static inline char * num2Ip(unsigned long ip) {
 		struct in_addr in;
 		in.s_addr = ip;
 		return inet_ntoa(in);
 	}
 	
 	/** Get string ip */
-	const string & Ip() const;
+	const string & ip() const;
+
+	const string & ipUdp() const;
 	
 	/** Get port */
-	inline int Port() const {
-		return miPort;
+	inline int port() const {
+		return mPort;
 	}
 
-	void GetMac();
+	void getMac();
 
 	/** Get host */
-	bool Host();
+	bool getHost();
 	
 	/** Get ip by host */
-	static unsigned long IpByHost(const string & host);
+	static unsigned long ipByHost(const string & host);
 	
 	/** Get host by ip */
-	static bool HostByIp(const string & ip, string & host);
+	static bool hostByIp(const string & ip, string & host);
 
 	/** Main base timer */
-	int OnTimerBase(Time &now);
+	int onTimerBase(Time &now);
 
 	/** Main timer */
 	virtual int onTimer(Time &now);
 
-	virtual bool StrLog();
+	virtual bool strLog();
 
-	static bool CheckIp(const string &ip);
+	static bool checkIp(const string &ip);
 
-	inline bool IsClosed() {
-		return mbClosed;
+	inline bool isClosed() {
+		return mClosed;
 	}
-
-private:
-
-	tSocket mSocket; /** Socket descriptor */
-	Time mCloseTime; /** Time before closing the conn */
-	int miRecvBufEnd; /** Final position of the buffer msRecvBuf */
-	int miRecvBufRead; /** Current position of the buffer msRecvBuf */
-	int meStrStatus; /** Status of the line */
-
-	bool mbBlockInput; /** Blocking enterring channel for given conn */
-	bool mbBlockOutput; /** Blocking coming channel for given conn */
-
-	string * mCommand; /** Pointer to line, in which will be written data from buffer */
-
-	bool mbClosed; /** closed flag, for close counter */
 
 protected:
 
 	/** Socket type */
 	ConnType mConnType;
 
-	/** struct sockaddr_in */
-	struct sockaddr_in mAddrIN;
+	unsigned long mNetIp; /** Numeric ip */
+	string mIp; /** String ip */
+	string mIpConn; /** String ip (host) of server */
+	string mIpUdp;
+	int mPort; /** port */
+	int mPortConn; /** listen-conn port */
 
-	unsigned long miNetIp; /** Numeric ip */
-	string msIp; /** String ip */
-	string msIpConn; /** String ip (host) of server */
-	int miPort; /** port */
-	int miPortConn; /** listen-conn port */
+	string mMac; /** mac address */
+	string mHost; /** DNS */
 
-	string msMAC; /** mac address */
-	string msHost; /** DNS */
-
-	static char msRecvBuf[MAX_RECV_SIZE + 1]; /** Recv buffer */
-	string msSeparator; /** Separator */
+	static char mRecvBuf[MAX_RECV_SIZE + 1]; /** Recv buffer */
+	string mSeparator; /** Separator */
 	unsigned long mStrSizeMax; /** (10240) Max msg size */
 
-	string msSendBuf; /** Buffer for sending */
-	unsigned long miSendBufMax; /** Max size sending buf */
+	string mSendBuf; /** Buffer for sending */
+	unsigned long mSendBufMax; /** Max size sending buf */
+
+	list<Conn *>::iterator mIterator; /** Optimisation */
 
 protected:
 
 	/** Create socket (default TCP) */
-	tSocket SocketCreate(bool udp = false);
+	tSocket socketCreate(bool udp = false);
 
 	/** Bind */
-	tSocket SocketBind(tSocket, int port, const char * ip = NULL);
+	tSocket socketBind(tSocket, int port, const char * ip = NULL);
 
 	/** Listen TCP */
-	tSocket SocketListen(tSocket);
+	tSocket socketListen(tSocket);
 
 	/** Set non-block socket */
-	tSocket SocketNonBlock(tSocket);
+	tSocket socketNonBlock(tSocket);
 
 	/** Accept new conn */
-	tSocket Accept();
+	tSocket socketAccept();
 
 	/** Send len byte from buf */
 	int send(const char * buf, size_t & len);
+
+private:
+
+	tSocket mSocket; /** Socket descriptor */
+	Time mCloseTime; /** Time before closing the conn */
+	int mRecvBufEnd; /** Final position of the buffer mRecvBuf */
+	int mRecvBufRead; /** Current position of the buffer mRecvBuf */
+	int mStrStatus; /** Status of the line */
+
+	/** struct sockaddr_in */
+	struct sockaddr_in mSockAddrIn;
+	struct sockaddr_in mSockAddrInUdp;
+
+	static socklen_t mSockAddrInSize;
+
+	bool mBlockInput; /** Blocking enterring channel for given conn */
+	bool mBlockOutput; /** Blocking coming channel for given conn */
+
+	string * mCommand; /** Pointer to line, in which will be written data from buffer */
+
+	bool mClosed; /** closed flag, for close counter */
+	int mCloseReason; /** Reason of close connection */
 
 }; // class Conn
 

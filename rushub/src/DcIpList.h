@@ -95,7 +95,7 @@ public:
 	}; // iterator
 
 	inline iterator begin(const char * ip) {
-		return begin(Conn::Ip2Num(ip));
+		return begin(Conn::ip2Num(ip));
 	}
 	iterator begin(unsigned long ip) {
 		iterator it;

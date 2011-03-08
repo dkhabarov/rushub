@@ -54,10 +54,10 @@ public:
 	virtual int DoCmd(Parser *, Conn *);
 
 	/** Creating parser of the protocol */
-	virtual Parser * CreateParser();
+	virtual Parser * createParser();
 
 	/** Removing parser of the protocol */
-	virtual void DeleteParser(Parser *);
+	virtual void deleteParser(Parser *);
 
 protected:
 

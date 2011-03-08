@@ -128,25 +128,26 @@ typedef enum { /** Types of the commands */
 	NMDC_TYPE_SEARCH_PAS,     //< 2  = $Search Hub:
 	NMDC_TYPE_SEARCH,         //< 3  = $Search
 	NMDC_TYPE_SR,             //< 4  = $SR
-	NMDC_TYPE_MYNIFO,         //< 5  = $MyNIFO
-	NMDC_TYPE_SUPPORTS,       //< 6  = $Support
-	NMDC_TYPE_KEY,            //< 7  = $Key
-	NMDC_TYPE_VALIDATENICK,   //< 8  = $ValidateNick
-	NMDC_TYPE_VERSION,        //< 9  = $Version
-	NMDC_TYPE_GETNICKLIST,    //< 10 = $GetNickList
-	NMDC_TYPE_CHAT,           //< 11 = Chat
-	NMDC_TYPE_TO,             //< 12 = $To
-	NMDC_TYPE_QUIT,           //< 13 = $Quit
-	NMDC_TYPE_MYPASS,         //< 14 = $MyPass
-	NMDC_TYPE_CONNECTTOME,    //< 15 = $ConnecToMe
-	NMDC_TYPE_RCONNECTTOME,   //< 16 = $RevConnectToMe
-	NMDC_TYPE_MCONNECTTOME,   //< 17 = $MultiConnectToMe
-	NMDC_TYPE_KICK,           //< 18 = $Kick
-	NMDC_TYPE_OPFORCEMOVE,    //< 19 = $OpForceMove
-	NMDC_TYPE_GETINFO,        //< 20 = $GetINFO
-	NMDC_TYPE_MCTO,           //< 21 = $MCTo
-	NMDC_TYPE_PING,           //< 22 = |
-	NMDC_TYPE_UNKNOWN,        //< 23 = $Unknown
+	NMDC_TYPE_SR_UDP,         //< 5  = $SR UDP
+	NMDC_TYPE_MYNIFO,         //< 6  = $MyNIFO
+	NMDC_TYPE_SUPPORTS,       //< 7  = $Support
+	NMDC_TYPE_KEY,            //< 8  = $Key
+	NMDC_TYPE_VALIDATENICK,   //< 9  = $ValidateNick
+	NMDC_TYPE_VERSION,        //< 10  = $Version
+	NMDC_TYPE_GETNICKLIST,    //< 11 = $GetNickList
+	NMDC_TYPE_CHAT,           //< 12 = Chat
+	NMDC_TYPE_TO,             //< 13 = $To
+	NMDC_TYPE_QUIT,           //< 14 = $Quit
+	NMDC_TYPE_MYPASS,         //< 15 = $MyPass
+	NMDC_TYPE_CONNECTTOME,    //< 16 = $ConnecToMe
+	NMDC_TYPE_RCONNECTTOME,   //< 17 = $RevConnectToMe
+	NMDC_TYPE_MCONNECTTOME,   //< 18 = $MultiConnectToMe
+	NMDC_TYPE_KICK,           //< 19 = $Kick
+	NMDC_TYPE_OPFORCEMOVE,    //< 20 = $OpForceMove
+	NMDC_TYPE_GETINFO,        //< 21 = $GetINFO
+	NMDC_TYPE_MCTO,           //< 22 = $MCTo
+	NMDC_TYPE_PING,           //< 23 = |
+	NMDC_TYPE_UNKNOWN,        //< 24 = $Unknown
 } NmdcType;
 
 

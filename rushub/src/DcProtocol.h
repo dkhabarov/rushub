@@ -55,12 +55,12 @@ public:
 	virtual int DoCmd(Parser *, Conn *); /** Do command */
 	
 	/** Creating protocol parser */
-	virtual Parser * CreateParser() {
+	virtual Parser * createParser() {
 		return new DcParser;
 	}
 	
 	/** Removing protocol parser */
-	virtual void DeleteParser(Parser * parser) {
+	virtual void deleteParser(Parser * parser) {
 		if (parser != NULL) {
 			delete parser;
 		}
@@ -81,7 +81,7 @@ public:
 	static string & Append_DC_ForceMove(string & str, const string & address);
 	static void Append_DC_PMToAll(string & start, string & end, const string & from, const string & nick, const string & msg);
 
-	void SendMode(DcConn * dcconn, const string & str, int mode, UserList &, bool useCache = false);
+	void SendMode(DcConn * dcConn, const string & str, int mode, UserList &, bool useCache = false);
 	int SendNickList(DcConn *); /** Sending user-list and op-list */
 	static string GetNormalShare(__int64); /** Get normal share size */
 
@@ -109,6 +109,11 @@ protected:
 	int DC_Ping(DcParser *, DcConn *); /** Ping cmd */
 	int DC_Unknown(DcParser *, DcConn *); /** Unknown cmd */
 	int DC_Quit(DcParser *, DcConn *); /** Quit cmd */
+
+private:
+
+	int checkCommand(DcParser *, DcConn *);
+	bool antiflood(DcConn * dcConn, unsigned int iType);
 
 }; // DcProtocol
 

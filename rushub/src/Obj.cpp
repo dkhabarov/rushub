@@ -111,7 +111,7 @@ int Obj::Log(int level) {
 		mToLog = &log();
 		miLevel = level;
 		mbIsErrorLog = false;
-		return StrLog();
+		return strLog();
 	}
 	return 0;
 }
@@ -124,7 +124,7 @@ int Obj::ErrLog(int level) {
 		mToLog = &errLog();
 		miLevel = level;
 		mbIsErrorLog = true;
-		return StrLog();
+		return strLog();
 	}
 	return 0;
 }
@@ -140,7 +140,7 @@ void Obj::SetClassName(const char * name) {
 
 
 /** Main function putting log in stream */
-bool Obj::StrLog() {
+bool Obj::strLog() {
 	Time now;
 	LogStream() << "[" << now.AsDateMS() << "] " << ((mbIsErrorLog) ? ERR_LABEL " " : "")
 		<< "(" << miLevel << ") " << mClassName << ": ";

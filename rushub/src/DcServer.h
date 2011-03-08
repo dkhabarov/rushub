@@ -123,8 +123,8 @@ private:
 class DcServer : public Server, public DcServerBase {
 
 	friend class ::dcserver::DcListIterator; // for mConnList
-	friend class ::dcserver::DcConn; // for DoUserEnter in DcConn::OnFlush and MinDelay in DcConn::onTimer
-	friend class ::dcserver::DcConnFactory; // for RemoveFromDCUserList in DcConnFactory::DelConn
+	friend class ::dcserver::DcConn; // for DoUserEnter in DcConn::onFlush and MinDelay in DcConn::onTimer
+	friend class ::dcserver::DcConnFactory; // for RemoveFromDCUserList in DcConnFactory::deleteConn
 	friend class ::dcserver::protocol::DcProtocol; // for BeforeUserEnter in DcProtocol::DC_MyINFO
 	friend class ::webserver::WebConnFactory; // for call plugins
 
@@ -155,7 +155,7 @@ public:
 	FullUserList mDCUserList; /** User list */
 	UserList mDCBotList; /** Bot list */
 	UserList mOpList; /** Op list */
-	UserList mIpList; /** Ip list */
+	UserList mIpList; /** ip list */
 	UserList mActiveList; /** Active user list */
 	UserList mHelloList; /** Hello user list */
 	UserList mEnterList; /** Enter list */
@@ -192,11 +192,11 @@ public:
 	}
 
 	const string & getHubInfo() const {
-		return msHubName;
+		return mHubName;
 	}
 
 	const string & getLocale() const {
-		return mDcConfig.msLocale;
+		return mDcConfig.mLocale;
 	}
 
 	const string & getSystemVersion() const {
@@ -233,7 +233,7 @@ public:
 	int checkCmd(const string &);
 
 	/** Listebing of ports */
-	int Listening(int iPort = 0);
+	int Listening();
 
 	/** Main timer */
 	int onTimer(Time &now);
@@ -250,15 +250,15 @@ public:
 		return new DcListIterator(this);
 	}
 
-	bool sendToUser(DcConnBase *dcConn, const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
-	bool sendToNick(const char *sTo, const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
-	bool sendToAll(const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
-	bool sendToProfiles(unsigned long iProfile, const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
-	bool sendToIp(const char *sIP, const char *sData, unsigned long iProfile = 0, const char *sNick = NULL, const char *sFrom = NULL);
-	bool sendToAllExceptNicks(const vector<string> & NickList, const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
-	bool sendToAllExceptIps(const vector<string> & IPList, const char *sData, const char *sNick = NULL, const char *sFrom = NULL);
+	bool sendToUser(DcConnBase * dcConnBase, const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
+	bool sendToNick(const char * sTo, const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
+	bool sendToAll(const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
+	bool sendToProfiles(unsigned long iProfile, const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
+	bool sendToIp(const char * sIP, const char * sData, unsigned long iProfile = 0, const char * sNick = NULL, const char * sFrom = NULL);
+	bool sendToAllExceptNicks(const vector<string> & NickList, const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
+	bool sendToAllExceptIps(const vector<string> & IPList, const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
 
-	void forceMove(DcConnBase *dcConn, const char *sAddress, const char *sReason = NULL); //< Redirection client
+	void forceMove(DcConnBase * dcConnBase, const char * sAddress, const char * sReason = NULL); //< Redirection client
 
 	const vector<string> & getConfig();
 	const char * getConfig(const string & sName);
@@ -285,10 +285,10 @@ protected:
 	int OnNewConn(Conn *);
 
 	/** Returns pointer to line of the connection, in which will be recorded got data */
-	string * GetPtrForStr(Conn *);
+	string * getPtrForStr(Conn *);
 
 	/** Function of the processing enterring data */
-	void OnNewData(Conn *, string *);
+	void onNewData(Conn *, string *);
 
 	/** Antiflood function */
 	bool antiFlood(unsigned &iCount, Time & time, const unsigned &iCountLimit, const double &iTimeLimit);
@@ -297,10 +297,10 @@ protected:
 	bool ValidateUser(DcConn *, const string &sNick);
 
 	/** Check nick len */
-	bool CheckNickLength(DcConn *dcconn, const unsigned iLen);
+	bool CheckNickLength(DcConn *dcConn, const unsigned iLen);
 
 	/** Check nick used */
-	bool CheckNick(DcConn *dcconn);
+	bool CheckNick(DcConn *dcConn);
 
 	/** Actions before user entry */
 	bool BeforeUserEnter(DcConn *);
@@ -327,7 +327,7 @@ private:
 
 	Time mChecker; /** Checking time */
 	tCLIt conn_it; /** Iterator for optimum */
-	string msHubName; /** Hub name for plugins */
+	string mHubName; /** Hub name for plugins */
 	string sBuf; /** Temp buffer */
 	vector<DcConnBase *> mvIPConn; /** Conn with same ip for plugins */
 	vector<string> mvConfigNames; /** Config names for plugins */
@@ -348,9 +348,15 @@ private:
 
 	tIPEnterList * mIPEnterList;
 
-	void DelConn(Conn * conn);
+private:
+
+	void OnNewUdpData(Conn * conn, string * data);
+
+	void deleteConn(Conn * conn);
 
 	bool GetSysVersion();
+
+	bool ListeningServer(const char * name, const string & addresses, unsigned port, ListenFactory * listenFactory, bool udp = false);
 
 	struct PluginCallList {
 

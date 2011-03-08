@@ -39,7 +39,7 @@ public:
 	string mKey;
 
 	/** Cmd len */
-	int mLength;
+	size_t mLength;
 
 public:
 	ProtocolCommand();

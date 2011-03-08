@@ -70,10 +70,10 @@ DcServer::DcServer(const string & configFile, const string &):
 	miTotalUserCount(0),
 	miTotalShare(0),
 	mPluginList(mDcConfig.mPluginPath),
-	msHubName(INTERNALNAME " " INTERNALVERSION " " __DATE__ " " __TIME__),
+	mHubName(INTERNALNAME " " INTERNALVERSION " " __DATE__ " " __TIME__),
 	mListenFactory(NULL),
 	mWebListenFactory(NULL),
-	mIPEnterFlood(mDcConfig.miFloodCountReconnIp, mDcConfig.miFloodTimeReconnIp),
+	mIPEnterFlood(mDcConfig.mFloodCountReconnIp, mDcConfig.mFloodTimeReconnIp),
 	mCalls(&mPluginList)
 {
 	SetClassName("DcServer");
@@ -113,25 +113,25 @@ DcServer::DcServer(const string & configFile, const string &):
 	nmdc = "$ActiveList ";
 	mActiveList.SetNickListStart(nmdc);
 
-	if (mDcConfig.mbRegMainBot) { /** Main bot registration */
+	if (mDcConfig.mRegMainBot) { /** Main bot registration */
 
 		if (Log(3)) {
-			LogStream() << "Reg main bot '" << mDcConfig.msHubBot << "'" << endl;
+			LogStream() << "Reg main bot '" << mDcConfig.mHubBot << "'" << endl;
 		}
 
 		if (
 			regBot(
-				mDcConfig.msHubBot,
-				mDcConfig.msMainBotMyINFO, 
-				mDcConfig.msMainBotIP,
-				mDcConfig.mbMainBotKey
+				mDcConfig.mHubBot,
+				mDcConfig.mMainBotMyinfo, 
+				mDcConfig.mMainBotIp,
+				mDcConfig.mMainBotKey
 			) == -2
 		) {
 			regBot(
-				mDcConfig.msHubBot,
+				mDcConfig.mHubBot,
 				string("$ $$$0$"), 
-				mDcConfig.msMainBotIP,
-				mDcConfig.mbMainBotKey
+				mDcConfig.mMainBotIp,
+				mDcConfig.mMainBotKey
 			);
 		}
 	}
@@ -144,11 +144,11 @@ DcServer::~DcServer() {
 		LogStream() << "Destruct DcServer" << endl;
 	}
 
-	if (mDcConfig.mbRegMainBot) { /** Main bot unreg */
+	if (mDcConfig.mRegMainBot) { /** Main bot unreg */
 		if (Log(3)) {
-			LogStream() << "Unreg main bot '" << mDcConfig.msHubBot << "'" << endl;
+			LogStream() << "Unreg main bot '" << mDcConfig.mHubBot << "'" << endl;
 		}
-		unregBot(mDcConfig.msHubBot);
+		unregBot(mDcConfig.mHubBot);
 	}
 
 	DcUser * Us = NULL;
@@ -198,21 +198,21 @@ DcServer::~DcServer() {
 void DcServer::close() {
 	mbRun = false;
 	for (tCLIt it = mConnList.begin(); it != mConnList.end(); ++it) {
-		DelConn(*it);
+		deleteConn(*it);
 	}
 	for (tLLIt it = mListenList.begin(); it != mListenList.end(); ++it) {
-		DelConn(*it);
+		deleteConn(*it);
 	}
 }
 
 
 
-void DcServer::DelConn(Conn * conn) {
+void DcServer::deleteConn(Conn * conn) {
 	if (conn != NULL) {
-		mConnChooser.DelConn(conn);
+		mConnChooser.deleteConn(conn);
 		if (conn->mConnFactory != NULL) {
 			ConnFactory * Factory = conn->mConnFactory;
-			Factory->DelConn(conn);
+			Factory->deleteConn(conn);
 		} else {
 			delete conn;
 		}
@@ -248,60 +248,58 @@ void DcServer::getAddresses(
 
 
 
-/** Listening ports */
-int DcServer::Listening(int iPort) {
-	if (!mListenFactory) {
-		mListenFactory = new ListenFactory(this);
-	}
-
+bool DcServer::ListeningServer(const char * name, const string & addresses, unsigned port, ListenFactory * listenFactory, bool udp /*= false*/) {
 	vector<pair<string, int> > vAddresses;
-	getAddresses(msAddresses, vAddresses, 411);
+	getAddresses(addresses, vAddresses, port);
 
 	if (vAddresses.size() == 0) {
 		if (ErrLog(0)) {
-			LogStream() << "Incorrect address of the hub" << endl;
+			LogStream() << "Incorrect address of the " << name << endl;
 		}
+	}
+
+	bool ret = false;
+	for (vector<pair<string, int> >::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
+		if (Server::Listening(listenFactory, (*it).first, (*it).second, udp) == 0) {
+			ret = true;
+			if (Log(0)) {
+				LogStream() << name << " is running on " 
+					<< ((*it).first) << ":" << ((*it).second) 
+					<< (udp ? " UDP" : " TCP") << endl;
+			}
+			cout << name << " is running on " 
+				<< ((*it).first) << ":" << ((*it).second) 
+				<< (udp ? " UDP" : " TCP") << endl;
+		}
+	}
+	return ret;
+}
+
+
+
+/** Listening ports */
+int DcServer::Listening() {
+
+	if (!mListenFactory) {
+		mListenFactory = new ListenFactory(this);
+	}
+	if (!mWebListenFactory) {
+		mWebListenFactory = new WebListenFactory(this);
+	}
+
+	// DC Server
+	if (!ListeningServer("Server " INTERNALNAME " " INTERNALVERSION, mDcConfig.mAddresses, 411, mListenFactory)) {
 		return -1;
 	}
-	for (vector<pair<string, int> >::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
-		int iRes = Server::Listening(mListenFactory, (*it).first, (iPort != 0) ? iPort : (*it).second);
-		if (iRes != 0) {
-			return iRes;
-		}
-		if (Log(0)) {
-			LogStream() << "Server " INTERNALNAME " " INTERNALVERSION " is running on " 
-				<< ((*it).first) << ":" << ((iPort != 0) ? iPort : (*it).second) 
-				<< " TCP" << endl;
-		}
-		cout << "Server " INTERNALNAME " " INTERNALVERSION " is running on " 
-			<< ((*it).first) << ":" << ((iPort != 0) ? iPort : (*it).second) 
-			<< " TCP" << endl;
+
+	// Web Server
+	if (mDcConfig.mWebServer) {
+		ListeningServer("Web-Server", mDcConfig.mWebAddresses, 80, mWebListenFactory);
 	}
 
-	if (mDcConfig.mbWebServer) {
-		if (!mWebListenFactory) {
-			mWebListenFactory = new WebListenFactory(this);
-		}
-
-		vAddresses.clear();
-		getAddresses(mDcConfig.msWebAddresses, vAddresses, 80);
-
-		if (vAddresses.size() == 0) {
-			if (ErrLog(0)) {
-				LogStream() << "Incorrect address of the web server" << endl;
-			}
-		}
-		for (vector<pair<string, int> >::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
-			Server::Listening(mWebListenFactory, (*it).first, (iPort != 0) ? iPort : (*it).second);
-			if (Log(0)) {
-				LogStream() << "Web-Server is running on " 
-					<< ((*it).first) << ":" << ((*it).second) 
-					<< " TCP" << endl;
-			}
-			cout << "Web-Server is running on " 
-				<< ((*it).first) << ":" << ((*it).second) 
-				<< " TCP" << endl;
-		}
+	// UDP Server
+	if (mDcConfig.mUdpServer) {
+		ListeningServer("UDP-Server", mDcConfig.mUdpAddresses, 1209, mListenFactory, true);
 	}
 	return 0;
 }
@@ -331,13 +329,13 @@ int DcServer::onTimer(Time & now) {
 
 			double iFrequency = mMeanFrequency.GetMean(mTime);
 
-			if (iFrequency < 0.4 * mDcConfig.miSysLoading) {
+			if (iFrequency < 0.4 * mDcConfig.mSysLoading) {
 				mSystemLoad = SYSTEM_LOAD_SYSTEM_DOWN; // 0.4 (>2000 ms)
-			} else if (iFrequency < 0.9 * mDcConfig.miSysLoading) {
+			} else if (iFrequency < 0.9 * mDcConfig.mSysLoading) {
 				mSystemLoad = SYSTEM_LOAD_CRITICAL;    // 0.9 (>1000 ms)
-			} else if (iFrequency < 3.6 * mDcConfig.miSysLoading) {
+			} else if (iFrequency < 3.6 * mDcConfig.mSysLoading) {
 				mSystemLoad = SYSTEM_LOAD_MIDDLE;      // 3.6 (>250  ms)
-			} else if (iFrequency < 18  * mDcConfig.miSysLoading) {
+			} else if (iFrequency < 18  * mDcConfig.mSysLoading) {
 				mSystemLoad = SYSTEM_LOAD_LOWER;       // 18  (>50   ms)
 			} else {
 				mSystemLoad = SYSTEM_LOAD_OK;
@@ -380,39 +378,39 @@ int DcServer::onTimer(Time & now) {
 
 /** Function action after joining the client */
 int DcServer::OnNewConn(Conn *conn) {
-	DcConn * dcconn = (DcConn *) conn;
+	DcConn * dcConn = (DcConn *) conn;
 
 	if (mSystemLoad == SYSTEM_LOAD_SYSTEM_DOWN) {
-		if (dcconn->Log(1)) {
-			dcconn->LogStream() << "System down, close" << endl;
+		if (dcConn->Log(1)) {
+			dcConn->LogStream() << "System down, close" << endl;
 		}
-		dcconn->CloseNow(CLOSE_REASON_HUB_LOAD);
+		dcConn->closeNow(CLOSE_REASON_HUB_LOAD);
 		return 1;
 	}
 
 	/** Checking flood-entry (by ip) */
-	if (mIPEnterFlood.Check(dcconn->getNetIp(), mTime)) {
-		dcconn->CloseNow(CLOSE_REASON_IP_FLOOD);
+	if (mIPEnterFlood.Check(dcConn->getNetIp(), mTime)) {
+		dcConn->closeNow(CLOSE_REASON_FLOOD_IP_ENTRY);
 		return 2;
 	}
 
-	if (dcconn->Log(5)) {
-		dcconn->LogStream() << "[S]Stage OnNewConn" << endl;
+	if (dcConn->Log(5)) {
+		dcConn->LogStream() << "[S]Stage OnNewConn" << endl;
 	}
 	string sMsg;
-	dcconn->send(
+	dcConn->send(
 		DcProtocol::Append_DC_HubName(
 			DcProtocol::Append_DC_Lock(sMsg),
-			mDcConfig.msHubName,
-			mDcConfig.msTopic
+			mDcConfig.mHubName,
+			mDcConfig.mTopic
 		),
 		false,
 		false
 	);
 
 	#ifndef WITHOUT_PLUGINS
-		if (mCalls.mOnUserConnected.CallAll(dcconn)) {
-			dcconn->Flush();
+		if (mCalls.mOnUserConnected.CallAll(dcConn)) {
+			dcConn->flush();
 		} else
 	#endif
 	{
@@ -431,15 +429,15 @@ int DcServer::OnNewConn(Conn *conn) {
 			int w, d, h, m;
 			Uptime.AsTimeVals(w, d, h, m);
 			if (w) {
-				oss << w << " " << mDCLang.msTimes[0] << " ";
+				oss << w << " " << mDCLang.mTimes[0] << " ";
 			}
 			if (d) {
-				oss << d << " " << mDCLang.msTimes[1] << " ";
+				oss << d << " " << mDCLang.mTimes[1] << " ";
 			}
 			if (h) {
-				oss << h << " " << mDCLang.msTimes[2] << " ";
+				oss << h << " " << mDCLang.mTimes[2] << " ";
 			}
-			oss << m << " " << mDCLang.msTimes[3];
+			oss << m << " " << mDCLang.mTimes[3];
 			sTimeCache = oss.str();
 		}
 		if (iShareVal != miTotalShare) {
@@ -452,40 +450,72 @@ int DcServer::OnNewConn(Conn *conn) {
 			useCache = false;
 		}
 		if (!useCache) {
-			StringReplace(mDCLang.msFirstMsg, string("HUB"), sCache, string(INTERNALNAME " " INTERNALVERSION));
+			StringReplace(mDCLang.mFirstMsg, string("HUB"), sCache, string(INTERNALNAME " " INTERNALVERSION));
 			StringReplace(sCache, string("uptime"), sCache, sTimeCache);
 			StringReplace(sCache, string("users"), sCache, iUsersVal);
 			StringReplace(sCache, string("share"), sCache, sShareCache);
 		}
-		sendToUser(dcconn, sCache.c_str(), (char *) mDcConfig.msHubBot.c_str());
+		sendToUser(dcConn, sCache.c_str(), (char *) mDcConfig.mHubBot.c_str());
 	}
-	dcconn->SetTimeOut(HUB_TIME_OUT_LOGIN, mDcConfig.miTimeout[HUB_TIME_OUT_LOGIN], mTime); /** Timeout for enter */
-	dcconn->SetTimeOut(HUB_TIME_OUT_KEY, mDcConfig.miTimeout[HUB_TIME_OUT_KEY], mTime);
-	if (dcconn->Log(5)) {
-		dcconn->LogStream() << "[E]Stage OnNewConn" << endl;
+	dcConn->SetTimeOut(HUB_TIME_OUT_LOGIN, mDcConfig.mTimeout[HUB_TIME_OUT_LOGIN], mTime); /** Timeout for enter */
+	dcConn->SetTimeOut(HUB_TIME_OUT_KEY, mDcConfig.mTimeout[HUB_TIME_OUT_KEY], mTime);
+	if (dcConn->Log(5)) {
+		dcConn->LogStream() << "[E]Stage OnNewConn" << endl;
 	}
-	dcconn->Flush();
+	dcConn->flush();
 	return 0;
 }
 
 
 
 /** Returns pointer to line of the connection, in which will be recorded got data */
-string * DcServer::GetPtrForStr(Conn * conn) {
-	return conn->GetPtrForStr();
+string * DcServer::getPtrForStr(Conn * conn) {
+	return conn->getPtrForStr();
 }
 
 
 
 /** Function of the processing enterring data */
-void DcServer::OnNewData(Conn * conn, string * data) {
+void DcServer::onNewData(Conn * conn, string * data) {
 
-	if (conn->Log(4)) { 
-		conn->LogStream() << "IN: " << (*data) << NMDC_SEPARATOR << endl;
+	// Parse data
+	conn->mParser->Parse();
+
+	// Check TCP conn
+	if (conn->getConnType() == CONN_TYPE_CLIENTTCP) {
+		if (conn->Log(4)) {
+			conn->LogStream() << "IN: " << (*data) << NMDC_SEPARATOR << endl;
+		}
+		conn->mProtocol->DoCmd(conn->mParser, conn);
+	} else {
+		OnNewUdpData(conn, data);
+	}
+}
+
+
+
+void DcServer::OnNewUdpData(Conn * conn, string * data) {
+
+	if (conn->Log(4)) {
+		conn->LogStream() << "IN [UDP]: " << (*data) << NMDC_SEPARATOR << endl;
 	}
 
-	conn->mParser->Parse();
-	conn->mProtocol->DoCmd(conn->mParser, conn);
+	DcParser * dcparser = (DcParser *)conn->mParser;
+	if (dcparser->miType == NMDC_TYPE_SR) {
+		dcparser->miType = NMDC_TYPE_SR_UDP; // Set type for parse
+		if (!dcparser->SplitChunks()) {
+			dcparser->miType = NMDC_TYPE_SR; // Set simple SR type
+
+			DcUser * User = (DcUser *)mDCUserList.GetUserBaseByNick(dcparser->chunkString(CHUNK_SR_FROM));
+			if (User && User->mDcConn && conn->ipUdp() == User->getIp()) {
+				conn->mProtocol->DoCmd(dcparser, User->mDcConn);
+			}
+		}
+	} else {
+		if (conn->Log(5)) {
+			conn->LogStream() << "Unknown UDP data" << endl;
+		}
+	}
 }
 
 
@@ -502,7 +532,10 @@ bool DcServer::MinDelay(Time &time, double sec) {
 
 
 /** Antiflood function */
-bool DcServer::antiFlood(unsigned &iCount, Time & time, const unsigned &iCountLimit, const double &iTimeLimit) {
+bool DcServer::antiFlood(unsigned & iCount, Time & time, const unsigned & iCountLimit, const double & iTimeLimit) {
+	if (!iTimeLimit) {
+		return false;
+	}
 	bool bRet = false;
 	if (::fabs(double(mTime - time)) < iTimeLimit) {
 		if (iCountLimit < ++iCount) {
@@ -527,8 +560,8 @@ void DcServer::AddToOps(DcUser * User) {
 			if (User->mbHide) {
 				User->send(DcProtocol::Append_DC_OpList(sMsg, User->msNick), false, true);
 			} else {
-				mDCUserList.sendToAll(DcProtocol::Append_DC_OpList(sMsg, User->msNick), true/*mDcConfig.mbDelayedMyINFO*/, false);
-				mEnterList.sendToAll(sMsg, true/*mDcConfig.mbDelayedMyINFO*/, false);
+				mDCUserList.sendToAll(DcProtocol::Append_DC_OpList(sMsg, User->msNick), true/*mDcConfig.mDelayedMyinfo*/, false);
+				mEnterList.sendToAll(sMsg, true/*mDcConfig.mDelayedMyinfo*/, false);
 			}
 		}
 	}
@@ -564,11 +597,11 @@ void DcServer::DelFromOps(DcUser * User) {
 					User->send(s);
 				}
 			} else {
-				mDCUserList.sendToAll(DcProtocol::Append_DC_Quit(sMsg1, User->msNick), true/*mDcConfig.mbDelayedMyINFO*/, false);
-				mEnterList.sendToAll(sMsg1, true/*mDcConfig.mbDelayedMyINFO*/, false);
-				mHelloList.sendToAll(DcProtocol::Append_DC_Hello(sMsg2, User->msNick), true/*mDcConfig.mbDelayedMyINFO*/, false);
-				mDCUserList.sendToAll(User->getMyINFO(), true/*mDcConfig.mbDelayedMyINFO*/);
-				mEnterList.sendToAll(User->getMyINFO(), true/*mDcConfig.mbDelayedMyINFO*/);
+				mDCUserList.sendToAll(DcProtocol::Append_DC_Quit(sMsg1, User->msNick), true/*mDcConfig.mDelayedMyinfo*/, false);
+				mEnterList.sendToAll(sMsg1, true/*mDcConfig.mDelayedMyinfo*/, false);
+				mHelloList.sendToAll(DcProtocol::Append_DC_Hello(sMsg2, User->msNick), true/*mDcConfig.mDelayedMyinfo*/, false);
+				mDCUserList.sendToAll(User->getMyINFO(), true/*mDcConfig.mDelayedMyinfo*/);
+				mEnterList.sendToAll(User->getMyINFO(), true/*mDcConfig.mDelayedMyinfo*/);
 				mIpList.sendToAll(DcProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->getIp()), true, false);
 			}
 		}
@@ -606,8 +639,8 @@ void DcServer::AddToHide(DcUser * User) {
 		if (User->getInUserList()) {
 			string sMsg;
 			User->setInUserList(false);
-			mDCUserList.sendToAll(DcProtocol::Append_DC_Quit(sMsg, User->msNick), false/*mDcConfig.mbDelayedMyINFO*/, false);
-			mEnterList.sendToAll(sMsg, false/*mDcConfig.mbDelayedMyINFO*/, false); // false cache
+			mDCUserList.sendToAll(DcProtocol::Append_DC_Quit(sMsg, User->msNick), false/*mDcConfig.mDelayedMyinfo*/, false);
+			mEnterList.sendToAll(sMsg, false/*mDcConfig.mDelayedMyinfo*/, false); // false cache
 			User->setInUserList(true);
 			mOpList.Remake();
 			mDCUserList.Remake();
@@ -624,17 +657,17 @@ void DcServer::DelFromHide(DcUser * User) {
 			string sMsg1, sMsg2, sMsg3;
 			if (User->mbInOpList) {
 				User->setInUserList(false);
-				mHelloList.sendToAll(DcProtocol::Append_DC_Hello(sMsg1, User->msNick), false/*mDcConfig.mbDelayedMyINFO*/, false);
+				mHelloList.sendToAll(DcProtocol::Append_DC_Hello(sMsg1, User->msNick), false/*mDcConfig.mDelayedMyinfo*/, false);
 				sMsg2 = string(User->getMyINFO()).append(NMDC_SEPARATOR);
-				mDCUserList.sendToAll(DcProtocol::Append_DC_OpList(sMsg2, User->msNick), false/*mDcConfig.mbDelayedMyINFO*/, false);
-				mEnterList.sendToAll(sMsg2, false/*mDcConfig.mbDelayedMyINFO*/, false);
+				mDCUserList.sendToAll(DcProtocol::Append_DC_OpList(sMsg2, User->msNick), false/*mDcConfig.mDelayedMyinfo*/, false);
+				mEnterList.sendToAll(sMsg2, false/*mDcConfig.mDelayedMyinfo*/, false);
 				mIpList.sendToAll(DcProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->getIp()), false, false);
 				User->setInUserList(true);
 			} else {
 				User->setInUserList(false);
-				mHelloList.sendToAll(DcProtocol::Append_DC_Hello(sMsg1, User->msNick), false/*mDcConfig.mbDelayedMyINFO*/, false);
-				mDCUserList.sendToAll(User->getMyINFO(), false/*mDcConfig.mbDelayedMyINFO*/);
-				mEnterList.sendToAll(User->getMyINFO(), false/*mDcConfig.mbDelayedMyINFO*/);
+				mHelloList.sendToAll(DcProtocol::Append_DC_Hello(sMsg1, User->msNick), false/*mDcConfig.mDelayedMyinfo*/, false);
+				mDCUserList.sendToAll(User->getMyINFO(), false/*mDcConfig.mDelayedMyinfo*/);
+				mEnterList.sendToAll(User->getMyINFO(), false/*mDcConfig.mDelayedMyinfo*/);
 				mIpList.sendToAll(DcProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->getIp()), false, false);
 				User->setInUserList(true);
 			}
@@ -646,15 +679,15 @@ void DcServer::DelFromHide(DcUser * User) {
 
 
 
-bool DcServer::ValidateUser(DcConn * dcconn, const string & sNick) {
+bool DcServer::ValidateUser(DcConn * dcConn, const string & sNick) {
 
 	/** Checking for bad symbols in nick */
 	static string forbidedChars("$| ");
 	if (sNick.npos != sNick.find_first_of(forbidedChars)) {
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "Bad nick chars: '" << sNick << "'" << endl;
+		if (dcConn->Log(2)) {
+			dcConn->LogStream() << "Bad nick chars: '" << sNick << "'" << endl;
 		}
-		sendToUser(dcconn, mDCLang.msBadChars.c_str(), (char *) mDcConfig.msHubBot.c_str());
+		sendToUser(dcConn, mDCLang.mBadChars.c_str(), (char *) mDcConfig.mHubBot.c_str());
 		return false;
 	}
 
@@ -663,21 +696,21 @@ bool DcServer::ValidateUser(DcConn * dcconn, const string & sNick) {
 
 
 
-bool DcServer::CheckNickLength(DcConn * dcconn, const unsigned iLen) {
-	if (dcconn->miProfile == -1 && (iLen > mDcConfig.miMaxNickLen || iLen < mDcConfig.miMinNickLen)) {
+bool DcServer::CheckNickLength(DcConn * dcConn, const unsigned iLen) {
+	if (dcConn->miProfile == -1 && (iLen > mDcConfig.mMaxNickLen || iLen < mDcConfig.mMinNickLen)) {
 		string sMsg;
 
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "Bad nick len: " 
-				<< iLen << " (" << dcconn->mDcUser->msNick 
-				<< ") [" << mDcConfig.miMinNickLen << ", " 
-				<< mDcConfig.miMaxNickLen << "]" << endl;
+		if (dcConn->Log(2)) {
+			dcConn->LogStream() << "Bad nick len: " 
+				<< iLen << " (" << dcConn->mDcUser->msNick 
+				<< ") [" << mDcConfig.mMinNickLen << ", " 
+				<< mDcConfig.mMaxNickLen << "]" << endl;
 		}
 
-		StringReplace(mDCLang.msBadNickLen, string("min"), sMsg, (int) mDcConfig.miMinNickLen);
-		StringReplace(sMsg, string("max"), sMsg, (int) mDcConfig.miMaxNickLen);
+		StringReplace(mDCLang.mBadNickLen, string("min"), sMsg, (int) mDcConfig.mMinNickLen);
+		StringReplace(sMsg, string("max"), sMsg, (int) mDcConfig.mMaxNickLen);
 
-		sendToUser(dcconn, sMsg.c_str(), (char *) mDcConfig.msHubBot.c_str());
+		sendToUser(dcConn, sMsg.c_str(), (char *) mDcConfig.mHubBot.c_str());
 
 		return false;
 	}
@@ -687,78 +720,78 @@ bool DcServer::CheckNickLength(DcConn * dcconn, const unsigned iLen) {
 
 
 /** Checking for this nick used */
-bool DcServer::CheckNick(DcConn *dcconn) {
-	UserKey key = mDCUserList.Nick2Key(dcconn->mDcUser->msNick);
+bool DcServer::CheckNick(DcConn *dcConn) {
+	UserKey key = mDCUserList.Nick2Key(dcConn->mDcUser->msNick);
 	if (mDCUserList.ContainsKey(key)) {
 		string sMsg;
 		DcUser * us = (DcUser *) mDCUserList.Find(key);
 
-		if (!us->mDcConn || (us->getProfile() == -1 && us->getIp() != dcconn->Ip())) {
-			if (dcconn->Log(2)) {
-				dcconn->LogStream() << "Bad nick (used): '" 
-					<< dcconn->mDcUser->msNick << "'["
-					<< dcconn->Ip() << "] vs '" << us->msNick 
+		if (!us->mDcConn || (us->getProfile() == -1 && us->getIp() != dcConn->ip())) {
+			if (dcConn->Log(2)) {
+				dcConn->LogStream() << "Bad nick (used): '" 
+					<< dcConn->mDcUser->msNick << "'["
+					<< dcConn->ip() << "] vs '" << us->msNick 
 					<< "'[" << us->getIp() << "]" << endl;
 			}
 
-			StringReplace(mDCLang.msUsedNick, string("nick"), sMsg, dcconn->mDcUser->msNick);
+			StringReplace(mDCLang.mUsedNick, string("nick"), sMsg, dcConn->mDcUser->msNick);
 
-			sendToUser(dcconn, sMsg.c_str(), (char *) mDcConfig.msHubBot.c_str());
+			sendToUser(dcConn, sMsg.c_str(), (char *) mDcConfig.mHubBot.c_str());
 
-			dcconn->send(DcProtocol::Append_DC_ValidateDenide(sMsg.erase(), dcconn->mDcUser->msNick));
+			dcConn->send(DcProtocol::Append_DC_ValidateDenide(sMsg.erase(), dcConn->mDcUser->msNick));
 			return false;
 		}
 		if (us->mDcConn->Log(3)) {
 			us->mDcConn->LogStream() << "removed old user" << endl;
 		}
 		RemoveFromDCUserList(us);
-		us->mDcConn->CloseNow(CLOSE_REASON_OLD_CLIENT);
+		us->mDcConn->closeNow(CLOSE_REASON_USER_OLD);
 	}
 	return true;
 }
 
 
 
-bool DcServer::BeforeUserEnter(DcConn * dcconn) {
+bool DcServer::BeforeUserEnter(DcConn * dcConn) {
 	unsigned iWantedMask;
-	if (mDcConfig.mbDelayedLogin && dcconn->mbSendNickList) {
+	if (mDcConfig.mDelayedLogin && dcConn->mbSendNickList) {
 		iWantedMask = LOGIN_STATUS_LOGIN_DONE - LOGIN_STATUS_NICKLST;
 	} else {
 		iWantedMask = LOGIN_STATUS_LOGIN_DONE;
 	}
 
-	if (iWantedMask == dcconn->GetLSFlag(iWantedMask)) {
-		if (dcconn->Log(3)) {
-			dcconn->LogStream() << "Begin login" << endl;
+	if (iWantedMask == dcConn->GetLSFlag(iWantedMask)) {
+		if (dcConn->Log(3)) {
+			dcConn->LogStream() << "Begin login" << endl;
 		}
-		if (!CheckNick(dcconn)) {
-			dcconn->CloseNice(9000, CLOSE_REASON_INVALID_NICK);
+		if (!CheckNick(dcConn)) {
+			dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
 			return false;
 		}
-		if (dcconn->mbSendNickList) {
-			if (!mDcConfig.mbDelayedLogin) {
-				DoUserEnter(dcconn);
+		if (dcConn->mbSendNickList) {
+			if (!mDcConfig.mDelayedLogin) {
+				DoUserEnter(dcConn);
 			} else {
-				mEnterList.Add(dcconn->mDcUser);
+				mEnterList.Add(dcConn->mDcUser);
 			}
 
 			/** Can happen so that list not to send at a time */
-			mDCProtocol.SendNickList(dcconn);
+			mDCProtocol.SendNickList(dcConn);
 
-			dcconn->mbSendNickList = false;
+			dcConn->mbSendNickList = false;
 			return true;
 		}
-		if (!dcconn->mDcUser->getInUserList()) {
-			DoUserEnter(dcconn);
+		if (!dcConn->mDcUser->getInUserList()) {
+			DoUserEnter(dcConn);
 		}
 		return true;
 	} else { /** Invalid sequence of the sent commands */
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "Invalid sequence of the sent commands (" 
-				<< dcconn->GetLSFlag(iWantedMask) << "), wanted: " 
+		if (dcConn->Log(2)) {
+			dcConn->LogStream() << "Invalid sequence of the sent commands (" 
+				<< dcConn->GetLSFlag(iWantedMask) << "), wanted: " 
 				<< iWantedMask << endl;
 		}
-		dcconn->CloseNow(CLOSE_REASON_BAD_SEQUENCE);
+		dcConn->closeNow(CLOSE_REASON_CMD_SEQUENCE);
 		return false;
 	}
 }
@@ -766,44 +799,44 @@ bool DcServer::BeforeUserEnter(DcConn * dcconn) {
 
 
 /** User entry */
-void DcServer::DoUserEnter(DcConn * dcconn) {
+void DcServer::DoUserEnter(DcConn * dcConn) {
 	/** Check entry stages */
-	if (LOGIN_STATUS_LOGIN_DONE != dcconn->GetLSFlag(LOGIN_STATUS_LOGIN_DONE)) {
-		if (dcconn->Log(2)) {
-			dcconn->LogStream() << "User Login when not all done (" 
-				<< dcconn->GetLSFlag(LOGIN_STATUS_LOGIN_DONE) << ")" <<endl;
+	if (LOGIN_STATUS_LOGIN_DONE != dcConn->GetLSFlag(LOGIN_STATUS_LOGIN_DONE)) {
+		if (dcConn->Log(2)) {
+			dcConn->LogStream() << "User Login when not all done (" 
+				<< dcConn->GetLSFlag(LOGIN_STATUS_LOGIN_DONE) << ")" <<endl;
 		}
-		dcconn->CloseNow(CLOSE_REASON_NOT_LOGIN_DONE);
+		dcConn->closeNow(CLOSE_REASON_LOGIN_NOT_DONE);
 		return;
 	}
 
-	if (!CheckNick(dcconn)) {
-		dcconn->CloseNice(9000, CLOSE_REASON_INVALID_NICK);
+	if (!CheckNick(dcConn)) {
+		dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
 		return;
 	}
 
-	UserKey key = mDCUserList.Nick2Key(dcconn->mDcUser->msNick);
+	UserKey key = mDCUserList.Nick2Key(dcConn->mDcUser->msNick);
 
 	/** User is already considered came */
 	if (mEnterList.ContainsKey(key)) {
 		/** We send user contents of cache without clear this cache */
-		mEnterList.FlushForUser(dcconn->mDcUser);
+		mEnterList.FlushForUser(dcConn->mDcUser);
 		mEnterList.RemoveByKey(key);
 	}
 
 	/** Adding user to the user list */
-	if (!AddToUserList((DcUser *)dcconn->mDcUser)) {
-		dcconn->CloseNow(CLOSE_REASON_ADD_USER);
+	if (!AddToUserList((DcUser *)dcConn->mDcUser)) {
+		dcConn->closeNow(CLOSE_REASON_USER_ADD);
 		return;
 	}
 
 	/** Show to all */
-	ShowUserToAll(dcconn->mDcUser);
+	ShowUserToAll(dcConn->mDcUser);
 
-	AfterUserEnter(dcconn);
+	AfterUserEnter(dcConn);
 
-	dcconn->ClearTimeOut(HUB_TIME_OUT_LOGIN);
-	((DcUser *)dcconn->mDcUser)->mTimeEnter.Get();
+	dcConn->ClearTimeOut(HUB_TIME_OUT_LOGIN);
+	((DcUser *)dcConn->mDcUser)->mTimeEnter.Get();
 }
 
 
@@ -919,7 +952,7 @@ bool DcServer::RemoveFromDCUserList(DcUser *User) {
 			DcProtocol::Append_DC_Quit(sMsg, User->msNick);
 
 			/** Delay in sending MyINFO (and Quit) */
-			mDCUserList.sendToAll(sMsg, true/*mDcConfig.mbDelayedMyINFO*/, false);
+			mDCUserList.sendToAll(sMsg, true/*mDcConfig.mDelayedMyinfo*/, false);
 		}
 	}
 	return true;
@@ -946,32 +979,32 @@ bool DcServer::ShowUserToAll(DcUser *User) {
 	} else {
 
 		/** Sending the greeting for all users, not supporting feature NoHello (except enterring users) */
-		mHelloList.sendToAll(DcProtocol::Append_DC_Hello(sMsg1, User->msNick), true/*mDcConfig.mbDelayedMyINFO*/, false);
+		mHelloList.sendToAll(DcProtocol::Append_DC_Hello(sMsg1, User->msNick), true/*mDcConfig.mDelayedMyinfo*/, false);
 
 		/** Show MyINFO string to all users */
-		mDCUserList.sendToAll(User->getMyINFO(), true/*mDcConfig.mbDelayedMyINFO*/); // use cache -> so this can be after user is added
+		mDCUserList.sendToAll(User->getMyINFO(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
 
 		/** Show MyINFO string of the current user to all enterring users */
-		mEnterList.sendToAll(User->getMyINFO(), true/*mDcConfig.mbDelayedMyINFO*/);
+		mEnterList.sendToAll(User->getMyINFO(), true/*mDcConfig.mDelayedMyinfo*/);
 
 		/** Op entry */
 		if (User->mbInOpList) {
-			mDCUserList.sendToAll(DcProtocol::Append_DC_OpList(sMsg2, User->msNick), true/*mDcConfig.mbDelayedMyINFO*/, false);
-			mEnterList.sendToAll(sMsg2, true/*mDcConfig.mbDelayedMyINFO*/, false);
+			mDCUserList.sendToAll(DcProtocol::Append_DC_OpList(sMsg2, User->msNick), true/*mDcConfig.mDelayedMyinfo*/, false);
+			mEnterList.sendToAll(sMsg2, true/*mDcConfig.mDelayedMyinfo*/, false);
 		}
 	}
 
 	bool inUserList = User->getInUserList();
 
 	/** Prevention of the double sending MyINFO string */
-	if (!mDcConfig.mbDelayedLogin) {
+	if (!mDcConfig.mDelayedLogin) {
 			User->setInUserList(false);
 			mDCUserList.FlushCache();
 			mEnterList.FlushCache();
 			User->setInUserList(inUserList);
 	}
 
-	if (mDcConfig.mbSendUserIp) {
+	if (mDcConfig.mSendUserIp) {
 		string sStr;
 		User->setInUserList(false);
 		DcProtocol::Append_DC_UserIP(sStr, User->msNick, User->getIp());
@@ -994,12 +1027,12 @@ bool DcServer::ShowUserToAll(DcUser *User) {
 
 
 
-void DcServer::AfterUserEnter(DcConn *dcconn) {
-	if (dcconn->Log(3)) {
-		dcconn->LogStream() << "Entered the hub." << endl;
+void DcServer::AfterUserEnter(DcConn *dcConn) {
+	if (dcConn->Log(3)) {
+		dcConn->LogStream() << "Entered the hub." << endl;
 	}
 	#ifndef WITHOUT_PLUGINS
-		mCalls.mOnUserEnter.CallAll(dcconn);
+		mCalls.mOnUserEnter.CallAll(dcConn);
 	#endif
 }
 
@@ -1013,11 +1046,11 @@ DcUser * DcServer::GetDCUser(const char *sNick) {
 		if (User) {
 			return (DcUser *)User;
 		}
-		DcConn * dcconn;
+		DcConn * dcConn;
 		for (tCLIt it = mConnList.begin(); it != mConnList.end(); ++it) {
-			dcconn = (DcConn *)(*it);
-			if (dcconn && dcconn->mType == CLIENT_TYPE_NMDC && dcconn->mDcUser && dcconn->mDcUser->msNick == sN) {
-				return (DcUser *)dcconn->mDcUser;
+			dcConn = (DcConn *)(*it);
+			if (dcConn && dcConn->mType == CLIENT_TYPE_NMDC && dcConn->mDcUser && dcConn->mDcUser->msNick == sN) {
+				return (DcUser *)dcConn->mDcUser;
 			}
 		}
 	}
@@ -1036,10 +1069,10 @@ DcUserBase * DcServer::getDcUserBase(const char *sNick) {
 const vector<DcConnBase *> & DcServer::getDcConnBase(const char * sIP) {
 	DcIpList::iterator it;
 	mvIPConn.clear();
-	for (it = mIPListConn->begin(DcConn::Ip2Num(sIP)); it != mIPListConn->end(); ++it) {
-		DcConn * dcconn = (DcConn *)(*it);
-		if (dcconn->mType == CLIENT_TYPE_NMDC) {
-			mvIPConn.push_back(dcconn);
+	for (it = mIPListConn->begin(DcConn::ip2Num(sIP)); it != mIPListConn->end(); ++it) {
+		DcConn * dcConn = (DcConn *)(*it);
+		if (dcConn->mType == CLIENT_TYPE_NMDC) {
+			mvIPConn.push_back(dcConn);
 		}
 	}
 	return mvIPConn;
@@ -1048,34 +1081,34 @@ const vector<DcConnBase *> & DcServer::getDcConnBase(const char * sIP) {
 
 
 /** Send data to user */
-bool DcServer::sendToUser(DcConnBase *dcConn, const char *sData, const char *sNick, const char *sFrom) {
-	if (!dcConn || !sData) {
+bool DcServer::sendToUser(DcConnBase * dcConnBase, const char * sData, const char * sNick, const char * sFrom) {
+	if (!dcConnBase || !sData) {
 		return false;
 	}
 
 	// PM
 	if (sFrom && sNick) {
 		string sTo("<unknown>"), sStr;
-		if (dcConn->mDcUserBase) {
-			sTo = dcConn->mDcUserBase->getNick();
+		if (dcConnBase->mDcUserBase) {
+			sTo = dcConnBase->mDcUserBase->getNick();
 		}
-		dcConn->send(DcProtocol::Append_DC_PM(sStr, sTo, sFrom, sNick, sData));
+		dcConnBase->send(DcProtocol::Append_DC_PM(sStr, sTo, sFrom, sNick, sData));
 		return true;
 	}
 
 	// Chat
 	if (sNick) {
 		string sStr;
-		dcConn->send(DcProtocol::Append_DC_Chat(sStr, sNick, sData));
+		dcConnBase->send(DcProtocol::Append_DC_Chat(sStr, sNick, sData));
 		return true;
 	}
 
 	// Simple Msg
 	string sMsg(sData);
-	if (dcConn->mType == CLIENT_TYPE_NMDC && sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
+	if (dcConnBase->mType == CLIENT_TYPE_NMDC && sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
 		sMsg.append(NMDC_SEPARATOR);
 	}
-	dcConn->send(sMsg);
+	dcConnBase->send(sMsg);
 	return true;
 }
 
@@ -1181,7 +1214,7 @@ bool DcServer::sendToProfiles(unsigned long iProfile, const char *sData, const c
 
 
 bool DcServer::sendToIp(const char *sIP, const char *sData, unsigned long iProfile, const char *sNick, const char *sFrom) {
-	if (!sIP || !sData || !Conn::CheckIp(sIP)) {
+	if (!sIP || !sData || !Conn::checkIp(sIP)) {
 		return false;
 	}
 
@@ -1256,18 +1289,18 @@ bool DcServer::sendToAllExceptIps(const vector<string> & IPList, const char *sDa
 		return false;
 	}
 
-	DcConn * dcconn;
+	DcConn * dcConn;
 	vector<DcConn*> ul;
 	bool bBadIP = false;
 	for (List_t::const_iterator it = IPList.begin(); it != IPList.end(); ++it) {
-		if (!DcConn::CheckIp(*it)) {
+		if (!DcConn::checkIp(*it)) {
 			bBadIP = true;
 		}
-		for (DcIpList::iterator mit = mIPListConn->begin(DcConn::Ip2Num((*it).c_str())); mit != mIPListConn->end(); ++mit) {
-			dcconn = (DcConn*)(*mit);
-			if (dcconn->mDcUser && dcconn->mDcUser->getInUserList()) {
-				dcconn->mDcUser->setInUserList(false);
-				ul.push_back(dcconn);
+		for (DcIpList::iterator mit = mIPListConn->begin(DcConn::ip2Num((*it).c_str())); mit != mIPListConn->end(); ++mit) {
+			dcConn = (DcConn*)(*mit);
+			if (dcConn->mDcUser && dcConn->mDcUser->getInUserList()) {
+				dcConn->mDcUser->setInUserList(false);
+				ul.push_back(dcConn);
 			}
 		}
 	}
@@ -1313,23 +1346,23 @@ int DcServer::checkCmd(const string & sData) {
 
 
 
-void DcServer::forceMove(DcConnBase *dcConn, const char *sAddress, const char *sReason /* = NULL */) {
-	if (!dcConn || !sAddress) {
+void DcServer::forceMove(DcConnBase * dcConnBase, const char * sAddress, const char * sReason /* = NULL */) {
+	if (!dcConnBase || !sAddress) {
 		return;
 	}
-	DcConn * dcconn = (DcConn *) dcConn;
+	DcConn * dcConn = (DcConn *) dcConnBase;
 
 	string sMsg, sForce, sNick("<unknown>");
-	if (dcconn->mDcUser) {
-		sNick = dcconn->mDcUser->msNick;
+	if (dcConn->mDcUser) {
+		sNick = dcConn->mDcUser->msNick;
 	}
 
-	StringReplace(mDCLang.msForceMove, string("address"), sForce, string(sAddress));
+	StringReplace(mDCLang.mForceMove, string("address"), sForce, string(sAddress));
 	StringReplace(sForce, string("reason"), sForce, string(sReason != NULL ? sReason : ""));
-	DcProtocol::Append_DC_PM(sMsg, sNick, mDcConfig.msHubBot, mDcConfig.msHubBot, sForce);
-	DcProtocol::Append_DC_Chat(sMsg, mDcConfig.msHubBot, sForce);
-	dcconn->send(DcProtocol::Append_DC_ForceMove(sMsg, sAddress));
-	dcconn->CloseNice(9000, CLOSE_REASON_FORCE_MOVE);
+	DcProtocol::Append_DC_PM(sMsg, sNick, mDcConfig.mHubBot, mDcConfig.mHubBot, sForce);
+	DcProtocol::Append_DC_Chat(sMsg, mDcConfig.mHubBot, sForce);
+	dcConn->send(DcProtocol::Append_DC_ForceMove(sMsg, sAddress));
+	dcConn->closeNice(9000, CLOSE_REASON_CMD_FORCE_MOVE);
 }
 
 
@@ -1382,32 +1415,32 @@ bool DcServer::setConfig(const string & sName, const string & sValue) {
 	}
 
 	if (sName == "sHubBot") {
-		unregBot(mDcConfig.msHubBot);
+		unregBot(mDcConfig.mHubBot);
 	} else if (sName == "bRegMainBot") {
 		if (sValue == "true" || 0 != atoi(sValue.c_str()) ) {
-			if (regBot(mDcConfig.msHubBot, mDcConfig.msMainBotMyINFO, 
-				mDcConfig.msMainBotIP, mDcConfig.mbMainBotKey) == -2) {
-					regBot(mDcConfig.msHubBot, string("$ $$$0$"), 
-						mDcConfig.msMainBotIP, mDcConfig.mbMainBotKey);
+			if (regBot(mDcConfig.mHubBot, mDcConfig.mMainBotMyinfo, 
+				mDcConfig.mMainBotIp, mDcConfig.mMainBotKey) == -2) {
+					regBot(mDcConfig.mHubBot, string("$ $$$0$"), 
+						mDcConfig.mMainBotIp, mDcConfig.mMainBotKey);
 			}
 		} else {
-			unregBot(mDcConfig.msHubBot);
+			unregBot(mDcConfig.mHubBot);
 		}
 	}
 
 	config->convertFrom(sValue);
 
 	if (sName == "sHubBot") {
-		if (mDcConfig.mbRegMainBot) { /** Registration bot */
-			if (regBot(mDcConfig.msHubBot, mDcConfig.msMainBotMyINFO, 
-				mDcConfig.msMainBotIP, mDcConfig.mbMainBotKey) == -2) {
-					regBot(mDcConfig.msHubBot, string("$ $$$0$"), 
-						mDcConfig.msMainBotIP, mDcConfig.mbMainBotKey);
+		if (mDcConfig.mRegMainBot) { /** Registration bot */
+			if (regBot(mDcConfig.mHubBot, mDcConfig.mMainBotMyinfo, 
+				mDcConfig.mMainBotIp, mDcConfig.mMainBotKey) == -2) {
+					regBot(mDcConfig.mHubBot, string("$ $$$0$"), 
+						mDcConfig.mMainBotIp, mDcConfig.mMainBotKey);
 			}
 		}
 	} else if (sName == "sHubName" || sName == "sTopic") {
 		string sMsg;
-		sendToAll(DcProtocol::Append_DC_HubName(sMsg, mDcConfig.msHubName, mDcConfig.msTopic).c_str()); // use cache ?
+		sendToAll(DcProtocol::Append_DC_HubName(sMsg, mDcConfig.mHubName, mDcConfig.mTopic).c_str()); // use cache ?
 	}
 
 	mDcConfig.save();

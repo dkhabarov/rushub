@@ -84,7 +84,7 @@ public:
 	
 	/** Get IP address of user */
 	const string & getIp() const {
-		return msIp;
+		return mIp;
 	}
 
 	/** Get nick (for plugins) */
@@ -175,7 +175,7 @@ private:
 	bool mbInUserList; /** User in user-list */
 	bool mCanSend;
 	MyInfo myInfo;
-	string msIp; /** IP address of user/bot */
+	string mIp; /** IP address of user/bot */
 	
 
 }; // DcUser

@@ -37,6 +37,7 @@ ProtocolCommand aDC_Commands[] = {
 	ProtocolCommand("$Search Hub:"),       // check: nick, delay //this must be first!! before the next one
 	ProtocolCommand("$Search "),           // check: ip, delay
 	ProtocolCommand("$SR "),               // check: nick
+	ProtocolCommand("$SR "),               // check: nick (UDP SR)
 	ProtocolCommand("$MyINFO "),           // check: after_nick, nick, share_min_max
 	ProtocolCommand("$Supports "),
 	ProtocolCommand("$Key "),
@@ -145,6 +146,11 @@ bool DcParser::IsPassive(const string & description) {
 /** Split command to chunks */
 bool DcParser::SplitChunks() {
 
+	if (mIsParsed) {
+		return mbError;
+	}
+	mIsParsed = true;
+
 	SetChunk(0, 0, mCommand.length()); /** Zero part - always whole command */
 
 	switch (miType) {
@@ -177,38 +183,51 @@ bool DcParser::SplitChunks() {
 			$SR [result_nick] [file_path]^E[file_size] [free_slots]/[total_slots]^E[hub__name] ([hub_host][:[hub_port]])^E[searching_nick]
 			$SR [result_nick] [file_path]^E[file_size] [free_slots]/[total_slots]^ETTH:[TTHROOT] ([hub_ip][:[hub_port]])^E[searching_nick]
 			$SR [result_nick] [file_path]              [free_slots]/[total_slots]^ETTH:[TTHROOT] ([hub_ip][:[hub_port]])^E[searching_nick]
-			1)  ----FROM-----|------------------------------------------------(PATH)------------------------------------------------------
-			2)               |----PATH---|------------------------------------(SIZE)------------------------------------------------------
-			3)                           |-----------------------------------(HUBINFO)----------------------------------|----TO-----------
-			4)                           |----------------(SIZE)-----------------|---------------HUBINFO----------------|
-			5)                           |----SIZE----|---------(SLOTS)----------|
-			6)                                            |----SL_FR---/----SL_TO----|
 
-			1)  ----FROM-----|-------------------------------------(PATH)-----------------------------------------------------------------
-			2)               |------------------PATH-----------------------------|-----------------------------------(SIZE)---------------
-			3)                                                                   |-------------------HUBINFO------------|----TO-----------
-
-		//1)  ----FROM-----|-------------------------------------(PATH)-----------------------------------------------------------------
-		//2)               |--------PATH------------|-----------------------(SLOTS)-----------------------------------------------------
-		//3)                                        |-----------SLOTS----------|----------------------------------(HUBINFO)-------------
-		//4)                                                                   |--------------HUBINFO-----------------|----TO-----------
+			1)  |----FROM----|------------------------------------------------(PATH)-----------------------------------------------------|
+			2)               |------------------------------------------------(PATH)------------------------------------|----TO----------|
+			3)               |---------------------(PATH)------------------------|---------------HUBINFO----------------|
+			4)               |--------(PATH)----------|----------SLOTS-----------|
+			5)                                        |----SL_FR---/----SL_TO----|
+			6)               |----PATH---|---[SIZE]---|
 		*/
 
 			if (!SplitOnTwo(miKWSize, ' ', CHUNK_SR_FROM, CHUNK_SR_PATH)) {
 				mbError = 1;
-			} else if (!SplitOnTwo(0x05, CHUNK_SR_PATH,    CHUNK_SR_PATH,    CHUNK_SR_SIZE)) {
+			} else if (!SplitOnTwo(0x05, CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_TO,      false)) {
 				mbError = 1;
-			} else if (!SplitOnTwo(0x05, CHUNK_SR_SIZE,    CHUNK_SR_HUBINFO, CHUNK_SR_TO, false)) {
+			} else if (!SplitOnTwo(0x05, CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_HUBINFO, false)) {
 				mbError = 1;
-			} else if (SplitOnTwo(0x05,  CHUNK_SR_HUBINFO, CHUNK_SR_SIZE,    CHUNK_SR_HUBINFO)) {
-				if (!SplitOnTwo(' ', CHUNK_SR_SIZE,  CHUNK_SR_SIZE,  CHUNK_SR_SLOTS)) {
-					mbError = 1;
-				} else if (!SplitOnTwo('/', CHUNK_SR_SLOTS, CHUNK_SR_SL_FR, CHUNK_SR_SL_TO)) {
-					mbError = 1;
-				}
-			} else {
-				SetChunk(CHUNK_SR_SIZE, 0, 0);
+			} else if (!SplitOnTwo(' ',  CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_SLOTS,   false)) {
+				mbError = 1;
+			} else if (!SplitOnTwo('/',  CHUNK_SR_SLOTS, CHUNK_SR_SL_FR, CHUNK_SR_SL_TO,   false)) {
+				mbError = 1;
 			}
+			SplitOnTwo(0x05, CHUNK_SR_PATH, CHUNK_SR_PATH, CHUNK_SR_SIZE, false);
+			break;
+
+		case NMDC_TYPE_SR_UDP : /** Return search results
+			$SR [result_nick] [file_path]^E[file_size] [free_slots]/[total_slots]^E[hub__name] ([hub_host][:[hub_port]])
+			$SR [result_nick] [file_path]^E[file_size] [free_slots]/[total_slots]^ETTH:[TTHROOT] ([hub_ip][:[hub_port]])
+			$SR [result_nick] [file_path]              [free_slots]/[total_slots]^ETTH:[TTHROOT] ([hub_ip][:[hub_port]])
+
+			1)  |----FROM----|------------------------------------------------(PATH)------------------------------------|
+			2)               |---------------------(PATH)------------------------|---------------HUBINFO----------------|
+			3)               |--------(PATH)----------|----------SLOTS-----------|
+			4)                                        |----SL_FR---/----SL_TO----|
+			5)               |----PATH---|---[SIZE]---|
+		*/
+
+			if (!SplitOnTwo(miKWSize, ' ', CHUNK_SR_FROM, CHUNK_SR_PATH)) {
+				mbError = 1;
+			} else if (!SplitOnTwo(0x05, CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_HUBINFO, false)) {
+				mbError = 1;
+			} else if (!SplitOnTwo(' ',  CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_SLOTS,   false)) {
+				mbError = 1;
+			} else if (!SplitOnTwo('/',  CHUNK_SR_SLOTS, CHUNK_SR_SL_FR, CHUNK_SR_SL_TO,   false)) {
+				mbError = 1;
+			}
+			SplitOnTwo(0x05, CHUNK_SR_PATH, CHUNK_SR_PATH, CHUNK_SR_SIZE, false);
 			break;
 
 		case NMDC_TYPE_MYNIFO : /** $MyINFO $ALL [nick] [[desc]$ $[speed]$[email]$[share]$] */
@@ -306,6 +325,12 @@ bool DcParser::SplitChunks() {
 			if (!SplitOnTwo(miKWSize," $", CHUNK_MC_TO, CHUNK_MC_FROM)) {
 				mbError = 1;
 			} else if (!SplitOnTwo(' ', CHUNK_MC_FROM, CHUNK_MC_FROM, CHUNK_MC_MSG)) {
+				mbError = 1;
+			}
+			break;
+
+		case NMDC_TYPE_UNKNOWN : /** Cmd without $ in begining position */
+			if (mCommand.compare(0, 1, "$")) {
 				mbError = 1;
 			}
 			break;

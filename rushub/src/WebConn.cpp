@@ -32,7 +32,7 @@ using namespace ::webserver::protocol;
 WebConnFactory::WebConnFactory(Protocol * protocol, Server * server, string separator, int max) : 
 	ConnFactory(protocol, server)
 {
-	msSeparator = separator;
+	mSeparator = separator;
 	mStrSizeMax = max;
 }
 
@@ -47,7 +47,7 @@ WebConnFactory::~WebConnFactory() {
 
 
 
-Conn * WebConnFactory::CreateConn(tSocket sock) {
+Conn * WebConnFactory::createConn(tSocket sock) {
 
 	if (!mServer) {
 		return NULL;
@@ -63,20 +63,20 @@ Conn * WebConnFactory::CreateConn(tSocket sock) {
 
 
 
-void WebConnFactory::DelConn(Conn * &conn) {
-	ConnFactory::DelConn(conn);
+void WebConnFactory::deleteConn(Conn * &conn) {
+	ConnFactory::deleteConn(conn);
 }
 
 
 
-void WebConnFactory::OnNewData(Conn * conn, string * str) {
+void WebConnFactory::onNewData(Conn * conn, string * str) {
 
 	if (conn->Log(1)) {
 		conn->LogStream() << "WEB IN: " << (*str) << endl;
 	}
 
 	(*str).append(WEB_SEPARATOR);
-	if (conn->Remaining() < 0) {
+	if (conn->remaining() < 0) {
 		return;
 	}
 
@@ -90,7 +90,7 @@ void WebConnFactory::OnNewData(Conn * conn, string * str) {
 	if (!dcServer->mCalls.mOnWebData.CallAll(webConn, webParser))
 #endif
 	{
-		conn->CloseNice(9000, CLOSE_REASON_WEB);
+		conn->closeNice(9000, CLOSE_REASON_WEB);
 	}
 }
 
@@ -100,7 +100,7 @@ void WebConnFactory::OnNewData(Conn * conn, string * str) {
 
 WebListenFactory::WebListenFactory(Server * server) : ListenFactory(server) {
 	WebProtocol * webProtocol = new WebProtocol;
-	mWebConnFactory = new WebConnFactory(webProtocol, server, "\r\n\r\n", ((DcServer *)server)->mDcConfig.miWebStrSizeMax);
+	mWebConnFactory = new WebConnFactory(webProtocol, server, "\r\n\r\n", ((DcServer *)server)->mDcConfig.mWebStrSizeMax);
 }
 
 
@@ -142,11 +142,11 @@ WebConn::~WebConn() {
 int WebConn::onTimer(Time &) {
 	DcServer * dcServer = server();
 	Time lastRecv(mLastRecv);
-	if (dcServer->MinDelay(lastRecv, dcServer->mDcConfig.miWebTimeout)) {
+	if (dcServer->MinDelay(lastRecv, dcServer->mDcConfig.mWebTimeout)) {
 		if (Log(2)) {
 			LogStream() << "Any action timeout..." << endl;
 		}
-		CloseNice(9000, CLOSE_REASON_WEB);
+		closeNice(9000, CLOSE_REASON_WEB);
 		return 1;
 	}
 	return 0;
@@ -156,56 +156,56 @@ int WebConn::onTimer(Time &) {
 
 /** Get string of ip */
 const string & WebConn::getIp() {
-	return msIp;
+	return mIp;
 }
 
 
 
 /** Get string of server IP (host) */
 const string & WebConn::getIpConn() const {
-	return msIpConn;
+	return mIpConn;
 }
 
 
 
 /** Get mac address */
 const string & WebConn::getMacAddress() {
-	return msMAC;
+	return mMac;
 }
 
 
 
 /** Get real port */
 int WebConn::getPort() {
-	return miPort;
+	return mPort;
 }
 
 
 
 /** Get conn port */
 int WebConn::getPortConn() {
-	return miPortConn;
+	return mPortConn;
 }
 
 
 
 unsigned long WebConn::getNetIp() {
-	return miNetIp;
+	return mNetIp;
 }
 
 
 
 int WebConn::send(const string & data, bool flush /* = true */) {
-	if (!mbWritable) {
+	if (!mWritable) {
 		return 0;
 	}
-	return WriteData(data, flush);
+	return writeData(data, flush);
 }
 
 
 
 void WebConn::disconnect() {
-	CloseNice(9000, CLOSE_REASON_WEB);
+	closeNice(9000, CLOSE_REASON_WEB);
 }
 
 

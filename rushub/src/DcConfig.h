@@ -48,95 +48,60 @@ class DcConfig : public ConfigList {
 
 public:
 
-	int miStartPing;        //< Time interval in sec, after which begins ping user
-	int miMaxPassiveRes;    //< Max results in the passive search
+	int mStartPing;       //< Time interval in sec, after which begins ping user
+	int mMaxPassiveRes;   //< Max results in the passive search
 
-	int miUsersLimit;  //< User's limit
+	int mUsersLimit;	//< User's limit
 
-	unsigned long miWebStrSizeMax; //< Max size of web cmd
+	unsigned long mWebStrSizeMax; //< Max size of web cmd
 	unsigned mMaxCmdLen[NMDC_TYPE_UNKNOWN + 1];
-	unsigned miMaxNickLen;  //< Max length of nick
-	unsigned miMinNickLen;  //< Min length of nick
+	unsigned mMaxNickLen;	//< Max length of nick
+	unsigned mMinNickLen; //< Min length of nick
 
 	/** Allowed number reconnection during miTimeReconnIp sec */
-	unsigned miFloodCountReconnIp;
-	unsigned miFloodCountMyINFO;
-	unsigned miFloodCountMyINFO2;
-	unsigned miFloodCountSearch;
-	unsigned miFloodCountSearch2;
-	unsigned miFloodCountSR;
-	unsigned miFloodCountSR2;
-	unsigned miFloodCountChat;
-	unsigned miFloodCountChat2;
-	unsigned miFloodCountTo;
-	unsigned miFloodCountTo2;
-	unsigned miFloodCountNickList;
-	unsigned miFloodCountNickList2;
-	unsigned miFloodCountCTM;
-	unsigned miFloodCountCTM2;
-	unsigned miFloodCountRCTM;
-	unsigned miFloodCountRCTM2;
-	unsigned miFloodCountMCTo;
-	unsigned miFloodCountMCTo2;
-	unsigned miFloodCountPing;
-	unsigned miFloodCountPing2;
-	unsigned miFloodCountUnknown;
-	unsigned miFloodCountUnknown2;
+	unsigned mFloodCountReconnIp;
 
 	/** Reconnection times */
-	double miFloodTimeReconnIp;
-	double miFloodTimeMyINFO;
-	double miFloodTimeMyINFO2;
-	double miFloodTimeSearch;
-	double miFloodTimeSearch2;
-	double miFloodTimeSR;
-	double miFloodTimeSR2;
-	double miFloodTimeChat;
-	double miFloodTimeChat2;
-	double miFloodTimeTo;
-	double miFloodTimeTo2;
-	double miFloodTimeNickList;
-	double miFloodTimeNickList2;
-	double miFloodTimeCTM;
-	double miFloodTimeCTM2;
-	double miFloodTimeRCTM;
-	double miFloodTimeRCTM2;
-	double miFloodTimeMCTo;
-	double miFloodTimeMCTo2;
-	double miFloodTimePing;
-	double miFloodTimePing2;
-	double miFloodTimeUnknown;
-	double miFloodTimeUnknown2;
+	double mFloodTimeReconnIp;
 
-	double miPingInterval;      //< User's ping interval
-	double miTimeout[5];        //< Timeouts of the protocol entering commands
-	double miTimeoutAny;        //< Timeout connection
-	double miWebTimeout;        //< Timeout connection with web-client (in sec)
-	double miSysLoading;        //< Factor of the system loading
+	unsigned mFloodCount[NMDC_TYPE_UNKNOWN + 1];
+	unsigned mFloodCount2[NMDC_TYPE_UNKNOWN + 1];
+	double mFloodTime[NMDC_TYPE_UNKNOWN + 1];
+	double mFloodTime2[NMDC_TYPE_UNKNOWN + 1];
 
-	bool mbWebServer;           //< Web-server on/off
-	bool mbDisableNoDCCmd;      //< Allow DC commands only
+	double mPingInterval;       //< User's ping interval
+	double mTimeout[5];         //< Timeouts of the protocol entering commands
+	double mTimeoutAny;         //< Timeout connection
+	double mWebTimeout;         //< Timeout connection with web-client (in sec)
+	double mSysLoading;         //< Factor of the system loading
 
-	bool mbNicklistOnLogin;     //< Send user-list on login
-	bool mbDelayedLogin;        //< Logined user after send to it full user-list only (to big hubs)
+	bool mUdpServer;            //< UDP server on/off
 
-	bool mbCheckSearchIp;       //< Check IP in passive search
-	bool mbCheckSRNick;         //< Check nick in SR commands
-	bool mbCheckCTMIp;          //< Check IP in CTM commands
-	bool mbCheckRctmNick;       //< Check nick in RCTM commands
+	bool mWebServer;            //< Web-server on/off
+	bool mDisableNoDCCmd;       //< Allow DC commands only
 
-	bool mbDelayedMyINFO;       //< Delay in sending cmds: $MyINFO, $Hello, $Quit (optimisation)
-	bool mbSendUserIp;          //< Use UserIP & UserIP2 features
-	bool mbRegMainBot;          //< Reg main bot
-	bool mbMainBotKey;          //< Key for main bot
+	bool mNicklistOnLogin;      //< Send user-list on login
+	bool mDelayedLogin;         //< Logined user after send to it full user-list only (to big hubs)
 
-	string msWebAddresses;      //< Wib addresses "ip1[:port1] host2[:port2] ... ipN[:portN]"
-	string msHubBot;            //< Nick of the main bot
-	string msHubName;           //< Name of the hub
-	string msTopic;             //< Hub topic
-	string msLocale;            //< Main hub locale
-	string msMainBotMyINFO;     //< MyINFO string for the main bot
-	string msMainBotIP;         //< IP for the main bot
+	bool mCheckSearchIp;        //< Check IP in passive search
+	bool mCheckSrNick;          //< Check nick in SR commands
+	bool mCheckCtmIp;           //< Check IP in CTM commands
+	bool mCheckRctmNick;        //< Check nick in RCTM commands
+
+	bool mDelayedMyinfo;        //< Delay in sending cmds: $MyINFO, $Hello, $Quit (optimisation)
+	bool mSendUserIp;           //< Use UserIP & UserIP2 features
+	bool mRegMainBot;           //< Reg main bot
+	bool mMainBotKey;           //< Key for main bot
+
+	string mAddresses;          // "Ip1[:port1] Ip2[:port2] ... IpN[:portN]" - addresses of server
+	string mUdpAddresses;
+	string mWebAddresses;       //< Wib addresses "ip1[:port1] host2[:port2] ... ipN[:portN]"
+	string mHubBot;             //< Nick of the main bot
+	string mHubName;            //< Name of the hub
+	string mTopic;              //< Hub topic
+	string mLocale;             //< Main hub locale
+	string mMainBotMyinfo;			//< MyINFO string for the main bot
+	string mMainBotIp;          //< IP for the main bot
 
 	string mMainPath;           //< Main path
 	string mLogPath;            //< Logs path
@@ -175,38 +140,27 @@ class DcLang : public ConfigList {
 
 public:
 
-	string msFirstMsg;          //< First message
-	string msBadChatNick;       //< Message about bad nick in the chat
-	string msMyinfoError;       //< Message about syntax error in MyINFO command
-	string msBadLoginSequence;  //< Message about bad login sequence
-	string msBadMyinfoNick;     //< Message about bad nick in MyINFO command
-	string msUnits[7];          //< Units: B, KB, MB, GB, TB, PB, EB
-	string msTimeout;           //< Message about timeout with the reason
-	string msTimeoutCmd[5];     //< Timeouts names
-	string msTimeoutAny;        //< Message about connection timeout
-	string msForceMove;         //< Redirection message
-	string msUsersLimit;
+	string mFirstMsg;          //< First message
+	string mBadChatNick;       //< Message about bad nick in the chat
+	string mBadLoginSequence;  //< Message about bad login sequence
+	string mBadMyinfoNick;     //< Message about bad nick in MyINFO command
+	string mUnits[7];          //< Units: B, KB, MB, GB, TB, PB, EB
+	string mTimeout;           //< Message about timeout with the reason
+	string mTimeoutCmd[5];     //< Timeouts names
+	string mTimeoutAny;        //< Message about connection timeout
+	string mForceMove;         //< Redirection message
+	string mUsersLimit;
 
-	string msFloodMyINFO;
-	string msFloodSearch;
-	string msFloodSR;
-	string msFloodChat;
-	string msFloodTo;
-	string msFloodNickList;
-	string msFloodCTM;
-	string msFloodRCTM;
-	string msFloodMCTo;
-	string msFloodPing;
-	string msFloodUnknown;
+	string mFlood[NMDC_TYPE_UNKNOWN + 1];
 
-	string msBadSearchIp;   //< Message about bad IP in the active search
-	string msBadSRNick;     //< Message about bad nick in the SR commands
-	string msBadCTMIp;      //< Message about bad IP in the CTM commands
-	string msBadRevConNick; //< Message about bad nick in the passive search
-	string msUsedNick;      //< Message about occupied nick
-	string msBadNickLen;    //< Message about ban length for the nick
-	string msBadChars;      //< Message about bad symbols in the nick
-	string msTimes[5];      //< weeks, days, hours, min, sec
+	string mBadSearchIp;   //< Message about bad IP in the active search
+	string mBadSrNick;     //< Message about bad nick in the SR commands
+	string mBadCtmIp;      //< Message about bad IP in the CTM commands
+	string mBadRevConNick; //< Message about bad nick in the passive search
+	string mUsedNick;      //< Message about occupied nick
+	string mBadNickLen;    //< Message about ban length for the nick
+	string mBadChars;      //< Message about bad symbols in the nick
+	string mTimes[5];      //< weeks, days, hours, min, sec
 
 public:
 

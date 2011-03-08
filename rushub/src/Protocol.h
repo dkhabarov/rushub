@@ -51,8 +51,8 @@ public:
 	Protocol();
 	virtual ~Protocol();
 	virtual int DoCmd(Parser *, Conn *) = 0; /** DoCmd */
-	virtual Parser * CreateParser() = 0; /** CreateParser */
-	virtual void DeleteParser(Parser *) = 0; /** DeleteParser */
+	virtual Parser * createParser() = 0; /** createParser */
+	virtual void deleteParser(Parser *) = 0; /** deleteParser */
 
 }; // Protocol
 
@@ -66,15 +66,16 @@ public:
 
 	string mCommand; /** Main string with cmd */
 	int miType; /** Type of cmd */
-	unsigned miLen; /** Cmd len */
-	unsigned miKWSize; /** Key-word len */
+	size_t miLen; /** Cmd len */
+	size_t miKWSize; /** Key-word len */
 	bool mbError; /** error */
 
-	typedef pair<int, int> tChunk; /** Pair for chunk (begin, end) */
+	typedef pair<size_t, size_t> tChunk; /** Pair for chunk (begin, end) */
 	typedef vector<tChunk> tChunkList; /** Chunks list */
 	tChunkList mChunks; /** List */
 	string * mStrings; /** String array for chunks */
 	unsigned long mStrMap; /** Chunk already existed */
+	bool mIsParsed;
 
 public:
 
@@ -93,7 +94,7 @@ protected:
 
 	int mMaxChunks; /** Common (max) number of chunks */
 
-	void SetChunk(int n, int start, int len);
+	void SetChunk(int n, size_t start, size_t len);
 
 	bool SplitOnTwo(size_t start, const string & lim, int cn1, int cn2, size_t len = 0, bool left = true);
 	bool SplitOnTwo(size_t start, const char lim, int cn1, int cn2, size_t len = 0, bool left = true);
@@ -101,9 +102,9 @@ protected:
 	bool SplitOnTwo(const string & lim, int chunk, int cn1, int cn2, bool left = true);
 	bool SplitOnTwo(const char lim, int chunk, int cn1, int cn2, bool left = true);
 
-	bool ChunkRedRight(int chunk, int amount);
+	bool ChunkRedRight(int chunk, size_t amount);
 
-	bool ChunkRedLeft(int chunk, int amount);
+	bool ChunkRedLeft(int chunk, size_t amount);
 
 }; // Parser
 

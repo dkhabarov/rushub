@@ -73,18 +73,16 @@ protected:
 
 class Server : public Obj {
 
-friend class Conn; /** for protected var on close socket (Conn::CloseNow) */
+friend class Conn; /** for protected var on close socket (Conn::closeNow) */
 friend class ListenFactory; /* OnNewConn */
-friend class ConnFactory; /* OnNewData */
+friend class ConnFactory; /* onNewData */
 
 public:
-
-	string msAddresses; /** string "Ip1[:port1] Ip2[:port2] ... IpN[:portN]" - addresses of server */
 
 	ConnFactory * mConnFactory; /** ConnFactory */
 
 	unsigned long mStrSizeMax; /** (10240) Max msg size */
-	string msSeparator; /** Proto separator */
+	string mSeparator; /** Proto separator */
 
 	Time mTime; /** Current time of main cycle on the server */
 	MeanFrequency<unsigned, 21> mMeanFrequency; /** Mean frequency */
@@ -95,27 +93,27 @@ public:
 	int mTimerServPeriod; /** Serv period (msec) */
 	int mTimerConnPeriod; /** Conn period (msec) */
 
-	bool mbMAC; /** allow to define MAC address */
+	bool mMac; /** allow to define MAC address */
 
 public:
 
-	Server(const string sSep);
+	Server(const string sep);
 	virtual ~Server();
 
 	/** Set and Listen port */
-	virtual int Listening(ListenFactory *, const string & sIP, int iPort = 0);
+	virtual int Listening(ListenFactory *, const string & ip, int port = 0, bool udp = false);
 
 	/** Listen port (TCP/UDP) */
-	virtual Conn * Listen(const string & sIP, int iPort, bool bUDP = false);
+	virtual Conn * Listen(const string & ip, int port, bool udp = false);
 
 	/** Create, bind and add connection for port */
-	virtual Conn * AddListen(Conn *, const string & sIP, int iPort, bool bUDP = false);
+	virtual Conn * AddListen(Conn *, const string & ip, int port, bool udp = false);
 
 	/** Stop listen conn */
 	virtual bool StopListen(Conn *);
 
 	/** Find conn by port */
-	virtual Conn * FindConnByPort(int iPort);
+	virtual Conn * FindConnByPort(int port);
 
 	/** Main cycle */
 	int Run();
@@ -130,10 +128,10 @@ public:
 	void Stop(int);
 
 	/** Main base timer */
-	int OnTimerBase(Time &now);
+	int onTimerBase(Time & now);
 
 	/** Main timer */
-	virtual int onTimer(Time &now);
+	virtual int onTimer(Time & now);
 
 	/** InputData */
 	int InputData(Conn *);
@@ -189,11 +187,11 @@ protected:
 	/** OnNewConn */
 	virtual int OnNewConn(Conn *);
 
-	/** GetPtrForStr */
-	virtual string * GetPtrForStr(Conn *);
+	/** getPtrForStr */
+	virtual string * getPtrForStr(Conn *);
 
-	/** OnNewData */
-	virtual void OnNewData(Conn *, string *);
+	/** onNewData */
+	virtual void onNewData(Conn *, string *);
 
 	/** Close server */
 	virtual void close() {

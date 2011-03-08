@@ -197,8 +197,8 @@ void UserList::FlushCache() {
 }
 
 /** Redefining log level function */
-bool UserList::StrLog() {
-	Obj::StrLog();
+bool UserList::strLog() {
+	Obj::strLog();
 	LogStream() << "(" << Size() << ")" << "[" << mName << "] ";
 	return true;
 }

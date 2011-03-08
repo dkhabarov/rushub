@@ -54,14 +54,14 @@ int WebProtocol::DoCmd(Parser *, Conn *) {
 
 
 /** Creating parser of the protocol */
-Parser * WebProtocol::CreateParser() {
+Parser * WebProtocol::createParser() {
 	return new WebParser;
 }
 
 
 
 /** Removing parser of the protocol */
-void WebProtocol::DeleteParser(Parser * parser) {
+void WebProtocol::deleteParser(Parser * parser) {
 	if (parser != NULL) {
 		delete parser;
 	}

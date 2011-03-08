@@ -67,7 +67,7 @@ DcUser::~DcUser() {
 
 
 bool DcUser::CanSend() {
-	return mbInUserList && mDcConn && mDcConn->mbOk;
+	return mbInUserList && mDcConn && mDcConn->mOk;
 }
 
 
@@ -90,8 +90,8 @@ int DcUser::getProfile() const {
 
 
 void DcUser::SetIp(const string & ip) {
-	if (ip.size() && DcConn::CheckIp(ip)) {
-		msIp = ip;
+	if (ip.size() && DcConn::checkIp(ip)) {
+		mIp = ip;
 	}
 }
 

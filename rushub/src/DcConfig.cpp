@@ -72,89 +72,112 @@ DcConfig::~DcConfig() {
 
 void DcConfig::addVars(Server * server) {
 
-	Add("iFloodCountReconnIp",  miFloodCountReconnIp,         1);
-	Add("iFloodCountMyINFO",    miFloodCountMyINFO,           6);
-	Add("iFloodCountSearch",    miFloodCountSearch,           3);
-	Add("iFloodCountSR",        miFloodCountSR,               1000);
-	Add("iFloodCountChat",      miFloodCountChat,             3);
-	Add("iFloodCountPm",        miFloodCountTo,               5);
-	Add("iFloodCountNickList",  miFloodCountNickList,         1);
-	Add("iFloodCountCTM",       miFloodCountCTM,              500);
-	Add("iFloodCountRCTM",      miFloodCountRCTM,             250);
-	Add("iFloodCountMCTo",      miFloodCountMCTo,             5);
-	Add("iFloodCountPing",      miFloodCountPing,             5);
-	Add("iFloodCountUnknown",   miFloodCountUnknown,          1);
-	Add("iFloodCountMyINFO2",   miFloodCountMyINFO2,          30);
-	Add("iFloodCountSearch2",   miFloodCountSearch2,          10);
-	Add("iFloodCountSR2",       miFloodCountSR2,              10000);
-	Add("iFloodCountChat2",     miFloodCountChat2,            20);
-	Add("iFloodCountPm2",       miFloodCountTo2,              30);
-	Add("iFloodCountNickList2", miFloodCountNickList2,        1);
-	Add("iFloodCountCTM2",      miFloodCountCTM2,             5000);
-	Add("iFloodCountRCTM2",     miFloodCountRCTM2,            2500);
-	Add("iFloodCountMCTo2",     miFloodCountMCTo2,            30);
-	Add("iFloodCountPing2",     miFloodCountPing2,            20);
-	Add("iFloodCountUnknown2",  miFloodCountUnknown2,         10);
+	for (int i = 0; i <= NMDC_TYPE_UNKNOWN; ++i) {
+		mFloodCount[i] = 0;
+		mFloodCount2[i] = 0;
+		mFloodTime[i] = 0;
+		mFloodTime2[i] = 0;
+	}
+	
+	Add("iFloodCountReconnIp",    mFloodCountReconnIp,                  1     );
+	Add("iFloodCountMyINFO",      mFloodCount [NMDC_TYPE_MYNIFO],       6     );
+	Add("iFloodCountMyINFO2",     mFloodCount2[NMDC_TYPE_MYNIFO],       30    );
+	Add("iFloodCountSearch",      mFloodCount [NMDC_TYPE_SEARCH],       3     );
+	Add("iFloodCountSearch2",     mFloodCount2[NMDC_TYPE_SEARCH],       10    );
+	Add("iFloodCountSearchPas",  	mFloodCount [NMDC_TYPE_SEARCH_PAS],   3     );
+	Add("iFloodCountSearchPas2",  mFloodCount2[NMDC_TYPE_SEARCH_PAS],   10    );
+	Add("iFloodCountMSearch",     mFloodCount [NMDC_TYPE_MSEARCH],      3     );
+	Add("iFloodCountMSearch2",    mFloodCount2[NMDC_TYPE_MSEARCH],      10    );
+	Add("iFloodCountMSearchPas",  mFloodCount [NMDC_TYPE_MSEARCH_PAS],  3     );
+	Add("iFloodCountMSearchPas2", mFloodCount2[NMDC_TYPE_MSEARCH_PAS],  10    );
+	Add("iFloodCountSR",          mFloodCount [NMDC_TYPE_SR],           1000  );
+	Add("iFloodCountSR2",         mFloodCount2[NMDC_TYPE_SR],           10000 );
+	Add("iFloodCountSRUDP",       mFloodCount [NMDC_TYPE_SR_UDP],       1000  );
+	Add("iFloodCountSRUDP2",      mFloodCount2[NMDC_TYPE_SR_UDP],       10000 );
+	Add("iFloodCountChat",        mFloodCount [NMDC_TYPE_CHAT],         3     );
+	Add("iFloodCountChat2",       mFloodCount2[NMDC_TYPE_CHAT],         20    );
+	Add("iFloodCountPm",          mFloodCount [NMDC_TYPE_TO],           5     );
+	Add("iFloodCountPm2",         mFloodCount2[NMDC_TYPE_TO],           30    );
+	Add("iFloodCountNickList",    mFloodCount [NMDC_TYPE_GETNICKLIST],  1     );
+	Add("iFloodCountNickList2",   mFloodCount2[NMDC_TYPE_GETNICKLIST],  1     );
+	Add("iFloodCountCTM",         mFloodCount [NMDC_TYPE_CONNECTTOME],  500   );
+	Add("iFloodCountCTM2",        mFloodCount2[NMDC_TYPE_CONNECTTOME],  5000  );
+	Add("iFloodCountRCTM",        mFloodCount [NMDC_TYPE_RCONNECTTOME], 250   );
+	Add("iFloodCountRCTM2",       mFloodCount2[NMDC_TYPE_RCONNECTTOME], 2500  );
+	Add("iFloodCountMCTo",        mFloodCount [NMDC_TYPE_MCTO],         5     );
+	Add("iFloodCountMCTo2",       mFloodCount2[NMDC_TYPE_MCTO],         30    );
+	Add("iFloodCountPing",        mFloodCount [NMDC_TYPE_PING],         5     );
+	Add("iFloodCountPing2",       mFloodCount2[NMDC_TYPE_PING],         20    );
+	Add("iFloodCountUnknown",     mFloodCount [NMDC_TYPE_UNKNOWN],      1     );
+	Add("iFloodCountUnknown2",    mFloodCount2[NMDC_TYPE_UNKNOWN],      10    );
 
-	Add("iFloodTimeReconnIp",   miFloodTimeReconnIp,          5.);
-	Add("iFloodTimeMyINFO",     miFloodTimeMyINFO,            60.);
-	Add("iFloodTimeSearch",     miFloodTimeSearch,            10.);
-	Add("iFloodTimeSR",         miFloodTimeSR,                60.);
-	Add("iFloodTimeChat",       miFloodTimeChat,              5.);
-	Add("iFloodTimePm",         miFloodTimeTo,                10.);
-	Add("iFloodTimeNickList",   miFloodTimeNickList,          60.);
-	Add("iFloodTimeCTM",        miFloodTimeCTM,               60.);
-	Add("iFloodTimeRCTM",       miFloodTimeRCTM,              60.);
-	Add("iFloodTimeMCTo",       miFloodTimeMCTo,              10.);
-	Add("iFloodTimePing",       miFloodTimePing,              1.);
-	Add("iFloodTimeUnknown",    miFloodTimeUnknown,           3.);
-	Add("iFloodTimeMyINFO2",    miFloodTimeMyINFO2,           900.);
-	Add("iFloodTimeSearch2",    miFloodTimeSearch2,           60.);
-	Add("iFloodTimeSR2",        miFloodTimeSR2,               600.);
-	Add("iFloodTimeChat2",      miFloodTimeChat2,             20.);
-	Add("iFloodTimePm2",        miFloodTimeTo2,               30.);
-	Add("iFloodTimeNickList2",  miFloodTimeNickList2,         1800.);
-	Add("iFloodTimeCTM2",       miFloodTimeCTM2,              600.);
-	Add("iFloodTimeRCTM2",      miFloodTimeRCTM2,             600.);
-	Add("iFloodTimeMCTo2",      miFloodTimeMCTo2,             30.);
-	Add("iFloodTimePing2",      miFloodTimePing2,             30.);
-	Add("iFloodTimeUnknown2",   miFloodTimeUnknown2,          60.);
+	Add("iFloodTimeReconnIp",     mFloodTimeReconnIp,                   5.    );
+	Add("iFloodTimeMyINFO",       mFloodTime [NMDC_TYPE_MYNIFO],        60.   );
+	Add("iFloodTimeMyINFO2",      mFloodTime2[NMDC_TYPE_MYNIFO],        900.  );
+	Add("iFloodTimeSearch",       mFloodTime [NMDC_TYPE_SEARCH],        10.   );
+	Add("iFloodTimeSearch2",      mFloodTime2[NMDC_TYPE_SEARCH],        60.   );
+	Add("iFloodTimeSearchPas",    mFloodTime [NMDC_TYPE_SEARCH_PAS],    10.   );
+	Add("iFloodTimeSearchPas2",   mFloodTime2[NMDC_TYPE_SEARCH_PAS],    60.   );
+	Add("iFloodTimeMSearch",      mFloodTime [NMDC_TYPE_MSEARCH],       10.   );
+	Add("iFloodTimeMSearch2",     mFloodTime2[NMDC_TYPE_MSEARCH],       60.   );
+	Add("iFloodTimeMSearchPas",   mFloodTime [NMDC_TYPE_MSEARCH_PAS],   10.   );
+	Add("iFloodTimeMSearchPas2",  mFloodTime2[NMDC_TYPE_MSEARCH_PAS],   60.   );
+	Add("iFloodTimeSR",           mFloodTime [NMDC_TYPE_SR],            60.   );
+	Add("iFloodTimeSR2",          mFloodTime2[NMDC_TYPE_SR],            600.  );
+	Add("iFloodTimeSRUDP",        mFloodTime [NMDC_TYPE_SR_UDP],        60.   );
+	Add("iFloodTimeSRUDP2",       mFloodTime2[NMDC_TYPE_SR_UDP],        600.  );
+	Add("iFloodTimeChat",         mFloodTime [NMDC_TYPE_CHAT],          5.    );
+	Add("iFloodTimeChat2",        mFloodTime2[NMDC_TYPE_CHAT],          20.   );
+	Add("iFloodTimePm",           mFloodTime [NMDC_TYPE_TO],            10.   );
+	Add("iFloodTimePm2",          mFloodTime2[NMDC_TYPE_TO],            30.   );
+	Add("iFloodTimeNickList",     mFloodTime [NMDC_TYPE_GETNICKLIST],   60.   );
+	Add("iFloodTimeNickList2",    mFloodTime2[NMDC_TYPE_GETNICKLIST],   1800. );
+	Add("iFloodTimeCTM",          mFloodTime [NMDC_TYPE_CONNECTTOME],   60.   );
+	Add("iFloodTimeCTM2",         mFloodTime2[NMDC_TYPE_CONNECTTOME],   600.  );
+	Add("iFloodTimeRCTM",         mFloodTime [NMDC_TYPE_RCONNECTTOME],  60.   );
+	Add("iFloodTimeRCTM2",        mFloodTime2[NMDC_TYPE_RCONNECTTOME],  600.  );
+	Add("iFloodTimeMCTo",         mFloodTime [NMDC_TYPE_MCTO],          10.   );
+	Add("iFloodTimeMCTo2",        mFloodTime2[NMDC_TYPE_MCTO],          30.   );
+	Add("iFloodTimePing",         mFloodTime [NMDC_TYPE_PING],          1.    );
+	Add("iFloodTimePing2",        mFloodTime2[NMDC_TYPE_PING],          30.   );
+	Add("iFloodTimeUnknown",      mFloodTime [NMDC_TYPE_UNKNOWN],       3.    );
+	Add("iFloodTimeUnknown2",     mFloodTime2[NMDC_TYPE_UNKNOWN],       60.   );
 
-	Add("iLenCmdMSearch",       mMaxCmdLen[NMDC_TYPE_MSEARCH],      256   );
-	Add("iLenCmdMSearchPas",    mMaxCmdLen[NMDC_TYPE_MSEARCH_PAS],  256   );
-	Add("iLenCmdSearchPas",     mMaxCmdLen[NMDC_TYPE_SEARCH_PAS],   256   );
-	Add("iLenCmdSearch",        mMaxCmdLen[NMDC_TYPE_SEARCH],       256   );
-	Add("iLenCmdSR",            mMaxCmdLen[NMDC_TYPE_SR],           1024  );
-	Add("iLenCmdMyINFO",        mMaxCmdLen[NMDC_TYPE_MYNIFO],       256   );
-	Add("iLenCmdSupports",      mMaxCmdLen[NMDC_TYPE_SUPPORTS],     1024  );
-	Add("iLenCmdKey",           mMaxCmdLen[NMDC_TYPE_KEY],          128   );
-	Add("iLenCmdValidateNick",  mMaxCmdLen[NMDC_TYPE_VALIDATENICK], 64    );
-	Add("iLenCmdVersion",       mMaxCmdLen[NMDC_TYPE_VERSION],      32    );
-	Add("iLenCmdGetNickList",   mMaxCmdLen[NMDC_TYPE_GETNICKLIST],  12    );
-	Add("iLenCmdChat",          mMaxCmdLen[NMDC_TYPE_CHAT],         65536 );
-	Add("iLenCmdTo",            mMaxCmdLen[NMDC_TYPE_TO],           65536 );
-	Add("iLenCmdQuit",          mMaxCmdLen[NMDC_TYPE_QUIT],         64    );
-	Add("iLenCmdMyPass",        mMaxCmdLen[NMDC_TYPE_MYPASS],       64    );
-	Add("iLenCmdCTM",           mMaxCmdLen[NMDC_TYPE_CONNECTTOME],  128   );
-	Add("iLenCmdRCTM",          mMaxCmdLen[NMDC_TYPE_RCONNECTTOME], 128   );
-	Add("iLenCmdMCTM",          mMaxCmdLen[NMDC_TYPE_MCONNECTTOME], 128   );
-	Add("iLenCmdKick",          mMaxCmdLen[NMDC_TYPE_KICK],         64    );
-	Add("iLenCmdOFM",           mMaxCmdLen[NMDC_TYPE_OPFORCEMOVE],  512   );
-	Add("iLenCmdGetINFO",       mMaxCmdLen[NMDC_TYPE_GETINFO],      128   );
-	Add("iLenCmdMCTo",          mMaxCmdLen[NMDC_TYPE_MCTO],         65536 );
-	Add("iLenCmdUnknown",       mMaxCmdLen[NMDC_TYPE_UNKNOWN],      128   );
+	Add("iLenCmdMSearch",         mMaxCmdLen[NMDC_TYPE_MSEARCH],        256   );
+	Add("iLenCmdMSearchPas",      mMaxCmdLen[NMDC_TYPE_MSEARCH_PAS],    256   );
+	Add("iLenCmdSearchPas",       mMaxCmdLen[NMDC_TYPE_SEARCH_PAS],     256   );
+	Add("iLenCmdSearch",          mMaxCmdLen[NMDC_TYPE_SEARCH],         256   );
+	Add("iLenCmdSR",              mMaxCmdLen[NMDC_TYPE_SR],             1024  );
+	Add("iLenCmdMyINFO",          mMaxCmdLen[NMDC_TYPE_MYNIFO],         256   );
+	Add("iLenCmdSupports",        mMaxCmdLen[NMDC_TYPE_SUPPORTS],       1024  );
+	Add("iLenCmdKey",             mMaxCmdLen[NMDC_TYPE_KEY],            128   );
+	Add("iLenCmdValidateNick",    mMaxCmdLen[NMDC_TYPE_VALIDATENICK],   64    );
+	Add("iLenCmdVersion",         mMaxCmdLen[NMDC_TYPE_VERSION],        32    );
+	Add("iLenCmdGetNickList",     mMaxCmdLen[NMDC_TYPE_GETNICKLIST],    12    );
+	Add("iLenCmdChat",            mMaxCmdLen[NMDC_TYPE_CHAT],           65536 );
+	Add("iLenCmdTo",              mMaxCmdLen[NMDC_TYPE_TO],             65536 );
+	Add("iLenCmdQuit",            mMaxCmdLen[NMDC_TYPE_QUIT],           64    );
+	Add("iLenCmdMyPass",          mMaxCmdLen[NMDC_TYPE_MYPASS],         64    );
+	Add("iLenCmdCTM",             mMaxCmdLen[NMDC_TYPE_CONNECTTOME],    128   );
+	Add("iLenCmdRCTM",            mMaxCmdLen[NMDC_TYPE_RCONNECTTOME],   128   );
+	Add("iLenCmdMCTM",            mMaxCmdLen[NMDC_TYPE_MCONNECTTOME],   128   );
+	Add("iLenCmdKick",            mMaxCmdLen[NMDC_TYPE_KICK],           64    );
+	Add("iLenCmdOFM",             mMaxCmdLen[NMDC_TYPE_OPFORCEMOVE],    512   );
+	Add("iLenCmdGetINFO",         mMaxCmdLen[NMDC_TYPE_GETINFO],        128   );
+	Add("iLenCmdMCTo",            mMaxCmdLen[NMDC_TYPE_MCTO],           65536 );
+	Add("iLenCmdUnknown",         mMaxCmdLen[NMDC_TYPE_UNKNOWN],        128   );
 	mMaxCmdLen[NMDC_TYPE_PING] = 0; // ping length
 
-	Add("iWebTimeout",          miWebTimeout,                 30.);
-	Add("iWebStrSizeMax",       miWebStrSizeMax,              10240);
-	Add("sWebAddresses",        msWebAddresses,
+	Add("iWebTimeout",            mWebTimeout,                          30.);
+	Add("iWebStrSizeMax",         mWebStrSizeMax,                       10240);
+	Add("sWebAddresses",          mWebAddresses,
 		#ifdef _WIN32
 			string("0.0.0.0:80")
 		#else
 			string("0.0.0.0:8080")
 		#endif
 	);
-	Add("bWebServer",           mbWebServer,                  false);
+	Add("bWebServer",             mWebServer,                           false);
 
 	/* Timeouts of the protocol commands */
 	const char * timeoutName[] = {
@@ -174,46 +197,49 @@ void DcConfig::addVars(Server * server) {
 	};
 
 	for (int i = 0; i < 5; ++i) {
-		miTimeout[i] = timeoutDefault[i];
+		mTimeout[i] = timeoutDefault[i];
 		string s("iTimeout");
 		s.append(timeoutName[i]);
-		Add(s, miTimeout[i], timeoutDefault[i]);
+		Add(s, mTimeout[i], timeoutDefault[i]);
 	}
 
-	Add("iTimeoutAny",          miTimeoutAny,                 600.);
-	Add("iTimerServPeriod",     server->mTimerServPeriod,     2000);
-	Add("iTimerConnPeriod",     server->mTimerConnPeriod,     4000);
-	Add("iStepDelay",           server->mStepDelay,           0);
-	Add("iStrSizeMax",          server->mStrSizeMax,          10240);
-	Add("iSysLoading",          miSysLoading,                 1.);
-	Add("iStartPing",           miStartPing,                  300);
-	Add("iPingInterval",        miPingInterval,               60.);
-	Add("bNicklistOnLogin",     mbNicklistOnLogin,            true);
-	Add("bDelayedLogin",        mbDelayedLogin,               true);
-	mbDelayedMyINFO = false;//Add("bDelayedMyINFO",       mbDelayedMyINFO,              false);
-	Add("bDisableNoDCCmd",      mbDisableNoDCCmd,             true);
-	Add("bCheckSearchIp",       mbCheckSearchIp,              true);
-	Add("bCheckSRNick",         mbCheckSRNick,                true);
-	Add("bCheckRctmNick",       mbCheckRctmNick,              true);
-	Add("bCheckCTMIp",          mbCheckCTMIp,                 true);
-	Add("bSendUserIp",          mbSendUserIp,                 true);
-	Add("bMAC",                 server->mbMAC,                false);
-	Add("iMaxPassiveRes",       miMaxPassiveRes,              25);
-	Add("iMaxNickLen",          miMaxNickLen,                 32);
-	Add("iMinNickLen",          miMinNickLen,                 2);
-	Add("iUsersLimit",          miUsersLimit,                 -1);
-	Add("iMaxLevel",            miMaxLevel,                   miMaxLevel); // set this default value for log
-	Add("iMaxErrLevel",         miMaxErrLevel,                miMaxErrLevel); // set this default value for log
+	Add("iTimeoutAny",            mTimeoutAny,                          600.);
+	Add("iTimerServPeriod",       server->mTimerServPeriod,             2000);
+	Add("iTimerConnPeriod",       server->mTimerConnPeriod,             4000);
+	Add("iStepDelay",             server->mStepDelay,                   0);
+	Add("iStrSizeMax",            server->mStrSizeMax,                  10240);
+	Add("iSysLoading",            mSysLoading,                          1.);
+	Add("iStartPing",             mStartPing,                           300);
+	Add("iPingInterval",          mPingInterval,                        60.);
+	Add("bNicklistOnLogin",       mNicklistOnLogin,                     true);
+	Add("bDelayedLogin",          mDelayedLogin,                        true);
+	mDelayedMyinfo = false;//Add("bDelayedMyINFO",    mDelayedMyinfo,   false);
+	Add("bDisableNoDCCmd",        mDisableNoDCCmd,                      true);
+	Add("bCheckSearchIp",         mCheckSearchIp,                       true);
+	Add("bCheckSRNick",           mCheckSrNick,                         true);
+	Add("bCheckRctmNick",         mCheckRctmNick,                       true);
+	Add("bCheckCTMIp",            mCheckCtmIp,                          true);
+	Add("bSendUserIp",            mSendUserIp,                          true);
+	Add("bMAC",                   server->mMac,                         false);
+	Add("iMaxPassiveRes",         mMaxPassiveRes,                       25);
+	Add("iMaxNickLen",            mMaxNickLen,                          32);
+	Add("iMinNickLen",            mMinNickLen,                          2);
+	Add("iUsersLimit",            mUsersLimit,                          -1);
+	Add("iMaxLevel",              miMaxLevel,                           miMaxLevel); // set this default value for log
+	Add("iMaxErrLevel",           miMaxErrLevel,                        miMaxErrLevel); // set this default value for log
 
-	Add("sLocale",              msLocale,                     string(setlocale(LC_ALL, "")) );
-	Add("sMainBotIP",           msMainBotIP,                  string("127.0.0.1") );
-	Add("sMainBotMyINFO",       msMainBotMyINFO,              string("RusHub bot<Bot V:1.0,M:A,H:0/0/1,S:0>$ $$$0$") );
-	Add("bMainBotKey",          mbMainBotKey,                 true);
-	Add("sHubBot",              msHubBot,                     string("RusHub") );
-	Add("bRegMainBot",          mbRegMainBot,                 true);
-	Add("sTopic",               msTopic,                      string("Russian hub software") );
-	Add("sHubName",             msHubName,                    string("RusHub") );
-	Add("sAddresses",           server->msAddresses,
+	Add("sUDPAddresses",          mUdpAddresses,                        string("0.0.0.0:1209") );
+	Add("bUDPServer",             mUdpServer,                           false);
+	
+	Add("sLocale",                mLocale,                              string(setlocale(LC_ALL, "")) );
+	Add("sMainBotIP",             mMainBotIp,                           string("127.0.0.1") );
+	Add("sMainBotMyINFO",         mMainBotMyinfo,                       string("RusHub bot<Bot V:1.0,M:A,H:0/0/1,S:0>$ $$$0$") );
+	Add("bMainBotKey",            mMainBotKey,                          true);
+	Add("sHubBot",                mHubBot,                              string("RusHub") );
+	Add("bRegMainBot",            mRegMainBot,                          true);
+	Add("sTopic",                 mTopic,                               string("Russian hub software") );
+	Add("sHubName",               mHubName,                             string("RusHub") );
+	Add("sAddresses",             mAddresses,
 		#ifdef _WIN32
 			string("0.0.0.0:411")
 		#else
@@ -287,35 +313,38 @@ DcLang::~DcLang() {
 
 void DcLang::addVars() {
 
-	Add("sFirstMsg", msFirstMsg, string("Этот хаб работает под управлением %[HUB] (Время работы: %[uptime] / Юзеров: %[users] / Шара: %[share])."));
-	Add("sBadChatNick", msBadChatNick, string("Неверный ник: %[nick]."));
-	Add("sMyinfoError", msMyinfoError, string("Ошибка в синтаксисе команды MyINFO."));
-	Add("sBadLoginSequence", msBadLoginSequence, string("Не правильная последовательность отосланных команд при входе."));
-	Add("sBadMyinfoNick", msBadMyinfoNick, string("Неверный ник в MyINFO команде."));
-	Add("sBadRevConNick", msBadRevConNick, string("Неверный ник при соединении: %[nick]. Ваш реальный ник: %[real_nick]."));
-	Add("sTimeout", msTimeout, string("Тайм-аут %[reason]."));
-	Add("sTimeoutAny", msTimeoutAny, string("Тайм-аут соединения."));
-	Add("sBadCTMIp", msBadCTMIp, string("В запросе на подключение вы отсылаете неверный ip адрес: %[ip], ваш реальный ip: %[real_ip]."));
-	Add("sBadSRNick", msBadSRNick, string("Неверный ник в результатах поиска: %[nick]. Ваш реальный ник: %[real_nick]."));
-	Add("sBadSearchIp", msBadSearchIp, string("В поисковом запросе вы отсылаете неверный ip адрес: %[ip], ваш реальный ip: %[real_ip]."));
-	Add("sUsedNick", msUsedNick, string("Этот ник %[nick] уже используется другим пользователем."));
+	Add("sFirstMsg", mFirstMsg, string("Этот хаб работает под управлением %[HUB] (Время работы: %[uptime] / Юзеров: %[users] / Шара: %[share])."));
+	Add("sBadChatNick", mBadChatNick, string("Неверный ник: %[nick]."));
+	Add("sBadLoginSequence", mBadLoginSequence, string("Не правильная последовательность отосланных команд при входе."));
+	Add("sBadMyinfoNick", mBadMyinfoNick, string("Неверный ник в MyINFO команде."));
+	Add("sBadRevConNick", mBadRevConNick, string("Неверный ник при соединении: %[nick]. Ваш реальный ник: %[real_nick]."));
+	Add("sTimeout", mTimeout, string("Тайм-аут %[reason]."));
+	Add("sTimeoutAny", mTimeoutAny, string("Тайм-аут соединения."));
+	Add("sBadCTMIp", mBadCtmIp, string("В запросе на подключение вы отсылаете неверный ip адрес: %[ip], ваш реальный ip: %[real_ip]."));
+	Add("sBadSRNick", mBadSrNick, string("Неверный ник в результатах поиска: %[nick]. Ваш реальный ник: %[real_nick]."));
+	Add("sBadSearchIp", mBadSearchIp, string("В поисковом запросе вы отсылаете неверный ip адрес: %[ip], ваш реальный ip: %[real_ip]."));
+	Add("sUsedNick", mUsedNick, string("Этот ник %[nick] уже используется другим пользователем."));
 
-	Add("sBadNickLen", msBadNickLen, string("Недопустимая длина ника. Допустимая длина ника от %[min] до %[max] символов."));
-	Add("sBadChars", msBadChars, string("Недопустимые символы в нике."));
-	Add("sUsersLimit", msUsersLimit, string("Достигнут придел по количеству подключенных пользователей."));
-	Add("sForceMove", msForceMove, string("Вы были перенаправлены на хаб dchub://%[address] причина: %[reason]"));
+	Add("sBadNickLen", mBadNickLen, string("Недопустимая длина ника. Допустимая длина ника от %[min] до %[max] символов."));
+	Add("sBadChars", mBadChars, string("Недопустимые символы в нике."));
+	Add("sUsersLimit", mUsersLimit, string("Достигнут придел по количеству подключенных пользователей."));
+	Add("sForceMove", mForceMove, string("Вы были перенаправлены на хаб dchub://%[address] причина: %[reason]"));
 
-	Add("sFloodMyINFO", msFloodMyINFO, string("Пожалуйста не флудите командой MyINFO."));
-	Add("sFloodSearch", msFloodSearch, string("Пожалуйста не используйте поиск так часто."));
-	Add("sFloodSR", msFloodSR, string("Не флудите результатами поиска."));
-	Add("sFloodChat", msFloodChat, string("Пожалуйста не флудите!"));
-	Add("sFloodTo", msFloodTo, string("Пожалуйста не флудите в привате."));
-	Add("sFloodNickList", msFloodNickList, string("Пожалуйста не флудите с помощью слишком частого получения списка пользователей."));
-	Add("sFloodCTM", msFloodCTM, string("Пожалуйста не флудите частыми запросами на соединение с пользователями хаба."));
-	Add("sFloodRCTM", msFloodRCTM, string("Пожалуйста не флудите частыми запросами на соединение с активнми пользователями хаба."));
-	Add("sFloodMCTo", msFloodTo, string("Пожалуйста не флудите!"));
-	Add("sFloodPing", msFloodPing, string("Ваш клиент слишком часто пингует хаб."));
-	Add("sFloodUnknown", msFloodUnknown, string("Не флудите неизвестными командами."));
+	Add("sFloodMyINFO", mFlood[NMDC_TYPE_MYNIFO], string("Пожалуйста не флудите командой MyINFO."));
+	Add("sFloodSearch", mFlood[NMDC_TYPE_SEARCH], string("Пожалуйста не используйте поиск так часто."));
+	Add("sFloodSearchPassive", mFlood[NMDC_TYPE_SEARCH_PAS], string("Пожалуйста не используйте поиск так часто."));
+	Add("sFloodMultiSearch", mFlood[NMDC_TYPE_MSEARCH], string("Пожалуйста не используйте поиск так часто."));
+	Add("sFloodMultiSearchPassive", mFlood[NMDC_TYPE_MSEARCH_PAS], string("Пожалуйста не используйте поиск так часто."));
+	Add("sFloodSR", mFlood[NMDC_TYPE_SR], string("Не флудите результатами поиска."));
+	Add("sFloodSRUDP", mFlood[NMDC_TYPE_SR_UDP], string("Не флудите результатами поиска."));
+	Add("sFloodChat", mFlood[NMDC_TYPE_CHAT], string("Пожалуйста не флудите!"));
+	Add("sFloodTo", mFlood[NMDC_TYPE_TO], string("Пожалуйста не флудите в привате."));
+	Add("sFloodNickList", mFlood[NMDC_TYPE_GETNICKLIST], string("Пожалуйста не флудите с помощью слишком частого получения списка пользователей."));
+	Add("sFloodCTM", mFlood[NMDC_TYPE_CONNECTTOME], string("Пожалуйста не флудите частыми запросами на соединение с пользователями хаба."));
+	Add("sFloodRCTM", mFlood[NMDC_TYPE_RCONNECTTOME], string("Пожалуйста не флудите частыми запросами на соединение с активнми пользователями хаба."));
+	Add("sFloodMCTo", mFlood[NMDC_TYPE_MCTO], string("Пожалуйста не флудите!"));
+	Add("sFloodPing", mFlood[NMDC_TYPE_PING], string("Ваш клиент слишком часто пингует хаб."));
+	Add("sFloodUnknown", mFlood[NMDC_TYPE_UNKNOWN], string("Не флудите неизвестными командами."));
 
 	const char * reason[] = {
 		"получения ключа",
@@ -336,7 +365,7 @@ void DcLang::addVars() {
 	for (int i = 0; i < 5; ++i) {
 		string s("sTimeout");
 		s.append(name[i]);
-		Add(s, msTimeoutCmd[i], reason[i]);
+		Add(s, mTimeoutCmd[i], reason[i]);
 	}
 
 	const char * units[] = {
@@ -360,10 +389,10 @@ void DcLang::addVars() {
 	};
 
 	for (int i = 0; i < 7; ++i) {
-		msUnits[i] = unitsDef[i];
+		mUnits[i] = unitsDef[i];
 		string s("sUnit");
 		s.append(units[i]);
-		Add(s, msUnits[i], unitsDef[i]);
+		Add(s, mUnits[i], unitsDef[i]);
 	}
 
 	const char * times[] = {
@@ -383,10 +412,10 @@ void DcLang::addVars() {
 	};
 
 	for (int i = 0; i < 5; ++i) {
-		msTimes[i] = timesDef[i];
+		mTimes[i] = timesDef[i];
 		string s("sTimes");
 		s.append(times[i]);
-		Add(s, msTimes[i], timesDef[i]);
+		Add(s, mTimes[i], timesDef[i]);
 	}
 
 }

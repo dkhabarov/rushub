@@ -36,9 +36,9 @@ public:
 	WebConnFactory(Protocol *, Server *, string separator, int max);
 	virtual ~WebConnFactory();
 
-	Conn * CreateConn(tSocket sock = 0);
-	void DelConn(Conn * &);
-	void OnNewData(Conn *, string *);
+	Conn * createConn(tSocket sock = 0);
+	void deleteConn(Conn * &);
+	void onNewData(Conn *, string *);
 
 }; // class WebConnFactory
 

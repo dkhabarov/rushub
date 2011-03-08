@@ -90,7 +90,7 @@ public:
 	}
 
 	virtual bool AddConn(ConnBase *);
-	virtual bool DelConn(ConnBase *);
+	virtual bool deleteConn(ConnBase *);
 	virtual bool HasConn(ConnBase *);
 
 	virtual int Choose(Time &) = 0;

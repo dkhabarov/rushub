@@ -41,7 +41,8 @@ Parser::Parser(int max) :
 	mChunks(max),
 	mStrings(NULL),
 	mStrMap(0l),
-	mMaxChunks(max)
+	mMaxChunks(max),
+	mIsParsed(false)
 {
 	mStrings = new std::string[2 * mMaxChunks];
 }
@@ -66,10 +67,11 @@ void Parser::ReInit() {
 	mbError = false; 
 	mChunks.clear(); 
 	mChunks.resize(mMaxChunks); 
-	mStrMap = 0l; 
+	mStrMap = 0l;
+	mIsParsed = false;
 }
 
-void Parser::SetChunk(int n, int start, int len) {
+void Parser::SetChunk(int n, size_t start, size_t len) {
 	tChunk & chunk = mChunks[n];
 	chunk.first = start;
 	chunk.second = len;
@@ -91,8 +93,8 @@ bool Parser::SplitOnTwo(size_t start, const string & lim, int cn1, int cn2, size
 			return false;
 		}
 	}
-	SetChunk(cn1, (int)start, int(i - start));
-	SetChunk(cn2, int(i + lim.length()), int(miLen - i - lim.length()));
+	SetChunk(cn1, start, i - start);
+	SetChunk(cn2, i + lim.length(), miLen - i - lim.length());
 	return true;
 }
 
@@ -112,8 +114,8 @@ bool Parser::SplitOnTwo(size_t start, const char lim, int cn1, int cn2, size_t l
 			return false;
 		}
 	}
-	SetChunk(cn1, (int)start, int(i - start));
-	SetChunk(cn2, int(i + 1), int(miLen - i - 1));
+	SetChunk(cn1, start, i - start);
+	SetChunk(cn2, i + 1, miLen - i - 1);
 	return true;
 }
 
@@ -128,14 +130,14 @@ bool Parser::SplitOnTwo(const char lim, int ch, int cn1, int cn2, bool left) {
 }
 
 
-bool Parser::ChunkRedRight(int cn, int amount) {
+bool Parser::ChunkRedRight(int cn, size_t amount) {
 	mChunks[cn].second -= amount;
 	return true;
 }
 
-bool Parser::ChunkRedLeft(int cn, int amount) {
+bool Parser::ChunkRedLeft(int cn, size_t amount) {
 	tChunk & chunk = mChunks[cn];
-	if (unsigned(chunk.first + amount) < miLen) {
+	if (chunk.first + amount < miLen) {
 		chunk.first += amount;
 		chunk.second -= amount;
 		return true;

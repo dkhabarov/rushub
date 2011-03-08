@@ -78,7 +78,7 @@ public:
 	void * loadSym(const char *);
 
 	/** Log */
-	bool StrLog();
+	bool strLog();
 
 protected:
 
