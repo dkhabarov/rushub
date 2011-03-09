@@ -94,6 +94,8 @@ protected:
 
 	int mMaxChunks; /** Common (max) number of chunks */
 
+protected:
+
 	void SetChunk(int n, size_t start, size_t len);
 
 	bool SplitOnTwo(size_t start, const string & lim, int cn1, int cn2, size_t len = 0, bool left = true);

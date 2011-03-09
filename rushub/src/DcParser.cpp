@@ -105,7 +105,7 @@ string & DcParser::chunkString(unsigned int n) {
 		mStrMap |= flag;
 		try {
 			tChunk &c = mChunks[n];
-			if (c.first >= 0 && c.second >= 0 && (unsigned)c.first < mCommand.length() && (unsigned)c.second < mCommand.length()) {
+			if (c.first < mCommand.length() && c.second < mCommand.length()) {
 				mStrings[n].assign(mCommand, c.first, c.second); /** Record n part in n element of the array of the lines */
 			} else if (ErrLog(1)) {
 				LogStream() << "Badly parsed message : " << mCommand << endl;
