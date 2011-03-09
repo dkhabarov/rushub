@@ -121,8 +121,6 @@ public:
 
 	static unsigned long mConnCounter; /** Conn counter */
 
-	bool mOk; /** Points that given connection is registered (socket of connection is created and bound) */
-	bool mWritable; /** Points that data can be read and be written */
 	Time mLastRecv; /** Time of the last recv action from the client */
 
 	ConnFactory * mConnFactory; /** Conn factory */
@@ -143,6 +141,16 @@ public:
 	inline ConnType getConnType() const {
 		return mConnType;
 	}
+	
+	inline bool isOk() const {
+		return mOk;
+	}
+	
+	inline bool isWritable() const {
+		return mWritable;
+	}
+	
+	void setOk(bool);
 
 	/** Create, bind and listen socket */
 	tSocket makeSocket(int port, const char * ip = NULL, bool udp = false);
@@ -255,6 +263,9 @@ protected:
 	/** Socket type */
 	ConnType mConnType;
 
+	bool mOk; /** Points that given connection is registered (socket of connection is created and bound) */
+	bool mWritable; /** Points that data can be read and be written */
+	
 	unsigned long mNetIp; /** Numeric ip */
 	string mIp; /** String ip */
 	string mIpConn; /** String ip (host) of server */
@@ -290,6 +301,8 @@ protected:
 
 	/** Accept new conn */
 	tSocket socketAccept();
+
+	virtual void onOk(bool);
 
 	/** Send len byte from buf */
 	int send(const char * buf, size_t & len);

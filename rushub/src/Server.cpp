@@ -292,7 +292,9 @@ void Server::Step() {
 	}
 
 	ConnChoose::sChooseRes res;
-	int activity;
+	ConnType connType;
+	bool ok = false;
+	int activity = 0;
 	int forDel = miNumCloseConn;
 
 	for (tChIt it = mConnChooser.begin(); it != mConnChooser.end();) {
@@ -303,12 +305,13 @@ void Server::Step() {
 			continue;
 		}
 		activity = res.mRevents;
-		bool &bOk = mNowConn->mOk;
+		ok = mNowConn->isOk();
+		connType = mNowConn->getConnType();
 
 		if (
-			bOk && 
+			ok && 
 			(activity & ConnChoose::eEF_INPUT) && 
-			(mNowConn->getConnType() == CONN_TYPE_LISTEN)
+			(connType == CONN_TYPE_LISTEN)
 		) {
 
 			if (mNowConn->Log(5)) {
@@ -333,25 +336,25 @@ void Server::Step() {
 
 		} else { // not listening socket (optimization)
 
-			if (bOk && (activity & ConnChoose::eEF_INPUT) && ((mNowConn->getConnType() == CONN_TYPE_CLIENTTCP) || (mNowConn->getConnType() == CONN_TYPE_CLIENTUDP))) {
+			if (ok && (activity & ConnChoose::eEF_INPUT) && ((connType == CONN_TYPE_CLIENTTCP) || (connType == CONN_TYPE_CLIENTUDP))) {
 				try {
 					if (mNowConn->Log(5)) {
 						mNowConn->LogStream() << "::(s)InputData" << endl;
 					}
 
 					if (InputData(mNowConn) <= 0) {
-						bOk = false;
+						mNowConn->setOk(false);
 					}
 
 					if (mNowConn->Log(5)) {
 						mNowConn->LogStream() << "::(e)InputData" << endl;
 					}
-				} catch(const char *str) {
+				} catch (const char * str) {
 					if (ErrLog(0)) {
 						LogStream() << "Exception in InputData: " << str << endl;
 					}
 					throw "Exception in InputData";
-				} catch(...) {
+				} catch (...) {
 					if (ErrLog(0)) {
 						LogStream() << "Exception in InputData" << endl;
 					}
@@ -359,7 +362,7 @@ void Server::Step() {
 				}
 			}
 
-			if (bOk && (activity & ConnChoose::eEF_OUTPUT)) {
+			if (ok && (activity & ConnChoose::eEF_OUTPUT)) {
 				try {
 					if (mNowConn->Log(5)) {
 						mNowConn->LogStream() << "::(s)OutputData" << endl;
@@ -370,12 +373,12 @@ void Server::Step() {
 					if (mNowConn->Log(5)) {
 						mNowConn->LogStream() << "::(e)OutputData" << endl;
 					}
-				} catch(const char *str) {
+				} catch (const char * str) {
 					if (ErrLog(0)) {
 						LogStream() << "Exception in OutputData: " << str << endl;
 					}
 					throw "Exception in OutputData";
-				} catch(...) {
+				} catch (...) {
 					if (ErrLog(0)) {
 						LogStream() << "Exception in OutputData" << endl;
 					}
@@ -383,7 +386,7 @@ void Server::Step() {
 				}
 			}
 
-			if (!bOk || (activity & (ConnChoose::eEF_ERROR | ConnChoose::eEF_CLOSE))) {
+			if (!ok || (activity & (ConnChoose::eEF_ERROR | ConnChoose::eEF_CLOSE))) {
 
 				forDel = 0; // tmp
 
@@ -401,12 +404,12 @@ void Server::Step() {
 					if (Log(5)) {
 						LogStream() << "::(e)DelConnection. Number connections: " << mConnChooser.mConnBaseList.Size() << endl;
 					}
-				} catch(const char *str) {
+				} catch (const char * str) {
 					if (ErrLog(0)) {
 						LogStream() << "Exception in DelConnection: " << str << endl;
 					}
 					throw "Exception in DelConnection";
-				} catch(...) {
+				} catch (...) {
 					if (ErrLog(0)) {
 						LogStream() << "Exception in DelConnection" << endl;
 					}
@@ -428,7 +431,7 @@ void Server::Step() {
 
 int Server::AddConnection(Conn *conn) {
 
-	if (!conn->mOk) {
+	if (!conn->isOk()) {
 		if (conn->Log(2)) {
 			conn->LogStream() << "Not reserved connection: " << conn->ip() << endl;
 		}
@@ -563,7 +566,7 @@ int Server::InputData(Conn *conn) {
 	}
 
 	int iRead = 0;
-	while (conn->mOk && conn->mWritable) {
+	while (conn->isOk() && conn->isWritable()) {
 		if (conn->strStatus() == STRING_STATUS_NO_STR) {
 			conn->setStrToRead(getPtrForStr(conn),
 				(conn->mConnFactory != NULL) ? conn->mConnFactory->mSeparator : mSeparator,
@@ -611,7 +614,7 @@ int Server::onTimerBase(Time &now) {
 		mTimes.mConn = now;
 		tCLIt it_e = mConnList.end();
 		for (tCLIt it = mConnList.begin(); it != it_e; ++it) {
-			if ((*it)->mOk) {
+			if ((*it)->isOk()) {
 				(*it)->onTimerBase(now);
 			}
 		}

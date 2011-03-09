@@ -159,9 +159,7 @@ DcServer::~DcServer() {
 		if (Us->mDcConn) {
 			DelConnection(Us->mDcConn);
 		} else {
-			cout << "11" << endl;
 			if (Us->getInUserList()) {
-				cout << "22" << endl;
 				this->RemoveFromDCUserList(Us);
 			}
 			delete Us;
@@ -636,12 +634,12 @@ void DcServer::DelFromIpList(DcUser * User) {
 void DcServer::AddToHide(DcUser * User) {
 	if (!User->mbHide) {
 		User->mbHide = true;
-		if (User->getInUserList()) {
+		if (User->isCanSend()) {
 			string sMsg;
-			User->setInUserList(false);
+			User->setCanSend(false);
 			mDCUserList.sendToAll(DcProtocol::Append_DC_Quit(sMsg, User->msNick), false/*mDcConfig.mDelayedMyinfo*/, false);
 			mEnterList.sendToAll(sMsg, false/*mDcConfig.mDelayedMyinfo*/, false); // false cache
-			User->setInUserList(true);
+			User->setCanSend(true);
 			mOpList.Remake();
 			mDCUserList.Remake();
 		}
@@ -653,23 +651,23 @@ void DcServer::AddToHide(DcUser * User) {
 void DcServer::DelFromHide(DcUser * User) {
 	if (User->mbHide) {
 		User->mbHide = false;
-		if (User->getInUserList()) {
+		if (User->isCanSend()) {
 			string sMsg1, sMsg2, sMsg3;
 			if (User->mbInOpList) {
-				User->setInUserList(false);
+				User->setCanSend(false);
 				mHelloList.sendToAll(DcProtocol::Append_DC_Hello(sMsg1, User->msNick), false/*mDcConfig.mDelayedMyinfo*/, false);
 				sMsg2 = string(User->getMyINFO()).append(NMDC_SEPARATOR);
 				mDCUserList.sendToAll(DcProtocol::Append_DC_OpList(sMsg2, User->msNick), false/*mDcConfig.mDelayedMyinfo*/, false);
 				mEnterList.sendToAll(sMsg2, false/*mDcConfig.mDelayedMyinfo*/, false);
 				mIpList.sendToAll(DcProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->getIp()), false, false);
-				User->setInUserList(true);
+				User->setCanSend(true);
 			} else {
-				User->setInUserList(false);
+				User->setCanSend(false);
 				mHelloList.sendToAll(DcProtocol::Append_DC_Hello(sMsg1, User->msNick), false/*mDcConfig.mDelayedMyinfo*/, false);
 				mDCUserList.sendToAll(User->getMyINFO(), false/*mDcConfig.mDelayedMyinfo*/);
 				mEnterList.sendToAll(User->getMyINFO(), false/*mDcConfig.mDelayedMyinfo*/);
 				mIpList.sendToAll(DcProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->getIp()), false, false);
-				User->setInUserList(true);
+				User->setCanSend(true);
 			}
 			mOpList.Remake();
 			mDCUserList.Remake();
@@ -994,24 +992,24 @@ bool DcServer::ShowUserToAll(DcUser *User) {
 		}
 	}
 
-	bool inUserList = User->getInUserList();
+	bool canSend = User->isCanSend();
 
 	/** Prevention of the double sending MyINFO string */
 	if (!mDcConfig.mDelayedLogin) {
-			User->setInUserList(false);
+			User->setCanSend(false);
 			mDCUserList.FlushCache();
 			mEnterList.FlushCache();
-			User->setInUserList(inUserList);
+			User->setCanSend(canSend);
 	}
 
 	if (mDcConfig.mSendUserIp) {
 		string sStr;
-		User->setInUserList(false);
+		User->setCanSend(false);
 		DcProtocol::Append_DC_UserIP(sStr, User->msNick, User->getIp());
 		if (sStr.length()) {
 			mIpList.sendToAll(sStr, true);
 		}
-		User->setInUserList(inUserList);
+		User->setCanSend(canSend);
 
 		if (User->mbInIpList) {
 			User->send(mDCUserList.GetIpList(), true, false);
@@ -1254,8 +1252,8 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & NickList, const char 
 	vector<DcUser *> ul;
 	for (List_t::const_iterator it = NickList.begin(); it != NickList.end(); ++it) {
 		User = (DcUser*)mDCUserList.GetUserBaseByNick(*it);
-		if (User && User->getInUserList()) {
-			User->setInUserList(false);
+		if (User && User->isCanSend()) {
+			User->setCanSend(false);
 			ul.push_back(User);
 		}
 	}
@@ -1276,7 +1274,7 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & NickList, const char 
 	}
 
 	for (vector<DcUser *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
-		(*ul_it)->setInUserList(true);
+		(*ul_it)->setCanSend(true);
 	}
 
 	return true;
@@ -1298,8 +1296,8 @@ bool DcServer::sendToAllExceptIps(const vector<string> & IPList, const char *sDa
 		}
 		for (DcIpList::iterator mit = mIPListConn->begin(DcConn::ip2Num((*it).c_str())); mit != mIPListConn->end(); ++mit) {
 			dcConn = (DcConn*)(*mit);
-			if (dcConn->mDcUser && dcConn->mDcUser->getInUserList()) {
-				dcConn->mDcUser->setInUserList(false);
+			if (dcConn->mDcUser && dcConn->mDcUser->isCanSend()) {
+				dcConn->mDcUser->setCanSend(false);
 				ul.push_back(dcConn);
 			}
 		}
@@ -1323,7 +1321,7 @@ bool DcServer::sendToAllExceptIps(const vector<string> & IPList, const char *sDa
 	}
 
 	for (vector<DcConn*>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
-		(*ul_it)->mDcUser->setInUserList(true);
+		(*ul_it)->mDcUser->setCanSend(true);
 	}
 
 	return (bBadIP == true) ? false : true;

@@ -161,13 +161,13 @@ public:
 
 	unsigned mFeatures;         //< Features
 	string msSupports;          //< Support cmd param
-	string mVersion;           //< DC version
+	string mVersion;            //< DC version
 	string msData;              //< Some user's data
 	int miProfile;              //< Profile
 	bool mbSendNickList;        //< Sending user list when login
 	bool mbIpRecv;              //< Permit on reception of the messages, sending on my ip
 	bool mbNickListInProgress;  //< True while sending first nicklist
-	DcUser * mDcUser;          //< User object
+	DcUser * mDcUser;           //< User object
 
 	struct Timers { /** Timers */
 
@@ -292,6 +292,10 @@ protected:
 		Time mPingServer;
 
 	} mTimes;
+
+protected:
+
+	virtual void onOk(bool);
 
 private:
 

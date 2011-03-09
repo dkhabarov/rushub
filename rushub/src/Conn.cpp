@@ -47,14 +47,14 @@ char Conn::mRecvBuf[MAX_RECV_SIZE + 1];
 
 Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 	Obj("Conn"),
-	mOk(socket > 0),
-	mWritable(true),
 	mConnFactory(NULL),
 	mListenFactory(NULL),
 	mServer(server),
 	mProtocol(NULL),
 	mParser(NULL),
 	mConnType(connType),
+	mOk(socket > 0),
+	mWritable(true),
 	mNetIp(0),
 	mPort(0),
 	mPortConn(0),
@@ -108,6 +108,18 @@ Conn::operator tSocket() const {
 	return mSocket;
 }
 
+
+
+void Conn::setOk(bool ok) {
+	mOk = ok;
+	onOk(ok);
+}
+
+
+
+void Conn::onOk(bool) {
+}
+
 	
 
 /** makeSocket */
@@ -123,7 +135,7 @@ tSocket Conn::makeSocket(int port, const char * ip, bool udp) {
 	}
 	mPort = port; /** Set port */
 	mIp = ip; /** Set ip (host) */
-	mOk = mSocket > 0; /** Reg conn */
+	setOk(mSocket > 0); /** Reg conn */
 	return mSocket;
 }
 
@@ -218,13 +230,17 @@ tSocket Conn::socketNonBlock(tSocket sock) {
 }
 
 
+
+
+
 ////////////////////////////////////////////////////////
 /** Close socket */
 void Conn::close() {
 	if (mSocket <= 0) {
 		return;
 	}
-	mWritable = mOk = false;
+	mWritable = false;
+	setOk(false);
 
 	/** OnClose */
 	if (mServer) {
@@ -265,7 +281,8 @@ void Conn::closeNice(int imsec /* = 0 */, int iReason /* = 0 */) {
 
 /** closeNow */
 void Conn::closeNow(int iReason /* = 0 */) {
-	mWritable = mOk = false;
+	mWritable = false;
+	setOk(false);
 	if (mServer) {
 		if (!(mServer->mConnChooser.ConnChoose::OptGet((ConnBase*)this) & ConnChoose::eEF_CLOSE)) {
 			++ mServer->miNumCloseConn;

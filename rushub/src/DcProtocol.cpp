@@ -993,24 +993,24 @@ void DcProtocol::SendMode(DcConn * dcConn, const string & str, int iMode, UserLi
 	if (iMode == 0) { /** Send to all */
 		UL.sendToAll(str, bUseCache, bAddSep);
 	} else if (iMode == 3) { /** Send to all except current user */
-		if (dcConn->mDcUser->getInUserList()) {
-			dcConn->mDcUser->setInUserList(false);
+		if (dcConn->mDcUser->isCanSend()) {
+			dcConn->mDcUser->setCanSend(false);
 			UL.sendToAll(str, bUseCache, bAddSep);
-			dcConn->mDcUser->setInUserList(true);
+			dcConn->mDcUser->setCanSend(true);
 		}
 	} else if (iMode == 4) { /** Send to all except users with ip of the current user */
 		DcConn * conn = NULL;
 		vector<DcConn *> ul;
 		for (DcIpList::iterator mit = mDcServer->mIPListConn->begin(DcConn::ip2Num(dcConn->getIp().c_str())); mit != mDcServer->mIPListConn->end(); ++mit) {
 			conn = (DcConn *)(*mit);
-			if(conn->mDcUser && conn->mDcUser->getInUserList()) {
-				conn->mDcUser->setInUserList(false);
+			if(conn->mDcUser && conn->mDcUser->isCanSend()) {
+				conn->mDcUser->setCanSend(false);
 				ul.push_back(conn);
 			}
 		}
 		UL.sendToAll(str, bUseCache, bAddSep);
 		for (vector<DcConn *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
-			(*ul_it)->mDcUser->setInUserList(true);
+			(*ul_it)->mDcUser->setCanSend(true);
 		}
 	}
 }

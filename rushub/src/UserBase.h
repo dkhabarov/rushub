@@ -31,7 +31,7 @@ class UserBase {
 
 public:
 
-	virtual bool CanSend() = 0;
+	virtual bool isCanSend() = 0;
 	virtual void send(const string & msg, bool sep = false, bool flush = true) = 0;
 	virtual const string & Nick() const = 0;
 	virtual const string & MyINFO() const = 0;

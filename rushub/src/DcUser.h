@@ -68,17 +68,14 @@ public:
 	DcUser(const string & nick);
 	virtual ~DcUser();
 
-	bool CanSend();
 	void send(const string & data, bool addSep = false, bool flush = true);
 
 	void setInUserList(bool);
 	
-	inline bool getCanSend() {
-		return mCanSend;
-	}
+	void setCanSend(bool canSend);
 	
-	inline void setCanSend(bool canSend) {
-		mCanSend = canSend;
+	inline bool isCanSend() {
+		return mCanSend;
 	}
 	
 	

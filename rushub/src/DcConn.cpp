@@ -296,6 +296,17 @@ bool DcConn::SetUser(DcUser * User) {
 	return true;
 }
 
+
+
+void DcConn::onOk(bool ok) {
+	if (mDcUser) {
+		mDcUser->setCanSend(ok);
+	}
+}
+
+
+
+
 DcConnFactory::DcConnFactory(Protocol *protocol, Server *s) : ConnFactory(protocol, s) {
 }
 

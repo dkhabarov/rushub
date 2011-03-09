@@ -47,7 +47,7 @@ namespace dcserver {
 #endif // _WIN32
 
 void UserList::ufSend::operator() (UserBase * userBase) {
-	if (userBase && userBase->CanSend()) {
+	if (userBase && userBase->isCanSend()) {
 		if (!mbProfile) {
 			userBase->send(msData, false); // newPolitic
 		} else {
@@ -66,7 +66,7 @@ void UserList::ufSend::operator() (UserBase * userBase) {
 }
 
 void UserList::ufSendWithNick::operator() (UserBase * userBase) {
-	if (userBase && userBase->CanSend()) { 
+	if (userBase && userBase->isCanSend()) { 
 		if (!mbProfile) {
 			userBase->send(msDataStart, false, false);
 			userBase->send(userBase->Nick(), false, false);

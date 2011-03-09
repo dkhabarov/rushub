@@ -66,14 +66,17 @@ DcUser::~DcUser() {
 }
 
 
-bool DcUser::CanSend() {
-	return mbInUserList && mDcConn && mDcConn->mOk;
-}
-
 
 void DcUser::setInUserList(bool inUserList) {
 	mbInUserList = inUserList;
 }
+
+
+
+void DcUser::setCanSend(bool canSend) {
+	mCanSend = (mbInUserList && mDcConn && mDcConn->isOk() && canSend);
+}
+
 
 
 void DcUser::send(const string & data, bool addSep, bool flush) {
