@@ -557,12 +557,12 @@ int Conn::readFromRecvBuf() {
 			closeNow(CLOSE_REASON_MAXSIZE_RECV);
 			return 0;
 		}
-		mCommand->append((char *)buf, len);
+		mCommand->append(buf, len);
 		mRecvBufRead = mRecvBufEnd = 0;
 		return len;
 	}
 	len = pos + mSeparator.size();
-	mCommand->append((char *)buf, pos);
+	mCommand->append(buf, pos);
 	mRecvBufRead += len;
 	mStrStatus = STRING_STATUS_STR_DONE;
 	return len;
@@ -576,7 +576,7 @@ int Conn::remaining() {
 		closeNow(CLOSE_REASON_MAXSIZE_REMAINING);
 		return -1;
 	}
-	mCommand->append((char *)buf, len);
+	mCommand->append(buf, len);
 	mRecvBufRead = mRecvBufEnd = 0;
 	return len;
 }

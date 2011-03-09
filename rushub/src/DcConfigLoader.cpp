@@ -75,20 +75,21 @@ int DcConfigLoader::loadFromXml(ConfigListBase * configListBase, const char * fi
 	}
 
 	/** Check version */
-	const char * version;
+	const char * version = NULL;
 	if (mainItem->ToElement() == NULL || (version = mainItem->ToElement()->Attribute("Version")) == NULL) {
 		return -3;
 	}
 
-	Config * config;
-	char * name, * data;
-	istringstream * iss;
+	Config * config = NULL;
+	const char * name = NULL;
+	const char * data = NULL;
+	istringstream * iss = NULL;
 	TiXmlNode * value = NULL;
 	while ((value = mainItem->IterateChildren(value)) != NULL) {
-		if (value->ToElement() == NULL || (name = (char *)value->ToElement()->Attribute("Name")) == NULL) {
+		if (value->ToElement() == NULL || (name = value->ToElement()->Attribute("Name")) == NULL) {
 			continue;
 		}
-		data = (char *) value->ToElement()->GetText();
+		data = value->ToElement()->GetText();
 		if ((config = configListBase->operator[](name)) != NULL) {
 			iss = new istringstream(data != NULL ? data : "");
 			iss->seekg(0, istream::beg);

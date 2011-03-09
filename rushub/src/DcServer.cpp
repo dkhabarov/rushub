@@ -455,7 +455,7 @@ int DcServer::OnNewConn(Conn *conn) {
 			StringReplace(sCache, string("users"), sCache, iUsersVal);
 			StringReplace(sCache, string("share"), sCache, sShareCache);
 		}
-		sendToUser(dcConn, sCache.c_str(), (char *) mDcConfig.mHubBot.c_str());
+		sendToUser(dcConn, sCache.c_str(), mDcConfig.mHubBot.c_str());
 	}
 	dcConn->SetTimeOut(HUB_TIME_OUT_LOGIN, mDcConfig.mTimeout[HUB_TIME_OUT_LOGIN], mTime); /** Timeout for enter */
 	dcConn->SetTimeOut(HUB_TIME_OUT_KEY, mDcConfig.mTimeout[HUB_TIME_OUT_KEY], mTime);
@@ -687,7 +687,7 @@ bool DcServer::ValidateUser(DcConn * dcConn, const string & sNick) {
 		if (dcConn->Log(2)) {
 			dcConn->LogStream() << "Bad nick chars: '" << sNick << "'" << endl;
 		}
-		sendToUser(dcConn, mDCLang.mBadChars.c_str(), (char *) mDcConfig.mHubBot.c_str());
+		sendToUser(dcConn, mDCLang.mBadChars.c_str(), mDcConfig.mHubBot.c_str());
 		return false;
 	}
 
@@ -710,7 +710,7 @@ bool DcServer::CheckNickLength(DcConn * dcConn, const unsigned iLen) {
 		StringReplace(mDCLang.mBadNickLen, string("min"), sMsg, (int) mDcConfig.mMinNickLen);
 		StringReplace(sMsg, string("max"), sMsg, (int) mDcConfig.mMaxNickLen);
 
-		sendToUser(dcConn, sMsg.c_str(), (char *) mDcConfig.mHubBot.c_str());
+		sendToUser(dcConn, sMsg.c_str(), mDcConfig.mHubBot.c_str());
 
 		return false;
 	}
@@ -736,7 +736,7 @@ bool DcServer::CheckNick(DcConn *dcConn) {
 
 			StringReplace(mDCLang.mUsedNick, string("nick"), sMsg, dcConn->mDcUser->msNick);
 
-			sendToUser(dcConn, sMsg.c_str(), (char *) mDcConfig.mHubBot.c_str());
+			sendToUser(dcConn, sMsg.c_str(), mDcConfig.mHubBot.c_str());
 
 			dcConn->send(DcProtocol::Append_DC_ValidateDenide(sMsg.erase(), dcConn->mDcUser->msNick));
 			return false;

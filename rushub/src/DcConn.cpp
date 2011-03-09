@@ -228,7 +228,7 @@ int DcConn::onTimer(Time &now) {
 					LogStream() << "Operation timeout (" << HubTimeOut(i) << ")" << endl;
 				}
 				StringReplace(dcServer->mDCLang.mTimeout, string("reason"), sMsg, dcServer->mDCLang.mTimeoutCmd[i]);
-				dcServer->sendToUser(this, sMsg.c_str(), (char*)dcServer->mDcConfig.mHubBot.c_str());
+				dcServer->sendToUser(this, sMsg.c_str(), dcServer->mDcConfig.mHubBot.c_str());
 				this->closeNice(9000, CLOSE_REASON_TIMEOUT);
 				return 1;
 			}
@@ -240,7 +240,7 @@ int DcConn::onTimer(Time &now) {
 		if (Log(2)) {
 			LogStream() << "Any action timeout..." << endl;
 		}
-		dcServer->sendToUser(this, dcServer->mDCLang.mTimeoutAny.c_str(), (char*)dcServer->mDcConfig.mHubBot.c_str());
+		dcServer->sendToUser(this, dcServer->mDCLang.mTimeoutAny.c_str(), dcServer->mDcConfig.mHubBot.c_str());
 		closeNice(9000, CLOSE_REASON_TIMEOUT_ANYACTION);
 		return 2;
 	}*/
