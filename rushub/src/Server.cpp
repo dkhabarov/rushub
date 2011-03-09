@@ -50,13 +50,13 @@ Server::Server(const string sSep) :
 	mConnFactory(NULL),
 	mStrSizeMax(10240),
 	mSeparator(sSep),
-	mMeanFrequency(mTime, 90.0, 20),
 	mStepDelay(0),
-	miNumCloseConn(0),
 	mTimerServPeriod(1000),
 	mTimerConnPeriod(4000),
 	mMac(true),
-	miMainLoopCode(0),
+	mMainLoopCode(0),
+	miNumCloseConn(0),
+	mMeanFrequency(mTime, 90.0, 20),
 	mServer(NULL),
 	mNowConn(NULL)
 {
@@ -141,7 +141,7 @@ Conn * Server::Listen(const string & ip, int port, bool udp) {
 		conn->mProtocol = mConnFactory->mProtocol;
 	}
 
-	if (!AddListen(conn, ip, port, udp)) { /** Listen conn */
+	if (!addListen(conn, ip, port, udp)) { /** Listen conn */
 		delete conn;
 		return NULL;
 	}
@@ -151,7 +151,7 @@ Conn * Server::Listen(const string & ip, int port, bool udp) {
 
 
 /** Create, bind and add connection for port */
-Conn *Server::AddListen(Conn * conn, const string & ip, int port, bool udp) {
+Conn *Server::addListen(Conn * conn, const string & ip, int port, bool udp) {
 	/** Socket object was created */
 	if (conn) {
 		if (conn->makeSocket(port, ip.c_str(), udp) == INVALID_SOCKET) {
@@ -187,7 +187,7 @@ Conn *Server::AddListen(Conn * conn, const string & ip, int port, bool udp) {
 }
 
 /** StopListen */
-bool Server::StopListen(Conn * conn) {
+bool Server::stopListen(Conn * conn) {
 	if (conn) {
 		mConnChooser.deleteConn(conn);
 		return true;
@@ -195,7 +195,7 @@ bool Server::StopListen(Conn * conn) {
 	return false;
 }
 
-Conn * Server::FindConnByPort(int port) {
+Conn * Server::findConnByPort(int port) {
 	Conn * conn = NULL;
 	for (ConnChoose::tConnBaseList::iterator it = mConnChooser.mConnBaseList.begin();
 		it != mConnChooser.mConnBaseList.end();
@@ -210,17 +210,17 @@ Conn * Server::FindConnByPort(int port) {
 }
 
 /** Main cycle */
-int Server::Run() {
+int Server::run() {
 	Time now;
-	mbRun = true;
+	mRun = true;
 	if (Log(1)) {
 		LogStream() << "Main loop start" << endl;
 	}
 
-	while (mbRun) { /** Main cycle */
+	while (mRun) { /** Main cycle */
 		try {
 			mTime.Get(); /** Current time */
-			Step(); /** Server's step */
+			step(); /** Server's step */
 
 			/** Timers (100 msec) */
 			if (abs(int(now.Get() - mTimes.mServ)) >= 100) { /** transfer of time */
@@ -244,23 +244,23 @@ int Server::Run() {
 			if (ErrLog(0)) {
 				LogStream() << "Exception in Run function" << endl;
 			}
-			throw "Server::Run()";
+			throw "Server::run()";
 		}
 	}
 	if (Log(1)) {
-		LogStream() << "Main loop stop(" << miMainLoopCode << ")" << endl;
+		LogStream() << "Main loop stop(" << mMainLoopCode << ")" << endl;
 	}
-	return miMainLoopCode;
+	return mMainLoopCode;
 }
 
 /** Stop main cycle */
-void Server::Stop(int code) {
-	mbRun = false;
-	miMainLoopCode = code; // 1 - restart
+void Server::stop(int code) {
+	mRun = false;
+	mMainLoopCode = code; // 1 - restart
 }
 
-/** Step */
-void Server::Step() {
+/** step */
+void Server::step() {
 	int ret;
 	static Time tmout(0, 1000l); /** timeout 1 msec */
 
@@ -324,10 +324,10 @@ void Server::Step() {
 					if (ErrLog(0)) {
 						LogStream() << "ListenFactory is empty" << endl;
 					}
-					throw "Exception in InputData";
+					throw "Exception in inputData";
 				}
-				if (AddConnection(new_conn) > 0) {
-					mNowConn->mListenFactory->OnNewConn(new_conn);
+				if (addConnection(new_conn) > 0) {
+					mNowConn->mListenFactory->onNewConn(new_conn);
 				}
 			}
 			if (mNowConn->Log(5)) {
@@ -339,50 +339,50 @@ void Server::Step() {
 			if (ok && (activity & ConnChoose::eEF_INPUT) && ((connType == CONN_TYPE_CLIENTTCP) || (connType == CONN_TYPE_CLIENTUDP))) {
 				try {
 					if (mNowConn->Log(5)) {
-						mNowConn->LogStream() << "::(s)InputData" << endl;
+						mNowConn->LogStream() << "::(s)inputData" << endl;
 					}
 
-					if (InputData(mNowConn) <= 0) {
+					if (inputData(mNowConn) <= 0) {
 						mNowConn->setOk(false);
 					}
 
 					if (mNowConn->Log(5)) {
-						mNowConn->LogStream() << "::(e)InputData" << endl;
+						mNowConn->LogStream() << "::(e)inputData" << endl;
 					}
 				} catch (const char * str) {
 					if (ErrLog(0)) {
-						LogStream() << "Exception in InputData: " << str << endl;
+						LogStream() << "Exception in inputData: " << str << endl;
 					}
-					throw "Exception in InputData";
+					throw "Exception in inputData";
 				} catch (...) {
 					if (ErrLog(0)) {
-						LogStream() << "Exception in InputData" << endl;
+						LogStream() << "Exception in inputData" << endl;
 					}
-					throw "Exception in InputData";
+					throw "Exception in inputData";
 				}
 			}
 
 			if (ok && (activity & ConnChoose::eEF_OUTPUT)) {
 				try {
 					if (mNowConn->Log(5)) {
-						mNowConn->LogStream() << "::(s)OutputData" << endl;
+						mNowConn->LogStream() << "::(s)outputData" << endl;
 					}
 
-					OutputData(mNowConn);
+					outputData(mNowConn);
 
 					if (mNowConn->Log(5)) {
-						mNowConn->LogStream() << "::(e)OutputData" << endl;
+						mNowConn->LogStream() << "::(e)outputData" << endl;
 					}
 				} catch (const char * str) {
 					if (ErrLog(0)) {
-						LogStream() << "Exception in OutputData: " << str << endl;
+						LogStream() << "Exception in outputData: " << str << endl;
 					}
-					throw "Exception in OutputData";
+					throw "Exception in outputData";
 				} catch (...) {
 					if (ErrLog(0)) {
-						LogStream() << "Exception in OutputData" << endl;
+						LogStream() << "Exception in outputData" << endl;
 					}
-					throw "Exception in OutputData";
+					throw "Exception in outputData";
 				}
 			}
 
@@ -396,24 +396,24 @@ void Server::Step() {
 
 				try {
 					if (Log(5)) {
-						LogStream() << "::(s)DelConnection" << endl;
+						LogStream() << "::(s)delConnection" << endl;
 					}
 
-					DelConnection(mNowConn);
+					delConnection(mNowConn);
 
 					if (Log(5)) {
-						LogStream() << "::(e)DelConnection. Number connections: " << mConnChooser.mConnBaseList.Size() << endl;
+						LogStream() << "::(e)delConnection. Number connections: " << mConnChooser.mConnBaseList.Size() << endl;
 					}
 				} catch (const char * str) {
 					if (ErrLog(0)) {
-						LogStream() << "Exception in DelConnection: " << str << endl;
+						LogStream() << "Exception in delConnection: " << str << endl;
 					}
-					throw "Exception in DelConnection";
+					throw "Exception in delConnection";
 				} catch (...) {
 					if (ErrLog(0)) {
-						LogStream() << "Exception in DelConnection" << endl;
+						LogStream() << "Exception in delConnection" << endl;
 					}
-					throw "Exception in DelConnection";
+					throw "Exception in delConnection";
 				}
 			}
 		}
@@ -429,7 +429,7 @@ void Server::Step() {
 
 ///////////////////////////////////add_connection/del_connection///////////////////////////////////
 
-int Server::AddConnection(Conn *conn) {
+int Server::addConnection(Conn *conn) {
 
 	if (!conn->isOk()) {
 		if (conn->Log(2)) {
@@ -485,13 +485,13 @@ int Server::AddConnection(Conn *conn) {
 	return 1;
 }
 
-/** DelConnection(Conn *old_conn) */
-int Server::DelConnection(Conn *old_conn) {
+/** delConnection(Conn *old_conn) */
+int Server::delConnection(Conn *old_conn) {
 	if (!old_conn) {
 		if (mNowConn && mNowConn->ErrLog(0)) {
-			mNowConn->LogStream() << "Fatal error: DelConnection null pointer" << endl;
+			mNowConn->LogStream() << "Fatal error: delConnection null pointer" << endl;
 		}
-		throw "Fatal error: DelConnection null pointer";
+		throw "Fatal error: delConnection null pointer";
 	}
 
 	/*if (Log(4)) {
@@ -531,24 +531,24 @@ int Server::DelConnection(Conn *old_conn) {
 	return 1;
 }
 
-/** OnNewConn */
-int Server::OnNewConn(Conn *conn) {
+/** onNewConn */
+int Server::onNewConn(Conn *conn) {
 	if (!conn) {
 		return -1;
 	}
 	return 0;
 }
 
-/** OnClose */
-void Server::OnClose(Conn *conn) {
+/** onClose */
+void Server::onClose(Conn *conn) {
 	if (!conn) {
 		return;
 	}
 	mConnChooser.deleteConn(conn);
 }
 
-/** InputData */
-int Server::InputData(Conn *conn) {
+/** inputData */
+int Server::inputData(Conn *conn) {
 	try {
 		if (conn->recv() <= 0) {
 			return 0;
@@ -601,8 +601,8 @@ void Server::onNewData(Conn *, string * str) {
 	delete str;
 }
 
-/** OutputData */
-int Server::OutputData(Conn *conn) {
+/** outputData */
+int Server::outputData(Conn *conn) {
 	conn->flush();
 	return 0;
 }
@@ -637,8 +637,8 @@ ConnFactory * ListenFactory::connFactory() {
 	return mServer->mConnFactory;
 }
 
-int ListenFactory::OnNewConn(Conn * conn) {
-	return mServer->OnNewConn(conn);
+int ListenFactory::onNewConn(Conn * conn) {
+	return mServer->onNewConn(conn);
 }
 
 }; // server

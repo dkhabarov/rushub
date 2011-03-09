@@ -52,7 +52,7 @@ public:
 	virtual ~WebListenFactory();
 
 	ConnFactory * connFactory();
-	int OnNewConn(Conn *);
+	int onNewConn(Conn *);
 
 protected:
 

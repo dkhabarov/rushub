@@ -242,14 +242,14 @@ void Conn::close() {
 	mWritable = false;
 	setOk(false);
 
-	/** OnClose */
+	/** onClose */
 	if (mServer) {
-		mServer->OnClose(this);
+		mServer->onClose(this);
 	}
 
 #ifndef _WIN32
 	TEMP_FAILURE_RETRY(SOCK_CLOSE(mSocket));
-	if (SockErr != SOCK_EINTR || (mServer && !mServer->mbRun)) { // Interrupted system call on exit
+	if (SockErr != SOCK_EINTR || (mServer && !mServer->mRun)) { // Interrupted system call on exit
 #else
 	int err = TEMP_FAILURE_RETRY(SOCK_CLOSE(mSocket));
 	if (!(SOCK_ERROR(err))) {

@@ -118,9 +118,9 @@ ConnFactory * WebListenFactory::connFactory() {
 
 
 
-int WebListenFactory::OnNewConn(Conn * conn) {
-	mServer->InputData(conn);
-	return 0;//ListenFactory::OnNewConn(conn);
+int WebListenFactory::onNewConn(Conn * conn) {
+	mServer->inputData(conn);
+	return 0;//ListenFactory::onNewConn(conn);
 }
 
 

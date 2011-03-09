@@ -270,11 +270,11 @@ public:
 	int unregBot(const string & sNick);
 
 	void stopHub() {
-		Stop(0);
+		stop(0);
 	}
 
 	void restartHub() {
-		Stop(1);
+		stop(1);
 	}
 
 	static void getAddresses(const string & sAddresses, vector<pair<string, int> > & vec, int iDefPort);
@@ -282,7 +282,7 @@ public:
 protected:
 
 	/** Function action when joining the client */
-	int OnNewConn(Conn *);
+	int onNewConn(Conn *);
 
 	/** Returns pointer to line of the connection, in which will be recorded got data */
 	string * getPtrForStr(Conn *);

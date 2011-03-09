@@ -225,7 +225,7 @@ int Service::Start() {
 	return 0;
 }
 
-int Service::Stop() {
+int Service::stop() {
 	ss.dwCurrentState = SERVICE_STOPPED;
 	SetServiceStatus(ssh, &ss);
 	return 0;
@@ -377,7 +377,7 @@ void WINAPI Service::CtrlHandler(DWORD dwCtrl) {
 				Service::mCurService->LogStream() << "Received a " << dwCtrl << " signal, service stop" << endl;
 			}
 			// Service stop
-			DcServer::currentDcServer->Stop(0);
+			DcServer::currentDcServer->stop(0);
 			break;
 
 		case SERVICE_CONTROL_INTERROGATE :

@@ -87,7 +87,7 @@ public:
 	static int ServiceStart(char * name = NULL);
 	static int cli(int argc, char * argv[], string & configFile);
 	static int Start();
-	static int Stop();
+	static int stop();
 
 }; // Service
 

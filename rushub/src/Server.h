@@ -63,7 +63,7 @@ public:
 	ListenFactory(Server *);
 	virtual ~ListenFactory();
 	virtual ConnFactory * connFactory();
-	virtual int OnNewConn(Conn *);
+	virtual int onNewConn(Conn *);
 
 protected:
 	Server * mServer;
@@ -73,8 +73,8 @@ protected:
 
 class Server : public Obj {
 
-friend class Conn; /** for protected var on close socket (Conn::closeNow) */
-friend class ListenFactory; /* OnNewConn */
+friend class Conn; /** for closeNow and miNumCloseConn */
+friend class ListenFactory; /* onNewConn */
 friend class ConnFactory; /* onNewData */
 
 public:
@@ -85,10 +85,7 @@ public:
 	string mSeparator; /** Proto separator */
 
 	Time mTime; /** Current time of main cycle on the server */
-	MeanFrequency<unsigned, 21> mMeanFrequency; /** Mean frequency */
 	int mStepDelay; /** Step delay (for testing) */
-
-	int miNumCloseConn; /** Strong close conn flag */
 
 	int mTimerServPeriod; /** Serv period (msec) */
 	int mTimerConnPeriod; /** Conn period (msec) */
@@ -107,43 +104,27 @@ public:
 	virtual Conn * Listen(const string & ip, int port, bool udp = false);
 
 	/** Create, bind and add connection for port */
-	virtual Conn * AddListen(Conn *, const string & ip, int port, bool udp = false);
+	virtual Conn * addListen(Conn *, const string & ip, int port, bool udp = false);
 
 	/** Stop listen conn */
-	virtual bool StopListen(Conn *);
+	virtual bool stopListen(Conn *);
 
 	/** Find conn by port */
-	virtual Conn * FindConnByPort(int port);
+	virtual Conn * findConnByPort(int port);
 
 	/** Main cycle */
-	int Run();
-
-	/** Main step in the cycle */
-	void Step();
-
-	/** OnClose conn */
-	void OnClose(Conn *);
+	int run();
 
 	/** Stop cycle */
-	void Stop(int);
+	void stop(int);
 
-	/** Main base timer */
-	int onTimerBase(Time & now);
+	/** inputData */
+	int inputData(Conn *);
 
-	/** Main timer */
-	virtual int onTimer(Time & now);
-
-	/** InputData */
-	int InputData(Conn *);
-
-	/** OutputData */
-	int OutputData(Conn *);
+	/** outputData */
+	int outputData(Conn *);
 
 protected:
-
-	#ifdef _WIN32
-		static bool initWSA; /** Windows init flag for WSA (Windows Sockets API) */
-	#endif
 
 	typedef list<Conn *> tConnList; /** tConnList */
 	typedef tConnList::iterator tCLIt;
@@ -163,10 +144,16 @@ protected:
 	#endif
 
 	/** Run-flag */
-	bool mbRun;
+	bool mRun;
 
 	/** MainLoopCode (0) If 1 then restart hub! */
-	int miMainLoopCode;
+	int mMainLoopCode;
+	
+	/** Strong close conn flag */
+	int miNumCloseConn;
+	
+	/** Mean frequency */
+	MeanFrequency<unsigned, 21> mMeanFrequency;
 
 	/** Point to Server (for config) */
 	Server * mServer;
@@ -178,30 +165,47 @@ protected:
 
 protected:
 
-	/** AddConnection */
-	virtual int AddConnection(Conn *);
+	/** addConnection */
+	int addConnection(Conn *);
 
-	/** DelConnection */
-	int DelConnection(Conn *);
+	/** delConnection */
+	int delConnection(Conn *);
 
-	/** OnNewConn */
-	virtual int OnNewConn(Conn *);
+	/** onNewConn */
+	virtual int onNewConn(Conn *);
 
+	/** main timer */
+	virtual int onTimer(Time & now);
+	
 	/** getPtrForStr */
 	virtual string * getPtrForStr(Conn *);
 
 	/** onNewData */
 	virtual void onNewData(Conn *, string *);
 
-	/** Close server */
+	/** close server */
 	virtual void close() {
 	}
+	
+	/** onClose conn */
+	void onClose(Conn *);
 
 private:
 
 	/** Current connection */
 	Conn * mNowConn;
 
+	#ifdef _WIN32
+		static bool initWSA; /** Windows init flag for WSA (Windows Sockets API) */
+	#endif
+	
+private:
+
+	/** Main step in the cycle */
+	void step();
+
+	/** Main base timer */
+	int onTimerBase(Time & now);
 
 }; // Server
 

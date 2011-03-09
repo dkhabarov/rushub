@@ -69,7 +69,7 @@ static void sigHandler(int sig) {
 				DcServer::currentDcServer->LogStream() << "Received a " << sig << " signal, quiting" << endl;
 			}
 			cout << "Received a " << sig << " signal, quiting" << endl;
-			DcServer::currentDcServer->Stop(0);
+			DcServer::currentDcServer->stop(0);
 			break;
 
 		default :
@@ -131,10 +131,10 @@ int runHub(int argc, char ** argv, bool isService /*= false*/) {
 			}
 		#endif
 
-		result = server.Run(); // 1 = restart
+		result = server.run(); // 1 = restart
 
 		#ifdef _WIN32
-			if (isService && service.Stop() < 0) {
+			if (isService && service.stop() < 0) {
 				return -4;
 			}
 		#endif

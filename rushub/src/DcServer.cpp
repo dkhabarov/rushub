@@ -157,7 +157,7 @@ DcServer::~DcServer() {
 		Us = (DcUser *) (*it);
 		++it;
 		if (Us->mDcConn) {
-			DelConnection(Us->mDcConn);
+			delConnection(Us->mDcConn);
 		} else {
 			if (Us->getInUserList()) {
 				this->RemoveFromDCUserList(Us);
@@ -194,7 +194,7 @@ DcServer::~DcServer() {
 
 /** Close server */
 void DcServer::close() {
-	mbRun = false;
+	mRun = false;
 	for (tCLIt it = mConnList.begin(); it != mConnList.end(); ++it) {
 		deleteConn(*it);
 	}
@@ -375,7 +375,7 @@ int DcServer::onTimer(Time & now) {
 
 
 /** Function action after joining the client */
-int DcServer::OnNewConn(Conn *conn) {
+int DcServer::onNewConn(Conn *conn) {
 	DcConn * dcConn = (DcConn *) conn;
 
 	if (mSystemLoad == SYSTEM_LOAD_SYSTEM_DOWN) {
@@ -393,7 +393,7 @@ int DcServer::OnNewConn(Conn *conn) {
 	}
 
 	if (dcConn->Log(5)) {
-		dcConn->LogStream() << "[S]Stage OnNewConn" << endl;
+		dcConn->LogStream() << "[S]Stage onNewConn" << endl;
 	}
 	string sMsg;
 	dcConn->send(
@@ -458,7 +458,7 @@ int DcServer::OnNewConn(Conn *conn) {
 	dcConn->SetTimeOut(HUB_TIME_OUT_LOGIN, mDcConfig.mTimeout[HUB_TIME_OUT_LOGIN], mTime); /** Timeout for enter */
 	dcConn->SetTimeOut(HUB_TIME_OUT_KEY, mDcConfig.mTimeout[HUB_TIME_OUT_KEY], mTime);
 	if (dcConn->Log(5)) {
-		dcConn->LogStream() << "[E]Stage OnNewConn" << endl;
+		dcConn->LogStream() << "[E]Stage onNewConn" << endl;
 	}
 	dcConn->flush();
 	return 0;
