@@ -873,6 +873,7 @@ bool DcServer::AddToUserList(DcUser * User) {
 	}
 
 	User->setInUserList(true);
+	User->setCanSend(true);
 	if (!User->IsPassive()) {
 		mActiveList.AddWithKey(key, User);
 	}
