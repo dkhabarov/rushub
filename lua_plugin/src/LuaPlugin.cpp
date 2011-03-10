@@ -52,7 +52,7 @@ LuaPlugin::~LuaPlugin() {
 }
 
 /** Actions when loading plugin */
-void LuaPlugin::onLoad(DcServerBase *dcServerBase) {
+void LuaPlugin::onLoad(DcServerBase * dcServerBase) {
 	//setlocale(LC_ALL, dcServerBase->getLocale().c_str());
 	mCurServer = dcServerBase;
 
@@ -67,7 +67,7 @@ void LuaPlugin::onLoad(DcServerBase *dcServerBase) {
 
 		// replace slashes
 		size_t pos = mainDir.find("/");
-		while(pos != mainDir.npos) {
+		while (pos != mainDir.npos) {
 			mainDir.replace(pos, 1, LUA_DIRSEP);
 			pos = mainDir.find("/", pos);
 		}
@@ -138,17 +138,19 @@ bool LuaPlugin::regAll(PluginListBase * pluginListBase) {
 LuaInterpreter * LuaPlugin::FindScript(const string & sScriptName) {
 	tvLuaInterpreter::iterator it;
 	LuaInterpreter * Script;
-	for(it = mLua.begin(); it != mLua.end(); ++it) {
+	for (it = mLua.begin(); it != mLua.end(); ++it) {
 		Script = *it;
-		if(Script->mName == sScriptName)
+		if (Script->mName == sScriptName) {
 			return Script;
+		}
 	}
 	return NULL;
 }
 
 int LuaPlugin::CheckExists(LuaInterpreter * Script) {
-	if(!Script) return 0;
-	if(!Dir::isFileExist((msScriptsDir + Script->mName).c_str())) {
+	if (!Script) {
+		return 0;
+	} else if (!Dir::isFileExist((msScriptsDir + Script->mName).c_str())) {
 		Script->mbEnabled = false;
 		return 0;
 	}
@@ -162,7 +164,7 @@ int LuaPlugin::CheckExists(LuaInterpreter * Script) {
 */
 LuaInterpreter * LuaPlugin::AddScript(const string & sScriptName, bool bOnlyNew) {
 	LuaInterpreter * Script = FindScript(sScriptName);
-	if(!Script && Dir::isFileExist((msScriptsDir + sScriptName).c_str())) {
+	if (!Script && Dir::isFileExist((msScriptsDir + sScriptName).c_str())) {
 		Script = new LuaInterpreter(sScriptName, msScriptsDir);
 		mLua.push_back(Script);
 		return Script;
@@ -189,7 +191,9 @@ int LuaPlugin::StartScript(const string & sScriptName) {
 	@return LUA_ERRMEM (4) - memory error
 */
 int LuaPlugin::StartScript(LuaInterpreter * Script) {
-	if(!Script) return LUA_ERRFILE;
+	if (!Script) {
+		return LUA_ERRFILE;
+	}
 	mTasksList.AddTask(NULL, eT_Save);
 	int iRet = Script->Start();
 	return iRet;
@@ -202,23 +206,24 @@ int LuaPlugin::StartScript(LuaInterpreter * Script) {
 */
 int LuaPlugin::StopScript(LuaInterpreter * Script, bool bCurrent) {
 	int iRet = LUA_ERRFILE;
-	if(Script) {
+	if (Script) {
 		mTasksList.AddTask(NULL, eT_Save);
-		if(bCurrent) {
+		if (bCurrent) {
 			Script->mbEnabled = false;
-			mTasksList.AddTask((void*)Script, eT_StopScript);
-			if(!CheckExists(Script)) { // Removing from list in the case of absence
+			mTasksList.AddTask((void *) Script, eT_StopScript);
+			if (!CheckExists(Script)) { // Removing from list in the case of absence
 				mLua.remove(Script);
 				iRet = LUA_ERRFILE;
-			} else
+			} else {
 				iRet = 0;
+			}
 		} else {
 			iRet = -1;
-			if(Script->Stop()) {
+			if (Script->Stop()) {
 				Script->DelTmr();
 				iRet = 0;
 			}
-			if(!CheckExists(Script)) {
+			if (!CheckExists(Script)) {
 				mLua.remove(Script);
 				delete Script;
 				Script = NULL;
@@ -235,19 +240,21 @@ int LuaPlugin::StopScript(LuaInterpreter * Script, bool bCurrent) {
 	@return LUA_ERRSYNTAX - error in the script
 */
 int LuaPlugin::RestartScript(LuaInterpreter * Script, bool bCurrent) {
-	if(Script) {
+	if (Script) {
 		mTasksList.AddTask(NULL, eT_Save);
-		if(bCurrent) {
+		if (bCurrent) {
 			int st = luaL_loadfile(Script->mL, (msScriptsDir + Script->mName).c_str());
-			if(!st)
-				mTasksList.AddTask((void*)Script, eT_RestartScript);
-			else
+			if (!st) {
+				mTasksList.AddTask((void *) Script, eT_RestartScript);
+			} else {
 				StopScript(Script, true);
+			}
 			return st;
 		} else {
 			int st = StopScript(Script);
-			if(st == 0 || st == -1)
+			if (st == 0 || st == -1) {
 				return StartScript(Script);
+			}
 		}
 	}
 	return LUA_ERRFILE;
@@ -281,24 +288,27 @@ int LuaPlugin::RestartScripts(LuaInterpreter * CurScript, int iType) {
 /** Loading all scripts */
 int LuaPlugin::LoadScripts() {
 	TiXmlDocument file((this->getPluginDir() + "scripts.xml").c_str());
-	if(file.LoadFile()) {
+	if (file.LoadFile()) {
 		TiXmlHandle MainHandle(&file);
 		TiXmlElement *MainItem = MainHandle.FirstChild("Scripts").Element();
-		if(MainItem != NULL) {
+		if (MainItem != NULL) {
 			char *sName, *sEnabled;
 			TiXmlNode *Value = NULL;
-			while((Value = MainItem->IterateChildren(Value)) != NULL) {
-				if(Value->ToElement() == NULL || 
+			while ((Value = MainItem->IterateChildren(Value)) != NULL) {
+				if (Value->ToElement() == NULL || 
 					(sName = (char *)Value->ToElement()->Attribute("Name")) == NULL || 
-					(sEnabled = (char *)Value->ToElement()->Attribute("Enabled")) == NULL) {
+					(sEnabled = (char *)Value->ToElement()->Attribute("Enabled")) == NULL
+				) {
 					continue;
 				}
 				string sFile(sName);
-				if((sFile.size() <= 4) || (0 != sFile.compare(sFile.size() - 4, 4, ".lua")))
+				if ((sFile.size() <= 4) || (0 != sFile.compare(sFile.size() - 4, 4, ".lua"))) {
 					sFile.append(".lua");
+				}
 				LuaInterpreter * Script = AddScript(sFile, true);
-				if(strcmp(sEnabled, "false") != 0 && strcmp(sEnabled, "0") != 0)
+				if (strcmp(sEnabled, "false") != 0 && strcmp(sEnabled, "0") != 0) {
 					StartScript(Script);
+				}
 			}
 		}
 	}
@@ -347,7 +357,7 @@ void LuaPlugin::save() {
 	MainItem.SetAttribute("Version", PLUGIN_VERSION);
 	tvLuaInterpreter::iterator it;
 	LuaInterpreter * Script;
-	for(it = mLua.begin(); it != mLua.end(); ++it) {
+	for (it = mLua.begin(); it != mLua.end(); ++it) {
 		Script = *it;
 		TiXmlElement Item("Script");
 		Item.SetAttribute("Name", Script->mName.c_str());
@@ -360,8 +370,8 @@ void LuaPlugin::save() {
 
 int LuaPlugin::MoveUp(LuaInterpreter * Script) {
 	tvLuaInterpreter::iterator it, it_prev = mLua.begin();
-	for(it = ++mLua.begin(); it != mLua.end(); ++it) {
-		if(*it == Script) {
+	for (it = ++mLua.begin(); it != mLua.end(); ++it) {
+		if (*it == Script) {
 			mLua.erase(it);
 			mLua.insert(it_prev, Script);
 			return 1;
@@ -374,8 +384,8 @@ int LuaPlugin::MoveUp(LuaInterpreter * Script) {
 int LuaPlugin::MoveDown(LuaInterpreter * Script) {
 	tvLuaInterpreter::iterator it;
 	LuaInterpreter * tmp;
-	for(it = mLua.begin(); it != --mLua.end(); ++it) {
-		if(*it == Script) {
+	for (it = mLua.begin(); it != --mLua.end(); ++it) {
+		if (*it == Script) {
 			++it;
 			tmp = *it;
 			mLua.insert(--it, tmp);
@@ -392,27 +402,34 @@ int LuaPlugin::MoveDown(LuaInterpreter * Script) {
 int LuaPlugin::CallAll(const char* sFuncName, DcConnBase * dcConnBase, DcParserBase * dcParserBase) {
 	int iRet = 0;
 	int iBlock = 0; // On defaults don't block
-	if(dcParserBase) mCurDCParser = dcParserBase;
-	else mCurDCParser = NULL;
+	if (dcParserBase) {
+		mCurDCParser = dcParserBase;
+	} else {
+		mCurDCParser = NULL;
+	}
 	mCurDCConn = dcConnBase;
 
 	LuaInterpreter * Script;
-	for(tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
+	for (tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
 
 		Script = *it;
-		if(!Script->mL) continue;
+		if (!Script->mL) {
+			continue;
+		}
 
 		Script->NewCallParam((void *)dcConnBase, LUA_TLIGHTUSERDATA);
-		if(mCurDCParser) Script->NewCallParam((void *)mCurDCParser->mParseString.c_str(), LUA_TSTRING);
+		if (mCurDCParser) {
+			Script->NewCallParam((void *)mCurDCParser->mParseString.c_str(), LUA_TSTRING);
+		}
 
 		iRet = Script->CallFunc(sFuncName);
-		if(iRet == 1) { // 1 - blocked
+		if (iRet == 1) { // 1 - blocked
 			mCurDCParser = NULL;
 			mCurDCConn = NULL;
 			return 1;
-		}
-		if(iRet && (!iBlock || iBlock > iRet))
+		} else if (iRet && (!iBlock || iBlock > iRet)) {
 			iBlock = iRet;
+		}
 	}
 	mCurDCParser = NULL;
 	mCurDCConn = NULL;
@@ -424,7 +441,7 @@ int LuaPlugin::CallAll(const char* sFuncName, DcConnBase * dcConnBase, DcParserB
 /** Executed on each step of the timer of the server (100 msec) */
 int LuaPlugin::onTimer() {
 	mTasksList.CheckTasks();
-	for(tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
+	for (tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
 		(*it)->onTimer();
 	}
 	return 1;
@@ -433,9 +450,11 @@ int LuaPlugin::onTimer() {
 /** OnConfigChange event */
 int LuaPlugin::OnConfigChange(const char * sName, const char * sValue) {
 	LuaInterpreter * Script;
-	for(tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
+	for (tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
 		Script = *it;
-		if(!Script->mL) continue;
+		if (!Script->mL) {
+			continue;
+		}
 		Script->NewCallParam((void *)sName, LUA_TSTRING);
 		Script->NewCallParam((void *)sValue, LUA_TSTRING);
 		Script->CallFunc("OnConfigChange");
@@ -445,41 +464,50 @@ int LuaPlugin::OnConfigChange(const char * sName, const char * sValue) {
 
 /** onFlood event */
 int LuaPlugin::onFlood(DcConnBase * dcConnBase, int iType1, int iType2) {
-	if(dcConnBase != NULL) {
+	if (dcConnBase != NULL) {
 		int iRet = 0, iBlock = 0; // On defaults don't block
 		LuaInterpreter * Script;
-		for(tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
+		for (tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
 			Script = *it;
-			if(!Script->mL) continue;
+			if (!Script->mL) {
+				continue;
+			}
 			Script->NewCallParam((void *)dcConnBase, LUA_TLIGHTUSERDATA);
 			Script->NewCallParam(lua_Number(iType1), LUA_TNUMBER);
 			Script->NewCallParam(lua_Number(iType2), LUA_TNUMBER);
 			iRet = Script->CallFunc("OnFlood");
-			if(iRet == 1) { // 1 - blocked
+			if (iRet == 1) { // 1 - blocked
 				return 1;
 			}
-			if(iRet && (!iBlock || iBlock > iRet))
-			iBlock = iRet;
+			if (iRet && (!iBlock || iBlock > iRet)) {
+				iBlock = iRet;
+			}
 		}
 		return iBlock;
-	} else LogError("Error in LuaPlugin::onFlood");
+	}
+	LogError("Error in LuaPlugin::onFlood");
 	return 1;
 }
 
 /// onWebData(WebID, sData)
 int LuaPlugin::onWebData(DcConnBase * dcConnBase, WebParserBase * webParserBase) {
-	if((dcConnBase != NULL) && (webParserBase != NULL)) {
+	if ((dcConnBase != NULL) && (webParserBase != NULL)) {
 		int iRet = 0, iBlock = 0; // On defaults don't block
 		LuaInterpreter * Script;
-		for(tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
+		for (tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
 			Script = *it;
-			if(!Script->mL) continue;
+			if (!Script->mL) {
+				continue;
+			}
 			Script->NewCallParam((void *)dcConnBase, LUA_TLIGHTUSERDATA);
 			Script->NewCallParam((void *)webParserBase->mParseString.c_str(), LUA_TSTRING);
 			iRet = Script->CallFunc("OnWebData");
-			if(iRet == 1) return 1; // 1 - blocked
-			if(iRet && (!iBlock || iBlock > iRet))
-			iBlock = iRet;
+			if (iRet == 1) {
+				return 1; // 1 - blocked
+			}
+			if (iRet && (!iBlock || iBlock > iRet)) {
+				iBlock = iRet;
+			}
 		}
 		return iBlock;
 	}
@@ -490,50 +518,63 @@ int LuaPlugin::onWebData(DcConnBase * dcConnBase, WebParserBase * webParserBase)
 int LuaPlugin::OnScriptAction(const char * sScriptName, const char * sAction) {
 	tvLuaInterpreter::iterator it;
 	LuaInterpreter * Script;
-	for(it = mLua.begin(); it != mLua.end(); ++it) {
+	for (it = mLua.begin(); it != mLua.end(); ++it) {
 		Script = *it;
-		if(!Script->mL) continue;
-		if(sScriptName) Script->NewCallParam((void *)sScriptName, LUA_TSTRING);
-		if(Script->CallFunc(sAction))
+		if (!Script->mL) {
+			continue;
+		} else if (sScriptName) {
+			Script->NewCallParam((void *)sScriptName, LUA_TSTRING);
+		}
+		if (Script->CallFunc(sAction)) {
 			return 0;
+		}
 	}
 	return 1;
 }
 
 /** OnScriptError event */
-int LuaPlugin::OnScriptError(LuaInterpreter * Current, const char* sScriptName, const char* sErrMsg, bool bStoped) {
+int LuaPlugin::OnScriptError(LuaInterpreter * Current, const char * sScriptName, const char * sErrMsg, bool bStoped) {
 	tvLuaInterpreter::iterator it;
 	LuaInterpreter * Script;
-	for(it = mLua.begin(); it != mLua.end(); ++it) {
+	for (it = mLua.begin(); it != mLua.end(); ++it) {
 		Script = *it;
-		if(!Script->mL || Script == Current) continue;
+		if (!Script->mL || Script == Current) {
+			continue;
+		}
 		Script->NewCallParam((void *)sScriptName, LUA_TSTRING);
 		Script->NewCallParam((void *)sErrMsg, LUA_TSTRING);
 		Script->NewCallParam(lua_Number(bStoped), LUA_TBOOLEAN);
-		if(Script->CallFunc("OnScriptError"))
+		if (Script->CallFunc("OnScriptError")) {
 			return 0;
+		}
 	}
 	return 1;
 }
 
 /** onAny event */
 int LuaPlugin::onAny(DcConnBase * dcConnBase, DcParserBase * dcParserBase) {
-	if((dcConnBase != NULL) && (dcParserBase != NULL)) {
+	if ((dcConnBase != NULL) && (dcParserBase != NULL)) {
 		int iRet = 0, iBlock = 0; // On defaults don't block
 		LuaInterpreter * Script;
-		for(tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
+		for (tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
 			Script = *it;
-			if(!Script->mL) continue;
+			if (!Script->mL) {
+				continue;
+			}
 			Script->NewCallParam((void *)dcConnBase, LUA_TLIGHTUSERDATA);
 			Script->NewCallParam((void *)dcParserBase->mParseString.c_str(), LUA_TSTRING);
 			Script->NewCallParam(lua_Number((double)dcParserBase->getCommandType()), LUA_TNUMBER);
 			iRet = Script->CallFunc("OnAny");
-			if(iRet == 1) return 1; // 1 - blocked
-			if(iRet && (!iBlock || iBlock > iRet))
-			iBlock = iRet;
+			if (iRet == 1) {
+				return 1; // 1 - blocked
+			}
+			if (iRet && (!iBlock || iBlock > iRet)) {
+				iBlock = iRet;
+			}
 		}
 		return iBlock;
-	} else LogError("Error in LuaPlugin::onAny");
+	}
+	LogError("Error in LuaPlugin::onAny");
 	return 1;
 }
 

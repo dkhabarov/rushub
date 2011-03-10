@@ -61,23 +61,35 @@ public:
 	int AddTimer(cTimer *);
 	int DelTimer(int);
 	void DelTimer();
-	int Size() { return mList.Size(); }
+	int Size() {
+		return mList.Size();
+	}
 
 }; // class cTimerList
 
 class cTmrCnt {
 
-private:
-	int miId;
+public:
+
+	static int miCount; // static counter
 
 public:
-	static int miCount; // static counter
-	cTmrCnt(int iId = 0) : miId(iId) {}
+
+	cTmrCnt(int iId = 0) : miId(iId) {
+	}
+
 	bool operator() (void * val) {
-		if(((cTimer*)val)->miId != miId) return false;
+		if (((cTimer*)val)->miId != miId) {
+			return false;
+		}
 		++ miCount;
 		return true;
 	}
+
+private:
+
+	int miId;
+
 }; // class cTmrCnt
 
 }; // namespace luaplugin

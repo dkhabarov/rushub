@@ -43,15 +43,20 @@ class TasksList {
 
 public:
 	struct cTask {
-		cTask():mParam(NULL) {}
-		cTask(tTask iType):miType(iType),mParam(NULL) {}
-		~cTask() {}
+		cTask():mParam(NULL) {
+		}
+		cTask(tTask iType) : miType(iType), mParam(NULL) {
+		}
+		~cTask() {
+		}
 		tTask miType;
 		void * mParam;
 	}; // cTasks
 
-	TasksList() : miTackChecker(0) {}
-	~TasksList() {}
+	TasksList() : miTackChecker(0) {
+	}
+	~TasksList() {
+	}
 
 	void AddTask(void * Param, tTask iType = eT_No); /** Adding tasks */
 	void CheckTasks();

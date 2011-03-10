@@ -49,25 +49,38 @@ public:
 
 	LuaInterpreter(const string & sName, string & sFullName);
 	~LuaInterpreter();
-	LuaInterpreter & operator=(const LuaInterpreter &) { return *this; }
+
+	LuaInterpreter & operator = (const LuaInterpreter &) {
+		return *this;
+	}
 
 	int Start(); // (-1 - run already)
 	int Stop();
 
-	int CallFunc(const char*);
-	void RegFunc(const char*, int (*)(lua_State*));
-	void RegStrField(const char*, const char*);
+	int CallFunc(const char *);
+	void RegFunc(const char *, int (*)(lua_State *));
+	void RegStrField(const char *, const char *);
 
 	void Timer(int iId, const char * sFunc);
-	bool OnError(const char* sFunc, const char* sErrMsg, bool bStop = false);
+	bool OnError(const char * sFunc, const char * sErrMsg, bool bStop = false);
 	void NewCallParam(void * data, int type = 0);
 	void NewCallParam(lua_Number data, int type = 0);
 
-	inline void onTimer() { mTimerList.onTimer(); }
-	inline int AddTmr(cTimer * timer) { return mTimerList.AddTimer(timer); }
-	inline int Size() { return mTimerList.Size(); }
-	inline int DelTmr(int tm) { return mTimerList.DelTimer(tm); }
-	inline void DelTmr() { mTimerList.DelTimer(); }
+	inline void onTimer() {
+		mTimerList.onTimer();
+	}
+	inline int AddTmr(cTimer * timer) {
+		return mTimerList.AddTimer(timer);
+	}
+	inline int Size() {
+		return mTimerList.Size();
+	}
+	inline int DelTmr(int tm) {
+		return mTimerList.DelTimer(tm);
+	}
+	inline void DelTmr() {
+		mTimerList.DelTimer();
+	}
 
 private:
 
@@ -75,10 +88,12 @@ private:
 		void * data;
 		lua_Number num;
 		int type;
-		sParam(void * d, int t):data(d),type(t){}
-		sParam(lua_Number n, int t):num(n),type(t){}
+		sParam(void * d, int t) : data(d), type(t) {
+		}
+		sParam(lua_Number n, int t) : num(n), type(t) {
+		}
 	};
-	typedef vector<sParam*> tvCallParams;
+	typedef vector<sParam *> tvCallParams;
 	tvCallParams mCallParams;
 
 	void CreateUserMT();

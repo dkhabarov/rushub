@@ -43,7 +43,9 @@ LuaInterpreter::~LuaInterpreter() {
 
 /** On start script (-1 - run already)*/
 int LuaInterpreter::Start() {
-	if(mL) return -1;
+	if (mL) {
+		return -1;
+	}
 	mbEnabled = true;
 	mL = luaL_newstate();
 
@@ -63,7 +65,7 @@ int LuaInterpreter::Start() {
 	lua_pushliteral(mL, "package");
 	lua_gettable(mL, LUA_GLOBALSINDEX);
 
-	if(!LuaPlugin::mCurLua->mbSetLuaPath) {
+	if (!LuaPlugin::mCurLua->mbSetLuaPath) {
 		lua_pushliteral(mL, "path");
 		lua_rawget(mL, -2);
 		LuaPlugin::mCurLua->msLuaPath.append(lua_tostring(mL, -1));
@@ -149,7 +151,7 @@ int LuaInterpreter::Start() {
 	#else
 		int iStatus = lua_dofile(mL, (char *)(msPath + mName).c_str());
 	#endif
-	if(iStatus) {
+	if (iStatus) {
 		OnError("OnError", lua_tostring(mL, -1), true);
 		LuaPlugin::mCurLua->mCurScript = Old;
 		return iStatus;
@@ -163,11 +165,12 @@ int LuaInterpreter::Start() {
 
 /** On stop script */
 int LuaInterpreter::Stop() {
-	if(mL) {
+	if (mL) {
 		DelTmr();
 
-		for(tBotList::iterator it = mBotList.begin(); it != mBotList.end(); ++it)
+		for (tBotList::iterator it = mBotList.begin(); it != mBotList.end(); ++it) {
 			LuaPlugin::mCurServer->unregBot(*it);
+		}
 		mBotList.clear();
 
 		CallFunc("OnExit");
@@ -181,13 +184,13 @@ int LuaInterpreter::Stop() {
 }
 
 
-void LuaInterpreter::RegFunc(const char* sFuncName, int (*fncptr)(lua_State*)) {
+void LuaInterpreter::RegFunc(const char * sFuncName, int (*fncptr)(lua_State *)) {
 	lua_pushstring(mL, sFuncName);
 	lua_pushcfunction(mL, fncptr);
 	lua_rawset(mL, -3);
 }
 
-void LuaInterpreter::RegStrField(const char* sName, const char* sVal) {
+void LuaInterpreter::RegStrField(const char * sName, const char * sVal) {
 	lua_pushstring(mL, sName);
 	lua_pushstring(mL, sVal);
 	lua_rawset(mL, -3);
@@ -195,14 +198,14 @@ void LuaInterpreter::RegStrField(const char* sName, const char* sVal) {
 
 
 /** 1 - lock! */
-int LuaInterpreter::CallFunc(const char* sFunc) {
+int LuaInterpreter::CallFunc(const char * sFunc) {
 	tvCallParams::iterator it;
 	lua_settop(mL, 0);
 	int iBase = lua_gettop(mL);
 
 	lua_pushliteral(mL, "_TRACEBACK");
 	lua_rawget(mL, LUA_GLOBALSINDEX); // lua 5.1
-	if(lua_isfunction(mL, -1)) {
+	if (lua_isfunction(mL, -1)) {
 		iBase = lua_gettop(mL);
 	} else {
 		lua_pop(mL, 1);
@@ -211,35 +214,42 @@ int LuaInterpreter::CallFunc(const char* sFunc) {
 	//lua_insert(mL, iBase);
 
 	lua_getglobal(mL, sFunc);
-	if(lua_isnil(mL, -1)) { // function not exists
-		for(it = mCallParams.begin(); it != mCallParams.end(); ++it) delete (*it);
+	if (lua_isnil(mL, -1)) { // function not exists
+		for (it = mCallParams.begin(); it != mCallParams.end(); ++it) {
+			delete (*it);
+		}
 		mCallParams.clear();
 		lua_pop(mL, -1); // remove nil value
 		lua_remove(mL, iBase); // remove _TRACEBACK
 		return 0;
 	}
 
-	void** userdata;
-	for(it = mCallParams.begin(); it != mCallParams.end(); ++it) {
-		switch((*it)->type) {
-			case LUA_TLIGHTUSERDATA:
-				userdata = (void**) lua_newuserdata(mL, sizeof(void*));
+	void ** userdata;
+	for (it = mCallParams.begin(); it != mCallParams.end(); ++it) {
+		switch ((*it)->type) {
+			case LUA_TLIGHTUSERDATA :
+				userdata = (void **) lua_newuserdata(mL, sizeof(void *));
 				*userdata = (*it)->data;
 				luaL_getmetatable(mL, MT_USER_CONN);
 				lua_setmetatable(mL, -2);
 				break;
-			case LUA_TSTRING:
+
+			case LUA_TSTRING :
 				lua_pushstring(mL, (char*)(*it)->data);
 				break;
-			case LUA_TBOOLEAN:
+
+			case LUA_TBOOLEAN :
 				lua_pushboolean(mL, int((*it)->num));
 				break;
-			case LUA_TNUMBER:
+
+			case LUA_TNUMBER :
 				lua_pushnumber(mL, (*it)->num);
 				break;
-			default:
+
+			default :
 				lua_pushnil(mL);
 				break;
+
 		}
 		delete (*it);
 	}
@@ -249,8 +259,8 @@ int LuaInterpreter::CallFunc(const char* sFunc) {
 	LuaInterpreter * Old = LuaPlugin::mCurLua->mCurScript;
 	LuaPlugin::mCurLua->mCurScript = this;
 
-	if(lua_pcall(mL, iLen, 1, iBase)) {
-		if(!OnError(sFunc, lua_tostring(mL, -1))) {
+	if (lua_pcall(mL, iLen, 1, iBase)) {
+		if (!OnError(sFunc, lua_tostring(mL, -1))) {
 			lua_pop(mL, 1);
 			lua_remove(mL, iBase); // remove _TRACEBACK
 		}
@@ -259,10 +269,11 @@ int LuaInterpreter::CallFunc(const char* sFunc) {
 	}
 
 	int iVal = 0;
-	if(lua_isboolean(mL, -1))
+	if (lua_isboolean(mL, -1)) {
 		iVal = ((lua_toboolean(mL, -1) == 0) ? 0 : 1);
-	else if(lua_isnumber(mL, -1))
+	} else if(lua_isnumber(mL, -1)) {
 		iVal = (int)lua_tonumber(mL, -1);
+	}
 
 	lua_pop(mL, 1);
 	lua_remove(mL, iBase); // remove _TRACEBACK
@@ -271,17 +282,19 @@ int LuaInterpreter::CallFunc(const char* sFunc) {
 	return iVal;
 }
 
-bool LuaInterpreter::OnError(const char* sFunc, const char* sErrMsg, bool bStop) {
+bool LuaInterpreter::OnError(const char * sFunc, const char * sErrMsg, bool bStop) {
 	bool bStoped = true;
 	LuaPlugin::mCurLua->msLastError = sErrMsg;
 	LogError(sErrMsg);
-	if(strcmp(sFunc, "OnError")) {
-		NewCallParam((void *)sErrMsg, LUA_TSTRING);
+	if (strcmp(sFunc, "OnError")) {
+		NewCallParam((void *) sErrMsg, LUA_TSTRING);
 		bStoped = !CallFunc("OnError");
 	}
 	bStoped = bStoped || bStop;
 	LuaPlugin::mCurLua->OnScriptError(this, mName.c_str(), sErrMsg, bStoped);
-	if(bStoped) return !LuaPlugin::mCurLua->StopScript(this, true);
+	if (bStoped) {
+		return !LuaPlugin::mCurLua->StopScript(this, true);
+	}
 	return false;
 }
 
@@ -290,9 +303,10 @@ void LuaInterpreter::Timer(int iId, const char * sFunc) {
 	lua_pushnumber(mL, iId);
 	LuaInterpreter * Old = LuaPlugin::mCurLua->mCurScript;
 	LuaPlugin::mCurLua->mCurScript = this;
-	if(lua_pcall(mL, 1, 0, 0)) {
-		if(!OnError("OnTimer", lua_tostring(mL, -1), true))
+	if (lua_pcall(mL, 1, 0, 0)) {
+		if (!OnError("OnTimer", lua_tostring(mL, -1), true)) {
 			lua_pop(mL, 1);
+		}
 	}
 	LuaPlugin::mCurLua->mCurScript = Old;
 }
@@ -308,7 +322,9 @@ void LuaInterpreter::NewCallParam(lua_Number Data, int iType) {
 }
 
 void LuaInterpreter::CreateUserMT() {
-	if(!luaL_newmetatable(mL, MT_USER_CONN)) return;
+	if (!luaL_newmetatable(mL, MT_USER_CONN)) {
+		return;
+	}
 
 	lua_pushliteral(mL, "__index");
 	lua_pushstring(mL, "userIndex");
@@ -333,7 +349,9 @@ void LuaInterpreter::CreateUserMT() {
 }
 
 void LuaInterpreter::CreateConfigMT() {
-	if(!luaL_newmetatable(mL, MT_CONFIG)) return;
+	if (!luaL_newmetatable(mL, MT_CONFIG)) {
+		return;
+	}
 
 	lua_pushliteral(mL, "__index");
 	lua_pushstring(mL, "ConfigIndex");

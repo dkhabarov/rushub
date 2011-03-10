@@ -27,7 +27,7 @@ namespace luaplugin {
 
 int Uid::uidToString(lua_State * L) {
 	char buf[9] = { '\0' };
-	sprintf(buf, "%p", *((void**)lua_touserdata(L, 1)));
+	sprintf(buf, "%p", *((void **)lua_touserdata(L, 1)));
 	lua_pushfstring(L, "%s (%s)", lua_tostring(L, lua_upvalueindex(1)), buf);
 	return 1;
 }

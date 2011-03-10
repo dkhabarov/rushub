@@ -77,7 +77,9 @@ public:
 	LuaPlugin();
 	virtual ~LuaPlugin();
 
-	virtual const string & GetScriptsDir(){ return msScriptsDir; }
+	virtual const string & GetScriptsDir() {
+		return msScriptsDir;
+	}
 
 	virtual void onLoad(DcServerBase *); /** Actions when loading plugin */
 	virtual bool regAll(PluginListBase * pluginListBase); /** Registration all events for this plugin */
@@ -110,7 +112,7 @@ public:
 	virtual int onFlood(DcConnBase *, int, int);
 	virtual int onWebData(DcConnBase *, WebParserBase *);
 
-	virtual int OnScriptError(LuaInterpreter * Current, const char* sScriptName, const char* sErrMsg, bool bStoped = true);
+	virtual int OnScriptError(LuaInterpreter * Current, const char * sScriptName, const char * sErrMsg, bool bStoped = true);
 	virtual int OnScriptAction(const char * sScriptName, const char * sAction);
 
 	int OnConfigChange(const char *, const char *);

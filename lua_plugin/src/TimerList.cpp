@@ -41,7 +41,7 @@ cTimer::~cTimer() {
 }
 
 void cTimer::Check(int iTime) {
-	if(abs(iTime - miTime) >= miInterval) {
+	if (abs(iTime - miTime) >= miInterval) {
 		mScript->Timer(miId, msFunc.c_str());
 		miTime = iTime;
 	}
@@ -54,7 +54,7 @@ cTimerList::~cTimerList() {
 }
 
 static void Checker(void * val) {
-	((cTimer*)val)->Check(LuaPlugin::mCurServer->getMSec());
+	((cTimer *)val)->Check(LuaPlugin::mCurServer->getMSec());
 }
 void cTimerList::onTimer() {
 	mList.Loop(Checker);
