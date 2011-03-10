@@ -79,8 +79,11 @@ Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 			closeNow(CLOSE_REASON_GETPEERNAME);
 		}
 
+		char ip[INET_ADDRSTRLEN];
+		inet_ntop(AF_INET, &(saddr.sin_addr), ip, INET_ADDRSTRLEN);
+
+		mIp = ip; /** String ip */
 		mNetIp = saddr.sin_addr.s_addr; /** Numeric ip */
-		mIp = inet_ntoa(saddr.sin_addr); /** String ip */
 		mPort = ntohs(saddr.sin_port); /** port */
 
 		if (mServer->mMac) {

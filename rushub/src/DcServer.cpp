@@ -1460,33 +1460,34 @@ bool DcServer::setLang(const string & sName, const string & sValue) {
 
 
 
-int DcServer::regBot(const string & sNick, const string & sMyINFO, const string & sIP, bool bKey) {
-	if (!sNick.length() || sNick.length() > 64 || sNick.find_first_of(" |$") != sNick.npos) {
+int DcServer::regBot(const string & nick, const string & myInfo, const string & ip, bool key) {
+	if (!nick.length() || nick.length() > 64 || nick.find_first_of(" |$") != nick.npos) {
 		return -1;
 	}
 
-	string sINFO(sMyINFO);
-	DcUser *User = new DcUser(sNick);
-	User->mDcServer = this;
-	User->mbInOpList = bKey;
-	User->SetIp(sIP);
-	if (!sINFO.length()) {
-		sINFO = "$ $$$0$";
+	string info(myInfo);
+	DcUser * dcUser = new DcUser(nick);
+	dcUser->mDcServer = this;
+	dcUser->mbInOpList = key;
+	dcUser->SetIp(ip);
+	if (!info.size()) {
+		info = "$ $$$0$";
 	}
-	if (!User->setMyINFO(string("$MyINFO $ALL ") + sNick + " " + sINFO, sNick)) {
+	if (!dcUser->setMyINFO(string("$MyINFO $ALL ") + nick + " " + info, nick)) {
+		delete dcUser;
 		return -2;
 	}
 
 	if (Log(3)) {
-		LogStream() << "Reg bot: " << sNick << endl;
+		LogStream() << "Reg bot: " << nick << endl;
 	}
 
-	if (!AddToUserList(User)) {
-		delete User;
+	if (!AddToUserList(dcUser)) {
+		delete dcUser;
 		return -3;
 	}
-	mDCBotList.AddWithNick(sNick, User);
-	ShowUserToAll(User);
+	mDCBotList.AddWithNick(nick, dcUser);
+	ShowUserToAll(dcUser);
 	return 0;
 }
 
