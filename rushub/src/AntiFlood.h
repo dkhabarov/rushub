@@ -51,11 +51,8 @@ private:
 
 public:
 
-	AntiFlood(unsigned & iCount, double & time) : mList(NULL), miCount(iCount), mTime(time) {
-	}
-
-	~AntiFlood(){
-	}
+	AntiFlood(unsigned & iCount, double & time);
+	~AntiFlood();
 
 	AntiFlood & operator = (const AntiFlood &) {
 		return *this;

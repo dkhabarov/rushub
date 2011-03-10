@@ -26,6 +26,27 @@ namespace utils {
 
 
 
+AntiFlood::AntiFlood(unsigned & iCount, double & time) :
+	mList(NULL),
+	miCount(iCount),
+	mTime(time)
+{
+}
+
+
+
+AntiFlood::~AntiFlood() {
+	List_t * Item = NULL;
+	while (mList != NULL) {
+		sItem * Data = mList->Remove(mList->mKey, Item);
+		delete Data;
+		delete mList;
+		mList = Item;
+	}
+}
+
+
+
 void AntiFlood::Del(Time & now) {
 	if (mList) {
 		List_t * Item = NULL;
