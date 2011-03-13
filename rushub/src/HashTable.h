@@ -474,7 +474,11 @@ public:
 	/** Iterator through all NON-NULL elements of the container */
 	class iterator 
 	#ifdef _WIN32
-		: public _Iterator_with_base<std::forward_iterator_tag, V> // for_each algorithm
+		#if _MSC_VER < 1600
+		: public std::_Iterator_with_base<std::forward_iterator_tag, V> // for_each algorithm
+		#else
+		: public std::iterator<std::forward_iterator_tag, V> // for_each algorithm
+		#endif
 	#endif
 	{
 	public:

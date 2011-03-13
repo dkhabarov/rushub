@@ -29,23 +29,6 @@
 
 namespace dcserver {
 
-#ifdef _WIN32
-#define For_each for_each
-//template<class T1, class T2> inline
-//	T2 For_each(T1 first, T1 last, T2 f) {
-//		for (; first != last; ++first) {
-//			f(*first);
-//		}
-//		return f;
-//	}
-#else
-#define For_each for_each
-//template<class T1, class T2> inline
-//	T2 For_each(T1 first, T1 last, T2 f) {
-//		return for_each (first, last, f);
-//	}
-#endif // _WIN32
-
 void UserList::ufSend::operator() (UserBase * userBase) {
 	if (userBase && userBase->isCanSend()) {
 		if (!mbProfile) {
@@ -123,7 +106,7 @@ bool UserList::Remove(UserBase * userBase) {
 string & UserList::GetNickList() {
 	if (mbRemakeNextNickList && mbKeepNickList) {
 		mNickListMaker.Clear();
-		For_each(begin(), end(), mNickListMaker);
+		for_each(begin(), end(), mNickListMaker);
 		mbRemakeNextNickList = mbOptRemake = false;
 	}
 	return msNickList;
@@ -144,7 +127,7 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 		if (Log(4)) {
 			LogStream() << "sendToAll begin" << endl;
 		}
-		For_each(begin(), end(), ufSend(msCache));
+		for_each(begin(), end(), ufSend(msCache));
 		if (Log(4)) {
 			LogStream() << "sendToAll end" << endl;
 		}
@@ -163,7 +146,7 @@ void UserList::sendToProfiles(unsigned long profile, const string & data, bool a
 		LogStream() << "sendToProfiles begin" << endl;
 	}
 
-	For_each(begin(), end(), ufSend(sMsg, profile));
+	for_each(begin(), end(), ufSend(sMsg, profile));
 
 	if (Log(4)) {
 		LogStream() << "sendToProfiles end" << endl;
@@ -174,11 +157,11 @@ void UserList::sendToProfiles(unsigned long profile, const string & data, bool a
     Nick - user's nick
     Use for private send to all */
 void UserList::SendToWithNick(string & s, string & e) {
-	For_each(begin(), end(), ufSendWithNick(s, e));
+	for_each(begin(), end(), ufSendWithNick(s, e));
 }
 
 void UserList::SendToWithNick(string & s, string & e, unsigned long profile) {
-	For_each(begin(), end(), ufSendWithNick(s, e, profile));
+	for_each(begin(), end(), ufSendWithNick(s, e, profile));
 }
 
 /** Flush user cache */
@@ -244,7 +227,7 @@ string & FullUserList::GetInfoList(bool complete) {
 	if (mbKeepInfoList) {
 		if (mbRemakeNextInfoList && mbKeepInfoList) {
 			mINFOListMaker.Clear();
-			For_each(begin(), end(), mINFOListMaker);
+			for_each(begin(), end(), mINFOListMaker);
 			mbRemakeNextInfoList = mbOptRemake = false;
 		}
 		if (complete) {
@@ -259,7 +242,7 @@ string & FullUserList::GetInfoList(bool complete) {
 string & FullUserList::GetIpList() {
 	if (mbRemakeNextIpList && mbKeepIpList) {
 		mIpListMaker.Clear();
-		For_each(begin(), end(), mIpListMaker);
+		for_each(begin(), end(), mIpListMaker);
 		mbRemakeNextIpList = false;
 	}
 	return msIpList;
