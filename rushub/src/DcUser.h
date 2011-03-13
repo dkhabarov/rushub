@@ -126,7 +126,7 @@ public:
 	}
 	
 	int getProfile() const;
-	void SetIp(const string & ip);
+	void SetIp(const string & ip, bool check = false);
 
 	void setInOpList(bool inOpList);
 	void setInIpList(bool inIpList);

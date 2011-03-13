@@ -92,8 +92,8 @@ int DcUser::getProfile() const {
 }
 
 
-void DcUser::SetIp(const string & ip) {
-	if (ip.size() && DcConn::checkIp(ip)) {
+void DcUser::SetIp(const string & ip, bool check /*= false*/) {
+	if (ip.size() && (!check || check && DcConn::checkIp(ip))) {
 		mIp = ip;
 	}
 }

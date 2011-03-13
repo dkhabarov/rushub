@@ -1469,7 +1469,7 @@ int DcServer::regBot(const string & nick, const string & myInfo, const string & 
 	DcUser * dcUser = new DcUser(nick);
 	dcUser->mDcServer = this;
 	dcUser->mbInOpList = key;
-	dcUser->SetIp(ip);
+	dcUser->SetIp(ip, true);
 	if (!info.size()) {
 		info = "$ $$$0$";
 	}
