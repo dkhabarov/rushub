@@ -828,7 +828,7 @@ bool Conn::strLog() {
 }
 
 bool Conn::checkIp(const string &ip) {
-	int i;
+	int i = -1;
 	char c;
 	istringstream is(ip);
 	is >> i >> c;
