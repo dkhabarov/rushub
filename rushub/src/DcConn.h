@@ -131,12 +131,12 @@ class DcServer; /** server() */
 
 namespace protocol {
 
-	class DcProtocol;
+	class NmdcProtocol;
 
 }; // namespace protocol
 
 
-using ::dcserver::protocol::DcProtocol;
+using ::dcserver::protocol::NmdcProtocol;
 
 
 
@@ -155,7 +155,7 @@ public:
 
 class DcConn : public Conn, public DcConnBase {
 
-	friend class protocol::DcProtocol; /** for miSRCounter from DcProtocol::DC_SR */
+	friend class protocol::NmdcProtocol; /** for miSRCounter from NmdcProtocol::eventSr */
 
 public:
 

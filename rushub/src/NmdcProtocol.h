@@ -42,12 +42,12 @@ class UserList;
 
 namespace protocol {
 
-class DcProtocol : public Protocol {
+class NmdcProtocol : public Protocol {
 
 public:
 
-	DcProtocol();
-	virtual ~DcProtocol();
+	NmdcProtocol();
+	virtual ~NmdcProtocol();
 	
 	inline void SetServer(DcServer * dcServer) {
 		mDcServer = dcServer;
@@ -88,34 +88,34 @@ public:
 protected:
 	DcServer * mDcServer;
 
-	int DC_Search(DcParser *, DcConn *); /** Search request */
-	int DC_SR(DcParser *, DcConn *); /** Answer to search request */
-	int DC_MyINFO(DcParser *, DcConn *); /** MyINFO event */
-	int DC_Supports(DcParser *, DcConn *); /** Support of the additional expansions */
-	int DC_Key(DcParser *, DcConn *); /** Checking the key */
-	int DC_ValidateNick(DcParser *, DcConn *); /** Checking and reg nick */
-	int DC_Version(DcParser *, DcConn *); /** Checking a version */
-	int DC_GetNickList(DcParser *, DcConn *); /** Sending user-list */
-	int DC_Chat(DcParser *, DcConn *); /** Chat message */
-	int DC_To(DcParser *, DcConn *); /** Private message */
-	int DC_MyPass(DcParser *, DcConn *); /** Checking password */
-	int DC_ConnectToMe(DcParser *, DcConn *); /** Active connection */
-	int DC_RevConnectToMe(DcParser *, DcConn *); /** Passive connection */
-	int DC_MultiConnectToMe(DcParser *, DcConn *); /** Multi connection (for linked hubs) */
-	int DC_Kick(DcParser *, DcConn *); /** Kick */
-	int DC_OpForceMove(DcParser *, DcConn *); /** Force move */
-	int DC_GetINFO(DcParser *, DcConn *); /** Get user's MyINFO */
-	int DC_MCTo(DcParser *, DcConn *); /** Private message in chat */
-	int DC_Ping(DcParser *, DcConn *); /** Ping cmd */
-	int DC_Unknown(DcParser *, DcConn *); /** Unknown cmd */
-	int DC_Quit(DcParser *, DcConn *); /** Quit cmd */
+	int eventSearch(DcParser *, DcConn *); /** Search request */
+	int eventSr(DcParser *, DcConn *); /** Answer to search request */
+	int eventMyInfo(DcParser *, DcConn *); /** MyINFO event */
+	int eventSupports(DcParser *, DcConn *); /** Support of the additional expansions */
+	int eventKey(DcParser *, DcConn *); /** Checking the key */
+	int eventValidateNick(DcParser *, DcConn *); /** Checking and reg nick */
+	int eventVersion(DcParser *, DcConn *); /** Checking a version */
+	int eventGetNickList(DcParser *, DcConn *); /** Sending user-list */
+	int eventChat(DcParser *, DcConn *); /** Chat message */
+	int eventTo(DcParser *, DcConn *); /** Private message */
+	int eventMyPass(DcParser *, DcConn *); /** Checking password */
+	int eventConnectToMe(DcParser *, DcConn *); /** Active connection */
+	int eventRevConnectToMe(DcParser *, DcConn *); /** Passive connection */
+	int eventMultiConnectToMe(DcParser *, DcConn *); /** Multi connection (for linked hubs) */
+	int eventKick(DcParser *, DcConn *); /** Kick */
+	int eventOpForceMove(DcParser *, DcConn *); /** Force move */
+	int eventGetInfo(DcParser *, DcConn *); /** Get user's MyINFO */
+	int eventMcTo(DcParser *, DcConn *); /** Private message in chat */
+	int eventPing(DcParser *, DcConn *); /** Ping cmd */
+	int eventUnknown(DcParser *, DcConn *); /** Unknown cmd */
+	int eventQuit(DcParser *, DcConn *); /** Quit cmd */
 
 private:
 
 	int checkCommand(DcParser *, DcConn *);
 	bool antiflood(DcConn * dcConn, unsigned int iType);
 
-}; // DcProtocol
+}; // NmdcProtocol
 
 }; // namespace protocol
 

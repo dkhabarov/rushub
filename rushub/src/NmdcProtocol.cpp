@@ -22,7 +22,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DcProtocol.h"
+#include "NmdcProtocol.h"
 #include "DcServer.h" // for mDcServer
 #include "DcConn.h" // for DcConn
 
@@ -41,18 +41,18 @@ if (dcConn->GetLSFlag(FLAG)) { \
 
 
 
-DcProtocol::DcProtocol() {
-	SetClassName("DcProtocol");
+NmdcProtocol::NmdcProtocol() {
+	SetClassName("NmdcProtocol");
 }
 
 
 
-DcProtocol::~DcProtocol() {
+NmdcProtocol::~NmdcProtocol() {
 }
 
 
 
-int DcProtocol::DoCmd(Parser * parser, Conn * conn) {
+int NmdcProtocol::DoCmd(Parser * parser, Conn * conn) {
 	DcConn * dcConn = (DcConn *)conn;
 	DcParser * dcparser = (DcParser *)parser;
 
@@ -82,87 +82,87 @@ int DcProtocol::DoCmd(Parser * parser, Conn * conn) {
 			// Fallthrough
 
 		case NMDC_TYPE_SEARCH :
-			DC_Search(dcparser, dcConn);
+			eventSearch(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_SR :
-			DC_SR(dcparser, dcConn);
+			eventSr(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_MYNIFO :
-			DC_MyINFO(dcparser, dcConn);
+			eventMyInfo(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_SUPPORTS :
-			DC_Supports(dcparser, dcConn);
+			eventSupports(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_KEY :
-			DC_Key(dcparser, dcConn);
+			eventKey(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_VALIDATENICK :
-			DC_ValidateNick(dcparser, dcConn);
+			eventValidateNick(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_VERSION :
-			DC_Version(dcparser, dcConn);
+			eventVersion(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_GETNICKLIST :
-			DC_GetNickList(dcparser, dcConn);
+			eventGetNickList(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_CHAT :
-			DC_Chat(dcparser, dcConn);
+			eventChat(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_TO :
-			DC_To(dcparser, dcConn);
+			eventTo(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_MYPASS :
-			DC_MyPass(dcparser, dcConn);
+			eventMyPass(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_CONNECTTOME :
-			DC_ConnectToMe(dcparser, dcConn);
+			eventConnectToMe(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_RCONNECTTOME :
-			DC_RevConnectToMe(dcparser, dcConn);
+			eventRevConnectToMe(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_MCONNECTTOME :
-			DC_MultiConnectToMe(dcparser, dcConn);
+			eventMultiConnectToMe(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_KICK :
-			DC_Kick(dcparser, dcConn);
+			eventKick(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_OPFORCEMOVE :
-			DC_OpForceMove(dcparser, dcConn);
+			eventOpForceMove(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_GETINFO :
-			DC_GetINFO(dcparser, dcConn);
+			eventGetInfo(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_MCTO :
-			DC_MCTo(dcparser, dcConn);
+			eventMcTo(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_PING :
-			DC_Ping(dcparser, dcConn);
+			eventPing(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_UNKNOWN :
-			DC_Unknown(dcparser, dcConn);
+			eventUnknown(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_QUIT :
-			DC_Quit(dcparser, dcConn);
+			eventQuit(dcparser, dcConn);
 			break;
 
 		case NMDC_TYPE_UNPARSED :
@@ -183,7 +183,7 @@ int DcProtocol::DoCmd(Parser * parser, Conn * conn) {
 	return 0;
 }
 
-int DcProtocol::DC_Supports(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventSupports(DcParser * dcparser, DcConn * dcConn) {
 
 	string feature;
 	istringstream is(dcparser->mCommand);
@@ -221,7 +221,7 @@ int DcProtocol::DC_Supports(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int DcProtocol::DC_Key(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventKey(DcParser * dcparser, DcConn * dcConn) {
 	BADFLAG("Key", LOGIN_STATUS_KEY);
 
 	#ifndef WITHOUT_PLUGINS
@@ -239,7 +239,7 @@ int DcProtocol::DC_Key(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int DcProtocol::DC_ValidateNick(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventValidateNick(DcParser * dcparser, DcConn * dcConn) {
 	BADFLAG("ValidateNick", LOGIN_STATUS_VALNICK);
 
 	string &sNick = dcparser->chunkString(CHUNK_1_PARAM);
@@ -266,7 +266,7 @@ int DcProtocol::DC_ValidateNick(DcParser * dcparser, DcConn * dcConn) {
 		}
 	} catch(...) {
 		if (mDcServer->ErrLog(0)) {
-			mDcServer->LogStream() << "Unhandled exception in DcProtocol::DC_ValidateNick" << endl;
+			mDcServer->LogStream() << "Unhandled exception in NmdcProtocol::eventValidateNick" << endl;
 		}
 		if (dcConn->ErrLog(0)) {
 			dcConn->LogStream() << "Error in SetUser closing" << endl;
@@ -317,7 +317,7 @@ int DcProtocol::DC_ValidateNick(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int DcProtocol::DC_MyPass(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventMyPass(DcParser * dcparser, DcConn * dcConn) {
 	if (!dcConn->mDcUser) { /* Check of existence of the user for current connection */
 		if (dcConn->Log(2)) {
 			dcConn->LogStream() << "Mypass before validatenick" << endl;
@@ -352,7 +352,7 @@ int DcProtocol::DC_MyPass(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int DcProtocol::DC_Version(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventVersion(DcParser * dcparser, DcConn * dcConn) {
 	BADFLAG("Version", LOGIN_STATUS_VERSION);
 
 	string & sVersion = dcparser->chunkString(CHUNK_1_PARAM);
@@ -371,7 +371,7 @@ int DcProtocol::DC_Version(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int DcProtocol::DC_GetNickList(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventGetNickList(DcParser * dcparser, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
 		if (mDcServer->mCalls.mOnGetNickList.CallAll(dcConn, dcparser)) {
@@ -393,7 +393,7 @@ int DcProtocol::DC_GetNickList(DcParser * dcparser, DcConn * dcConn) {
 	return SendNickList(dcConn);
 }
 
-int DcProtocol::DC_MyINFO(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventMyInfo(DcParser * dcparser, DcConn * dcConn) {
 
 	const string & sNick = dcparser->chunkString(CHUNK_MI_NICK);
 
@@ -446,7 +446,7 @@ int DcProtocol::DC_MyINFO(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int DcProtocol::DC_Chat(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventChat(DcParser * dcparser, DcConn * dcConn) {
 
 	if (!dcConn->mDcUser) {
 		return -2;
@@ -481,7 +481,7 @@ int DcProtocol::DC_Chat(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int DcProtocol::DC_To(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventTo(DcParser * dcparser, DcConn * dcConn) {
 
 	if (!dcConn->mDcUser) {
 		return -2;
@@ -516,7 +516,7 @@ int DcProtocol::DC_To(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int DcProtocol::DC_MCTo(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventMcTo(DcParser * dcparser, DcConn * dcConn) {
 
 	if (!dcConn->mDcUser) {
 		return -2;
@@ -562,7 +562,7 @@ int DcProtocol::DC_MCTo(DcParser * dcparser, DcConn * dcConn) {
 	NMDC_TYPE_MSEARCH
 	NMDC_TYPE_MSEARCH_PAS
 */
-int DcProtocol::DC_Search(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventSearch(DcParser * dcparser, DcConn * dcConn) {
 
 	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
 		return -2;
@@ -631,7 +631,7 @@ int DcProtocol::DC_Search(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int DcProtocol::DC_SR(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventSr(DcParser * dcparser, DcConn * dcConn) {
 
 	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
 		return -2;
@@ -677,7 +677,7 @@ int DcProtocol::DC_SR(DcParser * dcparser, DcConn * dcConn) {
 }
 
 
-int DcProtocol::DC_ConnectToMe(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventConnectToMe(DcParser * dcparser, DcConn * dcConn) {
 
 	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
 		return -1;
@@ -707,7 +707,7 @@ int DcProtocol::DC_ConnectToMe(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int DcProtocol::DC_RevConnectToMe(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventRevConnectToMe(DcParser * dcparser, DcConn * dcConn) {
 
 	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
 		return -1;
@@ -739,11 +739,11 @@ int DcProtocol::DC_RevConnectToMe(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int DcProtocol::DC_MultiConnectToMe(DcParser *, DcConn *) {
+int NmdcProtocol::eventMultiConnectToMe(DcParser *, DcConn *) {
 	return 0;
 }
 
-int DcProtocol::DC_Kick(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventKick(DcParser * dcparser, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
 		if (mDcServer->mCalls.mOnKick.CallAll(dcConn, dcparser)) {
@@ -766,7 +766,7 @@ int DcProtocol::DC_Kick(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int DcProtocol::DC_OpForceMove(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventOpForceMove(DcParser * dcparser, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
 		if (mDcServer->mCalls.mOnOpForceMove.CallAll(dcConn, dcparser)) {
@@ -789,7 +789,7 @@ int DcProtocol::DC_OpForceMove(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int DcProtocol::DC_GetINFO(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventGetInfo(DcParser * dcparser, DcConn * dcConn) {
 	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
 		return -1;
 	}
@@ -816,11 +816,11 @@ int DcProtocol::DC_GetINFO(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int DcProtocol::DC_Ping(DcParser *, DcConn *) {
+int NmdcProtocol::eventPing(DcParser *, DcConn *) {
 	return 0;
 }
 
-int DcProtocol::DC_Unknown(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventUnknown(DcParser * dcparser, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
 	if (!mDcServer->mCalls.mOnUnknown.CallAll(dcConn, dcparser)) {
@@ -831,7 +831,7 @@ int DcProtocol::DC_Unknown(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int DcProtocol::DC_Quit(DcParser *, DcConn * dcConn) {
+int NmdcProtocol::eventQuit(DcParser *, DcConn * dcConn) {
 	dcConn->closeNice(9000, CLOSE_REASON_CMD_QUIT);
 	return 0;
 }
@@ -849,14 +849,14 @@ int DcProtocol::DC_Quit(DcParser *, DcConn * dcConn) {
 
 
 // $Lock ...|
-string & DcProtocol::Append_DC_Lock(string & str) {
+string & NmdcProtocol::Append_DC_Lock(string & str) {
 	static const char * cmd = "$Lock EXTENDEDPROTOCOL_" INTERNALNAME "_by_setuper_" INTERNALVERSION " Pk=" INTERNALNAME NMDC_SEPARATOR;
 	static unsigned int cmdLen = strlen(cmd);
 	return str.append(cmd, cmdLen);
 }
 
 // $Hello nick|
-string & DcProtocol::Append_DC_Hello(string & str, const string & nick) {
+string & NmdcProtocol::Append_DC_Hello(string & str, const string & nick) {
 	static const char * cmd = "$Hello ";
 	static unsigned int cmdLen = 7 + NMDC_SEPARATOR_LEN;
 	str.reserve(str.size() + nick.size() + cmdLen);
@@ -864,21 +864,21 @@ string & DcProtocol::Append_DC_Hello(string & str, const string & nick) {
 }
 
 // $HubIsFull|
-string & DcProtocol::Append_DC_HubIsFull(string & str) {
+string & NmdcProtocol::Append_DC_HubIsFull(string & str) {
 	static const char * cmd = "$HubIsFull" NMDC_SEPARATOR;
 	static unsigned int cmdLen = 10 + NMDC_SEPARATOR_LEN;
 	return str.append(cmd, cmdLen);
 }
 
 // $GetPass|
-string & DcProtocol::Append_DC_GetPass(string & str) {
+string & NmdcProtocol::Append_DC_GetPass(string & str) {
 	static const char * cmd = "$GetPass" NMDC_SEPARATOR;
 	static unsigned int cmdLen = 8 + NMDC_SEPARATOR_LEN;
 	return str.append(cmd, cmdLen);
 }
 
 // $ValidateDenide nick|
-string & DcProtocol::Append_DC_ValidateDenide(string & str, const string & nick) {
+string & NmdcProtocol::Append_DC_ValidateDenide(string & str, const string & nick) {
 	static const char * cmd = "$ValidateDenide ";
 	static unsigned int cmdLen = 16 + NMDC_SEPARATOR_LEN;
 	str.reserve(str.size() + nick.size() + cmdLen);
@@ -886,7 +886,7 @@ string & DcProtocol::Append_DC_ValidateDenide(string & str, const string & nick)
 }
 
 // $HubName hubName - topic|
-string & DcProtocol::Append_DC_HubName(string & str, const string & hubName, const string & topic) {
+string & NmdcProtocol::Append_DC_HubName(string & str, const string & hubName, const string & topic) {
 	static const char * cmd = "$HubName ";
 	static const char * cmd2 = " - ";
 	static unsigned int cmdLen = 9 + NMDC_SEPARATOR_LEN;
@@ -901,7 +901,7 @@ string & DcProtocol::Append_DC_HubName(string & str, const string & hubName, con
 }
 
 // $HubTopic hubTopic|
-string & DcProtocol::Append_DC_HubTopic(string & str, const string & hubTopic) {
+string & NmdcProtocol::Append_DC_HubTopic(string & str, const string & hubTopic) {
 	static const char * cmd = "$HubTopic ";
 	static unsigned int cmdLen = 10 + NMDC_SEPARATOR_LEN;
 	str.reserve(str.size() + hubTopic.size() + cmdLen);
@@ -909,7 +909,7 @@ string & DcProtocol::Append_DC_HubTopic(string & str, const string & hubTopic) {
 }
 
 // <nick> msg|
-string & DcProtocol::Append_DC_Chat(string & str, const string & nick, const string & msg) {
+string & NmdcProtocol::Append_DC_Chat(string & str, const string & nick, const string & msg) {
 	static const char * cmd = "<";
 	static const char * cmd2 = "> ";
 	static unsigned int cmdLen = 3 + NMDC_SEPARATOR_LEN;
@@ -918,7 +918,7 @@ string & DcProtocol::Append_DC_Chat(string & str, const string & nick, const str
 }
 
 // $To: to From: from $<nick> msg|
-string & DcProtocol::Append_DC_PM(string & str, const string & to, const string & from, const string & nick, const string & msg) {
+string & NmdcProtocol::Append_DC_PM(string & str, const string & to, const string & from, const string & nick, const string & msg) {
 	static const char * cmd = "$To: ";
 	static const char * cmd2 = " From: ";
 	static const char * cmd3 = " $<";
@@ -930,7 +930,7 @@ string & DcProtocol::Append_DC_PM(string & str, const string & to, const string 
 }
 
 // $To: to From: from $<nick> msg|
-void DcProtocol::Append_DC_PMToAll(string & start, string & end, const string & from, const string & nick, const string & msg) {
+void NmdcProtocol::Append_DC_PMToAll(string & start, string & end, const string & from, const string & nick, const string & msg) {
 	static const char * cmd = "$To: ";
 	static const char * cmd2 = " From: ";
 	static const char * cmd3 = " $<";
@@ -943,7 +943,7 @@ void DcProtocol::Append_DC_PMToAll(string & start, string & end, const string & 
 }
 
 // $Quit nick|
-string & DcProtocol::Append_DC_Quit(string & str, const string & nick) {
+string & NmdcProtocol::Append_DC_Quit(string & str, const string & nick) {
 	static const char * cmd = "$Quit ";
 	static unsigned int cmdLen = 6 + NMDC_SEPARATOR_LEN;
 	str.reserve(str.size() + nick.size() + cmdLen);
@@ -951,7 +951,7 @@ string & DcProtocol::Append_DC_Quit(string & str, const string & nick) {
 }
 
 // $OpList nick$$|
-string & DcProtocol::Append_DC_OpList(string & str, const string & nick) {
+string & NmdcProtocol::Append_DC_OpList(string & str, const string & nick) {
 	static const char * cmd = "$OpList ";
 	static const char * cmd2 = "$$"NMDC_SEPARATOR;
 	static unsigned int cmdLen = 10 + NMDC_SEPARATOR_LEN;
@@ -961,7 +961,7 @@ string & DcProtocol::Append_DC_OpList(string & str, const string & nick) {
 }
 
 // $UserIP nick ip$$|
-string & DcProtocol::Append_DC_UserIP(string & str, const string & nick, const string & ip) {
+string & NmdcProtocol::Append_DC_UserIP(string & str, const string & nick, const string & ip) {
 	static const char * cmd = "$UserIP ";
 	static const char * cmd2 = " ";
 	static const char * cmd3 = "$$"NMDC_SEPARATOR;
@@ -974,7 +974,7 @@ string & DcProtocol::Append_DC_UserIP(string & str, const string & nick, const s
 	return str;
 }
 
-string & DcProtocol::Append_DC_ForceMove(string & str, const string & address) {
+string & NmdcProtocol::Append_DC_ForceMove(string & str, const string & address) {
 	static const char * cmd = "$forceMove ";
 	str.reserve(address.size() + 11 + NMDC_SEPARATOR_LEN);
 	return str.append(cmd, 11).append(address).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
@@ -984,7 +984,7 @@ string & DcProtocol::Append_DC_ForceMove(string & str, const string & address) {
 
 
 
-void DcProtocol::SendMode(DcConn * dcConn, const string & str, int iMode, UserList & UL, bool bUseCache) {
+void NmdcProtocol::SendMode(DcConn * dcConn, const string & str, int iMode, UserList & UL, bool bUseCache) {
 	bool bAddSep = false;
 	if (str.substr(str.size() - 1, 1) != NMDC_SEPARATOR) {
 		bAddSep = true;
@@ -1017,7 +1017,7 @@ void DcProtocol::SendMode(DcConn * dcConn, const string & str, int iMode, UserLi
 
 
 /** Sending the user-list and op-list */
-int DcProtocol::SendNickList(DcConn * dcConn) {
+int NmdcProtocol::SendNickList(DcConn * dcConn) {
 	try {
 		if ((dcConn->GetLSFlag(LOGIN_STATUS_LOGIN_DONE) != LOGIN_STATUS_LOGIN_DONE) && mDcServer->mDcConfig.mNicklistOnLogin) {
 			dcConn->mbNickListInProgress = true;
@@ -1076,7 +1076,7 @@ int DcProtocol::SendNickList(DcConn * dcConn) {
 }
 
 /** Get normal share size */
-string DcProtocol::GetNormalShare(__int64 iVal) {
+string NmdcProtocol::GetNormalShare(__int64 iVal) {
 	ostringstream os;
 	float s = static_cast<float>(iVal);
 	int i = 0;
@@ -1089,7 +1089,7 @@ string DcProtocol::GetNormalShare(__int64 iVal) {
 
 
 
-int DcProtocol::checkCommand(DcParser * dcParser, DcConn * dcConn) {
+int NmdcProtocol::checkCommand(DcParser * dcParser, DcConn * dcConn) {
 
 	// Checking length of command
 	if (dcParser->miLen > mDcServer->mDcConfig.mMaxCmdLen[dcParser->miType]) {
@@ -1131,7 +1131,7 @@ int DcProtocol::checkCommand(DcParser * dcParser, DcConn * dcConn) {
 
 
 
-bool DcProtocol::antiflood(DcConn * dcConn, unsigned int iType) {
+bool NmdcProtocol::antiflood(DcConn * dcConn, unsigned int iType) {
 	if (mDcServer->antiFlood(dcConn->mTimes1.mCount[iType], dcConn->mTimes1.mTime[iType],
 		mDcServer->mDcConfig.mFloodCount[iType], mDcServer->mDcConfig.mFloodTime[iType])
 	) {

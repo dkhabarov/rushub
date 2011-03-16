@@ -320,7 +320,7 @@ Conn *DcConnFactory::createConn(tSocket sock) {
 
 	DcConn * dcConn = new DcConn(CLIENT_TYPE_NMDC, sock, mServer);
 	dcConn->mConnFactory = this; /** Connection factory for current connection (DcConnFactory) */
-	dcConn->mProtocol = mProtocol; /** Protocol pointer (DcProtocol) */
+	dcConn->mProtocol = mProtocol; /** Protocol pointer (NmdcProtocol) */
 
 	DcServer * dcServer = (DcServer *) mServer;
 	if (!dcServer) {

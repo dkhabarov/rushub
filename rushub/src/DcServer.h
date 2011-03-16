@@ -29,7 +29,7 @@
 
 #include "Server.h"
 #include "DcConn.h"
-#include "DcProtocol.h"
+#include "NmdcProtocol.h"
 #include "Plugin.h"
 
 #include "DcConfig.h"
@@ -125,7 +125,7 @@ class DcServer : public Server, public DcServerBase {
 	friend class ::dcserver::DcListIterator; // for mConnList
 	friend class ::dcserver::DcConn; // for DoUserEnter in DcConn::onFlush and MinDelay in DcConn::onTimer
 	friend class ::dcserver::DcConnFactory; // for RemoveFromDCUserList in DcConnFactory::deleteConn
-	friend class ::dcserver::protocol::DcProtocol; // for BeforeUserEnter in DcProtocol::DC_MyINFO
+	friend class ::dcserver::protocol::NmdcProtocol; // for BeforeUserEnter in NmdcProtocol::eventMyInfo
 	friend class ::webserver::WebConnFactory; // for call plugins
 
 public:
@@ -149,7 +149,7 @@ public:
 	static string msSysVersion; /** Verion of OS System */
 
 	Time mStartTime; /** Start time of the hub */
-	DcProtocol mDCProtocol; /** DC Protocol */
+	NmdcProtocol mDCProtocol; /** DC Protocol */
 	DcParser mDCParser; /** Parser for checking syntax of commands */
 
 	FullUserList mDCUserList; /** User list */
