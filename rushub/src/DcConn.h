@@ -129,16 +129,6 @@ enum CloseReason {
 class DcServer; /** server() */
 
 
-namespace protocol {
-
-	class NmdcProtocol;
-
-}; // namespace protocol
-
-
-using ::dcserver::protocol::NmdcProtocol;
-
-
 
 class DcConnFactory : public ConnFactory {
 
