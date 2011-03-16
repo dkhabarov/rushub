@@ -596,7 +596,7 @@ int NmdcProtocol::eventSearch(DcParser * dcparser, DcConn * dcConn) {
 			break;
 
 		case NMDC_TYPE_SEARCH_PAS :
-			dcConn->miSRCounter = 0; /** Zeroizing result counter of the passive search */
+			dcConn->emptySrCounter(); /** Zeroizing result counter of the passive search */
 			SendMode(dcConn, dcparser->mCommand, iMode, mDcServer->mActiveList, true); // Use cache for send to all
 			break;
 
@@ -620,7 +620,7 @@ int NmdcProtocol::eventSearch(DcParser * dcparser, DcConn * dcConn) {
 			break;
 
 		case NMDC_TYPE_MSEARCH_PAS :
-			dcConn->miSRCounter = 0; /** Zeroizing result counter of the passive search */
+			dcConn->emptySrCounter(); /** Zeroizing result counter of the passive search */
 			SendMode(dcConn, dcparser->mCommand, iMode, mDcServer->mActiveList, true); // Use cache for send to all
 			break;
 
@@ -669,7 +669,10 @@ int NmdcProtocol::eventSr(DcParser * dcparser, DcConn * dcConn) {
 	#endif
 
 	/** Sending cmd */
-	if (dcUser && (!mDcServer->mDcConfig.mMaxPassiveRes || (++dcUser->mDcConn->miSRCounter <= unsigned(mDcServer->mDcConfig.mMaxPassiveRes)))) {
+	if (dcUser && (!mDcServer->mDcConfig.mMaxPassiveRes ||
+		(dcUser->mDcConn->getSrCounter() <= unsigned(mDcServer->mDcConfig.mMaxPassiveRes))
+	)) {
+		dcUser->mDcConn->increaseSrCounter();
 		string sStr(dcparser->mCommand, 0, dcparser->mChunks[CHUNK_SR_TO].first - 1); /** Remove nick on the end of cmd */
 		dcUser->mDcConn->send(sStr, true, false);
 	}

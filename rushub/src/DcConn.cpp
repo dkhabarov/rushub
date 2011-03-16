@@ -38,7 +38,7 @@ DcConn::DcConn(int type, tSocket sock, Server *s) :
 	mbIpRecv(false),
 	mbNickListInProgress(false),
 	mDcUser(NULL),
-	miSRCounter(0),
+	mSrCounter(0),
 	mLoginStatus(0)
 {
 	mDcUserBase = NULL;
@@ -294,6 +294,18 @@ bool DcConn::SetUser(DcUser * User) {
 		LogStream() << "User " << User->msNick << " connected ... " << endl;
 	}
 	return true;
+}
+
+
+
+void DcConn::increaseSrCounter() {
+	++mSrCounter;
+}
+
+
+
+void DcConn::emptySrCounter() {
+	mSrCounter = 0;
 }
 
 

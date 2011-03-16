@@ -155,7 +155,7 @@ public:
 
 class DcConn : public Conn, public DcConnBase {
 
-	friend class protocol::NmdcProtocol; /** for miSRCounter from NmdcProtocol::eventSr */
+	friend class protocol::NmdcProtocol; /** for mSrCounter from NmdcProtocol::eventSr */
 
 public:
 
@@ -275,12 +275,16 @@ public:
 	/** Set user object for current connection */
 	bool SetUser(DcUser * User);
 
+	inline unsigned int getSrCounter() {
+		return mSrCounter;
+	}
+
+	void increaseSrCounter();
+	void emptySrCounter();
+
 protected:
 
 	TimeOut mTimeOut[HUB_TIME_OUT_MAX];
-
-	//< Counter search results
-	unsigned miSRCounter;
 
 	//< Timers
 	struct Times {
@@ -299,7 +303,11 @@ protected:
 
 private:
 
-	unsigned int mLoginStatus; //< Login status
+	//< Counter search results
+	unsigned int mSrCounter;
+
+	//< Login status
+	unsigned int mLoginStatus;
 
 
 }; // class DcConn
