@@ -142,6 +142,12 @@ long DcConn::getEnterTime() const {
 
 
 
+void DcConn::setEnterTimeNow() {
+	mTimes.mKey.Get();
+}
+
+
+
 //< Client's protocol version
 const string & DcConn::getVersion() const {
 	return mVersion;

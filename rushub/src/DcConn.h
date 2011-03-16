@@ -155,8 +155,6 @@ public:
 
 class DcConn : public Conn, public DcConnBase {
 
-	friend class protocol::NmdcProtocol; /** for mSrCounter from NmdcProtocol::eventSr */
-
 public:
 
 	unsigned mFeatures;         //< Features
@@ -213,6 +211,8 @@ public:
 	virtual const string & getMacAddress() const;
 
 	virtual long getEnterTime() const;
+
+	virtual void setEnterTimeNow();
 
 	//< Client's protocol version
 	virtual const string & getVersion() const;

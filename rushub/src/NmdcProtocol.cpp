@@ -235,7 +235,7 @@ int NmdcProtocol::eventKey(DcParser * dcparser, DcConn * dcConn) {
 	dcConn->SetLSFlag(LOGIN_STATUS_KEY); /** User has sent key */
 	dcConn->ClearTimeOut(HUB_TIME_OUT_KEY);
 	dcConn->SetTimeOut(HUB_TIME_OUT_VALNICK, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_VALNICK], mDcServer->mTime);
-	dcConn->mTimes.mKey.Get();
+	dcConn->setEnterTimeNow();
 	return 0;
 }
 
@@ -581,13 +581,13 @@ int NmdcProtocol::eventSearch(DcParser * dcparser, DcConn * dcConn) {
 	switch (dcparser->miType) {
 
 		case NMDC_TYPE_SEARCH :
-			if (mDcServer->mDcConfig.mCheckSearchIp && dcConn->mIp != dcparser->chunkString(CHUNK_AS_IP)) {
+			if (mDcServer->mDcConfig.mCheckSearchIp && dcConn->getIp() != dcparser->chunkString(CHUNK_AS_IP)) {
 				sMsg = mDcServer->mDCLang.mBadSearchIp;
 				if (dcConn->Log(2)) {
 					dcConn->LogStream() << "Bad ip in active search, closing" << endl;
 				}
 				StringReplace(sMsg, string("ip"), sMsg, dcparser->chunkString(CHUNK_AS_IP));
-				StringReplace(sMsg, string("real_ip"), sMsg, dcConn->mIp);
+				StringReplace(sMsg, string("real_ip"), sMsg, dcConn->getIp());
 				mDcServer->sendToUser(dcConn, sMsg.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
 				dcConn->closeNice(9000, CLOSE_REASON_NICK_SEARCH);
 				return -1;
@@ -601,13 +601,13 @@ int NmdcProtocol::eventSearch(DcParser * dcparser, DcConn * dcConn) {
 			break;
 
 		case NMDC_TYPE_MSEARCH :
-			if (mDcServer->mDcConfig.mCheckSearchIp && (dcConn->mIp != dcparser->chunkString(CHUNK_AS_IP))) {
+			if (mDcServer->mDcConfig.mCheckSearchIp && (dcConn->getIp() != dcparser->chunkString(CHUNK_AS_IP))) {
 				sMsg = mDcServer->mDCLang.mBadSearchIp;
 				if (dcConn->Log(2)) {
 					dcConn->LogStream() << "Bad ip in active search, closing" << endl;
 				}
 				StringReplace(sMsg, string("ip"), sMsg, dcparser->chunkString(CHUNK_AS_IP));
-				StringReplace(sMsg, string("real_ip"), sMsg, dcConn->mIp);
+				StringReplace(sMsg, string("real_ip"), sMsg, dcConn->getIp());
 				mDcServer->sendToUser(dcConn, sMsg.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
 				dcConn->closeNice(9000, CLOSE_REASON_NICK_SEARCH);
 				return -1;
@@ -686,10 +686,10 @@ int NmdcProtocol::eventConnectToMe(DcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	if (mDcServer->mDcConfig.mCheckCtmIp && dcConn->mIp != dcparser->chunkString(CHUNK_CM_IP)) {
+	if (mDcServer->mDcConfig.mCheckCtmIp && dcConn->getIp() != dcparser->chunkString(CHUNK_CM_IP)) {
 		string sMsg = mDcServer->mDCLang.mBadCtmIp;
 		StringReplace(sMsg, string("ip"), sMsg, dcparser->chunkString(CHUNK_CM_IP));
-		StringReplace(sMsg, string("real_ip"), sMsg, dcConn->mIp);
+		StringReplace(sMsg, string("real_ip"), sMsg, dcConn->getIp());
 		mDcServer->sendToUser(dcConn, sMsg.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_CTM);
 		return -1;
