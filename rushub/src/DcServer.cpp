@@ -87,12 +87,12 @@ DcServer::DcServer(const string & configFile, const string &):
 	}
 
 	/** ConnFactory */
-	mConnFactory = new DcConnFactory(&mDCProtocol, this);
+	mConnFactory = new DcConnFactory(&mDcProtocol, this);
 
 	/** DcIpList */
 	mIPListConn = new DcIpList();
 
-	mDCProtocol.SetServer(this);
+	mDcProtocol.SetServer(this);
 	mPluginList.SetServer(this);
 
 	mPluginList.LoadAll(); /** Load plugins */
@@ -774,7 +774,7 @@ bool DcServer::BeforeUserEnter(DcConn * dcConn) {
 			}
 
 			/** Can happen so that list not to send at a time */
-			mDCProtocol.SendNickList(dcConn);
+			mDcProtocol.SendNickList(dcConn);
 
 			dcConn->mbSendNickList = false;
 			return true;

@@ -149,7 +149,7 @@ public:
 	static string msSysVersion; /** Verion of OS System */
 
 	Time mStartTime; /** Start time of the hub */
-	NmdcProtocol mDCProtocol; /** DC Protocol */
+	NmdcProtocol mDcProtocol; /** DC Protocol */
 	DcParser mDCParser; /** Parser for checking syntax of commands */
 
 	FullUserList mDCUserList; /** User list */
