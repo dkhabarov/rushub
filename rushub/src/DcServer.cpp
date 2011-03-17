@@ -154,7 +154,7 @@ DcServer::~DcServer() {
 	DcUser * Us = NULL;
 	UserList::iterator it, it_e = mDCUserList.end();	
 	for (it = mDCUserList.begin(); it != it_e;) {
-		Us = (DcUser *) (*it);
+		Us = static_cast<DcUser *> (*it);
 		++it;
 		if (Us->mDcConn) {
 			delConnection(Us->mDcConn);
@@ -376,7 +376,7 @@ int DcServer::onTimer(Time & now) {
 
 /** Function action after joining the client */
 int DcServer::onNewConn(Conn *conn) {
-	DcConn * dcConn = (DcConn *) conn;
+	DcConn * dcConn = static_cast<DcConn *> (conn);
 
 	if (mSystemLoad == SYSTEM_LOAD_SYSTEM_DOWN) {
 		if (dcConn->Log(1)) {
@@ -395,72 +395,12 @@ int DcServer::onNewConn(Conn *conn) {
 	if (dcConn->Log(5)) {
 		dcConn->LogStream() << "[S]Stage onNewConn" << endl;
 	}
-	string sMsg;
-	dcConn->send(
-		NmdcProtocol::Append_DC_HubName(
-			NmdcProtocol::Append_DC_Lock(sMsg),
-			mDcConfig.mHubName,
-			mDcConfig.mTopic
-		),
-		false,
-		false
-	);
 
-	#ifndef WITHOUT_PLUGINS
-		if (mCalls.mOnUserConnected.CallAll(dcConn)) {
-			dcConn->flush();
-		} else
-	#endif
-	{
-		static __int64 iShareVal = -1;
-		static int iUsersVal = -1;
-		static long iTimeVal = -1;
-		static string sTimeCache, sShareCache, sCache;
-		bool useCache = true;
-		Time Uptime(mTime);
-		Uptime -= mStartTime;
-		long min = Uptime.Sec() / 60;
-		if (iTimeVal != min) {
-			iTimeVal = min;
-			useCache = false;
-			stringstream oss;
-			int w, d, h, m;
-			Uptime.AsTimeVals(w, d, h, m);
-			if (w) {
-				oss << w << " " << mDCLang.mTimes[0] << " ";
-			}
-			if (d) {
-				oss << d << " " << mDCLang.mTimes[1] << " ";
-			}
-			if (h) {
-				oss << h << " " << mDCLang.mTimes[2] << " ";
-			}
-			oss << m << " " << mDCLang.mTimes[3];
-			sTimeCache = oss.str();
-		}
-		if (iShareVal != miTotalShare) {
-			iShareVal = miTotalShare;
-			useCache = false;
-			sShareCache = NmdcProtocol::GetNormalShare(iShareVal);
-		}
-		if (iUsersVal != miTotalUserCount) {
-			iUsersVal = miTotalUserCount;
-			useCache = false;
-		}
-		if (!useCache) {
-			StringReplace(mDCLang.mFirstMsg, string("HUB"), sCache, string(INTERNALNAME " " INTERNALVERSION));
-			StringReplace(sCache, string("uptime"), sCache, sTimeCache);
-			StringReplace(sCache, string("users"), sCache, iUsersVal);
-			StringReplace(sCache, string("share"), sCache, sShareCache);
-		}
-		sendToUser(dcConn, sCache.c_str(), mDcConfig.mHubBot.c_str());
-	}
-	dcConn->SetTimeOut(HUB_TIME_OUT_LOGIN, mDcConfig.mTimeout[HUB_TIME_OUT_LOGIN], mTime); /** Timeout for enter */
-	dcConn->SetTimeOut(HUB_TIME_OUT_KEY, mDcConfig.mTimeout[HUB_TIME_OUT_KEY], mTime);
+	mDcProtocol.onNewDcConn(dcConn);
+
 	if (dcConn->Log(5)) {
 		dcConn->LogStream() << "[E]Stage onNewConn" << endl;
 	}
-	dcConn->flush();
 	return 0;
 }
 
@@ -498,13 +438,13 @@ void DcServer::OnNewUdpData(Conn * conn, string * data) {
 		conn->LogStream() << "IN [UDP]: " << (*data) << NMDC_SEPARATOR << endl;
 	}
 
-	DcParser * dcparser = (DcParser *)conn->mParser;
+	DcParser * dcparser = static_cast<DcParser *> (conn->mParser);
 	if (dcparser->miType == NMDC_TYPE_SR) {
 		dcparser->miType = NMDC_TYPE_SR_UDP; // Set type for parse
 		if (!dcparser->SplitChunks()) {
 			dcparser->miType = NMDC_TYPE_SR; // Set simple SR type
 
-			DcUser * User = (DcUser *)mDCUserList.GetUserBaseByNick(dcparser->chunkString(CHUNK_SR_FROM));
+			DcUser * User = static_cast<DcUser *> (mDCUserList.GetUserBaseByNick(dcparser->chunkString(CHUNK_SR_FROM)));
 			if (User && User->mDcConn && conn->ipUdp() == User->getIp()) {
 				conn->mProtocol->DoCmd(dcparser, User->mDcConn);
 			}
@@ -722,7 +662,7 @@ bool DcServer::CheckNick(DcConn *dcConn) {
 	UserKey key = mDCUserList.Nick2Key(dcConn->mDcUser->msNick);
 	if (mDCUserList.ContainsKey(key)) {
 		string sMsg;
-		DcUser * us = (DcUser *) mDCUserList.Find(key);
+		DcUser * us = static_cast<DcUser *> (mDCUserList.Find(key));
 
 		if (!us->mDcConn || (us->getProfile() == -1 && us->getIp() != dcConn->ip())) {
 			if (dcConn->Log(2)) {
@@ -823,7 +763,7 @@ void DcServer::DoUserEnter(DcConn * dcConn) {
 	}
 
 	/** Adding user to the user list */
-	if (!AddToUserList((DcUser *)dcConn->mDcUser)) {
+	if (!AddToUserList(static_cast<DcUser *> (dcConn->mDcUser))) {
 		dcConn->closeNow(CLOSE_REASON_USER_ADD);
 		return;
 	}
@@ -834,7 +774,7 @@ void DcServer::DoUserEnter(DcConn * dcConn) {
 	AfterUserEnter(dcConn);
 
 	dcConn->ClearTimeOut(HUB_TIME_OUT_LOGIN);
-	((DcUser *)dcConn->mDcUser)->mTimeEnter.Get();
+	(static_cast<DcUser *> (dcConn->mDcUser))->mTimeEnter.Get();
 }
 
 
@@ -917,7 +857,7 @@ bool DcServer::RemoveFromDCUserList(DcUser *User) {
 		#endif
 
 		/** We make sure that user with such nick one! */
-		DcUser *other = (DcUser *)mDCUserList.GetUserBaseByNick(User->msNick);
+		DcUser * other = static_cast<DcUser *> (mDCUserList.GetUserBaseByNick(User->msNick));
 		if (!User->mDcConn) { /** Removing the bot */
 			mDCUserList.RemoveByKey(key);
 		} else if (other && other->mDcConn && User->mDcConn && other->mDcConn == User->mDcConn) {
@@ -1043,13 +983,13 @@ DcUser * DcServer::GetDCUser(const char *sNick) {
 	if (sN.size()) {
 		UserBase * User = mDCUserList.GetUserBaseByNick(sN);
 		if (User) {
-			return (DcUser *)User;
+			return static_cast<DcUser *> (User);
 		}
 		DcConn * dcConn;
 		for (tCLIt it = mConnList.begin(); it != mConnList.end(); ++it) {
-			dcConn = (DcConn *)(*it);
+			dcConn = static_cast<DcConn *> (*it);
 			if (dcConn && dcConn->mType == CLIENT_TYPE_NMDC && dcConn->mDcUser && dcConn->mDcUser->msNick == sN) {
-				return (DcUser *)dcConn->mDcUser;
+				return static_cast<DcUser *> (dcConn->mDcUser);
 			}
 		}
 	}
@@ -1060,7 +1000,7 @@ DcUser * DcServer::GetDCUser(const char *sNick) {
 
 DcUserBase * DcServer::getDcUserBase(const char *sNick) {
 	DcUser * User = GetDCUser(sNick);
-	return User != NULL ? (DcUserBase *)User : NULL;
+	return User != NULL ? static_cast<DcUserBase *> (User) : NULL;
 }
 
 
@@ -1069,7 +1009,7 @@ const vector<DcConnBase *> & DcServer::getDcConnBase(const char * sIP) {
 	DcIpList::iterator it;
 	mvIPConn.clear();
 	for (it = mIPListConn->begin(DcConn::ip2Num(sIP)); it != mIPListConn->end(); ++it) {
-		DcConn * dcConn = (DcConn *)(*it);
+		DcConn * dcConn = static_cast<DcConn *> (*it);
 		if (dcConn->mType == CLIENT_TYPE_NMDC) {
 			mvIPConn.push_back(dcConn);
 		}
@@ -1252,7 +1192,7 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & NickList, const char 
 	DcUser * User;
 	vector<DcUser *> ul;
 	for (List_t::const_iterator it = NickList.begin(); it != NickList.end(); ++it) {
-		User = (DcUser*)mDCUserList.GetUserBaseByNick(*it);
+		User = static_cast<DcUser *> (mDCUserList.GetUserBaseByNick(*it));
 		if (User && User->isCanSend()) {
 			User->setCanSend(false);
 			ul.push_back(User);
@@ -1296,7 +1236,7 @@ bool DcServer::sendToAllExceptIps(const vector<string> & IPList, const char *sDa
 			bBadIP = true;
 		}
 		for (DcIpList::iterator mit = mIPListConn->begin(DcConn::ip2Num((*it).c_str())); mit != mIPListConn->end(); ++mit) {
-			dcConn = (DcConn*)(*mit);
+			dcConn = static_cast<DcConn *> (*mit);
 			if (dcConn->mDcUser && dcConn->mDcUser->isCanSend()) {
 				dcConn->mDcUser->setCanSend(false);
 				ul.push_back(dcConn);
@@ -1349,7 +1289,7 @@ void DcServer::forceMove(DcConnBase * dcConnBase, const char * sAddress, const c
 	if (!dcConnBase || !sAddress) {
 		return;
 	}
-	DcConn * dcConn = (DcConn *) dcConnBase;
+	DcConn * dcConn = static_cast<DcConn *> (dcConnBase);
 
 	string sMsg, sForce, sNick("<unknown>");
 	if (dcConn->mDcUser) {
@@ -1501,7 +1441,7 @@ int DcServer::unregBot(const string & sNick) {
 		LogStream() << "Unreg bot: " << sNick << endl;
 	}
 
-	DcUser * User = (DcUser*)mDCUserList.GetUserBaseByNick(sNick);
+	DcUser * User = static_cast<DcUser *> (mDCUserList.GetUserBaseByNick(sNick));
 	if (!User) {
 		return -1;
 	}

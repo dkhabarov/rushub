@@ -66,6 +66,8 @@ public:
 		}
 	}
 
+	int onNewDcConn(DcConn * dcConn);
+
 	static string & Append_DC_Lock(string & str);
 	static string & Append_DC_Hello(string & str, const string & nick);
 	static string & Append_DC_HubIsFull(string & str);

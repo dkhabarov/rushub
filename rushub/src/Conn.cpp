@@ -290,7 +290,7 @@ void Conn::closeNow(int iReason /* = 0 */) {
 	mWritable = false;
 	setOk(false);
 	if (mServer) {
-		if (!(mServer->mConnChooser.ConnChoose::OptGet((ConnBase*)this) & ConnChoose::eEF_CLOSE)) {
+		if (!(mServer->mConnChooser.ConnChoose::OptGet(static_cast<ConnBase *> (this)) & ConnChoose::eEF_CLOSE)) {
 			++ mServer->miNumCloseConn;
 			mClosed = true; // poll conflict
 
@@ -302,12 +302,12 @@ void Conn::closeNow(int iReason /* = 0 */) {
 			}
 
 #if USE_SELECT
-			mServer->mConnChooser.ConnChoose::OptIn((ConnBase*)this, ConnChoose::eEF_CLOSE);
-			mServer->mConnChooser.ConnChoose::OptOut((ConnBase*)this, ConnChoose::eEF_ALL);
+			mServer->mConnChooser.ConnChoose::OptIn(static_cast<ConnBase *> (this), ConnChoose::eEF_CLOSE);
+			mServer->mConnChooser.ConnChoose::OptOut(static_cast<ConnBase *> (this), ConnChoose::eEF_ALL);
 #else
 			// this sequence of flags for poll!
-			mServer->mConnChooser.ConnChoose::OptOut((ConnBase*)this, ConnChoose::eEF_ALL);
-			mServer->mConnChooser.ConnChoose::OptIn((ConnBase*)this, ConnChoose::eEF_CLOSE);
+			mServer->mConnChooser.ConnChoose::OptOut(static_cast<ConnBase *> (this), ConnChoose::eEF_ALL);
+			mServer->mConnChooser.ConnChoose::OptIn(static_cast<ConnBase *> (this), ConnChoose::eEF_CLOSE);
 #endif
 			
 		} else {

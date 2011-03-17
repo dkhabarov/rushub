@@ -105,7 +105,7 @@ public:
 		if (mIt == mEnd) {
 			return NULL;
 		}
-		DcConn * dcConn = (DcConn *)(*mIt);
+		DcConn * dcConn = static_cast<DcConn *> (*mIt);
 		if (!dcConn) {
 			++mIt;
 			return this->operator() ();

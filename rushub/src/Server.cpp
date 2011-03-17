@@ -165,7 +165,7 @@ Conn *Server::addListen(Conn * conn, const string & ip, int port, bool udp) {
 		mConnChooser.AddConn(conn);
 
 		if (!mConnChooser.ConnChoose::OptIn(
-			(ConnBase *)conn,
+			static_cast<ConnBase *> (conn),
 			ConnChoose::tEventFlag(ConnChoose::eEF_INPUT | ConnChoose::eEF_ERROR))) {
 			if (ErrLog(0)) {
 				LogStream() << "Error: Can't add socket" << endl;
@@ -201,7 +201,7 @@ Conn * Server::findConnByPort(int port) {
 		it != mConnChooser.mConnBaseList.end();
 		++it
 	) {
-		conn = (Conn *)(*it);
+		conn = static_cast<Conn *> (*it);
 		if (conn && conn->port() == port) {
 			return conn;
 		}
@@ -301,7 +301,7 @@ void Server::step() {
 		res = (*it);
 		++it;
 
-		if ((mNowConn = (Conn *)res.mConnBase) == NULL) {
+		if ((mNowConn = static_cast<Conn *> (res.mConnBase)) == NULL) {
 			continue;
 		}
 		activity = res.mRevents;
@@ -457,7 +457,7 @@ int Server::addConnection(Conn *conn) {
 		#if USE_SELECT
 			(mConnChooser.Size() == (FD_SETSIZE - 1)) || 
 		#endif
-		!mConnChooser.ConnChoose::OptIn((ConnBase *)conn,
+		!mConnChooser.ConnChoose::OptIn(static_cast<ConnBase *> (conn),
 		ConnChoose::tEventFlag(ConnChoose::eEF_INPUT | ConnChoose::eEF_ERROR)))
 	{
 		if (conn->ErrLog(0)) {

@@ -291,7 +291,7 @@ void PluginList::OnPluginLoad(Plugin * plugin) {
 			" v " << (version != "" ? version : "n/a") << endl;
 	}
 
-	((Plugin *)plugin)->onLoad(mDcServerBase);
+	plugin->onLoad(mDcServerBase);
 
 }
 

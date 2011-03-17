@@ -259,7 +259,7 @@ public:
 
 	/** Pointer to the server */
 	inline DcServer * server() {
-		return (DcServer *) mServer;
+		return reinterpret_cast<DcServer *> (mServer);
 	}
 	
 	/** Set user object for current connection */

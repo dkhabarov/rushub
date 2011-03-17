@@ -57,7 +57,7 @@ Conn * WebConnFactory::createConn(tSocket sock) {
 	webconn->mConnFactory = this; /** Fuctory current connection (WebConnFactory) */
 	webconn->mProtocol = mProtocol; /** Protocol (WebProtocol) */
 
-	return (Conn *) webconn;
+	return static_cast<Conn *> (webconn);
 
 }
 
@@ -80,13 +80,13 @@ void WebConnFactory::onNewData(Conn * conn, string * str) {
 		return;
 	}
 
-	DcServer * dcServer = (DcServer*)mServer;
-	WebConn * webConn = (WebConn*) conn;
+	DcServer * dcServer = static_cast<DcServer *> (mServer);
+	WebConn * webConn = static_cast<WebConn *> (conn);
 	if (!dcServer || !webConn) {
 		return;
 	}
 #ifndef WITHOUT_PLUGINS
-	WebParser * webParser = (WebParser *)webConn->mParser;
+	WebParser * webParser = static_cast<WebParser *> (webConn->mParser);
 	if (!dcServer->mCalls.mOnWebData.CallAll(webConn, webParser))
 #endif
 	{
@@ -100,7 +100,7 @@ void WebConnFactory::onNewData(Conn * conn, string * str) {
 
 WebListenFactory::WebListenFactory(Server * server) : ListenFactory(server) {
 	WebProtocol * webProtocol = new WebProtocol;
-	mWebConnFactory = new WebConnFactory(webProtocol, server, "\r\n\r\n", ((DcServer *)server)->mDcConfig.mWebStrSizeMax);
+	mWebConnFactory = new WebConnFactory(webProtocol, server, "\r\n\r\n", (static_cast<DcServer *> (server))->mDcConfig.mWebStrSizeMax);
 }
 
 

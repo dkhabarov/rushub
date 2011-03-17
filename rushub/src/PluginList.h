@@ -333,7 +333,7 @@ public:
 	}
 
 	virtual int CallAll(DcConnBase * dcConnBase) {
-		mDcConn = (DcConn *) dcConnBase;
+		mDcConn = static_cast<DcConn *> (dcConnBase);
 		if (mDcConn != NULL) {
 			return this->CallList::CallAll();
 		} else {

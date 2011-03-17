@@ -331,7 +331,7 @@ DcConnFactory::DcConnFactory(Protocol *protocol, Server *s) : ConnFactory(protoc
 DcConnFactory::~DcConnFactory() {
 }
 
-Conn *DcConnFactory::createConn(tSocket sock) {
+Conn * DcConnFactory::createConn(tSocket sock) {
 	if (!mServer) {
 		return NULL;
 	}
@@ -340,18 +340,18 @@ Conn *DcConnFactory::createConn(tSocket sock) {
 	dcConn->mConnFactory = this; /** Connection factory for current connection (DcConnFactory) */
 	dcConn->mProtocol = mProtocol; /** Protocol pointer */
 
-	DcServer * dcServer = (DcServer *) mServer;
+	DcServer * dcServer = static_cast<DcServer *> (mServer);
 	if (!dcServer) {
 		return NULL;
 	}
 	dcServer->mIPListConn->Add(dcConn); /** Adding connection in IP-list */
 
-	return (Conn *)dcConn;
+	return static_cast<Conn *> (dcConn);
 }
 
 void DcConnFactory::deleteConn(Conn * &conn) {
-	DcConn * dcConn = (DcConn *) conn;
-	DcServer * dcServer = (DcServer *) mServer;
+	DcConn * dcConn = static_cast<DcConn *> (conn);
+	DcServer * dcServer = static_cast<DcServer *> (mServer);
 	if (dcConn && dcServer) {
 		dcServer->mIPListConn->Remove(dcConn);
 		if (dcConn->GetLSFlag(LOGIN_STATUS_ALOWED)) {
@@ -366,7 +366,7 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 		}
 		if (dcConn->mDcUser) {
 			if (dcConn->mDcUser->getInUserList()) {
-				dcServer->RemoveFromDCUserList((DcUser*)dcConn->mDcUser);
+				dcServer->RemoveFromDCUserList(static_cast<DcUser *> (dcConn->mDcUser));
 			} else { // remove from enter list, if user was already added in it, but user was not added in user list
 				dcServer->mEnterList.RemoveByNick(dcConn->mDcUser->getNick());
 			}
