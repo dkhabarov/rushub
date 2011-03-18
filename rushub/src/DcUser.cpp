@@ -103,9 +103,9 @@ void DcUser::SetIp(const string & ip) {
 /** Set/unset user in OpList (for plugins) */
 void DcUser::setInOpList(bool inOpList) {
 	if (inOpList) {
-		mDcServer->AddToOps(this);
+		mDcServer->mDcProtocol.addToOps(this);
 	} else {
-		mDcServer->DelFromOps(this);
+		mDcServer->mDcProtocol.delFromOps(this);
 	}
 }
 
@@ -113,9 +113,9 @@ void DcUser::setInOpList(bool inOpList) {
 /** Set/unset user in IpList (for plugins) */
 void DcUser::setInIpList(bool inIpList) {
 	if (inIpList) {
-		mDcServer->AddToIpList(this);
+		mDcServer->mDcProtocol.addToIpList(this);
 	} else {
-		mDcServer->DelFromIpList(this);
+		mDcServer->mDcProtocol.delFromIpList(this);
 	}
 }
 
@@ -123,9 +123,9 @@ void DcUser::setInIpList(bool inIpList) {
 /** Set/unset user in HideList (for plugins) */
 void DcUser::setHide(bool hide) {
 	if (hide) {
-		mDcServer->AddToHide(this);
+		mDcServer->mDcProtocol.addToHide(this);
 	} else {
-		mDcServer->DelFromHide(this);
+		mDcServer->mDcProtocol.delFromHide(this);
 	}
 }
 

@@ -38,6 +38,7 @@ namespace dcserver {
 
 class DcServer;
 class DcConn;
+class DcUser;
 class UserList;
 
 namespace protocol {
@@ -87,8 +88,18 @@ public:
 	int SendNickList(DcConn *); /** Sending user-list and op-list */
 	static string GetNormalShare(__int64); /** Get normal share size */
 
+	void addToOps(DcUser * dcUser);
+	void delFromOps(DcUser * dcUser);
+	void addToIpList(DcUser * dcUser);
+	void delFromIpList(DcUser * dcUser);
+	void addToHide(DcUser * dcUser);
+	void delFromHide(DcUser * dcUser);
+
 protected:
+
 	DcServer * mDcServer;
+
+private:
 
 	int eventSearch(DcParser *, DcConn *); /** Search request */
 	int eventSr(DcParser *, DcConn *); /** Answer to search request */
@@ -112,10 +123,12 @@ protected:
 	int eventUnknown(DcParser *, DcConn *); /** Unknown cmd */
 	int eventQuit(DcParser *, DcConn *); /** Quit cmd */
 
-private:
-
 	int checkCommand(DcParser *, DcConn *);
 	bool antiflood(DcConn * dcConn, unsigned int iType);
+
+	// Check validate nick (user)
+	bool validateUser(DcConn * dcConn, const string & sNick);
+	bool checkNickLength(DcConn * dcConn, const unsigned iLen);
 
 }; // NmdcProtocol
 

@@ -50,7 +50,7 @@ DcListIterator::DcListIterator(DcServer * dcServer) :
 
 
 DcServer * DcServer::currentDcServer = NULL;
-string DcServer::msSysVersion;
+string DcServer::mSysVersion;
 
 
 
@@ -82,8 +82,8 @@ DcServer::DcServer(const string & configFile, const string &):
 	currentDcServer = this;
 
 	/** Define OS */
-	if (!GetSysVersion()) {
-		msSysVersion = "unknown";
+	if (mSysVersion.empty()) {
+		mSysVersion = getSysVersion();
 	}
 
 	/** ConnFactory */
@@ -485,174 +485,6 @@ bool DcServer::antiFlood(unsigned & iCount, Time & time, const unsigned & iCount
 	time = mTime;
 	iCount = 0;
 	return bRet;
-}
-
-
-
-void DcServer::AddToOps(DcUser * User) {
-	if (!User->mbInOpList) {
-		User->mbInOpList = true;
-		if (User->getInUserList()) {
-			string sMsg;
-			mOpList.AddWithNick(User->msNick, User);
-			if (User->mbHide) {
-				User->send(NmdcProtocol::Append_DC_OpList(sMsg, User->msNick), false, true);
-			} else {
-				mDCUserList.sendToAll(NmdcProtocol::Append_DC_OpList(sMsg, User->msNick), true/*mDcConfig.mDelayedMyinfo*/, false);
-				mEnterList.sendToAll(sMsg, true/*mDcConfig.mDelayedMyinfo*/, false);
-			}
-		}
-	}
-}
-
-
-
-void DcServer::DelFromOps(DcUser * User) {
-	if (User->mbInOpList) {
-		User->mbInOpList = false;
-		if (User->getInUserList()) {
-			string sMsg1, sMsg2, sMsg3;
-			mOpList.RemoveByNick(User->msNick);
-			if (User->mbHide) {
-				if (User->mDcConn == NULL) {
-					return;
-				}
-				string s = User->getMyINFO();
-				User->send(NmdcProtocol::Append_DC_Quit(sMsg1, User->msNick), false, false);
-				if (User->mDcConn->mFeatures & SUPPORT_FEATUER_NOHELLO) {
-					User->send(s, true, false);
-				} else if (User->mDcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
-					User->send(NmdcProtocol::Append_DC_Hello(sMsg2, User->msNick), false, false);
-					User->send(s, true, false);
-				} else {
-					User->send(NmdcProtocol::Append_DC_Hello(sMsg2, User->msNick), false, false);
-				}
-
-				if ((User->mDcConn->mFeatures & SUPPORT_FEATUER_USERIP2) || User->mbInIpList) {
-					User->send(NmdcProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->getIp()));
-				} else {
-					s.clear();
-					User->send(s);
-				}
-			} else {
-				mDCUserList.sendToAll(NmdcProtocol::Append_DC_Quit(sMsg1, User->msNick), true/*mDcConfig.mDelayedMyinfo*/, false);
-				mEnterList.sendToAll(sMsg1, true/*mDcConfig.mDelayedMyinfo*/, false);
-				mHelloList.sendToAll(NmdcProtocol::Append_DC_Hello(sMsg2, User->msNick), true/*mDcConfig.mDelayedMyinfo*/, false);
-				mDCUserList.sendToAll(User->getMyINFO(), true/*mDcConfig.mDelayedMyinfo*/);
-				mEnterList.sendToAll(User->getMyINFO(), true/*mDcConfig.mDelayedMyinfo*/);
-				mIpList.sendToAll(NmdcProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->getIp()), true, false);
-			}
-		}
-	}
-}
-
-
-
-void DcServer::AddToIpList(DcUser * User) {
-	if (!User->mbInIpList) {
-		User->mbInIpList = true;
-		if (User->getInUserList()) {
-			mIpList.AddWithNick(User->msNick, User);
-			User->send(mDCUserList.GetIpList(), true);
-		}
-	}
-}
-
-
-
-void DcServer::DelFromIpList(DcUser * User) {
-	if (User->mbInIpList) {
-		User->mbInIpList = false;
-		if (User->getInUserList()) {
-			mIpList.RemoveByNick(User->msNick);
-		}
-	}
-}
-
-
-
-void DcServer::AddToHide(DcUser * User) {
-	if (!User->mbHide) {
-		User->mbHide = true;
-		if (User->isCanSend()) {
-			string sMsg;
-			User->setCanSend(false);
-			mDCUserList.sendToAll(NmdcProtocol::Append_DC_Quit(sMsg, User->msNick), false/*mDcConfig.mDelayedMyinfo*/, false);
-			mEnterList.sendToAll(sMsg, false/*mDcConfig.mDelayedMyinfo*/, false); // false cache
-			User->setCanSend(true);
-			mOpList.Remake();
-			mDCUserList.Remake();
-		}
-	}
-}
-
-
-
-void DcServer::DelFromHide(DcUser * User) {
-	if (User->mbHide) {
-		User->mbHide = false;
-		if (User->isCanSend()) {
-			string sMsg1, sMsg2, sMsg3;
-			if (User->mbInOpList) {
-				User->setCanSend(false);
-				mHelloList.sendToAll(NmdcProtocol::Append_DC_Hello(sMsg1, User->msNick), false/*mDcConfig.mDelayedMyinfo*/, false);
-				sMsg2 = string(User->getMyINFO()).append(NMDC_SEPARATOR);
-				mDCUserList.sendToAll(NmdcProtocol::Append_DC_OpList(sMsg2, User->msNick), false/*mDcConfig.mDelayedMyinfo*/, false);
-				mEnterList.sendToAll(sMsg2, false/*mDcConfig.mDelayedMyinfo*/, false);
-				mIpList.sendToAll(NmdcProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->getIp()), false, false);
-				User->setCanSend(true);
-			} else {
-				User->setCanSend(false);
-				mHelloList.sendToAll(NmdcProtocol::Append_DC_Hello(sMsg1, User->msNick), false/*mDcConfig.mDelayedMyinfo*/, false);
-				mDCUserList.sendToAll(User->getMyINFO(), false/*mDcConfig.mDelayedMyinfo*/);
-				mEnterList.sendToAll(User->getMyINFO(), false/*mDcConfig.mDelayedMyinfo*/);
-				mIpList.sendToAll(NmdcProtocol::Append_DC_UserIP(sMsg3, User->msNick, User->getIp()), false, false);
-				User->setCanSend(true);
-			}
-			mOpList.Remake();
-			mDCUserList.Remake();
-		}
-	}
-}
-
-
-
-bool DcServer::ValidateUser(DcConn * dcConn, const string & sNick) {
-
-	/** Checking for bad symbols in nick */
-	static string forbidedChars("$| ");
-	if (sNick.npos != sNick.find_first_of(forbidedChars)) {
-		if (dcConn->Log(2)) {
-			dcConn->LogStream() << "Bad nick chars: '" << sNick << "'" << endl;
-		}
-		sendToUser(dcConn, mDCLang.mBadChars.c_str(), mDcConfig.mHubBot.c_str());
-		return false;
-	}
-
-	return true;
-}
-
-
-
-bool DcServer::CheckNickLength(DcConn * dcConn, const unsigned iLen) {
-	if (dcConn->miProfile == -1 && (iLen > mDcConfig.mMaxNickLen || iLen < mDcConfig.mMinNickLen)) {
-		string sMsg;
-
-		if (dcConn->Log(2)) {
-			dcConn->LogStream() << "Bad nick len: " 
-				<< iLen << " (" << dcConn->mDcUser->msNick 
-				<< ") [" << mDcConfig.mMinNickLen << ", " 
-				<< mDcConfig.mMaxNickLen << "]" << endl;
-		}
-
-		StringReplace(mDCLang.mBadNickLen, string("min"), sMsg, (int) mDcConfig.mMinNickLen);
-		StringReplace(sMsg, string("max"), sMsg, (int) mDcConfig.mMaxNickLen);
-
-		sendToUser(dcConn, sMsg.c_str(), mDcConfig.mHubBot.c_str());
-
-		return false;
-	}
-	return true;
 }
 
 
@@ -1460,12 +1292,11 @@ int DcServer::unregBot(const string & sNick) {
 
 #ifdef _WIN32
 
-bool DcServer::GetSysVersion() {
+string DcServer::getSysVersion() {
 	OSVERSIONINFOEX osvi;
 	int bOsVersionInfoEx;
-	if (!msSysVersion.empty()) {
-		return true;
-	}
+
+	string version;
 
 	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
 	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
@@ -1474,7 +1305,7 @@ bool DcServer::GetSysVersion() {
 	if (!bOsVersionInfoEx) {
 		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 		if (!GetVersionEx((OSVERSIONINFO *) &osvi)) {
-			return false;
+			return string("unknown");
 		}
 	}
 
@@ -1484,10 +1315,10 @@ bool DcServer::GetSysVersion() {
 		case VER_PLATFORM_WIN32_NT : // Windows NT
 
 			if (osvi.dwMajorVersion <= 4) {
-				msSysVersion.append("Microsoft Windows NT ");
+				version.append("Microsoft Windows NT ");
 			}
 			if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0) {
-				msSysVersion.append("Microsoft Windows 2000 ");
+				version.append("Microsoft Windows 2000 ");
 			}
 
 			if (bOsVersionInfoEx) {
@@ -1496,46 +1327,46 @@ bool DcServer::GetSysVersion() {
 				if (osvi.wProductType == VER_NT_WORKSTATION) {
 
 					if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1) {
-						msSysVersion.append("Microsoft Windows XP ");
+						version.append("Microsoft Windows XP ");
 					} else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0) {
-						msSysVersion.append("Microsoft Windows Vista ");
+						version.append("Microsoft Windows Vista ");
 					} else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 1) {
-						msSysVersion.append("Microsoft Windows 7 ");
+						version.append("Microsoft Windows 7 ");
 					} else {
-						msSysVersion.append("Microsoft Windows (unknown version) ");
+						version.append("Microsoft Windows (unknown version) ");
 					}
 
 
 					if (osvi.wSuiteMask & VER_SUITE_PERSONAL) {
-						msSysVersion.append("Home Edition ");
+						version.append("Home Edition ");
 					} else {
-						msSysVersion.append("Professional ");
+						version.append("Professional ");
 					}
 
 				} else if (osvi.wProductType == VER_NT_SERVER) { // Check server type
 
 					if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2) {
-						msSysVersion.append("Microsoft Windows 2003 ");
+						version.append("Microsoft Windows 2003 ");
 					} else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0) {
-						msSysVersion.append("Microsoft Windows Server 2008 ");
+						version.append("Microsoft Windows Server 2008 ");
 					} else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 1) {
-						msSysVersion.append("Microsoft Windows Server 2008 R2 ");
+						version.append("Microsoft Windows Server 2008 R2 ");
 					} else {
-						msSysVersion.append("Microsoft Windows (unknown version) ");
+						version.append("Microsoft Windows (unknown version) ");
 					}
 
 					if (osvi.wSuiteMask & VER_SUITE_DATACENTER) {
-						msSysVersion.append("DataCenter Server ");
+						version.append("DataCenter Server ");
 					} else if (osvi.wSuiteMask & VER_SUITE_ENTERPRISE) {
 						if (osvi.dwMajorVersion == 4) {
-							msSysVersion.append("Advanced Server ");
+							version.append("Advanced Server ");
 						} else {
-							msSysVersion.append("Enterprise Server ");
+							version.append("Enterprise Server ");
 						}
 					} else if (osvi.wSuiteMask == VER_SUITE_BLADE) {
-						msSysVersion.append("Web Server ");
+						version.append("Web Server ");
 					} else {
-						msSysVersion.append("Server ");
+						version.append("Server ");
 					}
 
 				}
@@ -1547,25 +1378,25 @@ bool DcServer::GetSysVersion() {
 				LONG lRet = RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\ProductOptions", 0, KEY_QUERY_VALUE, &hKey);
 
 				if (lRet != ERROR_SUCCESS) {
-					return false;
+					return string("unknown");
 				}
 
 				lRet = RegQueryValueExA( hKey, "ProductType", NULL, NULL, (LPBYTE) szProductType, &dwBufLen);
 
 				if ((lRet != ERROR_SUCCESS) || (dwBufLen > 80)) {
-					return false;
+					return string("unknown");
 				}
 
 				RegCloseKey(hKey);
 
 				if (lstrcmpiA("WINNT", szProductType) == 0) {
-					msSysVersion.append("Professional ");
+					version.append("Professional ");
 				}
 				if (lstrcmpiA("LANMANNT", szProductType) == 0) {
-					msSysVersion.append("Server ");
+					version.append("Server ");
 				}
 				if (lstrcmpiA( "SERVERNT", szProductType) == 0) {
-					msSysVersion.append("Advanced Server ");
+					version.append("Advanced Server ");
 				}
 			}
 
@@ -1573,10 +1404,10 @@ bool DcServer::GetSysVersion() {
 			if (osvi.dwMajorVersion <= 4) {
 				sprintf(buf, "version %d.%d %s (Build %d)", 
 					osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
-				msSysVersion.append(buf);
+				version.append(buf);
 			} else {
 				sprintf(buf, "%s (Build %d)", osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
-				msSysVersion.append(buf);
+				version.append(buf);
 			}
 
 			break;
@@ -1584,44 +1415,47 @@ bool DcServer::GetSysVersion() {
 		case VER_PLATFORM_WIN32_WINDOWS : // Windows 95
 
 			if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 0) {
-				msSysVersion.append("Microsoft Windows 95 ");
+				version.append("Microsoft Windows 95 ");
 				if (osvi.szCSDVersion[1] == 'C' || osvi.szCSDVersion[1] == 'B') {
-					msSysVersion.append("OSR2 ");
+					version.append("OSR2 ");
 				}
 			} 
 
 			if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 10) {
-				msSysVersion.append("Microsoft Windows 98 ");
+				version.append("Microsoft Windows 98 ");
 				if (osvi.szCSDVersion[1] == 'A') {
-					msSysVersion.append("SE ");
+					version.append("SE ");
 				}
 			} 
 
 			if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 90) {
-				msSysVersion.append("Microsoft Windows Millennium Edition ");
+				version.append("Microsoft Windows Millennium Edition ");
 			} 
 			break;
 
 		case VER_PLATFORM_WIN32s : // Windows
-			msSysVersion.append("Microsoft Win32s ");
+			version.append("Microsoft Win32s ");
 			break;
 
 		default :
 			break;
 	}
-	return true; 
+	return version; 
 }
 
 #else
 
-bool DcServer::GetSysVersion() {
+string DcServer::getSysVersion() {
+	string version;
 	utsname osname;
 	if (uname(&osname) == 0) {
-		msSysVersion = string(osname.sysname) + " " + 
+		version = string(osname.sysname) + " " + 
 			string(osname.release) + " (" + 
 			string(osname.machine) + ")";
+	} else {
+		version = "unknown";
 	}
-	return true;
+	return version;
 }
 
 #endif

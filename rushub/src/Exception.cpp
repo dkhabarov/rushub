@@ -88,7 +88,7 @@ long __stdcall Exception::ExceptionFilter(LPEXCEPTION_POINTERS e) {
 	
 	f << "Code: " << code << endl
 		<< "Version: " << INTERNALVERSION << endl
-		<< "OS: " << DcServer::currentDcServer->msSysVersion << endl
+		<< "OS: " << DcServer::currentDcServer->mSysVersion << endl
 		<< "Time: " << tm << endl << endl;
 
 	WIN32_FIND_DATA fd;

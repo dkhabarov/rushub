@@ -146,7 +146,7 @@ public:
 	DcLang mDCLang;
 
 	SystemLoad mSystemLoad; /** Indicator of the system overloading */
-	static string msSysVersion; /** Verion of OS System */
+	static string mSysVersion; /** Verion of OS System */
 
 	Time mStartTime; /** Start time of the hub */
 	NmdcProtocol mDcProtocol; /** DC Protocol */
@@ -200,7 +200,7 @@ public:
 	}
 
 	const string & getSystemVersion() const {
-		return msSysVersion;
+		return mSysVersion;
 	}
 
 	int getMSec() const {
@@ -222,13 +222,6 @@ public:
 	__int64 getTotalShare() const {
 		return miTotalShare;
 	}
-
-	void AddToOps(DcUser * User);
-	void DelFromOps(DcUser * User);
-	void AddToIpList(DcUser * User);
-	void DelFromIpList(DcUser * User);
-	void AddToHide(DcUser * User);
-	void DelFromHide(DcUser * User);
 
 	int checkCmd(const string &);
 
@@ -293,12 +286,6 @@ protected:
 	/** Antiflood function */
 	bool antiFlood(unsigned &iCount, Time & time, const unsigned &iCountLimit, const double &iTimeLimit);
 
-	/** Check validate user */
-	bool ValidateUser(DcConn *, const string &sNick);
-
-	/** Check nick len */
-	bool CheckNickLength(DcConn *dcConn, const unsigned iLen);
-
 	/** Check nick used */
 	bool CheckNick(DcConn *dcConn);
 
@@ -354,9 +341,9 @@ private:
 
 	void deleteConn(Conn * conn);
 
-	bool GetSysVersion();
-
 	bool ListeningServer(const char * name, const string & addresses, unsigned port, ListenFactory * listenFactory, bool udp = false);
+
+	static string getSysVersion();
 
 	struct PluginCallList {
 
