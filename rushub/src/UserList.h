@@ -56,14 +56,9 @@ public:
 
 	/** Unary function for sending data to users */
 	struct ufSend : public unary_function<void, iterator> {
-		string & msData; /** Data for sending */
-		bool mbProfile;
-		unsigned long miProfile;
+		string & mData; /** Data for sending */
 
-		ufSend(string & sData) : msData(sData), mbProfile(false) {
-		}
-
-		ufSend(string & sData, unsigned long iProfile) : msData(sData), mbProfile(true), miProfile(iProfile) {
+		ufSend(string & data) : mData(data) {
 		}
 
 		ufSend & operator = (const ufSend &) {
@@ -73,23 +68,28 @@ public:
 		void operator() (UserBase *); /** Sending operator */
 	};
 
-	/** Unary function for sending data sDataS+sNick+sDataE to each user */
-	struct ufSendWithNick : public unary_function<void, iterator> {
-		string &msDataStart, &msDataEnd; /** Data for sending */
-		bool mbProfile;
-		unsigned long miProfile;
-		ufSendWithNick(string & sDataS, string & sDataE) : 
-			msDataStart(sDataS),
-			msDataEnd(sDataE),
-			mbProfile(false)
-		{
+	/** Unary function for sending data to users with profile */
+	struct ufSendProfile : public unary_function<void, iterator> {
+		string & mData; /** Data for sending */
+		unsigned long mProfile;
+
+		ufSendProfile(string & data, unsigned long profile) : mData(data), mProfile(profile) {
 		}
 
-		ufSendWithNick(string & sDataS, string & sDataE, unsigned long iProfile) : 
-			msDataStart(sDataS),
-			msDataEnd(sDataE),
-			mbProfile(true),
-			miProfile(iProfile)
+		ufSendProfile & operator = (const ufSendProfile &) {
+			return *this;
+		}
+
+		void operator() (UserBase *); /** Sending operator */
+	};
+
+	/** Unary function for sending data sDataS+sNick+sDataE to each user */
+	struct ufSendWithNick : public unary_function<void, iterator> {
+		string &mDataStart, &mDataEnd; /** Data for sending */
+
+		ufSendWithNick(string & dataStart, string & dataEnd) : 
+			mDataStart(dataStart),
+			mDataEnd(dataEnd)
 		{
 		}
 
@@ -99,6 +99,27 @@ public:
 
 		void operator() (UserBase *); /** Sending operator */
 	};
+
+	/** Unary function for sending data sDataS+sNick+sDataE to each user with profile */
+	struct ufSendWithNickProfile : public unary_function<void, iterator> {
+		string &mDataStart, &mDataEnd; /** Data for sending */
+		unsigned long mProfile;
+
+		ufSendWithNickProfile(string & dataStart, string & dataEnd, unsigned long profile) : 
+			mDataStart(dataStart),
+			mDataEnd(dataEnd),
+			mProfile(profile)
+		{
+		}
+
+		ufSendWithNickProfile & operator = (const ufSendWithNickProfile &) {
+			return *this;
+		}
+
+		void operator() (UserBase *); /** Sending operator */
+	};
+
+
 
 	/** Unary function for constructing nick-list */
 	struct ufDoNickList : public unary_function<void, iterator> {

@@ -1211,28 +1211,26 @@ bool DcServer::setLang(const string & sName, const string & sValue) {
 
 
 
-int DcServer::regBot(const string & nick, const string & myInfo, const string & ip, bool key) {
-	if (!nick.length() || nick.length() > 64 || nick.find_first_of(" |$") != nick.npos) {
-		return -1;
-	}
-
-	string info(myInfo);
+int DcServer::regBot(const string & nick, const string & info, const string & ip, bool key) {
 	DcUser * dcUser = new DcUser(nick);
 	dcUser->mDcServer = this;
 	dcUser->mbInOpList = key;
+
 	if (DcConn::checkIp(ip)) {
 		dcUser->SetIp(ip);
 	}
-	if (!info.size()) {
-		info = "$ $$$0$";
+
+	// Protocol dependence
+	if (!nick.length() || nick.length() > 64 || nick.find_first_of(" |$") != nick.npos) {
+		return -1;
 	}
 	if (!dcUser->setMyINFO(string("$MyINFO $ALL ") + nick + " " + info, nick)) {
-		info = "$ $$$0$";
-		if (!dcUser->setMyINFO(string("$MyINFO $ALL ") + nick + " " + info, nick)) {
+		if (!dcUser->setMyINFO(string("$MyINFO $ALL ") + nick + " $ $$$0$", nick)) {
 			delete dcUser;
 			return -2;
 		}
 	}
+	////
 
 	if (Log(3)) {
 		LogStream() << "Reg bot: " << nick << endl;

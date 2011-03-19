@@ -31,42 +31,46 @@ namespace dcserver {
 
 void UserList::ufSend::operator() (UserBase * userBase) {
 	if (userBase && userBase->isCanSend()) {
-		if (!mbProfile) {
-			userBase->send(msData, false); // newPolitic
-		} else {
-			int profile = userBase->getProfile() + 1;
-			if (profile < 0) {
-				profile = -profile;
-			}
-			if (profile > 31) {
-				profile = (profile % 32) - 1;
-			}
-			if (miProfile & (1 << profile)) {
-				userBase->send(msData, false); // newPolitic
-			}
+		userBase->send(mData, false); // newPolitic
+	}
+}
+
+void UserList::ufSendProfile::operator() (UserBase * userBase) {
+	if (userBase && userBase->isCanSend()) {
+		int profile = userBase->getProfile() + 1;
+		if (profile < 0) {
+			profile = -profile;
+		}
+		if (profile > 31) {
+			profile = (profile % 32) - 1;
+		}
+		if (mProfile & (1 << profile)) {
+			userBase->send(mData, false); // newPolitic
 		}
 	}
 }
 
 void UserList::ufSendWithNick::operator() (UserBase * userBase) {
 	if (userBase && userBase->isCanSend()) { 
-		if (!mbProfile) {
-			userBase->send(msDataStart, false, false);
+		userBase->send(mDataStart, false, false);
+		userBase->send(userBase->Nick(), false, false);
+		userBase->send(mDataEnd, true); // newPolitic
+	}
+}
+
+void UserList::ufSendWithNickProfile::operator() (UserBase * userBase) {
+	if (userBase && userBase->isCanSend()) { 
+		int profile = userBase->getProfile() + 1;
+		if (profile < 0) {
+			profile = -profile;
+		}
+		if (profile > 31) {
+			profile = (profile % 32) - 1;
+		}
+		if (mProfile & (1 << profile)) {
+			userBase->send(mDataStart, false, false);
 			userBase->send(userBase->Nick(), false, false);
-			userBase->send(msDataEnd, true); // newPolitic
-		} else {
-			int profile = userBase->getProfile() + 1;
-			if (profile < 0) {
-				profile = -profile;
-			}
-			if (profile > 31) {
-				profile = (profile % 32) - 1;
-			}
-			if (miProfile & (1 << profile)) {
-				userBase->send(msDataStart, false, false);
-				userBase->send(userBase->Nick(), false, false);
-				userBase->send(msDataEnd, true); // newPolitic
-			}
+			userBase->send(mDataEnd, true); // newPolitic
 		}
 	}
 }
@@ -146,7 +150,7 @@ void UserList::sendToProfiles(unsigned long profile, const string & data, bool a
 		LogStream() << "sendToProfiles begin" << endl;
 	}
 
-	for_each(begin(), end(), ufSend(sMsg, profile));
+	for_each(begin(), end(), ufSendProfile(sMsg, profile));
 
 	if (Log(4)) {
 		LogStream() << "sendToProfiles end" << endl;
@@ -161,7 +165,7 @@ void UserList::SendToWithNick(string & s, string & e) {
 }
 
 void UserList::SendToWithNick(string & s, string & e, unsigned long profile) {
-	for_each(begin(), end(), ufSendWithNick(s, e, profile));
+	for_each(begin(), end(), ufSendWithNickProfile(s, e, profile));
 }
 
 /** Flush user cache */
