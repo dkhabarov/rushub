@@ -50,17 +50,18 @@ class DcUser : public Obj, public DcUserBase, public UserBase {
 public:
 
 	DcServer * mDcServer;
-	DcConn * mDcConn; /** Connection for current user */
+	DcConn * mDcConn; //< Connection for current user
 
-	string msNick; /** User's nick */
+	Time mTimeEnter; //< Enter time on the hub
 
-	Time mTimeEnter;
 
-	bool mbInOpList; /** User in op-list */
-	bool mbInIpList; /** User in ip-list */
-	bool mbHide; /** User was hide */
-	bool mbForceMove; /** User can redirect other users */
-	bool mbKick; /** User can kick other users */
+	string msNick; //< User's nick
+
+	bool mInOpList; //< User in op-list
+	bool mInIpList; //< User in ip-list
+	bool mHide; //< User was hide
+	bool mForceMove; //< User can redirect other users
+	bool mKick; //< User can kick other users
 
 public:
 
@@ -71,60 +72,30 @@ public:
 	void send(const string & data, bool addSep = false, bool flush = true);
 
 	void setInUserList(bool);
-	
+
 	void setCanSend(bool canSend);
-	
+
 	inline bool isCanSend() {
 		return mCanSend;
 	}
-	
-	
+
+
 	/** Get IP address of user */
-	const string & getIp() const {
-		return mIp;
-	}
+	const string & getIp() const;
 
 	/** Get nick (for plugins) */
-	const string & getNick() const {
-		return msNick;
-	}
+	const string & getNick() const;
+	const string & Nick() const;
+	const string & MyINFO() const;
+	bool getInUserList() const;
+	bool getInOpList() const;
+	bool getInIpList() const;
+	bool getHide() const;
+	bool Hide() const;
+	bool getForceMove() const;
+	bool getKick() const;
 
-	const string & Nick() const {
-		return msNick;
-	}
-	
-	const string & MyINFO() const {
-		return myInfo.getMyInfo();
-	}
-	
-	bool getInUserList() const {
-		return mbInUserList;
-	}
 
-	bool getInOpList() const {
-		return mbInOpList;
-	}
-
-	bool getInIpList() const {
-		return mbInIpList;
-	}
-
-	bool getHide() const {
-		return mbHide;
-	}
-
-	bool Hide() const {
-		return mbHide;
-	}
-
-	bool getForceMove() const {
-		return mbForceMove;
-	}
-
-	bool getKick() const {
-		return mbKick;
-	}
-	
 	int getProfile() const;
 	void SetIp(const string & ip);
 
@@ -169,7 +140,7 @@ public:
 
 private:
 
-	bool mbInUserList; /** User in user-list */
+	bool mInUserList; /** User in user-list */
 	bool mCanSend;
 	MyInfo myInfo;
 	string mIp; /** IP address of user/bot */

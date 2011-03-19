@@ -29,12 +29,12 @@ DcUser::DcUser() :
 	DcUserBase(),
 	mDcServer(NULL),
 	mDcConn(NULL),
-	mbInOpList(false),
-	mbInIpList(false),
-	mbHide(false),
-	mbForceMove(false),
-	mbKick(false),
-	mbInUserList(false),
+	mInOpList(false),
+	mInIpList(false),
+	mHide(false),
+	mForceMove(false),
+	mKick(false),
+	mInUserList(false),
 	mCanSend(false)
 {
 	mDcConnBase = NULL;
@@ -46,12 +46,12 @@ DcUser::DcUser(const string & sNick) :
 	DcUserBase(),
 	mDcServer(NULL),
 	mDcConn(NULL),
-	mbInOpList(false),
-	mbInIpList(false),
-	mbHide(false),
-	mbForceMove(false),
-	mbKick(false),
-	mbInUserList(false),
+	mInOpList(false),
+	mInIpList(false),
+	mHide(false),
+	mForceMove(false),
+	mKick(false),
+	mInUserList(false),
 	mCanSend(false)
 {
 	mDcConnBase = NULL;
@@ -68,13 +68,13 @@ DcUser::~DcUser() {
 
 
 void DcUser::setInUserList(bool inUserList) {
-	mbInUserList = inUserList;
+	mInUserList = inUserList;
 }
 
 
 
 void DcUser::setCanSend(bool canSend) {
-	mCanSend = (mbInUserList && mDcConn && mDcConn->isOk() && canSend);
+	mCanSend = (mInUserList && mDcConn && mDcConn->isOk() && canSend);
 }
 
 
@@ -84,6 +84,75 @@ void DcUser::send(const string & data, bool addSep, bool flush) {
 		mDcConn->send(data, addSep, flush);
 	}
 }
+
+
+
+/** Get IP address of user */
+const string & DcUser::getIp() const {
+	return mIp;
+}
+
+
+
+/** Get nick */
+const string & DcUser::getNick() const {
+	return msNick;
+}
+
+
+
+const string & DcUser::Nick() const {
+	return msNick;
+}
+
+
+
+const string & DcUser::MyINFO() const {
+	return myInfo.getMyInfo();
+}
+
+
+
+bool DcUser::getInUserList() const {
+	return mInUserList;
+}
+
+
+
+bool DcUser::getInOpList() const {
+	return mInOpList;
+}
+
+
+
+bool DcUser::getInIpList() const {
+	return mInIpList;
+}
+
+
+
+bool DcUser::getHide() const {
+	return mHide;
+}
+
+
+
+bool DcUser::Hide() const {
+	return mHide;
+}
+
+
+
+bool DcUser::getForceMove() const {
+	return mForceMove;
+}
+
+
+
+bool DcUser::getKick() const {
+	return mKick;
+}
+
 
 
 int DcUser::getProfile() const {
@@ -132,13 +201,13 @@ void DcUser::setHide(bool hide) {
 
 /** Set/unset forceMove flag */
 void DcUser::setForceMove(bool forceMove) {
-	mbForceMove = forceMove;
+	mForceMove = forceMove;
 }
 
 
 /** Set/unset Kick flag */
 void DcUser::setKick(bool kick) {
-	mbKick = kick;
+	mKick = kick;
 }
 
 
