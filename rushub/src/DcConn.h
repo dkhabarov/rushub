@@ -263,7 +263,7 @@ public:
 	}
 	
 	/** Set user object for current connection */
-	bool SetUser(DcUser * User);
+	bool SetUser(DcUser * dcUser);
 
 	inline unsigned int getSrCounter() {
 		return mSrCounter;

@@ -276,8 +276,8 @@ void DcConn::closeNow(int iReason) {
 }
 
 /** Set user object for current connection */
-bool DcConn::SetUser(DcUser * User) {
-	if (!User) {
+bool DcConn::SetUser(DcUser * dcUser) {
+	if (!dcUser) {
 		if (ErrLog(1)) {
 			LogStream() << "Trying to add a NULL user" << endl;
 		}
@@ -287,17 +287,17 @@ bool DcConn::SetUser(DcUser * User) {
 		if (ErrLog(1)) {
 			LogStream() << "Trying to add user when it's actually done" << endl;
 		}
-		delete User;
+		delete dcUser;
 		return false;
 	}
-	mDcUser = User;
-	mDcUserBase = User;
-	User->SetIp(mIp);
-	User->mDcConn = this;
-	User->mDcConnBase = this;
-	User->mDcServer = server();
+	mDcUser = dcUser;
+	mDcUserBase = dcUser;
+	dcUser->SetIp(mIp);
+	dcUser->mDcConn = this;
+	dcUser->mDcConnBase = this;
+	dcUser->mDcServer = server();
 	if (Log(3)) {
-		LogStream() << "User " << User->msNick << " connected ... " << endl;
+		LogStream() << "User " << dcUser->msNick << " connected ... " << endl;
 	}
 	return true;
 }

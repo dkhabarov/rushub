@@ -553,7 +553,7 @@ int NmdcProtocol::eventTo(DcParser * dcparser, DcConn * dcConn) {
 	if (!dcConn->mDcUser->getInUserList()) {
 		return -3;
 	}
-	string & sNick = dcparser->chunkString(CHUNK_PM_TO);
+	string & nick = dcparser->chunkString(CHUNK_PM_TO);
 
 	/** Checking the coincidence nicks in command */
 	if (dcparser->chunkString(CHUNK_PM_FROM) != dcConn->mDcUser->msNick || dcparser->chunkString(CHUNK_PM_NICK) != dcConn->mDcUser->msNick) {
@@ -571,12 +571,12 @@ int NmdcProtocol::eventTo(DcParser * dcparser, DcConn * dcConn) {
 	#endif
 
 	/** Search user */
-	DcUser * User = static_cast<DcUser *> (mDcServer->mDCUserList.GetUserBaseByNick(sNick));
-	if (!User) {
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDCUserList.GetUserBaseByNick(nick));
+	if (!dcUser) {
 		return -2;
 	}
 
-	User->send(dcparser->mCommand, true);
+	dcUser->send(dcparser->mCommand, true);
 	return 0;
 }
 
@@ -589,7 +589,7 @@ int NmdcProtocol::eventMcTo(DcParser * dcparser, DcConn * dcConn) {
 		return -3;
 	}
 
-	string & sNick = dcparser->chunkString(CHUNK_MC_TO);
+	string & nick = dcparser->chunkString(CHUNK_MC_TO);
 
 	/** Checking the coincidence nicks in command */
 	if (dcparser->chunkString(CHUNK_MC_FROM) != dcConn->mDcUser->msNick) {
@@ -607,14 +607,14 @@ int NmdcProtocol::eventMcTo(DcParser * dcparser, DcConn * dcConn) {
 	#endif
 
 	/** Search user */
-	DcUser * User = static_cast<DcUser *> (mDcServer->mDCUserList.GetUserBaseByNick(sNick));
-	if (!User) {
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDCUserList.GetUserBaseByNick(nick));
+	if (!dcUser) {
 		return -2;
 	}
 
 	string msg;
-	User->send(Append_DC_Chat(msg, dcConn->mDcUser->msNick, dcparser->chunkString(CHUNK_MC_MSG)));
-	if (dcConn->mDcUser->msNick != sNick) {
+	dcUser->send(Append_DC_Chat(msg, dcConn->mDcUser->msNick, dcparser->chunkString(CHUNK_MC_MSG)));
+	if (dcConn->mDcUser->msNick != nick) {
 		dcConn->send(msg);
 	}
 	return 0;
@@ -759,8 +759,8 @@ int NmdcProtocol::eventConnectToMe(DcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	DcUser * User = static_cast<DcUser *> (mDcServer->mDCUserList.GetUserBaseByNick(dcparser->chunkString(CHUNK_CM_NICK)));
-	if (!User) {
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDCUserList.GetUserBaseByNick(dcparser->chunkString(CHUNK_CM_NICK)));
+	if (!dcUser) {
 		return -1;
 	}
 
@@ -770,7 +770,7 @@ int NmdcProtocol::eventConnectToMe(DcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	User->send(dcparser->mCommand, true);
+	dcUser->send(dcparser->mCommand, true);
 	return 0;
 }
 
@@ -822,14 +822,14 @@ int NmdcProtocol::eventKick(DcParser * dcparser, DcConn * dcConn) {
 		return -2;
 	}
 
-	DcUser * User = static_cast<DcUser *> (mDcServer->mDCUserList.GetUserBaseByNick(dcparser->chunkString(CHUNK_1_PARAM)));
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDCUserList.GetUserBaseByNick(dcparser->chunkString(CHUNK_1_PARAM)));
 
 	/** Is user exist? */
-	if (!User || !User->mDcConn) {
+	if (!dcUser || !dcUser->mDcConn) {
 		return -3;
 	}
 
-	User->mDcConn->closeNice(9000, CLOSE_REASON_CMD_KICK);
+	dcUser->mDcConn->closeNice(9000, CLOSE_REASON_CMD_KICK);
 	return 0;
 }
 
@@ -845,14 +845,14 @@ int NmdcProtocol::eventOpForceMove(DcParser * dcparser, DcConn * dcConn) {
 		return -2;
 	}
 
-	DcUser * User = static_cast<DcUser *> (mDcServer->mDCUserList.GetUserBaseByNick(dcparser->chunkString(CHUNK_FM_NICK)));
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDCUserList.GetUserBaseByNick(dcparser->chunkString(CHUNK_FM_NICK)));
 
 	/** Is user exist? */
-	if (!User || !User->mDcConn || !dcparser->chunkString(CHUNK_FM_DEST).size()) {
+	if (!dcUser || !dcUser->mDcConn || !dcparser->chunkString(CHUNK_FM_DEST).size()) {
 		return -3;
 	}
 
-	mDcServer->forceMove(User->mDcConn, dcparser->chunkString(CHUNK_FM_DEST).c_str(), dcparser->chunkString(CHUNK_FM_REASON).c_str());
+	mDcServer->forceMove(dcUser->mDcConn, dcparser->chunkString(CHUNK_FM_DEST).c_str(), dcparser->chunkString(CHUNK_FM_REASON).c_str());
 	return 0;
 }
 
@@ -861,12 +861,12 @@ int NmdcProtocol::eventGetInfo(DcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	DcUser * User = static_cast<DcUser *> (mDcServer->mDCUserList.GetUserBaseByNick(dcparser->chunkString(CHUNK_GI_OTHER)));
-	if (!User) {
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDCUserList.GetUserBaseByNick(dcparser->chunkString(CHUNK_GI_OTHER)));
+	if (!dcUser) {
 		return -2;
 	}
 
-	if (dcConn->mDcUser->mTimeEnter < User->mTimeEnter && Time() < (User->mTimeEnter + 60000)) {
+	if (dcConn->mDcUser->mTimeEnter < dcUser->mTimeEnter && Time() < (dcUser->mTimeEnter + 60000)) {
 		return 0;
 	}
 
@@ -877,8 +877,8 @@ int NmdcProtocol::eventGetInfo(DcParser * dcparser, DcConn * dcConn) {
 	#endif
 
 	//if(!(dcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO)){
-	if (!User->mbHide) {
-		dcConn->send(string(User->getMyINFO()), true, false);
+	if (!dcUser->mbHide) {
+		dcConn->send(string(dcUser->getMyINFO()), true, false);
 	}
 	return 0;
 }
