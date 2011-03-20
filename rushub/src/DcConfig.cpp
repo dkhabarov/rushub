@@ -106,6 +106,8 @@ void DcConfig::addVars(Server * server) {
 	Add("iFloodCountRCTM2",       mFloodCount2[NMDC_TYPE_RCONNECTTOME], 2500  );
 	Add("iFloodCountMCTo",        mFloodCount [NMDC_TYPE_MCTO],         5     );
 	Add("iFloodCountMCTo2",       mFloodCount2[NMDC_TYPE_MCTO],         30    );
+	Add("iFloodCountUserIp",      mFloodCount [NMDC_TYPE_USERIP],       100   );
+	Add("iFloodCountUserIp2",     mFloodCount2[NMDC_TYPE_USERIP],       1000  );
 	Add("iFloodCountPing",        mFloodCount [NMDC_TYPE_PING],         5     );
 	Add("iFloodCountPing2",       mFloodCount2[NMDC_TYPE_PING],         20    );
 	Add("iFloodCountUnknown",     mFloodCount [NMDC_TYPE_UNKNOWN],      1     );
@@ -138,6 +140,8 @@ void DcConfig::addVars(Server * server) {
 	Add("iFloodTimeRCTM2",        mFloodTime2[NMDC_TYPE_RCONNECTTOME],  600.  );
 	Add("iFloodTimeMCTo",         mFloodTime [NMDC_TYPE_MCTO],          10.   );
 	Add("iFloodTimeMCTo2",        mFloodTime2[NMDC_TYPE_MCTO],          30.   );
+	Add("iFloodTimeUserIp",       mFloodTime [NMDC_TYPE_USERIP],        10.   );
+	Add("iFloodTimeUserIp2",      mFloodTime2[NMDC_TYPE_USERIP],        30.   );
 	Add("iFloodTimePing",         mFloodTime [NMDC_TYPE_PING],          1.    );
 	Add("iFloodTimePing2",        mFloodTime2[NMDC_TYPE_PING],          30.   );
 	Add("iFloodTimeUnknown",      mFloodTime [NMDC_TYPE_UNKNOWN],       3.    );
@@ -165,6 +169,7 @@ void DcConfig::addVars(Server * server) {
 	Add("iLenCmdOFM",             mMaxCmdLen[NMDC_TYPE_OPFORCEMOVE],    512   );
 	Add("iLenCmdGetINFO",         mMaxCmdLen[NMDC_TYPE_GETINFO],        128   );
 	Add("iLenCmdMCTo",            mMaxCmdLen[NMDC_TYPE_MCTO],           65536 );
+	Add("iLenCmdUserIp",          mMaxCmdLen[NMDC_TYPE_USERIP],         1024  );
 	Add("iLenCmdUnknown",         mMaxCmdLen[NMDC_TYPE_UNKNOWN],        128   );
 	mMaxCmdLen[NMDC_TYPE_PING] = 0; // ping length
 
@@ -343,6 +348,7 @@ void DcLang::addVars() {
 	Add("sFloodCTM", mFlood[NMDC_TYPE_CONNECTTOME], string("Пожалуйста не флудите частыми запросами на соединение с пользователями хаба."));
 	Add("sFloodRCTM", mFlood[NMDC_TYPE_RCONNECTTOME], string("Пожалуйста не флудите частыми запросами на соединение с активнми пользователями хаба."));
 	Add("sFloodMCTo", mFlood[NMDC_TYPE_MCTO], string("Пожалуйста не флудите!"));
+	Add("sFloodUserIp", mFlood[NMDC_TYPE_USERIP], string("Пожалуйста не флудите запросами UserIP!"));
 	Add("sFloodPing", mFlood[NMDC_TYPE_PING], string("Ваш клиент слишком часто пингует хаб."));
 	Add("sFloodUnknown", mFlood[NMDC_TYPE_UNKNOWN], string("Не флудите неизвестными командами."));
 

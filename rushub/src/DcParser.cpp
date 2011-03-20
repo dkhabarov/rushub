@@ -46,7 +46,7 @@ ProtocolCommand aDC_Commands[] = {
 	ProtocolCommand("$GetNickList"),
 	ProtocolCommand("<"),                  // check: nick, delay, size, line_count
 	ProtocolCommand("$To: "),              // check: nick, other_nick
-	ProtocolCommand("$Quit "),             // no chech necessary
+	ProtocolCommand("$Quit "),             // no check necessary
 	ProtocolCommand("$MyPass "),
 	ProtocolCommand("$ConnectToMe "),      // check: ip, nick
 	ProtocolCommand("$RevConnectToMe "),   // check: nick, other_nick
@@ -55,6 +55,7 @@ ProtocolCommand aDC_Commands[] = {
 	ProtocolCommand("$OpForceMove $Who:"), // check: op, nick
 	ProtocolCommand("$GetINFO "),          // check: logged_in(FI), nick
 	ProtocolCommand("$MCTo: "),            // check: nick, other_nick
+	ProtocolCommand("$UserIP "),
 	ProtocolCommand("|")                   // ping cmd (cap)
 };
 
@@ -263,6 +264,9 @@ bool DcParser::SplitChunks() {
 			// Fallthrough
 
 		case NMDC_TYPE_MYPASS : /** $MyPass [pass] */
+			// Fallthrough
+
+		case NMDC_TYPE_USERIP : /** $UserIP [param] */
 			// Fallthrough
 
 		case NMDC_TYPE_KICK : /** $Kick [nick] */

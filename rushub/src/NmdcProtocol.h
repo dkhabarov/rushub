@@ -119,6 +119,7 @@ private:
 	int eventOpForceMove(DcParser *, DcConn *); /** Force move */
 	int eventGetInfo(DcParser *, DcConn *); /** Get user's MyINFO */
 	int eventMcTo(DcParser *, DcConn *); /** Private message in chat */
+	int eventUserIp(DcParser *, DcConn *); /** UserIP cmd */
 	int eventPing(DcParser *, DcConn *); /** Ping cmd */
 	int eventUnknown(DcParser *, DcConn *); /** Unknown cmd */
 	int eventQuit(DcParser *, DcConn *); /** Quit cmd */

@@ -133,7 +133,7 @@ typedef enum { /** Types of the commands */
 	NMDC_TYPE_SUPPORTS,       //< 7  = $Support
 	NMDC_TYPE_KEY,            //< 8  = $Key
 	NMDC_TYPE_VALIDATENICK,   //< 9  = $ValidateNick
-	NMDC_TYPE_VERSION,        //< 10  = $Version
+	NMDC_TYPE_VERSION,        //< 10 = $Version
 	NMDC_TYPE_GETNICKLIST,    //< 11 = $GetNickList
 	NMDC_TYPE_CHAT,           //< 12 = Chat
 	NMDC_TYPE_TO,             //< 13 = $To
@@ -146,8 +146,9 @@ typedef enum { /** Types of the commands */
 	NMDC_TYPE_OPFORCEMOVE,    //< 20 = $OpForceMove
 	NMDC_TYPE_GETINFO,        //< 21 = $GetINFO
 	NMDC_TYPE_MCTO,           //< 22 = $MCTo
-	NMDC_TYPE_PING,           //< 23 = |
-	NMDC_TYPE_UNKNOWN,        //< 24 = $Unknown
+	NMDC_TYPE_USERIP,         //< 23 = $UserIP
+	NMDC_TYPE_PING,           //< 24 = |
+	NMDC_TYPE_UNKNOWN,        //< 25 = $Unknown
 } NmdcType;
 
 

@@ -224,6 +224,10 @@ int NmdcProtocol::DoCmd(Parser * parser, Conn * conn) {
 			eventPing(dcparser, dcConn);
 			break;
 
+		case NMDC_TYPE_USERIP :
+			eventUserIp(dcparser, dcConn);
+			break;
+
 		case NMDC_TYPE_UNKNOWN :
 			eventUnknown(dcparser, dcConn);
 			break;
@@ -266,6 +270,8 @@ int NmdcProtocol::eventSupports(DcParser * dcparser, DcConn * dcConn) {
 			dcConn->mFeatures |= SUPPORT_FEATUER_NOHELLO;
 		} else if (feature == "UserIP2") {
 			dcConn->mFeatures |= SUPPORT_FEATUER_USERIP2;
+		} else if (feature == "UserIP") {
+			dcConn->mFeatures |= SUPPORT_FEATUER_USERIP;
 		} else if (feature == "TTHSearch") {
 			dcConn->mFeatures |= SUPPORT_FEATUER_TTHSEARCH;
 		} else if (feature == "QuickList") {
@@ -282,7 +288,7 @@ int NmdcProtocol::eventSupports(DcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	static string msg("$Supports UserCommand NoGetINFO NoHello UserIP2 MCTo"NMDC_SEPARATOR);
+	static string msg("$Supports UserCommand NoGetINFO NoHello UserIP UserIP2 MCTo"NMDC_SEPARATOR);
 	dcConn->send(msg, false, false);
 
 	return 0;
@@ -619,6 +625,52 @@ int NmdcProtocol::eventMcTo(DcParser * dcparser, DcConn * dcConn) {
 	}
 	return 0;
 }
+
+
+int NmdcProtocol::eventUserIp(DcParser * dcParser, DcConn * dcConn) {
+
+	if (!dcConn->mDcUser) {
+		return -2;
+	}
+	if (!dcConn->mDcUser->getInUserList()) {
+		return -3;
+	}
+
+	if (!(dcConn->mFeatures & (SUPPORT_FEATUER_USERIP | SUPPORT_FEATUER_USERIP2))) {
+		return -4;
+	}
+
+	string param = dcParser->chunkString(CHUNK_1_PARAM);
+	string nick, result("$UserIP ");
+
+	size_t pos = param.find("$$");
+	size_t cur = 0;
+	while (pos != param.npos) {
+		nick.assign(param, cur, pos - cur);
+		if (nick.size()) {
+			UserBase * userBase = mDcServer->mDCUserList.GetUserBaseByNick(nick);
+			if (userBase != NULL) {
+				result.append(nick).append(" ").append(userBase->getIp()).append("$$");
+			}
+		}
+		cur = pos + 2;
+		pos = param.find("$$", pos + 2);
+	}
+
+	// last param
+	nick.assign(param, cur, param.size() - cur);
+	if (nick.size()) {
+		UserBase * userBase = mDcServer->mDCUserList.GetUserBaseByNick(nick);
+		if (userBase != NULL) {
+			result.append(nick).append(" ").append(userBase->getIp());
+		}
+	}
+
+
+	dcConn->send(result, true);
+	return 0;
+}
+
 
 /**
 	NMDC_TYPE_SEARCH
