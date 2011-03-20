@@ -31,7 +31,7 @@
 #include <string>
 
 #define PLUGIN_NAME "LuaPlugin"
-#define PLUGIN_VERSION "2.0[beta]"
+#define PLUGIN_VERSION "2.0"
 
 namespace dcserver {
 
