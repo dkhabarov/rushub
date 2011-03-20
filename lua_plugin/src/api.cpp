@@ -124,7 +124,8 @@ static bool checkScriptName(lua_State * L, string & name) {
 	return true;
 }
 
-static bool findInterpreter(lua_State * L, LuaInterpreter * luaInterpreter, const string & name) {
+static LuaInterpreter * findInterpreter(lua_State * L, const string & name) {
+	LuaInterpreter * luaInterpreter = NULL;
 	for (LuaPlugin::tvLuaInterpreter::iterator it = LuaPlugin::mCurLua->mLua.begin();
 		it != LuaPlugin::mCurLua->mLua.end();
 		++it
@@ -136,9 +137,9 @@ static bool findInterpreter(lua_State * L, LuaInterpreter * luaInterpreter, cons
 	}
 	if (!luaInterpreter || !luaInterpreter->mL) {
 		error(L, "script was not found");
-		return false;
+		return NULL;
 	}
-	return true;
+	return luaInterpreter;
 }
 
 
@@ -300,14 +301,11 @@ int GetGVal(lua_State * L) {
 	}
 	size_t iLen;
 	string sScriptName(luaL_checklstring(L, 1, &iLen));
-	if (!checkFileLen(L, iLen)) {
-		return 2;
-	}
-	LuaInterpreter * LIP = NULL;
 	if (!checkScriptName(L, sScriptName)) {
 		return 2;
 	}
-	if (!findInterpreter(L, LIP, sScriptName)) {
+	LuaInterpreter * LIP = findInterpreter(L, sScriptName);
+	if (LIP == NULL) {
 		return 2;
 	}
 
@@ -328,14 +326,11 @@ int SetGVal(lua_State * L) {
 	}
 	size_t iLen;
 	string sScriptName(luaL_checklstring(L, 1, &iLen));
-	if (!checkFileLen(L, iLen)) {
-		return 2;
-	}
-	LuaInterpreter * LIP = NULL;
 	if (!checkScriptName(L, sScriptName)) {
 		return 2;
 	}
-	if (!findInterpreter(L, LIP, sScriptName)) {
+	LuaInterpreter * LIP = findInterpreter(L, sScriptName);
+	if (LIP == NULL) {
 		return 2;
 	}
 
@@ -1381,11 +1376,11 @@ int Call(lua_State * L) {
 		return errCount(L, "more 1");
 	}
 	string sScriptName(luaL_checkstring(L, 1));
-	LuaInterpreter * LIP = NULL;
 	if (!checkScriptName(L, sScriptName)) {
 		return 2;
 	}
-	if (!findInterpreter(L, LIP, sScriptName)) {
+	LuaInterpreter * LIP = findInterpreter(L, sScriptName);
+	if (LIP == NULL) {
 		return 2;
 	}
 
