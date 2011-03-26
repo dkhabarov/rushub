@@ -852,10 +852,12 @@ bool Conn::checkIp(const string &ip) {
 
 void Conn::getMac() {
 #ifdef _WIN32
-	char buf[17] = { '\0' };
-	unsigned long ip = ip2Num(mIp.c_str()), iSize = 0xFFFF;
-	MIB_IPNETTABLE * pT = (MIB_IPNETTABLE *) new char[0xFFFF];
-	if (0L == ::GetIpNetTable(pT, &iSize, 1)) {
+	char buf[18] = { '\0' };
+	unsigned long ip = ip2Num(mIp.c_str());
+	unsigned long size = 0x0;
+	::GetIpNetTable(NULL, &size, false);
+	MIB_IPNETTABLE * pT = (MIB_IPNETTABLE *) new char[size];
+	if (0L == ::GetIpNetTable(pT, &size, true)) {
 		for (unsigned long i = 0; i < pT->dwNumEntries; ++i) {
 			if ((pT->table[i].dwAddr == ip) && (pT->table[i].dwType != 2)) {
 				sprintf(buf, "%02x-%02x-%02x-%02x-%02x-%02x",
