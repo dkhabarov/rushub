@@ -24,7 +24,7 @@
 #include <windows.h>
 #include <stdio.h>
 
-static void set_dl_error(void) {
+static void set_dl_error() {
 	DWORD err = GetLastError();
 	if (FormatMessageA(FORMAT_MESSAGE_IGNORE_INSERTS |
 		FORMAT_MESSAGE_FROM_SYSTEM,
@@ -43,7 +43,7 @@ static void set_dl_error(void) {
 	}
 }
 
-char * dlerror(void) {
+char * dlerror() {
 	if (last_dyn_error[0]) {
 		return last_dyn_error;
 	}
@@ -81,6 +81,83 @@ int dlclose(void * handle) {
 		return 1;
 	}
 	last_dyn_error[0] = 0;
+	return 0;
+}
+
+#elif defined(__APPLE__)
+
+#include <mach-o/dyld.h>
+
+static void set_dl_error() {
+	NSLinkEditErrors errs;
+	int num;
+	const char * file;
+	const char * err;
+	NSLinkEditError(&errs, &num, &file, &err);
+	strcpy(last_dyn_error, err);
+}
+
+char * dlerror() {
+	if (last_dyn_error[0]) {
+		return last_dyn_error;
+	}
+	return NULL;
+}
+
+void * dlsym(void * handle, const char * symbol) {
+	NSSymbol nsSymbol = NSLookupSymbolInModule((NMModule) handle, symbol);
+	if (nsSymbol == NULL) {
+		sprintf(last_dyn_error, "symbol %s not found", symbol);
+		return NULL;
+	}
+	return (void *) NSAddressOfSymbol(nsSymbol);
+}
+
+void * dlopen(const char * path, int) {
+	if (!_dyld_present()) {
+		strcpy(last_dyn_error, "dyld not present");
+		return NULL;
+	}
+
+	NSObjectFileImage file;
+	NSObjectFileImageReturnCode code = NSCreateObjectFileImageFromFile(path, &file);
+	if (code != NSObjectFileImageSuccess) {
+		switch (code) {
+			case NSObjectFileImageInappropriateFile :
+				strcpy(last_dyn_error, "file is not a bundle");
+
+			case NSObjectFileImage :
+				strcpy(last_dyn_error, "library is for wrong CPU type");
+
+			case NSObjectFileImage :
+				strcpy(last_dyn_error, "bad format");
+
+			case NSObjectFileImage :
+				strcpy(last_dyn_error, "cannot access file");
+
+			default:
+				strcpy(last_dyn_error, "unknown error");
+
+		}
+		return NULL;
+	}
+
+	NSModule module = NSLinkModule(file, path,
+		NSLINKMODULE_OPTION_PRIVATE | NSLINKMODULE_OPTION_RETURN_ON_ERROR);
+	NSDestroyObjectFileImage(file);
+
+	if (module == NULL) {
+		set_dl_error();
+		return NULL;
+	}
+
+	last_dyn_error[0] = 0;
+	return module;
+}
+
+int dlclose(void * handle) {
+	NSUnLinkModule((NSModule) handle,
+		NSUNLINKMODULE_OPTION_RESET_LAZY_REFERENCES);
 	return 0;
 }
 

@@ -20,21 +20,27 @@
 #ifndef DLFCN
 #define DLFCN
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__)
 
-#define RTLD_LAZY 0x001 /** Lazy function call binding. */
-#define RTLD_NOW 0x002 /** Immediate function call binding. */
-#define RTLD_BINDING_MASK 0x3 /** Mask of binding time value. */
+	#define RTLD_LAZY 0x001 //< Lazy function call binding
+	#define RTLD_NOW 0x002 //< Immediate function call binding
+	#define RTLD_BINDING_MASK 0x3 //< Mask of binding time value
 
-char * dlerror(void);
-void * dlsym(void * handle, const char * symbol);
-void * dlopen(const char * path, int mode);
-int dlclose(void * handle);
+	char * dlerror();
+	void * dlsym(void * handle, const char * symbol);
+	void * dlopen(const char * path, int mode);
+	int dlclose(void * handle);
 
-static char last_dyn_error[512];
+	static char last_dyn_error[512];
 
 #else
-#	include <dlfcn.h>
+	/*
+		This is an implamentation of loadlib based on the dlfcn interface.
+		The dlfcn interface is available in Linux, SunOS, FreeBSD, NetBSD,
+		Solaris, IRIX, AIX 4.2, HPUX 11, and probably most other Unix flavors,
+		at least as an emulation layer on top of native functions.
+	*/
+	#include <dlfcn.h>
 #endif // _WIN32
 
 #endif // DLFCN

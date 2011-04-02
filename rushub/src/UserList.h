@@ -47,7 +47,7 @@ class UserBase;
 
 
 
-/** The structure, allowing add and delete the users. Quick iterations cycle for sending */
+/** The structure, allowing add and delete users. Quick iterations cycle for sending */
 class UserList : public Obj, public HashTable<UserBase *> {
 
 friend class DcServer;
