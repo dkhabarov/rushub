@@ -14,8 +14,18 @@ INCLUDE = -I/usr/include -I/usr/local/include -I/usr/include/lua5.1 -I/usr/inclu
 
 OBJS = $(CURDIR)/api.o $(CURDIR)/Dir.o $(CURDIR)/LuaInterpreter.o $(CURDIR)/LuaPlugin.o $(CURDIR)/TaskList.o $(CURDIR)/TimerList.o $(CURDIR)/Uid.o
 
-lib: $(OBJS)
+all: debian
+
+linux-static: freebsd
+
+freebsd: $(OBJS)
+	$(CXX) -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/tinyxml.a /usr/local/lib/liblua.a
+
+debian: $(OBJS)
 	$(CXX) -llua5.1 -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/tinyxml.a
+
+linux: $(OBJS)
+	$(CXX) -llua -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/tinyxml.a
 
 $(CURDIR)/api.o: $(CURDIR)/api.cpp $(CURDIR)/api.h $(CURDIR)/List.h $(CURDIR)/TimerList.h $(CURDIR)/LuaInterpreter.h $(CURDIR)/TaskList.h $(CURDIR)/LuaPlugin.h $(CURDIR)/Uid.h $(CURDIR)/Dir.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
