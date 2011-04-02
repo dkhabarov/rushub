@@ -51,7 +51,7 @@ void UserList::ufSendProfile::operator() (UserBase * userBase) {
 }
 
 void UserList::ufSendWithNick::operator() (UserBase * userBase) {
-	if (userBase && userBase->isCanSend()) { 
+	if (userBase && userBase->isCanSend()) {
 		userBase->send(mDataStart, false, false);
 		userBase->send(userBase->Nick(), false, false);
 		userBase->send(mDataEnd, true); // newPolitic

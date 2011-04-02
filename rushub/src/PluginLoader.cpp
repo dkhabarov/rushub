@@ -25,6 +25,10 @@
 #include "PluginLoader.h"
 #include "Plugin.h"
 
+#ifdef _WIN32
+	#include <windows.h>
+#endif
+
 
 namespace plugin {
 
@@ -88,7 +92,17 @@ bool PluginLoader::open() {
 bool PluginLoader::close() {
 	if (mHandle) {
 		if (mPlugin && mDelPluginFunc && mPlugin->mInternalPluginVersion == INTERNAL_PLUGIN_VERSION) {
-			mDelPluginFunc(mPlugin);
+			#ifdef _WIN32
+				__try {
+					mDelPluginFunc(mPlugin);
+				} __except( EXCEPTION_EXECUTE_HANDLER) {
+					if (ErrLog(0)) {
+						LogStream() << "error in DelPluginFunc (" << mPlugin->getName() << ")" << endl;
+					}
+				}
+			#else
+				mDelPluginFunc(mPlugin);
+			#endif
 		}
 		mPlugin = NULL;
 		dlclose(mHandle);

@@ -72,7 +72,7 @@ enum SupportFeature {
 
 	SUPPORT_FEATUER_USERCOMMAND = 1     , //< UserCommand feature
 	SUPPORT_FEATUER_NOGETINFO   = 1 << 1, //< NoGetINFO feature
-	SUPPORT_FEATUER_NOHELLO     = 1 << 2, //< NoHello feature
+	SUPPORT_FEATURE_NOHELLO     = 1 << 2, //< NoHello feature
 	SUPPORT_FEATUER_USERIP2     = 1 << 3, //< UserIP2 feature
 	SUPPORT_FEATUER_TTHSEARCH   = 1 << 4, //< TTHSearch feature
 	SUPPORT_FEATUER_QUICKLIST   = 1 << 5, //< Quicklist feature

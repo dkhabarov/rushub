@@ -45,20 +45,10 @@ class PluginListBase;
 /** Base class for call list */
 class CallList : public Obj {
 
-private:
-
-	typedef list<Plugin *> tPlugins;
-
-	/** Plugin list of call list */
-	tPlugins mPlugins;
-
-	/** Pointer on common plugin list */
-	PluginList * mPluginList;
-
 public:
 
 	/** Unary function of plugin list for current call list */
-	struct ufCallOne : public unary_function<void, tPlugins::iterator> {
+	struct ufCallOne : public unary_function<void, list<Plugin *>::iterator> {
 
 		/** Pointer on common plugin list */
 		PluginList * mPluginList;
@@ -102,11 +92,24 @@ public:
 
 private:
 
-	/** Unary function */
+	typedef list<Plugin *> tPlugins;
+
+	//< Plugin list of call list
+	tPlugins mPlugins;
+
+	//< Pointer on common plugin list
+	PluginList * mPluginList;
+
+	//< Unary function
 	ufCallOne mCallOne;
 
-	/** Name of the call list */
+	//< Name of the call list
 	string mName;
+
+	typedef vector<Plugin *> RemovedPlugins_t;
+
+	//< Removed plugins
+	RemovedPlugins_t removedPlugins;
 
 
 }; // class CallList

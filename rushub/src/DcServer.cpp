@@ -59,8 +59,8 @@ DcServer::DcServer(const string & configFile, const string &):
 	mDcConfig(&mDcConfigLoader, mServer, configFile.c_str()),
 	mDCLang(&mDcConfigLoader, &mDcConfig),
 	mSystemLoad(SYSTEM_LOAD_OK),
-	mDCUserList("UserList", true, true, true),
-	mDCBotList("BotList", true),
+	mDcUserList("UserList", true, true, true),
+	mBotList("BotList", true),
 	mOpList("OpList", true),
 	mIpList("IpList"),
 	mActiveList("ActiveList"),
@@ -101,13 +101,13 @@ DcServer::DcServer(const string & configFile, const string &):
 	string nmdc;
 
 	nmdc = "$NickList ";
-	mDCUserList.SetNickListStart(nmdc);
+	mDcUserList.SetNickListStart(nmdc);
 
 	nmdc = "$OpList ";
 	mOpList.SetNickListStart(nmdc);
 
 	nmdc = "$$";
-	mDCUserList.SetNickListSeparator(nmdc);
+	mDcUserList.SetNickListSeparator(nmdc);
 	mOpList.SetNickListSeparator(nmdc);
 
 	nmdc = "$ActiveList ";
@@ -137,8 +137,8 @@ DcServer::~DcServer() {
 	}
 
 	DcUser * Us = NULL;
-	UserList::iterator it, it_e = mDCUserList.end();	
-	for (it = mDCUserList.begin(); it != it_e;) {
+	UserList::iterator it, it_e = mDcUserList.end();	
+	for (it = mDcUserList.begin(); it != it_e;) {
 		Us = static_cast<DcUser *> (*it);
 		++it;
 		if (Us->mDcConn) {
@@ -297,8 +297,8 @@ int DcServer::onTimer(Time & now) {
 		mChecker = now;
 
 		mHelloList.FlushCache();
-		mDCUserList.FlushCache();
-		mDCBotList.FlushCache();
+		mDcUserList.FlushCache();
+		mBotList.FlushCache();
 		mEnterList.FlushCache();
 		mOpList.FlushCache();
 		mIpList.FlushCache();
@@ -338,8 +338,8 @@ int DcServer::onTimer(Time & now) {
 
 		mIPEnterFlood.Del(now); // Removing ip addresses, which already long ago entered
 
-		mDCUserList.AutoResize();
-		mDCBotList.AutoResize();
+		mDcUserList.AutoResize();
+		mBotList.AutoResize();
 		mHelloList.AutoResize();
 		mEnterList.AutoResize();
 		mActiveList.AutoResize();
@@ -429,7 +429,7 @@ void DcServer::OnNewUdpData(Conn * conn, string * data) {
 		if (!dcParser->SplitChunks()) {
 			dcParser->miType = NMDC_TYPE_SR; // Set simple SR type
 
-			DcUser * dcUser = static_cast<DcUser *> (mDCUserList.GetUserBaseByNick(dcParser->chunkString(CHUNK_SR_FROM)));
+			DcUser * dcUser = static_cast<DcUser *> (mDcUserList.GetUserBaseByNick(dcParser->chunkString(CHUNK_SR_FROM)));
 			if (dcUser && dcUser->mDcConn && conn->ipUdp() == dcUser->getIp()) {
 				conn->mProtocol->DoCmd(conn->mParser, dcUser->mDcConn);
 			}
@@ -476,10 +476,10 @@ bool DcServer::antiFlood(unsigned & count, Time & time, const unsigned & countLi
 
 /** Checking for this nick used */
 bool DcServer::CheckNick(DcConn *dcConn) {
-	UserKey key = mDCUserList.Nick2Key(dcConn->mDcUser->msNick);
-	if (mDCUserList.ContainsKey(key)) {
+	UserKey key = mDcUserList.Nick2Key(dcConn->mDcUser->msNick);
+	if (mDcUserList.ContainsKey(key)) {
 		string sMsg;
-		DcUser * us = static_cast<DcUser *> (mDCUserList.Find(key));
+		DcUser * us = static_cast<DcUser *> (mDcUserList.Find(key));
 
 		if (!us->mDcConn || (us->getProfile() == -1 && us->getIp() != dcConn->ip())) {
 			if (dcConn->Log(2)) {
@@ -570,7 +570,7 @@ void DcServer::DoUserEnter(DcConn * dcConn) {
 		return;
 	}
 
-	UserKey key = mDCUserList.Nick2Key(dcConn->mDcUser->msNick);
+	UserKey key = mDcUserList.Nick2Key(dcConn->mDcUser->msNick);
 
 	/** User is already considered came */
 	if (mEnterList.ContainsKey(key)) {
@@ -611,22 +611,22 @@ bool DcServer::AddToUserList(DcUser * dcUser) {
 		return false;
 	}
 
-	UserKey key = mDCUserList.Nick2Key(dcUser->msNick);
+	UserKey key = mDcUserList.Nick2Key(dcUser->msNick);
 
-	if (mDCUserList.Log(4)) {
-		mDCUserList.LogStream() << "Before add: " << dcUser->msNick << " Size: " << mDCUserList.Size() << endl;
+	if (mDcUserList.Log(4)) {
+		mDcUserList.LogStream() << "Before add: " << dcUser->msNick << " Size: " << mDcUserList.Size() << endl;
 	}
 
-	if (!mDCUserList.AddWithKey(key, dcUser)) {
+	if (!mDcUserList.AddWithKey(key, dcUser)) {
 		if (Log(1)) {
-			LogStream() << "Adding twice user with same nick " << dcUser->msNick << " (" << mDCUserList.Find(key)->Nick() << ")" << endl;
+			LogStream() << "Adding twice user with same nick " << dcUser->msNick << " (" << mDcUserList.Find(key)->Nick() << ")" << endl;
 		}
 		dcUser->setInUserList(false);
 		return false;
 	}
 
-	if (mDCUserList.Log(4)) {
-		mDCUserList.LogStream() << "After add: " << dcUser->msNick << " Size: " << mDCUserList.Size() << endl;
+	if (mDcUserList.Log(4)) {
+		mDcUserList.LogStream() << "After add: " << dcUser->msNick << " Size: " << mDcUserList.Size() << endl;
 	}
 
 	dcUser->setInUserList(true);
@@ -645,7 +645,7 @@ bool DcServer::AddToUserList(DcUser * dcUser) {
 		dcUser->mDcConn->mbIpRecv = true; /** Installing the permit on reception of the messages on ip */
 		mChatList.AddWithKey(key, dcUser);
 
-		if (!(dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_NOHELLO)) {
+		if (!(dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO)) {
 			mHelloList.AddWithKey(key, dcUser);
 		}
 		if (dcUser->mDcConn->Log(3)) {
@@ -662,11 +662,11 @@ bool DcServer::AddToUserList(DcUser * dcUser) {
 
 /** Removing user from the user list */
 bool DcServer::RemoveFromDCUserList(DcUser * dcUser) {
-	UserKey key = mDCUserList.Nick2Key(dcUser->msNick);
-	if (mDCUserList.Log(4)) {
-		mDCUserList.LogStream() << "Before leave: " << dcUser->msNick << " Size: " << mDCUserList.Size() << endl;
+	UserKey key = mDcUserList.Nick2Key(dcUser->msNick);
+	if (mDcUserList.Log(4)) {
+		mDcUserList.LogStream() << "Before leave: " << dcUser->msNick << " Size: " << mDcUserList.Size() << endl;
 	}
-	if (mDCUserList.ContainsKey(key)) {
+	if (mDcUserList.ContainsKey(key)) {
 		#ifndef WITHOUT_PLUGINS
 			if (dcUser->mDcConn) {
 				mCalls.mOnUserExit.CallAll(dcUser->mDcConn);
@@ -674,13 +674,13 @@ bool DcServer::RemoveFromDCUserList(DcUser * dcUser) {
 		#endif
 
 		/** We make sure that user with such nick one! */
-		DcUser * other = static_cast<DcUser *> (mDCUserList.GetUserBaseByNick(dcUser->msNick));
+		DcUser * other = static_cast<DcUser *> (mDcUserList.GetUserBaseByNick(dcUser->msNick));
 		if (!dcUser->mDcConn) { /** Removing the bot */
-			mDCUserList.RemoveByKey(key);
+			mDcUserList.RemoveByKey(key);
 		} else if (other && other->mDcConn && dcUser->mDcConn && other->mDcConn == dcUser->mDcConn) {
-			mDCUserList.RemoveByKey(key);
-			if (mDCUserList.Log(4)) {
-				mDCUserList.LogStream() << "After leave: " << dcUser->msNick << " Size: " << mDCUserList.Size() << endl;
+			mDcUserList.RemoveByKey(key);
+			if (mDcUserList.Log(4)) {
+				mDcUserList.LogStream() << "After leave: " << dcUser->msNick << " Size: " << mDcUserList.Size() << endl;
 			}
 		} else {
 			/** Such can happen only for users without connection or with different connection */
@@ -698,7 +698,7 @@ bool DcServer::RemoveFromDCUserList(DcUser * dcUser) {
 	mEnterList.RemoveByKey(key);
 	mChatList.RemoveByKey(key);
 	mActiveList.RemoveByKey(key);
-	mDCBotList.RemoveByKey(key);
+	mBotList.RemoveByKey(key);
 
 	if (dcUser->getInUserList()) {
 		dcUser->setInUserList(false);
@@ -708,7 +708,7 @@ bool DcServer::RemoveFromDCUserList(DcUser * dcUser) {
 			NmdcProtocol::Append_DC_Quit(sMsg, dcUser->msNick);
 
 			/** Delay in sending MyINFO (and Quit) */
-			mDCUserList.sendToAll(sMsg, true/*mDcConfig.mDelayedMyinfo*/, false);
+			mDcUserList.sendToAll(sMsg, true/*mDcConfig.mDelayedMyinfo*/, false);
 		}
 	}
 	return true;
@@ -720,7 +720,7 @@ bool DcServer::RemoveFromDCUserList(DcUser * dcUser) {
 bool DcServer::ShowUserToAll(DcUser * dcUser) {
 	string sMsg1, sMsg2;
 	if (dcUser->mHide && dcUser->mDcConn) {
-		if (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_NOHELLO) {
+		if (dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
 			dcUser->mDcConn->send(string(dcUser->getMyINFO()), true, false);
 		} else if (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
 			dcUser->mDcConn->send(NmdcProtocol::Append_DC_Hello(sMsg1, dcUser->msNick), false, false);
@@ -738,14 +738,14 @@ bool DcServer::ShowUserToAll(DcUser * dcUser) {
 		mHelloList.sendToAll(NmdcProtocol::Append_DC_Hello(sMsg1, dcUser->msNick), true/*mDcConfig.mDelayedMyinfo*/, false);
 
 		/** Show MyINFO string to all users */
-		mDCUserList.sendToAll(dcUser->getMyINFO(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
+		mDcUserList.sendToAll(dcUser->getMyINFO(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
 
 		/** Show MyINFO string of the current user to all enterring users */
 		mEnterList.sendToAll(dcUser->getMyINFO(), true/*mDcConfig.mDelayedMyinfo*/);
 
 		/** Op entry */
 		if (dcUser->mInOpList) {
-			mDCUserList.sendToAll(NmdcProtocol::Append_DC_OpList(sMsg2, dcUser->msNick), true/*mDcConfig.mDelayedMyinfo*/, false);
+			mDcUserList.sendToAll(NmdcProtocol::Append_DC_OpList(sMsg2, dcUser->msNick), true/*mDcConfig.mDelayedMyinfo*/, false);
 			mEnterList.sendToAll(sMsg2, true/*mDcConfig.mDelayedMyinfo*/, false);
 		}
 	}
@@ -755,7 +755,7 @@ bool DcServer::ShowUserToAll(DcUser * dcUser) {
 	/** Prevention of the double sending MyINFO string */
 	if (!mDcConfig.mDelayedLogin) {
 			dcUser->setCanSend(false);
-			mDCUserList.FlushCache();
+			mDcUserList.FlushCache();
 			mEnterList.FlushCache();
 			dcUser->setCanSend(canSend);
 	}
@@ -770,7 +770,7 @@ bool DcServer::ShowUserToAll(DcUser * dcUser) {
 		dcUser->setCanSend(canSend);
 
 		if (dcUser->mInIpList) {
-			dcUser->send(mDCUserList.GetIpList(), true, false);
+			dcUser->send(mDcUserList.GetIpList(), true, false);
 		} else if (dcUser->mDcConn && (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_USERIP2)) { // UserIP2
 			dcUser->send(sStr, false, false);
 		}
@@ -798,7 +798,7 @@ void DcServer::AfterUserEnter(DcConn *dcConn) {
 DcUser * DcServer::GetDCUser(const char * nick) {
 	string sN(nick);
 	if (sN.size()) {
-		UserBase * userBase = mDCUserList.GetUserBaseByNick(sN);
+		UserBase * userBase = mDcUserList.GetUserBaseByNick(sN);
 		if (userBase) {
 			return static_cast<DcUser *> (userBase);
 		}
@@ -915,14 +915,14 @@ bool DcServer::sendToAll(const char *sData, const char *sNick, const char *sFrom
 	if (sFrom && sNick) {
 		string sStart, sEnd;
 		NmdcProtocol::Append_DC_PMToAll(sStart, sEnd, sFrom, sNick, sData);
-		mDCUserList.SendToWithNick(sStart, sEnd);
+		mDcUserList.SendToWithNick(sStart, sEnd);
 		return true;
 	}
 
 	// Chat
 	if (sNick) {
 		string sStr;
-		mDCUserList.sendToAll(NmdcProtocol::Append_DC_Chat(sStr, sNick, sData), false, false);
+		mDcUserList.sendToAll(NmdcProtocol::Append_DC_Chat(sStr, sNick, sData), false, false);
 		return true;
 	}
 
@@ -931,7 +931,7 @@ bool DcServer::sendToAll(const char *sData, const char *sNick, const char *sFrom
 	if (sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
 		sMsg.append(NMDC_SEPARATOR);
 	}
-	mDCUserList.sendToAll(sMsg, false, false);
+	mDcUserList.sendToAll(sMsg, false, false);
 	return true;
 }
 
@@ -947,14 +947,14 @@ bool DcServer::sendToProfiles(unsigned long iProfile, const char *sData, const c
 	if (sFrom && sNick) {
 		string sStart, sEnd;
 		NmdcProtocol::Append_DC_PMToAll(sStart, sEnd, sFrom, sNick, sData);
-		mDCUserList.SendToWithNick(sStart, sEnd, iProfile);
+		mDcUserList.SendToWithNick(sStart, sEnd, iProfile);
 		return true;
 	}
 
 	// Chat
 	if (sNick) {
 		string sStr;
-		mDCUserList.sendToProfiles(iProfile, NmdcProtocol::Append_DC_Chat(sStr, sNick, sData), false);
+		mDcUserList.sendToProfiles(iProfile, NmdcProtocol::Append_DC_Chat(sStr, sNick, sData), false);
 		return true;
 	}
 
@@ -963,7 +963,7 @@ bool DcServer::sendToProfiles(unsigned long iProfile, const char *sData, const c
 	if (sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
 		sMsg.append(NMDC_SEPARATOR);
 	}
-	mDCUserList.sendToProfiles(iProfile, sMsg, false);
+	mDcUserList.sendToProfiles(iProfile, sMsg, false);
 	return true;
 }
 
@@ -1009,7 +1009,7 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & NickList, const char 
 	DcUser * dcUser;
 	vector<DcUser *> ul;
 	for (List_t::const_iterator it = NickList.begin(); it != NickList.end(); ++it) {
-		dcUser = static_cast<DcUser *> (mDCUserList.GetUserBaseByNick(*it));
+		dcUser = static_cast<DcUser *> (mDcUserList.GetUserBaseByNick(*it));
 		if (dcUser && dcUser->isCanSend()) {
 			dcUser->setCanSend(false);
 			ul.push_back(dcUser);
@@ -1019,16 +1019,16 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & NickList, const char 
 	if (sFrom && sNick) { // PM
 		string sStart, sEnd;
 		NmdcProtocol::Append_DC_PMToAll(sStart, sEnd, sFrom, sNick, sData);
-		mDCUserList.SendToWithNick(sStart, sEnd);
+		mDcUserList.SendToWithNick(sStart, sEnd);
 	} else if (sNick) { // Chat
 		string sStr;
-		mDCUserList.sendToAll(NmdcProtocol::Append_DC_Chat(sStr, sNick, sData), false, false);
+		mDcUserList.sendToAll(NmdcProtocol::Append_DC_Chat(sStr, sNick, sData), false, false);
 	} else { // Simple Msg
 		string sMsg(sData);
 		if (sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
 			sMsg.append(NMDC_SEPARATOR);
 		}
-		mDCUserList.sendToAll(sMsg, false, false);
+		mDcUserList.sendToAll(sMsg, false, false);
 	}
 
 	for (vector<DcUser *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
@@ -1065,16 +1065,16 @@ bool DcServer::sendToAllExceptIps(const vector<string> & IPList, const char *sDa
 		if (sFrom && sNick) { // PM
 			string sStart, sEnd;
 			NmdcProtocol::Append_DC_PMToAll(sStart, sEnd, sFrom, sNick, sData);
-			mDCUserList.SendToWithNick(sStart, sEnd);
+			mDcUserList.SendToWithNick(sStart, sEnd);
 		} else if (sNick) { // Chat
 			string sStr;
-			mDCUserList.sendToAll(NmdcProtocol::Append_DC_Chat(sStr, sNick, sData), false, false);
+			mDcUserList.sendToAll(NmdcProtocol::Append_DC_Chat(sStr, sNick, sData), false, false);
 		} else { // Simple Msg
 			string sMsg(sData);
 			if (sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
 				sMsg.append(NMDC_SEPARATOR);
 			}
-			mDCUserList.sendToAll(sMsg, false, false);
+			mDcUserList.sendToAll(sMsg, false, false);
 		}
 	}
 
@@ -1240,7 +1240,7 @@ int DcServer::regBot(const string & nick, const string & info, const string & ip
 		delete dcUser;
 		return -3;
 	}
-	mDCBotList.AddWithNick(nick, dcUser);
+	mBotList.AddWithNick(nick, dcUser);
 	ShowUserToAll(dcUser);
 	return 0;
 }
@@ -1253,7 +1253,7 @@ int DcServer::unregBot(const string & nick) {
 		LogStream() << "Unreg bot: " << nick << endl;
 	}
 
-	DcUser * dcUser = static_cast<DcUser *> (mDCUserList.GetUserBaseByNick(nick));
+	DcUser * dcUser = static_cast<DcUser *> (mDcUserList.GetUserBaseByNick(nick));
 	if (!dcUser) {
 		return -1;
 	}

@@ -152,8 +152,8 @@ public:
 	NmdcProtocol mDcProtocol; /** DC Protocol */
 	DcParser mDCParser; /** Parser for checking syntax of commands */
 
-	FullUserList mDCUserList; /** User list */
-	UserList mDCBotList; /** Bot list */
+	FullUserList mDcUserList; /** User list */
+	UserList mBotList; /** Bot list */
 	UserList mOpList; /** Op list */
 	UserList mIpList; /** ip list */
 	UserList mActiveList; /** Active user list */

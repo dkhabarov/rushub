@@ -77,8 +77,21 @@ void CallList::ufCallOne::operator() (Plugin * plugin) {
 
 	miCall = mCallList->CallOne(plugin);
 
+/*#ifdef _WIN32
+	__try {
+		miCall = mCallList->CallOne(plugin);
+	} __except( EXCEPTION_EXECUTE_HANDLER) {
+		if (mPluginList && mPluginList->ErrLog(0)) {
+			mPluginList->LogStream() << "error in plugin: " << plugin->getName() << endl;
+		}
+		plugin->suicide();
+	}
+#else
+	miCall = mCallList->CallOne(plugin);
+#endif*/
+
 	if (!plugin->isAlive()) {
-		mPluginList->UnloadPlugin(plugin->getName());
+		mCallList->removedPlugins.push_back(plugin);
 	}
 
 }
@@ -126,9 +139,23 @@ bool CallList::Unreg(Plugin *plugin) {
 int CallList::CallAll() {
 
 	/** 0 - default, 1 - lock, 2, 3 */
-	mCallOne.miCall = 0;
-	return for_each (mPlugins.begin(), mPlugins.end(), mCallOne).miCall;
+	mCallOne.miCall = for_each (mPlugins.begin(), mPlugins.end(), mCallOne).miCall;
 
+	// Check removed
+	if (removedPlugins.size()) {
+		for (
+			RemovedPlugins_t::const_iterator 
+				it = removedPlugins.begin(),
+				itEnd = removedPlugins.end();
+			it != itEnd;
+			++it
+		) {
+			mPluginList->UnloadPlugin((*it)->getName());
+		}
+		removedPlugins.clear();
+	}
+
+	return mCallOne.miCall;
 }
 
 

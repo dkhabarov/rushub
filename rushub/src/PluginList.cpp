@@ -151,7 +151,6 @@ bool PluginList::LoadPlugin(const string & filePath) {
 		LogStream() << "Success loading plugin: " << filePath << endl;
 	}
 
-	delete pluginLoader;
 	return true;
 }
 
@@ -174,6 +173,7 @@ bool PluginList::UnloadPlugin(const string & name) {
 		(*it)->Unreg(pluginLoader->mPlugin);
 	}
 
+	pluginLoader->close();
 	delete pluginLoader;
 	return true;
 }
