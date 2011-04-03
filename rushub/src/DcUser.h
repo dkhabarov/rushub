@@ -55,6 +55,7 @@ public:
 	Time mTimeEnter; //< Enter time on the hub
 
 
+	// TODO add param => hash for nick
 	string msNick; //< User's nick
 
 	bool mInOpList; //< User in op-list

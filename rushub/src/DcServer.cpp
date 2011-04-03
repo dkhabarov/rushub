@@ -99,12 +99,11 @@ DcServer::DcServer(const string & configFile, const string &):
 
 
 	mDcUserList.SetNickListStart("$NickList ");
-	mOpList.SetNickListStart("$OpList ");
-
 	mDcUserList.SetNickListSeparator("$$");
+
+	mOpList.SetNickListStart("$OpList ");
 	mOpList.SetNickListSeparator("$$");
 
-	mActiveList.SetNickListStart("$ActiveList ");
 
 	if (mDcConfig.mRegMainBot) { /** Main bot registration */
 		if (Log(3)) {

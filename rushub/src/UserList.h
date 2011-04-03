@@ -174,8 +174,8 @@ public:
 
 	Key Nick2Key(const string & nick) {
 		string key;
-		key.assign(nick);
-		::std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+		key.resize(nick.length());
+		::transform(nick.begin(), nick.end(), key.begin(), ::tolower);
 		return List_t::mHash(key);
 	}
 
