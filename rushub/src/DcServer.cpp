@@ -97,21 +97,14 @@ DcServer::DcServer(const string & configFile, const string &):
 
 	mPluginList.LoadAll(); /** Load plugins */
 
-	/** Set params of lists */
-	string nmdc;
 
-	nmdc = "$NickList ";
-	mDcUserList.SetNickListStart(nmdc);
+	mDcUserList.SetNickListStart("$NickList ");
+	mOpList.SetNickListStart("$OpList ");
 
-	nmdc = "$OpList ";
-	mOpList.SetNickListStart(nmdc);
+	mDcUserList.SetNickListSeparator("$$");
+	mOpList.SetNickListSeparator("$$");
 
-	nmdc = "$$";
-	mDcUserList.SetNickListSeparator(nmdc);
-	mOpList.SetNickListSeparator(nmdc);
-
-	nmdc = "$ActiveList ";
-	mActiveList.SetNickListStart(nmdc);
+	mActiveList.SetNickListStart("$ActiveList ");
 
 	if (mDcConfig.mRegMainBot) { /** Main bot registration */
 		if (Log(3)) {

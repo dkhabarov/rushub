@@ -217,11 +217,11 @@ public:
 
 	virtual string & GetNickList();
 
-	void SetNickListStart(const string & start) {
+	void SetNickListStart(const char * start) {
 		mNickListMaker.msStart = start;
 	}
 
-	void SetNickListSeparator(const string & sep) {
+	void SetNickListSeparator(const char * sep) {
 		mNickListMaker.msSep = sep;
 	}
 	
