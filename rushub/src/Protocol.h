@@ -66,16 +66,11 @@ public:
 
 	string mCommand; /** Main string with cmd */
 	int miType; /** Type of cmd */
-	size_t miLen; /** Cmd len */
-	size_t miKWSize; /** Key-word len */
-	bool mbError; /** error */
 
 	typedef pair<size_t, size_t> tChunk; /** Pair for chunk (begin, end) */
-	typedef vector<tChunk> tChunkList; /** Chunks list */
-	tChunkList mChunks; /** List */
-	string * mStrings; /** String array for chunks */
-	unsigned long mStrMap; /** Chunk already existed */
-	bool mIsParsed;
+	vector<tChunk> mChunks; /** List */
+
+	size_t miLen; /** Cmd len */
 
 public:
 
@@ -92,7 +87,12 @@ public:
 
 protected:
 
-	int mMaxChunks; /** Common (max) number of chunks */
+	size_t miKWSize; /** Key-word len */
+	bool mbError; /** error */
+	
+	string * mStrings; /** String array for chunks */
+	unsigned long mStrMap; /** Chunk already existed */
+	bool mIsParsed;
 
 protected:
 
@@ -107,6 +107,10 @@ protected:
 	bool ChunkRedRight(int chunk, size_t amount);
 
 	bool ChunkRedLeft(int chunk, size_t amount);
+
+private:
+
+	int mMaxChunks; /** Common (max) number of chunks */
 
 }; // Parser
 

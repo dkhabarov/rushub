@@ -150,7 +150,6 @@ public:
 
 	Time mStartTime; /** Start time of the hub */
 	NmdcProtocol mDcProtocol; /** DC Protocol */
-	DcParser mDCParser; /** Parser for checking syntax of commands */
 
 	FullUserList mDcUserList; /** User list */
 	UserList mBotList; /** Bot list */
@@ -223,7 +222,7 @@ public:
 		return miTotalShare;
 	}
 
-	int checkCmd(const string &);
+	int checkCmd(const string & cmd, DcUserBase * dcUserBase = NULL);
 
 	/** Listebing of ports */
 	int Listening();

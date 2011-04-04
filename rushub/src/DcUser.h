@@ -109,7 +109,7 @@ public:
 
 
 	const string & getMyINFO(/*bool real = false*/) const;
-	bool setMyINFO(const string & myInfo, const string & nick);
+	bool setMyINFO(const string & myInfo);
 	bool setMyINFO(DcParserBase * parser);
 
 	const string & getDesc(/*bool real = false*/) const;

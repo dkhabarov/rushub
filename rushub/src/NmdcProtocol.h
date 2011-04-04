@@ -22,8 +22,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DC_PROTOCOL_H
-#define DC_PROTOCOL_H
+#ifndef NMDC_PROTOCOL_H
+#define NMDC_PROTOCOL_H
 
 #include "Protocol.h"
 #include "DcParser.h"
@@ -137,4 +137,4 @@ private:
 
 }; // namespace dcserver
 
-#endif // DC_PROTOCOL_H
+#endif // NMDC_PROTOCOL_H

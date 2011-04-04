@@ -43,7 +43,6 @@ namespace dcserver {
 using namespace ::std;
 using namespace ::plugin;
 using namespace ::dcserver;
-using namespace ::dcserver::protoenums;
 using namespace ::luaplugin;
 
 

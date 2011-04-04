@@ -217,13 +217,15 @@ const string & DcUser::getMyINFO(/*bool real = false */) const {
 }
 
 /** Set MyINFO string (for plugins). With cmd & nick check */
-bool DcUser::setMyINFO(const string & newMyInfo, const string & nick) {
-	if (mDcServer->checkCmd(newMyInfo) != NMDC_TYPE_MYNIFO || 
-		mDcServer->mDCParser.chunkString(CHUNK_MI_NICK) != nick)
-	{
+bool DcUser::setMyINFO(const string & newMyInfo) {
+
+	// TODO remove DcParser class from this function
+
+	DcParser dcParser;
+	if (DcParser::checkCmd(dcParser, newMyInfo, this) != NMDC_TYPE_MYNIFO) {
 		return false;
 	}
-	myInfo.setMyInfo(newMyInfo, &mDcServer->mDCParser, mDcServer->miTotalShare);
+	myInfo.setMyInfo(newMyInfo, &dcParser, mDcServer->miTotalShare);
 	return true;
 }
 

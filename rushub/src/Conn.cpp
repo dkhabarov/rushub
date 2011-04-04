@@ -784,11 +784,13 @@ int Conn::send(const char *buf, size_t &len) {
 /** Get pointer for string */
 string * Conn::getPtrForStr() {
 	if (mParser == NULL) {
-		mParser = this->createParser();
+		mParser = createParser();
 	}
-	if (mParser == NULL) {
-		return NULL;
-	}
+	#ifdef _DEBUG
+		if (mParser == NULL) {
+			return NULL;
+		}
+	#endif
 	mParser->ReInit();
 	return &(mParser->getCommand());
 }

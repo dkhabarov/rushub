@@ -1079,17 +1079,10 @@ bool DcServer::sendToAllExceptIps(const vector<string> & IPList, const char *sDa
 
 
 
-int DcServer::checkCmd(const string & sData) {
-	mDCParser.ReInit();
-	mDCParser.mCommand = sData;
-	mDCParser.Parse();
-	if (mDCParser.SplitChunks()) {
-		return -1;
-	}
-	if (mDCParser.miType > 0 && mDCParser.miType < 3) {
-		return 3;
-	}
-	return mDCParser.miType;
+int DcServer::checkCmd(const string & cmd, DcUserBase * dcUserBase /*= NULL*/) {
+	// TODO remove this function
+	DcParser dcParser;
+	return DcParser::checkCmd(dcParser, cmd, dcUserBase);
 }
 
 
@@ -1216,8 +1209,8 @@ int DcServer::regBot(const string & nick, const string & info, const string & ip
 	if (!nick.length() || nick.length() > 64 || nick.find_first_of(" |$") != nick.npos) {
 		return -1;
 	}
-	if (!dcUser->setMyINFO(string("$MyINFO $ALL ") + nick + " " + info, nick)) {
-		if (!dcUser->setMyINFO(string("$MyINFO $ALL ") + nick + " $ $$$0$", nick)) {
+	if (!dcUser->setMyINFO(string("$MyINFO $ALL ") + nick + " " + info)) {
+		if (!dcUser->setMyINFO(string("$MyINFO $ALL ") + nick + " $ $$$0$")) {
 			delete dcUser;
 			return -2;
 		}

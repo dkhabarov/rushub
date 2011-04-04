@@ -35,10 +35,11 @@ Protocol::~Protocol(){
 Parser::Parser(int max) : 
 	Obj("Parser"),
 	miType(NMDC_TYPE_UNPARSED),
+	mChunks(max),
 	miLen(0),
 	miKWSize(0),
 	mbError(false),
-	mChunks(max),
+	
 	mStrings(NULL),
 	mStrMap(0l),
 	mIsParsed(false),

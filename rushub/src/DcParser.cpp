@@ -346,6 +346,26 @@ bool DcParser::SplitChunks() {
 	return mbError;
 }
 
+int DcParser::checkCmd(DcParser & dcParser, const string & sData, DcUserBase * dcUserBase /*= NULL*/) {
+	dcParser.ReInit();
+	dcParser.mCommand = sData;
+	dcParser.Parse();
+	if (dcParser.SplitChunks()) {
+		return -1;
+	}
+
+	if (dcParser.miType == NMDC_TYPE_MYNIFO && (dcUserBase == NULL ||
+			dcUserBase->getNick() != dcParser.chunkString(CHUNK_MI_NICK))
+	) {
+		return -2;
+	}
+
+	if (dcParser.miType > 0 && dcParser.miType < 3) {
+		return 3;
+	}
+	return dcParser.miType;
+}
+
 }; // namespace protocol
 
 }; // namespace dcserver

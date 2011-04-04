@@ -247,7 +247,7 @@ int Uid::userNewIndex(lua_State * L) {
 				if (!s) {
 					ERR_TYPEMETA(3, "UID", "string");
 				}
-				dcConnBase->mDcUserBase->setMyINFO(s, dcConnBase->mDcUserBase->getNick());
+				dcConnBase->mDcUserBase->setMyINFO(s);
 			} else {
 				lua_pushnil(L);
 			}

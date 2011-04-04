@@ -819,7 +819,7 @@ int SetUser(lua_State * L) {
 			return error(L, "user was not found");
 		}
 		string sMyINFO(luaL_checkstring(L, 3));
-		if (!dcConnBase->mDcUserBase->setMyINFO(sMyINFO, dcConnBase->mDcUserBase->getNick())) {
+		if (!dcConnBase->mDcUserBase->setMyINFO(sMyINFO)) {
 			return error(L, "wrong syntax");
 		}
 	} else if (iNum == eUV_sData) {
@@ -1241,17 +1241,17 @@ int SetCmd(lua_State * L) {
 		return 0;
 	}
 	const char * sData = luaL_checkstring(L, 1);
+	if (!LuaPlugin::mCurLua->mCurDCConn) {
+		luaL_argerror(L, 1, "internal fatal error");
+		return 0;
+	}
+	if (!LuaPlugin::mCurLua->mCurDCConn->mDcUserBase) {
+		luaL_argerror(L, 1, "user was not set");
+		return 0;
+	}
 	if (LuaPlugin::mCurLua->mCurDCParser) {
-		int iType = LuaPlugin::mCurServer->checkCmd(sData);
-		if (iType != LuaPlugin::mCurLua->mCurDCParser->getCommandType() ||
-			(
-				iType == NMDC_TYPE_MYNIFO && 
-				LuaPlugin::mCurLua->mCurDCConn && (
-					!LuaPlugin::mCurLua->mCurDCConn->mDcUserBase ||
-					LuaPlugin::mCurLua->mCurDCConn->mDcUserBase->getNick() != LuaPlugin::mCurLua->mCurDCParser->chunkString(CHUNK_MI_NICK)
-				)
-			)
-		) {
+		int iType = LuaPlugin::mCurServer->checkCmd(sData, LuaPlugin::mCurLua->mCurDCConn->mDcUserBase);
+		if (iType != LuaPlugin::mCurLua->mCurDCParser->getCommandType()) {
 			luaL_argerror(L, 1, "wrong syntax");
 			return 0;
 		}
