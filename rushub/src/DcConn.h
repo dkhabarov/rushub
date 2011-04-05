@@ -273,6 +273,12 @@ public:
 	void increaseSrCounter();
 	void emptySrCounter();
 
+	virtual bool parseCommand(const char * cmd);
+
+	virtual const string & getCmd();
+
+	virtual int getCmdType();
+
 protected:
 
 	TimeOut mTimeOut[HUB_TIME_OUT_MAX];

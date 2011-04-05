@@ -30,7 +30,6 @@
 #include "Plugin.h"
 
 using namespace ::server;
-using ::dcserver::DcParserBase;
 
 namespace dcserver {
 
@@ -221,7 +220,7 @@ namespace protocol {
 
 using namespace ::dcserver::protoenums;
 
-class DcParser : public Parser, public DcParserBase {
+class DcParser : public Parser {
 
 public:
 

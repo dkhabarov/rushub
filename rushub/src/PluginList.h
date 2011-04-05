@@ -49,7 +49,6 @@ namespace dcserver {
 	class DcServerBase;
 	class DcUser;
 	class UserList;
-	class DcParserBase;
 
 }; // namespace dcserver
 
@@ -349,10 +348,10 @@ protected:
 }; // class CallListConnection
 
 typedef CallListType1<DcUserBase> CallListUser;
+typedef CallListType1<DcConnBase> CallListConn;
 typedef CallListType1<string> CallListString;
 typedef CallListType2<DcConnBase, string> CallListConnString;
 typedef CallListType2<DcUserBase, DcUserBase> CallListUserUser;
-typedef CallListType2<DcConnBase, DcParserBase> CallListConnParser;
 typedef CallListType2<DcConnBase, WebParserBase> CallListConnWebParser;
 typedef CallListType3<DcUserBase *, DcUserBase *, string *> CallListUserUserString;
 typedef CallListType3<DcConnBase *, int, int> CallListConnIntInt;

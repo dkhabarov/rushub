@@ -229,8 +229,8 @@ bool DcUser::setMyINFO(const string & newMyInfo) {
 	return true;
 }
 
-bool DcUser::setMyINFO(DcParserBase * parser) {
-	myInfo.setMyInfo(parser->mParseString, parser, mDcServer->miTotalShare);
+bool DcUser::setMyINFO(DcParser * parser) {
+	myInfo.setMyInfo(parser->mCommand, parser, mDcServer->miTotalShare);
 	return true;
 }
 

@@ -110,7 +110,7 @@ public:
 
 	const string & getMyINFO(/*bool real = false*/) const;
 	bool setMyINFO(const string & myInfo);
-	bool setMyINFO(DcParserBase * parser);
+	bool setMyINFO(DcParser * parser);
 
 	const string & getDesc(/*bool real = false*/) const;
 	const string & getEmail(/*bool real = false*/) const;

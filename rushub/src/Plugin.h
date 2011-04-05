@@ -75,7 +75,7 @@ using namespace ::std;
 
 //< Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10012
+	#define INTERNAL_PLUGIN_VERSION 10013
 #endif
 
 //< NMDC protocol separator
@@ -203,6 +203,12 @@ public:
 
 	//< Set some client data
 	virtual void setData(const string &) = 0;
+
+	virtual bool parseCommand(const char * cmd) = 0;
+
+	virtual const string & getCmd() = 0;
+
+	virtual int getCmdType() = 0;
 
 }; // class DcConnBase
 
@@ -386,9 +392,6 @@ public:
 	//< Get total hub share size
 	virtual __int64 getTotalShare() const = 0;
 
-	//< Checking syntax of cmd. Returned NmdcType enum of checked cmd
-	virtual int checkCmd(const string & cmd, DcUserBase * dcUserBase = NULL) = 0;
-
 	//< Send comand to user
 	virtual bool sendToUser(
 		DcConnBase *,
@@ -501,38 +504,6 @@ public:
 
 }; // class DcServerBase
 
-
-// ================ DcParserBase ================
-
-/** Base DC parser */
-class DcParserBase {
-
-public:
-
-	//< Ref to string with command
-	string & mParseString;
-
-public:
-
-	DcParserBase(string & parseString) : 
-		mParseString(parseString)
-	{
-	}
-
-	virtual ~DcParserBase() {
-	}
-
-	virtual DcParserBase & operator = (const DcParserBase &) {
-		return *this;
-	}
-
-	//< Get string address for the chunk of command
-	virtual string & chunkString(unsigned int n) = 0;
-
-	//< Get command type
-	virtual int getCommandType() const = 0;
-
-}; // class DcParserBase
 
 }; // namespace dcserver
 
@@ -650,71 +621,71 @@ public:
 		return 1;
 	}
 
-	virtual int onSupports(DcConnBase *, DcParserBase *) {
+	virtual int onSupports(DcConnBase *) {
 		return 1;
 	}
 
-	virtual int onKey(DcConnBase *, DcParserBase *) {
+	virtual int onKey(DcConnBase *) {
 		return 1;
 	}
 
-	virtual int onValidateNick(DcConnBase *, DcParserBase *) {
+	virtual int onValidateNick(DcConnBase *) {
 		return 1;
 	}
 
-	virtual int onMyPass(DcConnBase *, DcParserBase *) {
+	virtual int onMyPass(DcConnBase *) {
 		return 1;
 	}
 
-	virtual int onVersion(DcConnBase *, DcParserBase *) {
+	virtual int onVersion(DcConnBase *) {
 		return 1;
 	}
 
-	virtual int onGetNickList(DcConnBase *, DcParserBase *) {
+	virtual int onGetNickList(DcConnBase *) {
 		return 1;
 	}
 
-	virtual int onMyINFO(DcConnBase *, DcParserBase *) {
+	virtual int onMyINFO(DcConnBase *) {
 		return 1;
 	}
 
-	virtual int onChat(DcConnBase *, DcParserBase *) {
+	virtual int onChat(DcConnBase *) {
 		return 1;
 	}
 
-	virtual int onTo(DcConnBase *, DcParserBase *) {
+	virtual int onTo(DcConnBase *) {
 		return 1;
 	}
 
-	virtual int onConnectToMe(DcConnBase *, DcParserBase *) {
+	virtual int onConnectToMe(DcConnBase *) {
 		return 1;
 	}
 
-	virtual int onRevConnectToMe(DcConnBase *, DcParserBase *) {
+	virtual int onRevConnectToMe(DcConnBase *) {
 		return 1;
 	}
 
-	virtual int onSearch(DcConnBase *, DcParserBase *) {
+	virtual int onSearch(DcConnBase *) {
 		return 1;
 	}
 
-	virtual int onSR(DcConnBase *, DcParserBase *) {
+	virtual int onSR(DcConnBase *) {
 		return 1;
 	}
 
-	virtual int onKick(DcConnBase *, DcParserBase *) {
+	virtual int onKick(DcConnBase *) {
 		return 1;
 	}
 
-	virtual int onOpForceMove(DcConnBase *, DcParserBase *) {
+	virtual int onOpForceMove(DcConnBase *) {
 		return 1;
 	}
 
-	virtual int onGetINFO(DcConnBase *, DcParserBase *) {
+	virtual int onGetINFO(DcConnBase *) {
 		return 1;
 	}
 
-	virtual int onMCTo(DcConnBase *, DcParserBase *) {
+	virtual int onMCTo(DcConnBase *) {
 		return 1;
 	}
 
@@ -722,11 +693,11 @@ public:
 		return 1;
 	}
 
-	virtual int onAny(DcConnBase *, DcParserBase *) {
+	virtual int onAny(DcConnBase *) {
 		return 1;
 	}
 
-	virtual int onUnknown(DcConnBase *, DcParserBase *) {
+	virtual int onUnknown(DcConnBase *) {
 		return 1;
 	}
 

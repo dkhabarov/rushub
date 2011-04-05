@@ -222,8 +222,6 @@ public:
 		return miTotalShare;
 	}
 
-	int checkCmd(const string & cmd, DcUserBase * dcUserBase = NULL);
-
 	/** Listebing of ports */
 	int Listening();
 
@@ -380,26 +378,26 @@ private:
 		CallListConnection    mOnUserDisconnected;
 		CallListConnection    mOnUserEnter;
 		CallListConnection    mOnUserExit;
-		CallListConnParser    mOnSupports;
-		CallListConnParser    mOnKey;
-		CallListConnParser    mOnValidateNick;
-		CallListConnParser    mOnMyPass;
-		CallListConnParser    mOnVersion;
-		CallListConnParser    mOnGetNickList;
-		CallListConnParser    mOnMyINFO;
-		CallListConnParser    mOnChat;
-		CallListConnParser    mOnTo;
-		CallListConnParser    mOnConnectToMe;
-		CallListConnParser    mOnRevConnectToMe;
-		CallListConnParser    mOnSearch;
-		CallListConnParser    mOnSR;
-		CallListConnParser    mOnKick;
-		CallListConnParser    mOnOpForceMove;
-		CallListConnParser    mOnGetINFO;
-		CallListConnParser    mOnMCTo;
+		CallListConnection    mOnSupports;
+		CallListConnection    mOnKey;
+		CallListConnection    mOnValidateNick;
+		CallListConnection    mOnMyPass;
+		CallListConnection    mOnVersion;
+		CallListConnection    mOnGetNickList;
+		CallListConnection    mOnMyINFO;
+		CallListConnection    mOnChat;
+		CallListConnection    mOnTo;
+		CallListConnection    mOnConnectToMe;
+		CallListConnection    mOnRevConnectToMe;
+		CallListConnection    mOnSearch;
+		CallListConnection    mOnSR;
+		CallListConnection    mOnKick;
+		CallListConnection    mOnOpForceMove;
+		CallListConnection    mOnGetINFO;
+		CallListConnection    mOnMCTo;
 		CallListSimple        mOnTimer;
-		CallListConnParser    mOnAny;
-		CallListConnParser    mOnUnknown;
+		CallListConnection    mOnAny;
+		CallListConnection    mOnUnknown;
 		CallListConnIntInt    mOnFlood;
 		CallListConnWebParser mOnWebData;
 

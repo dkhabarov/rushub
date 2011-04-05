@@ -61,7 +61,7 @@ ProtocolCommand aDC_Commands[] = {
 
 
 
-DcParser::DcParser() : Parser(10), DcParserBase(mCommand) { /** Max number of chunks - 10 */
+DcParser::DcParser() : Parser(10) { /** Max number of chunks - 10 */
 	SetClassName("DcParser");
 }
 

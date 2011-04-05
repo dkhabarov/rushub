@@ -1245,20 +1245,9 @@ int SetCmd(lua_State * L) {
 		luaL_argerror(L, 1, "internal fatal error");
 		return 0;
 	}
-	if (!LuaPlugin::mCurLua->mCurDCConn->mDcUserBase) {
-		luaL_argerror(L, 1, "user was not set");
+	if (!LuaPlugin::mCurLua->mCurDCConn->parseCommand(sData)) {
+		luaL_argerror(L, 1, "wrong syntax");
 		return 0;
-	}
-	if (LuaPlugin::mCurLua->mCurDCParser) {
-		int iType = LuaPlugin::mCurServer->checkCmd(sData, LuaPlugin::mCurLua->mCurDCConn->mDcUserBase);
-		if (iType != LuaPlugin::mCurLua->mCurDCParser->getCommandType()) {
-			luaL_argerror(L, 1, "wrong syntax");
-			return 0;
-		}
-		LuaPlugin::mCurLua->mCurDCParser->mParseString = sData;
-		lua_settop(L, 0);
-		lua_pushboolean(L, 1);
-		return 1;
 	}
 	lua_settop(L, 0);
 	lua_pushboolean(L, 0);

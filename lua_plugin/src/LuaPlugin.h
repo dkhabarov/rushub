@@ -31,7 +31,7 @@
 #include <string>
 
 #define PLUGIN_NAME "LuaPlugin"
-#define PLUGIN_VERSION "2.0"
+#define PLUGIN_VERSION "2.1[beta]"
 
 namespace dcserver {
 
@@ -68,7 +68,6 @@ public:
 	TasksList mTasksList;
 	cTimerList * mTimerList;
 
-	DcParserBase * mCurDCParser; /** Current cmd-parser (only for events) */
 	DcConnBase * mCurDCConn; /** Current connection (only for events) */
 
 public:
@@ -88,26 +87,26 @@ public:
 	virtual int onUserDisconnected(DcConnBase *);
 	virtual int onUserEnter(DcConnBase *);
 	virtual int onUserExit(DcConnBase *);
-	virtual int onSupports(DcConnBase *, DcParserBase *);
-	virtual int onKey(DcConnBase *, DcParserBase *);
-	virtual int onValidateNick(DcConnBase *, DcParserBase *);
-	virtual int onMyPass(DcConnBase *, DcParserBase *);
-	virtual int onVersion(DcConnBase *, DcParserBase *);
-	virtual int onGetNickList(DcConnBase *, DcParserBase *);
-	virtual int onMyINFO(DcConnBase *, DcParserBase *);
-	virtual int onChat(DcConnBase *, DcParserBase *);
-	virtual int onTo(DcConnBase *, DcParserBase *);
-	virtual int onConnectToMe(DcConnBase *, DcParserBase *);
-	virtual int onRevConnectToMe(DcConnBase *, DcParserBase *);
-	virtual int onSearch(DcConnBase *, DcParserBase *);
-	virtual int onSR(DcConnBase *, DcParserBase *);
-	virtual int onKick(DcConnBase *, DcParserBase *);
-	virtual int onOpForceMove(DcConnBase *, DcParserBase *);
-	virtual int onGetINFO(DcConnBase *, DcParserBase *);
-	virtual int onMCTo(DcConnBase *, DcParserBase *);
+	virtual int onSupports(DcConnBase *);
+	virtual int onKey(DcConnBase *);
+	virtual int onValidateNick(DcConnBase *);
+	virtual int onMyPass(DcConnBase *);
+	virtual int onVersion(DcConnBase *);
+	virtual int onGetNickList(DcConnBase *);
+	virtual int onMyINFO(DcConnBase *);
+	virtual int onChat(DcConnBase *);
+	virtual int onTo(DcConnBase *);
+	virtual int onConnectToMe(DcConnBase *);
+	virtual int onRevConnectToMe(DcConnBase *);
+	virtual int onSearch(DcConnBase *);
+	virtual int onSR(DcConnBase *);
+	virtual int onKick(DcConnBase *);
+	virtual int onOpForceMove(DcConnBase *);
+	virtual int onGetINFO(DcConnBase *);
+	virtual int onMCTo(DcConnBase *);
 	virtual int onTimer();
-	virtual int onAny(DcConnBase *, DcParserBase *);
-	virtual int onUnknown(DcConnBase *, DcParserBase *);
+	virtual int onAny(DcConnBase *);
+	virtual int onUnknown(DcConnBase *);
 	virtual int onFlood(DcConnBase *, int, int);
 	virtual int onWebData(DcConnBase *, WebParserBase *);
 
@@ -116,7 +115,7 @@ public:
 
 	int OnConfigChange(const char *, const char *);
 
-	int CallAll(const char *, DcConnBase * dcConnBase = NULL, DcParserBase * dcParserBase = NULL); /** Calling event for all scripts */
+	int CallAll(const char *, DcConnBase * dcConnBase = NULL, bool param = true); /** Calling event for all scripts */
 
 	LuaInterpreter * FindScript(const string & sScriptName);
 	LuaInterpreter * AddScript(const string & sScriptName, bool bOnlyNew = false);

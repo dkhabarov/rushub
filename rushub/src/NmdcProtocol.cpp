@@ -128,7 +128,7 @@ int NmdcProtocol::DoCmd(Parser * parser, Conn * conn) {
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnAny.CallAll(dcConn, dcparser)) {
+		if (mDcServer->mCalls.mOnAny.CallAll(dcConn)) {
 			return 1;
 		}
 	#endif
@@ -283,7 +283,7 @@ int NmdcProtocol::eventSupports(DcParser * dcparser, DcConn * dcConn) {
 	dcConn->msSupports.assign(dcparser->mCommand, 10, dcparser->mCommand.size() - 10);
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnSupports.CallAll(dcConn, dcparser)) {
+		if (mDcServer->mCalls.mOnSupports.CallAll(dcConn)) {
 			return -3;
 		}
 	#endif
@@ -294,11 +294,11 @@ int NmdcProtocol::eventSupports(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int NmdcProtocol::eventKey(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventKey(DcParser *, DcConn * dcConn) {
 	BADFLAG("Key", LOGIN_STATUS_KEY);
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnKey.CallAll(dcConn, dcparser)) {
+		if (mDcServer->mCalls.mOnKey.CallAll(dcConn)) {
 			//string sLock, sKey;
 			//sLock = Append_DC_Lock(sLock).substr(1, sLock.size() - 1);
 			//Lock2Key(sLock, sKey);
@@ -373,7 +373,7 @@ int NmdcProtocol::eventValidateNick(DcParser * dcparser, DcConn * dcConn) {
 	string sMsg;
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnValidateNick.CallAll(dcConn, dcparser)) {
+		if (mDcServer->mCalls.mOnValidateNick.CallAll(dcConn)) {
 			dcConn->send(Append_DC_GetPass(sMsg)); /** We are sending the query for reception of the password */
 			dcConn->SetTimeOut(HUB_TIME_OUT_PASS, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_PASS], mDcServer->mTime);
 			return -4;
@@ -390,7 +390,7 @@ int NmdcProtocol::eventValidateNick(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int NmdcProtocol::eventMyPass(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventMyPass(DcParser *, DcConn * dcConn) {
 	if (!dcConn->mDcUser) { /* Check of existence of the user for current connection */
 		if (dcConn->Log(2)) {
 			dcConn->LogStream() << "Mypass before validatenick" << endl;
@@ -405,7 +405,7 @@ int NmdcProtocol::eventMyPass(DcParser * dcparser, DcConn * dcConn) {
 	// or $Hello Nick|$LogedIn Nick|
 	int bOp = 0;
 	#ifndef WITHOUT_PLUGINS
-		bOp = (mDcServer->mCalls.mOnMyPass.CallAll(dcConn, dcparser));
+		bOp = (mDcServer->mCalls.mOnMyPass.CallAll(dcConn));
 	#endif
 
 	string sMsg;
@@ -431,7 +431,7 @@ int NmdcProtocol::eventVersion(DcParser * dcparser, DcConn * dcConn) {
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnVersion.CallAll(dcConn, dcparser) && sVersion != "1,0091") {
+		if (mDcServer->mCalls.mOnVersion.CallAll(dcConn) && sVersion != "1,0091") {
 			dcConn->closeNice(9000, CLOSE_REASON_CMD_VERSION); /** Checking of the version */
 		}
 	#endif
@@ -441,10 +441,10 @@ int NmdcProtocol::eventVersion(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int NmdcProtocol::eventGetNickList(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventGetNickList(DcParser *, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnGetNickList.CallAll(dcConn, dcparser)) {
+		if (mDcServer->mCalls.mOnGetNickList.CallAll(dcConn)) {
 			return 3;
 		}
 	#endif
@@ -494,7 +494,7 @@ int NmdcProtocol::eventMyInfo(DcParser * dcparser, DcConn * dcConn) {
 
 	int iMode = 0;
 	#ifndef WITHOUT_PLUGINS
-		iMode = mDcServer->mCalls.mOnMyINFO.CallAll(dcConn, dcparser);
+		iMode = mDcServer->mCalls.mOnMyINFO.CallAll(dcConn);
 	#endif
 
 	if (iMode != 1 && dcConn->mDcUser->getInUserList()) {
@@ -539,7 +539,7 @@ int NmdcProtocol::eventChat(DcParser * dcparser, DcConn * dcConn) {
 	}
 	int iMode = 0;
 	#ifndef WITHOUT_PLUGINS
-		iMode = mDcServer->mCalls.mOnChat.CallAll(dcConn, dcparser);
+		iMode = mDcServer->mCalls.mOnChat.CallAll(dcConn);
 	#endif
 
 	//Hash<unsigned long> hash;
@@ -571,7 +571,7 @@ int NmdcProtocol::eventTo(DcParser * dcparser, DcConn * dcConn) {
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnTo.CallAll(dcConn, dcparser)) {
+		if (mDcServer->mCalls.mOnTo.CallAll(dcConn)) {
 			return 0;
 		}
 	#endif
@@ -607,7 +607,7 @@ int NmdcProtocol::eventMcTo(DcParser * dcparser, DcConn * dcConn) {
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnMCTo.CallAll(dcConn, dcparser)) {
+		if (mDcServer->mCalls.mOnMCTo.CallAll(dcConn)) {
 			return 0;
 		}
 	#endif
@@ -688,7 +688,7 @@ int NmdcProtocol::eventSearch(DcParser * dcparser, DcConn * dcConn) {
 
 	int iMode = 0;
 	#ifndef WITHOUT_PLUGINS
-		iMode = mDcServer->mCalls.mOnSearch.CallAll(dcConn, dcparser);
+		iMode = mDcServer->mCalls.mOnSearch.CallAll(dcConn);
 	#endif
 
 	/** Sending cmd */
@@ -779,7 +779,7 @@ int NmdcProtocol::eventSr(DcParser * dcparser, DcConn * dcConn) {
 
 	/** != 0 - error */
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnSR.CallAll(dcConn, dcparser)) {
+		if (mDcServer->mCalls.mOnSR.CallAll(dcConn)) {
 			return -3;
 		}
 	#endif
@@ -817,7 +817,7 @@ int NmdcProtocol::eventConnectToMe(DcParser * dcparser, DcConn * dcConn) {
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnConnectToMe.CallAll(dcConn, dcparser)) {
+		if (mDcServer->mCalls.mOnConnectToMe.CallAll(dcConn)) {
 			return -2;
 		}
 	#endif
@@ -849,7 +849,7 @@ int NmdcProtocol::eventRevConnectToMe(DcParser * dcparser, DcConn * dcConn) {
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnRevConnectToMe.CallAll(dcConn, dcparser)) {
+		if (mDcServer->mCalls.mOnRevConnectToMe.CallAll(dcConn)) {
 			return -2;
 		}
 	#endif
@@ -865,7 +865,7 @@ int NmdcProtocol::eventMultiConnectToMe(DcParser *, DcConn *) {
 int NmdcProtocol::eventKick(DcParser * dcparser, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnKick.CallAll(dcConn, dcparser)) {
+		if (mDcServer->mCalls.mOnKick.CallAll(dcConn)) {
 			return -1;
 		}
 	#endif
@@ -888,7 +888,7 @@ int NmdcProtocol::eventKick(DcParser * dcparser, DcConn * dcConn) {
 int NmdcProtocol::eventOpForceMove(DcParser * dcparser, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnOpForceMove.CallAll(dcConn, dcparser)) {
+		if (mDcServer->mCalls.mOnOpForceMove.CallAll(dcConn)) {
 			return -1;
 		}
 	#endif
@@ -923,7 +923,7 @@ int NmdcProtocol::eventGetInfo(DcParser * dcparser, DcConn * dcConn) {
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnGetINFO.CallAll(dcConn, dcparser)) {
+		if (mDcServer->mCalls.mOnGetINFO.CallAll(dcConn)) {
 			return -2;
 		}
 	#endif
@@ -939,10 +939,10 @@ int NmdcProtocol::eventPing(DcParser *, DcConn *) {
 	return 0;
 }
 
-int NmdcProtocol::eventUnknown(DcParser * dcparser, DcConn * dcConn) {
+int NmdcProtocol::eventUnknown(DcParser *, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-	if (!mDcServer->mCalls.mOnUnknown.CallAll(dcConn, dcparser)) {
+	if (!mDcServer->mCalls.mOnUnknown.CallAll(dcConn)) {
 		dcConn->closeNice(9000, CLOSE_REASON_CMD_UNKNOWN);
 		return -2;
 	}

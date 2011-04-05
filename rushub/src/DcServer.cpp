@@ -1079,14 +1079,6 @@ bool DcServer::sendToAllExceptIps(const vector<string> & IPList, const char *sDa
 
 
 
-int DcServer::checkCmd(const string & cmd, DcUserBase * dcUserBase /*= NULL*/) {
-	// TODO remove this function
-	DcParser dcParser;
-	return DcParser::checkCmd(dcParser, cmd, dcUserBase);
-}
-
-
-
 void DcServer::forceMove(DcConnBase * dcConnBase, const char * sAddress, const char * sReason /* = NULL */) {
 	if (!dcConnBase || !sAddress) {
 		return;

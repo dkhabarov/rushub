@@ -26,6 +26,7 @@
 
 using namespace ::std;
 using namespace ::dcserver::protoenums;
+using namespace ::dcserver::protocol;
 
 #ifndef _WIN32
 	#ifndef __int64
@@ -51,7 +52,7 @@ public:
 	inline const string & getMyInfo() const {
 		return myInfo;
 	}
-	void setMyInfo(const string & myInfo, DcParserBase * parser, __int64 & totalHubShare);
+	void setMyInfo(const string & myInfo, DcParser * parser, __int64 & totalHubShare);
 
 	inline const string & getDescription() const {
 		return description;
