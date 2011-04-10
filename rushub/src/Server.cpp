@@ -47,7 +47,6 @@ namespace server {
 //////////////////////////////////////////////constructor////////////////////////////////////////
 Server::Server(const string sSep) :
 	Obj("Server"),
-	mConnFactory(NULL),
 	mStrSizeMax(10240),
 	mSeparator(sSep),
 	mStepDelay(0),
@@ -60,7 +59,6 @@ Server::Server(const string sSep) :
 	mServer(NULL),
 	mNowConn(NULL)
 {
-	//mConnFactory = new ConnFactory(NULL, this);
 
 #ifdef _WIN32
 	/** WSA for windows */
@@ -115,11 +113,18 @@ Server::~Server() {
 /** Set and Listen port */
 int Server::Listening(ListenFactory * listenFactory, const string & ip, int port, bool udp /*= false*/) {
 	Conn * conn = Listen(ip, port, udp);
-	if (conn != NULL) { /** Listen TCP port */
-		conn->mListenFactory = listenFactory;
-		return 0;
+	if (conn == NULL) {
+		return -1;
 	}
-	return -1;
+
+	// Set server listen factory
+	conn->mListenFactory = listenFactory;
+
+	// Set protocol for UDP conn without factory
+	ConnFactory * connFactory = listenFactory->getConnFactory();
+	conn->mProtocol = connFactory->mProtocol;
+
+	return 0;
 }
 
 
@@ -128,20 +133,13 @@ int Server::Listening(ListenFactory * listenFactory, const string & ip, int port
 Conn * Server::Listen(const string & ip, int port, bool udp) {
 	Conn * conn = NULL;
 
-	if (!udp) { /** Create socket listening server for TCP port */
+	if (!udp) { // Create socket listening server for TCP port
 		conn = new Conn(0, this, CONN_TYPE_LISTEN);
-	} else { /** Create socket server for UDP port */
+	} else { // Create socket server for UDP port
 		conn = new Conn(0, this, CONN_TYPE_CLIENTUDP);
-
-		if (mConnFactory == NULL) {
-			throw "ConnFactory is NULL";
-		}
-
-		// Set protocol for UDP conn without factory
-		conn->mProtocol = mConnFactory->mProtocol;
 	}
 
-	if (!addListen(conn, ip, port, udp)) { /** Listen conn */
+	if (!addListen(conn, ip, port, udp)) { // Listen conn
 		delete conn;
 		return NULL;
 	}
@@ -152,7 +150,7 @@ Conn * Server::Listen(const string & ip, int port, bool udp) {
 
 /** Create, bind and add connection for port */
 Conn *Server::addListen(Conn * conn, const string & ip, int port, bool udp) {
-	/** Socket object was created */
+	// Socket object was created
 	if (conn) {
 		if (conn->makeSocket(port, ip.c_str(), udp) == INVALID_SOCKET) {
 			if (ErrLog(0)) {
@@ -217,12 +215,12 @@ int Server::run() {
 		LogStream() << "Main loop start" << endl;
 	}
 
-	while (mRun) { /** Main cycle */
+	while (mRun) { // Main cycle
 		try {
-			mTime.Get(); /** Current time */
-			step(); /** Server's step */
+			mTime.Get(); // Current time
+			step(); // Server's step
 
-			/** Timers (100 msec) */
+			// Timers (100 msec)
 			if (abs(int(now.Get() - mTimes.mServ)) >= 100) { /** transfer of time */
 				mTimes.mServ = now;
 				onTimerBase(now);
@@ -230,12 +228,12 @@ int Server::run() {
 
 			if (mStepDelay) {
 				#ifdef _WIN32
-					Sleep(mStepDelay); /** Testing (mStepDelay msec) */
+					Sleep(mStepDelay); // (mStepDelay msec)
 				#else
 					usleep(mStepDelay * 1000);
 				#endif
 			}
-			mMeanFrequency.Insert(mTime); /** MeanFrequency */
+			mMeanFrequency.Insert(mTime); // MeanFrequency
 		} catch(const char *str) {
 			if (ErrLog(0)) {
 				LogStream() << "Exception: " << str << endl;
@@ -262,10 +260,10 @@ void Server::stop(int code) {
 /** step */
 void Server::step() {
 	int ret;
-	static Time tmout(0, 1000l); /** timeout 1 msec */
+	static Time tmout(0, 1000l); // timeout 1 msec
 
 	try {
-		/** Checking the arrival data in listen sockets */
+		// Checking the arrival data in listen sockets
 		ret = mConnChooser.Choose(tmout);
 		if (ret <= 0 && !miNumCloseConn) { 
 			#ifdef _WIN32
@@ -318,16 +316,26 @@ void Server::step() {
 				mNowConn->LogStream() << "::(s)NewConn" << endl;
 			}
 
+			// Create new connection:
+			// 1. Accept new socket
+			// 2. Create new connection object using ConnFactory from ListenFactory
 			Conn * new_conn = mNowConn->createNewConn(); /** CONN_TYPE_CLIENTTCP (Conn) */
+
 			if (new_conn) {
-				if (!mNowConn->mListenFactory) {
-					if (ErrLog(0)) {
-						LogStream() << "ListenFactory is empty" << endl;
-					}
-					throw "Exception in inputData";
-				}
 				if (addConnection(new_conn) > 0) {
-					mNowConn->mListenFactory->onNewConn(new_conn);
+
+					if (mNowConn->mListenFactory) {
+						// On new connection using ListenFactory
+						mNowConn->mListenFactory->onNewConn(new_conn);
+					} else {
+						if (Log(4)) {
+							LogStream() << "ListenFactory is empty" << endl;
+						}
+
+						// On new connection by server
+						onNewConn(new_conn);
+					}
+
 				}
 			}
 			if (mNowConn->Log(5)) {
@@ -631,14 +639,6 @@ ListenFactory::ListenFactory(Server * server) : mServer(server) {
 }
 
 ListenFactory::~ListenFactory() {
-}
-
-ConnFactory * ListenFactory::connFactory() {
-	return mServer->mConnFactory;
-}
-
-int ListenFactory::onNewConn(Conn * conn) {
-	return mServer->onNewConn(conn);
 }
 
 }; // server

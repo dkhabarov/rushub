@@ -62,8 +62,8 @@ class ListenFactory {
 public:
 	ListenFactory(Server *);
 	virtual ~ListenFactory();
-	virtual ConnFactory * connFactory();
-	virtual int onNewConn(Conn *);
+	virtual ConnFactory * getConnFactory() = 0;
+	virtual int onNewConn(Conn *) = 0;
 
 protected:
 	Server * mServer;
@@ -78,8 +78,6 @@ friend class ListenFactory; /* onNewConn */
 friend class ConnFactory; /* onNewData */
 
 public:
-
-	ConnFactory * mConnFactory; /** ConnFactory */
 
 	unsigned long mStrSizeMax; /** (10240) Max msg size */
 	string mSeparator; /** Proto separator */
@@ -123,6 +121,9 @@ public:
 
 	/** outputData */
 	int outputData(Conn *);
+
+	/** onNewConn */
+	virtual int onNewConn(Conn *);
 
 protected:
 
@@ -170,9 +171,6 @@ protected:
 
 	/** delConnection */
 	int delConnection(Conn *);
-
-	/** onNewConn */
-	virtual int onNewConn(Conn *);
 
 	/** main timer */
 	virtual int onTimer(Time & now);

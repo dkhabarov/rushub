@@ -87,7 +87,7 @@ void WebConnFactory::onNewData(Conn * conn, string * str) {
 	}
 #ifndef WITHOUT_PLUGINS
 	WebParser * webParser = static_cast<WebParser *> (webConn->mParser);
-	if (!dcServer->mCalls.mOnWebData.CallAll(webConn, webParser))
+	if (webParser && !dcServer->mCalls.mOnWebData.CallAll(webConn, webParser))
 #endif
 	{
 		conn->closeNice(9000, CLOSE_REASON_WEB);
@@ -112,7 +112,7 @@ WebListenFactory::~WebListenFactory() {
 
 
 
-ConnFactory * WebListenFactory::connFactory() {
+ConnFactory * WebListenFactory::getConnFactory() {
 	return mWebConnFactory;
 }
 

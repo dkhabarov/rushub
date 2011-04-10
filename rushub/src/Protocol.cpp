@@ -32,6 +32,8 @@ Protocol::Protocol() : Obj("Protocol") {
 Protocol::~Protocol(){
 }
 
+
+
 Parser::Parser(int max) : 
 	Obj("Parser"),
 	miType(NMDC_TYPE_UNPARSED),

@@ -194,10 +194,10 @@ public:
 	int readFromRecvBuf();
 
 	/** Get pointer for string */
-	virtual string * getPtrForStr();
+	virtual string * getParserStringPtr();
 
-	/** Create parser */
-	virtual Parser * createParser();
+	/** Get parser */
+	virtual Parser * getParser();
 
 	/** Remove parser */
 	virtual void deleteParser(Parser *);
@@ -276,31 +276,16 @@ protected:
 	string mMac; /** mac address */
 	string mHost; /** DNS */
 
-	static char mRecvBuf[MAX_RECV_SIZE + 1]; /** Recv buffer */
 	string mSeparator; /** Separator */
 	unsigned long mStrSizeMax; /** (10240) Max msg size */
 
+	static char mRecvBuf[MAX_RECV_SIZE + 1]; /** Recv buffer */
 	string mSendBuf; /** Buffer for sending */
 	unsigned long mSendBufMax; /** Max size sending buf */
 
 	list<Conn *>::iterator mIterator; /** Optimisation */
 
 protected:
-
-	/** Create socket (default TCP) */
-	tSocket socketCreate(bool udp = false);
-
-	/** Bind */
-	tSocket socketBind(tSocket, int port, const char * ip = NULL);
-
-	/** Listen TCP */
-	tSocket socketListen(tSocket);
-
-	/** Set non-block socket */
-	tSocket socketNonBlock(tSocket);
-
-	/** Accept new conn */
-	tSocket socketAccept();
 
 	virtual void onOk(bool);
 
@@ -328,6 +313,23 @@ private:
 
 	bool mClosed; /** closed flag, for close counter */
 	int mCloseReason; /** Reason of close connection */
+
+private:
+
+	//< Create socket (default TCP)
+	tSocket socketCreate(bool udp = false);
+
+	//< Bind
+	tSocket socketBind(tSocket, int port, const char * ip = NULL);
+
+	//< Listen TCP
+	tSocket socketListen(tSocket);
+
+	//< Set non-block socket
+	tSocket socketNonBlock(tSocket);
+
+	//< Accept new conn
+	tSocket socketAccept();
 
 }; // class Conn
 

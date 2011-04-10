@@ -120,10 +120,44 @@ int NmdcProtocol::onNewDcConn(DcConn * dcConn) {
 }
 
 int NmdcProtocol::DoCmd(Parser * parser, Conn * conn) {
-	DcConn * dcConn = static_cast<DcConn *> (conn);
-	DcParser * dcparser = static_cast<DcParser *> (parser);
 
-	if (checkCommand(dcparser, dcConn) < 0) {
+	// Check UDP data
+	if (conn->getConnType() == CONN_TYPE_CLIENTUDP) {
+
+		DcParser * dcParser = static_cast<DcParser *> (parser);
+
+		if (dcParser->miType == NMDC_TYPE_SR) {
+			dcParser->miType = NMDC_TYPE_SR_UDP; // Set type for parse
+			if (!dcParser->SplitChunks()) {
+				DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.GetUserBaseByNick(dcParser->chunkString(CHUNK_SR_FROM)));
+				if (dcUser && dcUser->mDcConn && conn->ipUdp() == dcUser->getIp()) {
+					conn = dcUser->mDcConn;
+					parser = conn->mParser;
+					if (!parser) {
+						return 1;
+					}
+					parser->mCommand = dcParser->mCommand;
+					parser->Parse();
+				} else {
+					return 1;
+				}
+			} else {
+				return 1;
+			}
+		} else {
+			if (conn->Log(4)) {
+				conn->LogStream() << "Unknown UDP data" << endl;
+			}
+			return 1;
+		}
+
+	}
+
+	DcParser * dcParser = static_cast<DcParser *> (parser);
+	DcConn * dcConn = static_cast<DcConn *> (conn);
+
+
+	if (checkCommand(dcParser, dcConn) < 0) {
 		return -1;
 	}
 
@@ -134,10 +168,10 @@ int NmdcProtocol::DoCmd(Parser * parser, Conn * conn) {
 	#endif
 
 	if (dcConn->Log(5)) {
-		dcConn->LogStream() << "[S]Stage " << dcparser->miType << endl;
+		dcConn->LogStream() << "[S]Stage " << dcParser->miType << endl;
 	}
 	
-	switch (parser->miType) {
+	switch (dcParser->miType) {
 
 		case NMDC_TYPE_MSEARCH :
 			// Fallthrough
@@ -149,107 +183,107 @@ int NmdcProtocol::DoCmd(Parser * parser, Conn * conn) {
 			// Fallthrough
 
 		case NMDC_TYPE_SEARCH :
-			eventSearch(dcparser, dcConn);
+			eventSearch(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_SR :
-			eventSr(dcparser, dcConn);
+			eventSr(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_MYNIFO :
-			eventMyInfo(dcparser, dcConn);
+			eventMyInfo(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_SUPPORTS :
-			eventSupports(dcparser, dcConn);
+			eventSupports(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_KEY :
-			eventKey(dcparser, dcConn);
+			eventKey(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_VALIDATENICK :
-			eventValidateNick(dcparser, dcConn);
+			eventValidateNick(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_VERSION :
-			eventVersion(dcparser, dcConn);
+			eventVersion(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_GETNICKLIST :
-			eventGetNickList(dcparser, dcConn);
+			eventGetNickList(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_CHAT :
-			eventChat(dcparser, dcConn);
+			eventChat(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_TO :
-			eventTo(dcparser, dcConn);
+			eventTo(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_MYPASS :
-			eventMyPass(dcparser, dcConn);
+			eventMyPass(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_CONNECTTOME :
-			eventConnectToMe(dcparser, dcConn);
+			eventConnectToMe(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_RCONNECTTOME :
-			eventRevConnectToMe(dcparser, dcConn);
+			eventRevConnectToMe(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_MCONNECTTOME :
-			eventMultiConnectToMe(dcparser, dcConn);
+			eventMultiConnectToMe(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_KICK :
-			eventKick(dcparser, dcConn);
+			eventKick(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_OPFORCEMOVE :
-			eventOpForceMove(dcparser, dcConn);
+			eventOpForceMove(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_GETINFO :
-			eventGetInfo(dcparser, dcConn);
+			eventGetInfo(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_MCTO :
-			eventMcTo(dcparser, dcConn);
+			eventMcTo(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_PING :
-			eventPing(dcparser, dcConn);
+			eventPing(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_USERIP :
-			eventUserIp(dcparser, dcConn);
+			eventUserIp(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_UNKNOWN :
-			eventUnknown(dcparser, dcConn);
+			eventUnknown(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_QUIT :
-			eventQuit(dcparser, dcConn);
+			eventQuit(dcParser, dcConn);
 			break;
 
 		case NMDC_TYPE_UNPARSED :
-			dcparser->Parse();
-			return DoCmd(parser, dcConn);
+			dcParser->Parse();
+			return DoCmd(dcParser, dcConn);
 
 		default :
 			if (ErrLog(1)) {
-				LogStream() << "Incoming untreated event: " << parser->miType << endl;
+				LogStream() << "Incoming untreated event: " << dcParser->miType << endl;
 			}
 			break;
 
 	}
 
 	if (dcConn->Log(5)) {
-		dcConn->LogStream() << "[E]Stage " << dcparser->miType << endl;
+		dcConn->LogStream() << "[E]Stage " << dcParser->miType << endl;
 	}
 	return 0;
 }

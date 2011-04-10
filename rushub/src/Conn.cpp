@@ -97,9 +97,9 @@ Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 
 Conn::~Conn() {
 	if (mParser) {
-		this->deleteParser(mParser);
+		deleteParser(mParser);
+		mParser = NULL;
 	}
-	mParser = NULL;
 	mListenFactory = NULL;
 	mConnFactory = NULL;
 	mServer = NULL;
@@ -324,24 +324,27 @@ void Conn::closeNow(int iReason /* = 0 */) {
 
 /** createNewConn */
 Conn * Conn::createNewConn() {
-	tSocket sock;
-	if ((sock = socketAccept()) == INVALID_SOCKET) {
+	tSocket sock = socketAccept();
+	if (sock == INVALID_SOCKET) {
 		return NULL;
 	}
 
-	ConnFactory *Factory = NULL;
-	Conn *new_conn = NULL;
+	ConnFactory * connFactory = NULL;
+	Conn * new_conn = NULL;
 
-	/** Presence of the factory for listen socket without fall! */
+	// Presence of the factory for listen socket without fall!
 	if (mListenFactory) {
-		Factory = mListenFactory->connFactory();
+		connFactory = mListenFactory->getConnFactory();
 	}
-	/*if (mServer && mServer->mConnFactory) {
-		Factory = mServer->mConnFactory;
-	}*/
 
-	if (Factory != NULL) {
-		new_conn = Factory->createConn(sock); /** Create CONN_TYPE_CLIENTTCP conn */
+	if (connFactory != NULL) {
+		new_conn = connFactory->createConn(sock); // Create connection object by factory (CONN_TYPE_CLIENTTCP)
+	} else {
+		if (Log(3)) {
+			LogStream() << "Create simple connection object for socket: " << sock << endl;
+		}
+		new_conn = new Conn(sock, mServer); // Create simple connection object (CONN_TYPE_CLIENTTCP)
+		new_conn->mProtocol = mProtocol;
 	}
 	if (!new_conn) {
 		if (ErrLog(0)) {
@@ -526,7 +529,7 @@ void Conn::clearStr() {
 
 /** Get pointer for string with data */
 string * Conn::getCommand() {
-	return mCommand;
+	return &mParser->mCommand;
 }
 
 
@@ -589,6 +592,32 @@ int Conn::readFromRecvBuf() {
 	mRecvBufRead += len;
 	mStrStatus = STRING_STATUS_STR_DONE;
 	return len;
+}
+
+/** Get pointer for string */
+string * Conn::getParserStringPtr() {
+	if (mParser == NULL) {
+		mParser = getParser();
+	}
+	mParser->ReInit();
+	return &(mParser->mCommand);
+}
+
+Parser * Conn::getParser() {
+	if (mProtocol != NULL) {
+		return mProtocol->createParser();
+	} else {
+		throw "Protocol is NULL";
+		// return NULL;
+	}
+}
+
+void Conn::deleteParser(Parser * OldParser) {
+	if (this->mProtocol != NULL) {
+		this->mProtocol->deleteParser(OldParser);
+	} else {
+		delete OldParser;
+	}
 }
 
 /** remaining (for web-server) */
@@ -723,7 +752,7 @@ void Conn::flush() {
 /** Send len byte from buf */
 int Conn::send(const char *buf, size_t &len) {
 #ifdef QUICK_SEND /** Quick send */
-	if (this->mConnType != CONN_TYPE_CLIENTUDP) {
+	if (mConnType != CONN_TYPE_CLIENTUDP) {
 		len = ::send(mSocket, buf, len, 0);
 	} else {
 		len = ::sendto(mSocket, buf, len, 0, (struct sockaddr *) &mSockAddrInUdp, mSockAddrInSize);
@@ -779,32 +808,6 @@ int Conn::send(const char *buf, size_t &len) {
 	len = total; /* Number sending bytes */
 	return SOCK_ERROR(n) ? -1 : 0; /* return -1 - fail, 0 - ok */
 #endif
-}
-
-/** Get pointer for string */
-string * Conn::getPtrForStr() {
-	if (mParser == NULL) {
-		mParser = createParser();
-	}
-	#ifdef _DEBUG
-		if (mParser == NULL) {
-			return NULL;
-		}
-	#endif
-	mParser->ReInit();
-	return &(mParser->getCommand());
-}
-
-Parser * Conn::createParser() {
-	return this->mProtocol != NULL ? this->mProtocol->createParser(): NULL;
-}
-
-void Conn::deleteParser(Parser * OldParser) {
-	if (this->mProtocol != NULL) {
-		this->mProtocol->deleteParser(OldParser);
-	} else {
-		delete OldParser;
-	}
 }
 
 /** Main base timer */

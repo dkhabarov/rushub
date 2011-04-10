@@ -51,7 +51,7 @@ public:
 	WebListenFactory(Server *);
 	virtual ~WebListenFactory();
 
-	ConnFactory * connFactory();
+	ConnFactory * getConnFactory();
 	int onNewConn(Conn *);
 
 protected:

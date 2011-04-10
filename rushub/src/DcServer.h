@@ -269,10 +269,10 @@ public:
 
 	static void getAddresses(const string & sAddresses, vector<pair<string, int> > & vec, int iDefPort);
 
-protected:
-
 	/** Function action when joining the client */
 	int onNewConn(Conn *);
+
+protected:
 
 	/** Returns pointer to line of the connection, in which will be recorded got data */
 	string * getPtrForStr(Conn *);
@@ -316,7 +316,10 @@ private:
 	vector<DcConnBase *> mvIPConn; /** Conn with same ip for plugins */
 	vector<string> mvConfigNames; /** Config names for plugins */
 
-	ListenFactory * mListenFactory;
+	//< DC Server Listen Factory
+	ListenFactory * mDcListenFactory;
+
+	//< Web Server Listen Factory
 	WebListenFactory * mWebListenFactory;
 
 	AntiFlood mIPEnterFlood;
@@ -333,8 +336,6 @@ private:
 	tIPEnterList * mIPEnterList;
 
 private:
-
-	void OnNewUdpData(Conn * conn, string * data);
 
 	void deleteConn(Conn * conn);
 
@@ -404,6 +405,23 @@ private:
 	} mCalls;
 
 }; // class DcServer
+
+
+
+/** DC listen factory */
+class DcListenFactory : public ListenFactory {
+
+public:
+	DcListenFactory(Server *, Protocol *);
+	virtual ~DcListenFactory();
+	virtual ConnFactory * getConnFactory();
+	virtual int onNewConn(Conn *);
+
+private:
+	ConnFactory * mDcConnFactory;
+
+}; // ListenFactory
+
 
 }; // namespace dcserver
 

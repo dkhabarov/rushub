@@ -71,7 +71,7 @@ DcServer::DcServer(const string & configFile, const string &):
 	miTotalShare(0),
 	mPluginList(mDcConfig.mPluginPath),
 	mHubName(INTERNALNAME " " INTERNALVERSION " " __DATE__ " " __TIME__),
-	mListenFactory(NULL),
+	mDcListenFactory(NULL),
 	mWebListenFactory(NULL),
 	mIPEnterFlood(mDcConfig.mFloodCountReconnIp, mDcConfig.mFloodTimeReconnIp),
 	mCalls(&mPluginList)
@@ -85,9 +85,6 @@ DcServer::DcServer(const string & configFile, const string &):
 	if (mSysVersion.empty()) {
 		mSysVersion = getSysVersion();
 	}
-
-	/** ConnFactory */
-	mConnFactory = new DcConnFactory(&mDcProtocol, this);
 
 	/** DcIpList */
 	mIPListConn = new DcIpList();
@@ -151,19 +148,14 @@ DcServer::~DcServer() {
 		mIPListConn = NULL;
 	}
 
-	if (mListenFactory != NULL) {
-		delete mListenFactory;
-		mListenFactory = NULL;
+	if (mDcListenFactory != NULL) {
+		delete mDcListenFactory;
+		mDcListenFactory = NULL;
 	}
 
 	if (mWebListenFactory != NULL) {
 		delete mWebListenFactory;
 		mWebListenFactory = NULL;
-	}
-
-	if (mConnFactory != NULL) {
-		delete mConnFactory;
-		mConnFactory = NULL;
 	}
 }
 
@@ -185,9 +177,10 @@ void DcServer::close() {
 void DcServer::deleteConn(Conn * conn) {
 	if (conn != NULL) {
 		mConnChooser.deleteConn(conn);
-		if (conn->mConnFactory != NULL) {
-			ConnFactory * Factory = conn->mConnFactory;
-			Factory->deleteConn(conn);
+
+		ConnFactory * connFactory = conn->mConnFactory;
+		if (connFactory != NULL) {
+			connFactory->deleteConn(conn);
 		} else {
 			delete conn;
 		}
@@ -252,29 +245,30 @@ bool DcServer::ListeningServer(const char * name, const string & addresses, unsi
 
 
 
-/** Listening ports */
+/** Listening all servers */
 int DcServer::Listening() {
 
-	if (!mListenFactory) {
-		mListenFactory = new ListenFactory(this);
+	if (!mDcListenFactory) {
+		mDcListenFactory = new DcListenFactory(this, &mDcProtocol);
 	}
+
 	if (!mWebListenFactory) {
 		mWebListenFactory = new WebListenFactory(this);
 	}
 
 	// DC Server
-	if (!ListeningServer("Server " INTERNALNAME " " INTERNALVERSION, mDcConfig.mAddresses, 411, mListenFactory)) {
+	if (!ListeningServer("DC Server " INTERNALNAME " " INTERNALVERSION, mDcConfig.mAddresses, 411, mDcListenFactory)) {
 		return -1;
 	}
 
 	// Web Server
 	if (mDcConfig.mWebServer) {
-		ListeningServer("Web-Server", mDcConfig.mWebAddresses, 80, mWebListenFactory);
+		ListeningServer("Web Server", mDcConfig.mWebAddresses, 80, mWebListenFactory);
 	}
 
-	// UDP Server
+	// UDP DC Server
 	if (mDcConfig.mUdpServer) {
-		ListeningServer("UDP-Server", mDcConfig.mUdpAddresses, 1209, mListenFactory, true);
+		ListeningServer("DC Server (UDP)", mDcConfig.mUdpAddresses, 1209, mDcListenFactory, true);
 	}
 	return 0;
 }
@@ -385,7 +379,7 @@ int DcServer::onNewConn(Conn *conn) {
 
 /** Returns pointer to line of the connection, in which will be recorded got data */
 string * DcServer::getPtrForStr(Conn * conn) {
-	return conn->getPtrForStr();
+	return conn->getParserStringPtr();
 }
 
 
@@ -393,43 +387,20 @@ string * DcServer::getPtrForStr(Conn * conn) {
 /** Function of the processing enterring data */
 void DcServer::onNewData(Conn * conn, string * data) {
 
-	// Parse data
-	conn->mParser->Parse();
-
-	// Check TCP conn
-	if (conn->getConnType() == CONN_TYPE_CLIENTTCP) {
-		if (conn->Log(4)) {
-			conn->LogStream() << "IN: " << (*data) << endl;
-		}
-		conn->mProtocol->DoCmd(conn->mParser, conn);
-	} else {
-		OnNewUdpData(conn, data);
-	}
-}
-
-
-
-void DcServer::OnNewUdpData(Conn * conn, string * data) {
-
 	if (conn->Log(4)) {
-		conn->LogStream() << "IN [UDP]: " << (*data) << endl;
+		conn->LogStream() << "IN: " << (*data) << endl;
 	}
 
-	DcParser * dcParser = static_cast<DcParser *> (conn->mParser);
-	if (dcParser->miType == NMDC_TYPE_SR) {
-		dcParser->miType = NMDC_TYPE_SR_UDP; // Set type for parse
-		if (!dcParser->SplitChunks()) {
-			dcParser->miType = NMDC_TYPE_SR; // Set simple SR type
+	// Protocol parser
+	Parser * parser = conn->mParser;
 
-			DcUser * dcUser = static_cast<DcUser *> (mDcUserList.GetUserBaseByNick(dcParser->chunkString(CHUNK_SR_FROM)));
-			if (dcUser && dcUser->mDcConn && conn->ipUdp() == dcUser->getIp()) {
-				conn->mProtocol->DoCmd(conn->mParser, dcUser->mDcConn);
-			}
-		}
-	} else {
-		if (conn->Log(5)) {
-			conn->LogStream() << "Unknown UDP data" << endl;
-		}
+	if (parser != NULL) {
+
+		// Definition a new command
+		parser->Parse();
+
+		// Do protocol command
+		conn->mProtocol->DoCmd(parser, conn);
 	}
 }
 
@@ -1416,6 +1387,26 @@ string DcServer::getSysVersion() {
 }
 
 #endif
+
+
+DcListenFactory::DcListenFactory(Server * server, Protocol * protocol) : ListenFactory(server) {
+	mDcConnFactory = new DcConnFactory(protocol, server);
+}
+
+DcListenFactory::~DcListenFactory() {
+	if(mDcConnFactory) {
+		delete mDcConnFactory;
+		mDcConnFactory = NULL;
+	}
+}
+
+ConnFactory * DcListenFactory::getConnFactory() {
+	return mDcConnFactory;
+}
+
+int DcListenFactory::onNewConn(Conn * conn) {
+	return mServer->onNewConn(conn);
+}
 
 
 }; // namespace dcserver
