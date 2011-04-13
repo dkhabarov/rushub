@@ -1490,6 +1490,14 @@ void NmdcProtocol::delFromHide(DcUser * dcUser) {
 	}
 }
 
+string NmdcProtocol::getSeparator() {
+	return NMDC_SEPARATOR;
+}
+
+unsigned long NmdcProtocol::getMaxCommandLength() {
+	return mDcServer->mDcConfig.mMaxNmdcCommandLength;
+}
+
 }; // namespace protocol
 
 }; // namespace dcserver

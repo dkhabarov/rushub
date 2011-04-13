@@ -59,6 +59,9 @@ public:
 	virtual Parser * createParser() {
 		return new DcParser;
 	}
+
+	virtual string getSeparator();
+	virtual unsigned long getMaxCommandLength();
 	
 	/** Removing protocol parser */
 	virtual void deleteParser(Parser * parser) {

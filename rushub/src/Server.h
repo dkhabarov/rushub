@@ -54,33 +54,13 @@ namespace server {
 
 class Conn;
 class ConnFactory;
-class Server;
-
-/** Base listen factory class */
-class ListenFactory {
-
-public:
-	ListenFactory(Server *);
-	virtual ~ListenFactory();
-	virtual ConnFactory * getConnFactory() = 0;
-	virtual int onNewConn(Conn *) = 0;
-
-protected:
-	Server * mServer;
-
-}; // ListenFactory
-
 
 class Server : public Obj {
 
 friend class Conn; /** for closeNow and miNumCloseConn */
-friend class ListenFactory; /* onNewConn */
 friend class ConnFactory; /* onNewData */
 
 public:
-
-	unsigned long mStrSizeMax; /** (10240) Max msg size */
-	string mSeparator; /** Proto separator */
 
 	Time mTime; /** Current time of main cycle on the server */
 	int mStepDelay; /** Step delay (for testing) */
@@ -92,11 +72,11 @@ public:
 
 public:
 
-	Server(const string sep);
+	Server();
 	virtual ~Server();
 
 	/** Set and Listen port */
-	virtual int Listening(ListenFactory *, const string & ip, int port = 0, bool udp = false);
+	virtual int Listening(ConnFactory *, const string & ip, int port = 0, bool udp = false);
 
 	/** Listen port (TCP/UDP) */
 	virtual Conn * Listen(const string & ip, int port, bool udp = false);

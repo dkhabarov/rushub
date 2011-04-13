@@ -33,32 +33,15 @@ class WebConnFactory : public ConnFactory {
 
 public:
 
-	WebConnFactory(Protocol *, Server *, string separator, int max);
+	WebConnFactory(Protocol *, Server *);
 	virtual ~WebConnFactory();
 
 	Conn * createConn(tSocket sock = 0);
 	void deleteConn(Conn * &);
 	void onNewData(Conn *, string *);
-
-}; // class WebConnFactory
-
-
-
-class WebListenFactory : public ListenFactory {
-
-public:
-
-	WebListenFactory(Server *);
-	virtual ~WebListenFactory();
-
-	ConnFactory * getConnFactory();
 	int onNewConn(Conn *);
 
-protected:
-
-	ConnFactory * mWebConnFactory;
-
-}; // class WebListenFactory
+}; // class WebConnFactory
 
 
 

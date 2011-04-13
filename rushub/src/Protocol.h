@@ -54,6 +54,9 @@ public:
 	virtual Parser * createParser() = 0; /** createParser */
 	virtual void deleteParser(Parser *) = 0; /** deleteParser */
 
+	virtual string getSeparator() = 0; /** protocol separator */
+	virtual unsigned long getMaxCommandLength() = 0; /** protocol max command length */
+
 }; // Protocol
 
 

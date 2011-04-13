@@ -29,8 +29,8 @@
 namespace dcserver {
 
 
-DcConn::DcConn(int type, tSocket sock, Server *s) : 
-	Conn(sock, s),
+DcConn::DcConn(int type, tSocket sock, Server * server) : 
+	Conn(sock, server),
 	DcConnBase(type),
 	mFeatures(0),
 	miProfile(-1),
@@ -351,7 +351,9 @@ int DcConn::getCmdType() {
 
 
 
-DcConnFactory::DcConnFactory(Protocol *protocol, Server *s) : ConnFactory(protocol, s) {
+DcConnFactory::DcConnFactory(Protocol * protocol, Server * server) : 
+	ConnFactory(protocol, server)
+{
 }
 
 DcConnFactory::~DcConnFactory() {
@@ -363,6 +365,7 @@ Conn * DcConnFactory::createConn(tSocket sock) {
 	}
 
 	DcConn * dcConn = new DcConn(CLIENT_TYPE_NMDC, sock, mServer);
+	dcConn->setCreatedByFactory(true);
 	dcConn->mConnFactory = this; /** Connection factory for current connection (DcConnFactory) */
 	dcConn->mProtocol = mProtocol; /** Protocol pointer */
 

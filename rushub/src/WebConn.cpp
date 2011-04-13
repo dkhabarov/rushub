@@ -29,20 +29,14 @@ using namespace ::webserver::protocol;
 
 
 
-WebConnFactory::WebConnFactory(Protocol * protocol, Server * server, string separator, int max) : 
+WebConnFactory::WebConnFactory(Protocol * protocol, Server * server) : 
 	ConnFactory(protocol, server)
 {
-	mSeparator = separator;
-	mStrSizeMax = max;
 }
 
 
 
 WebConnFactory::~WebConnFactory() {
-	if (mProtocol) {
-		delete mProtocol; // only for WebProtocol!
-		mProtocol = NULL;
-	}
 }
 
 
@@ -53,11 +47,12 @@ Conn * WebConnFactory::createConn(tSocket sock) {
 		return NULL;
 	}
 
-	WebConn * webconn = new WebConn(sock, mServer);
-	webconn->mConnFactory = this; /** Fuctory current connection (WebConnFactory) */
-	webconn->mProtocol = mProtocol; /** Protocol (WebProtocol) */
+	WebConn * webConn = new WebConn(sock, mServer);
+	webConn->setCreatedByFactory(true);
+	webConn->mConnFactory = this; /** Fuctory current connection (WebConnFactory) */
+	webConn->mProtocol = mProtocol; /** Protocol (WebProtocol) */
 
-	return static_cast<Conn *> (webconn);
+	return static_cast<Conn *> (webConn);
 
 }
 
@@ -96,38 +91,17 @@ void WebConnFactory::onNewData(Conn * conn, string * str) {
 
 
 
-
-
-WebListenFactory::WebListenFactory(Server * server) : ListenFactory(server) {
-	WebProtocol * webProtocol = new WebProtocol;
-	mWebConnFactory = new WebConnFactory(webProtocol, server, "\r\n\r\n", (static_cast<DcServer *> (server))->mDcConfig.mWebStrSizeMax);
-}
-
-
-
-WebListenFactory::~WebListenFactory() {
-	if(mWebConnFactory) delete mWebConnFactory; // only for WebConnFactory!
-	mWebConnFactory = NULL;
-}
-
-
-
-ConnFactory * WebListenFactory::getConnFactory() {
-	return mWebConnFactory;
-}
-
-
-
-int WebListenFactory::onNewConn(Conn * conn) {
+int WebConnFactory::onNewConn(Conn * conn) {
 	mServer->inputData(conn);
-	return 0;//ListenFactory::onNewConn(conn);
+	return 0;
 }
 
 
 
 
-
-WebConn::WebConn(tSocket sock, Server * server) : DcConn(CLIENT_TYPE_WEB, sock, server) {
+WebConn::WebConn(tSocket sock, Server * server) : 
+	DcConn(CLIENT_TYPE_WEB, sock, server)
+{
 	SetClassName("WebConn");
 }
 

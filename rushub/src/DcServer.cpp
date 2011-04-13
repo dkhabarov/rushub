@@ -55,7 +55,7 @@ string DcServer::mSysVersion;
 
 
 DcServer::DcServer(const string & configFile, const string &):
-	Server(NMDC_SEPARATOR),
+	Server(),
 	mDcConfig(&mDcConfigLoader, mServer, configFile.c_str()),
 	mDCLang(&mDcConfigLoader, &mDcConfig),
 	mSystemLoad(SYSTEM_LOAD_OK),
@@ -71,8 +71,9 @@ DcServer::DcServer(const string & configFile, const string &):
 	miTotalShare(0),
 	mPluginList(mDcConfig.mPluginPath),
 	mHubName(INTERNALNAME " " INTERNALVERSION " " __DATE__ " " __TIME__),
-	mDcListenFactory(NULL),
-	mWebListenFactory(NULL),
+	mDcConnFactory(NULL),
+	mWebConnFactory(NULL),
+	mWebProtocol(NULL),
 	mIPEnterFlood(mDcConfig.mFloodCountReconnIp, mDcConfig.mFloodTimeReconnIp),
 	mCalls(&mPluginList)
 {
@@ -148,14 +149,19 @@ DcServer::~DcServer() {
 		mIPListConn = NULL;
 	}
 
-	if (mDcListenFactory != NULL) {
-		delete mDcListenFactory;
-		mDcListenFactory = NULL;
+	if (mDcConnFactory != NULL) {
+		delete mDcConnFactory;
+		mDcConnFactory = NULL;
 	}
 
-	if (mWebListenFactory != NULL) {
-		delete mWebListenFactory;
-		mWebListenFactory = NULL;
+	if (mWebConnFactory != NULL) {
+		delete mWebConnFactory;
+		mWebConnFactory = NULL;
+	}
+
+	if (mWebProtocol != NULL) {
+		delete mWebProtocol;
+		mWebProtocol = NULL;
 	}
 }
 
@@ -179,7 +185,7 @@ void DcServer::deleteConn(Conn * conn) {
 		mConnChooser.deleteConn(conn);
 
 		ConnFactory * connFactory = conn->mConnFactory;
-		if (connFactory != NULL) {
+		if (connFactory != NULL && conn->getCreatedByFactory()) {
 			connFactory->deleteConn(conn);
 		} else {
 			delete conn;
@@ -216,7 +222,7 @@ void DcServer::getAddresses(
 
 
 
-bool DcServer::ListeningServer(const char * name, const string & addresses, unsigned port, ListenFactory * listenFactory, bool udp /*= false*/) {
+bool DcServer::ListeningServer(const char * name, const string & addresses, unsigned port, ConnFactory * connFactory, bool udp /*= false*/) {
 	vector<pair<string, int> > vAddresses;
 	getAddresses(addresses, vAddresses, port);
 
@@ -228,7 +234,7 @@ bool DcServer::ListeningServer(const char * name, const string & addresses, unsi
 
 	bool ret = false;
 	for (vector<pair<string, int> >::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
-		if (Server::Listening(listenFactory, (*it).first, (*it).second, udp) == 0) {
+		if (Server::Listening(connFactory, (*it).first, (*it).second, udp) == 0) {
 			ret = true;
 			if (Log(0)) {
 				LogStream() << name << " is running on " 
@@ -248,27 +254,31 @@ bool DcServer::ListeningServer(const char * name, const string & addresses, unsi
 /** Listening all servers */
 int DcServer::Listening() {
 
-	if (!mDcListenFactory) {
-		mDcListenFactory = new DcListenFactory(this, &mDcProtocol);
+	if (!mDcConnFactory) {
+		mDcConnFactory = new DcConnFactory(&mDcProtocol, this);
 	}
 
-	if (!mWebListenFactory) {
-		mWebListenFactory = new WebListenFactory(this);
+	if (!mWebProtocol) {
+		mWebProtocol = new WebProtocol(mDcConfig.mMaxWebCommandLength);
+	}
+
+	if (!mWebConnFactory) {
+		mWebConnFactory = new WebConnFactory(mWebProtocol, this);
 	}
 
 	// DC Server
-	if (!ListeningServer("DC Server " INTERNALNAME " " INTERNALVERSION, mDcConfig.mAddresses, 411, mDcListenFactory)) {
+	if (!ListeningServer("DC Server " INTERNALNAME " " INTERNALVERSION, mDcConfig.mAddresses, 411, mDcConnFactory)) {
 		return -1;
 	}
 
 	// Web Server
 	if (mDcConfig.mWebServer) {
-		ListeningServer("Web Server", mDcConfig.mWebAddresses, 80, mWebListenFactory);
+		ListeningServer("Web Server", mDcConfig.mWebAddresses, 80, mWebConnFactory);
 	}
 
 	// UDP DC Server
 	if (mDcConfig.mUdpServer) {
-		ListeningServer("DC Server (UDP)", mDcConfig.mUdpAddresses, 1209, mDcListenFactory, true);
+		ListeningServer("DC Server (UDP)", mDcConfig.mUdpAddresses, 1209, mDcConnFactory, true);
 	}
 	return 0;
 }
@@ -1387,26 +1397,5 @@ string DcServer::getSysVersion() {
 }
 
 #endif
-
-
-DcListenFactory::DcListenFactory(Server * server, Protocol * protocol) : ListenFactory(server) {
-	mDcConnFactory = new DcConnFactory(protocol, server);
-}
-
-DcListenFactory::~DcListenFactory() {
-	if(mDcConnFactory) {
-		delete mDcConnFactory;
-		mDcConnFactory = NULL;
-	}
-}
-
-ConnFactory * DcListenFactory::getConnFactory() {
-	return mDcConnFactory;
-}
-
-int DcListenFactory::onNewConn(Conn * conn) {
-	return mServer->onNewConn(conn);
-}
-
 
 }; // namespace dcserver

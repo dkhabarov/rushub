@@ -45,10 +45,8 @@ namespace server {
 
 
 //////////////////////////////////////////////constructor////////////////////////////////////////
-Server::Server(const string sSep) :
+Server::Server() :
 	Obj("Server"),
-	mStrSizeMax(10240),
-	mSeparator(sSep),
 	mStepDelay(0),
 	mTimerServPeriod(1000),
 	mTimerConnPeriod(4000),
@@ -111,17 +109,16 @@ Server::~Server() {
 }
 
 /** Set and Listen port */
-int Server::Listening(ListenFactory * listenFactory, const string & ip, int port, bool udp /*= false*/) {
+int Server::Listening(ConnFactory * connFactory, const string & ip, int port, bool udp /*= false*/) {
 	Conn * conn = Listen(ip, port, udp);
 	if (conn == NULL) {
 		return -1;
 	}
 
 	// Set server listen factory
-	conn->mListenFactory = listenFactory;
+	conn->mConnFactory = connFactory;
 
 	// Set protocol for UDP conn without factory
-	ConnFactory * connFactory = listenFactory->getConnFactory();
 	conn->mProtocol = connFactory->mProtocol;
 
 	return 0;
@@ -318,15 +315,15 @@ void Server::step() {
 
 			// Create new connection:
 			// 1. Accept new socket
-			// 2. Create new connection object using ConnFactory from ListenFactory
+			// 2. Create new connection object (using ConnFactory from ListenFactory else create simple Conn)
 			Conn * new_conn = mNowConn->createNewConn(); /** CONN_TYPE_CLIENTTCP (Conn) */
 
 			if (new_conn) {
 				if (addConnection(new_conn) > 0) {
 
-					if (mNowConn->mListenFactory) {
+					if (mNowConn->mConnFactory) {
 						// On new connection using ListenFactory
-						mNowConn->mListenFactory->onNewConn(new_conn);
+						mNowConn->mConnFactory->onNewConn(new_conn);
 					} else {
 						if (Log(4)) {
 							LogStream() << "ListenFactory is empty" << endl;
@@ -443,7 +440,7 @@ int Server::addConnection(Conn *conn) {
 		if (conn->Log(2)) {
 			conn->LogStream() << "Not reserved connection: " << conn->ip() << endl;
 		}
-		if (conn->mConnFactory != NULL) {
+		if (conn->mConnFactory != NULL && conn->getCreatedByFactory()) {
 			conn->mConnFactory->deleteConn(conn);
 		} else {
 			if (conn->Log(2)) {
@@ -471,8 +468,8 @@ int Server::addConnection(Conn *conn) {
 		if (conn->ErrLog(0)) {
 			conn->LogStream() << "Error: Can't add socket!" << endl;
 		}
-		if (conn->mConnFactory != NULL) {
-			conn->mConnFactory->deleteConn(conn); 
+		if (conn->mConnFactory != NULL && conn->getCreatedByFactory()) {
+			conn->mConnFactory->deleteConn(conn);
 		} else {
 			delete conn;
 		}
@@ -524,7 +521,7 @@ int Server::delConnection(Conn *old_conn) {
 
 	mConnChooser.deleteConn(old_conn);
 
-	if (old_conn->mConnFactory != NULL) {
+	if (old_conn->mConnFactory != NULL && old_conn->getCreatedByFactory()) {
 		old_conn->mConnFactory->deleteConn(old_conn); 
 	} else {
 		if (old_conn->Log(0)) {
@@ -573,30 +570,32 @@ int Server::inputData(Conn *conn) {
 		return 0;
 	}
 
-	int iRead = 0;
+	int bytes = 0;
 	while (conn->isOk() && conn->isWritable()) {
 		if (conn->strStatus() == STRING_STATUS_NO_STR) {
-			conn->setStrToRead(getPtrForStr(conn),
-				(conn->mConnFactory != NULL) ? conn->mConnFactory->mSeparator : mSeparator,
-				(conn->mConnFactory != NULL) ? conn->mConnFactory->mStrSizeMax: mStrSizeMax
-			);
+			conn->setStrToRead(getPtrForStr(conn));
 		}
 
-		iRead += conn->readFromRecvBuf();
+		bytes += conn->readFromRecvBuf();
 
-		if (conn->strStatus() == STRING_STATUS_STR_DONE) { 
+		if (conn->strStatus() == STRING_STATUS_STR_DONE) {
+
 			if (conn->mConnFactory != NULL) {
+				// On new data using ListenFactory
 				conn->mConnFactory->onNewData(conn, conn->getCommand());
 			} else {
+				// On new data by server
 				onNewData(conn, conn->getCommand());
 			}
+
 			conn->clearStr();
 		}
+
 		if (conn->recvBufIsEmpty()) {
 			break;
 		}
 	}
-	return iRead;
+	return bytes;
 }
 
 /** getPtrForStr */
@@ -635,10 +634,5 @@ int Server::onTimer(Time &) {
 	return 0;
 }
 
-ListenFactory::ListenFactory(Server * server) : mServer(server) {
-}
-
-ListenFactory::~ListenFactory() {
-}
 
 }; // server

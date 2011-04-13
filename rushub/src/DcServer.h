@@ -39,6 +39,7 @@
 #include "DcConfigLoader.h"
 #include "AntiFlood.h"
 #include "DcIpList.h"
+#include "WebProtocol.h"
 
 #include "stringutils.h" // for StringReplace
 
@@ -46,6 +47,8 @@
 
 
 using namespace ::plugin;
+//using namespace ::webserver;
+using namespace ::webserver::protocol;
 
 namespace dcserver {
 
@@ -316,11 +319,14 @@ private:
 	vector<DcConnBase *> mvIPConn; /** Conn with same ip for plugins */
 	vector<string> mvConfigNames; /** Config names for plugins */
 
-	//< DC Server Listen Factory
-	ListenFactory * mDcListenFactory;
+	//< DC Server Conn Factory
+	DcConnFactory * mDcConnFactory;
 
-	//< Web Server Listen Factory
-	WebListenFactory * mWebListenFactory;
+	//< Web Server Conn Factory
+	WebConnFactory * mWebConnFactory;
+
+	//< Web Protocol
+	WebProtocol * mWebProtocol;
 
 	AntiFlood mIPEnterFlood;
 	struct IpEnter {
@@ -339,7 +345,7 @@ private:
 
 	void deleteConn(Conn * conn);
 
-	bool ListeningServer(const char * name, const string & addresses, unsigned port, ListenFactory * listenFactory, bool udp = false);
+	bool ListeningServer(const char * name, const string & addresses, unsigned port, ConnFactory * connFactory, bool udp = false);
 
 	static string getSysVersion();
 
@@ -405,22 +411,6 @@ private:
 	} mCalls;
 
 }; // class DcServer
-
-
-
-/** DC listen factory */
-class DcListenFactory : public ListenFactory {
-
-public:
-	DcListenFactory(Server *, Protocol *);
-	virtual ~DcListenFactory();
-	virtual ConnFactory * getConnFactory();
-	virtual int onNewConn(Conn *);
-
-private:
-	ConnFactory * mDcConnFactory;
-
-}; // ListenFactory
 
 
 }; // namespace dcserver

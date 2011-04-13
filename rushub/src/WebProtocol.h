@@ -45,8 +45,12 @@ class WebProtocol : public Protocol {
 
 public:
 
-	WebProtocol();
+	WebProtocol(unsigned long & maxCommandLength);
 	virtual ~WebProtocol();
+
+	virtual WebProtocol & operator = (const WebProtocol &) {
+		return *this;
+	}
 
 	void SetServer(Server *);
 
@@ -59,9 +63,18 @@ public:
 	/** Removing parser of the protocol */
 	virtual void deleteParser(Parser *);
 
+	virtual string getSeparator() {
+		return "\r\n\r\n";
+	}
+
+	virtual unsigned long getMaxCommandLength() {
+		return mMaxCommandLength;
+	}
+
 protected:
 
 	Server * mServer;
+	unsigned long & mMaxCommandLength;
 
 }; // class WebProtocol
 

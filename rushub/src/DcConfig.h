@@ -53,7 +53,8 @@ public:
 
 	int mUsersLimit;	//< User's limit
 
-	unsigned long mWebStrSizeMax; //< Max size of web cmd
+	unsigned long mMaxNmdcCommandLength;
+	unsigned long mMaxWebCommandLength; //< Max size of web cmd
 	unsigned mMaxCmdLen[NMDC_TYPE_UNKNOWN + 1];
 	unsigned mMaxNickLen;	//< Max length of nick
 	unsigned mMinNickLen; //< Min length of nick

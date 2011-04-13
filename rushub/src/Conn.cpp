@@ -48,7 +48,6 @@ char Conn::mRecvBuf[MAX_RECV_SIZE + 1];
 Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 	Obj("Conn"),
 	mConnFactory(NULL),
-	mListenFactory(NULL),
 	mServer(server),
 	mProtocol(NULL),
 	mParser(NULL),
@@ -65,7 +64,8 @@ Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 	mBlockInput(false),
 	mBlockOutput(true),
 	mClosed(false),
-	mCloseReason(0)
+	mCloseReason(0),
+	mCreatedByFactory(false)
 {
 	clearStr(); /** Clear params */
 	memset(&mCloseTime, 0, sizeof(mCloseTime));
@@ -100,7 +100,6 @@ Conn::~Conn() {
 		deleteParser(mParser);
 		mParser = NULL;
 	}
-	mListenFactory = NULL;
 	mConnFactory = NULL;
 	mServer = NULL;
 	mProtocol = NULL;
@@ -329,16 +328,10 @@ Conn * Conn::createNewConn() {
 		return NULL;
 	}
 
-	ConnFactory * connFactory = NULL;
 	Conn * new_conn = NULL;
 
-	// Presence of the factory for listen socket without fall!
-	if (mListenFactory) {
-		connFactory = mListenFactory->getConnFactory();
-	}
-
-	if (connFactory != NULL) {
-		new_conn = connFactory->createConn(sock); // Create connection object by factory (CONN_TYPE_CLIENTTCP)
+	if (mConnFactory != NULL) {
+		new_conn = mConnFactory->createConn(sock); // Create connection object by factory (CONN_TYPE_CLIENTTCP)
 	} else {
 		if (Log(3)) {
 			LogStream() << "Create simple connection object for socket: " << sock << endl;
@@ -520,8 +513,6 @@ int Conn::recv() {
 /** Clear params */
 void Conn::clearStr() {
 	mCommand = NULL;
-	mSeparator = "\0";
-	mStrSizeMax = 0;
 	mStrStatus = STRING_STATUS_NO_STR;
 }
 
@@ -549,7 +540,7 @@ const string & Conn::ipUdp() const {
 
 /** Installing the string, in which will be recorded received data, 
 	and installation main parameter */
-void Conn::setStrToRead(string * pStr, string separator, unsigned long iMax) {
+void Conn::setStrToRead(string * pStr) {
 	if (mStrStatus != STRING_STATUS_NO_STR) {
 		if (ErrLog(0)) {
 			LogStream() << "Fatal error: Bad setStrToRead" << endl;
@@ -563,8 +554,6 @@ void Conn::setStrToRead(string * pStr, string separator, unsigned long iMax) {
 		throw "Fatal error: Bad setStrToRead. Null string pointer";
 	}
 	mCommand = pStr;
-	mSeparator = separator;
-	mStrSizeMax = iMax;
 	mStrStatus = STRING_STATUS_PARTLY;
 }
 
@@ -576,10 +565,20 @@ int Conn::readFromRecvBuf() {
 		}
 		throw "Fatal error: ReadFromBuf with null string pointer";
 	}
+
 	char * buf = mRecvBuf + mRecvBufRead;
 	size_t pos, len = (mRecvBufEnd - mRecvBufRead);
-	if ((pos = string(buf).find(mSeparator)) == string::npos) {
-		if (mCommand->size() + len > mStrSizeMax) {
+
+	string separator("\0");
+	unsigned long maxCommandLength = 10240;
+	
+	if (mProtocol != NULL) {
+		separator = mProtocol->getSeparator();
+		maxCommandLength = mProtocol->getMaxCommandLength();
+	}
+
+	if ((pos = string(buf).find(separator)) == string::npos) {
+		if (mCommand->size() + len > maxCommandLength) {
 			closeNow(CLOSE_REASON_MAXSIZE_RECV);
 			return 0;
 		}
@@ -587,7 +586,7 @@ int Conn::readFromRecvBuf() {
 		mRecvBufRead = mRecvBufEnd = 0;
 		return len;
 	}
-	len = pos + mSeparator.size();
+	len = pos + separator.length();
 	mCommand->append(buf, pos);
 	mRecvBufRead += len;
 	mStrStatus = STRING_STATUS_STR_DONE;
@@ -622,9 +621,12 @@ void Conn::deleteParser(Parser * OldParser) {
 
 /** remaining (for web-server) */
 int Conn::remaining() {
+
+	unsigned long maxCommandLength = (mProtocol != NULL ? mProtocol->getMaxCommandLength() : 10240);
+
 	char * buf = mRecvBuf + mRecvBufRead;
 	int len = mRecvBufEnd - mRecvBufRead;
-	if (mCommand->size() + len > mStrSizeMax) {
+	if (mCommand->size() + len > maxCommandLength) {
 		closeNow(CLOSE_REASON_MAXSIZE_REMAINING);
 		return -1;
 	}
@@ -917,11 +919,9 @@ bool Conn::hostByIp(const string & sIp, string &sHost) {
 
 
 /////////////////////ConnFactory/////////////////////
-ConnFactory::ConnFactory(Protocol * protocol, Server * s) : 
-	mStrSizeMax(s->mStrSizeMax),
-	mSeparator(s->mSeparator),
+ConnFactory::ConnFactory(Protocol * protocol, Server * server) : 
 	mProtocol(protocol),
-	mServer(s)
+	mServer(server)
 {
 }
 
@@ -929,7 +929,8 @@ ConnFactory::~ConnFactory() {
 }
 
 Conn * ConnFactory::createConn(tSocket sock) {
-	Conn *conn = new Conn(sock, mServer); /** CONN_TYPE_CLIENTTCP */
+	Conn * conn = new Conn(sock, mServer); /** CONN_TYPE_CLIENTTCP */
+	conn->setCreatedByFactory(true);
 	conn->mConnFactory = this;
 	conn->mProtocol = mProtocol; /** proto */
 	return conn;
@@ -943,6 +944,10 @@ void ConnFactory::deleteConn(Conn * &conn) {
 
 void ConnFactory::onNewData(Conn * conn, string * str) {
 	mServer->onNewData(conn, str);
+}
+
+int ConnFactory::onNewConn(Conn * conn) {
+	return mServer->onNewConn(conn);
 }
 
 }; // server

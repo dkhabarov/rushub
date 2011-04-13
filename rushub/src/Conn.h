@@ -50,8 +50,6 @@ class ConnFactory {
 
 public:
 
-	unsigned long mStrSizeMax;
-	string mSeparator;
 	Protocol * mProtocol; /** Protocal */
 
 public:
@@ -62,6 +60,7 @@ public:
 	virtual Conn * createConn(tSocket sock = 0);
 	virtual void deleteConn(Conn * &);
 	virtual void onNewData(Conn *, string *);
+	virtual int onNewConn(Conn *);
 
 protected:
 
@@ -124,7 +123,6 @@ public:
 	Time mLastRecv; /** Time of the last recv action from the client */
 
 	ConnFactory * mConnFactory; /** Conn factory */
-	ListenFactory * mListenFactory; /** Listen factory */
 	Server * mServer; /** Server */
 	Protocol * mProtocol; /** Protocol */
 	Parser * mParser; /** Parser */
@@ -180,6 +178,14 @@ public:
 		return mStrStatus;
 	}
 
+	inline void setCreatedByFactory(bool createdByFactory) {
+		mCreatedByFactory = createdByFactory;
+	}
+
+	inline bool getCreatedByFactory() const {
+		return mCreatedByFactory;
+	}
+
 	/** remaining (for web-server) */
 	virtual int remaining();
 
@@ -188,7 +194,7 @@ public:
 
 	/** Installing the string, in which will be recorded received data, 
 	and installation main parameter */
-	void setStrToRead(string *, string separator, unsigned long max);
+	void setStrToRead(string *);
 
 	/** Reading data from buffer and record in line of the protocol */
 	int readFromRecvBuf();
@@ -276,9 +282,6 @@ protected:
 	string mMac; /** mac address */
 	string mHost; /** DNS */
 
-	string mSeparator; /** Separator */
-	unsigned long mStrSizeMax; /** (10240) Max msg size */
-
 	static char mRecvBuf[MAX_RECV_SIZE + 1]; /** Recv buffer */
 	string mSendBuf; /** Buffer for sending */
 	unsigned long mSendBufMax; /** Max size sending buf */
@@ -313,6 +316,9 @@ private:
 
 	bool mClosed; /** closed flag, for close counter */
 	int mCloseReason; /** Reason of close connection */
+
+	//< Created by ConnFactory
+	bool mCreatedByFactory;
 
 private:
 

@@ -174,7 +174,7 @@ void DcConfig::addVars(Server * server) {
 	mMaxCmdLen[NMDC_TYPE_PING] = 0; // ping length
 
 	Add("iWebTimeout",            mWebTimeout,                          30.);
-	Add("iWebStrSizeMax",         mWebStrSizeMax,                       10240);
+	Add("iWebStrSizeMax",         mMaxWebCommandLength,                 10240);
 	Add("sWebAddresses",          mWebAddresses,
 		#ifdef _WIN32
 			string("0.0.0.0:80")
@@ -212,7 +212,7 @@ void DcConfig::addVars(Server * server) {
 	Add("iTimerServPeriod",       server->mTimerServPeriod,             2000);
 	Add("iTimerConnPeriod",       server->mTimerConnPeriod,             4000);
 	Add("iStepDelay",             server->mStepDelay,                   0);
-	Add("iStrSizeMax",            server->mStrSizeMax,                  10240);
+	Add("iStrSizeMax",            mMaxNmdcCommandLength,                10240);
 	Add("iSysLoading",            mSysLoading,                          1.);
 	Add("iStartPing",             mStartPing,                           300);
 	Add("iPingInterval",          mPingInterval,                        60.);

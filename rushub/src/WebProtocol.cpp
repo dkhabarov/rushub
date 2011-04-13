@@ -27,8 +27,9 @@ namespace protocol {
 
 
 
-WebProtocol::WebProtocol() :
-	mServer(NULL)
+WebProtocol::WebProtocol(unsigned long & maxCommandLength) :
+	mServer(NULL),
+	mMaxCommandLength(maxCommandLength)
 {
 	SetClassName("WebProtocol");
 }
