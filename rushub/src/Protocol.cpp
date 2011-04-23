@@ -41,7 +41,6 @@ Parser::Parser(int max) :
 	miLen(0),
 	miKWSize(0),
 	mbError(false),
-	
 	mStrings(NULL),
 	mStrMap(0l),
 	mIsParsed(false),
