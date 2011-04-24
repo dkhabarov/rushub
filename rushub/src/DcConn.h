@@ -148,9 +148,10 @@ class DcConn : public Conn, public DcConnBase {
 
 public:
 
-	unsigned mFeatures;         //< Features
-	string msSupports;          //< Support cmd param
-	string mVersion;            //< DC version
+	unsigned mFeatures;         //< Features (PROTOCOL NMDC)
+	string msSupports;          //< Support cmd param (PROTOCOL NMDC)
+	string mVersion;            //< DC version (PROTOCOL NMDC)
+
 	string msData;              //< Some user's data
 	int miProfile;              //< Profile
 	bool mbSendNickList;        //< Sending user list when login
@@ -160,11 +161,11 @@ public:
 
 	struct Timers { /** Timers */
 
-		Time mTime[NMDC_TYPE_UNKNOWN];
-		unsigned mCount[NMDC_TYPE_UNKNOWN];
+		Time mTime[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !
+		unsigned mCount[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !
 
 		Timers() {
-			for (int i = 0; i <= NMDC_TYPE_UNKNOWN; ++i) {
+			for (int i = 0; i <= NMDC_TYPE_UNKNOWN; ++i) { // PROTOCOL NMDC !
 				mCount[i] = 0;
 				mTime[i].Null();
 			}
@@ -172,10 +173,15 @@ public:
 
 	} mTimes1, mTimes2;
 
+
 public:
 
 	DcConn(int type, tSocket sock = 0, Server * server = NULL);
 	virtual ~DcConn();
+
+
+
+	// === DcConnBase functions ===
 
 	//< Sending RAW command to the client
 	virtual int send(const string & data, bool addSep = false, bool flush = true);
@@ -205,9 +211,10 @@ public:
 
 	virtual void setEnterTimeNow();
 
-	//< Client's protocol version
+	//< Client's protocol version (PROTOCOL NMDC)
 	virtual const string & getVersion() const;
 
+	//< Support string (PROTOCOL NMDC)
 	virtual const string & getSupports() const;
 
 
@@ -223,34 +230,13 @@ public:
 	virtual void setData(const string & sData);
 
 
+	virtual bool parseCommand(const char * cmd);
 
-	
-	/** Flush sending buffer */
-	virtual void onFlush();
+	virtual const char * getCommand();
 
-	//< Setting entry status flag
-	inline void SetLSFlag(unsigned int s) {
-		mLoginStatus |= s;
-	}
-	
-	//< Reset flag
-	inline void ReSetLSFlag(unsigned int s) {
-		mLoginStatus = s;
-	}
-	
-	//< Get flag
-	inline unsigned int GetLSFlag(unsigned int s) {
-		return mLoginStatus & s;
-	}
+	// =====================
 
-	//< Set timeout
-	void SetTimeOut(HubTimeOut, double Sec, Time & now);
-	
-	//< Clear timeout
-	void ClearTimeOut(HubTimeOut);
-	
-	// Check timeout
-	int CheckTimeOut(HubTimeOut t, Time & now);
+
 
 	//< Timer for current connection
 	virtual int onTimer(Time & now);
@@ -258,24 +244,48 @@ public:
 	virtual void closeNow(int iReason = 0);
 	virtual void closeNice(int msec, int iReason = 0);
 
+
+
 	/** Pointer to the server */
-	inline DcServer * server() {
-		return reinterpret_cast<DcServer *> (mServer);
-	}
-	
+	DcServer * server();
+
 	/** Set user object for current connection */
+	// PROTOCOL NMDC ?
 	bool SetUser(DcUser * dcUser);
 
-	inline unsigned int getSrCounter() {
+	unsigned int getSrCounter() {
 		return mSrCounter;
 	}
 
 	void increaseSrCounter();
 	void emptySrCounter();
 
-	virtual bool parseCommand(const char * cmd);
 
-	virtual const char * getCommand();
+
+	//< Setting entry status flag
+	void SetLSFlag(unsigned int s) {
+		mLoginStatus |= s;
+	}
+
+	//< Reset flag
+	void ReSetLSFlag(unsigned int s) {
+		mLoginStatus = s;
+	}
+
+	//< Get flag
+	unsigned int GetLSFlag(unsigned int s) {
+		return mLoginStatus & s;
+	}
+
+	//< Set timeout
+	void SetTimeOut(HubTimeOut, double Sec, Time & now);
+
+	//< Clear timeout
+	void ClearTimeOut(HubTimeOut);
+
+	// Check timeout
+	int CheckTimeOut(HubTimeOut t, Time & now);
+
 
 protected:
 
@@ -293,6 +303,9 @@ protected:
 	} mTimes;
 
 protected:
+
+	/** Flush sending buffer */
+	virtual void onFlush();
 
 	virtual void onOk(bool);
 

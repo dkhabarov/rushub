@@ -1246,9 +1246,9 @@ string NmdcProtocol::GetNormalShare(__int64 iVal) {
 int NmdcProtocol::checkCommand(DcParser * dcParser, DcConn * dcConn) {
 
 	// Checking length of command
-	if (dcParser->miLen > mDcServer->mDcConfig.mMaxCmdLen[dcParser->mType]) {
+	if (dcParser->getCommandLen() > mDcServer->mDcConfig.mMaxCmdLen[dcParser->mType]) {
 		if (dcConn->Log(1)) {
-			dcConn->LogStream() << "Bad CMD(" << dcParser->mType << ") length: " << dcParser->miLen << endl;
+			dcConn->LogStream() << "Bad CMD(" << dcParser->mType << ") length: " << dcParser->getCommandLen() << endl;
 		}
 		dcConn->closeNow(CLOSE_REASON_CMD_LENGTH);
 		return -1;

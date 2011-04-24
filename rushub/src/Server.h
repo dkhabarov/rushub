@@ -87,9 +87,6 @@ public:
 	/** Stop listen conn */
 	virtual bool stopListen(Conn *);
 
-	/** Find conn by port */
-	virtual Conn * findConnByPort(int port);
-
 	/** Main cycle */
 	int run();
 

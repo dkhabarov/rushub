@@ -190,19 +190,7 @@ bool Server::stopListen(Conn * conn) {
 	return false;
 }
 
-Conn * Server::findConnByPort(int port) {
-	Conn * conn = NULL;
-	for (ConnChoose::tConnBaseList::iterator it = mConnChooser.mConnBaseList.begin();
-		it != mConnChooser.mConnBaseList.end();
-		++it
-	) {
-		conn = static_cast<Conn *> (*it);
-		if (conn && conn->port() == port) {
-			return conn;
-		}
-	}
-	return NULL;
-}
+
 
 /** Main cycle */
 int Server::run() {
@@ -453,9 +441,6 @@ int Server::addConnection(Conn *conn) {
 
 	/*if (Log(4)) {
 		LogStream() << "Num clients before add: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.Size() << endl;
-	}
-	if (Log(4)) {
-		LogStream() << "Add new connection on socket: " << (tSocket)(*conn) << " - " << conn->ip() << ":" << conn->port() << endl;
 	}*/
 
 	if (

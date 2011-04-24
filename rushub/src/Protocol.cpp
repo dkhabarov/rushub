@@ -38,8 +38,8 @@ Parser::Parser(int max) :
 	Obj("Parser"),
 	mType(NMDC_TYPE_UNPARSED),
 	mChunks(max),
-	miLen(0),
 	miKWSize(0),
+	mLength(0),
 	mbError(false),
 	mStrings(NULL),
 	mStrMap(0l),
@@ -61,16 +61,20 @@ Parser::~Parser() {
 
 /** ReInit() */
 void Parser::ReInit() {
-	mCommand.resize(0); 
-	mCommand.reserve(512); 
-	mType = NMDC_TYPE_UNPARSED; 
-	miLen = 0; 
-	miKWSize = 0; 
-	mbError = false; 
-	mChunks.clear(); 
-	mChunks.resize(mMaxChunks); 
+	mCommand.resize(0);
+	mCommand.reserve(512);
+	mType = NMDC_TYPE_UNPARSED;
+	miKWSize = 0;
+	mLength = 0;
+	mbError = false;
+	mChunks.clear();
+	mChunks.resize(mMaxChunks);
 	mStrMap = 0l;
 	mIsParsed = false;
+}
+
+size_t Parser::getCommandLen() {
+	return mLength;
 }
 
 void Parser::SetChunk(int n, size_t start, size_t len) {
@@ -82,7 +86,7 @@ void Parser::SetChunk(int n, size_t start, size_t len) {
 bool Parser::SplitOnTwo(size_t start, const string & lim, int cn1, int cn2, size_t len, bool left) {
 	size_t i = 0;
 	if (len == 0) {
-		len = miLen;
+		len = mLength;
 	}
 	if (left) { 
 		i = mCommand.find(lim, start); 
@@ -96,14 +100,14 @@ bool Parser::SplitOnTwo(size_t start, const string & lim, int cn1, int cn2, size
 		}
 	}
 	SetChunk(cn1, start, i - start);
-	SetChunk(cn2, i + lim.length(), miLen - i - lim.length());
+	SetChunk(cn2, i + lim.length(), mLength - i - lim.length());
 	return true;
 }
 
 bool Parser::SplitOnTwo(size_t start, const char lim, int cn1, int cn2, size_t len, bool left) {
 	size_t i = 0;
 	if (len == 0) {
-		len = miLen;
+		len = mLength;
 	}
 	if (left) { 
 		i = mCommand.find_first_of(lim, start); 
@@ -117,7 +121,7 @@ bool Parser::SplitOnTwo(size_t start, const char lim, int cn1, int cn2, size_t l
 		}
 	}
 	SetChunk(cn1, start, i - start);
-	SetChunk(cn2, i + 1, miLen - i - 1);
+	SetChunk(cn2, i + 1, mLength - i - 1);
 	return true;
 }
 
@@ -139,7 +143,7 @@ bool Parser::ChunkRedRight(int cn, size_t amount) {
 
 bool Parser::ChunkRedLeft(int cn, size_t amount) {
 	tChunk & chunk = mChunks[cn];
-	if (chunk.first + amount < miLen) {
+	if (chunk.first + amount < mLength) {
 		chunk.first += amount;
 		chunk.second -= amount;
 		return true;

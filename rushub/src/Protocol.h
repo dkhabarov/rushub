@@ -75,8 +75,6 @@ public:
 	typedef pair<size_t, size_t> tChunk; /** Pair for chunk (begin, end) */
 	vector<tChunk> mChunks; /** List */
 
-	size_t miLen; /** Cmd len */
-
 public:
 
 	Parser(int max);
@@ -86,13 +84,16 @@ public:
 
 	virtual void ReInit(); /** ReInit */
 
+	size_t getCommandLen();
+
 protected:
 
-	size_t miKWSize; /** Key-word len */
-	bool mbError; /** error */
-	
-	string * mStrings; /** String array for chunks */
-	unsigned long mStrMap; /** Chunk already existed */
+	size_t miKWSize; //< Key-word len (PROTOCOL NMDC)
+	size_t mLength; //< Command len
+	bool mbError; //< Error
+
+	string * mStrings; //< String array for chunks
+	unsigned long mStrMap; //< Chunk already existed
 	bool mIsParsed;
 
 protected:

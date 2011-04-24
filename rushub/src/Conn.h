@@ -214,9 +214,6 @@ public:
 	/** Write data in sending buffer */
 	virtual int writeData(const string & data, bool flush);
 
-	/** onFlush */
-	virtual void onFlush();
-
 	void flush(); /** Flush buffer */
 
 
@@ -236,11 +233,6 @@ public:
 
 	const string & ipUdp() const;
 	
-	/** Get port */
-	int port() const {
-		return mPort;
-	}
-
 	void getMac();
 
 	/** Get host */
@@ -291,6 +283,9 @@ protected:
 	list<Conn *>::iterator mIterator; /** Optimisation */
 
 protected:
+
+	/** onFlush */
+	virtual void onFlush();
 
 	virtual void onOk(bool);
 

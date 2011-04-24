@@ -55,6 +55,9 @@ DcConn::~DcConn() {
 	mDcUserBase = NULL;
 }
 
+DcServer * DcConn::server() {
+	return static_cast<DcServer *> (mServer);
+}
 
 
 int DcConn::send(const string & data, bool addSep, bool flush) {
@@ -348,6 +351,8 @@ const char * DcConn::getCommand() {
 	}
 	return (*command).c_str();
 }
+
+
 
 
 

@@ -74,8 +74,8 @@ DcParser::~DcParser() {
 
 /** Do parse for command and return type of this command */
 int DcParser::Parse() {
-	miLen = mCommand.size(); /** Set cmd len */
-	if (miLen) {
+	mLength = mCommand.size(); /** Set cmd len */
+	if (mLength) {
 		for (int i = 0; i < NMDC_TYPE_UNKNOWN; ++i) {
 			if (aDC_Commands[i].Check(mCommand)) { /** Check cmd from mCommand */
 				mType = NmdcType(i); /** Set cmd type */
@@ -84,7 +84,7 @@ int DcParser::Parse() {
 			}
 		}
 	}
-	if (!miLen) {
+	if (!mLength) {
 		mType = NMDC_TYPE_PING;
 	} else if(mType == NMDC_TYPE_UNPARSED) {
 		mType = NMDC_TYPE_UNKNOWN; /** Unknown cmd */
@@ -271,10 +271,10 @@ bool DcParser::SplitChunks() {
 
 		case NMDC_TYPE_KICK : /** $Kick [nick] */
 			/* can be an empty line? */
-			if (miLen == miKWSize) {
+			if (mLength == miKWSize) {
 				mbError = 1;
 			} else {
-				SetChunk(CHUNK_1_PARAM, miKWSize, miLen - miKWSize);
+				SetChunk(CHUNK_1_PARAM, miKWSize, mLength - miKWSize);
 			}
 			break;
 
