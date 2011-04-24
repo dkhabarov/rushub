@@ -42,8 +42,8 @@ Service::Service() : Obj("Service") {
 Service::~Service() {
 }
 
-/** InstallService */
-int Service::InstallService(char * name, const char * configFile) {
+/** installService */
+int Service::installService(char * name, const char * configFile) {
 
 	// Open SC Manager
 	SC_HANDLE Manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
@@ -101,8 +101,8 @@ int Service::InstallService(char * name, const char * configFile) {
 	return 0;
 }
 
-/** UninstallService */
-int Service::UninstallService(char * name) {
+/** uninstallService */
+int Service::uninstallService(char * name) {
 
 	// Open SC Manager
 	SC_HANDLE Manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
@@ -151,7 +151,7 @@ int Service::UninstallService(char * name) {
 	return 0;
 }
 
-int Service::ServiceStart(char * name) {
+int Service::serviceStart(char * name) {
 
 	SC_HANDLE Manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
 	if (!Manager) {
@@ -182,7 +182,7 @@ int Service::ServiceStart(char * name) {
 	return 0;
 }
 
-int Service::ServiceStop(char * name) {
+int Service::serviceStop(char * name) {
 
 	SC_HANDLE Manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
 	if (!Manager) {
@@ -214,7 +214,7 @@ int Service::ServiceStop(char * name) {
 	return 0;
 }
 
-int Service::Start() {
+int Service::start() {
 	ss.dwCurrentState = SERVICE_RUNNING;
 	if (::SetServiceStatus(ssh, &ss) == false) {
 		if (Service::mCurService->ErrLog(0)) {
@@ -286,7 +286,7 @@ int Service::cli(int argc, char * argv[], string & configFile) {
 					cout << "Please, set service name." << endl;
 					return -4;
 				}
-				UninstallService(argv[i]);
+				uninstallService(argv[i]);
 				return 0;
 
 			case eQuit :
@@ -294,7 +294,7 @@ int Service::cli(int argc, char * argv[], string & configFile) {
 					cout << "Please, set service name." << endl;
 					return -5;
 				}
-				ServiceStop(argv[i]);
+				serviceStop(argv[i]);
 				return 0;
 
 			case eHelp :
@@ -338,7 +338,7 @@ int Service::cli(int argc, char * argv[], string & configFile) {
 	}
 
 	if (installName) {
-		InstallService(installName, config);
+		installService(installName, config);
 	}
 
 	if (isService) { // Service!
@@ -347,13 +347,13 @@ int Service::cli(int argc, char * argv[], string & configFile) {
 
 	if (startName) {
 		SERVICE_TABLE_ENTRY DispatchTable[] = {
-			{ startName, (LPSERVICE_MAIN_FUNCTION)Service::ServiceMain },
+			{ startName, (LPSERVICE_MAIN_FUNCTION)Service::serviceMain },
 			{ NULL, NULL }
 		};
 		if (::StartServiceCtrlDispatcher(DispatchTable) == 0) {
 			if (GetLastError() == ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) {
 				// attempt to start service from console
-				mCurService->ServiceStart(startName);
+				mCurService->serviceStart(startName);
 			}
 			return -2;
 		}
@@ -363,7 +363,7 @@ int Service::cli(int argc, char * argv[], string & configFile) {
 	return 2; // Simple start
 }
 
-void WINAPI Service::CtrlHandler(DWORD dwCtrl) {
+void WINAPI Service::ctrlHandler(DWORD dwCtrl) {
 
 	switch (dwCtrl) {
 
@@ -400,7 +400,7 @@ void WINAPI Service::CtrlHandler(DWORD dwCtrl) {
 	}
 }
 
-void WINAPI Service::ServiceMain(DWORD, LPTSTR *lpszArgv) {
+void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 
 	SC_HANDLE Manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 	if (!Manager) {
@@ -439,7 +439,7 @@ void WINAPI Service::ServiceMain(DWORD, LPTSTR *lpszArgv) {
 	::CloseServiceHandle(Manager);
 	
 
-	ssh = ::RegisterServiceCtrlHandler(lpszArgv[0], CtrlHandler);
+	ssh = ::RegisterServiceCtrlHandler(lpszArgv[0], ctrlHandler);
 	if (!ssh) {
 		if (Service::mCurService->ErrLog(0)) {
 			Service::mCurService->LogStream() << "Register service ctrl handler failed (" << (unsigned long)GetLastError() << ")" << endl;

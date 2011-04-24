@@ -137,7 +137,7 @@ public:
 			return *this;
 		}
 
-		virtual void Clear() { /** Clear var and record prefix */
+		virtual void clear() { /** Clear var and record prefix */
 			msList.erase(0, msList.size());
 			msList.append(msStart.c_str(), msStart.size());
 		}
@@ -172,60 +172,60 @@ public:
 		return *this;
 	}
 
-	Key Nick2Key(const string & nick) {
+	Key nick2Key(const string & nick) {
 		string key;
 		key.resize(nick.length());
 		::transform(nick.begin(), nick.end(), key.begin(), ::tolower);
 		return List_t::mHash(key);
 	}
 
-	UserBase * GetUserBaseByNick(const string & nick) {
-		return List_t::Find(Nick2Key(nick));
+	UserBase * getUserBaseByNick(const string & nick) {
+		return List_t::find(nick2Key(nick));
 	}
 
-	UserBase * GetUserBaseByKey(const Key & key) {
-		return List_t::Find(key);
+	UserBase * getUserBaseByKey(const Key & key) {
+		return List_t::find(key);
 	}
 
-	bool ContainsNick(const string & nick) {
-		return List_t::Contain(Nick2Key(nick));
+	bool containsNick(const string & nick) {
+		return List_t::contain(nick2Key(nick));
 	}
 
-	bool ContainsKey(const Key &key) {
-		return List_t::Contain(key);
+	bool containsKey(const Key &key) {
+		return List_t::contain(key);
 	}
 
-	bool AddWithNick(const string & nick, UserBase * userBase) {
-		return List_t::Add(Nick2Key(nick), userBase);
+	bool addWithNick(const string & nick, UserBase * userBase) {
+		return List_t::add(nick2Key(nick), userBase);
 	}
 
-	bool AddWithKey(const Key & key, UserBase * userBase) {
-		return List_t::Add(key, userBase);
+	bool addWithKey(const Key & key, UserBase * userBase) {
+		return List_t::add(key, userBase);
 	}
 
-	bool RemoveByNick(const string & nick) {
-		return List_t::Remove(Nick2Key(nick));
+	bool removeByNick(const string & nick) {
+		return List_t::remove(nick2Key(nick));
 	}
 
-	bool RemoveByKey(const Key & key) {
-		return List_t::Remove(key);
+	bool removeByKey(const Key & key) {
+		return List_t::remove(key);
 	}
 
-	bool Add(UserBase * userBase);
+	bool add(UserBase * userBase);
 
-	bool Remove(UserBase * userBase);
+	bool remove(UserBase * userBase);
 
-	virtual string & GetNickList();
+	virtual string & getNickList();
 
-	void SetNickListStart(const char * start) {
+	void setNickListStart(const char * start) {
 		mNickListMaker.msStart = start;
 	}
 
-	void SetNickListSeparator(const char * sep) {
+	void setNickListSeparator(const char * sep) {
 		mNickListMaker.msSep = sep;
 	}
 	
-	void Remake() {
+	void remake() {
 		mbRemakeNextNickList = (!mbOptRemake);
 	}
 
@@ -236,20 +236,20 @@ public:
 	void sendToProfiles(unsigned long profile, const string & data, bool addSep = true);
 
 	/** Sending data sStart+Nick+sEnd to all list */
-	void SendToWithNick(string & start, string & end);
+	void sendToWithNick(string & start, string & end);
 
 	/** Sending data sStart+Nick+sEnd to profiles */
-	void SendToWithNick(string & start, string & end, unsigned long profile);
+	void sendToWithNick(string & start, string & end, unsigned long profile);
 
 	/** Sending data from cache to user */
-	void FlushForUser(UserBase * userBase);
+	void flushForUser(UserBase * userBase);
 
 	/** Sending data from cache to all and clear cache */
-	void FlushCache();
+	void flushCache();
 
-	bool AutoResize() {
+	bool autoResize() {
 		unsigned size, capacity, newSize;
-		if (List_t::AutoResize(size, capacity, newSize) && Log(3)) {
+		if (List_t::autoResize(size, capacity, newSize) && Log(3)) {
 			LogStream() << "Autoresizing: size = " << size << 
 			", capacity = " << capacity << " -> " << newSize << endl;
 			return true;
@@ -257,14 +257,14 @@ public:
 		return false;
 	}
 
-	/** OnAdd */
-	virtual void OnAdd(UserBase * userBase) {
+	/** onAdd */
+	virtual void onAdd(UserBase * userBase) {
 		if (!mbRemakeNextNickList && mbKeepNickList) {
 			mNickListMaker(userBase);
 		}
 	}
-	/** OnRemove */
-	virtual void OnRemove(UserBase *) {
+	/** onRemove */
+	virtual void onRemove(UserBase *) {
 		mbRemakeNextNickList = mbKeepNickList;
 		mbOptRemake = false;
 	}
@@ -298,8 +298,8 @@ public:
 			return *this;
 		}
 
-		virtual void Clear() { /** Clear var and record prefix */
-			ufDoNickList::Clear();
+		virtual void clear() { /** Clear var and record prefix */
+			ufDoNickList::clear();
 			msListComplete.erase(0, msListComplete.size());
 			msListComplete.append(msStart.data(), msStart.size());
 		}
@@ -350,11 +350,11 @@ public:
 	virtual ~FullUserList() {
 	}
 
-	virtual string & GetNickList();
-	virtual string & GetInfoList(bool bComplete = false);
-	virtual string & GetIpList();
+	virtual string & getNickList();
+	virtual string & getInfoList(bool bComplete = false);
+	virtual string & getIpList();
 
-	inline void Remake() {
+	inline void remake() {
 		if (!mbOptRemake) {
 			mbRemakeNextNickList = mbRemakeNextInfoList = mbRemakeNextIpList = true;
 		} else {
@@ -363,16 +363,16 @@ public:
 	}
 
 
-	/** OnAdd */
-	virtual void OnAdd(UserBase * userBase) {
-		UserList::OnAdd(userBase);
+	/** onAdd */
+	virtual void onAdd(UserBase * userBase) {
+		UserList::onAdd(userBase);
 		if(!mbRemakeNextInfoList && mbKeepInfoList) mINFOListMaker(userBase);
 		if(!mbRemakeNextIpList && mbKeepIpList) mIpListMaker(userBase);
 	}
 
-	/** OnRemove */
-	virtual void OnRemove(UserBase * userBase) {
-		UserList::OnRemove(userBase);
+	/** onRemove */
+	virtual void onRemove(UserBase * userBase) {
+		UserList::onRemove(userBase);
 		mbRemakeNextInfoList = mbKeepInfoList;
 		mbRemakeNextIpList = mbKeepIpList;
 	}

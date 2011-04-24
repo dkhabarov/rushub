@@ -45,20 +45,20 @@ public:
 	~TimeOut() {
 	}
 
-	inline void SetMinDelay(double min) {
+	inline void setMinDelay(double min) {
 		mMinDelay = min;
 	}
 
-	inline void SetMaxDelay(double max) {
+	inline void setMaxDelay(double max) {
 		mMaxDelay = max;
 	}
 
 	/** Set time of the last event */
-	inline void Reset(const Time & now) {
+	inline void reset(const Time & now) {
 		mLast = now;
 	}
 
-	inline void Disable() {
+	inline void disable() {
 		mLast = 0.;
 	}
 
@@ -67,7 +67,7 @@ public:
 	-1 - event not in interval (< min);
 	-2 - event was beyond the scope of interval (> max).
 	Flag event checks lower verge and reset timer */
-	int Check(const Time & now, bool event = false) {
+	int check(const Time & now, bool event = false) {
 		if (!bool(mLast)) {
 			return 0;
 		}
@@ -80,7 +80,7 @@ public:
 			return -2;
 		}
 		if (event) {
-			Reset(now);
+			reset(now);
 		}
 		return 0;
 	}

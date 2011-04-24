@@ -82,7 +82,7 @@ void WebConnFactory::onNewData(Conn * conn, string * str) {
 	}
 #ifndef WITHOUT_PLUGINS
 	WebParser * webParser = static_cast<WebParser *> (webConn->mParser);
-	if (webParser && !dcServer->mCalls.mOnWebData.CallAll(webConn, webParser))
+	if (webParser && !dcServer->mCalls.mOnWebData.callAll(webConn, webParser))
 #endif
 	{
 		conn->closeNice(9000, CLOSE_REASON_WEB);
@@ -116,7 +116,7 @@ WebConn::~WebConn() {
 int WebConn::onTimer(Time &) {
 	DcServer * dcServer = server();
 	Time lastRecv(mLastRecv);
-	if (dcServer->MinDelay(lastRecv, dcServer->mDcConfig.mWebTimeout)) {
+	if (dcServer->minDelay(lastRecv, dcServer->mDcConfig.mWebTimeout)) {
 		if (Log(2)) {
 			LogStream() << "Any action timeout..." << endl;
 		}

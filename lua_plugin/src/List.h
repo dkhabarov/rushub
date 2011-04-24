@@ -69,10 +69,10 @@ public:
 	}
 
 	~cList() {
-		Clear();
+		clear();
 	}
 
-	void Clear() {
+	void clear() {
 		Item<T> *p, *q = mFirst;
 		while (q) {
 			p = q;
@@ -83,11 +83,11 @@ public:
 		miSize = 0;
 	}
 
-	int Size() {
+	int size() {
 		return miSize;
 	}
 
-	void Add(T * value) {
+	void add(T * value) {
 		if (value != NULL) {
 			if (mLast == NULL) {
 				mFirst = mLast = new Item<T>(value);

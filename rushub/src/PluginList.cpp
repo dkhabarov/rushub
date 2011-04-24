@@ -24,7 +24,7 @@
 
 #include "PluginList.h"
 #include "PluginLoader.h"
-#include "stringutils.h" // StrCompare
+#include "stringutils.h" // strCompare
 #include "Dir.h"
 
 
@@ -49,25 +49,25 @@ PluginList::PluginList(const string & path) :
 PluginList::~PluginList() {
 	// Removing plugins
 	for (vector<Hash_t>::iterator it = mPluginLoaderHash.begin(); it != mPluginLoaderHash.end(); ++it) {
-		mPluginLoaders.Remove(*it);
+		mPluginLoaders.remove(*it);
 	}
 
 	// Removing call lists
 	for (vector<Hash_t>::iterator it = mKeyList.begin(); it != mKeyList.end(); ++it) {
-		mCallLists.Remove(*it);
+		mCallLists.remove(*it);
 	}
 }
 
 
 
-void PluginList::SetServer(DcServerBase * dcServerBase) {
+void PluginList::setServer(DcServerBase * dcServerBase) {
 	mDcServerBase = dcServerBase;
 }
 
 
 
 /** Loading all plugins from plugins dir */
-bool PluginList::LoadAll() {
+bool PluginList::loadAll() {
 	if (Log(3)) {
 		LogStream() << "Open plugin dir: " << mPluginDir << endl;
 	}
@@ -85,15 +85,15 @@ bool PluginList::LoadAll() {
 	while (NULL != (entry = readdir(dir))) {
 		file = entry->d_name;
 		#ifdef _WIN32
-			if ((file.size() > 4) && (0 == StrCompare(file, file.size() - 4, 4, ".dll")))
+			if ((file.size() > 4) && (0 == strCompare(file, file.size() - 4, 4, ".dll")))
 		#else
-			if ((file.size() > 3) && (0 == StrCompare(file, file.size() - 3, 3, ".so")))
+			if ((file.size() > 3) && (0 == strCompare(file, file.size() - 3, 3, ".so")))
 		#endif
 		{
 			if (Log(3)) {
 				LogStream() << "Plugin file name: " << file << endl;
 			}
-			LoadPlugin(mPluginDir + file);
+			loadPlugin(mPluginDir + file);
 		}
 	}
 
@@ -104,7 +104,7 @@ bool PluginList::LoadAll() {
 
 
 /** Loadin plugin from file (lib) dll (so) */
-bool PluginList::LoadPlugin(const string & filePath) {
+bool PluginList::loadPlugin(const string & filePath) {
 
 	PluginLoader * pluginLoader = new PluginLoader(filePath);
 	if (Log(3)) {
@@ -116,7 +116,7 @@ bool PluginList::LoadPlugin(const string & filePath) {
 		if (
 			!pluginLoader->open() ||
 			!pluginLoader->loadSym() ||
-			!mPluginLoaders.Add(mPluginLoaders.mHash(pluginLoader->mPlugin->getName()), pluginLoader)
+			!mPluginLoaders.add(mPluginLoaders.mHash(pluginLoader->mPlugin->getName()), pluginLoader)
 		) {
 
 			const string & error = pluginLoader->getError();
@@ -133,7 +133,7 @@ bool PluginList::LoadPlugin(const string & filePath) {
 
 		pluginLoader->mPlugin->setPluginList(this); /** Set pointer on list for plugin */
 		pluginLoader->mPlugin->regAll(this); /** Reg all call-function for this plugin */
-		OnPluginLoad(pluginLoader->mPlugin); /** OnLoad */
+		onPluginLoad(pluginLoader->mPlugin); /** OnLoad */
 
 	} catch (...) {
 
@@ -157,12 +157,12 @@ bool PluginList::LoadPlugin(const string & filePath) {
 
 
 /** Unload plugin by name */
-bool PluginList::UnloadPlugin(const string & name) {
+bool PluginList::unloadPlugin(const string & name) {
 
 	unsigned long key = mPluginLoaders.mHash(name);
-	PluginLoader * pluginLoader = mPluginLoaders.Find(key);
+	PluginLoader * pluginLoader = mPluginLoaders.find(key);
 
-	if (!pluginLoader || !mPluginLoaders.Remove(key)) {
+	if (!pluginLoader || !mPluginLoaders.remove(key)) {
 		if (ErrLog(2)) {
 			LogStream() << "Can't unload plugin name: '" << name << "'" << endl;
 		}
@@ -170,7 +170,7 @@ bool PluginList::UnloadPlugin(const string & name) {
 	}
 
 	for (CallListMap::iterator it = mCallLists.begin(); it != mCallLists.end(); ++it) {
-		(*it)->Unreg(pluginLoader->mPlugin);
+		(*it)->unreg(pluginLoader->mPlugin);
 	}
 
 	pluginLoader->close();
@@ -181,27 +181,27 @@ bool PluginList::UnloadPlugin(const string & name) {
 
 
 /** Reload plugin by name */
-bool PluginList::ReloadPlugin(const string & name) {
-	PluginLoader * pluginLoader = mPluginLoaders.Find(mPluginLoaders.mHash(name));
+bool PluginList::reloadPlugin(const string & name) {
+	PluginLoader * pluginLoader = mPluginLoaders.find(mPluginLoaders.mHash(name));
 	if (
 		!pluginLoader || 
-		!UnloadPlugin(name)
+		!unloadPlugin(name)
 	) {
 		return false;
 	}
-	return LoadPlugin(pluginLoader->getFileName());
+	return loadPlugin(pluginLoader->getFileName());
 }
 
 
 
 /** Set call list */
-bool PluginList::SetCallList(string id, CallList * callList) {
+bool PluginList::setCallList(string id, CallList * callList) {
 	if (!callList || id.size() == 0) {
 		return false;
 	}
 
 	Hash_t hash = mCallLists.mHash(id);
-	if (mCallLists.Add(hash, callList)) {
+	if (mCallLists.add(hash, callList)) {
 		mKeyList.push_back(hash);
 	}
 	return false;
@@ -216,9 +216,9 @@ bool PluginList::regCallList(const char * id, Plugin * plugin) {
 		return false;
 	}
 
-	CallList * callList = mCallLists.Find(mCallLists.mHash(id));
+	CallList * callList = mCallLists.find(mCallLists.mHash(id));
 	return callList != NULL ? 
-		callList->Reg(plugin) : 
+		callList->reg(plugin) : 
 		false;
 }
 
@@ -231,9 +231,9 @@ bool PluginList::unregCallList(const char * id, Plugin * plugin) {
 		return false;
 	}
 
-	CallList * callList = mCallLists.Find(mCallLists.mHash(id));
+	CallList * callList = mCallLists.find(mCallLists.mHash(id));
 	return callList != NULL ? 
-		callList->Unreg(plugin) : 
+		callList->unreg(plugin) : 
 		false;
 }
 
@@ -250,18 +250,18 @@ void PluginList::list(ostream & os) {
 
 
 /** Show all plugins for all calls */
-void PluginList::ListAll(ostream & os) {
+void PluginList::listAll(ostream & os) {
 	for (CallListMap::iterator it = mCallLists.begin(); it != mCallLists.end(); ++it) {
 		os << "callList: " << (*it)->getName() << "\n";
-		(*it)->ListRegs(os, "   ");
+		(*it)->listRegs(os, "   ");
 	}
 }
 
 
 
 /** Get plugin by name */
-Plugin * PluginList::GetPlugin(const string & name) {
-	PluginLoader * pluginLoader = mPluginLoaders.Find(mPluginLoaders.mHash(name));
+Plugin * PluginList::getPlugin(const string & name) {
+	PluginLoader * pluginLoader = mPluginLoaders.find(mPluginLoaders.mHash(name));
 	return pluginLoader != NULL ? 
 		pluginLoader->mPlugin : 
 		NULL;
@@ -270,7 +270,7 @@ Plugin * PluginList::GetPlugin(const string & name) {
 
 
 /** Get plugin by lib */
-Plugin * PluginList::GetPluginByLib(const string & lib) {
+Plugin * PluginList::getPluginByLib(const string & lib) {
 	for (PluginLoaderMap::iterator it = mPluginLoaders.begin(); it != mPluginLoaders.end(); ++it) {
 		if ((*it)->getFileName() == lib) {
 			return (*it)->mPlugin;
@@ -281,8 +281,8 @@ Plugin * PluginList::GetPluginByLib(const string & lib) {
 
 
 
-/** OnPluginLoad */
-void PluginList::OnPluginLoad(Plugin * plugin) {
+/** onPluginLoad */
+void PluginList::onPluginLoad(Plugin * plugin) {
 
 	if (Log(1)) {
 		const string & name = plugin->getName();

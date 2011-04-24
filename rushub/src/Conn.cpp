@@ -24,7 +24,7 @@
 
 #include "Conn.h"
 #include "Server.h" // for mServer
-#include "stringutils.h" // for ShrinkStringToFit, StrCutLeft
+#include "stringutils.h" // for shrinkStringToFit, strCutLeft
 
 #include <iostream> // cout, endl
 
@@ -36,7 +36,7 @@
 	#endif
 #endif
 
-using namespace ::utils; // ShrinkStringToFit, StrCutLeft
+using namespace ::utils; // shrinkStringToFit, strCutLeft
 
 namespace server {
 
@@ -289,7 +289,7 @@ void Conn::closeNow(int iReason /* = 0 */) {
 	mWritable = false;
 	setOk(false);
 	if (mServer) {
-		if (!(mServer->mConnChooser.ConnChoose::OptGet(static_cast<ConnBase *> (this)) & ConnChoose::eEF_CLOSE)) {
+		if (!(mServer->mConnChooser.ConnChoose::optGet(static_cast<ConnBase *> (this)) & ConnChoose::eEF_CLOSE)) {
 			++ mServer->miNumCloseConn;
 			mClosed = true; // poll conflict
 
@@ -301,12 +301,12 @@ void Conn::closeNow(int iReason /* = 0 */) {
 			}
 
 #if USE_SELECT
-			mServer->mConnChooser.ConnChoose::OptIn(static_cast<ConnBase *> (this), ConnChoose::eEF_CLOSE);
-			mServer->mConnChooser.ConnChoose::OptOut(static_cast<ConnBase *> (this), ConnChoose::eEF_ALL);
+			mServer->mConnChooser.ConnChoose::optIn(static_cast<ConnBase *> (this), ConnChoose::eEF_CLOSE);
+			mServer->mConnChooser.ConnChoose::optOut(static_cast<ConnBase *> (this), ConnChoose::eEF_ALL);
 #else
 			// this sequence of flags for poll!
-			mServer->mConnChooser.ConnChoose::OptOut(static_cast<ConnBase *> (this), ConnChoose::eEF_ALL);
-			mServer->mConnChooser.ConnChoose::OptIn(static_cast<ConnBase *> (this), ConnChoose::eEF_CLOSE);
+			mServer->mConnChooser.ConnChoose::optOut(static_cast<ConnBase *> (this), ConnChoose::eEF_ALL);
+			mServer->mConnChooser.ConnChoose::optIn(static_cast<ConnBase *> (this), ConnChoose::eEF_CLOSE);
 #endif
 			
 		} else {
@@ -601,7 +601,7 @@ string * Conn::getParserCommandPtr() {
 	if (mParser == NULL) {
 		return NULL;
 	}
-	mParser->ReInit();
+	mParser->reInit();
 	return &(mParser->mCommand);
 }
 
@@ -687,9 +687,9 @@ int Conn::writeData(const string & sData, bool bFlush) {
 			LogStream() << "Block sent. Was sent " << size << " bytes" << endl;
 		}
 		if (!appended) {
-			StrCutLeft(sData, mSendBuf, size);
+			strCutLeft(sData, mSendBuf, size);
 		} else {
-			StrCutLeft(mSendBuf, size); /** del from buf sent data */
+			strCutLeft(mSendBuf, size); /** del from buf sent data */
 		}
 
 		if (bool(mCloseTime)) {
@@ -700,7 +700,7 @@ int Conn::writeData(const string & sData, bool bFlush) {
 		if (mServer && mOk) {
 			if (mBlockOutput) {
 				mBlockOutput = false;
-				mServer->mConnChooser.ConnChoose::OptIn(this, ConnChoose::eEF_OUTPUT);
+				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::eEF_OUTPUT);
 				if (Log(3)) {
 					LogStream() << "Unblock output channel" << endl;
 				}
@@ -708,12 +708,12 @@ int Conn::writeData(const string & sData, bool bFlush) {
 
 			bufLen = mSendBuf.size();
 			if (mBlockInput && bufLen < MAX_SEND_UNBLOCK_SIZE) { /** Unset block of input */
-				mServer->mConnChooser.ConnChoose::OptIn(this, ConnChoose::eEF_INPUT);
+				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::eEF_INPUT);
 				if (Log(3)) {
 					LogStream() << "Unblock input channel" << endl;
 				}
 			} else if (!mBlockInput && bufLen >= MAX_SEND_BLOCK_SIZE) { /** Set block of input */
-				mServer->mConnChooser.ConnChoose::OptOut(this, ConnChoose::eEF_INPUT);
+				mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::eEF_INPUT);
 				if (Log(3)) {
 					LogStream() << "Block input channel" << endl;
 				}
@@ -723,7 +723,7 @@ int Conn::writeData(const string & sData, bool bFlush) {
 		if (appended) {
 			mSendBuf.erase(0, mSendBuf.size());
 		}
-		ShrinkStringToFit(mSendBuf);
+		shrinkStringToFit(mSendBuf);
 
 		if (bool(mCloseTime)) {
 			closeNow();
@@ -732,7 +732,7 @@ int Conn::writeData(const string & sData, bool bFlush) {
 
 		if (mServer && mOk && !mBlockOutput) {
 			mBlockOutput = true;
-			mServer->mConnChooser.ConnChoose::OptOut(this, ConnChoose::eEF_OUTPUT);
+			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::eEF_OUTPUT);
 			if (Log(3)) {
 				LogStream() << "Block output channel" << endl;
 			}

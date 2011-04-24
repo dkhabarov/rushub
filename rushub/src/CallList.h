@@ -61,7 +61,7 @@ public:
 
 		ufCallOne(PluginList * pluginList);
 
-		void SetCallList(CallList * callList);
+		void setCallList(CallList * callList);
 
 		void operator() (Plugin *);
 	};
@@ -76,19 +76,19 @@ public:
 	virtual const string & getName() const;
 
 	/** Registers plugin in call list */
-	bool Reg(Plugin *);
+	bool reg(Plugin *);
 
 	/** Remove registration from call list */
-	bool Unreg(Plugin *);
+	bool unreg(Plugin *);
 
 	/** Call all plugins */
-	virtual int CallAll();
+	virtual int callAll();
 
 	/** Call one plugin */
-	virtual int CallOne(Plugin *) = 0;
+	virtual int callOne(Plugin *) = 0;
 
 	/** Show plugins list for this call */
-	virtual void ListRegs(ostream & os, const char * sep);
+	virtual void listRegs(ostream & os, const char * sep);
 
 private:
 

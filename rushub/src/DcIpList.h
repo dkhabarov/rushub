@@ -44,17 +44,17 @@ public:
 	DcIpList();
 	virtual ~DcIpList();
 
-	bool Add(DcConn *);
-	bool Remove(DcConn *);
+	bool add(DcConn *);
+	bool remove(DcConn *);
 
 	void sendToIp(unsigned long ip, string & data, unsigned long profile = 0, bool addSep = false, bool flush = true);
 	void sendToIp(const char * ip, string & data, unsigned long profile = 0, bool addSep = false, bool flush = true);
-	void SendToIPWithNick(unsigned long ip, string & start, string & end, unsigned long profile = 0, bool addSep = false, bool flush = true);
-	void SendToIPWithNick(const char * ip, string & start, string & end, unsigned long profile = 0, bool addSep = false, bool flush = true);
+	void sendToIpWithNick(unsigned long ip, string & start, string & end, unsigned long profile = 0, bool addSep = false, bool flush = true);
+	void sendToIpWithNick(const char * ip, string & start, string & end, unsigned long profile = 0, bool addSep = false, bool flush = true);
 
-	bool AutoResize() {
+	bool autoResize() {
 		unsigned size, capacity, newSize;
-		if (mIpTable.AutoResize(size, capacity, newSize) && Log(3)) {
+		if (mIpTable.autoResize(size, capacity, newSize) && Log(3)) {
 			LogStream() << "Autoresizing: size = " << size << 
 				", capacity = " << capacity << " -> " + newSize << endl;
 			return true;
@@ -99,7 +99,7 @@ public:
 	}
 	iterator begin(unsigned long ip) {
 		iterator it;
-		it.mIpList = mIpTable.Find(ip);
+		it.mIpList = mIpTable.find(ip);
 		return it;
 	}
 	inline iterator end() {
@@ -109,7 +109,7 @@ public:
 protected:
 
 	int send(DcConn * conn);
-	int SendWithNick(DcConn * conn);
+	int sendWithNick(DcConn * conn);
 
 }; // class DcIpList
 

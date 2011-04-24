@@ -101,13 +101,13 @@ const string & DcUser::getNick() const {
 
 
 
-const string & DcUser::Nick() const {
+const string & DcUser::nick() const {
 	return msNick;
 }
 
 
 
-const string & DcUser::MyINFO() const {
+const string & DcUser::myInfoString() const {
 	return myInfo.getMyInfo();
 }
 
@@ -137,7 +137,7 @@ bool DcUser::getHide() const {
 
 
 
-bool DcUser::Hide() const {
+bool DcUser::hide() const {
 	return mHide;
 }
 
@@ -161,7 +161,7 @@ int DcUser::getProfile() const {
 }
 
 
-void DcUser::SetIp(const string & ip) {
+void DcUser::setIp(const string & ip) {
 	if (ip.size()) {
 		mIp = ip;
 	}
@@ -262,9 +262,9 @@ __int64 DcUser::getShare(/*bool real = false */) const {
 	return myInfo.getShare();
 }
 
-bool DcUser::IsPassive() const {
+bool DcUser::isPassive() const {
 	// !!!
-	return myInfo.dcTag.IsPassive();
+	return myInfo.dcTag.isPassive();
 }
 
 const string & DcUser::getTag(/*bool real = false */) const {

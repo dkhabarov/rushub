@@ -77,11 +77,11 @@ DcParser::~DcParser() {
 
 
 /** Do parse for command and return type of this command */
-int DcParser::Parse() {
+int DcParser::parse() {
 	mLength = mCommand.size(); /** Set cmd len */
 	if (mLength) {
 		for (int i = 0; i < NMDC_TYPE_UNKNOWN; ++i) {
-			if (aDC_Commands[i].Check(mCommand)) { /** Check cmd from mCommand */
+			if (aDC_Commands[i].check(mCommand)) { /** Check cmd from mCommand */
 				mType = NmdcType(i); /** Set cmd type */
 				mKeyLength = aDC_Commands[i].mLength; /** Set length of key word for command */
 				return mType;
@@ -98,8 +98,8 @@ int DcParser::Parse() {
 
 
 
-void DcParser::ReInit() {
-	Parser::ReInit();
+void DcParser::reInit() {
+	Parser::reInit();
 
 	mError = false;
 	mKeyLength = 0;
@@ -135,7 +135,7 @@ string & DcParser::chunkString(unsigned int n) {
 	return mStrings[n];
 }
 
-bool DcParser::IsPassive(const string & description) {
+bool DcParser::isPassive(const string & description) {
 	if (!description.size()) {
 		return false;
 	}
@@ -160,14 +160,14 @@ bool DcParser::IsPassive(const string & description) {
 }
 
 /** Split command to chunks */
-bool DcParser::SplitChunks() {
+bool DcParser::splitChunks() {
 
 	if (mIsParsed) {
 		return mError;
 	}
 	mIsParsed = true;
 
-	SetChunk(0, 0, mCommand.length()); /** Zero part - always whole command */
+	setChunk(0, 0, mCommand.length()); /** Zero part - always whole command */
 
 	switch (mType) {
 
@@ -178,19 +178,19 @@ bool DcParser::SplitChunks() {
 			// Fallthrough
 			
 		case NMDC_TYPE_SEARCH : /** $Search [[ip]:[port]] [[F?T?0?9]?[searchpattern]] */
-			if (!SplitOnTwo(mKeyLength, ' ', CHUNK_AS_ADDR, CHUNK_AS_QUERY)) {
+			if (!splitOnTwo(mKeyLength, ' ', CHUNK_AS_ADDR, CHUNK_AS_QUERY)) {
 				mError = true;
-			} else if (!SplitOnTwo(':', CHUNK_AS_ADDR, CHUNK_AS_IP, CHUNK_AS_PORT)) {
+			} else if (!splitOnTwo(':', CHUNK_AS_ADDR, CHUNK_AS_IP, CHUNK_AS_PORT)) {
 				mError = true;
-			} else if (!SplitOnTwo('?', CHUNK_AS_QUERY, CHUNK_AS_SEARCHLIMITS, CHUNK_AS_SEARCHPATTERN, 0)) {
+			} else if (!splitOnTwo('?', CHUNK_AS_QUERY, CHUNK_AS_SEARCHLIMITS, CHUNK_AS_SEARCHPATTERN, 0)) {
 				mError = true;
 			}
 			break;
 
 		case NMDC_TYPE_SEARCH_PAS : /** $Search Hub:[nick] [[F?T?0?9]?[searchpattern]] */
-			if (!SplitOnTwo(mKeyLength, ' ', CHUNK_PS_NICK, CHUNK_PS_QUERY)) {
+			if (!splitOnTwo(mKeyLength, ' ', CHUNK_PS_NICK, CHUNK_PS_QUERY)) {
 				mError = true;
-			} else if (!SplitOnTwo('?', CHUNK_PS_QUERY, CHUNK_PS_SEARCHLIMITS, CHUNK_PS_SEARCHPATTERN, 0)) {
+			} else if (!splitOnTwo('?', CHUNK_PS_QUERY, CHUNK_PS_SEARCHLIMITS, CHUNK_PS_SEARCHPATTERN, 0)) {
 				mError = true; /** Searching for on the right */
 			}
 			break;
@@ -208,18 +208,18 @@ bool DcParser::SplitChunks() {
 			6)               |----PATH---|---[SIZE]---|
 		*/
 
-			if (!SplitOnTwo(mKeyLength, ' ', CHUNK_SR_FROM, CHUNK_SR_PATH)) {
+			if (!splitOnTwo(mKeyLength, ' ', CHUNK_SR_FROM, CHUNK_SR_PATH)) {
 				mError = true;
-			} else if (!SplitOnTwo(0x05, CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_TO,      false)) {
+			} else if (!splitOnTwo(0x05, CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_TO,      false)) {
 				mError = true;
-			} else if (!SplitOnTwo(0x05, CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_HUBINFO, false)) {
+			} else if (!splitOnTwo(0x05, CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_HUBINFO, false)) {
 				mError = true;
-			} else if (!SplitOnTwo(' ',  CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_SLOTS,   false)) {
+			} else if (!splitOnTwo(' ',  CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_SLOTS,   false)) {
 				mError = true;
-			} else if (!SplitOnTwo('/',  CHUNK_SR_SLOTS, CHUNK_SR_SL_FR, CHUNK_SR_SL_TO,   false)) {
+			} else if (!splitOnTwo('/',  CHUNK_SR_SLOTS, CHUNK_SR_SL_FR, CHUNK_SR_SL_TO,   false)) {
 				mError = true;
 			}
-			SplitOnTwo(0x05, CHUNK_SR_PATH, CHUNK_SR_PATH, CHUNK_SR_SIZE, false);
+			splitOnTwo(0x05, CHUNK_SR_PATH, CHUNK_SR_PATH, CHUNK_SR_SIZE, false);
 			break;
 
 		case NMDC_TYPE_SR_UDP : /** Return search results
@@ -234,30 +234,30 @@ bool DcParser::SplitChunks() {
 			5)               |----PATH---|---[SIZE]---|
 		*/
 
-			if (!SplitOnTwo(mKeyLength, ' ', CHUNK_SR_FROM, CHUNK_SR_PATH)) {
+			if (!splitOnTwo(mKeyLength, ' ', CHUNK_SR_FROM, CHUNK_SR_PATH)) {
 				mError = true;
-			} else if (!SplitOnTwo(0x05, CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_HUBINFO, false)) {
+			} else if (!splitOnTwo(0x05, CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_HUBINFO, false)) {
 				mError = true;
-			} else if (!SplitOnTwo(' ',  CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_SLOTS,   false)) {
+			} else if (!splitOnTwo(' ',  CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_SLOTS,   false)) {
 				mError = true;
-			} else if (!SplitOnTwo('/',  CHUNK_SR_SLOTS, CHUNK_SR_SL_FR, CHUNK_SR_SL_TO,   false)) {
+			} else if (!splitOnTwo('/',  CHUNK_SR_SLOTS, CHUNK_SR_SL_FR, CHUNK_SR_SL_TO,   false)) {
 				mError = true;
 			}
-			SplitOnTwo(0x05, CHUNK_SR_PATH, CHUNK_SR_PATH, CHUNK_SR_SIZE, false);
+			splitOnTwo(0x05, CHUNK_SR_PATH, CHUNK_SR_PATH, CHUNK_SR_SIZE, false);
 			break;
 
 		case NMDC_TYPE_MYNIFO : /** $MyINFO $ALL [nick] [[desc]$ $[speed]$[email]$[share]$] */
-			if (!SplitOnTwo(mKeyLength, ' ', CHUNK_MI_DEST, CHUNK_MI_NICK)) {
+			if (!splitOnTwo(mKeyLength, ' ', CHUNK_MI_DEST, CHUNK_MI_NICK)) {
 				mError = true;
-			} else if (!SplitOnTwo(' ', CHUNK_MI_NICK, CHUNK_MI_NICK, CHUNK_MI_INFO)) {
+			} else if (!splitOnTwo(' ', CHUNK_MI_NICK, CHUNK_MI_NICK, CHUNK_MI_INFO)) {
 				mError = true;
-			} else if (!SplitOnTwo("$ $", CHUNK_MI_INFO, CHUNK_MI_DESC, CHUNK_MI_SPEED)) {
+			} else if (!splitOnTwo("$ $", CHUNK_MI_INFO, CHUNK_MI_DESC, CHUNK_MI_SPEED)) {
 				mError = true;
-			} else if (!SplitOnTwo('$', CHUNK_MI_SPEED, CHUNK_MI_SPEED, CHUNK_MI_MAIL)) {
+			} else if (!splitOnTwo('$', CHUNK_MI_SPEED, CHUNK_MI_SPEED, CHUNK_MI_MAIL)) {
 				mError = true;
-			} else if (!SplitOnTwo('$', CHUNK_MI_MAIL, CHUNK_MI_MAIL, CHUNK_MI_SIZE)) {
+			} else if (!splitOnTwo('$', CHUNK_MI_MAIL, CHUNK_MI_MAIL, CHUNK_MI_SIZE)) {
 				mError = true;
-			} else if (!ChunkRedRight(CHUNK_MI_SIZE, 1)) { /** Removing the last char $ */
+			} else if (!chunkRedRight(CHUNK_MI_SIZE, 1)) { /** Removing the last char $ */
 				mError = true;
 			}
 			break;
@@ -289,36 +289,36 @@ bool DcParser::SplitChunks() {
 			if (mLength == mKeyLength) {
 				mError = true;
 			} else {
-				SetChunk(CHUNK_1_PARAM, mKeyLength, mLength - mKeyLength);
+				setChunk(CHUNK_1_PARAM, mKeyLength, mLength - mKeyLength);
 			}
 			break;
 
 		case NMDC_TYPE_CHAT : /** <[nick]> [msg] */
-			if (!SplitOnTwo(mKeyLength, "> ", CHUNK_CH_NICK, CHUNK_CH_MSG)) {
+			if (!splitOnTwo(mKeyLength, "> ", CHUNK_CH_NICK, CHUNK_CH_MSG)) {
 				mError = true;
 			}
 			break;
 
 		case NMDC_TYPE_TO : /** $To: [remote_nick] From: [nick] $<[[nick]> [msg]] */
-			if (!SplitOnTwo(mKeyLength," From: ", CHUNK_PM_TO, CHUNK_PM_FROM)) {
+			if (!splitOnTwo(mKeyLength," From: ", CHUNK_PM_TO, CHUNK_PM_FROM)) {
 				mError = true;
-			} else if (!SplitOnTwo(" $<", CHUNK_PM_FROM, CHUNK_PM_FROM, CHUNK_PM_CHMSG)) {
+			} else if (!splitOnTwo(" $<", CHUNK_PM_FROM, CHUNK_PM_FROM, CHUNK_PM_CHMSG)) {
 				mError = true;
-			} else if (!SplitOnTwo("> ", CHUNK_PM_CHMSG, CHUNK_PM_NICK, CHUNK_PM_MSG)) {
+			} else if (!splitOnTwo("> ", CHUNK_PM_CHMSG, CHUNK_PM_NICK, CHUNK_PM_MSG)) {
 				mError = true;
 			}
 			break;
 
 		case NMDC_TYPE_CONNECTTOME : /** $ConnectToMe [nick] [[ip]:[port]] */
-			if (!SplitOnTwo(mKeyLength, ' ', CHUNK_CM_NICK, CHUNK_CM_ACTIVE)) {
+			if (!splitOnTwo(mKeyLength, ' ', CHUNK_CM_NICK, CHUNK_CM_ACTIVE)) {
 				mError = true;
-			} else if(!SplitOnTwo(':', CHUNK_CM_ACTIVE, CHUNK_CM_IP, CHUNK_CM_PORT)) {
+			} else if(!splitOnTwo(':', CHUNK_CM_ACTIVE, CHUNK_CM_IP, CHUNK_CM_PORT)) {
 				mError = true;
 			}
 			break;
 
 		case NMDC_TYPE_RCONNECTTOME : /** $RevConnectToMe [nick] [remote_nick] */
-			if (!SplitOnTwo(mKeyLength, ' ', CHUNK_RC_NICK, CHUNK_RC_OTHER)) {
+			if (!splitOnTwo(mKeyLength, ' ', CHUNK_RC_NICK, CHUNK_RC_OTHER)) {
 				mError = true;
 			}
 			break;
@@ -327,23 +327,23 @@ bool DcParser::SplitChunks() {
 			break;
 
 		case NMDC_TYPE_OPFORCEMOVE : /** $OpForceMove $Who:[remote_nick]$Where:[address]$Msg:[reason] */
-			if (!SplitOnTwo(mKeyLength, "$Where:", CHUNK_FM_NICK, CHUNK_FM_DEST)) {
+			if (!splitOnTwo(mKeyLength, "$Where:", CHUNK_FM_NICK, CHUNK_FM_DEST)) {
 				mError = true;
-			} else if (!SplitOnTwo("$Msg:", CHUNK_FM_DEST, CHUNK_FM_DEST, CHUNK_FM_REASON)) {
+			} else if (!splitOnTwo("$Msg:", CHUNK_FM_DEST, CHUNK_FM_DEST, CHUNK_FM_REASON)) {
 				mError = true;
 			}
 			break;
 
 		case NMDC_TYPE_GETINFO : /** $GetINFO [remote_nick] [nick] */
-			if (!SplitOnTwo(mKeyLength, ' ', CHUNK_GI_OTHER, CHUNK_GI_NICK)) {
+			if (!splitOnTwo(mKeyLength, ' ', CHUNK_GI_OTHER, CHUNK_GI_NICK)) {
 				mError = true;
 			}
 			break;
 
 		case NMDC_TYPE_MCTO : /** $MCTo: [remote_nick] $[nick] [msg] */
-			if (!SplitOnTwo(mKeyLength," $", CHUNK_MC_TO, CHUNK_MC_FROM)) {
+			if (!splitOnTwo(mKeyLength," $", CHUNK_MC_TO, CHUNK_MC_FROM)) {
 				mError = true;
-			} else if (!SplitOnTwo(' ', CHUNK_MC_FROM, CHUNK_MC_FROM, CHUNK_MC_MSG)) {
+			} else if (!splitOnTwo(' ', CHUNK_MC_FROM, CHUNK_MC_FROM, CHUNK_MC_MSG)) {
 				mError = true;
 			}
 			break;
@@ -362,10 +362,10 @@ bool DcParser::SplitChunks() {
 }
 
 int DcParser::checkCmd(DcParser & dcParser, const string & sData, DcUserBase * dcUserBase /*= NULL*/) {
-	dcParser.ReInit();
+	dcParser.reInit();
 	dcParser.mCommand = sData;
-	dcParser.Parse();
-	if (dcParser.SplitChunks()) {
+	dcParser.parse();
+	if (dcParser.splitChunks()) {
 		return -1;
 	}
 

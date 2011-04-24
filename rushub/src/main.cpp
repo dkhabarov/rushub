@@ -118,7 +118,7 @@ int runHub(int argc, char ** argv, bool isService /*= false*/) {
 		DcServer server(configFile, argv[0]);
 
 		/** Listening all ports */
-		if (server.Listening() != 0) {
+		if (server.listening() != 0) {
 			if (server.ErrLog(0)) {
 				server.LogStream() << "Listening failed" << endl;
 			}
@@ -126,7 +126,7 @@ int runHub(int argc, char ** argv, bool isService /*= false*/) {
 		}
 
 		#ifdef _WIN32
-			if (isService && service.Start() < 0) {
+			if (isService && service.start() < 0) {
 				return -3;
 			}
 		#endif
@@ -154,7 +154,7 @@ int main(int argc, char ** argv) {
 		signal(SIGPIPE, sigHandler);
 		signal(SIGTSTP, sigHandler);
 	#else
-		SetUnhandledExceptionFilter(&Exception::ExceptionFilter);
+		SetUnhandledExceptionFilter(&Exception::exceptionFilter);
 	#endif
 
 	return runHub(argc, argv);

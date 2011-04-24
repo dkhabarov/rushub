@@ -65,13 +65,13 @@ void TasksList::AddTask(void * Param, tTask iType) {
 	} else {
 		cTask * Task = new cTask(iType);
 		Task->mParam = Param;
-		mList.Add(Task);
+		mList.add(Task);
 	}
 }
 
 void TasksList::CheckTasks() {
 	mList.Loop(Tasks);
-	mList.Clear();
+	mList.clear();
 	if (miTackChecker) {
 		CommonTasks();
 	}

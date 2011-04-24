@@ -42,7 +42,7 @@ typedef enum {
 
 	HUB_TIME_OUT_KEY = 0, //< Waiting $Key after $Lock
 	HUB_TIME_OUT_VALNICK, //< Waiting $ValidateNick after $Lock
-	HUB_TIME_OUT_LOGIN,   //< Life time of the connection object before full entry (DoUserEnter)
+	HUB_TIME_OUT_LOGIN,   //< Life time of the connection object before full entry (doUserEnter)
 	HUB_TIME_OUT_MYINFO,  //< After $ValidateNick and before $MyINFO timeout
 	HUB_TIME_OUT_PASS,    //< Waiting pass
 	HUB_TIME_OUT_MAX      //< Max timeout type
@@ -251,7 +251,7 @@ public:
 
 	/** Set user object for current connection */
 	// PROTOCOL NMDC ?
-	bool SetUser(DcUser * dcUser);
+	bool setUser(DcUser * dcUser);
 
 	unsigned int getSrCounter() {
 		return mSrCounter;
@@ -263,28 +263,28 @@ public:
 
 
 	//< Setting entry status flag
-	void SetLSFlag(unsigned int s) {
+	void setLoginStatusFlag(unsigned int s) {
 		mLoginStatus |= s;
 	}
 
 	//< Reset flag
-	void ReSetLSFlag(unsigned int s) {
+	void resetLoginStatusFlag(unsigned int s) {
 		mLoginStatus = s;
 	}
 
 	//< Get flag
-	unsigned int GetLSFlag(unsigned int s) {
+	unsigned int getLoginStatusFlag(unsigned int s) {
 		return mLoginStatus & s;
 	}
 
 	//< Set timeout
-	void SetTimeOut(HubTimeOut, double Sec, Time & now);
+	void setTimeOut(HubTimeOut, double Sec, Time & now);
 
 	//< Clear timeout
-	void ClearTimeOut(HubTimeOut);
+	void clearTimeOut(HubTimeOut);
 
 	// Check timeout
-	int CheckTimeOut(HubTimeOut t, Time & now);
+	int checkTimeOut(HubTimeOut t, Time & now);
 
 
 protected:

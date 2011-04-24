@@ -44,34 +44,34 @@ namespace utils {
 
 /** Function of the comparison of the substring from string str1 with string str2
   (0 - equal, 1 - not equal, -1 - not is faithfully given size of the substring str1) */
-int StrCompare(const string &str1, size_t start, size_t count, const string &str2);
+int strCompare(const string &str1, size_t start, size_t count, const string &str2);
 
 /** Removing the spare reserved place in internal buffer of the string */
-void ShrinkStringToFit(string &str);
+void shrinkStringToFit(string &str);
 
 /** Removing symbols on the left */
-void StrCutLeft(string &, size_t);
+void strCutLeft(string &, size_t);
 
 /** Removing symbols on the left and record result in other string */
-void StrCutLeft(const string &, string &, size_t);
+void strCutLeft(const string &, string &, size_t);
 
-bool LoadFileInString(const string &, string &);
+bool loadFileInString(const string &, string &);
 
-string & StringReplace(const string &, const string &, string &, const string &, bool b = false);
-string & StringReplace(const string &, const string &, string &, double, bool b = false);
-string & StringReplace(const string &, const string &, string &, int, bool b = false);
-string & StringReplace(const string &, const string &, string &, long, bool b = false);
-string & StringReplace(const string &, const string &, string &, __int64, bool b = false);
+string & stringReplace(const string &, const string &, string &, const string &, bool b = false);
+string & stringReplace(const string &, const string &, string &, double, bool b = false);
+string & stringReplace(const string &, const string &, string &, int, bool b = false);
+string & stringReplace(const string &, const string &, string &, long, bool b = false);
+string & stringReplace(const string &, const string &, string &, __int64, bool b = false);
 
-string ReplaceSp(const string &, bool bTo = false);
+string replaceSp(const string &, bool bTo = false);
 
-string Int64ToString(__int64 const &);
-__int64 StringToInt64(const string &);
+string int64ToString(__int64 const &);
+__int64 stringToInt64(const string &);
 
-int CountLines(const string &);
-bool LimitLines(const string &, int);
+int countLines(const string &);
+bool limitLines(const string &, int);
 
-void StringSplit(const string &, char sDelim, vector<string> &);
+void stringSplit(const string &, char sDelim, vector<string> &);
 
 string & trim(string &);
 

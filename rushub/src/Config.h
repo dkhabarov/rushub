@@ -84,7 +84,7 @@ public:
 
 	/** Operator of the apropriation data */
 	template <class T> Config & operator = (const T & i) {
-		*(T *)Address() = i;
+		*(T *)address() = i;
 		return *this;
 	}
 
@@ -128,7 +128,7 @@ protected:
 protected:
 
 	/** Function returns address */
-	virtual void * Address() {
+	virtual void * address() {
 		return mAddress;
 	}
 
@@ -143,7 +143,7 @@ public: \
 	Config##SUFFIX(TYPE & var) : Config((void *) & var) {} \
 	Config##SUFFIX(TYPE & var, string const & name) : Config((void *) & var) { this->mName = name; } \
 	virtual ~Config##SUFFIX() {} \
-	virtual Config##SUFFIX & operator = (TYPE const & i) { *(TYPE *)Address() = i; return *this; } /** Operator of the apropriation */ \
+	virtual Config##SUFFIX & operator = (TYPE const & i) { *(TYPE *)address() = i; return *this; } /** Operator of the apropriation */ \
 	virtual TYPE & data() { return *(TYPE *)mAddress; } /** Returns data */ \
 	virtual istream & readFromStream(istream & is); /** Read from stream */ \
 	virtual ostream & writeToStream(ostream & os); /** Write to stream */ \

@@ -41,7 +41,7 @@ void MyInfo::setMyInfo(const string & myInfo, DcParser * parser, __int64 & total
 		this->myInfo = myInfo;
 
 		totalHubShare -= share;
-		share = StringToInt64(parser->chunkString(CHUNK_MI_SIZE));
+		share = stringToInt64(parser->chunkString(CHUNK_MI_SIZE));
 		totalHubShare += share;
 
 		email = parser->chunkString(CHUNK_MI_MAIL);

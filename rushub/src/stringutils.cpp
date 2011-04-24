@@ -30,21 +30,21 @@ namespace utils {
 
 /** Function of the comparison of the substring from string str1 with string str2
   (0 - equal, 1 - not equal, -1 - not is faithfully given size of the substring str1) */
-int StrCompare(const string & str1, size_t start, size_t count, const string & str2) {
+int strCompare(const string & str1, size_t start, size_t count, const string & str2) {
 	return str1.compare(start, count, str2);
 }
 
 
 
 /** Removing the spare reserved place in internal buffer of the string */
-void ShrinkStringToFit(string & str) {
+void shrinkStringToFit(string & str) {
 	string(str.data(), str.size()).swap(str);
 }
 
 
 
 /** Removing symbols on the left */
-void StrCutLeft(string & str, size_t iCut) {
+void strCutLeft(string & str, size_t iCut) {
 	if (iCut > str.length()) {
 		iCut = str.length();
 	}
@@ -54,7 +54,7 @@ void StrCutLeft(string & str, size_t iCut) {
 
 
 /** Removing symbols on the left and record result in other string */
-void StrCutLeft(const string & str1, string & str2, size_t cut) {
+void strCutLeft(const string & str1, string & str2, size_t cut) {
 	if (cut > str1.size()) {
 		cut = str1.size();
 	}
@@ -64,7 +64,7 @@ void StrCutLeft(const string & str1, string & str2, size_t cut) {
 
 
 /** Record from the file to the string */
-bool LoadFileInString(const string & fileName, string & str) {
+bool loadFileInString(const string & fileName, string & str) {
 	string buf;
 	bool addLine = false;
 	ifstream ifs(fileName.c_str());
@@ -89,7 +89,7 @@ bool LoadFileInString(const string & fileName, string & str) {
 
 
 /** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & StringReplace(const string & str, const string & varname, string & dest, const string & by, bool b) {
+string & stringReplace(const string & str, const string & varname, string & dest, const string & by, bool b) {
 	string search;
 	if (!b) {
 		search = "%[";
@@ -110,40 +110,40 @@ string & StringReplace(const string & str, const string & varname, string & dest
 
 
 /** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & StringReplace(const string & str, const string & varname, string & dest, int by, bool b) {
+string & stringReplace(const string & str, const string & varname, string & dest, int by, bool b) {
 	ostringstream os;
 	os << by;
-	return StringReplace(str, varname, dest, os.str(), b);
+	return stringReplace(str, varname, dest, os.str(), b);
 }
 
 
 
 /** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & StringReplace(const string & str, const string & varname, string & dest, double by, bool b) {
+string & stringReplace(const string & str, const string & varname, string & dest, double by, bool b) {
 	ostringstream os;
 	os << by;
-	return StringReplace(str, varname, dest, os.str(), b);
+	return stringReplace(str, varname, dest, os.str(), b);
 }
 
 
 
 /** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & StringReplace(const string & str, const string & varname, string & dest, long by, bool b) {
+string & stringReplace(const string & str, const string & varname, string & dest, long by, bool b) {
 	ostringstream os;
 	os << by;
-	return StringReplace(str, varname, dest, os.str(), b);
+	return stringReplace(str, varname, dest, os.str(), b);
 }
 
 
 
 /** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & StringReplace(const string & str, const string & varname, string & dest, __int64 by, bool b) {
-	return StringReplace(str, varname, dest, Int64ToString(by), b);
+string & stringReplace(const string & str, const string & varname, string & dest, __int64 by, bool b) {
+	return stringReplace(str, varname, dest, int64ToString(by), b);
 }
 
 
 
-string ReplaceSp(const string & str, bool to) {
+string replaceSp(const string & str, bool to) {
 	string dest(str), search, rep;
 	if (to) {
 		search = "\\n";
@@ -175,7 +175,7 @@ string ReplaceSp(const string & str, bool to) {
 
 
 /** Typecasting __int64 to string */
-string Int64ToString(__int64 const & ll) {
+string int64ToString(__int64 const & ll) {
 	char sBuf[32] = { '\0' };
 #ifdef _WIN32
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
@@ -192,7 +192,7 @@ string Int64ToString(__int64 const & ll) {
 
 
 /** Typecasting string to __int64 */
-__int64 StringToInt64(const string & str) {
+__int64 stringToInt64(const string & str) {
 #ifdef _WIN32
 	__int64 result = 0;
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
@@ -208,7 +208,7 @@ __int64 StringToInt64(const string & str) {
 
 
 
-int CountLines(const string & str) {
+int countLines(const string & str) {
 	int lines = 1;
 	size_t pos = 0;
 	while (str.npos != (pos = str.find_first_of("\n", pos ? pos + 1 : 0))) {
@@ -220,7 +220,7 @@ int CountLines(const string & str) {
 
 
 /** Function will return true, if number of the strings less than max */
-bool LimitLines(const string & str, int max) {
+bool limitLines(const string & str, int max) {
 	int lines = 1;
 	size_t pos = 0;
 	while (str.npos != (pos = str.find_first_of("\n", pos ? pos + 1 : 0))) {
@@ -233,7 +233,7 @@ bool LimitLines(const string & str, int max) {
 
 
 
-void StringSplit(const string & str, char sDelim, vector<string> & vRes) {
+void stringSplit(const string & str, char sDelim, vector<string> & vRes) {
 	size_t i, j = 0;
 	while ((i = str.find_first_of(sDelim, j)) != str.npos) {
 		vRes.push_back(str.substr(j, i - j));

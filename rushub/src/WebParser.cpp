@@ -40,14 +40,14 @@ WebParser::~WebParser() {
 
 
 /** Parse cmd and return type */
-int WebParser::Parse() {
+int WebParser::parse() {
 	return NMDC_TYPE_UNPARSED;
 }
 
 
 
 /** Split cmd to chunks */
-bool WebParser::SplitChunks() {
+bool WebParser::splitChunks() {
 	return false;
 }
 

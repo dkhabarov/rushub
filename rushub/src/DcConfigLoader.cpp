@@ -164,7 +164,7 @@ int DcConfigLoader::loadFromFile(ConfigListBase * configListBase, const char * f
 		if ((config = configListBase->operator[](name)) != NULL) {
 			ItemType itemType = config->getTypeId();
 			if ((itemType == ITEM_TYPE_STRING) || (itemType == ITEM_TYPE_PCHAR)) {
-				data = ReplaceSp(data, true);
+				data = replaceSp(data, true);
 			}
 
 			iss = new istringstream(data);
@@ -192,7 +192,7 @@ int DcConfigLoader::saveToStream(ConfigListBase * configListBase, ostream & os) 
 
 		ItemType itemType = (*it)->getTypeId();
 		if ((itemType == ITEM_TYPE_STRING) || (itemType == ITEM_TYPE_PCHAR)) {
-			string data = ReplaceSp(*(*it));
+			string data = replaceSp(*(*it));
 			os << (*it)->mName << " = " << data << endl;
 		} else {
 			os << (*it)->mName << " = " << *(*it) << endl;

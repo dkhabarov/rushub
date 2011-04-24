@@ -41,8 +41,8 @@ ConnPoll::~ConnPoll() {
 
 
 
-bool ConnPoll::AddConn(ConnBase * connBase) {
-	if (!ConnChoose::AddConn(connBase)) {
+bool ConnPoll::addConn(ConnBase * connBase) {
+	if (!ConnChoose::addConn(connBase)) {
 		return false;
 	}
 	if (mMaxSocket >= (tSocket)mvFD.size()) {
@@ -53,7 +53,7 @@ bool ConnPoll::AddConn(ConnBase * connBase) {
 
 
 
-int ConnPoll::Choose(Time & timeout) {
+int ConnPoll::choose(Time & timeout) {
 	int miliSec = timeout.MiliSec() + 1;
 	int tmp, n = 0, ret = 0, done = 0, size = mvFD.size();
 	while (size) {
@@ -72,7 +72,7 @@ int ConnPoll::Choose(Time & timeout) {
 
 
 
-bool ConnPoll::OptIn(tSocket sock, tEventFlag mask) {
+bool ConnPoll::optIn(tSocket sock, tEventFlag mask) {
 	PollFd & pollFd = mvFD[sock];
  	unsigned events = pollFd.events;
 	if (!events && mask) {
@@ -98,7 +98,7 @@ bool ConnPoll::OptIn(tSocket sock, tEventFlag mask) {
 
 
 
-void ConnPoll::OptOut(tSocket sock, tEventFlag mask) {
+void ConnPoll::optOut(tSocket sock, tEventFlag mask) {
 	PollFd & pollFd = mvFD[sock];
  	unsigned events = ~(0u);
 	if (mask & eEF_INPUT) {
@@ -117,7 +117,7 @@ void ConnPoll::OptOut(tSocket sock, tEventFlag mask) {
 
 
 
-int ConnPoll::OptGet(tSocket sock) {
+int ConnPoll::optGet(tSocket sock) {
 	PollFd & pollFd = mvFD[sock];
 	unsigned events = pollFd.events;
 	int mask = 0;
@@ -139,7 +139,7 @@ int ConnPoll::OptGet(tSocket sock) {
 
 
 
-int ConnPoll::RevGet(tSocket sock) {
+int ConnPoll::revGet(tSocket sock) {
 	PollFd & pollFd = mvFD[sock];
 	unsigned events = pollFd.revents;
 	int mask = 0;
@@ -160,7 +160,7 @@ int ConnPoll::RevGet(tSocket sock) {
 
 
 
-bool ConnPoll::RevTest(tSocket sock) {
+bool ConnPoll::revTest(tSocket sock) {
 	PollFd & pollFd = mvFD[sock];
  	if (SOCK_INVALID(pollFd.fd)) {
 		return false;

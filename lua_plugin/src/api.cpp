@@ -786,7 +786,7 @@ int GetUser(lua_State * L) {
 
 //! deprecated
 /// SetUser(UID/sNick, iType, Value)
-int SetUser(lua_State * L) {
+int setUser(lua_State * L) {
 	if (!checkCount(L, 3)) {
 		return 0;
 	}
@@ -1271,7 +1271,7 @@ int AddTimer(lua_State * L) {
 		return error(L, "timer function was not found");
 	}
 
-	if (LuaPlugin::mCurLua->mCurScript->Size() > maxTimers) {
+	if (LuaPlugin::mCurLua->mCurScript->size() > maxTimers) {
 		return luaL_error(L, "bad count timers for this script (max %d)", maxTimers);
 	}
 	cTimer * timer = new cTimer(iId, iInterval, sFunc.c_str(), LuaPlugin::mCurLua->mCurScript);

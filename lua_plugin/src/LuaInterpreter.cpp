@@ -42,7 +42,7 @@ LuaInterpreter::~LuaInterpreter() {
 }
 
 /** On start script (-1 - run already)*/
-int LuaInterpreter::Start() {
+int LuaInterpreter::start() {
 	if (mL) {
 		return -1;
 	}
@@ -101,7 +101,7 @@ int LuaInterpreter::Start() {
 	RegFunc("SendToIP",             &sendToIp);
 	RegFunc("SendToNicks",          &SendToNicks);
 	RegFunc("GetUser",              &GetUser);
-	RegFunc("SetUser",              &SetUser);
+	RegFunc("SetUser",              &setUser);
 	RegFunc("GetUsersCount",        &getUsersCount);
 	RegFunc("GetTotalShare",        &getTotalShare);
 	RegFunc("GetUpTime",            &getUpTime);

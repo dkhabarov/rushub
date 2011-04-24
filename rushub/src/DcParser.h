@@ -69,7 +69,7 @@ typedef enum { /** Types of the commands */
 /** The Following constants were developed for accomodation 
 	corresponding to parameter for each enterring commands of 
 	the protocol DC in variable mChunks, are used in function 
-	DcServer::DC_* as well as in DcParser::SplitChunks... 
+	DcServer::DC_* as well as in DcParser::splitChunks... 
 	they must correspond
 */
 
@@ -232,15 +232,15 @@ public:
 	}
 	
 	/** Do parse for command and return type of this command */
-	virtual int Parse();
+	virtual int parse();
 	
-	virtual void ReInit();
+	virtual void reInit();
 
 	/** Get string address for the chunk of command */
 	string & chunkString(unsigned int n);
 	
-	bool SplitChunks();
-	static bool IsPassive(const string & description);
+	bool splitChunks();
+	static bool isPassive(const string & description);
 	static int checkCmd(DcParser & dcParser, const string & sData, DcUserBase * dcUserBase = NULL);
 
 private:

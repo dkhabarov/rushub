@@ -48,25 +48,25 @@ ConnSelect::~ConnSelect() {
 		if (ChR) {
 			sock = ChR->mFd;
 			delete ChR;
-			mResList.Remove(sock);
+			mResList.remove(sock);
 		}
 	}
 }
 
 
 
-bool ConnSelect::OptIn(tSocket sock, tEventFlag mask) {
+bool ConnSelect::optIn(tSocket sock, tEventFlag mask) {
 	if (
-		(mask & eEF_INPUT && !mReadFS.Set(sock)) ||
-		(mask & eEF_OUTPUT && !mWriteFS.Set(sock)) ||
-		(mask & eEF_ERROR && !mExceptFS.Set(sock)) ||
-		(mask & eEF_CLOSE && !mCloseFS.Set(sock))
+		(mask & eEF_INPUT && !mReadFS.set(sock)) ||
+		(mask & eEF_OUTPUT && !mWriteFS.set(sock)) ||
+		(mask & eEF_ERROR && !mExceptFS.set(sock)) ||
+		(mask & eEF_CLOSE && !mCloseFS.set(sock))
 	) {
 		return false;
 	}
-	sChooseRes * ChR = mResList.Find(sock);
+	sChooseRes * ChR = mResList.find(sock);
 	if (!ChR) {
-		mResList.Add(sock, new sChooseRes(sock, mask));
+		mResList.add(sock, new sChooseRes(sock, mask));
 	} else {
 		ChR->mEvents |= mask;
 	}
@@ -75,44 +75,44 @@ bool ConnSelect::OptIn(tSocket sock, tEventFlag mask) {
 
 
 
-void ConnSelect::OptOut(tSocket sock, tEventFlag mask) {
+void ConnSelect::optOut(tSocket sock, tEventFlag mask) {
 	if (mask & eEF_INPUT ) {
-		mReadFS.Clr(sock);
+		mReadFS.clr(sock);
 	}
 	if (mask & eEF_OUTPUT) {
-		mWriteFS.Clr(sock);
+		mWriteFS.clr(sock);
 	}
 	if (mask & eEF_ERROR ) {
-		mExceptFS.Clr(sock);
+		mExceptFS.clr(sock);
 	}
 	if (mask & eEF_CLOSE ) {
-		mCloseFS.Clr(sock);
+		mCloseFS.clr(sock);
 	}
 
-	sChooseRes * ChR = mResList.Find(sock);
+	sChooseRes * ChR = mResList.find(sock);
 	if (ChR) {
 		ChR->mEvents -= (ChR->mEvents & mask);
 		if (!ChR->mEvents) {
 			delete ChR;
-			mResList.Remove(sock);
+			mResList.remove(sock);
 		}
 	}
 }
 
 
 
-int ConnSelect::OptGet(tSocket sock) {
+int ConnSelect::optGet(tSocket sock) {
 	int mask = 0;
-	if (mReadFS.IsSet(sock)) {
+	if (mReadFS.isSet(sock)) {
 		mask |= eEF_INPUT;
 	}
-	if (mWriteFS.IsSet(sock)) {
+	if (mWriteFS.isSet(sock)) {
 		mask |= eEF_OUTPUT;
 	}
-	if (mExceptFS.IsSet(sock)) {
+	if (mExceptFS.isSet(sock)) {
 		mask |= eEF_ERROR;
 	}
-	if (mCloseFS.IsSet(sock)) {
+	if (mCloseFS.isSet(sock)) {
 		mask |= eEF_CLOSE;
 	}
 	return mask;
@@ -120,18 +120,18 @@ int ConnSelect::OptGet(tSocket sock) {
 
 
 
-int ConnSelect::RevGet(tSocket sock) {
+int ConnSelect::revGet(tSocket sock) {
 	int mask = 0;
-	if (mResReadFS.IsSet(sock)) {
+	if (mResReadFS.isSet(sock)) {
 		mask |= eEF_INPUT;
 	}
-	if (mResWriteFS.IsSet(sock)) {
+	if (mResWriteFS.isSet(sock)) {
 		mask |= eEF_OUTPUT;
 	}
-	if (mResExceptFS.IsSet(sock)) {
+	if (mResExceptFS.isSet(sock)) {
 		mask |= eEF_ERROR;
 	}
-	if (mCloseFS.IsSet(sock)) {
+	if (mCloseFS.isSet(sock)) {
 		mask |= eEF_CLOSE;
 	}
 	return mask;
@@ -139,17 +139,17 @@ int ConnSelect::RevGet(tSocket sock) {
 
 
 
-bool ConnSelect::RevTest(tSocket sock) {
-	return mResWriteFS.IsSet(sock) ||
-		mResReadFS.IsSet(sock) ||
-		mResExceptFS.IsSet(sock) ||
-		mCloseFS.IsSet(sock);
+bool ConnSelect::revTest(tSocket sock) {
+	return mResWriteFS.isSet(sock) ||
+		mResReadFS.isSet(sock) ||
+		mResExceptFS.isSet(sock) ||
+		mCloseFS.isSet(sock);
 }
 
 
 
 /** Do select */
-int ConnSelect::Choose(Time & timeout) {
+int ConnSelect::choose(Time & timeout) {
 	mResReadFS = mReadFS;
 	mResWriteFS = mWriteFS;
 	mResExceptFS = mExceptFS;
@@ -160,17 +160,17 @@ int ConnSelect::Choose(Time & timeout) {
 		return -1;
 	}
 
-	ClearRevents();
-	SetRevents(mResReadFS, eEF_INPUT);
-	SetRevents(mResWriteFS, eEF_OUTPUT);
-	SetRevents(mResExceptFS, eEF_ERROR);
-	SetRevents(mCloseFS, eEF_CLOSE);
+	clearRevents();
+	setRevents(mResReadFS, eEF_INPUT);
+	setRevents(mResWriteFS, eEF_OUTPUT);
+	setRevents(mResExceptFS, eEF_ERROR);
+	setRevents(mCloseFS, eEF_CLOSE);
 	return ret;
 }
 
 
 
-void ConnSelect::ClearRevents(void) {
+void ConnSelect::clearRevents(void) {
 	sChooseRes * ChR = NULL;
 	for (tResList::iterator it = mResList.begin(); it != mResList.end(); ++it) {
 		ChR = (*it);
@@ -182,15 +182,15 @@ void ConnSelect::ClearRevents(void) {
 
 
 
-void ConnSelect::SetRevents(cSelectFD & fdset, unsigned mask) {
+void ConnSelect::setRevents(cSelectFD & fdset, unsigned mask) {
 	tSocket sock;
 	sChooseRes * ChR = NULL;
 	#ifdef _WIN32
 	for (unsigned i = 0; i < fdset.fd_count; ++i) {
 		sock = fdset.fd_array[i];
-		ChR = mResList.Find(sock);
+		ChR = mResList.find(sock);
 		if (!ChR) {
-			mResList.Add(sock, new sChooseRes(sock, 0, mask));
+			mResList.add(sock, new sChooseRes(sock, 0, mask));
 		} else {
 			ChR->mRevents |= mask;
 		}
@@ -199,9 +199,9 @@ void ConnSelect::SetRevents(cSelectFD & fdset, unsigned mask) {
 	for (unsigned i = 0; i < FD_SETSIZE; ++i) {
 		sock = i;
 		if (FD_ISSET(sock, &fdset)) {
-			ChR = mResList.Find(sock);
+			ChR = mResList.find(sock);
 			if (!ChR) {
-				mResList.Add(sock, new sChooseRes(sock, 0, mask));
+				mResList.add(sock, new sChooseRes(sock, 0, mask));
 			} else {
 				ChR->mRevents |= mask;
 			}

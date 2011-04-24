@@ -37,8 +37,8 @@ using namespace ::utils;
 namespace configuration {
 
 #define NEWITEM(TYPE, SUFFIX) \
-virtual Config##SUFFIX * Add(TYPE & v) { return new Config##SUFFIX(v); } \
-virtual ConfigP##SUFFIX * Add(TYPE * & v) { return new ConfigP##SUFFIX(v); }
+virtual Config##SUFFIX * add(TYPE & v) { return new Config##SUFFIX(v); } \
+virtual ConfigP##SUFFIX * add(TYPE * & v) { return new ConfigP##SUFFIX(v); }
 
 /** The Class of the making the object for any type. 
 Contains the functions of the creation of all available types. */
@@ -48,16 +48,16 @@ public:
 
   ConfigFactory() {
 	}
-	NEWITEM(bool, Bool);            /** virtual ConfigBool    * Add(bool & var) { return new ConfigBool(var) } */
-	NEWITEM(double, Double);        /** virtual ConfigDouble  * Add(double & var) { return new ConfigDouble(var) } */
-	NEWITEM(int, Int);              /** virtual ConfigInt     * Add(int & var) { return new ConfigInt(var) } */
-	NEWITEM(long, Long);            /** virtual ConfigLong    * Add(long & var) { return new ConfigLong(var) } */
-	NEWITEM(unsigned int, UInt);    /** virtual ConfigUInt    * Add(unsigned int & var) { return new ConfigUInt(var) } */
-	NEWITEM(unsigned long, ULong);  /** virtual ConfigULong   * Add(unsigned long & var) { return new ConfigULong(var) } */
-	NEWITEM(__int64, Int64);        /** virtual ConfigInt64   * Add(__int64 & var) { return new ConfigInt64(var) } */
-	NEWITEM(char, Char);            /** virtual ConfigChar    * Add(char & var) { return new ConfigChar(var) } */
-	NEWITEM(string, String);        /** virtual ConfigString  * Add(string & var) { return new ConfigString(var) } */
-	virtual void Delete(Config * config) { /** Removing config */
+	NEWITEM(bool, Bool);            /** virtual ConfigBool    * add(bool & var) { return new ConfigBool(var) } */
+	NEWITEM(double, Double);        /** virtual ConfigDouble  * add(double & var) { return new ConfigDouble(var) } */
+	NEWITEM(int, Int);              /** virtual ConfigInt     * add(int & var) { return new ConfigInt(var) } */
+	NEWITEM(long, Long);            /** virtual ConfigLong    * add(long & var) { return new ConfigLong(var) } */
+	NEWITEM(unsigned int, UInt);    /** virtual ConfigUInt    * add(unsigned int & var) { return new ConfigUInt(var) } */
+	NEWITEM(unsigned long, ULong);  /** virtual ConfigULong   * add(unsigned long & var) { return new ConfigULong(var) } */
+	NEWITEM(__int64, Int64);        /** virtual ConfigInt64   * add(__int64 & var) { return new ConfigInt64(var) } */
+	NEWITEM(char, Char);            /** virtual ConfigChar    * add(char & var) { return new ConfigChar(var) } */
+	NEWITEM(string, String);        /** virtual ConfigString  * add(string & var) { return new ConfigString(var) } */
+	virtual void del(Config * config) { /** Removing config */
 		delete config;
 	}
 }; // ConfigFactory
@@ -85,31 +85,39 @@ public:
 	struct iterator {
 		ConfigListBase * mConfigListBase;
 		tVIt mIterator;
+
 		iterator() {
 		}
+
 		iterator(ConfigListBase * configListBase, const tVIt & it) : 
 			mConfigListBase(configListBase),
 			mIterator(it)
 		{
 		}
+
 		Config * operator * () {
-			return mConfigListBase->mList.Find(*mIterator);
+			return mConfigListBase->mList.find(*mIterator);
 		}
+
 		iterator & operator ++ () {
 			++mIterator;
 			return *this;
 		}
+
 		inline bool operator != (iterator & it) {
 			return mIterator != it.mIterator;
 		}
+
 		iterator(iterator & it) {
 			operator = (it);
 		}
-		iterator & Set(ConfigListBase * configListBase, const tVIt & it) {
+
+		iterator & set(ConfigListBase * configListBase, const tVIt & it) {
 			mConfigListBase = configListBase;
 			mIterator = it;
 			return *this;
 		}
+
 		iterator & operator = (iterator & it) {
 			mIterator = it.mIterator;
 			mConfigListBase = it.mConfigListBase;
@@ -125,32 +133,32 @@ public:
 
 	Config * operator[] (const char *); /** Get config by name */
 	Config * operator[] (const string &); /** Get config by name */
-	Config * Add(const string &, Config *); /** Add config object in list */
-	void SetBaseTo(void * newBase); /** Set base pointer in address */
+	Config * add(const string &, Config *); /** Add config object in list */
+	void setBaseTo(void * newBase); /** Set base pointer in address */
 
 	virtual int load() = 0; /** Loading from store */
 	virtual int save() = 0; /** Saving to store */
 
 	/** Set begin iterator */
 	iterator & begin() {
-		return mBegin.Set(this, mKeyList.begin());
+		return mBegin.set(this, mKeyList.begin());
 	}
 
 	/** Set end iterator */
 	iterator & end() {
-		return mEnd.Set(this, mKeyList.end());
+		return mEnd.set(this, mKeyList.end());
 	}
 
 }; // class ConfigListBase
 
 /** Adding */
 #define ADDMTDS(TYPE) \
-Config * Add(const string & name, TYPE & var); \
-Config * Add(const string & name, TYPE & var, TYPE const & def);
+Config * add(const string & name, TYPE & var); \
+Config * add(const string & name, TYPE & var, TYPE const & def);
 
 #define ADDPMTDS(TYPE) \
-Config * Add(const string & name, TYPE * & var); \
-Config * Add(const string & name, TYPE * & var, TYPE const & def);
+Config * add(const string & name, TYPE * & var); \
+Config * add(const string & name, TYPE * & var, TYPE const & def);
 
 #define ADDMETHODS(TYPE) \
 ADDMTDS(TYPE); \

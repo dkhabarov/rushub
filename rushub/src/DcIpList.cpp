@@ -36,28 +36,28 @@ DcIpList::~DcIpList() {
 	}
 }
 
-bool DcIpList::Add(DcConn * conn) {
-	IpList * ipList = mIpTable.Find(conn->getNetIp());
+bool DcIpList::add(DcConn * conn) {
+	IpList * ipList = mIpTable.find(conn->getNetIp());
 	if (ipList == NULL) {
-		mIpTable.Add(conn->getNetIp(), new IpList((tSocket)(*conn), conn));
+		mIpTable.add(conn->getNetIp(), new IpList((tSocket)(*conn), conn));
 	} else {
-		ipList->Add((tSocket)(*conn), conn);
+		ipList->add((tSocket)(*conn), conn);
 	}
 	return true;
 }
 
-bool DcIpList::Remove(DcConn * dcConn) {
-	IpList * ipList = NULL, * ipLists = mIpTable.Find(dcConn->getNetIp());
+bool DcIpList::remove(DcConn * dcConn) {
+	IpList * ipList = NULL, * ipLists = mIpTable.find(dcConn->getNetIp());
 	if (ipLists == NULL) {
 		return false;
 	}
 	ipList = ipLists;
-	Conn * conn = ipLists->Remove((tSocket)(*dcConn), ipList);
+	Conn * conn = ipLists->remove((tSocket)(*dcConn), ipList);
 	if (ipList != ipLists) {
 		if (ipList) {
-			mIpTable.Update(dcConn->getNetIp(), ipList);
+			mIpTable.update(dcConn->getNetIp(), ipList);
 		} else {
-			mIpTable.Remove(dcConn->getNetIp()); /** Removing the list from hash-table */
+			mIpTable.remove(dcConn->getNetIp()); /** Removing the list from hash-table */
 		}
 		delete ipLists; /** removing old start element in the list */
 		ipLists = NULL;
@@ -69,8 +69,8 @@ void DcIpList::sendToIp(const char * ip, string & data, unsigned long profile, b
 	sendToIp(Conn::ip2Num(ip), data, profile, addSep, flush);
 }
 
-void DcIpList::SendToIPWithNick(const char * ip, string & start, string & end, unsigned long profile, bool addSep, bool flush) {
-	SendToIPWithNick(Conn::ip2Num(ip), start, end, profile, addSep, flush);
+void DcIpList::sendToIpWithNick(const char * ip, string & start, string & end, unsigned long profile, bool addSep, bool flush) {
+	sendToIpWithNick(Conn::ip2Num(ip), start, end, profile, addSep, flush);
 }
 
 void DcIpList::sendToIp(unsigned long ip, string & data, unsigned long profile, bool addSep, bool flush) {
@@ -78,22 +78,22 @@ void DcIpList::sendToIp(unsigned long ip, string & data, unsigned long profile, 
 	msData1 = data;
 	mFlush = flush;
 	mAddSep = addSep;
-	IpList * ipList = mIpTable.Find(ip);
+	IpList * ipList = mIpTable.find(ip);
 	while (ipList != NULL) {
 		send(ipList->mData);
 		ipList = ipList->mNext;
 	}
 }
 
-void DcIpList::SendToIPWithNick(unsigned long ip, string & start, string & end, unsigned long profile, bool addSep, bool flush) {
+void DcIpList::sendToIpWithNick(unsigned long ip, string & start, string & end, unsigned long profile, bool addSep, bool flush) {
 	miProfile = profile;
 	msData1 = start;
 	msData2 = end;
 	mFlush = flush;
 	mAddSep = addSep;
-	IpList * ipList = mIpTable.Find(ip);
+	IpList * ipList = mIpTable.find(ip);
 	while (ipList != NULL) {
-		SendWithNick(ipList->mData);
+		sendWithNick(ipList->mData);
 		ipList = ipList->mNext;
 	}
 }
@@ -119,7 +119,7 @@ int DcIpList::send(DcConn * dcConn) {
 	return 0;
 }
 
-int DcIpList::SendWithNick(DcConn * dcConn) {
+int DcIpList::sendWithNick(DcConn * dcConn) {
 	if (!dcConn || !dcConn->mDcUser || !dcConn->mbIpRecv) {
 		return 0;
 	}

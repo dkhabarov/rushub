@@ -40,8 +40,8 @@ ProtocolCommand::~ProtocolCommand() {
 }
 
 /** Checking that string contains command */
-bool ProtocolCommand::Check(const string & str) {
-	return 0 == StrCompare(str, 0, mLength, mKey);
+bool ProtocolCommand::check(const string & str) {
+	return 0 == strCompare(str, 0, mLength, mKey);
 }
 
 };

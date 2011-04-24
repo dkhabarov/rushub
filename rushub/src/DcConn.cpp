@@ -193,7 +193,7 @@ void DcConn::setData(const string & sData) {
 /** onFlush sending buffer */
 void DcConn::onFlush() {
 	if (mbNickListInProgress) {
-		SetLSFlag(LOGIN_STATUS_NICKLST);
+		setLoginStatusFlag(LOGIN_STATUS_NICKLST);
 		mbNickListInProgress = false;
 		if (!mOk || !mWritable) {
 			if (Log(2)) {
@@ -203,25 +203,25 @@ void DcConn::onFlush() {
 			if (Log(3)) {
 				LogStream() << "Enter after nicklist" << endl;
 			}
-			server()->DoUserEnter(this);
+			server()->doUserEnter(this);
 		}
 	}
 }
 
 /** Set timeout for this connection */
-void DcConn::SetTimeOut(HubTimeOut to, double Sec, Time &now) {
-	mTimeOut[to].SetMaxDelay(Sec);
-	mTimeOut[to].Reset(now);
+void DcConn::setTimeOut(HubTimeOut to, double Sec, Time &now) {
+	mTimeOut[to].setMaxDelay(Sec);
+	mTimeOut[to].reset(now);
 }
 
 /** Clear timeout */
-void DcConn::ClearTimeOut(HubTimeOut to) {
-	mTimeOut[to].Disable();
+void DcConn::clearTimeOut(HubTimeOut to) {
+	mTimeOut[to].disable();
 }
 
 /** Check timeout */
-int DcConn::CheckTimeOut(HubTimeOut to, Time &now) {
-	return 0 == mTimeOut[to].Check(now);
+int DcConn::checkTimeOut(HubTimeOut to, Time &now) {
+	return 0 == mTimeOut[to].check(now);
 }
 
 /** Timer for the current connection */
@@ -231,12 +231,12 @@ int DcConn::onTimer(Time &now) {
 	/** Check timeouts. For entering only */
 	if (!mDcUser || !mDcUser->getInUserList()) { // Optimisation
 		for (int i = 0; i < HUB_TIME_OUT_MAX; ++i) {
-			if (!CheckTimeOut(HubTimeOut(i), now)) {
+			if (!checkTimeOut(HubTimeOut(i), now)) {
 				string sMsg;
 				if (Log(2)) {
 					LogStream() << "Operation timeout (" << HubTimeOut(i) << ")" << endl;
 				}
-				StringReplace(dcServer->mDCLang.mTimeout, string("reason"), sMsg, dcServer->mDCLang.mTimeoutCmd[i]);
+				stringReplace(dcServer->mDCLang.mTimeout, string("reason"), sMsg, dcServer->mDCLang.mTimeoutCmd[i]);
 				dcServer->sendToUser(this, sMsg.c_str(), dcServer->mDcConfig.mHubBot.c_str());
 				this->closeNice(9000, CLOSE_REASON_TIMEOUT);
 				return 1;
@@ -245,7 +245,7 @@ int DcConn::onTimer(Time &now) {
 	}
 
 	/*Time lastRecv(mLastRecv);
-	if (dcServer->MinDelay(lastRecv, dcServer->mDcConfig.mTimeoutAny)) {
+	if (dcServer->minDelay(lastRecv, dcServer->mDcConfig.mTimeoutAny)) {
 		if (Log(2)) {
 			LogStream() << "Any action timeout..." << endl;
 		}
@@ -261,7 +261,7 @@ int DcConn::onTimer(Time &now) {
 	Time Ago(now);
 	Ago -= dcServer->mDcConfig.mStartPing;
 	if (
-		dcServer->MinDelay(mTimes.mPingServer, dcServer->mDcConfig.mPingInterval) &&
+		dcServer->minDelay(mTimes.mPingServer, dcServer->mDcConfig.mPingInterval) &&
 		mDcUser && mDcUser->getInUserList() && mDcUser->mTimeEnter < Ago
 	) {
 		string s;
@@ -279,7 +279,7 @@ void DcConn::closeNow(int iReason) {
 }
 
 /** Set user object for current connection */
-bool DcConn::SetUser(DcUser * dcUser) {
+bool DcConn::setUser(DcUser * dcUser) {
 	if (!dcUser) {
 		if (ErrLog(1)) {
 			LogStream() << "Trying to add a NULL user" << endl;
@@ -295,7 +295,7 @@ bool DcConn::SetUser(DcUser * dcUser) {
 	}
 	mDcUser = dcUser;
 	mDcUserBase = dcUser;
-	dcUser->SetIp(mIp);
+	dcUser->setIp(mIp);
 	dcUser->mDcConn = this;
 	dcUser->mDcConnBase = this;
 	dcUser->mDcServer = server();
@@ -336,9 +336,9 @@ bool DcConn::parseCommand(const char * cmd) {
 	int type = mParser->mType;
 	string oldCmd = command;
 	command = cmd;
-	if (mParser->Parse() != type) {
+	if (mParser->parse() != type) {
 		command = oldCmd;
-		mParser->Parse();
+		mParser->parse();
 		return false;
 	}
 	return true;
@@ -378,7 +378,7 @@ Conn * DcConnFactory::createConn(tSocket sock) {
 	if (!dcServer) {
 		return NULL;
 	}
-	dcServer->mIPListConn->Add(dcConn); /** Adding connection in IP-list */
+	dcServer->mIPListConn->add(dcConn); /** Adding connection in IP-list */
 
 	return static_cast<Conn *> (dcConn);
 }
@@ -387,8 +387,8 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 	DcServer * dcServer = static_cast<DcServer *> (mServer);
 	if (dcConn && dcServer) {
-		dcServer->mIPListConn->Remove(dcConn);
-		if (dcConn->GetLSFlag(LOGIN_STATUS_ALOWED)) {
+		dcServer->mIPListConn->remove(dcConn);
+		if (dcConn->getLoginStatusFlag(LOGIN_STATUS_ALOWED)) {
 			dcServer->miTotalUserCount --;
 			if (dcConn->mDcUser) {
 				dcServer->miTotalShare -= dcConn->mDcUser->getShare();
@@ -396,20 +396,20 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 					conn->LogStream() << "Del conn without user" << endl;
 			}
 		} else if (conn->Log(3)) {
-			conn->LogStream() << "Del conn without ALOWED flag: " << dcConn->GetLSFlag(LOGIN_STATUS_LOGIN_DONE) << endl;
+			conn->LogStream() << "Del conn without ALOWED flag: " << dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE) << endl;
 		}
 		if (dcConn->mDcUser) {
 			if (dcConn->mDcUser->getInUserList()) {
-				dcServer->RemoveFromDCUserList(static_cast<DcUser *> (dcConn->mDcUser));
+				dcServer->removeFromDcUserList(static_cast<DcUser *> (dcConn->mDcUser));
 			} else { // remove from enter list, if user was already added in it, but user was not added in user list
-				dcServer->mEnterList.RemoveByNick(dcConn->mDcUser->getNick());
+				dcServer->mEnterList.removeByNick(dcConn->mDcUser->getNick());
 			}
 			delete dcConn->mDcUser;
 			dcConn->mDcUser = NULL;
 			dcConn->mDcUserBase = NULL;
 		}
 		#ifndef WITHOUT_PLUGINS
-			dcServer->mCalls.mOnUserDisconnected.CallAll(dcConn);
+			dcServer->mCalls.mOnUserDisconnected.callAll(dcConn);
 		#endif
 	} else if (conn->ErrLog(0)) {
 		conn->LogStream() << "Fail error in deleteConn: dcConn = " <<

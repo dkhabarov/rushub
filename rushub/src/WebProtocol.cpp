@@ -41,14 +41,14 @@ WebProtocol::~WebProtocol() {
 
 
 
-void WebProtocol::SetServer(Server * server) {
+void WebProtocol::setServer(Server * server) {
 	mServer = server;
 }
 
 
 
 /** Execution of the command */
-int WebProtocol::DoCmd(Parser *, Conn *) {
+int WebProtocol::doCommand(Parser *, Conn *) {
 	return 0;
 }
 

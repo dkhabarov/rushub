@@ -85,27 +85,27 @@ public:
 	}
 
 	/** virtual function for select limit detect */
-	virtual unsigned Size() {
+	virtual unsigned size() {
 		return 0;
 	}
 
-	virtual bool AddConn(ConnBase *);
+	virtual bool addConn(ConnBase *);
 	virtual bool deleteConn(ConnBase *);
-	virtual bool HasConn(ConnBase *);
+	virtual bool hasConn(ConnBase *);
 
-	virtual int Choose(Time &) = 0;
+	virtual int choose(Time &) = 0;
 
-	virtual bool OptIn(tSocket, tEventFlag) = 0;
-	virtual void OptOut(tSocket, tEventFlag) = 0;
-	virtual int OptGet(tSocket) = 0;
-	virtual int RevGet(tSocket) = 0;
-	virtual bool RevTest(tSocket) = 0;
+	virtual bool optIn(tSocket, tEventFlag) = 0;
+	virtual void optOut(tSocket, tEventFlag) = 0;
+	virtual int optGet(tSocket) = 0;
+	virtual int revGet(tSocket) = 0;
+	virtual bool revTest(tSocket) = 0;
 
-	inline bool OptIn(ConnBase *, tEventFlag);
-	inline void OptOut(ConnBase *, tEventFlag);
-	inline int OptGet(ConnBase *);
-	inline int RevGet(ConnBase *);
-	inline bool RevTest(ConnBase *);
+	inline bool optIn(ConnBase *, tEventFlag);
+	inline void optOut(ConnBase *, tEventFlag);
+	inline int optGet(ConnBase *);
+	inline int revGet(ConnBase *);
+	inline bool revTest(ConnBase *);
 
 	inline ConnBase * operator [] (tSocket);
 
@@ -150,14 +150,14 @@ public:
 		}
 
 		iterator & operator ++() {
-			while ((++mRes.mFd < *mMax) && !(mChoose->RevTest(mRes.mFd))) {
+			while ((++mRes.mFd < *mMax) && !(mChoose->revTest(mRes.mFd))) {
 			}
 			return *this;
 		};
 
 		sChooseRes & operator * () {
-			mRes.mEvents = mChoose->OptGet(mRes.mFd);
-			mRes.mRevents = mChoose->RevGet(mRes.mFd);
+			mRes.mEvents = mChoose->optGet(mRes.mFd);
+			mRes.mRevents = mChoose->revGet(mRes.mFd);
 			mRes.mConnBase = mChoose->operator[] (mRes.mFd);
 			return mRes;
 		};
@@ -181,7 +181,7 @@ public:
 	iterator & begin() {
 		static iterator beginIterator(this, &mMaxSocket);
 		beginIterator.mRes.mFd = 0;
-		if (!RevTest(tSocket(0))) {
+		if (!revTest(tSocket(0))) {
 			++beginIterator;
 		}
 		return beginIterator;
@@ -195,31 +195,31 @@ public:
 
 }; // class ConnChoose
 
-bool ConnChoose::OptIn(ConnBase * connBase, ConnChoose::tEventFlag eMask) {
-	return connBase != NULL ? this->OptIn(tSocket(*connBase), eMask) : false;
+bool ConnChoose::optIn(ConnBase * connBase, ConnChoose::tEventFlag eMask) {
+	return connBase != NULL ? this->optIn(tSocket(*connBase), eMask) : false;
 }
 
-void ConnChoose::OptOut(ConnBase * connBase, ConnChoose::tEventFlag eMask) {
+void ConnChoose::optOut(ConnBase * connBase, ConnChoose::tEventFlag eMask) {
 	if (!connBase) {
 		return;
 	}
-	this->OptOut(tSocket(*connBase), eMask);
+	this->optOut(tSocket(*connBase), eMask);
 }
 
-int ConnChoose::OptGet(ConnBase * connBase) {
-	return connBase != NULL ? OptGet(tSocket(*connBase)) : 0;
+int ConnChoose::optGet(ConnBase * connBase) {
+	return connBase != NULL ? optGet(tSocket(*connBase)) : 0;
 }
 
-int ConnChoose::RevGet(ConnBase * connBase) {
-	return connBase != NULL ? RevGet(tSocket(*connBase)) : 0;
+int ConnChoose::revGet(ConnBase * connBase) {
+	return connBase != NULL ? revGet(tSocket(*connBase)) : 0;
 }
 
-bool ConnChoose::RevTest(ConnBase * connBase) {
-	return connBase != NULL ? RevTest(tSocket(*connBase)) : false;
+bool ConnChoose::revTest(ConnBase * connBase) {
+	return connBase != NULL ? revTest(tSocket(*connBase)) : false;
 }
 
 ConnBase * ConnChoose::operator [] (tSocket sock) {
-	return mConnBaseList.Find(sock);
+	return mConnBaseList.find(sock);
 }
 
 }; // namespace server

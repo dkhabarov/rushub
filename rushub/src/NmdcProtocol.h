@@ -50,10 +50,10 @@ public:
 	NmdcProtocol();
 	virtual ~NmdcProtocol();
 	
-	inline void SetServer(DcServer * dcServer) {
+	inline void setServer(DcServer * dcServer) {
 		mDcServer = dcServer;
 	}
-	virtual int DoCmd(Parser *, Conn *); /** Do command */
+	virtual int doCommand(Parser *, Conn *); /** Do command */
 	
 	virtual Conn * getConnForUdpData(Conn *, Parser *);
 
@@ -74,24 +74,24 @@ public:
 
 	int onNewDcConn(DcConn * dcConn);
 
-	static string & Append_DC_Lock(string & str);
-	static string & Append_DC_Hello(string & str, const string & nick);
-	static string & Append_DC_HubIsFull(string & str);
-	static string & Append_DC_GetPass(string & str);
-	static string & Append_DC_ValidateDenide(string & str, const string & nick);
-	static string & Append_DC_HubName(string & str, const string & hubName, const string & topic);
-	static string & Append_DC_HubTopic(string & str, const string & hubTopic);
-	static string & Append_DC_Chat(string & str, const string & nick, const string & msg);
-	static string & Append_DC_PM(string & str, const string & to, const string & from, const string & nick, const string & msg);
-	static string & Append_DC_Quit(string & str, const string & nick);
-	static string & Append_DC_OpList(string & str, const string & nick);
-	static string & Append_DC_UserIP(string & str, const string & nick, const string & ip);
-	static string & Append_DC_ForceMove(string & str, const string & address);
-	static void Append_DC_PMToAll(string & start, string & end, const string & from, const string & nick, const string & msg);
+	static string & appendLock(string & str);
+	static string & appendHello(string & str, const string & nick);
+	static string & appendHubIsFull(string & str);
+	static string & appendGetPass(string & str);
+	static string & appendValidateDenide(string & str, const string & nick);
+	static string & appendHubName(string & str, const string & hubName, const string & topic);
+	static string & appendHubTopic(string & str, const string & hubTopic);
+	static string & appendChat(string & str, const string & nick, const string & msg);
+	static string & appendPm(string & str, const string & to, const string & from, const string & nick, const string & msg);
+	static string & appendQuit(string & str, const string & nick);
+	static string & appendOpList(string & str, const string & nick);
+	static string & appendUserIp(string & str, const string & nick, const string & ip);
+	static string & appendForceMove(string & str, const string & address);
+	static void appendPmToAll(string & start, string & end, const string & from, const string & nick, const string & msg);
 
-	void SendMode(DcConn * dcConn, const string & str, int mode, UserList &, bool useCache = false);
-	int SendNickList(DcConn *); /** Sending user-list and op-list */
-	static string GetNormalShare(__int64); /** Get normal share size */
+	void sendMode(DcConn * dcConn, const string & str, int mode, UserList &, bool useCache = false);
+	int sendNickList(DcConn *); /** Sending user-list and op-list */
+	static string getNormalShare(__int64); /** Get normal share size */
 
 	void addToOps(DcUser * dcUser);
 	void delFromOps(DcUser * dcUser);

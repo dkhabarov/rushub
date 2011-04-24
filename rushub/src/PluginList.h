@@ -84,26 +84,26 @@ public:
 		return *this;
 	}
 
-	void SetServer(DcServerBase *);
+	void setServer(DcServerBase *);
 
 	virtual const string & getPluginDir() const {
 		return mPluginDir;
 	}
 
 	/** Load all plugins */
-	bool LoadAll();
+	bool loadAll();
 
 	/** Load plugin by lib */
-	bool LoadPlugin(const string & filePath);
+	bool loadPlugin(const string & filePath);
 
 	/** Unload plugin by name */
-	bool UnloadPlugin(const string & name);
+	bool unloadPlugin(const string & name);
 
 	/** Reload plugin by name */
-	bool ReloadPlugin(const string & name);
+	bool reloadPlugin(const string & name);
 
 	/** Set call list */
-	bool SetCallList(string id, CallList *);
+	bool setCallList(string id, CallList *);
 
 
 	virtual bool regCallList(const char * id, Plugin *);
@@ -113,16 +113,16 @@ public:
 
 	void list(ostream & os);
 
-	void ListAll(ostream & os);
+	void listAll(ostream & os);
 
 
-	Plugin * GetPlugin(const string & name);
+	Plugin * getPlugin(const string & name);
 
-	Plugin * GetPluginByLib(const string & lib);
+	Plugin * getPluginByLib(const string & lib);
 
 
-	/** OnPluginLoad event */
-	void OnPluginLoad(Plugin *);
+	/** onPluginLoad event */
+	void onPluginLoad(Plugin *);
 
 protected:
 
@@ -156,7 +156,7 @@ public:
 	{
 	}
 
-	virtual int CallOne(Plugin *) = 0;
+	virtual int callOne(Plugin *) = 0;
 
 }; // class CallListBase
 
@@ -179,7 +179,7 @@ public:
 	virtual ~CallListSimple() {
 	}
 
-	virtual int CallOne(Plugin * plugin) {
+	virtual int callOne(Plugin * plugin) {
 		return (plugin->*mFunc)();
 	}
 
@@ -208,13 +208,13 @@ public:
 	virtual ~CallListType1() {
 	}
 
-	virtual int CallOne(Plugin * plugin) {
+	virtual int callOne(Plugin * plugin) {
 		return (plugin->*mFunc) (mData);
 	}
 
-	virtual int CallAll(A t) {
+	virtual int callAll(A t) {
 		mData = t;
-		return CallList::CallAll();
+		return CallList::callAll();
 	}
 
 protected:
@@ -244,14 +244,14 @@ public:
 	virtual ~CallListType2() {
 	}
 
-	virtual int CallOne(Plugin * plugin) {
+	virtual int callOne(Plugin * plugin) {
 		return (plugin->*mFunc) (mData1, mData2);
 	}
 
-	virtual int CallAll(A a, B b) {
+	virtual int callAll(A a, B b) {
 		mData1 = a;
 		mData2 = b;
-		return CallList::CallAll();
+		return CallList::callAll();
 	}
 
 protected:
@@ -280,13 +280,13 @@ public:
 	virtual ~CallListType3() {
 	}
 
-	virtual int CallOne(Plugin * plugin) { return (plugin->*mFunc) (mData1, mData2, mData3); }
+	virtual int callOne(Plugin * plugin) { return (plugin->*mFunc) (mData1, mData2, mData3); }
 
-	virtual int CallAll(A a, B b, C c) {
+	virtual int callAll(A a, B b, C c) {
 		mData1 = a;
 		mData2 = b;
 		mData3 = c;
-		return CallList::CallAll();
+		return CallList::callAll();
 	}
 
 protected:
@@ -316,14 +316,14 @@ public:
 	virtual ~CallListConnection() {
 	}
 
-	virtual int CallOne(Plugin * plugin) {
+	virtual int callOne(Plugin * plugin) {
 		return (plugin->*mFunc) (mDcConn);
 	}
 
-	virtual int CallAll(DcConnBase * dcConnBase) {
+	virtual int callAll(DcConnBase * dcConnBase) {
 		mDcConn = static_cast<DcConn *> (dcConnBase);
 		if (mDcConn != NULL) {
-			return this->CallList::CallAll();
+			return this->CallList::callAll();
 		} else {
 			return 1;
 		}

@@ -35,6 +35,7 @@ namespace server {
 class ProtocolCommand {
 
 public:
+
 	/** Key-word of cmd */
 	string mKey;
 
@@ -42,10 +43,11 @@ public:
 	size_t mLength;
 
 public:
+
 	ProtocolCommand();
 	ProtocolCommand(string sKey);
 	virtual ~ProtocolCommand();
-	bool Check(const string & str);
+	bool check(const string & str);
 
 }; // ProtocolCommand
 

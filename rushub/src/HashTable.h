@@ -64,29 +64,29 @@ public:
 	virtual ~Array();
 
 	/** Returns number not zero element in array (miSize) */
-	virtual unsigned Size() const {
+	virtual unsigned size() const {
 		return miSize;
 	}
 
 	/** Returns reserved number a cell (miCapacity) */
-	virtual unsigned Capacity() const {
+	virtual unsigned capacity() const {
 		return miCapacity;
 	}
 
 	/** Inserts not zero data in array. Returns NULL in the event of successful charting, 
 	    otherwise returns data, which were already contributed earlier in cell with this number */
-	virtual V Insert(unsigned iNum, const V Data = 0);
+	virtual V insert(unsigned iNum, const V Data = 0);
 
 	/** Updates not zero data in cell with specified by number. 
 	    Returns old data or NULL */
-	virtual V Update(unsigned iNum, const V Data);
+	virtual V update(unsigned iNum, const V Data);
 
 	/** Deletes not zero data from specified cells of the array. 
 	    Returns remote data or NULL in the event of their absences */
-	virtual V Remove(unsigned iNum);
+	virtual V remove(unsigned iNum);
 
 	/** Returns data specified cells of the array or NULL in the event of their absences */
-	virtual V Find(unsigned iNum);
+	virtual V find(unsigned iNum);
 
 
 	/** Iterator for container */
@@ -98,7 +98,7 @@ public:
 		iterator() : mData((V*)NULL), i(0), end(0) {
 		}
 
-		iterator(V *Data, unsigned _i, unsigned _end) : mData(Data), i(_i), end(_end) {
+		iterator(V * Data, unsigned _i, unsigned _end) : mData(Data), i(_i), end(_end) {
 		}
 
 		iterator & operator = (const iterator &it) {
@@ -133,7 +133,7 @@ public:
 			return NULL;
 		}
 
-		inline bool IsEnd() const {
+		inline bool isEnd() const {
 			return i >= end;
 		}
 	};
@@ -169,7 +169,7 @@ template <class V> Array<V>::~Array() {
 
 /** Inserts not zero data in array. Returns NULL in the event of successful charting, 
     otherwise returns data, which were already contributed earlier in cell with this number */
-template <class V> V Array<V>::Insert(unsigned iNum, const V Data) {
+template <class V> V Array<V>::insert(unsigned iNum, const V Data) {
 	iNum %= miCapacity;
 	V OldData = mData[iNum];
 	if (!OldData && Data) {
@@ -181,7 +181,7 @@ template <class V> V Array<V>::Insert(unsigned iNum, const V Data) {
 
 /** Updates not zero data in cell with specified by number. 
     Returns old data or NULL */
-template <class V> V Array<V>::Update(unsigned iNum, const V Data) {
+template <class V> V Array<V>::update(unsigned iNum, const V Data) {
 	iNum %= miCapacity;
 	V OldData = mData[iNum];
 	if (OldData && Data) {
@@ -193,7 +193,7 @@ template <class V> V Array<V>::Update(unsigned iNum, const V Data) {
 
 /** Deletes not zero data from specified cells of the array. 
     Returns remote data or NULL in the event of their absences */
-template <class V> V Array<V>::Remove(unsigned iNum) {
+template <class V> V Array<V>::remove(unsigned iNum) {
 	iNum %= miCapacity;
 	V OldData = mData[iNum];
 	if (OldData) {
@@ -204,7 +204,7 @@ template <class V> V Array<V>::Remove(unsigned iNum) {
 }
 
 /** Returns data specified cells of the array or NULL in the event of their absences */
-template <class V> V Array<V>::Find(unsigned iNum) {
+template <class V> V Array<V>::find(unsigned iNum) {
 	return mData[iNum % miCapacity];
 }
 
@@ -234,7 +234,7 @@ public:
 	}
 
 	/** Size of list */
-	unsigned Size() const {
+	unsigned size() const {
 		unsigned i = 1;
 		List * it = mNext;
 		while (it != NULL) {
@@ -247,7 +247,7 @@ public:
 	/** The Accompaniment data and key in list. 
 	    Returns the added data or data for existing key.
 	    The Data can be repeated, key is unique! */
-	V Add(K key, V Data) {
+	V add(K key, V Data) {
 		if (mKey == key) {
 			return mData; /** Element with such key already exists in list */
 		}
@@ -265,7 +265,7 @@ public:
 
 	/** Update data in list with specified by key. 
 	    Returns previous key data or NULL */
-	V Update(K key, const V & Value) {
+	V update(K key, const V & Value) {
 		V Data = NULL;
 		if (mKey == key) { /** Update the first element of the list */
 			Data = mData;
@@ -287,7 +287,7 @@ public:
 	/** Removing the element of the list. 
 	    Returns data of removed element or NULL.
 	    Start - a pointer on initial element, received after removing. */
-	V Remove(K key, List *&Start) {
+	V remove(K key, List *&Start) {
 		if (mKey == key) { /** First element of the list */
 			Start = mNext;
 			mNext = NULL;
@@ -311,7 +311,7 @@ public:
 	}
 
 	/** Finding data by key */
-	V Find(K key) {
+	V find(K key) {
 		if (mKey == key) {
 			return mData; /** Have found in first element of the list */
 		}
@@ -362,48 +362,48 @@ public:
 	}
 
 	~HashTable() {
-		Clear();
+		clear();
 		delete mData;
 		mData = NULL;
 	}
 
 	/** Size */
-	inline unsigned Size() const { return miSize; }
+	inline unsigned size() const { return miSize; }
 
 	/** Clear */
-	void Clear() {
+	void clear() {
 		tItem * Item = NULL;
-		for (unsigned it = 0; it < mData->Capacity(); ++it) {
-			Item = mData->Find(it); /** Find data by iterator */
+		for (unsigned it = 0; it < mData->capacity(); ++it) {
+			Item = mData->find(it); /** Find data by iterator */
 			if (Item != NULL) {
 				delete Item; /** Remove list */
 			}
-			mData->Remove(it); /** Remove element */
+			mData->remove(it); /** Remove element */
 		}
 		miSize = 0;
 	}
 
 	/** Adds not zero data and key.
 	Returns true if successful accompaniment data and key (key is unique) */
-	bool Add(const Key & key, V Data) {
+	bool add(const Key & key, V Data) {
 		if(Data == (V)NULL) return false; /** No data */
-		unsigned iHash = key % mData->Capacity(); /** Get hash */
+		unsigned iHash = key % mData->capacity(); /** Get hash */
 		tItem *Items, *Item = NULL;
-		Items = mData->Find(iHash); /** Get cell data of the array */
+		Items = mData->find(iHash); /** Get cell data of the array */
 		if (Items == NULL) { /** Check presence of the list in cell of the array */
 			Item = new tItem(key, Data); /** Create new list with data and key */
-			mData->Insert(iHash, Item); /** Insert created list in cell of the array */
+			mData->insert(iHash, Item); /** Insert created list in cell of the array */
 
 			if (!mbIsResizing) {
-				OnAdd(Data);
+				onAdd(Data);
 				++miSize;
 			}
 			return true;
 		}
 		/** Add data in existing list of the cell of the array */
-		if (Data == Items->Add(key, Data)) {
+		if (Data == Items->add(key, Data)) {
 			if (!mbIsResizing) {
-				OnAdd(Data);
+				onAdd(Data);
 				++miSize;
 			}
 			return true;
@@ -412,25 +412,25 @@ public:
 	}
 
 	/** Returns true if successful removing */
-	bool Remove(const Key & key) {
-		unsigned iHash = key % mData->Capacity(); /** Get hash */
-		tItem *Item = NULL, *Items = mData->Find(iHash); /** Get cell data of the array */
+	bool remove(const Key & key) {
+		unsigned iHash = key % mData->capacity(); /** Get hash */
+		tItem *Item = NULL, *Items = mData->find(iHash); /** Get cell data of the array */
 		if (Items == NULL) { /** Check presence of the list in cell of the array */
 			return false;
 		}
 		Item = Items;
-		V Data = Items->Remove(key, Item); /** Removing from list */
+		V Data = Items->remove(key, Item); /** Removing from list */
 		if (Item != Items) { /** Checking for removing the first element */
 			if (Item) {
-				mData->Update(iHash, Item); /** Update list in cell */
+				mData->update(iHash, Item); /** Update list in cell */
 			} else {
-				mData->Remove(iHash); /** Removing cell */
+				mData->remove(iHash); /** Removing cell */
 			}
 			delete Items; /** Removing the old start element of the list */
 			Items = NULL;
 		}
 		if ((V)NULL != Data) { /** Removing has occurred */
-			OnRemove(Data);
+			onRemove(Data);
 			--miSize;
 			return true;
 		}
@@ -438,37 +438,37 @@ public:
 	}
 
 	/** Contain by key */
-	bool Contain(const Key & key) {
-		tItem * Items = mData->Find(key % mData->Capacity()); /** Get cell data of the array */
+	bool contain(const Key & key) {
+		tItem * Items = mData->find(key % mData->capacity()); /** Get cell data of the array */
 		if (Items == NULL) { /** Check presence of the list in cell of the array */
 			return false;
 		}
-		return ((V)NULL != Items->Find(key)); /** Search key in list */
+		return ((V)NULL != Items->find(key)); /** Search key in list */
 	}
 
 	/** Find by key */
-	V Find(const Key & key) {
-		tItem * Items = mData->Find(key % mData->Capacity()); /** Get cell data of the array */
+	V find(const Key & key) {
+		tItem * Items = mData->find(key % mData->capacity()); /** Get cell data of the array */
 		if (Items == NULL) { /** Check presence of the list in cell of the array */
 			return (V)NULL;
 		}
-		return Items->Find(key); /** Search data by key */
+		return Items->find(key); /** Search data by key */
 	}
 
 	/** Update data (not NULL) to key. Returns true if successful */
-	bool Update(const Key & key, const V &Data) {
+	bool update(const Key & key, const V &Data) {
 		if (Data == (V)NULL) {
 			return false; /** No data */
 		}
-		tItem * Items = mData->Find(key % mData->Capacity());
+		tItem * Items = mData->find(key % mData->capacity());
 		if (Items == NULL) { /** Check presence of the list in cell of the array */
 			return false;
 		}
-		return (Items->Update(key, Data) != (V)NULL); /** Update data in list */
+		return (Items->update(key, Data) != (V)NULL); /** Update data in list */
 	}
 
-	virtual void OnAdd(V) {}
-	virtual void OnRemove(V) {}
+	virtual void onAdd(V) {}
+	virtual void onRemove(V) {}
 
 
 	/** Iterator through all NON-NULL elements of the container */
@@ -489,7 +489,7 @@ public:
 		}
 
 		iterator(typename tData::iterator it) : i(it) {
-			if (!i.IsEnd()) {
+			if (!i.isEnd()) {
 				mItem = *i;
 			} else {
 				mItem = NULL;
@@ -519,7 +519,7 @@ public:
 				mItem = mItem->mNext;
 			} else {
 				++i;
-				if (!i.IsEnd()) {
+				if (!i.isEnd()) {
 					mItem = (*i);
 				} else {
 					mItem = NULL;
@@ -528,7 +528,7 @@ public:
 			return *this;
 		}
 
-		inline bool IsEnd() const {
+		inline bool isEnd() const {
 			return mItem == NULL;
 		}
 		
@@ -545,37 +545,37 @@ public:
 		return iterator();
 	}
 
-	/** AutoResize */
-	bool AutoResize(unsigned & size, unsigned & capacity, unsigned & newSize) {
-		capacity = this->mData->Capacity();
+	/** autoResize */
+	bool autoResize(unsigned & size, unsigned & capacity, unsigned & newSize) {
+		capacity = this->mData->capacity();
 		size = this->miSize;
 		if ((size > (capacity << 1)) || (((size << 1) + 1) < capacity)) {
 			newSize = size + (size >> 1) + 1;
-			this->Resize(newSize);
+			this->resize(newSize);
 			return true;
 		}
 		return false;
 	}
 
-	bool AutoResize() {
-		unsigned capacity = this->mData->Capacity();
+	bool autoResize() {
+		unsigned capacity = this->mData->capacity();
 		if ((this->miSize > (capacity << 1)) || (((this->miSize << 1) + 1) < capacity)) {
-			this->Resize(this->miSize + (this->miSize >> 1) + 1);
+			this->resize(this->miSize + (this->miSize >> 1) + 1);
 			return true;
 		}
 		return false;
 	}
 
 	/** Resize */
-	int Resize(int newSize) {
+	int resize(int newSize) {
 		tData * newData = new tData(newSize);
 		tData * oldData = this->mData;
 
 		iterator it = this->begin();
 		mbIsResizing = true;
 		this->mData = newData;
-		while (!it.IsEnd()) {
-			this->Add(it.mItem->mKey, it.mItem->mData);
+		while (!it.isEnd()) {
+			this->add(it.mItem->mKey, it.mItem->mData);
 			++it;
 		}
 		delete oldData;
@@ -583,13 +583,13 @@ public:
 		return 0;
 	}
 
-	void Dump(std::ostream & os) const {
-		os << "Size = " << miSize << " Capacity = " << mData->Capacity() << endl;
+	void dump(std::ostream & os) const {
+		os << "Size = " << miSize << " Capacity = " << mData->capacity() << endl;
 		tItem * items = NULL;
-		for (unsigned i = 0; i < mData->Capacity(); ++i) {
-			items = mData->Find(i);
+		for (unsigned i = 0; i < mData->capacity(); ++i) {
+			items = mData->find(i);
 			if (items != NULL) {
-				os << "i = " << i << " count = " << items->Size() << endl;
+				os << "i = " << i << " count = " << items->size() << endl;
 				do {
 					os << "Key = " << items->mKey << " Data = " << items->mData << endl;
 				} while ((items = items->mNext) != NULL);

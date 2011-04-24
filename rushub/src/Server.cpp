@@ -109,8 +109,8 @@ Server::~Server() {
 }
 
 /** Set and Listen port */
-int Server::Listening(ConnFactory * connFactory, const string & ip, int port, bool udp /*= false*/) {
-	Conn * conn = Listen(ip, port, udp);
+int Server::listening(ConnFactory * connFactory, const string & ip, int port, bool udp /*= false*/) {
+	Conn * conn = listen(ip, port, udp);
 	if (conn == NULL) {
 		return -1;
 	}
@@ -127,7 +127,7 @@ int Server::Listening(ConnFactory * connFactory, const string & ip, int port, bo
 
 
 /** Listen port (TCP/UDP) */
-Conn * Server::Listen(const string & ip, int port, bool udp) {
+Conn * Server::listen(const string & ip, int port, bool udp) {
 	Conn * conn = NULL;
 
 	if (!udp) { // Create socket listening server for TCP port
@@ -157,9 +157,9 @@ Conn *Server::addListen(Conn * conn, const string & ip, int port, bool udp) {
 		}
 
 		mListenList.insert(mListenList.begin(), conn);
-		mConnChooser.AddConn(conn);
+		mConnChooser.addConn(conn);
 
-		if (!mConnChooser.ConnChoose::OptIn(
+		if (!mConnChooser.ConnChoose::optIn(
 			static_cast<ConnBase *> (conn),
 			ConnChoose::tEventFlag(ConnChoose::eEF_INPUT | ConnChoose::eEF_ERROR))) {
 			if (ErrLog(0)) {
@@ -218,7 +218,7 @@ int Server::run() {
 					usleep(mStepDelay * 1000);
 				#endif
 			}
-			mMeanFrequency.Insert(mTime); // MeanFrequency
+			mMeanFrequency.insert(mTime); // MeanFrequency
 		} catch(const char *str) {
 			if (ErrLog(0)) {
 				LogStream() << "Exception: " << str << endl;
@@ -249,7 +249,7 @@ void Server::step() {
 
 	try {
 		// Checking the arrival data in listen sockets
-		ret = mConnChooser.Choose(tmout);
+		ret = mConnChooser.choose(tmout);
 		if (ret <= 0 && !miNumCloseConn) { 
 			#ifdef _WIN32
 				//Sleep(0);
@@ -260,14 +260,14 @@ void Server::step() {
 		}
 	} catch(const char *str) {
 		if (ErrLog(0)) {
-			LogStream() << "Exception in Choose: " << str << endl;
+			LogStream() << "Exception in choose: " << str << endl;
 		}
 		return;
 	} catch(...) {
 		if (ErrLog(0)) {
-			LogStream() << "Exception in Choose" << endl;
+			LogStream() << "Exception in choose" << endl;
 		}
-		throw "Exception in Choose";
+		throw "Exception in choose";
 	}
 
 	if (Log(5)) {
@@ -328,7 +328,7 @@ void Server::step() {
 				}
 			}
 			if (mNowConn->Log(5)) {
-				mNowConn->LogStream() << "::(e)NewConn. Number connections: " << mConnChooser.mConnBaseList.Size() << endl;
+				mNowConn->LogStream() << "::(e)NewConn. Number connections: " << mConnChooser.mConnBaseList.size() << endl;
 			}
 
 		} else { // not listening socket (optimization)
@@ -399,7 +399,7 @@ void Server::step() {
 					delConnection(mNowConn);
 
 					if (Log(5)) {
-						LogStream() << "::(e)delConnection. Number connections: " << mConnChooser.mConnBaseList.Size() << endl;
+						LogStream() << "::(e)delConnection. Number connections: " << mConnChooser.mConnBaseList.size() << endl;
 					}
 				} catch (const char * str) {
 					if (ErrLog(0)) {
@@ -444,14 +444,14 @@ int Server::addConnection(Conn *conn) {
 	}
 
 	/*if (Log(4)) {
-		LogStream() << "Num clients before add: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.Size() << endl;
+		LogStream() << "Num clients before add: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.size() << endl;
 	}*/
 
 	if (
 		#if USE_SELECT
-			(mConnChooser.Size() == (FD_SETSIZE - 1)) || 
+			(mConnChooser.size() == (FD_SETSIZE - 1)) || 
 		#endif
-		!mConnChooser.ConnChoose::OptIn(static_cast<ConnBase *> (conn),
+		!mConnChooser.ConnChoose::optIn(static_cast<ConnBase *> (conn),
 		ConnChoose::tEventFlag(ConnChoose::eEF_INPUT | ConnChoose::eEF_ERROR)))
 	{
 		if (conn->ErrLog(0)) {
@@ -465,13 +465,13 @@ int Server::addConnection(Conn *conn) {
 		return -2;
 	}
 
-	mConnChooser.AddConn(conn);
+	mConnChooser.addConn(conn);
 
 	tCLIt it = mConnList.insert(mConnList.begin(), conn);
 	conn->mIterator = it;
 
 	/*if (Log(4)) {
-		LogStream() << "Num clients after add: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.Size() << endl;
+		LogStream() << "Num clients after add: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.size() << endl;
 	}*/
 
 	conn->mPortConn = mNowConn->mPort;
@@ -489,7 +489,7 @@ int Server::delConnection(Conn *old_conn) {
 	}
 
 	/*if (Log(4)) {
-		LogStream() << "Num clients before del: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.Size() << endl;
+		LogStream() << "Num clients before del: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.size() << endl;
 	}
 	if (Log(4)) {
 		LogStream() << "Delete connection on socket: " << (tSocket)(*old_conn) << endl;
@@ -520,7 +520,7 @@ int Server::delConnection(Conn *old_conn) {
 	}
 
 	/*if (Log(4)) {
-		LogStream() << "Num clients after del: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.Size() << endl;
+		LogStream() << "Num clients after del: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.size() << endl;
 	}*/
 	return 1;
 }

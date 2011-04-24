@@ -53,7 +53,7 @@ void UserList::ufSendProfile::operator() (UserBase * userBase) {
 void UserList::ufSendWithNick::operator() (UserBase * userBase) {
 	if (userBase && userBase->isCanSend()) {
 		userBase->send(mDataStart, false, false);
-		userBase->send(userBase->Nick(), false, false);
+		userBase->send(userBase->nick(), false, false);
 		userBase->send(mDataEnd, true); // newPolitic
 	}
 }
@@ -69,15 +69,15 @@ void UserList::ufSendWithNickProfile::operator() (UserBase * userBase) {
 		}
 		if (mProfile & (1 << profile)) {
 			userBase->send(mDataStart, false, false);
-			userBase->send(userBase->Nick(), false, false);
+			userBase->send(userBase->nick(), false, false);
 			userBase->send(mDataEnd, true); // newPolitic
 		}
 	}
 }
 
 void UserList::ufDoNickList::operator() (UserBase * userBase) {
-	if (!userBase->Hide()) {
-		msList.append(userBase->Nick());
+	if (!userBase->hide()) {
+		msList.append(userBase->nick());
 		msList.append(msSep);
 	}
 }
@@ -93,23 +93,23 @@ UserList::UserList(string name, bool keepNickList) :
 {
 }
 
-bool UserList::Add(UserBase * userBase) {
+bool UserList::add(UserBase * userBase) {
 	if (userBase) {
-		return List_t::Add(Nick2Key(userBase->Nick()), userBase);
+		return List_t::add(nick2Key(userBase->nick()), userBase);
 	}
 	return false;
 }
 
-bool UserList::Remove(UserBase * userBase) {
+bool UserList::remove(UserBase * userBase) {
 	if (userBase) {
-		return List_t::Remove(Nick2Key(userBase->Nick()));
+		return List_t::remove(nick2Key(userBase->nick()));
 	}
 	return false;
 }
 
-string & UserList::GetNickList() {
+string & UserList::getNickList() {
 	if (mbRemakeNextNickList && mbKeepNickList) {
-		mNickListMaker.Clear();
+		mNickListMaker.clear();
 		for_each(begin(), end(), mNickListMaker);
 		mbRemakeNextNickList = mbOptRemake = false;
 	}
@@ -160,23 +160,23 @@ void UserList::sendToProfiles(unsigned long profile, const string & data, bool a
 /** Sending data start+Nick+end to all
     Nick - user's nick
     Use for private send to all */
-void UserList::SendToWithNick(string & s, string & e) {
+void UserList::sendToWithNick(string & s, string & e) {
 	for_each(begin(), end(), ufSendWithNick(s, e));
 }
 
-void UserList::SendToWithNick(string & s, string & e, unsigned long profile) {
+void UserList::sendToWithNick(string & s, string & e, unsigned long profile) {
 	for_each(begin(), end(), ufSendWithNickProfile(s, e, profile));
 }
 
 /** Flush user cache */
-void UserList::FlushForUser(UserBase * userBase) {
+void UserList::flushForUser(UserBase * userBase) {
 	if (msCache.size()) {
 		ufSend(msCache).operator() (userBase);
 	}
 }
 
 /** Flush common cache */
-void UserList::FlushCache() {
+void UserList::flushCache() {
 	static string sStr;
 	if (msCache.size()) {
 		sendToAll(sStr, false, false);
@@ -186,21 +186,21 @@ void UserList::FlushCache() {
 /** Redefining log level function */
 bool UserList::strLog() {
 	Obj::strLog();
-	LogStream() << "(" << Size() << ")" << "[" << mName << "] ";
+	LogStream() << "(" << size() << ")" << "[" << mName << "] ";
 	return true;
 }
 
 
 void FullUserList::ufDoINFOList::operator() (UserBase * userBase) {
-	if (!userBase->Hide()) {
-		msListComplete.append(userBase->MyINFO());
+	if (!userBase->hide()) {
+		msListComplete.append(userBase->myInfoString());
 		msListComplete.append(msSep);
 	}
 }
 
 void FullUserList::ufDoIpList::operator() (UserBase * userBase) {
-	if (!userBase->Hide() && userBase->getIp().size()) {
-		msList.append(userBase->Nick());
+	if (!userBase->hide() && userBase->getIp().size()) {
+		msList.append(userBase->nick());
 		msList.append(" ");
 		msList.append(userBase->getIp());
 		msList.append(msSep);
@@ -219,18 +219,18 @@ FullUserList::FullUserList(string name, bool keepNickList, bool keepInfoList, bo
 	SetClassName("FullUserList");
 }
 
-string & FullUserList::GetNickList() {
+string & FullUserList::getNickList() {
 	if (mbKeepNickList) {
-		msCompositeNickList = UserList::GetNickList();
+		msCompositeNickList = UserList::getNickList();
 		mbOptRemake = false;
 	}
 	return msCompositeNickList;
 }
 
-string & FullUserList::GetInfoList(bool complete) {
+string & FullUserList::getInfoList(bool complete) {
 	if (mbKeepInfoList) {
 		if (mbRemakeNextInfoList && mbKeepInfoList) {
-			mINFOListMaker.Clear();
+			mINFOListMaker.clear();
 			for_each(begin(), end(), mINFOListMaker);
 			mbRemakeNextInfoList = mbOptRemake = false;
 		}
@@ -243,9 +243,9 @@ string & FullUserList::GetInfoList(bool complete) {
 	return msCompositeINFOList;
 }
 
-string & FullUserList::GetIpList() {
+string & FullUserList::getIpList() {
 	if (mbRemakeNextIpList && mbKeepIpList) {
-		mIpListMaker.Clear();
+		mIpListMaker.clear();
 		for_each(begin(), end(), mIpListMaker);
 		mbRemakeNextIpList = false;
 	}

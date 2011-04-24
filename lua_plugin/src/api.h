@@ -92,7 +92,7 @@ int SendToNicks(lua_State * L);
 int GetUser(lua_State * L);
 
 // SetUser(UID/sNick, iType, Value)
-int SetUser(lua_State * L);
+int setUser(lua_State * L);
 
 // GetUsers(sIP, iByte)
 int GetUsers(lua_State * L);

@@ -23,7 +23,7 @@
  */
 
 #include "Config.h"
-#include "stringutils.h" // for StringToInt64
+#include "stringutils.h" // for stringToInt64
 
 #ifndef _WIN32
 	#include <memory.h>
@@ -34,7 +34,7 @@
 #endif
 
 
-using namespace ::utils; // for StringToInt64
+using namespace ::utils; // for stringToInt64
 
 
 namespace configuration {
@@ -110,7 +110,7 @@ CCONVERTFROM(int, Int, atoi(str.c_str()));
 CCONVERTFROM(long, Long, atol(str.c_str()));
 CCONVERTFROM(unsigned int, UInt, atol(str.c_str()));
 CCONVERTFROM(unsigned long, ULong, strtoul(str.c_str(), NULL, 10));
-CCONVERTFROM(__int64, Int64, StringToInt64(str));
+CCONVERTFROM(__int64, Int64, stringToInt64(str));
 CCONVERTFROM(string, String, str);
 
 

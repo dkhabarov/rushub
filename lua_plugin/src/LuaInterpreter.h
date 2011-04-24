@@ -54,7 +54,7 @@ public:
 		return *this;
 	}
 
-	int Start(); // (-1 - run already)
+	int start(); // (-1 - run already)
 	int Stop();
 
 	int CallFunc(const char *);
@@ -72,8 +72,8 @@ public:
 	inline int AddTmr(cTimer * timer) {
 		return mTimerList.AddTimer(timer);
 	}
-	inline int Size() {
-		return mTimerList.Size();
+	inline int size() {
+		return mTimerList.size();
 	}
 	inline int DelTmr(int tm) {
 		return mTimerList.DelTimer(tm);

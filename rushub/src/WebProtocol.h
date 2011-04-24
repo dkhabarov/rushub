@@ -52,10 +52,10 @@ public:
 		return *this;
 	}
 
-	void SetServer(Server *);
+	void setServer(Server *);
 
 	/** Execution of the command */
-	virtual int DoCmd(Parser *, Conn *);
+	virtual int doCommand(Parser *, Conn *);
 
 	virtual Conn * getConnForUdpData(Conn *, Parser *) {
 		return NULL;

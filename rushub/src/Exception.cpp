@@ -46,7 +46,7 @@ Exception::~Exception() {
 
 
 
-long __stdcall Exception::ExceptionFilter(LPEXCEPTION_POINTERS e) {
+long __stdcall Exception::exceptionFilter(LPEXCEPTION_POINTERS e) {
 
 	if (++recursion > MAX_RECURSIONS) {
 		exit(-1);
@@ -63,7 +63,7 @@ long __stdcall Exception::ExceptionFilter(LPEXCEPTION_POINTERS e) {
 
 	// Loads dll and pdb
 	#ifndef _DEBUG
-		Init(path.c_str());
+		init(path.c_str());
 	#endif
 
 	if (first) {
@@ -103,12 +103,12 @@ long __stdcall Exception::ExceptionFilter(LPEXCEPTION_POINTERS e) {
 		#endif
 	}
 
-	Exception::StackTrace(f, e->ContextRecord->Eip, e->ContextRecord->Esp, e->ContextRecord->Ebp);
+	Exception::stackTrace(f, e->ContextRecord->Eip, e->ContextRecord->Esp, e->ContextRecord->Ebp);
 
 	f.close();
 
 	#ifndef _DEBUG
-		Uninit();
+		uninit();
 		exit(-1);
 	#else
 		return EXCEPTION_CONTINUE_SEARCH;
@@ -116,7 +116,7 @@ long __stdcall Exception::ExceptionFilter(LPEXCEPTION_POINTERS e) {
 }
 
 // ".;%_NT_SYMBOL_PATH%;%_NT_ALTERNATE_SYMBOL_PATH%;%SYSTEMROOT%;%SYSTEMROOT%\System32;" + initPath
-int Exception::Init(const char * path) {
+int Exception::init(const char * path) {
 	SymSetOptions(SYMOPT_DEFERRED_LOADS | SYMOPT_FAIL_CRITICAL_ERRORS | SYMOPT_LOAD_LINES );
 
 	char buf[BUFFERSIZE] = { '\0' };
@@ -143,12 +143,12 @@ int Exception::Init(const char * path) {
 	return SymInitialize(GetCurrentProcess(), symbolPath.c_str(), 1);
 }
 
-int Exception::Uninit() {
+int Exception::uninit() {
 	return SymCleanup(GetCurrentProcess());
 }
 
 // Get function prototype and parameter info from ip address and stack address
-int Exception::GetFunctionInfo(unsigned long functionAddress, unsigned long stackAddress, char * buff) {
+int Exception::getFunctionInfo(unsigned long functionAddress, unsigned long stackAddress, char * buff) {
 	unsigned __int64 disp = 0;
 	unsigned long size = 1024 * 16;
 	PSYMBOL_INFO pSym = (PSYMBOL_INFO) GlobalAlloc(GMEM_FIXED, size);
@@ -216,7 +216,7 @@ int Exception::GetFunctionInfo(unsigned long functionAddress, unsigned long stac
 }
 
 // Get the module name from a given address
-int Exception::GetModuleName(unsigned address, char * buff) {
+int Exception::getModuleName(unsigned address, char * buff) {
 	IMAGEHLP_MODULE moduleInfo;
 	::ZeroMemory(&moduleInfo, sizeof(moduleInfo));
 	moduleInfo.SizeOfStruct = sizeof(moduleInfo);
@@ -230,7 +230,7 @@ int Exception::GetModuleName(unsigned address, char * buff) {
 
 // Get source file name and line number from IP address
 // The output format is: "sourcefile(linenumber)" or "modulename|address" or "address"
-int Exception::GetSourceInfo(unsigned address, char * buff) {
+int Exception::getSourceInfo(unsigned address, char * buff) {
 	IMAGEHLP_LINE lineInfo;
 	unsigned long disp;
 	char fileName[BUFFERSIZE] = "";
@@ -246,7 +246,7 @@ int Exception::GetSourceInfo(unsigned address, char * buff) {
 		return 1;
 	}
 
-	GetModuleName(address, moduleInfo);
+	getModuleName(address, moduleInfo);
 	if (moduleInfo[0] == '?' || moduleInfo[0] == '\0') {
 		sprintf(buff, "0x%08X", address);
 	} else {
@@ -255,11 +255,11 @@ int Exception::GetSourceInfo(unsigned address, char * buff) {
 	return 0;
 }
 
-void Exception::StackTrace(std::ostream & f, unsigned long eip, unsigned long esp, unsigned long ebp) {
-	StackTrace(GetCurrentThread(), "Stack trace:", f, eip, esp, ebp);
+void Exception::stackTrace(std::ostream & f, unsigned long eip, unsigned long esp, unsigned long ebp) {
+	stackTrace(GetCurrentThread(), "Stack trace:", f, eip, esp, ebp);
 }
 
-void Exception::StackTrace(void * hThread, char * msg, std::ostream & f, unsigned long eip, unsigned long esp, unsigned long ebp) {
+void Exception::stackTrace(void * hThread, char * msg, std::ostream & f, unsigned long eip, unsigned long esp, unsigned long ebp) {
 	int bResult;
 	char symInfo[BUFFERSIZE] = "?";
 	char srcInfo[BUFFERSIZE] = "?";
@@ -281,8 +281,8 @@ void Exception::StackTrace(void * hThread, char * msg, std::ostream & f, unsigne
 
 	f << msg << endl << endl;
 
-	GetFunctionInfo(callStack.AddrPC.Offset, callStack.AddrFrame.Offset, symInfo);
-	GetSourceInfo(callStack.AddrPC.Offset, srcInfo);
+	getFunctionInfo(callStack.AddrPC.Offset, callStack.AddrFrame.Offset, symInfo);
+	getSourceInfo(callStack.AddrPC.Offset, srcInfo);
 
 	f << srcInfo << ": " << symInfo << endl;
 
@@ -305,8 +305,8 @@ void Exception::StackTrace(void * hThread, char * msg, std::ostream & f, unsigne
 			break;
 		}
 
-		GetFunctionInfo(callStack.AddrPC.Offset, callStack.AddrFrame.Offset, symInfo);
-		GetSourceInfo(callStack.AddrPC.Offset, srcInfo);
+		getFunctionInfo(callStack.AddrPC.Offset, callStack.AddrFrame.Offset, symInfo);
+		getSourceInfo(callStack.AddrPC.Offset, srcInfo);
 
 		f << srcInfo << ": " << symInfo << endl;
 	}

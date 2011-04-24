@@ -40,7 +40,7 @@ cTimer::cTimer(int iId, int iInterval, const char * sFunc, LuaInterpreter * Scri
 cTimer::~cTimer() {
 }
 
-void cTimer::Check(int iTime) {
+void cTimer::check(int iTime) {
 	if (abs(iTime - miTime) >= miInterval) {
 		mScript->Timer(miId, msFunc.c_str());
 		miTime = iTime;
@@ -54,7 +54,7 @@ cTimerList::~cTimerList() {
 }
 
 static void Checker(void * val) {
-	((cTimer *)val)->Check(LuaPlugin::mCurServer->getMSec());
+	((cTimer *)val)->check(LuaPlugin::mCurServer->getMSec());
 }
 void cTimerList::onTimer() {
 	mList.Loop(Checker);
@@ -63,7 +63,7 @@ void cTimerList::onTimer() {
 int cTimerList::AddTimer(cTimer * timer) {
 	cTmrCnt::miCount = 0;
 	mList.Loop(cTmrCnt(timer->miId));
-	mList.Add(timer);
+	mList.add(timer);
 	return ++cTmrCnt::miCount;
 }
 int cTimerList::DelTimer(int iId) {
@@ -72,7 +72,7 @@ int cTimerList::DelTimer(int iId) {
 	return cTmrCnt::miCount;
 }
 void cTimerList::DelTimer() {
-	mList.Clear();
+	mList.clear();
 }
 
 }; // namespace luaplugin

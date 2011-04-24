@@ -45,7 +45,7 @@ public:
 public:
 	cTimer(int iId, int iInterval, const char * sFunc, LuaInterpreter * Script);
 	~cTimer();
-	void Check(int iTime);
+	void check(int iTime);
 
 }; // cTimer
 
@@ -61,8 +61,8 @@ public:
 	int AddTimer(cTimer *);
 	int DelTimer(int);
 	void DelTimer();
-	int Size() {
-		return mList.Size();
+	int size() {
+		return mList.size();
 	}
 
 }; // class cTimerList

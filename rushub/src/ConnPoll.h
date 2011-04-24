@@ -71,15 +71,15 @@ public:
 	ConnPoll();
 	~ConnPoll();
 
-	bool AddConn(ConnBase *);
+	bool addConn(ConnBase *);
 
-	int Choose(Time &);
+	int choose(Time &);
 
-	bool OptIn(tSocket, tEventFlag);
-	void OptOut(tSocket, tEventFlag);
-	int OptGet(tSocket);
-	int RevGet(tSocket);
-	bool RevTest(tSocket);
+	bool optIn(tSocket, tEventFlag);
+	void optOut(tSocket, tEventFlag);
+	int optGet(tSocket);
+	int revGet(tSocket);
+	bool revTest(tSocket);
 
 private:
 

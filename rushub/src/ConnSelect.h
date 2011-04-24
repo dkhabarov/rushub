@@ -57,17 +57,17 @@ public:
 	ConnSelect();
 	virtual ~ConnSelect();
 
-	inline unsigned Size() {
-		return mResList.Size();
+	inline unsigned size() {
+		return mResList.size();
 	}
 
-	int Choose(Time &);
+	int choose(Time &);
 
-	bool OptIn(tSocket, tEventFlag);
-	void OptOut(tSocket, tEventFlag);
-	int OptGet(tSocket);
-	int RevGet(tSocket);
-	bool RevTest(tSocket);
+	bool optIn(tSocket, tEventFlag);
+	void optOut(tSocket, tEventFlag);
+	int optGet(tSocket);
+	int revGet(tSocket);
+	bool revTest(tSocket);
 
 	struct cSelectFD : public fd_set {
 		cSelectFD() {
@@ -84,13 +84,13 @@ public:
 			#endif
 			return *this;
 		}
-		inline bool IsSet(tSocket sock) {
+		inline bool isSet(tSocket sock) {
 			return FD_ISSET(sock, this) != 0;
 		}
-		inline void Clr(tSocket sock) {
+		inline void clr(tSocket sock) {
 			FD_CLR(sock, this);
 		}
-		bool Set(tSocket sock) {
+		bool set(tSocket sock) {
 			#ifdef _WIN32
 				if(fd_count >= FD_SETSIZE) {
 					return false;
@@ -101,8 +101,8 @@ public:
 		}
 	};
 
-	void ClearRevents();
-	void SetRevents(cSelectFD & fdset, unsigned eMask);
+	void clearRevents();
+	void setRevents(cSelectFD & fdset, unsigned eMask);
 
 	struct iterator {
 		ConnSelect * mSel; /** for operator [] */
@@ -117,7 +117,11 @@ public:
 			mIt = it.mIt;
 			return *this;
 		}
-		bool operator != (const iterator & it){ return mIt != it.mIt; }
+
+		bool operator != (const iterator & it) {
+			return mIt != it.mIt;
+		}
+
 		sChooseRes & operator * () {
 			sChooseRes * ChR = NULL;
 			
@@ -153,7 +157,7 @@ public:
 			#ifdef _WIN32
 				__try {
 					while (
-						!(++mIt).IsEnd() &&
+						!(++mIt).isEnd() &&
 						!(*mIt)->mRevents &&
 						!((*mIt)->mEvents & eEF_CLOSE)
 					) {
@@ -170,7 +174,7 @@ public:
 				}
 			#else
 				while (
-					!(++mIt).IsEnd() &&
+					!(++mIt).isEnd() &&
 					!(*mIt)->mRevents &&
 					!((*mIt)->mEvents & eEF_CLOSE)
 				) {
@@ -184,7 +188,7 @@ public:
 		static iterator begin_it(this, mResList.begin());
 		begin_it.mIt = mResList.begin();
 		if (
-			!begin_it.mIt.IsEnd() &&
+			!begin_it.mIt.isEnd() &&
 			!(*begin_it.mIt)->mRevents &&
 			!((*begin_it.mIt)->mEvents & eEF_CLOSE)
 		) {

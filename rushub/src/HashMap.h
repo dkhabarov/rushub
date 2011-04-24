@@ -64,7 +64,7 @@ public:
 	}
 
 	/** Number element in container HashMap */
-	inline size_t Size() const {
+	inline size_t size() const {
 		return mHashMap.size();
 	}
 
@@ -79,21 +79,21 @@ public:
 	}
 
 	/** Adding data and hash-key (true - ok, false - fail) */
-	bool Add(const K & hash, V Data);
+	bool add(const K & hash, V Data);
 
 	/** Removing data by hash-key (true - ok, false - fail) */
-	bool Remove(const K & hash);
+	bool remove(const K & hash);
 
 	/** Check existed this hash-key (true - yes, false - no) */
-	bool Contain(const K & hash);
+	bool contain(const K & hash);
 
 	/** Return data by hash-key. Return val else NULL */
-	V Find(const K & hash);
+	V find(const K & hash);
 
-	virtual void OnAdd(V) {
+	virtual void onAdd(V) {
 	}
 
-	virtual void OnRemove(V) {
+	virtual void onRemove(V) {
 	}
 
 }; // HashMap
@@ -101,10 +101,10 @@ public:
 
 /** Adding data and hash-key (true - ok, false - fail) */
 template <class V, class K>
-bool HashMap<V, K>::Add(const K & hash, V Data) {
+bool HashMap<V, K>::add(const K & hash, V Data) {
 
 	/** Check */
-	if (Contain(hash)) {
+	if (contain(hash)) {
 		if (Log(1)) {
 			LogStream() << "Hash " << hash << " is contains already" << endl;
 		}
@@ -123,7 +123,7 @@ bool HashMap<V, K>::Add(const K & hash, V Data) {
 	/** Insert hash-key */
 	pair<tUHIt, bool> P = mHashMap.insert(tHashPair(hash, ulit));
 	if (P.second) {
-		OnAdd(Data);
+		onAdd(Data);
 		if (Log(4)) {
 			LogStream() << "Added: " << hash << " (size: " << mHashMap.size() << ")" << endl;
 		}
@@ -139,10 +139,10 @@ bool HashMap<V, K>::Add(const K & hash, V Data) {
 
 /** Removing data by hash-key (true - ok, false - fail) */
 template <class V, class K>
-bool HashMap<V, K>::Remove(const K & hash) {
+bool HashMap<V, K>::remove(const K & hash) {
 	tUHIt uhit = mHashMap.find(hash);
 	if (uhit != mHashMap.end()) {
-		OnRemove(*(uhit->second));
+		onRemove(*(uhit->second));
 		mList.erase(uhit->second); /** Remove data */
 		mHashMap.erase(uhit); /** Remove key */
 		if (Log(4)) {
@@ -158,13 +158,13 @@ bool HashMap<V, K>::Remove(const K & hash) {
 
 /** Check existed this hash-key (true - yes, false - no) */
 template <class V, class K>
-bool HashMap<V, K>::Contain(const K & hash) {
+bool HashMap<V, K>::contain(const K & hash) {
 	return mHashMap.find(hash) != mHashMap.end();
 }
 
 /** Return data by hash-key. Return val else NULL */
 template <class V, class K>
-V HashMap<V, K>::Find(const K & hash) {
+V HashMap<V, K>::find(const K & hash) {
 	tUHIt uhit = mHashMap.find(hash);
 	if (uhit != mHashMap.end()) {
 		return *(uhit->second); /** Pointer to iterator = val */

@@ -38,9 +38,9 @@ ConfigListBase::~ConfigListBase() {
 	Config * config = NULL; /** Pointer on object */
 	for (tVIt it = mKeyList.begin(); it != mKeyList.end(); ++it) {
 		hash = *it; /** Get hash from vector */
-		config = mList.Find(hash); /** Get object by hash */
-		mList.Remove(hash); /** Del object from list by hash */
-		this->mFactory->Delete(config); /** Del object */
+		config = mList.find(hash); /** Get object by hash */
+		mList.remove(hash); /** Del object from list by hash */
+		this->mFactory->del(config); /** Del object */
 	}
 	if (mFactory != NULL) {
 		delete mFactory;
@@ -51,11 +51,11 @@ ConfigListBase::~ConfigListBase() {
 
 
 /** Adding config */
-Config * ConfigListBase::Add(const string & key, Config * config) {
+Config * ConfigListBase::add(const string & key, Config * config) {
 	Hash_t hash = mList.mHash(key);
-	if (!mList.Add(hash, config)) { /** Add */
+	if (!mList.add(hash, config)) { /** Add */
 		if (Log(1)) {
-			Config * other = mList.Find(hash);
+			Config * other = mList.find(hash);
 			LogStream() << "Don't add " << key << " because of " << (other ? other->mName.c_str() : "NULL") << endl;
 			return NULL;
 		}
@@ -69,23 +69,23 @@ Config * ConfigListBase::Add(const string & key, Config * config) {
 
 /** Get config by name */
 Config * ConfigListBase::operator[](const char * name) {
-	return mList.Find(mList.mHash(name));
+	return mList.find(mList.mHash(name));
 }
 
 
 
 /** Get config by name */
 Config * ConfigListBase::operator[](const string & name) {
-	return mList.Find(mList.mHash(name));
+	return mList.find(mList.mHash(name));
 }
 
 
 
 /** Set new address */
-void ConfigListBase::SetBaseTo(void * new_base) {
+void ConfigListBase::setBaseTo(void * new_base) {
 	if (mBase) {
 		for (tVIt it = mKeyList.begin(); it != mKeyList.end(); ++it) {
-			mList.Find(*it)->mAddress = (void *)(long(mList.Find(*it)->mAddress) + (long(new_base) - long(mBase)));
+			mList.find(*it)->mAddress = (void *)(long(mList.find(*it)->mAddress) + (long(new_base) - long(mBase)));
 		}
 	}
 	mBase = new_base;
@@ -95,12 +95,12 @@ void ConfigListBase::SetBaseTo(void * new_base) {
 
 /** Creating and adding configs */
 #define ADDVAL(TYPE) \
-Config * ConfigList::Add(const string & name, TYPE & var) { \
-	Config * config = this->mFactory->Add(var); \
-	return this->ConfigListBase::Add(name, config); \
+Config * ConfigList::add(const string & name, TYPE & var) { \
+	Config * config = this->mFactory->add(var); \
+	return this->ConfigListBase::add(name, config); \
 } \
-Config * ConfigList::Add(const string & name, TYPE & var, TYPE const & def) { \
-	Config * config = this->Add(name, var); \
+Config * ConfigList::add(const string & name, TYPE & var, TYPE const & def) { \
+	Config * config = this->add(name, var); \
 	*config = def; \
 	return config; \
 }
@@ -108,12 +108,12 @@ Config * ConfigList::Add(const string & name, TYPE & var, TYPE const & def) { \
 
 
 #define ADDPVAL(TYPE) \
-Config * ConfigList::Add(const string & name, TYPE* & var) { \
-	Config * config = this->mFactory->Add(var); \
-	return this->ConfigListBase::Add(name, config); \
+Config * ConfigList::add(const string & name, TYPE* & var) { \
+	Config * config = this->mFactory->add(var); \
+	return this->ConfigListBase::add(name, config); \
 } \
-Config * ConfigList::Add(const string & name, TYPE* & var, TYPE const & def) { \
-	Config * config = this->Add(name, var); \
+Config * ConfigList::add(const string & name, TYPE* & var, TYPE const & def) { \
+	Config * config = this->add(name, var); \
 	*config = &def; \
 	return config; \
 }

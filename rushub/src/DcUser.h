@@ -86,19 +86,19 @@ public:
 
 	/** Get nick (for plugins) */
 	const string & getNick() const;
-	const string & Nick() const;
-	const string & MyINFO() const;
+	const string & nick() const;
+	const string & myInfoString() const;
 	bool getInUserList() const;
 	bool getInOpList() const;
 	bool getInIpList() const;
 	bool getHide() const;
-	bool Hide() const;
+	bool hide() const;
 	bool getForceMove() const;
 	bool getKick() const;
 
 
 	int getProfile() const;
-	void SetIp(const string & ip);
+	void setIp(const string & ip);
 
 	void setInOpList(bool inOpList);
 	void setInIpList(bool inIpList);
@@ -121,7 +121,7 @@ public:
 	__int64 getShare(/*bool real = false*/) const;
 
 	// setPassive ?
-	bool IsPassive() const;
+	bool isPassive() const;
 
 	const string & getTag(/*bool real = false*/) const;
 	const string & getClient(/*bool real = false*/) const;

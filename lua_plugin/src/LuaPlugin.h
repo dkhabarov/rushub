@@ -115,7 +115,7 @@ public:
 
 	int OnConfigChange(const char *, const char *);
 
-	int CallAll(const char *, DcConnBase * dcConnBase = NULL, bool param = true); /** Calling event for all scripts */
+	int callAll(const char *, DcConnBase * dcConnBase = NULL, bool param = true); /** Calling event for all scripts */
 
 	LuaInterpreter * FindScript(const string & sScriptName);
 	LuaInterpreter * AddScript(const string & sScriptName, bool bOnlyNew = false);
@@ -123,7 +123,7 @@ public:
 	void CheckNewScripts();
 
 	int LoadScripts(); /** Loading all scripts */
-	int Clear(); /** Stoping and removing all scripts */
+	int clear(); /** Stoping and removing all scripts */
 
 	/** Restarting all scripts 
 		@param iType: 0 - simple restarting, 1 - restarting except loaded script, 2 - restarting except current script

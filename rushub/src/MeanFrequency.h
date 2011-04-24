@@ -50,7 +50,7 @@ public:
 	int mStartIdx; /** Current index to positions */
 	int mNumFill; /** Amount filled period */
 
-	void Dump() {
+	void dump() {
 		cout << "mOverPeriod: " << mOverPeriod.AsPeriod() << endl
 			<< " mStart, mEnd: " << mStart.AsDate() << ", " << mEnd.AsDate() << endl
 			<< " mPart, mPeriodPart: " << mPart.AsDate() << ", " << mPeriodPart.AsPeriod() << endl
@@ -68,13 +68,13 @@ public:
 		mResolution = max_size;
 		mOverPeriod = Time(0.);
 		mPeriodPart = 0;
-		Reset(now);
+		reset(now);
 	}
 
 	MeanFrequency(const Time & now) {
 		mResolution = max_size;
-		SetPeriod(1.);
-		Reset(now);
+		setPeriod(1.);
+		reset(now);
 	};
 
 	MeanFrequency(const Time & now, double per, int res):
@@ -82,16 +82,16 @@ public:
 		mPeriodPart(per/res),
 		mResolution(res)
 	{
-		Reset(now);
+		reset(now);
 	};
 
-	void Insert(const Time & now, T data = 1) {
-		Adjust(now);
+	void insert(const Time & now, T data = 1) {
+		adjust(now);
 		mCounts[(mStartIdx + mNumFill) % mResolution] += data;
 	};
 
-	double GetMean(const Time & now) {
-		double Sum = CountAll(now);
+	double getMean(const Time & now) {
+		double Sum = countAll(now);
 		if (!mNumFill) {
 			return 0.;
 		}
@@ -100,8 +100,8 @@ public:
 		return Sum;
 	}
 
-	T CountAll(const Time & now) {
-		Adjust(now);
+	T countAll(const Time & now) {
+		adjust(now);
 		T sum = 0;
 		int i, j = mStartIdx;
 		for (i = 0; i < mNumFill; ++i) {
@@ -113,16 +113,16 @@ public:
 		return sum;
 	};
 
-	void Adjust(const Time & now) {
+	void adjust(const Time & now) {
 		if (mEnd < now) {
 			Time t(mEnd);
 			t += mOverPeriod;
 			if (t < now) {
-				Reset(now);
+				reset(now);
 				return;
 			}
 			while (mEnd < now) {
-				Shift();
+				shift();
 			}
 		} else if (mNumFill < mResolution) {
 			while ((mPart < now) && (mNumFill < mResolution)) {
@@ -132,7 +132,7 @@ public:
 		}
 	};
 
-	void Shift() {
+	void shift() {
 		mEnd += mPeriodPart;
 		mStart += mPeriodPart;
 		mCounts[mStartIdx] = 0;
@@ -145,7 +145,7 @@ public:
 		}
 	};
 
-	void Reset(const Time &now) {
+	void reset(const Time &now) {
 		memset(&mCounts, 0, sizeof(mCounts));
 		mStart = now;
 
@@ -159,7 +159,7 @@ public:
 		mStartIdx = 0;
 	}
 
-	void SetPeriod(double per) {
+	void setPeriod(double per) {
 		mOverPeriod = Time(per);
 		mPeriodPart = mOverPeriod / mResolution;
 	};

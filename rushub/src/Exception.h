@@ -46,14 +46,14 @@ public:
 	Exception();
 	~Exception();
 
-	static long __stdcall ExceptionFilter(LPEXCEPTION_POINTERS e);
-	static int Init(const char * path);
-	static int Uninit();
-	static int GetFunctionInfo(unsigned long functionAddress, unsigned long stackAddress, char * buff);
-	static int GetSourceInfo(unsigned address, char * buff);
-	static int GetModuleName(unsigned address, char * buff);
-	static void StackTrace(std::ostream & f, unsigned long eip, unsigned long esp, unsigned long ebp);
-	static void StackTrace(void * hThread, char * lpszMessage, std::ostream & f, unsigned long eip, unsigned long esp, unsigned long ebp);
+	static long __stdcall exceptionFilter(LPEXCEPTION_POINTERS e);
+	static int init(const char * path);
+	static int uninit();
+	static int getFunctionInfo(unsigned long functionAddress, unsigned long stackAddress, char * buff);
+	static int getSourceInfo(unsigned address, char * buff);
+	static int getModuleName(unsigned address, char * buff);
+	static void stackTrace(std::ostream & f, unsigned long eip, unsigned long esp, unsigned long ebp);
+	static void stackTrace(void * hThread, char * lpszMessage, std::ostream & f, unsigned long eip, unsigned long esp, unsigned long ebp);
 
 }; // Exception
 

@@ -45,7 +45,7 @@ LuaPlugin::LuaPlugin() :
 
 LuaPlugin::~LuaPlugin() {
 	save();
-	this->Clear();
+	this->clear();
 	mCurServer = NULL;
 	mCurLua = NULL;
 }
@@ -194,7 +194,7 @@ int LuaPlugin::StartScript(LuaInterpreter * Script) {
 		return LUA_ERRFILE;
 	}
 	mTasksList.AddTask(NULL, eT_Save);
-	int iRet = Script->Start();
+	int iRet = Script->start();
 	return iRet;
 }
 
@@ -338,7 +338,7 @@ void LuaPlugin::CheckNewScripts() {
 }
 
 /** Stoping all scripts */
-int LuaPlugin::Clear() {
+int LuaPlugin::clear() {
 	for (tvLuaInterpreter::iterator it = mLua.begin(); it != mLua.end(); ++it) {
 		if (*it != NULL) {
 			delete *it;
@@ -398,7 +398,7 @@ int LuaPlugin::MoveDown(LuaInterpreter * Script) {
 
 // ToDo: add cmd param
 /** 1 - blocked */
-int LuaPlugin::CallAll(const char* sFuncName, DcConnBase * dcConnBase, bool param /*= true*/) {
+int LuaPlugin::callAll(const char* sFuncName, DcConnBase * dcConnBase, bool param /*= true*/) {
 	int iRet = 0;
 	int iBlock = 0; // On defaults don't block
 	mCurDCConn = dcConnBase;
@@ -567,112 +567,112 @@ int LuaPlugin::onAny(DcConnBase * dcConnBase, int type) {
 
 // OnUserConnected(tUser)
 int LuaPlugin::onUserConnected(DcConnBase * dcConnBase) {
-		return CallAll("OnUserConnected", dcConnBase, false);
+		return callAll("OnUserConnected", dcConnBase, false);
 }
 
 // OnUserDisconnected(tUser)
 int LuaPlugin::onUserDisconnected(DcConnBase * dcConnBase) {
-		return CallAll("OnUserDisconnected", dcConnBase, false);
+		return callAll("OnUserDisconnected", dcConnBase, false);
 }
 
 // OnUserEnter(tUser)
 int LuaPlugin::onUserEnter(DcConnBase * dcConnBase) {
-		return CallAll("OnUserEnter", dcConnBase, false);
+		return callAll("OnUserEnter", dcConnBase, false);
 }
 
 // OnUserExit(tUser)
 int LuaPlugin::onUserExit(DcConnBase * dcConnBase) {
-		return CallAll("OnUserExit", dcConnBase, false);
+		return callAll("OnUserExit", dcConnBase, false);
 }
 
 // OnSupports(tUser, sData)
 int LuaPlugin::onSupports(DcConnBase * dcConnBase) {
-	return CallAll("OnSupports", dcConnBase, true);
+	return callAll("OnSupports", dcConnBase, true);
 }
 
 // OnKey(tUser, sData)
 int LuaPlugin::onKey(DcConnBase * dcConnBase) {
-	return CallAll("OnKey", dcConnBase, true);
+	return callAll("OnKey", dcConnBase, true);
 }
 
 // OnUnknown(tUser, sData)
 int LuaPlugin::onUnknown(DcConnBase * dcConnBase) {
-	return CallAll("OnUnknown", dcConnBase, true);
+	return callAll("OnUnknown", dcConnBase, true);
 }
 
 // OnValidateNick(tUser, sData)
 int LuaPlugin::onValidateNick(DcConnBase * dcConnBase) {
-	return CallAll("OnValidateNick", dcConnBase, true);
+	return callAll("OnValidateNick", dcConnBase, true);
 }
 
 // OnMyPass(tUser, sData)
 int LuaPlugin::onMyPass(DcConnBase * dcConnBase) {
-	return CallAll("OnMyPass", dcConnBase, true);
+	return callAll("OnMyPass", dcConnBase, true);
 }
 
 // OnVersion(tUser, sData)
 int LuaPlugin::onVersion(DcConnBase * dcConnBase) {
-	return CallAll("OnVersion", dcConnBase, true);
+	return callAll("OnVersion", dcConnBase, true);
 }
 
 // OnGetNickList(tUser, sData)
 int LuaPlugin::onGetNickList(DcConnBase * dcConnBase) {
-	return CallAll("OnGetNickList", dcConnBase, true);
+	return callAll("OnGetNickList", dcConnBase, true);
 }
 
 // OnMyINFO(tUser, sData)
 int LuaPlugin::onMyINFO(DcConnBase * dcConnBase) {
-	return CallAll("OnMyINFO", dcConnBase, true);
+	return callAll("OnMyINFO", dcConnBase, true);
 }
 
 // OnChat(tUser, sData)
 int LuaPlugin::onChat(DcConnBase * dcConnBase) {
-	return CallAll("OnChat", dcConnBase, true);
+	return callAll("OnChat", dcConnBase, true);
 }
 
 // OnTo(tUser, sData)
 int LuaPlugin::onTo(DcConnBase * dcConnBase) {
-	return CallAll("OnTo", dcConnBase, true);
+	return callAll("OnTo", dcConnBase, true);
 }
 
 // OnConnectToMe(tUser, sData)
 int LuaPlugin::onConnectToMe(DcConnBase * dcConnBase) {
-	return CallAll("OnConnectToMe", dcConnBase, true);
+	return callAll("OnConnectToMe", dcConnBase, true);
 }
 
 // OnRevConnectToMe(tUser, sData)
 int LuaPlugin::onRevConnectToMe(DcConnBase * dcConnBase) {
-	return CallAll("OnRevConnectToMe", dcConnBase, true);
+	return callAll("OnRevConnectToMe", dcConnBase, true);
 }
 
 // OnSearch(tUser, sData)
 int LuaPlugin::onSearch(DcConnBase * dcConnBase) {
-	return CallAll("OnSearch", dcConnBase, true);
+	return callAll("OnSearch", dcConnBase, true);
 }
 
 // OnSR(tUser, sData)
 int LuaPlugin::onSR(DcConnBase * dcConnBase) {
-	return CallAll("OnSR", dcConnBase, true);
+	return callAll("OnSR", dcConnBase, true);
 }
 
 // OnKick(tUser, sData)
 int LuaPlugin::onKick(DcConnBase * dcConnBase) {
-	return CallAll("OnKick", dcConnBase, true);
+	return callAll("OnKick", dcConnBase, true);
 }
 
 // OnOpForceMove(tUser, sData)
 int LuaPlugin::onOpForceMove(DcConnBase * dcConnBase) {
-	return CallAll("OnOpForceMove", dcConnBase, true);
+	return callAll("OnOpForceMove", dcConnBase, true);
 }
 
 // OnGetINFO(tUser, sData)
 int LuaPlugin::onGetINFO(DcConnBase * dcConnBase) {
-	return CallAll("OnGetINFO", dcConnBase, true);
+	return callAll("OnGetINFO", dcConnBase, true);
 }
 
 // OnMCTo(tUser, sData)
 int LuaPlugin::onMCTo(DcConnBase * dcConnBase) {
-	return CallAll("OnMCTo", dcConnBase, true);
+	return callAll("OnMCTo", dcConnBase, true);
 }
 
 

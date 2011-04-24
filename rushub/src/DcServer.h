@@ -41,7 +41,7 @@
 #include "DcIpList.h"
 #include "WebProtocol.h"
 
-#include "stringutils.h" // for StringReplace
+#include "stringutils.h" // for stringReplace
 
 #include <istream> // for istringstream
 
@@ -54,7 +54,7 @@ namespace dcserver {
 
 using namespace ::server; /** for Server */
 using namespace ::dcserver::protocol;
-using namespace ::utils; /** for StringReplace */
+using namespace ::utils; /** for stringReplace */
 
 
 
@@ -126,9 +126,9 @@ private:
 class DcServer : public Server, public DcServerBase {
 
 	friend class ::dcserver::DcListIterator; // for mConnList
-	friend class ::dcserver::DcConn; // for DoUserEnter in DcConn::onFlush and MinDelay in DcConn::onTimer
-	friend class ::dcserver::DcConnFactory; // for RemoveFromDCUserList in DcConnFactory::deleteConn
-	friend class ::dcserver::protocol::NmdcProtocol; // for BeforeUserEnter in NmdcProtocol::eventMyInfo
+	friend class ::dcserver::DcConn; // for doUserEnter in DcConn::onFlush and minDelay in DcConn::onTimer
+	friend class ::dcserver::DcConnFactory; // for removeFromDcUserList in DcConnFactory::deleteConn
+	friend class ::dcserver::protocol::NmdcProtocol; // for beforeUserEnter in NmdcProtocol::eventMyInfo
 	friend class ::webserver::WebConnFactory; // for call plugins
 
 public:
@@ -226,16 +226,16 @@ public:
 	}
 
 	/** Listebing of ports */
-	int Listening();
+	int listening();
 
 	/** Main timer */
 	int onTimer(Time &now);
 
 	/** Function checks min interval */
-	bool MinDelay(Time &then, double sec);
+	bool minDelay(Time &then, double sec);
 
 	/** Pointer on the user (or NULL) */
-	DcUser * GetDCUser(const char *sNick);
+	DcUser * getDcUser(const char *sNick);
 	const vector<DcConnBase*> & getDcConnBase(const char * sIP);
 	DcUserBase * getDcUserBase(const char *sNick);
 
@@ -289,25 +289,25 @@ protected:
 	bool antiFlood(unsigned &iCount, Time & time, const unsigned &iCountLimit, const double &iTimeLimit);
 
 	/** Check nick used */
-	bool CheckNick(DcConn *dcConn);
+	bool checkNick(DcConn *dcConn);
 
 	/** Actions before user entry */
-	bool BeforeUserEnter(DcConn *);
+	bool beforeUserEnter(DcConn *);
 
 	/** User entry */
-	void DoUserEnter(DcConn *);
+	void doUserEnter(DcConn *);
 
 	/** Adding user in the user list */
-	bool AddToUserList(DcUser *);
+	bool addToUserList(DcUser *);
 
 	/** Removing user from the user list */
-	bool RemoveFromDCUserList(DcUser *);
+	bool removeFromDcUserList(DcUser *);
 
 	/** Show user to all */
-	bool ShowUserToAll(DcUser *);
+	bool showUserToAll(DcUser *);
 
 	/** Actions after user entry */
-	void AfterUserEnter(DcConn *);
+	void afterUserEnter(DcConn *);
 
 	/** Close server */
 	void close();
@@ -331,6 +331,7 @@ private:
 	WebProtocol * mWebProtocol;
 
 	AntiFlood mIPEnterFlood;
+
 	struct IpEnter {
 		Time mTime;
 		unsigned miCount;
@@ -347,7 +348,7 @@ private:
 
 	void deleteConn(Conn * conn);
 
-	bool ListeningServer(const char * name, const string & addresses, unsigned port, ConnFactory * connFactory, bool udp = false);
+	bool listeningServer(const char * name, const string & addresses, unsigned port, ConnFactory * connFactory, bool udp = false);
 
 	static string getSysVersion();
 

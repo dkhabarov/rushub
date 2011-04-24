@@ -39,8 +39,8 @@ public:
 	virtual ~WebParser();
 
 	/** Parse cmd and return type */
-	int Parse();
-	bool SplitChunks();
+	int parse();
+	bool splitChunks();
 
 }; // class WebParser
 

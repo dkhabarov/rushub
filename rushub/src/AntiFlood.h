@@ -58,8 +58,8 @@ public:
 		return *this;
 	}
 
-	bool Check(HashType_t hash, Time now);
-	void Del(Time & now);
+	bool check(HashType_t hash, Time now);
+	void del(Time & now);
 
 }; // AntiFlood
 

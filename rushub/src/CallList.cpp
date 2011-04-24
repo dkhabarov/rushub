@@ -37,10 +37,10 @@ CallList::CallList(PluginList * pluginList, string id) :
 	mName(id)
 {
 
-	mCallOne.SetCallList(this);
+	mCallOne.setCallList(this);
 
 	if (mPluginList) {
-		mPluginList->SetCallList(id, this);
+		mPluginList->setCallList(id, this);
 	}
 
 }
@@ -67,7 +67,7 @@ CallList::ufCallOne::ufCallOne(PluginList * pluginList) :
 
 
 
-void CallList::ufCallOne::SetCallList(CallList * callList) {
+void CallList::ufCallOne::setCallList(CallList * callList) {
 	mCallList = callList;
 }
 
@@ -75,11 +75,11 @@ void CallList::ufCallOne::SetCallList(CallList * callList) {
 
 void CallList::ufCallOne::operator() (Plugin * plugin) {
 
-	miCall = mCallList->CallOne(plugin);
+	miCall = mCallList->callOne(plugin);
 
 /*#ifdef _WIN32
 	__try {
-		miCall = mCallList->CallOne(plugin);
+		miCall = mCallList->callOne(plugin);
 	} __except( EXCEPTION_EXECUTE_HANDLER) {
 		if (mPluginList && mPluginList->ErrLog(0)) {
 			mPluginList->LogStream() << "error in plugin: " << plugin->getName() << endl;
@@ -87,7 +87,7 @@ void CallList::ufCallOne::operator() (Plugin * plugin) {
 		plugin->suicide();
 	}
 #else
-	miCall = mCallList->CallOne(plugin);
+	miCall = mCallList->callOne(plugin);
 #endif*/
 
 	if (!plugin->isAlive()) {
@@ -100,7 +100,7 @@ void CallList::ufCallOne::operator() (Plugin * plugin) {
 
 
 /** Registers plugin in call list */
-bool CallList::Reg(Plugin * plugin) {
+bool CallList::reg(Plugin * plugin) {
 
 	if (!plugin) {
 		return false;
@@ -118,7 +118,7 @@ bool CallList::Reg(Plugin * plugin) {
 
 
 /** Remove registration from call list */
-bool CallList::Unreg(Plugin *plugin) {
+bool CallList::unreg(Plugin *plugin) {
 
 	if (!plugin) {
 		return false;
@@ -136,7 +136,7 @@ bool CallList::Unreg(Plugin *plugin) {
 
 
 /** Call all plugins */
-int CallList::CallAll() {
+int CallList::callAll() {
 
 	/** 0 - default, 1 - lock, 2, 3 */
 	mCallOne.miCall = for_each (mPlugins.begin(), mPlugins.end(), mCallOne).miCall;
@@ -150,7 +150,7 @@ int CallList::CallAll() {
 			it != itEnd;
 			++it
 		) {
-			mPluginList->UnloadPlugin((*it)->getName());
+			mPluginList->unloadPlugin((*it)->getName());
 		}
 		removedPlugins.clear();
 	}
@@ -161,7 +161,7 @@ int CallList::CallAll() {
 
 
 /** Show plugins list for this call */
-void CallList::ListRegs(ostream & os, const char * sep) {
+void CallList::listRegs(ostream & os, const char * sep) {
 
 	for (tPlugins::iterator i = mPlugins.begin(); i != mPlugins.end(); ++i) {
 		os << sep << (*i)->getName() << "\n";
