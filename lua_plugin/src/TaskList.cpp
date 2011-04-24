@@ -26,7 +26,7 @@ namespace luaplugin {
 void Tasks(void * val) {
 	TasksList::cTask * task = (TasksList::cTask *) val;
 	LuaInterpreter * Param = (LuaInterpreter *) (task->mParam);
-	switch (task->miType) {
+	switch (task->mType) {
 		case eT_RestartScript :
 			LuaPlugin::mCurLua->RestartScript(Param);
 			break;

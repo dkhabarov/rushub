@@ -136,18 +136,18 @@ public:
 	virtual operator tSocket() const;
 
 	/** Get type connection */
-	inline ConnType getConnType() const {
+	ConnType getConnType() const {
 		return mConnType;
 	}
-	
-	inline bool isOk() const {
+
+	bool isOk() const {
 		return mOk;
 	}
-	
-	inline bool isWritable() const {
+
+	bool isWritable() const {
 		return mWritable;
 	}
-	
+
 	void setOk(bool);
 
 	/** Create, bind and listen socket */
@@ -164,25 +164,25 @@ public:
 	virtual int recv();
 
 	/** Check empty recv buf */
-	inline int recvBufIsEmpty() const {
+	int recvBufIsEmpty() const {
 		return mRecvBufEnd == mRecvBufRead;
 	}
 
 	/** Check empty recv buf */
-	inline int sendBufIsEmpty() const {
+	int sendBufIsEmpty() const {
 		return mSendBuf.length() == 0;
 	}
 
 	/** Get status */
-	inline int strStatus() const {
+	int strStatus() const {
 		return mStrStatus;
 	}
 
-	inline void setCreatedByFactory(bool createdByFactory) {
+	void setCreatedByFactory(bool createdByFactory) {
 		mCreatedByFactory = createdByFactory;
 	}
 
-	inline bool getCreatedByFactory() const {
+	bool getCreatedByFactory() const {
 		return mCreatedByFactory;
 	}
 
@@ -190,26 +190,26 @@ public:
 	virtual int remaining();
 
 	/** Clear params */
-	void clearStr();
+	void clearCommandPtr();
 
 	/** Installing the string, in which will be recorded received data, 
 	and installation main parameter */
-	void setStrToRead(string *);
+	void setCommandPtr(string *);
 
 	/** Reading data from buffer and record in line of the protocol */
 	int readFromRecvBuf();
 
 	/** Get pointer for string */
-	virtual string * getParserStringPtr();
+	virtual string * getParserCommandPtr();
 
 	/** Get parser */
-	virtual Parser * getParser();
+	virtual Parser * createParser();
 
 	/** Remove parser */
 	virtual void deleteParser(Parser *);
 
 	/** Get pointer for string with data */
-	string * getCommand();
+	string * getCommandPtr();
 
 	/** Write data in sending buffer */
 	virtual int writeData(const string & data, bool flush);
@@ -219,11 +219,13 @@ public:
 
 	void flush(); /** Flush buffer */
 
-	static inline unsigned long ip2Num(const char * ip) {
+
+
+	static unsigned long ip2Num(const char * ip) {
 		return inet_addr(ip);
 	}
 	
-	static inline char * num2Ip(unsigned long ip) {
+	static char * num2Ip(unsigned long ip) {
 		struct in_addr in;
 		in.s_addr = ip;
 		return inet_ntoa(in);
@@ -235,7 +237,7 @@ public:
 	const string & ipUdp() const;
 	
 	/** Get port */
-	inline int port() const {
+	int port() const {
 		return mPort;
 	}
 
@@ -250,19 +252,19 @@ public:
 	/** Get host by ip */
 	static bool hostByIp(const string & ip, string & host);
 
+	static bool checkIp(const string &ip);
+
+	bool isClosed() {
+		return mClosed;
+	}
+
+	virtual bool strLog();
+
 	/** Main base timer */
 	int onTimerBase(Time &now);
 
 	/** Main timer */
 	virtual int onTimer(Time &now);
-
-	virtual bool strLog();
-
-	static bool checkIp(const string &ip);
-
-	inline bool isClosed() {
-		return mClosed;
-	}
 
 protected:
 

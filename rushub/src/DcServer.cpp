@@ -388,8 +388,8 @@ int DcServer::onNewConn(Conn *conn) {
 
 
 /** Returns pointer to line of the connection, in which will be recorded got data */
-string * DcServer::getPtrForStr(Conn * conn) {
-	return conn->getParserStringPtr();
+string * DcServer::createCommandPtr(Conn * conn) {
+	return conn->getParserCommandPtr();
 }
 
 
@@ -404,14 +404,46 @@ void DcServer::onNewData(Conn * conn, string * data) {
 	// Protocol parser
 	Parser * parser = conn->mParser;
 
+	// ToDo Parser == NULL ?
+	// ToDo Protocol == NULL ?
+
 	if (parser != NULL) {
 
-		// Definition a new command
+		// Parser
 		parser->Parse();
+
+		// UDP data
+		if (conn->getConnType() == CONN_TYPE_CLIENTUDP) {
+			onNewUdpData(conn, data);
+			return;
+		}
 
 		// Do protocol command
 		conn->mProtocol->DoCmd(parser, conn);
 	}
+}
+
+
+
+void DcServer::onNewUdpData(Conn * conn, string *) {
+
+	Parser * parser = conn->mParser;
+
+	// UDP redirect
+	Conn * userConn = conn->mProtocol->getConnForUdpData(conn, parser);
+	if (userConn == NULL) {
+		// unknown UDP data
+		return;
+	}
+
+	// setCommandPtr
+	userConn->setCommandPtr(&parser->mCommand);
+
+	// Do protocol command
+	conn->mProtocol->DoCmd(parser, userConn);
+
+	// Clear state and commandPtr
+	userConn->clearCommandPtr();
 }
 
 

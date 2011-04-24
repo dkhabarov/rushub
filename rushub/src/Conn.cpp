@@ -67,7 +67,7 @@ Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 	mCloseReason(0),
 	mCreatedByFactory(false)
 {
-	clearStr(); /** Clear params */
+	clearCommandPtr();
 	memset(&mCloseTime, 0, sizeof(mCloseTime));
 
 	if (mSocket) {
@@ -510,21 +510,6 @@ int Conn::recv() {
 
 
 
-/** Clear params */
-void Conn::clearStr() {
-	mCommand = NULL;
-	mStrStatus = STRING_STATUS_NO_STR;
-}
-
-
-
-/** Get pointer for string with data */
-string * Conn::getCommand() {
-	return &mParser->mCommand;
-}
-
-
-
 /** Get string ip */
 const string & Conn::ip() const {
 	return mIp;
@@ -538,20 +523,35 @@ const string & Conn::ipUdp() const {
 
 
 
+/** Clear params */
+void Conn::clearCommandPtr() {
+	mCommand = NULL;
+	mStrStatus = STRING_STATUS_NO_STR;
+}
+
+
+
+/** Get pointer for string with data */
+string * Conn::getCommandPtr() {
+	return mCommand;
+}
+
+
+
 /** Installing the string, in which will be recorded received data, 
 	and installation main parameter */
-void Conn::setStrToRead(string * pStr) {
+void Conn::setCommandPtr(string * pStr) {
 	if (mStrStatus != STRING_STATUS_NO_STR) {
 		if (ErrLog(0)) {
-			LogStream() << "Fatal error: Bad setStrToRead" << endl;
+			LogStream() << "Fatal error: Bad setCommandPtr" << endl;
 		}
-		throw "Fatal error: Bad setStrToRead";
+		throw "Fatal error: Bad setCommandPtr";
 	}
 	if (!pStr) {
 		if (ErrLog(0)) {
-			LogStream() << "Fatal error: Bad setStrToRead. Null string pointer" << endl;
+			LogStream() << "Fatal error: Bad setCommandPtr. Null string pointer" << endl;
 		}
-		throw "Fatal error: Bad setStrToRead. Null string pointer";
+		throw "Fatal error: Bad setCommandPtr. Null string pointer";
 	}
 	mCommand = pStr;
 	mStrStatus = STRING_STATUS_PARTLY;
@@ -594,28 +594,31 @@ int Conn::readFromRecvBuf() {
 }
 
 /** Get pointer for string */
-string * Conn::getParserStringPtr() {
+string * Conn::getParserCommandPtr() {
 	if (mParser == NULL) {
-		mParser = getParser();
+		mParser = createParser();
+	}
+	if (mParser == NULL) {
+		return NULL;
 	}
 	mParser->ReInit();
 	return &(mParser->mCommand);
 }
 
-Parser * Conn::getParser() {
-	if (mProtocol != NULL) {
-		return mProtocol->createParser();
-	} else {
-		throw "Protocol is NULL";
-		// return NULL;
+Parser * Conn::createParser() {
+	if (mProtocol == NULL) {
+		return NULL;
 	}
+	return mProtocol->createParser();
 }
 
-void Conn::deleteParser(Parser * OldParser) {
-	if (this->mProtocol != NULL) {
-		this->mProtocol->deleteParser(OldParser);
-	} else {
-		delete OldParser;
+void Conn::deleteParser(Parser * parser) {
+	if (parser != NULL) {
+		if (mProtocol != NULL) {
+			mProtocol->deleteParser(parser);
+		} else {
+			delete parser;
+		}
 	}
 }
 

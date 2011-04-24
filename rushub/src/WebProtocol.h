@@ -57,6 +57,10 @@ public:
 	/** Execution of the command */
 	virtual int DoCmd(Parser *, Conn *);
 
+	virtual Conn * getConnForUdpData(Conn *, Parser *) {
+		return NULL;
+	}
+
 	/** Creating parser of the protocol */
 	virtual Parser * createParser();
 

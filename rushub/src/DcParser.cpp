@@ -78,18 +78,18 @@ int DcParser::Parse() {
 	if (miLen) {
 		for (int i = 0; i < NMDC_TYPE_UNKNOWN; ++i) {
 			if (aDC_Commands[i].Check(mCommand)) { /** Check cmd from mCommand */
-				miType = NmdcType(i); /** Set cmd type */
+				mType = NmdcType(i); /** Set cmd type */
 				miKWSize = aDC_Commands[i].mLength; /** Set length of key word for command */
-				return miType;
+				return mType;
 			}
 		}
 	}
 	if (!miLen) {
-		miType = NMDC_TYPE_PING;
-	} else if(miType == NMDC_TYPE_UNPARSED) {
-		miType = NMDC_TYPE_UNKNOWN; /** Unknown cmd */
+		mType = NMDC_TYPE_PING;
+	} else if(mType == NMDC_TYPE_UNPARSED) {
+		mType = NMDC_TYPE_UNKNOWN; /** Unknown cmd */
 	}
-	return miType;
+	return mType;
 }
 
 /** Get string address for the chunk of command */
@@ -154,7 +154,7 @@ bool DcParser::SplitChunks() {
 
 	SetChunk(0, 0, mCommand.length()); /** Zero part - always whole command */
 
-	switch (miType) {
+	switch (mType) {
 
 		case NMDC_TYPE_MSEARCH :
 			// Fallthrough
@@ -354,16 +354,16 @@ int DcParser::checkCmd(DcParser & dcParser, const string & sData, DcUserBase * d
 		return -1;
 	}
 
-	if (dcParser.miType == NMDC_TYPE_MYNIFO && (dcUserBase == NULL ||
+	if (dcParser.mType == NMDC_TYPE_MYNIFO && (dcUserBase == NULL ||
 			dcUserBase->getNick() != dcParser.chunkString(CHUNK_MI_NICK))
 	) {
 		return -2;
 	}
 
-	if (dcParser.miType > 0 && dcParser.miType < 3) {
+	if (dcParser.mType > 0 && dcParser.mType < 3) {
 		return 3;
 	}
-	return dcParser.miType;
+	return dcParser.mType;
 }
 
 }; // namespace protocol

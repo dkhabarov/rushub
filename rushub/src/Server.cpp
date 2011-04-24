@@ -573,7 +573,7 @@ int Server::inputData(Conn *conn) {
 	int bytes = 0;
 	while (conn->isOk() && conn->isWritable()) {
 		if (conn->strStatus() == STRING_STATUS_NO_STR) {
-			conn->setStrToRead(getPtrForStr(conn));
+			conn->setCommandPtr(createCommandPtr(conn));
 		}
 
 		bytes += conn->readFromRecvBuf();
@@ -582,13 +582,13 @@ int Server::inputData(Conn *conn) {
 
 			if (conn->mConnFactory != NULL) {
 				// On new data using ListenFactory
-				conn->mConnFactory->onNewData(conn, conn->getCommand());
+				conn->mConnFactory->onNewData(conn, conn->getCommandPtr());
 			} else {
 				// On new data by server
-				onNewData(conn, conn->getCommand());
+				onNewData(conn, conn->getCommandPtr());
 			}
 
-			conn->clearStr();
+			conn->clearCommandPtr();
 		}
 
 		if (conn->recvBufIsEmpty()) {
@@ -598,8 +598,8 @@ int Server::inputData(Conn *conn) {
 	return bytes;
 }
 
-/** getPtrForStr */
-string * Server::getPtrForStr(Conn *) {
+/** createCommandPtr */
+string * Server::createCommandPtr(Conn *) {
 	return new string;
 }
 

@@ -105,7 +105,7 @@ public:
 	virtual int onGetINFO(DcConnBase *);
 	virtual int onMCTo(DcConnBase *);
 	virtual int onTimer();
-	virtual int onAny(DcConnBase *);
+	virtual int onAny(DcConnBase *, int);
 	virtual int onUnknown(DcConnBase *);
 	virtual int onFlood(DcConnBase *, int, int);
 	virtual int onWebData(DcConnBase *, WebParserBase *);

@@ -119,39 +119,37 @@ int NmdcProtocol::onNewDcConn(DcConn * dcConn) {
 	return 0;
 }
 
-int NmdcProtocol::DoCmd(Parser * parser, Conn * conn) {
+Conn * NmdcProtocol::getConnForUdpData(Conn * conn, Parser * parser) {
 
-	// Check UDP data
-	if (conn->getConnType() == CONN_TYPE_CLIENTUDP) {
+	// only SR command
+	if (parser->mType == NMDC_TYPE_SR) {
+		parser->mType = NMDC_TYPE_SR_UDP; // Set type for parse
 
 		DcParser * dcParser = static_cast<DcParser *> (parser);
+		if (!dcParser->SplitChunks()) {
 
-		if (dcParser->miType == NMDC_TYPE_SR) {
-			dcParser->miType = NMDC_TYPE_SR_UDP; // Set type for parse
-			if (!dcParser->SplitChunks()) {
-				DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.GetUserBaseByNick(dcParser->chunkString(CHUNK_SR_FROM)));
-				if (dcUser && dcUser->mDcConn && conn->ipUdp() == dcUser->getIp()) {
-					conn = dcUser->mDcConn;
-					parser = conn->mParser;
-					if (!parser) {
-						return 1;
-					}
-					parser->mCommand = dcParser->mCommand;
-					parser->Parse();
-				} else {
-					return 1;
-				}
+			DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.GetUserBaseByNick(dcParser->chunkString(CHUNK_SR_FROM)));
+			if (dcUser && dcUser->mDcConn && conn->ipUdp() == dcUser->getIp()) {
+				return dcUser->mDcConn;
 			} else {
-				return 1;
+				if (conn->Log(3)) {
+					conn->LogStream() << "Not found user for UDP data" << endl;
+				}
 			}
 		} else {
-			if (conn->Log(4)) {
-				conn->LogStream() << "Unknown UDP data" << endl;
+			if (conn->Log(3)) {
+				conn->LogStream() << "Bad UDP cmd syntax" << endl;
 			}
-			return 1;
 		}
-
+	} else {
+		if (conn->Log(4)) {
+			conn->LogStream() << "Unknown UDP data" << endl;
+		}
 	}
+	return NULL;
+}
+
+int NmdcProtocol::DoCmd(Parser * parser, Conn * conn) {
 
 	DcParser * dcParser = static_cast<DcParser *> (parser);
 	DcConn * dcConn = static_cast<DcConn *> (conn);
@@ -162,16 +160,16 @@ int NmdcProtocol::DoCmd(Parser * parser, Conn * conn) {
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnAny.CallAll(dcConn)) {
+		if (mDcServer->mCalls.mOnAny.CallAll(dcConn, dcParser->mType)) {
 			return 1;
 		}
 	#endif
 
 	if (dcConn->Log(5)) {
-		dcConn->LogStream() << "[S]Stage " << dcParser->miType << endl;
+		dcConn->LogStream() << "[S]Stage " << dcParser->mType << endl;
 	}
 	
-	switch (dcParser->miType) {
+	switch (dcParser->mType) {
 
 		case NMDC_TYPE_MSEARCH :
 			// Fallthrough
@@ -185,6 +183,9 @@ int NmdcProtocol::DoCmd(Parser * parser, Conn * conn) {
 		case NMDC_TYPE_SEARCH :
 			eventSearch(dcParser, dcConn);
 			break;
+
+		case NMDC_TYPE_SR_UDP :
+			// Fallthrough
 
 		case NMDC_TYPE_SR :
 			eventSr(dcParser, dcConn);
@@ -276,14 +277,14 @@ int NmdcProtocol::DoCmd(Parser * parser, Conn * conn) {
 
 		default :
 			if (ErrLog(1)) {
-				LogStream() << "Incoming untreated event: " << dcParser->miType << endl;
+				LogStream() << "Incoming untreated event: " << dcParser->mType << endl;
 			}
 			break;
 
 	}
 
 	if (dcConn->Log(5)) {
-		dcConn->LogStream() << "[E]Stage " << dcParser->miType << endl;
+		dcConn->LogStream() << "[E]Stage " << dcParser->mType << endl;
 	}
 	return 0;
 }
@@ -728,7 +729,7 @@ int NmdcProtocol::eventSearch(DcParser * dcparser, DcConn * dcConn) {
 	/** Sending cmd */
 	string sMsg;
 
-	switch (dcparser->miType) {
+	switch (dcparser->mType) {
 
 		case NMDC_TYPE_SEARCH :
 			if (mDcServer->mDcConfig.mCheckSearchIp && dcConn->getIp() != dcparser->chunkString(CHUNK_AS_IP)) {
@@ -866,7 +867,7 @@ int NmdcProtocol::eventRevConnectToMe(DcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	/** Checking the nick */
+	/** Checking the nick (PROTOCOL NMDC) */
 	if (mDcServer->mDcConfig.mCheckRctmNick && (dcparser->chunkString(CHUNK_RC_NICK) != dcConn->mDcUser->msNick)) {
 		string sMsg = mDcServer->mDCLang.mBadRevConNick;
 		StringReplace(sMsg, string("nick"), sMsg, dcparser->chunkString(CHUNK_RC_NICK));
@@ -1245,9 +1246,9 @@ string NmdcProtocol::GetNormalShare(__int64 iVal) {
 int NmdcProtocol::checkCommand(DcParser * dcParser, DcConn * dcConn) {
 
 	// Checking length of command
-	if (dcParser->miLen > mDcServer->mDcConfig.mMaxCmdLen[dcParser->miType]) {
+	if (dcParser->miLen > mDcServer->mDcConfig.mMaxCmdLen[dcParser->mType]) {
 		if (dcConn->Log(1)) {
-			dcConn->LogStream() << "Bad CMD(" << dcParser->miType << ") length: " << dcParser->miLen << endl;
+			dcConn->LogStream() << "Bad CMD(" << dcParser->mType << ") length: " << dcParser->miLen << endl;
 		}
 		dcConn->closeNow(CLOSE_REASON_CMD_LENGTH);
 		return -1;
@@ -1265,9 +1266,9 @@ int NmdcProtocol::checkCommand(DcParser * dcParser, DcConn * dcConn) {
 	// Check Syntax
 	if (dcParser->SplitChunks()) {
 		// Protection from commands, not belonging to DC protocol
-		if (dcParser->miType != NMDC_TYPE_UNKNOWN || mDcServer->mDcConfig.mDisableNoDCCmd) {
+		if (dcParser->mType != NMDC_TYPE_UNKNOWN || mDcServer->mDcConfig.mDisableNoDCCmd) {
 			if (dcConn->Log(1)) {
-				dcConn->LogStream() << "Wrong syntax in cmd: " << dcParser->miType << endl;
+				dcConn->LogStream() << "Wrong syntax in cmd: " << dcParser->mType << endl;
 			}
 			dcConn->closeNice(9000, CLOSE_REASON_CMD_SYNTAX);
 			return -3;
@@ -1275,7 +1276,7 @@ int NmdcProtocol::checkCommand(DcParser * dcParser, DcConn * dcConn) {
 	}
 
 	// Check flood
-	if (antiflood(dcConn, dcParser->miType)) {
+	if (antiflood(dcConn, dcParser->mType)) {
 		return -4;
 	}
 

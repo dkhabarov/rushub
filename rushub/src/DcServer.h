@@ -278,10 +278,12 @@ public:
 protected:
 
 	/** Returns pointer to line of the connection, in which will be recorded got data */
-	string * getPtrForStr(Conn *);
+	string * createCommandPtr(Conn *);
 
 	/** Function of the processing enterring data */
 	void onNewData(Conn *, string *);
+
+	void onNewUdpData(Conn *, string *);
 
 	/** Antiflood function */
 	bool antiFlood(unsigned &iCount, Time & time, const unsigned &iCountLimit, const double &iTimeLimit);
@@ -403,7 +405,7 @@ private:
 		CallListConnection    mOnGetINFO;
 		CallListConnection    mOnMCTo;
 		CallListSimple        mOnTimer;
-		CallListConnection    mOnAny;
+		CallListConnInt       mOnAny;
 		CallListConnection    mOnUnknown;
 		CallListConnIntInt    mOnFlood;
 		CallListConnWebParser mOnWebData;

@@ -228,7 +228,7 @@ public:
 	virtual ~DcParser();
 
 	inline int getCommandType() const {
-		return miType;
+		return mType;
 	}
 	
 	/** Do parse for command and return type of this command */

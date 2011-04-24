@@ -55,6 +55,8 @@ public:
 	}
 	virtual int DoCmd(Parser *, Conn *); /** Do command */
 	
+	virtual Conn * getConnForUdpData(Conn *, Parser *);
+
 	/** Creating protocol parser */
 	virtual Parser * createParser() {
 		return new DcParser;

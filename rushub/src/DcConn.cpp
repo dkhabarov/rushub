@@ -325,28 +325,28 @@ void DcConn::onOk(bool ok) {
 bool DcConn::parseCommand(const char * cmd) {
 
 	// ToDo: set command pointer
-	string * command = getCommand();
-	if (command == NULL || mParser == NULL) {
+	if (getCommandPtr() == NULL || mParser == NULL) {
 		return false;
 	}
+	string & command = *getCommandPtr();
 
-	int type = mParser->miType;
-	string oldCmd = (*command);
-	*command = cmd;
+	int type = mParser->mType;
+	string oldCmd = command;
+	command = cmd;
 	if (mParser->Parse() != type) {
-		*command = oldCmd;
+		command = oldCmd;
 		mParser->Parse();
 		return false;
 	}
 	return true;
 }
 
-const string & DcConn::getCmd() {
-	return *getCommand();
-}
-
-int DcConn::getCmdType() {
-	return mParser != NULL ? mParser->miType : -1;
+const char * DcConn::getCommand() {
+	string * command = getCommandPtr();
+	if (command == NULL) {
+		return NULL;
+	}
+	return (*command).c_str();
 }
 
 

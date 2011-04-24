@@ -275,9 +275,7 @@ public:
 
 	virtual bool parseCommand(const char * cmd);
 
-	virtual const string & getCmd();
-
-	virtual int getCmdType();
+	virtual const char * getCommand();
 
 protected:
 

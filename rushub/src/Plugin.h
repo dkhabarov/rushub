@@ -206,9 +206,7 @@ public:
 
 	virtual bool parseCommand(const char * cmd) = 0;
 
-	virtual const string & getCmd() = 0;
-
-	virtual int getCmdType() = 0;
+	virtual const char * getCommand() = 0;
 
 }; // class DcConnBase
 
@@ -693,7 +691,7 @@ public:
 		return 1;
 	}
 
-	virtual int onAny(DcConnBase *) {
+	virtual int onAny(DcConnBase *, int) {
 		return 1;
 	}
 

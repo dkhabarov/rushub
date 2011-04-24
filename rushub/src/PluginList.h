@@ -190,12 +190,12 @@ protected:
 }; // class CallListSimple
 
 
-template <class T>
+template <class A>
 class CallListType1 : public CallListBase {
 
 public:
 
-	typedef int (Plugin::*tpFunc) (T *);
+	typedef int (Plugin::*tpFunc) (A);
 
 public:
 
@@ -203,7 +203,6 @@ public:
 		CallListBase(pluginList, id),
 		mFunc(func)
 	{
-		mData = NULL;
 	}
 
 	virtual ~CallListType1() {
@@ -213,19 +212,15 @@ public:
 		return (plugin->*mFunc) (mData);
 	}
 
-	virtual int CallAll(T * t) {
+	virtual int CallAll(A t) {
 		mData = t;
-		if (mData != NULL) {
-			return CallList::CallAll();
-		} else {
-			return 1;
-		}
+		return CallList::CallAll();
 	}
 
 protected:
 
 	tpFunc mFunc;
-	T * mData;
+	A mData;
 
 }; // class CallListType1
 
@@ -236,7 +231,7 @@ class CallListType2 : public CallListBase {
 
 public:
 
-	typedef int (Plugin::*tpFunc) (A *, B *);
+	typedef int (Plugin::*tpFunc) (A, B);
 
 public:
 
@@ -244,8 +239,6 @@ public:
 		CallListBase(pluginList, id),
 		mFunc(func)
 	{
-		mData1 = NULL;
-		mData2 = NULL;
 	}
 
 	virtual ~CallListType2() {
@@ -255,21 +248,17 @@ public:
 		return (plugin->*mFunc) (mData1, mData2);
 	}
 
-	virtual int CallAll(A * a, B * b) {
+	virtual int CallAll(A a, B b) {
 		mData1 = a;
 		mData2 = b;
-		if ((mData1 != NULL) && (mData2 != NULL)) {
-			return CallList::CallAll();
-		} else {
-			return 1;
-		}
+		return CallList::CallAll();
 	}
 
 protected:
 
 	tpFunc mFunc;
-	A * mData1;
-	B * mData2;
+	A mData1;
+	B mData2;
 
 }; // class CallListType2
 
@@ -347,13 +336,9 @@ protected:
 
 }; // class CallListConnection
 
-typedef CallListType1<DcUserBase> CallListUser;
-typedef CallListType1<DcConnBase> CallListConn;
-typedef CallListType1<string> CallListString;
-typedef CallListType2<DcConnBase, string> CallListConnString;
-typedef CallListType2<DcUserBase, DcUserBase> CallListUserUser;
-typedef CallListType2<DcConnBase, WebParserBase> CallListConnWebParser;
-typedef CallListType3<DcUserBase *, DcUserBase *, string *> CallListUserUserString;
+typedef CallListType1<DcConnBase *> CallListConn;
+typedef CallListType2<DcConnBase *, WebParserBase *> CallListConnWebParser;
+typedef CallListType2<DcConnBase *, int> CallListConnInt;
 typedef CallListType3<DcConnBase *, int, int> CallListConnIntInt;
 
 }; // namespace plugin

@@ -415,7 +415,7 @@ int LuaPlugin::CallAll(const char* sFuncName, DcConnBase * dcConnBase, bool para
 
 		// ToDo
 		if (param) {
-			Script->NewCallParam((void *)dcConnBase->getCmd().c_str(), LUA_TSTRING);
+			Script->NewCallParam((void *)dcConnBase->getCommand(), LUA_TSTRING);
 		}
 
 		iRet = Script->CallFunc(sFuncName);
@@ -541,7 +541,7 @@ int LuaPlugin::OnScriptError(LuaInterpreter * Current, const char * sScriptName,
 }
 
 /** onAny event */
-int LuaPlugin::onAny(DcConnBase * dcConnBase) {
+int LuaPlugin::onAny(DcConnBase * dcConnBase, int type) {
 
 	int iRet = 0, iBlock = 0; // On defaults don't block
 	LuaInterpreter * Script = NULL;
@@ -551,8 +551,8 @@ int LuaPlugin::onAny(DcConnBase * dcConnBase) {
 			continue;
 		}
 		Script->NewCallParam((void *)dcConnBase, LUA_TLIGHTUSERDATA);
-		Script->NewCallParam((void *)dcConnBase->getCmd().c_str(), LUA_TSTRING);
-		Script->NewCallParam(lua_Number((double)dcConnBase->getCmdType()), LUA_TNUMBER);
+		Script->NewCallParam((void *)dcConnBase->getCommand(), LUA_TSTRING);
+		Script->NewCallParam(lua_Number(type), LUA_TNUMBER);
 		iRet = Script->CallFunc("OnAny");
 		if (iRet == 1) {
 			return 1; // 1 - blocked

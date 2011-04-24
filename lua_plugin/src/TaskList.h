@@ -45,11 +45,11 @@ public:
 	struct cTask {
 		cTask():mParam(NULL) {
 		}
-		cTask(tTask iType) : miType(iType), mParam(NULL) {
+		cTask(tTask iType) : mType(iType), mParam(NULL) {
 		}
 		~cTask() {
 		}
-		tTask miType;
+		tTask mType;
 		void * mParam;
 	}; // cTasks
 

@@ -36,7 +36,7 @@ Protocol::~Protocol(){
 
 Parser::Parser(int max) : 
 	Obj("Parser"),
-	miType(NMDC_TYPE_UNPARSED),
+	mType(NMDC_TYPE_UNPARSED),
 	mChunks(max),
 	miLen(0),
 	miKWSize(0),
@@ -63,7 +63,7 @@ Parser::~Parser() {
 void Parser::ReInit() {
 	mCommand.resize(0); 
 	mCommand.reserve(512); 
-	miType = NMDC_TYPE_UNPARSED; 
+	mType = NMDC_TYPE_UNPARSED; 
 	miLen = 0; 
 	miKWSize = 0; 
 	mbError = false; 

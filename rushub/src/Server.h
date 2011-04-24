@@ -155,8 +155,8 @@ protected:
 	/** main timer */
 	virtual int onTimer(Time & now);
 	
-	/** getPtrForStr */
-	virtual string * getPtrForStr(Conn *);
+	/** createCommandPtr */
+	virtual string * createCommandPtr(Conn *);
 
 	/** onNewData */
 	virtual void onNewData(Conn *, string *);

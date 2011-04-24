@@ -57,6 +57,8 @@ public:
 	virtual string getSeparator() = 0; /** protocol separator */
 	virtual unsigned long getMaxCommandLength() = 0; /** protocol max command length */
 
+	virtual Conn * getConnForUdpData(Conn *, Parser *) = 0;
+
 }; // Protocol
 
 
@@ -68,7 +70,7 @@ class Parser : public Obj {
 public:
 
 	string mCommand; /** Main string with cmd */
-	int miType; /** Type of cmd */
+	int mType; /** Type of cmd */
 
 	typedef pair<size_t, size_t> tChunk; /** Pair for chunk (begin, end) */
 	vector<tChunk> mChunks; /** List */
