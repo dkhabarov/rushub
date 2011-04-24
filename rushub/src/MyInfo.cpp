@@ -62,38 +62,28 @@ void MyInfo::setMyInfo(const string & myInfo, DcParser * parser, __int64 & total
 
 void MyInfo::setDescription(const string & description) {
 	this->description = description;
-	construct();
 }
 
 
 void MyInfo::setEmail(const string & email) {
 	this->email = email;
-	construct();
 }
 
 
 void MyInfo::setConnection(const string & connection) {
 	this->connection = connection;
-	construct();
 }
 
 
 void MyInfo::setMagicByte(unsigned magicByte) {
 	this->magicByte = magicByte;
-	construct();
 }
 
 
 void MyInfo::setShare(__int64 share) {
 	this->share = share;
-	construct();
 }
 
-
-
-void MyInfo::construct() {
-
-}
 
 
 }; // namespace dcserver

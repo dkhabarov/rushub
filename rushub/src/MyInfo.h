@@ -98,9 +98,6 @@ private:
 	/// Share size
 	__int64 share;
 
-private:
-
-	void construct();
 
 }; // MyInfo
 
