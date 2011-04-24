@@ -61,7 +61,11 @@ ProtocolCommand aDC_Commands[] = {
 
 
 
-DcParser::DcParser() : Parser(10) { /** Max number of chunks - 10 */
+DcParser::DcParser() :
+	Parser(10), // Max number of chunks - 10
+	mError(false),
+	mKeyLength(0)
+{ 
 	SetClassName("DcParser");
 }
 
@@ -79,7 +83,7 @@ int DcParser::Parse() {
 		for (int i = 0; i < NMDC_TYPE_UNKNOWN; ++i) {
 			if (aDC_Commands[i].Check(mCommand)) { /** Check cmd from mCommand */
 				mType = NmdcType(i); /** Set cmd type */
-				miKWSize = aDC_Commands[i].mLength; /** Set length of key word for command */
+				mKeyLength = aDC_Commands[i].mLength; /** Set length of key word for command */
 				return mType;
 			}
 		}
@@ -91,6 +95,17 @@ int DcParser::Parse() {
 	}
 	return mType;
 }
+
+
+
+void DcParser::ReInit() {
+	Parser::ReInit();
+
+	mError = false;
+	mKeyLength = 0;
+}
+
+
 
 /** Get string address for the chunk of command */
 string & DcParser::chunkString(unsigned int n) {
@@ -148,7 +163,7 @@ bool DcParser::IsPassive(const string & description) {
 bool DcParser::SplitChunks() {
 
 	if (mIsParsed) {
-		return mbError;
+		return mError;
 	}
 	mIsParsed = true;
 
@@ -163,20 +178,20 @@ bool DcParser::SplitChunks() {
 			// Fallthrough
 			
 		case NMDC_TYPE_SEARCH : /** $Search [[ip]:[port]] [[F?T?0?9]?[searchpattern]] */
-			if (!SplitOnTwo(miKWSize, ' ', CHUNK_AS_ADDR, CHUNK_AS_QUERY)) {
-				mbError = 1;
+			if (!SplitOnTwo(mKeyLength, ' ', CHUNK_AS_ADDR, CHUNK_AS_QUERY)) {
+				mError = true;
 			} else if (!SplitOnTwo(':', CHUNK_AS_ADDR, CHUNK_AS_IP, CHUNK_AS_PORT)) {
-				mbError = 1;
+				mError = true;
 			} else if (!SplitOnTwo('?', CHUNK_AS_QUERY, CHUNK_AS_SEARCHLIMITS, CHUNK_AS_SEARCHPATTERN, 0)) {
-				mbError = 1;
+				mError = true;
 			}
 			break;
 
 		case NMDC_TYPE_SEARCH_PAS : /** $Search Hub:[nick] [[F?T?0?9]?[searchpattern]] */
-			if (!SplitOnTwo(miKWSize, ' ', CHUNK_PS_NICK, CHUNK_PS_QUERY)) {
-				mbError =1;
+			if (!SplitOnTwo(mKeyLength, ' ', CHUNK_PS_NICK, CHUNK_PS_QUERY)) {
+				mError = true;
 			} else if (!SplitOnTwo('?', CHUNK_PS_QUERY, CHUNK_PS_SEARCHLIMITS, CHUNK_PS_SEARCHPATTERN, 0)) {
-				mbError = 1; /** Searching for on the right */
+				mError = true; /** Searching for on the right */
 			}
 			break;
 
@@ -193,16 +208,16 @@ bool DcParser::SplitChunks() {
 			6)               |----PATH---|---[SIZE]---|
 		*/
 
-			if (!SplitOnTwo(miKWSize, ' ', CHUNK_SR_FROM, CHUNK_SR_PATH)) {
-				mbError = 1;
+			if (!SplitOnTwo(mKeyLength, ' ', CHUNK_SR_FROM, CHUNK_SR_PATH)) {
+				mError = true;
 			} else if (!SplitOnTwo(0x05, CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_TO,      false)) {
-				mbError = 1;
+				mError = true;
 			} else if (!SplitOnTwo(0x05, CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_HUBINFO, false)) {
-				mbError = 1;
+				mError = true;
 			} else if (!SplitOnTwo(' ',  CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_SLOTS,   false)) {
-				mbError = 1;
+				mError = true;
 			} else if (!SplitOnTwo('/',  CHUNK_SR_SLOTS, CHUNK_SR_SL_FR, CHUNK_SR_SL_TO,   false)) {
-				mbError = 1;
+				mError = true;
 			}
 			SplitOnTwo(0x05, CHUNK_SR_PATH, CHUNK_SR_PATH, CHUNK_SR_SIZE, false);
 			break;
@@ -219,31 +234,31 @@ bool DcParser::SplitChunks() {
 			5)               |----PATH---|---[SIZE]---|
 		*/
 
-			if (!SplitOnTwo(miKWSize, ' ', CHUNK_SR_FROM, CHUNK_SR_PATH)) {
-				mbError = 1;
+			if (!SplitOnTwo(mKeyLength, ' ', CHUNK_SR_FROM, CHUNK_SR_PATH)) {
+				mError = true;
 			} else if (!SplitOnTwo(0x05, CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_HUBINFO, false)) {
-				mbError = 1;
+				mError = true;
 			} else if (!SplitOnTwo(' ',  CHUNK_SR_PATH,  CHUNK_SR_PATH,  CHUNK_SR_SLOTS,   false)) {
-				mbError = 1;
+				mError = true;
 			} else if (!SplitOnTwo('/',  CHUNK_SR_SLOTS, CHUNK_SR_SL_FR, CHUNK_SR_SL_TO,   false)) {
-				mbError = 1;
+				mError = true;
 			}
 			SplitOnTwo(0x05, CHUNK_SR_PATH, CHUNK_SR_PATH, CHUNK_SR_SIZE, false);
 			break;
 
 		case NMDC_TYPE_MYNIFO : /** $MyINFO $ALL [nick] [[desc]$ $[speed]$[email]$[share]$] */
-			if (!SplitOnTwo(miKWSize, ' ', CHUNK_MI_DEST, CHUNK_MI_NICK)) {
-				mbError = 1;
+			if (!SplitOnTwo(mKeyLength, ' ', CHUNK_MI_DEST, CHUNK_MI_NICK)) {
+				mError = true;
 			} else if (!SplitOnTwo(' ', CHUNK_MI_NICK, CHUNK_MI_NICK, CHUNK_MI_INFO)) {
-				mbError = 1;
+				mError = true;
 			} else if (!SplitOnTwo("$ $", CHUNK_MI_INFO, CHUNK_MI_DESC, CHUNK_MI_SPEED)) {
-				mbError = 1;
+				mError = true;
 			} else if (!SplitOnTwo('$', CHUNK_MI_SPEED, CHUNK_MI_SPEED, CHUNK_MI_MAIL)) {
-				mbError = 1;
+				mError = true;
 			} else if (!SplitOnTwo('$', CHUNK_MI_MAIL, CHUNK_MI_MAIL, CHUNK_MI_SIZE)) {
-				mbError = 1;
+				mError = true;
 			} else if (!ChunkRedRight(CHUNK_MI_SIZE, 1)) { /** Removing the last char $ */
-				mbError = 1;
+				mError = true;
 			}
 			break;
 
@@ -271,40 +286,40 @@ bool DcParser::SplitChunks() {
 
 		case NMDC_TYPE_KICK : /** $Kick [nick] */
 			/* can be an empty line? */
-			if (mLength == miKWSize) {
-				mbError = 1;
+			if (mLength == mKeyLength) {
+				mError = true;
 			} else {
-				SetChunk(CHUNK_1_PARAM, miKWSize, mLength - miKWSize);
+				SetChunk(CHUNK_1_PARAM, mKeyLength, mLength - mKeyLength);
 			}
 			break;
 
 		case NMDC_TYPE_CHAT : /** <[nick]> [msg] */
-			if (!SplitOnTwo(miKWSize, "> ", CHUNK_CH_NICK, CHUNK_CH_MSG)) {
-				mbError = 1;
+			if (!SplitOnTwo(mKeyLength, "> ", CHUNK_CH_NICK, CHUNK_CH_MSG)) {
+				mError = true;
 			}
 			break;
 
 		case NMDC_TYPE_TO : /** $To: [remote_nick] From: [nick] $<[[nick]> [msg]] */
-			if (!SplitOnTwo(miKWSize," From: ", CHUNK_PM_TO, CHUNK_PM_FROM)) {
-				mbError = 1;
+			if (!SplitOnTwo(mKeyLength," From: ", CHUNK_PM_TO, CHUNK_PM_FROM)) {
+				mError = true;
 			} else if (!SplitOnTwo(" $<", CHUNK_PM_FROM, CHUNK_PM_FROM, CHUNK_PM_CHMSG)) {
-				mbError = 1;
+				mError = true;
 			} else if (!SplitOnTwo("> ", CHUNK_PM_CHMSG, CHUNK_PM_NICK, CHUNK_PM_MSG)) {
-				mbError = 1;
+				mError = true;
 			}
 			break;
 
 		case NMDC_TYPE_CONNECTTOME : /** $ConnectToMe [nick] [[ip]:[port]] */
-			if (!SplitOnTwo(miKWSize, ' ', CHUNK_CM_NICK, CHUNK_CM_ACTIVE)) {
-				mbError = 1;
+			if (!SplitOnTwo(mKeyLength, ' ', CHUNK_CM_NICK, CHUNK_CM_ACTIVE)) {
+				mError = true;
 			} else if(!SplitOnTwo(':', CHUNK_CM_ACTIVE, CHUNK_CM_IP, CHUNK_CM_PORT)) {
-				mbError = 1;
+				mError = true;
 			}
 			break;
 
 		case NMDC_TYPE_RCONNECTTOME : /** $RevConnectToMe [nick] [remote_nick] */
-			if (!SplitOnTwo(miKWSize, ' ', CHUNK_RC_NICK, CHUNK_RC_OTHER)) {
-				mbError = 1;
+			if (!SplitOnTwo(mKeyLength, ' ', CHUNK_RC_NICK, CHUNK_RC_OTHER)) {
+				mError = true;
 			}
 			break;
 
@@ -312,30 +327,30 @@ bool DcParser::SplitChunks() {
 			break;
 
 		case NMDC_TYPE_OPFORCEMOVE : /** $OpForceMove $Who:[remote_nick]$Where:[address]$Msg:[reason] */
-			if (!SplitOnTwo(miKWSize, "$Where:", CHUNK_FM_NICK, CHUNK_FM_DEST)) {
-				mbError = 1;
+			if (!SplitOnTwo(mKeyLength, "$Where:", CHUNK_FM_NICK, CHUNK_FM_DEST)) {
+				mError = true;
 			} else if (!SplitOnTwo("$Msg:", CHUNK_FM_DEST, CHUNK_FM_DEST, CHUNK_FM_REASON)) {
-				mbError = 1;
+				mError = true;
 			}
 			break;
 
 		case NMDC_TYPE_GETINFO : /** $GetINFO [remote_nick] [nick] */
-			if (!SplitOnTwo(miKWSize, ' ', CHUNK_GI_OTHER, CHUNK_GI_NICK)) {
-				mbError = 1;
+			if (!SplitOnTwo(mKeyLength, ' ', CHUNK_GI_OTHER, CHUNK_GI_NICK)) {
+				mError = true;
 			}
 			break;
 
 		case NMDC_TYPE_MCTO : /** $MCTo: [remote_nick] $[nick] [msg] */
-			if (!SplitOnTwo(miKWSize," $", CHUNK_MC_TO, CHUNK_MC_FROM)) {
-				mbError = 1;
+			if (!SplitOnTwo(mKeyLength," $", CHUNK_MC_TO, CHUNK_MC_FROM)) {
+				mError = true;
 			} else if (!SplitOnTwo(' ', CHUNK_MC_FROM, CHUNK_MC_FROM, CHUNK_MC_MSG)) {
-				mbError = 1;
+				mError = true;
 			}
 			break;
 
 		case NMDC_TYPE_UNKNOWN : /** Cmd without $ in begining position */
 			if (mCommand.compare(0, 1, "$")) {
-				mbError = 1;
+				mError = true;
 			}
 			break;
 
@@ -343,7 +358,7 @@ bool DcParser::SplitChunks() {
 			break;
 
 	}
-	return mbError;
+	return mError;
 }
 
 int DcParser::checkCmd(DcParser & dcParser, const string & sData, DcUserBase * dcUserBase /*= NULL*/) {

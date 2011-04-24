@@ -227,19 +227,26 @@ public:
 	DcParser();
 	virtual ~DcParser();
 
-	inline int getCommandType() const {
+	int getCommandType() const {
 		return mType;
 	}
 	
 	/** Do parse for command and return type of this command */
-	int Parse();
+	virtual int Parse();
 	
+	virtual void ReInit();
+
 	/** Get string address for the chunk of command */
 	string & chunkString(unsigned int n);
 	
 	bool SplitChunks();
 	static bool IsPassive(const string & description);
 	static int checkCmd(DcParser & dcParser, const string & sData, DcUserBase * dcUserBase = NULL);
+
+private:
+
+	bool mError;
+	size_t mKeyLength; //< Key-word len
 
 }; // class DcParser
 

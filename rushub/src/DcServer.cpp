@@ -364,13 +364,13 @@ int DcServer::onNewConn(Conn *conn) {
 			dcConn->LogStream() << "System down, close" << endl;
 		}
 		dcConn->closeNow(CLOSE_REASON_HUB_LOAD);
-		return 1;
+		return -1;
 	}
 
 	/** Checking flood-entry (by ip) */
 	if (mIPEnterFlood.Check(dcConn->getNetIp(), mTime)) {
 		dcConn->closeNow(CLOSE_REASON_FLOOD_IP_ENTRY);
-		return 2;
+		return -2;
 	}
 
 	if (dcConn->Log(5)) {

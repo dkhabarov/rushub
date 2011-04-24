@@ -88,9 +88,7 @@ public:
 
 protected:
 
-	size_t miKWSize; //< Key-word len (PROTOCOL NMDC)
 	size_t mLength; //< Command len
-	bool mbError; //< Error
 
 	string * mStrings; //< String array for chunks
 	unsigned long mStrMap; //< Chunk already existed

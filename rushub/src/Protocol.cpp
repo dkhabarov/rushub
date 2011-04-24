@@ -38,9 +38,7 @@ Parser::Parser(int max) :
 	Obj("Parser"),
 	mType(NMDC_TYPE_UNPARSED),
 	mChunks(max),
-	miKWSize(0),
 	mLength(0),
-	mbError(false),
 	mStrings(NULL),
 	mStrMap(0l),
 	mIsParsed(false),
@@ -64,9 +62,7 @@ void Parser::ReInit() {
 	mCommand.resize(0);
 	mCommand.reserve(512);
 	mType = NMDC_TYPE_UNPARSED;
-	miKWSize = 0;
 	mLength = 0;
-	mbError = false;
 	mChunks.clear();
 	mChunks.resize(mMaxChunks);
 	mStrMap = 0l;

@@ -309,16 +309,20 @@ void Server::step() {
 			if (new_conn) {
 				if (addConnection(new_conn) > 0) {
 
-					if (mNowConn->mConnFactory) {
-						// On new connection using ListenFactory
-						mNowConn->mConnFactory->onNewConn(new_conn);
-					} else {
-						if (Log(4)) {
-							LogStream() << "ListenFactory is empty" << endl;
+					if (inputData(new_conn) >= 0) {
+
+						if (mNowConn->mConnFactory) {
+							// On new connection using ListenFactory
+							mNowConn->mConnFactory->onNewConn(new_conn);
+						} else {
+							if (Log(4)) {
+								LogStream() << "ListenFactory is empty" << endl;
+							}
+
+							// On new connection by server
+							onNewConn(new_conn);
 						}
 
-						// On new connection by server
-						onNewConn(new_conn);
 					}
 
 				}
