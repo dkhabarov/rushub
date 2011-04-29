@@ -26,7 +26,6 @@
 #define DC_PARSER_H
 
 #include "Protocol.h"
-#include "ProtocolCommand.h" // for ProtocolCommand
 #include "Plugin.h"
 
 using namespace ::server;

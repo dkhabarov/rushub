@@ -23,14 +23,49 @@
  */
 
 #include "DcParser.h"
+#include "stringutils.h"
 
 namespace dcserver {
 
 namespace protocol {
 
 using namespace ::dcserver::protoenums;
+using namespace ::utils;
 
-/** Основные ключевые слова команд */
+
+/** Protocol command */
+class ProtocolCommand {
+
+public:
+
+	/** Key-word of cmd */
+	string mKey;
+
+	/** Cmd len */
+	size_t mLength;
+
+public:
+
+	ProtocolCommand() {
+	}
+
+	ProtocolCommand(string sKey) : mKey(sKey) {
+		mLength = mKey.length();
+	}
+
+	virtual ~ProtocolCommand() {
+	}
+
+	/** Checking that string contains command */
+	bool check(const string & str) {
+		return 0 == strCompare(str, 0, mLength, mKey);
+	}
+
+}; // ProtocolCommand
+
+
+
+/** Main NMDC commands keywords */
 ProtocolCommand aDC_Commands[] = {
 	ProtocolCommand("$MultiSearch "),      // check: ip, delay
 	ProtocolCommand("$MultiSearch Hub:"),  // check: nick, delay
