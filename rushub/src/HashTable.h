@@ -607,6 +607,6 @@ public:
 #endif // HASH_TABLE_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

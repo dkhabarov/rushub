@@ -120,6 +120,6 @@ private:
 #endif // TIMES_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

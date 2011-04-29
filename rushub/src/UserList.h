@@ -384,6 +384,6 @@ public:
 #endif // USER_LIST_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

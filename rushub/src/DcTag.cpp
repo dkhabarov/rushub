@@ -213,6 +213,6 @@ void DcTag::findIntParam(const char * find, int & param, TagNil tagNil) {
 }; // namespace dcserver
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

@@ -1572,6 +1572,6 @@ int SetHubState(lua_State * L) {
 }; // namespace luaplugin
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

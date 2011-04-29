@@ -341,6 +341,6 @@ private:
 #endif // CONN_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

@@ -56,6 +56,6 @@ public:
 #endif // PROTOCOL_CMD_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

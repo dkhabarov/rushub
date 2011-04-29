@@ -260,6 +260,6 @@ string & trim(string & str) {
 }; // namespace utils
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

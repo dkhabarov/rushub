@@ -119,6 +119,6 @@ private:
 #endif // CALL_LIST_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

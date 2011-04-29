@@ -346,6 +346,6 @@ typedef CallListType3<DcConnBase *, int, int> CallListConnIntInt;
 #endif // PLUGIN_LIST_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

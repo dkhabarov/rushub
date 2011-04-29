@@ -47,6 +47,6 @@ bool ProtocolCommand::check(const string & str) {
 };
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

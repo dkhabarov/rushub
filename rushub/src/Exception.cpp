@@ -324,6 +324,6 @@ void Exception::stackTrace(void * hThread, char * msg, std::ostream & f, unsigne
 #endif // _WIN32
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

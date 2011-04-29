@@ -147,6 +147,6 @@ public:
 #endif // LUA_PLUGIN_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

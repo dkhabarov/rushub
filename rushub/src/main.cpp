@@ -161,6 +161,6 @@ int main(int argc, char ** argv) {
 }
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

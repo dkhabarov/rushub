@@ -83,6 +83,6 @@ public:
 #endif // WEB_CONN_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

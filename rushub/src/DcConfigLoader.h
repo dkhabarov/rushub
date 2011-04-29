@@ -60,6 +60,6 @@ public:
 #endif // DC_CONFIG_LOADER_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

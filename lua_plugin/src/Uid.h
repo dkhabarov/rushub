@@ -94,6 +94,6 @@ private:
 #endif // UID_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

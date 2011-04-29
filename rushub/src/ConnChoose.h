@@ -227,6 +227,6 @@ ConnBase * ConnChoose::operator [] (tSocket sock) {
 #endif // CONN_CHOOSE_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

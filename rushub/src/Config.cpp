@@ -253,6 +253,6 @@ ISNULLPSTRING();
 }; // namespace configuration
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

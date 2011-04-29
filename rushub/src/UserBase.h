@@ -46,6 +46,6 @@ public:
 #endif // USER_BASE_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

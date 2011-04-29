@@ -68,6 +68,6 @@ public:
 #endif // ANTIFLOOD_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

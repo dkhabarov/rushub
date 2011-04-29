@@ -178,6 +178,6 @@ CONFIGBASEITEM(string *, ITEM_TYPE_PSTRING, PString);     /** ConfigPString */
 #endif // CONFIG_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

@@ -94,6 +94,6 @@ private:
 #endif // CONN_POLL_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

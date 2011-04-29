@@ -228,6 +228,6 @@ bool Dir::checkPath(string & path) {
 }; // namespace utils
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

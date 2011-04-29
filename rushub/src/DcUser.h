@@ -154,6 +154,6 @@ private:
 #endif // DC_USER_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

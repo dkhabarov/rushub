@@ -63,6 +63,6 @@ public:
 #endif // EXCEPTION_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

@@ -103,6 +103,6 @@ private:
 #endif // TIMEOUT_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

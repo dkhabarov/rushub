@@ -187,6 +187,6 @@ void WebConn::disconnect() {
 }; // namespace webserver
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

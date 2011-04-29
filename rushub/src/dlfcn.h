@@ -46,6 +46,6 @@
 #endif // DLFCN
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

@@ -118,6 +118,6 @@ protected:
 #endif // DC_IP_LIST_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

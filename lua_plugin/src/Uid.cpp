@@ -369,6 +369,6 @@ void Uid::pushBoolean(lua_State * L, int val, bool cond) {
 }; // namespace luaplugin
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

@@ -762,6 +762,6 @@ private:
 #endif // PLUGIN_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

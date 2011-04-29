@@ -1433,6 +1433,6 @@ string DcServer::getSysVersion() {
 }; // namespace dcserver
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

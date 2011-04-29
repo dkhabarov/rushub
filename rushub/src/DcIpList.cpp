@@ -147,6 +147,6 @@ int DcIpList::sendWithNick(DcConn * dcConn) {
 }; // namespace dcserver
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

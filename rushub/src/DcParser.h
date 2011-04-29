@@ -257,6 +257,6 @@ private:
 #endif // DC_PARSER_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

@@ -95,6 +95,6 @@ public:
 #endif // DIR_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

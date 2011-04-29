@@ -421,6 +421,6 @@ private:
 #endif // DC_SERVER_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

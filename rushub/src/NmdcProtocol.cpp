@@ -1504,6 +1504,6 @@ unsigned long NmdcProtocol::getMaxCommandLength() {
 }; // namespace dcserver
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

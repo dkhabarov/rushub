@@ -96,6 +96,6 @@ public:
 #endif // SERVICE_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

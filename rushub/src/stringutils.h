@@ -80,6 +80,6 @@ string & trim(string &);
 #endif // STRING_UTILS_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

@@ -125,6 +125,6 @@ private:
 #endif // OBJ_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

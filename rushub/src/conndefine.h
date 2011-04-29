@@ -128,6 +128,6 @@
 #endif // CONN_DEF_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

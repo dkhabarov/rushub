@@ -255,6 +255,6 @@ string & FullUserList::getIpList() {
 }; // namespace dcserver
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

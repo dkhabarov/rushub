@@ -177,6 +177,6 @@ V HashMap<V, K>::find(const K & hash) {
 #endif // HASH_LIST_MAP_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

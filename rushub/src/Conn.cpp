@@ -956,6 +956,6 @@ int ConnFactory::onNewConn(Conn * conn) {
 }; // server
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

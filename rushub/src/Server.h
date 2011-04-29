@@ -189,6 +189,6 @@ private:
 #endif // SERVER_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

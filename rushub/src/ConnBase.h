@@ -44,6 +44,6 @@ public:
 #endif // CONN_BASE_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

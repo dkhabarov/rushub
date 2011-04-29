@@ -195,6 +195,6 @@ public:
 #endif // CONFIG_LIST_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

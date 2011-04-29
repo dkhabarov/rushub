@@ -138,6 +138,6 @@ ADDVALUES(string);
 }; // namespace configuration
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

@@ -325,6 +325,6 @@ private:
 #endif // DC_CONN_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

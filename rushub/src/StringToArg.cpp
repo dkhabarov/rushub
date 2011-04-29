@@ -179,6 +179,6 @@ int StringToArg::CopyCookedString(char ** dest, char ** src) {
 #endif // _WIN32
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

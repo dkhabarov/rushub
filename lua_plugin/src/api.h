@@ -178,6 +178,6 @@ int redirect(lua_State * L);
 #endif // FUNCS_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

@@ -108,6 +108,6 @@ private:
 #endif // LUA_INTERPRETER_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

@@ -627,6 +627,6 @@ int Server::onTimer(Time &) {
 }; // server
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

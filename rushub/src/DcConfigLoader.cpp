@@ -216,6 +216,6 @@ int DcConfigLoader::saveToFile(ConfigListBase * configListBase, const char * fil
 }; // namespace configuration
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

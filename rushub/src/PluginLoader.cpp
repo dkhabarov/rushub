@@ -171,6 +171,6 @@ bool PluginLoader::strLog() {
 }; // namespace plugin
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

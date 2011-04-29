@@ -191,6 +191,6 @@ private:
 #endif // DC_CONFIG_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

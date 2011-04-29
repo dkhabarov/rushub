@@ -52,6 +52,6 @@ public:
 #endif // WEB_PARSER_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

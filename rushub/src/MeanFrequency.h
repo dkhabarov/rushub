@@ -171,6 +171,6 @@ public:
 #endif // MEAN_FREQUENCY_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

@@ -156,6 +156,6 @@ private:
 #endif // LIST_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

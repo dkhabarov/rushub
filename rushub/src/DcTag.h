@@ -224,6 +224,6 @@ private:
 #endif // DC_TAG_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

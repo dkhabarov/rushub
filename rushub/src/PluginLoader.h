@@ -107,6 +107,6 @@ protected:
 #endif // PLUGIN_LOADER_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

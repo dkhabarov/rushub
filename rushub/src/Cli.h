@@ -74,6 +74,6 @@ public:
 #endif // CLI_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

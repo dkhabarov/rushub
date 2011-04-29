@@ -51,6 +51,6 @@ public:
 #endif // STR_TO_ARG_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

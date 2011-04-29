@@ -106,6 +106,6 @@ private:
 #endif // MY_INFO_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

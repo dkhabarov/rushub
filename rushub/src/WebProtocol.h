@@ -90,6 +90,6 @@ protected:
 #endif // WEB_PROTOCOL_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

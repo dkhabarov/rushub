@@ -51,6 +51,6 @@ public:
 #endif // CONFIG_LOADER_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

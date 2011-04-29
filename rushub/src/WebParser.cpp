@@ -56,6 +56,6 @@ bool WebParser::splitChunks() {
 }; // namespace webserver
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

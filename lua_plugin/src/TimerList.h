@@ -97,6 +97,6 @@ private:
 #endif // TIMER_LIST_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

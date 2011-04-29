@@ -145,6 +145,6 @@ private:
 #endif // NMDC_PROTOCOL_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

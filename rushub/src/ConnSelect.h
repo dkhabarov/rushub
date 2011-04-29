@@ -229,6 +229,6 @@ protected:
 #endif // CONN_SELECT_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */

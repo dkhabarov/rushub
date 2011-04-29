@@ -119,6 +119,6 @@ private:
 #endif // PROTOCOL_H
 
 /**
-* $Id$
-* $HeadURL$
-*/
+ * $Id$
+ * $HeadURL$
+ */
