@@ -152,3 +152,8 @@ private:
 }; // namespace dcserver
 
 #endif // DC_USER_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

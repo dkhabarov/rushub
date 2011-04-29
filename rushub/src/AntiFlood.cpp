@@ -104,3 +104,8 @@ bool AntiFlood::check(HashType_t hash, Time now) {
 
 
 }; // namespace utils
+
+/**
+* $Id$
+* $HeadURL$
+*/

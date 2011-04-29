@@ -251,3 +251,8 @@ ISNULLPDOUBLE();
 ISNULLPSTRING();
 
 }; // namespace configuration
+
+/**
+* $Id$
+* $HeadURL$
+*/

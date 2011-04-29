@@ -147,3 +147,8 @@ void Cli::printVersion(FILE * stream, int exitStatus) {
 
 
 #endif // _WIN32
+
+/**
+* $Id$
+* $HeadURL$
+*/

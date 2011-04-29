@@ -81,3 +81,8 @@ public:
 }; // namespace webserver
 
 #endif // WEB_CONN_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

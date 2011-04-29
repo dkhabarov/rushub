@@ -61,3 +61,8 @@ public:
 #endif // _WIN32
 
 #endif // EXCEPTION_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

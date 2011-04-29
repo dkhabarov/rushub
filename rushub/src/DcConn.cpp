@@ -420,3 +420,8 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 }
 
 }; // namespace dcserver
+
+/**
+* $Id$
+* $HeadURL$
+*/

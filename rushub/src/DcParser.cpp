@@ -384,3 +384,8 @@ int DcParser::checkCmd(DcParser & dcParser, const string & sData, DcUserBase * d
 }; // namespace protocol
 
 }; // namespace dcserver
+
+/**
+* $Id$
+* $HeadURL$
+*/

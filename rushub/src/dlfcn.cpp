@@ -162,3 +162,8 @@ int dlclose(void * handle) {
 }
 
 #endif // _WIN32
+
+/**
+* $Id$
+* $HeadURL$
+*/

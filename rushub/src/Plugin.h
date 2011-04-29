@@ -760,3 +760,8 @@ private:
 }; // namespace plugin
 
 #endif // PLUGIN_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

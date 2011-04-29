@@ -189,3 +189,8 @@ private:
 }; // namespace dcserver
 
 #endif // DC_CONFIG_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

@@ -78,3 +78,8 @@ string & trim(string &);
 }; // namespace utils
 
 #endif // STRING_UTILS_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

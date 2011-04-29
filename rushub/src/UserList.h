@@ -382,3 +382,8 @@ public:
 }; // namespace dcserver
 
 #endif // USER_LIST_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

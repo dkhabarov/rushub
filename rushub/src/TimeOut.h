@@ -101,3 +101,8 @@ private:
 }; // namespace utils
 
 #endif // TIMEOUT_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

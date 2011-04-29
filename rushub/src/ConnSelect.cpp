@@ -214,3 +214,8 @@ void ConnSelect::setRevents(cSelectFD & fdset, unsigned mask) {
 }; // server
 
 #endif // USE_SELECT
+
+/**
+* $Id$
+* $HeadURL$
+*/

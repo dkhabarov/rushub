@@ -297,3 +297,8 @@ void PluginList::onPluginLoad(Plugin * plugin) {
 
 
 }; // namespace plugin
+
+/**
+* $Id$
+* $HeadURL$
+*/

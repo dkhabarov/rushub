@@ -73,3 +73,8 @@ void WebProtocol::deleteParser(Parser * parser) {
 }; // namespace protocol
 
 }; // namespace webserver
+
+/**
+* $Id$
+* $HeadURL$
+*/

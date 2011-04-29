@@ -225,3 +225,8 @@ ConnBase * ConnChoose::operator [] (tSocket sock) {
 }; // namespace server
 
 #endif // CONN_CHOOSE_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

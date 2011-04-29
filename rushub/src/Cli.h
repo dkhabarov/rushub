@@ -72,3 +72,8 @@ public:
 #endif // _WIN32
 
 #endif // CLI_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

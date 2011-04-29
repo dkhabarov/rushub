@@ -94,3 +94,8 @@ public:
 #endif // _WIN32
 
 #endif // SERVICE_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

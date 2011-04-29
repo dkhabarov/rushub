@@ -104,3 +104,8 @@ private:
 }; // namespace dcserver
 
 #endif // MY_INFO_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

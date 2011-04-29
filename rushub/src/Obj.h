@@ -123,3 +123,8 @@ private:
 }; // class Obj
 
 #endif // OBJ_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

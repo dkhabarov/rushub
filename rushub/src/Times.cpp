@@ -346,3 +346,8 @@ const Time & Time::AsDateMS() const {
 }
 	
 }; // namespace utils
+
+/**
+* $Id$
+* $HeadURL$
+*/

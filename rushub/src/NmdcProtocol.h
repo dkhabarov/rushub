@@ -143,3 +143,8 @@ private:
 }; // namespace dcserver
 
 #endif // NMDC_PROTOCOL_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

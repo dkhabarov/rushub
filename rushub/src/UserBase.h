@@ -44,3 +44,8 @@ public:
 }; // namespace dcserver
 
 #endif // USER_BASE_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

@@ -54,3 +54,8 @@ public:
 }; // server
 
 #endif // PROTOCOL_CMD_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

@@ -255,3 +255,8 @@ private:
 }; // namespace dcserver
 
 #endif // DC_PARSER_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

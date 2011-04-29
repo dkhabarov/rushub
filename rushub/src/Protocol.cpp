@@ -148,3 +148,8 @@ bool Parser::chunkRedLeft(int cn, size_t amount) {
 }
 
 };
+
+/**
+* $Id$
+* $HeadURL$
+*/

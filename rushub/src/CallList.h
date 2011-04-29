@@ -117,3 +117,8 @@ private:
 }; // namespace plugin
 
 #endif // CALL_LIST_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

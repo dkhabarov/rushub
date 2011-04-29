@@ -105,3 +105,8 @@ protected:
 }; // namespace plugin
 
 #endif // PLUGIN_LOADER_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

@@ -193,3 +193,8 @@ public:
 }; // namespace configuration
 
 #endif // CONFIG_LIST_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

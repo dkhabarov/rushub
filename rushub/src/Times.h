@@ -118,3 +118,8 @@ private:
 }; // namespace utils
 
 #endif // TIMES_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

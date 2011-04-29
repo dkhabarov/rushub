@@ -169,3 +169,8 @@ public:
 }; // namespace utils
 
 #endif // MEAN_FREQUENCY_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

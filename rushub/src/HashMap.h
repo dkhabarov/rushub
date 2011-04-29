@@ -175,3 +175,8 @@ V HashMap<V, K>::find(const K & hash) {
 }; // namespace utils
 
 #endif // HASH_LIST_MAP_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

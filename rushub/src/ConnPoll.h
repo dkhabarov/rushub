@@ -92,3 +92,8 @@ private:
 #endif // _WIN32
 
 #endif // CONN_POLL_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

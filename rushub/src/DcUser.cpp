@@ -325,3 +325,8 @@ unsigned int DcUser::getTagNil(/*bool real = false */) const {
 
 
 }; // namespace dcserver
+
+/**
+* $Id$
+* $HeadURL$
+*/

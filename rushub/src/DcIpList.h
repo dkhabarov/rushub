@@ -116,3 +116,8 @@ protected:
 }; // namespace dcserver
 
 #endif // DC_IP_LIST_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

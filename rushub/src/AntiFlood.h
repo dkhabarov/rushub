@@ -66,3 +66,8 @@ public:
 }; // namespace utils
 
 #endif // ANTIFLOOD_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

@@ -87,3 +87,8 @@ void MyInfo::setShare(__int64 share) {
 
 
 }; // namespace dcserver
+
+/**
+* $Id$
+* $HeadURL$
+*/

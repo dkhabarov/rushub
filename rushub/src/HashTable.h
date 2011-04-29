@@ -605,3 +605,8 @@ public:
 }; // namespace utils
 
 #endif // HASH_TABLE_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

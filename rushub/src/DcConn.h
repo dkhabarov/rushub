@@ -323,3 +323,8 @@ private:
 }; // namespace dcserver
 
 #endif // DC_CONN_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

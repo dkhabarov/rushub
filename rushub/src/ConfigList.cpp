@@ -136,3 +136,8 @@ ADDVALUES(__int64);
 ADDVALUES(string);
 
 }; // namespace configuration
+
+/**
+* $Id$
+* $HeadURL$
+*/

@@ -467,3 +467,8 @@ void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 }
 
 #endif // _WIN32
+
+/**
+* $Id$
+* $HeadURL$
+*/

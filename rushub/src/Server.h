@@ -187,3 +187,8 @@ private:
 }; // server
 
 #endif // SERVER_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

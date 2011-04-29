@@ -344,3 +344,8 @@ typedef CallListType3<DcConnBase *, int, int> CallListConnIntInt;
 }; // namespace plugin
 
 #endif // PLUGIN_LIST_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

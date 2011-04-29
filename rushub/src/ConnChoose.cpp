@@ -56,3 +56,8 @@ bool ConnChoose::hasConn(ConnBase * connBase) {
 }
 
 }; // server
+
+/**
+* $Id$
+* $HeadURL$
+*/

@@ -222,3 +222,8 @@ private:
 }; // namespace dcserver
 
 #endif // DC_TAG_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

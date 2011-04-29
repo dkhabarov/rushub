@@ -88,3 +88,8 @@ protected:
 }; // namespace webserver
 
 #endif // WEB_PROTOCOL_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

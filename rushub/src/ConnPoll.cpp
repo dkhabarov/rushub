@@ -182,3 +182,8 @@ bool ConnPoll::revTest(tSocket sock) {
 }; // server
 
 #endif // _WIN32
+
+/**
+* $Id$
+* $HeadURL$
+*/

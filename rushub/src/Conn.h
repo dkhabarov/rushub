@@ -339,3 +339,8 @@ private:
 }; // namespace server
 
 #endif // CONN_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

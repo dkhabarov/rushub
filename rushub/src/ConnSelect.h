@@ -227,3 +227,8 @@ protected:
 #endif // USE_SELECT
 
 #endif // CONN_SELECT_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

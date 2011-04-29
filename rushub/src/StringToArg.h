@@ -49,3 +49,8 @@ public:
 #endif // _WIN32
 
 #endif // STR_TO_ARG_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

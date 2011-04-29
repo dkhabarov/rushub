@@ -42,3 +42,8 @@ public:
 }; // namespace server
 
 #endif // CONN_BASE_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

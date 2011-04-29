@@ -452,3 +452,8 @@ int DcLang::reload() {
 
 
 }; // namespace dcserver
+
+/**
+* $Id$
+* $HeadURL$
+*/

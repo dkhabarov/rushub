@@ -117,3 +117,8 @@ private:
 }; // server
 
 #endif // PROTOCOL_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

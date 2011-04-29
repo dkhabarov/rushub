@@ -176,3 +176,8 @@ CONFIGBASEITEM(string *, ITEM_TYPE_PSTRING, PString);     /** ConfigPString */
 }; // namespace configuration
 
 #endif // CONFIG_H
+
+/**
+* $Id$
+* $HeadURL$
+*/
