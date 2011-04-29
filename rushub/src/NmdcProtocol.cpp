@@ -351,7 +351,7 @@ int NmdcProtocol::eventValidateNick(DcParser * dcparser, DcConn * dcConn) {
 	BADFLAG("ValidateNick", LOGIN_STATUS_VALNICK);
 
 	string &sNick = dcparser->chunkString(CHUNK_1_PARAM);
-	unsigned iNickLen = sNick.length();
+	size_t iNickLen = sNick.length();
 
 	/** Additional checking the nick length */
 	if (iNickLen > 0xFF) {
@@ -1005,14 +1005,14 @@ int NmdcProtocol::eventQuit(DcParser *, DcConn * dcConn) {
 // $Lock ...|
 string & NmdcProtocol::appendLock(string & str) {
 	static const char * cmd = "$Lock EXTENDEDPROTOCOL_" INTERNALNAME "_by_setuper_" INTERNALVERSION " Pk=" INTERNALNAME NMDC_SEPARATOR;
-	static unsigned int cmdLen = strlen(cmd);
+	static size_t cmdLen = strlen(cmd);
 	return str.append(cmd, cmdLen);
 }
 
 // $Hello nick|
 string & NmdcProtocol::appendHello(string & str, const string & nick) {
 	static const char * cmd = "$Hello ";
-	static unsigned int cmdLen = 7 + NMDC_SEPARATOR_LEN;
+	static size_t cmdLen = 7 + NMDC_SEPARATOR_LEN;
 	str.reserve(str.size() + nick.size() + cmdLen);
 	return str.append(cmd, 7).append(nick).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
 }
@@ -1020,21 +1020,21 @@ string & NmdcProtocol::appendHello(string & str, const string & nick) {
 // $HubIsFull|
 string & NmdcProtocol::appendHubIsFull(string & str) {
 	static const char * cmd = "$HubIsFull" NMDC_SEPARATOR;
-	static unsigned int cmdLen = 10 + NMDC_SEPARATOR_LEN;
+	static size_t cmdLen = 10 + NMDC_SEPARATOR_LEN;
 	return str.append(cmd, cmdLen);
 }
 
 // $GetPass|
 string & NmdcProtocol::appendGetPass(string & str) {
 	static const char * cmd = "$GetPass" NMDC_SEPARATOR;
-	static unsigned int cmdLen = 8 + NMDC_SEPARATOR_LEN;
+	static size_t cmdLen = 8 + NMDC_SEPARATOR_LEN;
 	return str.append(cmd, cmdLen);
 }
 
 // $ValidateDenide nick|
 string & NmdcProtocol::appendValidateDenide(string & str, const string & nick) {
 	static const char * cmd = "$ValidateDenide ";
-	static unsigned int cmdLen = 16 + NMDC_SEPARATOR_LEN;
+	static size_t cmdLen = 16 + NMDC_SEPARATOR_LEN;
 	str.reserve(str.size() + nick.size() + cmdLen);
 	return str.append(cmd, 16).append(nick).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
 }
@@ -1043,8 +1043,8 @@ string & NmdcProtocol::appendValidateDenide(string & str, const string & nick) {
 string & NmdcProtocol::appendHubName(string & str, const string & hubName, const string & topic) {
 	static const char * cmd = "$HubName ";
 	static const char * cmd2 = " - ";
-	static unsigned int cmdLen = 9 + NMDC_SEPARATOR_LEN;
-	static unsigned int cmdLen2 = 12 + NMDC_SEPARATOR_LEN;
+	static size_t cmdLen = 9 + NMDC_SEPARATOR_LEN;
+	static size_t cmdLen2 = 12 + NMDC_SEPARATOR_LEN;
 	if (topic.length()) {
 		str.reserve(str.size() + hubName.size() + topic.size() + cmdLen2);
 		return str.append(cmd, 9).append(hubName).append(cmd2, 3).append(topic).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
@@ -1057,7 +1057,7 @@ string & NmdcProtocol::appendHubName(string & str, const string & hubName, const
 // $HubTopic hubTopic|
 string & NmdcProtocol::appendHubTopic(string & str, const string & hubTopic) {
 	static const char * cmd = "$HubTopic ";
-	static unsigned int cmdLen = 10 + NMDC_SEPARATOR_LEN;
+	static size_t cmdLen = 10 + NMDC_SEPARATOR_LEN;
 	str.reserve(str.size() + hubTopic.size() + cmdLen);
 	return str.append(cmd, 10).append(hubTopic).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
 }
@@ -1066,7 +1066,7 @@ string & NmdcProtocol::appendHubTopic(string & str, const string & hubTopic) {
 string & NmdcProtocol::appendChat(string & str, const string & nick, const string & msg) {
 	static const char * cmd = "<";
 	static const char * cmd2 = "> ";
-	static unsigned int cmdLen = 3 + NMDC_SEPARATOR_LEN;
+	static size_t cmdLen = 3 + NMDC_SEPARATOR_LEN;
 	str.reserve(str.size() + nick.size() + msg.size() + cmdLen);
 	return str.append(cmd, 1).append(nick).append(cmd2, 2).append(msg).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
 }
@@ -1077,7 +1077,7 @@ string & NmdcProtocol::appendPm(string & str, const string & to, const string & 
 	static const char * cmd2 = " From: ";
 	static const char * cmd3 = " $<";
 	static const char * cmd4 = "> ";
-	static unsigned int cmdLen = 17 + NMDC_SEPARATOR_LEN;
+	static size_t cmdLen = 17 + NMDC_SEPARATOR_LEN;
 	str.reserve(str.size() + to.size() + from.size() + nick.size() + msg.size() + cmdLen);
 	str.append(cmd, 5).append(to).append(cmd2, 7).append(from).append(cmd3, 3).append(nick);
 	return str.append(cmd4, 2).append(msg).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
@@ -1089,7 +1089,7 @@ void NmdcProtocol::appendPmToAll(string & start, string & end, const string & fr
 	static const char * cmd2 = " From: ";
 	static const char * cmd3 = " $<";
 	static const char * cmd4 = "> ";
-	static unsigned int cmdLen = 12 + NMDC_SEPARATOR_LEN;
+	static size_t cmdLen = 12 + NMDC_SEPARATOR_LEN;
 	start.append(cmd, 5);
 	end.reserve(end.size() + from.size() + nick.size() + msg.size() + cmdLen);
 	end.append(cmd2, 7).append(from).append(cmd3, 3).append(nick);
@@ -1099,7 +1099,7 @@ void NmdcProtocol::appendPmToAll(string & start, string & end, const string & fr
 // $Quit nick|
 string & NmdcProtocol::appendQuit(string & str, const string & nick) {
 	static const char * cmd = "$Quit ";
-	static unsigned int cmdLen = 6 + NMDC_SEPARATOR_LEN;
+	static size_t cmdLen = 6 + NMDC_SEPARATOR_LEN;
 	str.reserve(str.size() + nick.size() + cmdLen);
 	return str.append(cmd, 6).append(nick).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
 }
@@ -1108,8 +1108,8 @@ string & NmdcProtocol::appendQuit(string & str, const string & nick) {
 string & NmdcProtocol::appendOpList(string & str, const string & nick) {
 	static const char * cmd = "$OpList ";
 	static const char * cmd2 = "$$"NMDC_SEPARATOR;
-	static unsigned int cmdLen = 10 + NMDC_SEPARATOR_LEN;
-	static unsigned int cmdLen2 = 2 + NMDC_SEPARATOR_LEN;
+	static size_t cmdLen = 10 + NMDC_SEPARATOR_LEN;
+	static size_t cmdLen2 = 2 + NMDC_SEPARATOR_LEN;
 	str.reserve(str.size() + nick.size() + cmdLen);
 	return str.append(cmd, 8).append(nick).append(cmd2, cmdLen2);
 }
@@ -1119,8 +1119,8 @@ string & NmdcProtocol::appendUserIp(string & str, const string & nick, const str
 	static const char * cmd = "$UserIP ";
 	static const char * cmd2 = " ";
 	static const char * cmd3 = "$$"NMDC_SEPARATOR;
-	static unsigned int cmdLen = 11 + NMDC_SEPARATOR_LEN;
-	static unsigned int cmdLen2 = 2 + NMDC_SEPARATOR_LEN;
+	static size_t cmdLen = 11 + NMDC_SEPARATOR_LEN;
+	static size_t cmdLen2 = 2 + NMDC_SEPARATOR_LEN;
 	if (ip.length()) {
 		str.reserve(str.size() + nick.size() + ip.size() + cmdLen);
 		str.append(cmd, 8).append(nick).append(cmd2, 1).append(ip).append(cmd3, cmdLen2);
@@ -1335,7 +1335,7 @@ bool NmdcProtocol::validateUser(DcConn * dcConn, const string & sNick) {
 
 
 
-bool NmdcProtocol::checkNickLength(DcConn * dcConn, const unsigned iLen) {
+bool NmdcProtocol::checkNickLength(DcConn * dcConn, size_t iLen) {
 
 	if (
 		dcConn->miProfile == -1 && (

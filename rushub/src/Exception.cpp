@@ -81,7 +81,13 @@ long __stdcall Exception::exceptionFilter(LPEXCEPTION_POINTERS e) {
 	strftime(tm, BUFFERSIZE, "%Y-%m-%d %H:%M:%S", &Tm);
 
 	char code[BUFFERSIZE] = { '\0' };
-	sprintf(code, "%x", e->ExceptionRecord->ExceptionCode);
+	
+	#ifdef _WIN64
+		sprintf(code, "%I64x", e->ExceptionRecord->ExceptionCode);
+	#else
+		sprintf(code, "%I32x", e->ExceptionRecord->ExceptionCode);
+	#endif
+	
 
 	ofstream f;
 	f.open(FILE_NAME, ios_base::app);

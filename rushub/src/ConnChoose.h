@@ -85,7 +85,7 @@ public:
 	}
 
 	/** virtual function for select limit detect */
-	virtual unsigned size() {
+	virtual size_t size() {
 		return 0;
 	}
 

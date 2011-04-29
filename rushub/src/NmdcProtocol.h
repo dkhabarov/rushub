@@ -134,7 +134,7 @@ private:
 
 	// Check validate nick (user)
 	bool validateUser(DcConn * dcConn, const string & sNick);
-	bool checkNickLength(DcConn * dcConn, const unsigned iLen);
+	bool checkNickLength(DcConn * dcConn, size_t iLen);
 
 }; // NmdcProtocol
 

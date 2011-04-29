@@ -53,52 +53,52 @@ template <class V> class Array {
 
 protected:
 
-	unsigned miCapacity; /** Reserved number cell (element of the array) */
-	unsigned miSize; /** Number contributed not zero element in array */
+	size_t miCapacity; /** Reserved number cell (element of the array) */
+	size_t miSize; /** Number contributed not zero element in array */
 	V *mData; /** Array data */
 
 public:
 
-	Array(unsigned iCapacity = 1024);
+	Array(size_t iCapacity = 1024);
 
 	virtual ~Array();
 
 	/** Returns number not zero element in array (miSize) */
-	virtual unsigned size() const {
+	virtual size_t size() const {
 		return miSize;
 	}
 
 	/** Returns reserved number a cell (miCapacity) */
-	virtual unsigned capacity() const {
+	virtual size_t capacity() const {
 		return miCapacity;
 	}
 
 	/** Inserts not zero data in array. Returns NULL in the event of successful charting, 
 	    otherwise returns data, which were already contributed earlier in cell with this number */
-	virtual V insert(unsigned iNum, const V Data = 0);
+	virtual V insert(size_t iNum, const V Data = 0);
 
 	/** Updates not zero data in cell with specified by number. 
 	    Returns old data or NULL */
-	virtual V update(unsigned iNum, const V Data);
+	virtual V update(size_t iNum, const V Data);
 
 	/** Deletes not zero data from specified cells of the array. 
 	    Returns remote data or NULL in the event of their absences */
-	virtual V remove(unsigned iNum);
+	virtual V remove(size_t iNum);
 
 	/** Returns data specified cells of the array or NULL in the event of their absences */
-	virtual V find(unsigned iNum);
+	virtual V find(size_t iNum);
 
 
 	/** Iterator for container */
 	struct iterator {
 		V * mData;
-		unsigned i;
-		unsigned end;
+		size_t i;
+		size_t end;
 
 		iterator() : mData((V*)NULL), i(0), end(0) {
 		}
 
-		iterator(V * Data, unsigned _i, unsigned _end) : mData(Data), i(_i), end(_end) {
+		iterator(V * Data, size_t _i, size_t _end) : mData(Data), i(_i), end(_end) {
 		}
 
 		iterator & operator = (const iterator &it) {
@@ -155,7 +155,7 @@ public:
 }; // Array
 
 
-template <class V> Array<V>::Array(unsigned iCapacity) : miCapacity(iCapacity), miSize(0) {
+template <class V> Array<V>::Array(size_t iCapacity) : miCapacity(iCapacity), miSize(0) {
 	mData = new V[miCapacity];
 	memset(mData, NULL, sizeof(V) * miCapacity);
 }
@@ -169,7 +169,7 @@ template <class V> Array<V>::~Array() {
 
 /** Inserts not zero data in array. Returns NULL in the event of successful charting, 
     otherwise returns data, which were already contributed earlier in cell with this number */
-template <class V> V Array<V>::insert(unsigned iNum, const V Data) {
+template <class V> V Array<V>::insert(size_t iNum, const V Data) {
 	iNum %= miCapacity;
 	V OldData = mData[iNum];
 	if (!OldData && Data) {
@@ -181,7 +181,7 @@ template <class V> V Array<V>::insert(unsigned iNum, const V Data) {
 
 /** Updates not zero data in cell with specified by number. 
     Returns old data or NULL */
-template <class V> V Array<V>::update(unsigned iNum, const V Data) {
+template <class V> V Array<V>::update(size_t iNum, const V Data) {
 	iNum %= miCapacity;
 	V OldData = mData[iNum];
 	if (OldData && Data) {
@@ -193,7 +193,7 @@ template <class V> V Array<V>::update(unsigned iNum, const V Data) {
 
 /** Deletes not zero data from specified cells of the array. 
     Returns remote data or NULL in the event of their absences */
-template <class V> V Array<V>::remove(unsigned iNum) {
+template <class V> V Array<V>::remove(size_t iNum) {
 	iNum %= miCapacity;
 	V OldData = mData[iNum];
 	if (OldData) {
@@ -204,7 +204,7 @@ template <class V> V Array<V>::remove(unsigned iNum) {
 }
 
 /** Returns data specified cells of the array or NULL in the event of their absences */
-template <class V> V Array<V>::find(unsigned iNum) {
+template <class V> V Array<V>::find(size_t iNum) {
 	return mData[iNum % miCapacity];
 }
 
@@ -234,8 +234,8 @@ public:
 	}
 
 	/** Size of list */
-	unsigned size() const {
-		unsigned i = 1;
+	size_t size() const {
+		size_t i = 1;
 		List * it = mNext;
 		while (it != NULL) {
 			it = it->mNext;
@@ -349,12 +349,12 @@ public:
 protected:
 
 	tData * mData; /** Array with 1024 elements (on default) with type tItem* */
-	unsigned miSize; /** Size */
+	size_t miSize; /** Size */
 	bool mbIsResizing; /** Resizing flag */
 
 public:
 
-	HashTable(unsigned iCapacity = 1024) : 
+	HashTable(size_t iCapacity = 1024) : 
 		miSize(0),
 		mbIsResizing(false)
 	{
@@ -368,12 +368,12 @@ public:
 	}
 
 	/** Size */
-	inline unsigned size() const { return miSize; }
+	inline size_t size() const { return miSize; }
 
 	/** Clear */
 	void clear() {
 		tItem * Item = NULL;
-		for (unsigned it = 0; it < mData->capacity(); ++it) {
+		for (size_t it = 0; it < mData->capacity(); ++it) {
 			Item = mData->find(it); /** Find data by iterator */
 			if (Item != NULL) {
 				delete Item; /** Remove list */
@@ -387,7 +387,7 @@ public:
 	Returns true if successful accompaniment data and key (key is unique) */
 	bool add(const Key & key, V Data) {
 		if(Data == (V)NULL) return false; /** No data */
-		unsigned iHash = key % mData->capacity(); /** Get hash */
+		size_t iHash = key % mData->capacity(); /** Get hash */
 		tItem *Items, *Item = NULL;
 		Items = mData->find(iHash); /** Get cell data of the array */
 		if (Items == NULL) { /** Check presence of the list in cell of the array */
@@ -413,7 +413,7 @@ public:
 
 	/** Returns true if successful removing */
 	bool remove(const Key & key) {
-		unsigned iHash = key % mData->capacity(); /** Get hash */
+		size_t iHash = key % mData->capacity(); /** Get hash */
 		tItem *Item = NULL, *Items = mData->find(iHash); /** Get cell data of the array */
 		if (Items == NULL) { /** Check presence of the list in cell of the array */
 			return false;
@@ -546,7 +546,7 @@ public:
 	}
 
 	/** autoResize */
-	bool autoResize(unsigned & size, unsigned & capacity, unsigned & newSize) {
+	bool autoResize(size_t & size, size_t & capacity, size_t & newSize) {
 		capacity = this->mData->capacity();
 		size = this->miSize;
 		if ((size > (capacity << 1)) || (((size << 1) + 1) < capacity)) {
@@ -558,7 +558,7 @@ public:
 	}
 
 	bool autoResize() {
-		unsigned capacity = this->mData->capacity();
+		size_t capacity = this->mData->capacity();
 		if ((this->miSize > (capacity << 1)) || (((this->miSize << 1) + 1) < capacity)) {
 			this->resize(this->miSize + (this->miSize >> 1) + 1);
 			return true;
@@ -567,7 +567,7 @@ public:
 	}
 
 	/** Resize */
-	int resize(int newSize) {
+	size_t resize(size_t newSize) {
 		tData * newData = new tData(newSize);
 		tData * oldData = this->mData;
 
@@ -586,7 +586,7 @@ public:
 	void dump(std::ostream & os) const {
 		os << "Size = " << miSize << " Capacity = " << mData->capacity() << endl;
 		tItem * items = NULL;
-		for (unsigned i = 0; i < mData->capacity(); ++i) {
+		for (size_t i = 0; i < mData->capacity(); ++i) {
 			items = mData->find(i);
 			if (items != NULL) {
 				os << "i = " << i << " count = " << items->size() << endl;

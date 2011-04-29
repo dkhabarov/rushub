@@ -57,7 +57,7 @@ public:
 	ConnSelect();
 	virtual ~ConnSelect();
 
-	inline unsigned size() {
+	inline size_t size() {
 		return mResList.size();
 	}
 

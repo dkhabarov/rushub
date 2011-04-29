@@ -47,9 +47,9 @@ void MyInfo::setMyInfo(const string & myInfo, DcParser * parser, __int64 & total
 		email = parser->chunkString(CHUNK_MI_MAIL);
 		connection = parser->chunkString(CHUNK_MI_SPEED);
 
-		int connSize = connection.size();
+		size_t connSize = connection.size();
 		if (connSize != 0) {
-			magicByte = int(connection[--connSize]);
+			magicByte = unsigned(connection[--connSize]);
 			connection.assign(connection, 0, connSize);
 		}
 

@@ -53,7 +53,7 @@ public:
 	void sendToIpWithNick(const char * ip, string & start, string & end, unsigned long profile = 0, bool addSep = false, bool flush = true);
 
 	bool autoResize() {
-		unsigned size, capacity, newSize;
+		size_t size, capacity, newSize;
 		if (mIpTable.autoResize(size, capacity, newSize) && Log(3)) {
 			LogStream() << "Autoresizing: size = " << size << 
 				", capacity = " << capacity << " -> " + newSize << endl;
