@@ -182,7 +182,7 @@ public:
 	virtual const string & getMacAddress() const = 0;
 
 	//< Get enter time
-	virtual long getEnterTime() const = 0;
+	virtual long getConnectTime() const = 0;
 
 	//< Client's protocol version
 	virtual const string & getVersion() const = 0;

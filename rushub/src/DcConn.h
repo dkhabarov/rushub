@@ -149,7 +149,7 @@ class DcConn : public Conn, public DcConnBase {
 public:
 
 	unsigned mFeatures;         //< Features (PROTOCOL NMDC)
-	string msSupports;          //< Support cmd param (PROTOCOL NMDC)
+	string mSupports;           //< Support cmd param (PROTOCOL NMDC)
 	string mVersion;            //< DC version (PROTOCOL NMDC)
 
 	string msData;              //< Some user's data
@@ -207,9 +207,9 @@ public:
 	//< Get mac address
 	virtual const string & getMacAddress() const;
 
-	virtual long getEnterTime() const;
+	virtual long getConnectTime() const;
 
-	virtual void setEnterTimeNow();
+	virtual void setConnectTimeNow();
 
 	//< Client's protocol version (PROTOCOL NMDC)
 	virtual const string & getVersion() const;
@@ -294,8 +294,8 @@ protected:
 	//< Timers
 	struct Times {
 
-		//< Time sending cmd $Key to the server
-		Time mKey;
+		//< Time entering into the hub
+		Time mConnect;
 
 		//< Time last ping from server to client
 		Time mPingServer;

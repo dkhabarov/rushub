@@ -203,7 +203,7 @@ int Uid::userIndex(lua_State * L) {
 			break;
 
 		case PARAM_HASH_ENTERTIME :
-			lua_pushnumber(L, (lua_Number)dcConnBase->getEnterTime());
+			lua_pushnumber(L, (lua_Number)dcConnBase->getConnectTime());
 			break;
 
 		case PARAM_HASH_UID :

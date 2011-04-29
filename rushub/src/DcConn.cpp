@@ -139,14 +139,14 @@ const string & DcConn::getMacAddress() const {
 
 
 
-long DcConn::getEnterTime() const {
-	return mTimes.mKey.Sec();
+long DcConn::getConnectTime() const {
+	return mTimes.mConnect.Sec();
 }
 
 
 
-void DcConn::setEnterTimeNow() {
-	mTimes.mKey.Get();
+void DcConn::setConnectTimeNow() {
+	mTimes.mConnect.Get();
 }
 
 
@@ -159,7 +159,7 @@ const string & DcConn::getVersion() const {
 
 
 const string & DcConn::getSupports() const {
-	return msSupports;
+	return mSupports;
 }
 
 

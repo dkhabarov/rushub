@@ -315,7 +315,7 @@ int NmdcProtocol::eventSupports(DcParser * dcparser, DcConn * dcConn) {
 		feature.clear();
 		is >> feature;
 	}
-	dcConn->msSupports.assign(dcparser->mCommand, 10, dcparser->mCommand.size() - 10);
+	dcConn->mSupports.assign(dcparser->mCommand, 10, dcparser->mCommand.size() - 10);
 
 	#ifndef WITHOUT_PLUGINS
 		if (mDcServer->mCalls.mOnSupports.callAll(dcConn)) {
@@ -343,7 +343,7 @@ int NmdcProtocol::eventKey(DcParser *, DcConn * dcConn) {
 	dcConn->setLoginStatusFlag(LOGIN_STATUS_KEY); /** User has sent key */
 	dcConn->clearTimeOut(HUB_TIME_OUT_KEY);
 	dcConn->setTimeOut(HUB_TIME_OUT_VALNICK, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_VALNICK], mDcServer->mTime);
-	dcConn->setEnterTimeNow();
+	dcConn->setConnectTimeNow();
 	return 0;
 }
 
@@ -367,8 +367,8 @@ int NmdcProtocol::eventValidateNick(DcParser * dcparser, DcConn * dcConn) {
 	}
 
 	try {
-		DcUser *NewUser = new DcUser(sNick);
-		if (!dcConn->setUser(NewUser)) {
+		DcUser * newUser = new DcUser(sNick);
+		if (!dcConn->setUser(newUser)) {
 			dcConn->closeNow(CLOSE_REASON_USER_SET);
 			return -2;
 		}
@@ -400,7 +400,7 @@ int NmdcProtocol::eventValidateNick(DcParser * dcparser, DcConn * dcConn) {
 	}
 
 	dcConn->setLoginStatusFlag(LOGIN_STATUS_ALOWED);
-	++mDcServer->miTotalUserCount;
+	++ mDcServer->miTotalUserCount;
 
 	dcConn->setLoginStatusFlag(LOGIN_STATUS_VALNICK | LOGIN_STATUS_NICKLST); /** We Install NICKLST because user can not call user list */
 	dcConn->clearTimeOut(HUB_TIME_OUT_VALNICK);
