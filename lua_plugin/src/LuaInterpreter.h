@@ -106,3 +106,8 @@ private:
 }; // namespace luaplugin
 
 #endif // LUA_INTERPRETER_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

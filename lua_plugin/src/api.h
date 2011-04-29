@@ -176,3 +176,8 @@ int redirect(lua_State * L);
 }; // namespace luaplugin
 
 #endif // FUNCS_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

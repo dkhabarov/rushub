@@ -76,3 +76,8 @@ void cTimerList::DelTimer() {
 }
 
 }; // namespace luaplugin
+
+/**
+* $Id$
+* $HeadURL$
+*/

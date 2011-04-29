@@ -145,3 +145,8 @@ public:
 }; // class LuaPlugin
 
 #endif // LUA_PLUGIN_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

@@ -95,3 +95,8 @@ private:
 }; // namespace luaplugin
 
 #endif // TIMER_LIST_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

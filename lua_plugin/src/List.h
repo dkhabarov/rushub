@@ -154,3 +154,8 @@ private:
 }; // namespace luaplugin
 
 #endif // LIST_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

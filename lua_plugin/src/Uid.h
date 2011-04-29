@@ -92,3 +92,8 @@ private:
 }; // namespace luaplugin
 
 #endif // UID_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

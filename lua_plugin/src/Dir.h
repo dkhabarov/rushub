@@ -93,3 +93,8 @@ public:
 }; // namespace utils
 
 #endif // DIR_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

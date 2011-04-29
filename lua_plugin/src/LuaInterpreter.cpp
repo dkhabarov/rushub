@@ -376,3 +376,8 @@ void LuaInterpreter::CreateConfigMT() {
 }
 
 }; // namespace luaplugin
+
+/**
+* $Id$
+* $HeadURL$
+*/

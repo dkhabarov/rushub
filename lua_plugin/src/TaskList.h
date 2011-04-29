@@ -75,3 +75,8 @@ private:
 }; // namespace luaplugin
 
 #endif // TASKS_LIST_H
+
+/**
+* $Id$
+* $HeadURL$
+*/

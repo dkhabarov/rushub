@@ -677,3 +677,8 @@ int LuaPlugin::onMCTo(DcConnBase * dcConnBase) {
 
 
 REG_PLUGIN(LuaPlugin);
+
+/**
+* $Id$
+* $HeadURL$
+*/

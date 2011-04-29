@@ -78,3 +78,8 @@ void TasksList::CheckTasks() {
 }
 
 }; // namespace luaplugin
+
+/**
+* $Id$
+* $HeadURL$
+*/
