@@ -108,8 +108,9 @@ long __stdcall Exception::exceptionFilter(LPEXCEPTION_POINTERS e) {
 			return EXCEPTION_CONTINUE_SEARCH;
 		#endif
 	}
-
-	Exception::stackTrace(f, e->ContextRecord->Eip, e->ContextRecord->Esp, e->ContextRecord->Ebp);
+	#ifndef _WIN64
+		Exception::stackTrace(f, e->ContextRecord->Eip, e->ContextRecord->Esp, e->ContextRecord->Ebp);
+	#endif
 
 	f.close();
 

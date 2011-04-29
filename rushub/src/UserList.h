@@ -248,7 +248,7 @@ public:
 	void flushCache();
 
 	bool autoResize() {
-		unsigned size, capacity, newSize;
+		size_t size, capacity, newSize;
 		if (List_t::autoResize(size, capacity, newSize) && Log(3)) {
 			LogStream() << "Autoresizing: size = " << size << 
 			", capacity = " << capacity << " -> " << newSize << endl;
