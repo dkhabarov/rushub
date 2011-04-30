@@ -375,9 +375,6 @@ Conn * DcConnFactory::createConn(tSocket sock) {
 	dcConn->mProtocol = mProtocol; /** Protocol pointer */
 
 	DcServer * dcServer = static_cast<DcServer *> (mServer);
-	if (!dcServer) {
-		return NULL;
-	}
 	dcServer->mIPListConn->add(dcConn); /** Adding connection in IP-list */
 
 	return static_cast<Conn *> (dcConn);
