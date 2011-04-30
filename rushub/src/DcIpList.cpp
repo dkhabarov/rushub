@@ -22,12 +22,17 @@
 
 namespace dcserver {
 
-DcIpList::DcIpList() : Obj("DcIpList"), mFlush(false), mAddSep(false) {
+DcIpList::DcIpList() : 
+	Obj("DcIpList"),
+	HashTable<IpList *> (1024),
+	mFlush(false),
+	mAddSep(false)
+{
 }
 
 DcIpList::~DcIpList() {
 	IpList * ipList = NULL;
-	for (IpTable::iterator it = mIpTable.begin(); it != mIpTable.end(); ++it) {
+	for (HashTable<IpList *>::iterator it = IpTable::begin(); it != IpTable::end(); ++it) {
 		ipList = (*it);
 		if (ipList) {
 			delete ipList;
@@ -37,9 +42,9 @@ DcIpList::~DcIpList() {
 }
 
 bool DcIpList::add(DcConn * conn) {
-	IpList * ipList = mIpTable.find(conn->getNetIp());
+	IpList * ipList = IpTable::find(conn->getNetIp());
 	if (ipList == NULL) {
-		mIpTable.add(conn->getNetIp(), new IpList((tSocket)(*conn), conn));
+		IpTable::add(conn->getNetIp(), new IpList((tSocket)(*conn), conn));
 	} else {
 		ipList->add((tSocket)(*conn), conn);
 	}
@@ -47,7 +52,7 @@ bool DcIpList::add(DcConn * conn) {
 }
 
 bool DcIpList::remove(DcConn * dcConn) {
-	IpList * ipList = NULL, * ipLists = mIpTable.find(dcConn->getNetIp());
+	IpList * ipList = NULL, * ipLists = IpTable::find(dcConn->getNetIp());
 	if (ipLists == NULL) {
 		return false;
 	}
@@ -55,9 +60,9 @@ bool DcIpList::remove(DcConn * dcConn) {
 	Conn * conn = ipLists->remove((tSocket)(*dcConn), ipList);
 	if (ipList != ipLists) {
 		if (ipList) {
-			mIpTable.update(dcConn->getNetIp(), ipList);
+			IpTable::update(dcConn->getNetIp(), ipList);
 		} else {
-			mIpTable.remove(dcConn->getNetIp()); /** Removing the list from hash-table */
+			IpTable::remove(dcConn->getNetIp()); /** Removing the list from hash-table */
 		}
 		delete ipLists; /** removing old start element in the list */
 		ipLists = NULL;
@@ -78,7 +83,7 @@ void DcIpList::sendToIp(unsigned long ip, string & data, unsigned long profile, 
 	msData1 = data;
 	mFlush = flush;
 	mAddSep = addSep;
-	IpList * ipList = mIpTable.find(ip);
+	IpList * ipList = IpTable::find(ip);
 	while (ipList != NULL) {
 		send(ipList->mData);
 		ipList = ipList->mNext;
@@ -91,7 +96,7 @@ void DcIpList::sendToIpWithNick(unsigned long ip, string & start, string & end, 
 	msData2 = end;
 	mFlush = flush;
 	mAddSep = addSep;
-	IpList * ipList = mIpTable.find(ip);
+	IpList * ipList = IpTable::find(ip);
 	while (ipList != NULL) {
 		sendWithNick(ipList->mData);
 		ipList = ipList->mNext;

@@ -50,19 +50,6 @@ public:
 	int mStartIdx; /** Current index to positions */
 	int mNumFill; /** Amount filled period */
 
-	void dump() {
-		cout << "mOverPeriod: " << mOverPeriod.AsPeriod() << endl
-			<< " mStart, mEnd: " << mStart.AsDate() << ", " << mEnd.AsDate() << endl
-			<< " mPart, mPeriodPart: " << mPart.AsDate() << ", " << mPeriodPart.AsPeriod() << endl
-			<< " mResolution:" << mResolution << endl
-			<< " mCounts[" ;
-
-		for (int i = 0; i < max_size; ++i) {
-			cout << mCounts[i] << ", ";
-		}
-		cout << "] " << endl << "mStartIdx:" << mStartIdx << ", mNumFill:" << mNumFill << endl << endl;
-	}
-
 	MeanFrequency() {
 		Time now;
 		mResolution = max_size;

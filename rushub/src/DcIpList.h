@@ -28,13 +28,13 @@ using namespace ::utils;
 
 namespace dcserver {
 
-class DcIpList : public Obj {
+typedef List<tSocket, DcConn *> IpList;
+
+class DcIpList : public Obj, public HashTable<IpList *> {
 
 protected:
 
-	typedef List<tSocket, DcConn *> IpList;
 	typedef HashTable<IpList *> IpTable;
-	IpTable mIpTable;
 	bool mFlush, mAddSep;
 	unsigned long miProfile;
 	string msData1, msData2;
@@ -52,14 +52,11 @@ public:
 	void sendToIpWithNick(unsigned long ip, string & start, string & end, unsigned long profile = 0, bool addSep = false, bool flush = true);
 	void sendToIpWithNick(const char * ip, string & start, string & end, unsigned long profile = 0, bool addSep = false, bool flush = true);
 
-	bool autoResize() {
-		size_t size, capacity, newSize;
-		if (mIpTable.autoResize(size, capacity, newSize) && Log(3)) {
-			LogStream() << "Autoresizing: size = " << size << 
-				", capacity = " << capacity << " -> " + newSize << endl;
-			return true;
+	virtual void onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
+		if (Log(3)) {
+			LogStream() << "Autoresizing: size = " << currentSize << 
+				", capacity = " << oldCapacity << " -> " + newCapacity << endl;
 		}
-		return false;
 	}
 
 	class iterator {
@@ -99,7 +96,7 @@ public:
 	}
 	iterator begin(unsigned long ip) {
 		iterator it;
-		it.mIpList = mIpTable.find(ip);
+		it.mIpList = find(ip);
 		return it;
 	}
 	inline iterator end() {

@@ -29,7 +29,6 @@
 #include "CallList.h"
 #include "Plugin.h"
 
-#include "DcConn.h" // DcConn and DcConnBase conversion
 #include "WebConn.h"
 
 #include <string>
@@ -47,8 +46,6 @@ using namespace ::webserver;
 namespace dcserver {
 
 	class DcServerBase;
-	class DcUser;
-	class UserList;
 
 }; // namespace dcserver
 
@@ -310,19 +307,19 @@ public:
 		CallListBase(pluginList, id),
 		mFunc(func)
 	{
-		mDcConn = NULL;
+		mDcConnBase = NULL;
 	}
 
 	virtual ~CallListConnection() {
 	}
 
 	virtual int callOne(Plugin * plugin) {
-		return (plugin->*mFunc) (mDcConn);
+		return (plugin->*mFunc) (mDcConnBase);
 	}
 
 	virtual int callAll(DcConnBase * dcConnBase) {
-		mDcConn = static_cast<DcConn *> (dcConnBase);
-		if (mDcConn != NULL) {
+		mDcConnBase = dcConnBase;
+		if (mDcConnBase != NULL) {
 			return this->CallList::callAll();
 		} else {
 			return 1;
@@ -332,7 +329,7 @@ public:
 protected:
 
 	tpFuncConn mFunc;
-	DcConn * mDcConn;
+	DcConnBase * mDcConnBase;
 
 }; // class CallListConnection
 

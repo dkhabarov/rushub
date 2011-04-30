@@ -532,7 +532,7 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 			if (!mDcConfig.mDelayedLogin) {
 				doUserEnter(dcConn);
 			} else {
-				mEnterList.add(dcConn->mDcUser);
+				mEnterList.addWithNick(dcConn->mDcUser->getNick(), dcConn->mDcUser);
 			}
 
 			/** Can happen so that list not to send at a time */
@@ -679,7 +679,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 		#endif
 
 		/** We make sure that user with such nick one! */
-		DcUser * other = static_cast<DcUser *> (mDcUserList.getUserBaseByNick(dcUser->msNick));
+		DcUser * other = static_cast<DcUser *> (mDcUserList.getUserBaseByNick(dcUser->msNick)); // NMDC
 		if (!dcUser->mDcConn) { /** Removing the bot */
 			mDcUserList.removeByKey(key);
 		} else if (other && other->mDcConn && dcUser->mDcConn && other->mDcConn == dcUser->mDcConn) {
@@ -803,6 +803,7 @@ void DcServer::afterUserEnter(DcConn *dcConn) {
 DcUser * DcServer::getDcUser(const char * nick) {
 	string sN(nick);
 	if (sN.size()) {
+		// NMDC
 		UserBase * userBase = mDcUserList.getUserBaseByNick(sN);
 		if (userBase) {
 			return static_cast<DcUser *> (userBase);
@@ -920,7 +921,7 @@ bool DcServer::sendToAll(const char *sData, const char *sNick, const char *sFrom
 	if (sFrom && sNick) {
 		string sStart, sEnd;
 		NmdcProtocol::appendPmToAll(sStart, sEnd, sFrom, sNick, sData);
-		mDcUserList.sendToWithNick(sStart, sEnd);
+		mDcUserList.sendWithNick(sStart, sEnd);
 		return true;
 	}
 
@@ -952,7 +953,7 @@ bool DcServer::sendToProfiles(unsigned long iProfile, const char *sData, const c
 	if (sFrom && sNick) {
 		string sStart, sEnd;
 		NmdcProtocol::appendPmToAll(sStart, sEnd, sFrom, sNick, sData);
-		mDcUserList.sendToWithNick(sStart, sEnd, iProfile);
+		mDcUserList.sendWithNick(sStart, sEnd, iProfile);
 		return true;
 	}
 
@@ -1014,6 +1015,7 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & NickList, const char 
 	DcUser * dcUser;
 	vector<DcUser *> ul;
 	for (List_t::const_iterator it = NickList.begin(); it != NickList.end(); ++it) {
+		// NMDC
 		dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByNick(*it));
 		if (dcUser && dcUser->isCanSend()) {
 			dcUser->setCanSend(false);
@@ -1024,7 +1026,7 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & NickList, const char 
 	if (sFrom && sNick) { // PM
 		string sStart, sEnd;
 		NmdcProtocol::appendPmToAll(sStart, sEnd, sFrom, sNick, sData);
-		mDcUserList.sendToWithNick(sStart, sEnd);
+		mDcUserList.sendWithNick(sStart, sEnd);
 	} else if (sNick) { // Chat
 		string sStr;
 		mDcUserList.sendToAll(NmdcProtocol::appendChat(sStr, sNick, sData), false, false);
@@ -1070,7 +1072,7 @@ bool DcServer::sendToAllExceptIps(const vector<string> & IPList, const char *sDa
 		if (sFrom && sNick) { // PM
 			string sStart, sEnd;
 			NmdcProtocol::appendPmToAll(sStart, sEnd, sFrom, sNick, sData);
-			mDcUserList.sendToWithNick(sStart, sEnd);
+			mDcUserList.sendWithNick(sStart, sEnd);
 		} else if (sNick) { // Chat
 			string sStr;
 			mDcUserList.sendToAll(NmdcProtocol::appendChat(sStr, sNick, sData), false, false);
@@ -1243,6 +1245,7 @@ int DcServer::unregBot(const string & nick) {
 		LogStream() << "Unreg bot: " << nick << endl;
 	}
 
+	// NMDC
 	DcUser * dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByNick(nick));
 	if (!dcUser) {
 		return -1;

@@ -546,58 +546,37 @@ public:
 	}
 
 	/** autoResize */
-	bool autoResize(size_t & size, size_t & capacity, size_t & newSize) {
-		capacity = this->mData->capacity();
-		size = this->miSize;
-		if ((size > (capacity << 1)) || (((size << 1) + 1) < capacity)) {
-			newSize = size + (size >> 1) + 1;
-			this->resize(newSize);
+	bool autoResize() {
+		size_t capacity = mData->capacity();
+		if ((miSize > (capacity << 1)) || (((miSize << 1) + 1) < capacity)) {
+			resize(miSize + (miSize >> 1) + 1);
 			return true;
 		}
 		return false;
 	}
 
-	bool autoResize() {
-		size_t capacity = this->mData->capacity();
-		if ((this->miSize > (capacity << 1)) || (((this->miSize << 1) + 1) < capacity)) {
-			this->resize(this->miSize + (this->miSize >> 1) + 1);
-			return true;
-		}
-		return false;
+	virtual void onResize(size_t & /* currentSize */, size_t & /* oldCapacity */, size_t & /* newCapacity */) {
 	}
 
 	/** Resize */
-	size_t resize(size_t newSize) {
-		tData * newData = new tData(newSize);
-		tData * oldData = this->mData;
+	size_t resize(size_t newCapacity) {
+		tData * newData = new tData(newCapacity);
+		tData * oldData = mData;
 
-		iterator it = this->begin();
+		size_t oldCapacity = mData->capacity();
+		size_t size = miSize; // To not allow rewrite
+		onResize(size, oldCapacity, newCapacity);
+
+		iterator it = begin();
 		mbIsResizing = true;
-		this->mData = newData;
+		mData = newData;
 		while (!it.isEnd()) {
-			this->add(it.mItem->mKey, it.mItem->mData);
+			add(it.mItem->mKey, it.mItem->mData);
 			++it;
 		}
 		delete oldData;
 		mbIsResizing = false;
 		return 0;
-	}
-
-	void dump(std::ostream & os) const {
-		os << "Size = " << miSize << " Capacity = " << mData->capacity() << endl;
-		tItem * items = NULL;
-		for (size_t i = 0; i < mData->capacity(); ++i) {
-			items = mData->find(i);
-			if (items != NULL) {
-				os << "i = " << i << " count = " << items->size() << endl;
-				do {
-					os << "Key = " << items->mKey << " Data = " << items->mData << endl;
-				} while ((items = items->mNext) != NULL);
-			}
-			/*else {
-				os << "i = " << i << " count = 0" << endl;
-			}*/
-		}
 	}
 
 }; // HashTable

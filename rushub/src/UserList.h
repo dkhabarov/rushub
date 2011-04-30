@@ -42,15 +42,12 @@ using namespace ::utils; /** for HashTable */
 
 namespace dcserver {
 
-class DcUser;
 class UserBase;
 
 
 
 /** The structure, allowing add and delete users. Quick iterations cycle for sending */
 class UserList : public Obj, public HashTable<UserBase *> {
-
-friend class DcServer;
 
 public:
 
@@ -149,17 +146,17 @@ private:
 
 	typedef HashTable<UserBase *> List_t;
 
-	string mName;
-	string msCache;
+	string mName; //< Name of list
+	string mCache;
 
-	string msNickList;
+	string mNickList;
 	ufDoNickList mNickListMaker;
 
 protected:
 
-	bool mbKeepNickList;
-	bool mbRemakeNextNickList;
-	bool mbOptRemake; /** Flag of the absence of the change between remake */
+	bool mKeepNickList;
+	bool mRemakeNextNickList;
+	bool mOptRemake; /** Flag of the absence of the change between remake */
 
 public:
 
@@ -191,7 +188,7 @@ public:
 		return List_t::contain(nick2Key(nick));
 	}
 
-	bool containsKey(const Key &key) {
+	bool containsKey(const Key & key) {
 		return List_t::contain(key);
 	}
 
@@ -211,10 +208,6 @@ public:
 		return List_t::remove(key);
 	}
 
-	bool add(UserBase * userBase);
-
-	bool remove(UserBase * userBase);
-
 	virtual string & getNickList();
 
 	void setNickListStart(const char * start) {
@@ -226,7 +219,7 @@ public:
 	}
 	
 	void remake() {
-		mbRemakeNextNickList = (!mbOptRemake);
+		mRemakeNextNickList = (!mOptRemake);
 	}
 
 	/** Sending data to all from the list */
@@ -236,10 +229,10 @@ public:
 	void sendToProfiles(unsigned long profile, const string & data, bool addSep = true);
 
 	/** Sending data sStart+Nick+sEnd to all list */
-	void sendToWithNick(string & start, string & end);
+	void sendWithNick(string & start, string & end);
 
 	/** Sending data sStart+Nick+sEnd to profiles */
-	void sendToWithNick(string & start, string & end, unsigned long profile);
+	void sendWithNick(string & start, string & end, unsigned long profile);
 
 	/** Sending data from cache to user */
 	void flushForUser(UserBase * userBase);
@@ -247,26 +240,23 @@ public:
 	/** Sending data from cache to all and clear cache */
 	void flushCache();
 
-	bool autoResize() {
-		size_t size, capacity, newSize;
-		if (List_t::autoResize(size, capacity, newSize) && Log(3)) {
-			LogStream() << "Autoresizing: size = " << size << 
-			", capacity = " << capacity << " -> " << newSize << endl;
-			return true;
+	virtual void onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
+		if (Log(3)) {
+			LogStream() << "Autoresizing: size = " << currentSize << 
+			", capacity = " << oldCapacity << " -> " << newCapacity << endl;
 		}
-		return false;
 	}
 
 	/** onAdd */
 	virtual void onAdd(UserBase * userBase) {
-		if (!mbRemakeNextNickList && mbKeepNickList) {
+		if (!mRemakeNextNickList && mKeepNickList) {
 			mNickListMaker(userBase);
 		}
 	}
 	/** onRemove */
 	virtual void onRemove(UserBase *) {
-		mbRemakeNextNickList = mbKeepNickList;
-		mbOptRemake = false;
+		mRemakeNextNickList = mKeepNickList;
+		mOptRemake = false;
 	}
 
 	/** Redefining log level function */
@@ -326,22 +316,22 @@ public:
 
 private:
 
-	string msINFOList;
-	string msINFOListComplete;
-	string msIpList;
-	ufDoINFOList mINFOListMaker;
+	string mInfoList;
+	string mInfoListComplete;
+	string mIpList;
+	ufDoINFOList mInfoListMaker;
 	ufDoIpList mIpListMaker;
 
 protected:
 
-	bool mbKeepInfoList;
-	bool mbRemakeNextInfoList;
+	bool mKeepInfoList;
+	bool mRemakeNextInfoList;
 
-	bool mbKeepIpList;
-	bool mbRemakeNextIpList;
+	bool mKeepIpList;
+	bool mRemakeNextIpList;
 
-	string msCompositeNickList;
-	string msCompositeINFOList;
+	string mCompositeNickList;
+	string mCompositeInfoList;
 
 public:
 
@@ -355,10 +345,10 @@ public:
 	virtual string & getIpList();
 
 	inline void remake() {
-		if (!mbOptRemake) {
-			mbRemakeNextNickList = mbRemakeNextInfoList = mbRemakeNextIpList = true;
+		if (!mOptRemake) {
+			mRemakeNextNickList = mRemakeNextInfoList = mRemakeNextIpList = true;
 		} else {
-			mbRemakeNextNickList = mbRemakeNextInfoList = mbRemakeNextIpList = false;
+			mRemakeNextNickList = mRemakeNextInfoList = mRemakeNextIpList = false;
 		}
 	}
 
@@ -366,17 +356,17 @@ public:
 	/** onAdd */
 	virtual void onAdd(UserBase * userBase) {
 		UserList::onAdd(userBase);
-		if(!mbRemakeNextInfoList && mbKeepInfoList) mINFOListMaker(userBase);
-		if(!mbRemakeNextIpList && mbKeepIpList) mIpListMaker(userBase);
+		if(!mRemakeNextInfoList && mKeepInfoList) mInfoListMaker(userBase);
+		if(!mRemakeNextIpList && mKeepIpList) mIpListMaker(userBase);
 	}
 
 	/** onRemove */
 	virtual void onRemove(UserBase * userBase) {
 		UserList::onRemove(userBase);
-		mbRemakeNextInfoList = mbKeepInfoList;
-		mbRemakeNextIpList = mbKeepIpList;
+		mRemakeNextInfoList = mKeepInfoList;
+		mRemakeNextIpList = mKeepIpList;
 	}
-	
+
 }; // FullUserList
 
 }; // namespace dcserver
