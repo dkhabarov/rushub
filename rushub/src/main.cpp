@@ -32,14 +32,6 @@
 	#define SIGQUIT 1000
 	#define SIGHUP 1001
 	#define SIGTSTP 1002
-	#ifdef MODULAR
-		#pragma comment(lib, "config.lib")
-		#pragma comment(lib, "utils.lib")
-		#pragma comment(lib, "server.lib")
-		#pragma comment(lib, "webserver.lib")
-		#pragma comment(lib, "plugin.lib")
-		#pragma comment(lib, "tinyxml.lib")
-	#endif
 	#include "Exception.h"
 #else
 	#include "Cli.h"
