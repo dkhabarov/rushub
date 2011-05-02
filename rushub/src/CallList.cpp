@@ -23,7 +23,6 @@
  */
 
 #include "CallList.h"
-#include "Plugin.h"
 #include "PluginList.h"
 
 namespace plugin {
@@ -33,7 +32,6 @@ namespace plugin {
 CallList::CallList(PluginList * pluginList, string id) :
 	Obj("CallList"),
 	mPluginList(pluginList),
-	mCallOne(mPluginList),
 	mName(id)
 {
 
@@ -48,6 +46,12 @@ CallList::CallList(PluginList * pluginList, string id) :
 
 
 CallList::~CallList() {
+	Plugin * plugin = NULL;
+	for (tPlugins::iterator it = mPlugins.begin(); it != mPlugins.end();) {
+		plugin = (*it);
+		++it;
+		unreg(plugin);
+	}
 }
 
 
@@ -59,9 +63,8 @@ const string & CallList::getName() const {
 
 
 
-CallList::ufCallOne::ufCallOne(PluginList * pluginList) : 
-	mPluginList(pluginList),
-	miCall(0)
+CallList::ufCallOne::ufCallOne() :
+	mCallReturn(0)
 {
 }
 
@@ -75,19 +78,19 @@ void CallList::ufCallOne::setCallList(CallList * callList) {
 
 void CallList::ufCallOne::operator() (Plugin * plugin) {
 
-	miCall = mCallList->callOne(plugin);
+	mCallReturn = mCallList->callOne(plugin);
 
 /*#ifdef _WIN32
 	__try {
-		miCall = mCallList->callOne(plugin);
+		mCallReturn = mCallList->callOne(plugin);
 	} __except( EXCEPTION_EXECUTE_HANDLER) {
-		if (mPluginList && mPluginList->ErrLog(0)) {
-			mPluginList->LogStream() << "error in plugin: " << plugin->getName() << endl;
+		if (mCallList->mPluginList && mCallList->mPluginList->ErrLog(0)) {
+			mCallList->mPluginList->LogStream() << "error in plugin: " << plugin->getName() << endl;
 		}
 		plugin->suicide();
 	}
 #else
-	miCall = mCallList->callOne(plugin);
+	mCallReturn = mCallList->callOne(plugin);
 #endif*/
 
 	if (!plugin->isAlive()) {
@@ -118,7 +121,7 @@ bool CallList::reg(Plugin * plugin) {
 
 
 /** Remove registration from call list */
-bool CallList::unreg(Plugin *plugin) {
+bool CallList::unreg(Plugin * plugin) {
 
 	if (!plugin) {
 		return false;
@@ -139,7 +142,7 @@ bool CallList::unreg(Plugin *plugin) {
 int CallList::callAll() {
 
 	/** 0 - default, 1 - lock, 2, 3 */
-	mCallOne.miCall = for_each (mPlugins.begin(), mPlugins.end(), mCallOne).miCall;
+	mCallOne.mCallReturn = for_each (mPlugins.begin(), mPlugins.end(), mCallOne).mCallReturn;
 
 	// Check removed
 	if (removedPlugins.size()) {
@@ -155,7 +158,7 @@ int CallList::callAll() {
 		removedPlugins.clear();
 	}
 
-	return mCallOne.miCall;
+	return mCallOne.mCallReturn;
 }
 
 

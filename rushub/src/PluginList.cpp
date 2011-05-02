@@ -48,8 +48,15 @@ PluginList::PluginList(const string & path) :
 
 PluginList::~PluginList() {
 	// Removing plugins
+	Hash_t hash(0);
+	PluginLoader * pluginLoader = NULL;
 	for (vector<Hash_t>::iterator it = mPluginLoaderHash.begin(); it != mPluginLoaderHash.end(); ++it) {
-		mPluginLoaders.remove(*it);
+		hash = (*it);
+		pluginLoader = mPluginLoaders.find(hash);
+		if (pluginLoader) {
+			unloadPlugin(pluginLoader->mPlugin->getName());
+		}
+		mPluginLoaders.remove(hash);
 	}
 
 	// Removing call lists
@@ -169,8 +176,12 @@ bool PluginList::unloadPlugin(const string & name) {
 		return false;
 	}
 
+	CallList * callList = NULL;
 	for (CallListMap::iterator it = mCallLists.begin(); it != mCallLists.end(); ++it) {
-		(*it)->unreg(pluginLoader->mPlugin);
+		callList = (*it);
+		if (callList->mName != "") {
+			callList->unreg(pluginLoader->mPlugin);
+		}
 	}
 
 	pluginLoader->close();
@@ -235,26 +246,6 @@ bool PluginList::unregCallList(const char * id, Plugin * plugin) {
 	return callList != NULL ? 
 		callList->unreg(plugin) : 
 		false;
-}
-
-
-
-/** Show all loading plugins and versions */
-void PluginList::list(ostream & os) {
-	for (PluginLoaderMap::iterator it = mPluginLoaders.begin(); it != mPluginLoaders.end(); ++it) {
-		os << (*it)->mPlugin->getName() << " " << 
-			(*it)->mPlugin->getVersion() << "\n";
-	}
-}
-
-
-
-/** Show all plugins for all calls */
-void PluginList::listAll(ostream & os) {
-	for (CallListMap::iterator it = mCallLists.begin(); it != mCallLists.end(); ++it) {
-		os << "callList: " << (*it)->getName() << "\n";
-		(*it)->listRegs(os, "   ");
-	}
 }
 
 

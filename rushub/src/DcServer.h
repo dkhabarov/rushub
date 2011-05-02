@@ -40,6 +40,7 @@
 #include "AntiFlood.h"
 #include "DcIpList.h"
 #include "WebProtocol.h"
+#include "WebConn.h"
 
 #include "stringutils.h" // for stringReplace
 

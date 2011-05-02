@@ -26,6 +26,7 @@
 #define CALL_LIST_H
 
 #include "Obj.h"
+#include "Plugin.h"
 
 #include <string>
 #include <iostream>
@@ -33,37 +34,44 @@
 #include <algorithm>
 #include <functional>
 
-
 using namespace ::std;
+
+
 
 namespace plugin {
 
 class Plugin;
 class PluginList;
 class PluginListBase;
+struct ufCallOne;
 
 /** Base class for call list */
 class CallList : public Obj {
+
+	friend struct ufCallOne; // for mPluginList
+	friend class PluginList; // for mName
 
 public:
 
 	/** Unary function of plugin list for current call list */
 	struct ufCallOne : public unary_function<void, list<Plugin *>::iterator> {
 
-		/** Pointer on common plugin list */
-		PluginList * mPluginList;
-
-		/** Pointer on call list */
-		CallList * mCallList;
+	public:
 
 		/** Returning value from plugin */
-		int miCall;
+		int mCallReturn;
 
-		ufCallOne(PluginList * pluginList);
+		ufCallOne();
 
 		void setCallList(CallList * callList);
 
 		void operator() (Plugin *);
+
+	private:
+
+		/** Pointer on call list */
+		CallList * mCallList;
+
 	};
 
 public:
@@ -113,6 +121,203 @@ private:
 
 
 }; // class CallList
+
+
+
+class CallListBase : public CallList {
+
+public:
+
+	CallListBase(PluginList * pluginList, const char * id) :
+		CallList(pluginList, string(id))
+	{
+	}
+
+	virtual int callOne(Plugin *) = 0;
+
+}; // class CallListBase
+
+
+
+class CallListSimple : public CallListBase {
+
+public:
+
+	typedef int (Plugin::*tpFunc) ();
+
+public:
+
+	CallListSimple(PluginList * pluginList, const char * id, tpFunc func) :
+		CallListBase(pluginList, id),
+		mFunc(func)
+	{
+	}
+
+	virtual ~CallListSimple() {
+	}
+
+	virtual int callOne(Plugin * plugin) {
+		return (plugin->*mFunc)();
+	}
+
+protected:
+
+	tpFunc mFunc;
+
+}; // class CallListSimple
+
+
+template <class A>
+class CallListType1 : public CallListBase {
+
+public:
+
+	typedef int (Plugin::*tpFunc) (A);
+
+public:
+
+	CallListType1(PluginList * pluginList, const char * id, tpFunc func) :
+		CallListBase(pluginList, id),
+		mFunc(func)
+	{
+	}
+
+	virtual ~CallListType1() {
+	}
+
+	virtual int callOne(Plugin * plugin) {
+		return (plugin->*mFunc) (mData);
+	}
+
+	virtual int callAll(A t) {
+		mData = t;
+		return CallList::callAll();
+	}
+
+protected:
+
+	tpFunc mFunc;
+	A mData;
+
+}; // class CallListType1
+
+
+
+template <class A, class B>
+class CallListType2 : public CallListBase {
+
+public:
+
+	typedef int (Plugin::*tpFunc) (A, B);
+
+public:
+
+	CallListType2(PluginList * pluginList, const char * id, tpFunc func) :
+		CallListBase(pluginList, id),
+		mFunc(func)
+	{
+	}
+
+	virtual ~CallListType2() {
+	}
+
+	virtual int callOne(Plugin * plugin) {
+		return (plugin->*mFunc) (mData1, mData2);
+	}
+
+	virtual int callAll(A a, B b) {
+		mData1 = a;
+		mData2 = b;
+		return CallList::callAll();
+	}
+
+protected:
+
+	tpFunc mFunc;
+	A mData1;
+	B mData2;
+
+}; // class CallListType2
+
+template <class A, class B, class C>
+class CallListType3 : public CallListBase {
+
+public:
+
+	typedef int (Plugin::*tpFunc) (A, B, C);
+
+public:
+
+	CallListType3(PluginList * pluginList, const char * id, tpFunc func) :
+		CallListBase(pluginList, id),
+		mFunc(func)
+	{
+	}
+
+	virtual ~CallListType3() {
+	}
+
+	virtual int callOne(Plugin * plugin) { return (plugin->*mFunc) (mData1, mData2, mData3); }
+
+	virtual int callAll(A a, B b, C c) {
+		mData1 = a;
+		mData2 = b;
+		mData3 = c;
+		return CallList::callAll();
+	}
+
+protected:
+
+	tpFunc mFunc;
+	A mData1;
+	B mData2;
+	C mData3;
+
+}; // class CallListType3
+
+class CallListConnection : public CallListBase {
+
+public:
+
+	typedef int (Plugin::*tpFuncConn) (DcConnBase *);
+
+public:
+
+	CallListConnection(PluginList * pluginList, const char * id, tpFuncConn func) :
+		CallListBase(pluginList, id),
+		mFunc(func)
+	{
+		mDcConnBase = NULL;
+	}
+
+	virtual ~CallListConnection() {
+	}
+
+	virtual int callOne(Plugin * plugin) {
+		return (plugin->*mFunc) (mDcConnBase);
+	}
+
+	virtual int callAll(DcConnBase * dcConnBase) {
+		mDcConnBase = dcConnBase;
+		if (mDcConnBase != NULL) {
+			return this->CallList::callAll();
+		} else {
+			return 1;
+		}
+	}
+
+protected:
+
+	tpFuncConn mFunc;
+	DcConnBase * mDcConnBase;
+
+}; // class CallListConnection
+
+typedef CallListType1<DcConnBase *> CallListConn;
+typedef CallListType2<DcConnBase *, WebParserBase *> CallListConnWebParser;
+typedef CallListType2<DcConnBase *, int> CallListConnInt;
+typedef CallListType3<DcConnBase *, int, int> CallListConnIntInt;
+
 
 }; // namespace plugin
 
