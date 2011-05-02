@@ -25,50 +25,53 @@
 namespace luaplugin {
 
 template<typename T> class Item {
-	template<typename V> friend class cList;
+	template<typename V> friend class List;
 
 public:
 
-	Item() : mValue(NULL), mNext(NULL), mbDel(true) {
+	Item() : mValue(NULL), mNext(NULL), mAlive(false) {
+	}
+
+	Item(T * value) : mValue(value), mNext(NULL), mAlive(true) {
 	}
 
 	~Item() {
 		if (mValue) {
 			delete mValue;
+			mValue = NULL;
 		}
-	}
-
-	Item(T * value) : mValue(value), mNext(NULL), mbDel(false) {
 	}
 
 	T * GetValue() const {
 		return mValue;
 	}
 
-	bool IsDel() const {
-		return mbDel;
+	bool isAlive() const {
+		return mAlive;
 	}
 
-	void SetDel() {
-		mbDel = true;
+	void setDead() {
+		mAlive = false;
 	}
 
 private:
 
 	T * mValue;
 	Item<T> * mNext;
-	bool mbDel;
+	bool mAlive;
 
 }; // template class Item
 
-template<typename T> class cList {
+
+
+template<typename T> class List {
 
 public:
 
-	cList() : mFirst(NULL), mLast(NULL), miSize(0), mbProcess(false) {
+	List() : mFirst(NULL), mLast(NULL), miSize(0), mbProcess(false) {
 	}
 
-	~cList() {
+	~List() {
 		clear();
 	}
 
@@ -83,7 +86,7 @@ public:
 		miSize = 0;
 	}
 
-	int size() {
+	int size() const {
 		return miSize;
 	}
 
@@ -102,8 +105,8 @@ public:
 	template<typename P> void DelIf(P pred) {
 		Item<T> *p = mFirst;
 		while (p) {
-			if (!p->IsDel() && pred(p->GetValue())) {
-				p->SetDel();
+			if (p->isAlive() && pred(p->GetValue())) {
+				p->setDead();
 			}
 			p = p->mNext;
 		}
@@ -114,7 +117,7 @@ public:
 		mbProcess = true;
 		Item<T> *p = mFirst, *q = NULL, *r = NULL;
 		while (p) {
-			if (!p->IsDel()) {
+			if (p->isAlive()) {
 				pred(p->GetValue()); // may be Loop
 			}
 			p = p->mNext;
@@ -125,7 +128,7 @@ public:
 				r = q;
 				q = p;
 				p = p->mNext;
-				if (q->IsDel()) {
+				if (!q->isAlive()) {
 					if (q == mFirst) {
 						mFirst = p;
 					}
@@ -149,7 +152,8 @@ private:
 	int miSize;
 	bool mbProcess;
 
-}; // template class cList
+}; // template class List
+
 
 }; // namespace luaplugin
 

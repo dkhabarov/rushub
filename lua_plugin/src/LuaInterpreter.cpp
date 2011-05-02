@@ -38,7 +38,7 @@ LuaInterpreter::LuaInterpreter(const string & sName, string & sPath) :
 }
 
 LuaInterpreter::~LuaInterpreter() {
-	Stop();
+	stop();
 }
 
 /** On start script (-1 - run already)*/
@@ -164,7 +164,7 @@ int LuaInterpreter::start() {
 
 
 /** On stop script */
-int LuaInterpreter::Stop() {
+int LuaInterpreter::stop() {
 	if (mL) {
 		DelTmr();
 
@@ -298,7 +298,7 @@ bool LuaInterpreter::OnError(const char * sFunc, const char * sErrMsg, bool bSto
 	return false;
 }
 
-void LuaInterpreter::Timer(int iId, const char * sFunc) {
+void LuaInterpreter::timer(int iId, const char * sFunc) {
 	lua_getglobal(mL, sFunc);
 	lua_pushnumber(mL, iId);
 	LuaInterpreter * Old = LuaPlugin::mCurLua->mCurScript;

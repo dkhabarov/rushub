@@ -32,7 +32,7 @@ namespace luaplugin {
 
 class LuaInterpreter;
 
-class cTimer {
+class Timer {
 
 private:
 	int miTime, miInterval;
@@ -43,29 +43,29 @@ public:
 	LuaInterpreter * mScript;
 
 public:
-	cTimer(int iId, int iInterval, const char * sFunc, LuaInterpreter * Script);
-	~cTimer();
+	Timer(int iId, int iInterval, const char * sFunc, LuaInterpreter * Script);
+	~Timer();
 	void check(int iTime);
 
-}; // cTimer
+}; // Timer
 
-class cTimerList {
+class TimerList {
 
-	cList<cTimer> mList;
+	List<Timer> mList;
 
 public:
-	cTimerList();
-	~cTimerList();
+	TimerList();
+	~TimerList();
 
 	void onTimer();
-	int AddTimer(cTimer *);
+	int AddTimer(Timer *);
 	int DelTimer(int);
 	void DelTimer();
 	int size() {
 		return mList.size();
 	}
 
-}; // class cTimerList
+}; // class TimerList
 
 class cTmrCnt {
 
@@ -79,7 +79,7 @@ public:
 	}
 
 	bool operator() (void * val) {
-		if (((cTimer*)val)->miId != miId) {
+		if (((Timer*)val)->miId != miId) {
 			return false;
 		}
 		++ miCount;

@@ -64,7 +64,7 @@ public:
 private:
 
 	int miTackChecker; /** Bits of the common tasks */
-	cList<cTask> mList;
+	List<cTask> mList;
 
 private:
 

@@ -70,7 +70,7 @@ public:
 	string msLastError; /** Last error in scripts */
 
 	TasksList mTasksList;
-	cTimerList * mTimerList;
+	TimerList * mTimerList;
 
 	DcConnBase * mCurDCConn; /** Current connection (only for events) */
 
@@ -86,7 +86,7 @@ public:
 	virtual void onLoad(DcServerBase *); /** Actions when loading plugin */
 	virtual bool regAll(PluginListBase * pluginListBase); /** Registration all events for this plugin */
 
-// events
+	// events
 	virtual int onUserConnected(DcConnBase *);
 	virtual int onUserDisconnected(DcConnBase *);
 	virtual int onUserEnter(DcConnBase *);

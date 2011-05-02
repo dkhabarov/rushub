@@ -55,13 +55,13 @@ public:
 	}
 
 	int start(); // (-1 - run already)
-	int Stop();
+	int stop();
 
 	int CallFunc(const char *);
 	void RegFunc(const char *, int (*)(lua_State *));
 	void RegStrField(const char *, const char *);
 
-	void Timer(int iId, const char * sFunc);
+	void timer(int iId, const char * sFunc);
 	bool OnError(const char * sFunc, const char * sErrMsg, bool bStop = false);
 	void NewCallParam(void * data, int type = 0);
 	void NewCallParam(lua_Number data, int type = 0);
@@ -69,7 +69,7 @@ public:
 	inline void onTimer() {
 		mTimerList.onTimer();
 	}
-	inline int AddTmr(cTimer * timer) {
+	inline int AddTmr(Timer * timer) {
 		return mTimerList.AddTimer(timer);
 	}
 	inline int size() {
@@ -99,7 +99,7 @@ private:
 	void CreateUserMT();
 	void CreateConfigMT();
 
-	cTimerList mTimerList;
+	TimerList mTimerList;
 
 }; // class LuaInterpreter
 

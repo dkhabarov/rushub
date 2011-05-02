@@ -1274,7 +1274,7 @@ int AddTimer(lua_State * L) {
 	if (LuaPlugin::mCurLua->mCurScript->size() > maxTimers) {
 		return luaL_error(L, "bad count timers for this script (max %d)", maxTimers);
 	}
-	cTimer * timer = new cTimer(iId, iInterval, sFunc.c_str(), LuaPlugin::mCurLua->mCurScript);
+	Timer * timer = new Timer(iId, iInterval, sFunc.c_str(), LuaPlugin::mCurLua->mCurScript);
 	lua_settop(L, 0);
 	lua_pushinteger(L, LuaPlugin::mCurLua->mCurScript->AddTmr(timer));
 	return 1;
