@@ -32,40 +32,48 @@ namespace luaplugin {
 
 class LuaInterpreter;
 
+
+
 class Timer {
 
 private:
+
 	int miTime, miInterval;
 	string msFunc;
 
 public:
+
 	int miId;
 	LuaInterpreter * mScript;
 
 public:
+
 	Timer(int iId, int iInterval, const char * sFunc, LuaInterpreter * Script);
+
 	~Timer();
+
 	void check(int iTime);
 
 }; // Timer
 
-class TimerList {
 
-	List<Timer> mList;
+
+class TimerList : public List<Timer *> {
 
 public:
 	TimerList();
-	~TimerList();
+	virtual ~TimerList();
 
 	void onTimer();
 	int AddTimer(Timer *);
 	int DelTimer(int);
 	void DelTimer();
-	int size() {
-		return mList.size();
-	}
+
+	virtual void onRemove(Timer *);
 
 }; // class TimerList
+
+
 
 class cTmrCnt {
 

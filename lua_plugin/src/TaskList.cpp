@@ -22,9 +22,11 @@
 
 namespace luaplugin {
 
+
+
 /** Do tasks */
 void Tasks(void * val) {
-	TasksList::cTask * task = (TasksList::cTask *) val;
+	Task * task = (Task *) val;
 	LuaInterpreter * Param = (LuaInterpreter *) (task->mParam);
 	switch (task->mType) {
 		case eT_RestartScript :
@@ -51,6 +53,8 @@ void Tasks(void * val) {
 	}
 }
 
+
+
 void TasksList::CommonTasks() {
 	if (miTackChecker & eTB_Save) {
 		LuaPlugin::mCurLua->save();
@@ -58,24 +62,35 @@ void TasksList::CommonTasks() {
 	miTackChecker = 0;
 }
 
+
+
 /** Add task */
 void TasksList::AddTask(void * Param, tTask iType) {
 	if (!Param) {
 		miTackChecker = miTackChecker | (1 << iType); /** Common task */
 	} else {
-		cTask * Task = new cTask(iType);
-		Task->mParam = Param;
-		mList.add(Task);
+		Task * task = new Task(iType);
+		task->mParam = Param;
+		add(task);
 	}
 }
 
+
+
 void TasksList::CheckTasks() {
-	mList.Loop(Tasks);
-	mList.clear();
+	loop(Tasks);
+	clear();
 	if (miTackChecker) {
 		CommonTasks();
 	}
 }
+
+
+
+void TasksList::onRemove(Task * task) {
+	delete task;
+}
+
 
 }; // namespace luaplugin
 

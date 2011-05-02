@@ -39,32 +39,44 @@ typedef enum {
 } tTask; /** tTask */
 
 
-class TasksList {
+struct Task {
+
+	Task():mParam(NULL) {
+	}
+
+	Task(tTask iType) : mType(iType), mParam(NULL) {
+	}
+
+	~Task() {
+	}
+
+	tTask mType;
+
+	void * mParam;
+
+}; // Task
+
+
+
+class TasksList : public List<Task *> {
 
 public:
-	struct cTask {
-		cTask():mParam(NULL) {
-		}
-		cTask(tTask iType) : mType(iType), mParam(NULL) {
-		}
-		~cTask() {
-		}
-		tTask mType;
-		void * mParam;
-	}; // cTasks
 
 	TasksList() : miTackChecker(0) {
 	}
+
 	~TasksList() {
 	}
 
 	void AddTask(void * Param, tTask iType = eT_No); /** Adding tasks */
+
 	void CheckTasks();
+
+	virtual void onRemove(Task *);
 
 private:
 
 	int miTackChecker; /** Bits of the common tasks */
-	List<cTask> mList;
 
 private:
 

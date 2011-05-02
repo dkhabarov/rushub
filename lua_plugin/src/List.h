@@ -32,17 +32,13 @@ public:
 	Item() : mValue(NULL), mNext(NULL), mAlive(false) {
 	}
 
-	Item(T * value) : mValue(value), mNext(NULL), mAlive(true) {
+	Item(T value) : mValue(value), mNext(NULL), mAlive(true) {
 	}
 
 	~Item() {
-		if (mValue) {
-			delete mValue;
-			mValue = NULL;
-		}
 	}
 
-	T * GetValue() const {
+	T getValue() const {
 		return mValue;
 	}
 
@@ -56,7 +52,7 @@ public:
 
 private:
 
-	T * mValue;
+	T mValue;
 	Item<T> * mNext;
 	bool mAlive;
 
@@ -71,7 +67,7 @@ public:
 	List() : mFirst(NULL), mLast(NULL), miSize(0), mbProcess(false) {
 	}
 
-	~List() {
+	virtual ~List() {
 		clear();
 	}
 
@@ -80,45 +76,48 @@ public:
 		while (q) {
 			p = q;
 			q = q->mNext;
+			T value = p->getValue();
 			delete p;
+			onRemove(value);
 		}
 		mFirst = mLast = NULL;
 		miSize = 0;
 	}
 
-	int size() const {
+	virtual int size() const {
 		return miSize;
 	}
 
-	void add(T * value) {
-		if (value != NULL) {
-			if (mLast == NULL) {
-				mFirst = mLast = new Item<T>(value);
-			} else {
-				mLast->mNext = new Item<T>(value);
-				mLast = mLast->mNext;
-			}
-			++miSize;
+	virtual void add(T value) {
+		if (mLast == NULL) {
+			mFirst = mLast = new Item<T>(value);
+		} else {
+			mLast->mNext = new Item<T>(value);
+			mLast = mLast->mNext;
 		}
+		++miSize;
 	}
 
-	template<typename P> void DelIf(P pred) {
+	template<typename P> void removeIf(P pred) {
 		Item<T> *p = mFirst;
 		while (p) {
-			if (p->isAlive() && pred(p->GetValue())) {
+			if (p->isAlive() && pred(p->getValue())) {
 				p->setDead();
 			}
 			p = p->mNext;
 		}
 	}
 
-	template<typename P> void Loop(P pred) {
+	virtual void onRemove(T) {
+	}
+
+	template<typename P> void loop(P pred) {
 		bool proc = mbProcess;
 		mbProcess = true;
 		Item<T> *p = mFirst, *q = NULL, *r = NULL;
 		while (p) {
 			if (p->isAlive()) {
-				pred(p->GetValue()); // may be Loop
+				pred(p->getValue()); // may be Loop
 			}
 			p = p->mNext;
 		}
@@ -135,9 +134,11 @@ public:
 					if (q == mLast) {
 						mLast = r;
 					}
+					T value = q->getValue();
 					delete q;
 					q = NULL;
 					--miSize;
+					onRemove(value);
 				}
 			}
 			mbProcess = false;
