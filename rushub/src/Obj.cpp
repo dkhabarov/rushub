@@ -159,7 +159,7 @@ ostream & Obj::log() {
 		}
 		const string & buf = mSysLogOss.str();
 		if (!buf.empty()) {
-			syslog(sysLogLevel(miLevel, mbIsErrorLog), buf.c_str());
+			syslog(sysLogLevel(miLevel, mbIsErrorLog), "%s", buf.c_str());
 			mSysLogOss.str("");
 		}
 		return mSysLogOss;
