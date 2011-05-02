@@ -28,6 +28,11 @@
 
 #include <signal.h>
 
+#if defined(_DEBUG) && defined(VLD)
+	#include <vld.h>
+#endif
+
+
 #ifdef _WIN32
 	#define SIGQUIT 1000
 	#define SIGHUP 1001

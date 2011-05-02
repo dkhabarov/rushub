@@ -30,6 +30,10 @@
 #include <math.h> // abs
 #include <string>
 
+#if defined(_DEBUG) && defined(VLD)
+	#include <vld.h>
+#endif
+
 #define PLUGIN_NAME "LuaPlugin"
 #define PLUGIN_VERSION "2.1[beta]"
 
