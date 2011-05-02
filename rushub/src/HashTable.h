@@ -391,6 +391,7 @@ public:
 		tItem *Items, *Item = NULL;
 		Items = mData->find(iHash); /** Get cell data of the array */
 		if (Items == NULL) { /** Check presence of the list in cell of the array */
+
 			Item = new tItem(key, Data); /** Create new list with data and key */
 			mData->insert(iHash, Item); /** Insert created list in cell of the array */
 
@@ -429,7 +430,7 @@ public:
 			delete Items; /** Removing the old start element of the list */
 			Items = NULL;
 		}
-		if ((V)NULL != Data) { /** Removing has occurred */
+		if (!mbIsResizing && (V)NULL != Data) { /** Removing has occurred */
 			onRemove(Data);
 			--miSize;
 			return true;
@@ -564,18 +565,28 @@ public:
 		tData * oldData = mData;
 
 		size_t oldCapacity = mData->capacity();
-		size_t size = miSize; // To not allow rewrite
-		onResize(size, oldCapacity, newCapacity);
+		size_t size = miSize;
 
+		mbIsResizing = true; // Begin resizing
+
+		Key key(0); // Previous key
 		iterator it = begin();
-		mbIsResizing = true;
 		mData = newData;
 		while (!it.isEnd()) {
-			add(it.mItem->mKey, it.mItem->mData);
+			add(it.mItem->mKey, it.mItem->mData); // Adding
+			key = it.mItem->mKey; // Save key for next del
 			++it;
+
+			// Removing old data
+			mData = oldData;
+			remove(key);
+			mData = newData;
 		}
 		delete oldData;
-		mbIsResizing = false;
+
+		mbIsResizing = false; // End resizing
+
+		onResize(size, oldCapacity, newCapacity);
 		return 0;
 	}
 
