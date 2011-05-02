@@ -23,7 +23,10 @@
 
 namespace utils {
 
-#define strdup _strdup
+#ifndef strdup
+	#define strdup _strdup
+#endif
+
 #pragma warning(disable:4127) // Disable "conditional expression is constant"
 
 
