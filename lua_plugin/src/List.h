@@ -76,9 +76,8 @@ public:
 		while (q) {
 			p = q;
 			q = q->mNext;
-			T value = p->getValue();
+			onRemove(p->getValue());
 			delete p;
-			onRemove(value);
 		}
 		mFirst = mLast = NULL;
 		miSize = 0;
@@ -102,7 +101,7 @@ public:
 		Item<T> *p = mFirst;
 		while (p) {
 			if (p->isAlive() && pred(p->getValue())) {
-				p->setDead();
+				p->setDead(); // fix me!
 			}
 			p = p->mNext;
 		}
@@ -114,31 +113,33 @@ public:
 	template<typename P> void loop(P pred) {
 		bool proc = mbProcess;
 		mbProcess = true;
-		Item<T> *p = mFirst, *q = NULL, *r = NULL;
-		while (p) {
-			if (p->isAlive()) {
-				pred(p->getValue()); // may be Loop
+		Item<T> *next = mFirst, *curr = NULL, *prev = NULL;
+		while (next) {
+			if (next->isAlive()) {
+				pred(next->getValue()); // may be Loop
 			}
-			p = p->mNext;
+			next = next->mNext;
 		}
 		if (!proc) { // first Loop - removing all deleted elements
-			p = mFirst;
-			while (p) {
-				r = q;
-				q = p;
-				p = p->mNext;
-				if (!q->isAlive()) {
-					if (q == mFirst) {
-						mFirst = p;
+			next = mFirst;
+			while (next) {
+				prev = curr;
+				curr = next;
+				next = next->mNext;
+				if (!curr->isAlive()) {
+					if (curr == mFirst) {
+						mFirst = next;
 					}
-					if (q == mLast) {
-						mLast = r;
+					if (curr == mLast) {
+						mLast = prev;
 					}
-					T value = q->getValue();
-					delete q;
-					q = NULL;
+					if (prev) {
+						prev->mNext = next;
+					}
+					onRemove(curr->getValue());
+					delete curr;
+					curr = NULL;
 					--miSize;
-					onRemove(value);
 				}
 			}
 			mbProcess = false;
