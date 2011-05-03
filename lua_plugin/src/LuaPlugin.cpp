@@ -150,7 +150,7 @@ int LuaPlugin::checkExists(LuaInterpreter * script) {
 	if (!script) {
 		return 0;
 	} else if (!Dir::isFileExist((mScriptsDir + script->mName).c_str())) {
-		script->mbEnabled = false;
+		script->mEnabled = false;
 		return 0;
 	}
 	return 1;
@@ -207,7 +207,7 @@ int LuaPlugin::stopScript(LuaInterpreter * script, bool current) {
 	if (script) {
 		mTasksList.addTask(NULL, TASKTYPE_SAVE);
 		if (current) {
-			script->mbEnabled = false;
+			script->mEnabled = false;
 			mTasksList.addTask((void *) script, TASKTYPE_STOPSCRIPT);
 			if (!checkExists(script)) { // Removing from list in the case of absence
 				mLua.remove(script);
@@ -218,7 +218,7 @@ int LuaPlugin::stopScript(LuaInterpreter * script, bool current) {
 		} else {
 			ret = -1;
 			if (script->stop()) {
-				script->DelTmr();
+				script->delTmr();
 				ret = 0;
 			}
 			if (!checkExists(script)) {
@@ -266,8 +266,8 @@ int LuaPlugin::restartScripts(LuaInterpreter * curScript, int type) {
 	for (it = mLua.begin(); it != mLua.end(); ++it) {
 		script = *it;
 		if (((type == 0 || (type == 2 && script != curScript)) && 
-			script->mbEnabled && restartScript(script, script == curScript) == LUA_ERRFILE) ||
-			(!script->mbEnabled && stopScript(script, script == curScript) == LUA_ERRFILE))
+			script->mEnabled && restartScript(script, script == curScript) == LUA_ERRFILE) ||
+			(!script->mEnabled && stopScript(script, script == curScript) == LUA_ERRFILE))
 		{
 			if (first) {
 				first = false;
@@ -410,14 +410,14 @@ int LuaPlugin::callAll(const char * funcName, DcConnBase * dcConnBase, bool para
 			continue;
 		}
 
-		script->NewCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA);
+		script->newCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA);
 
 		// ToDo
 		if (param) {
-			script->NewCallParam((void *) dcConnBase->getCommand(), LUA_TSTRING);
+			script->newCallParam((void *) dcConnBase->getCommand(), LUA_TSTRING);
 		}
 
-		ret = script->CallFunc(funcName);
+		ret = script->callFunc(funcName);
 		if (ret == 1) { // 1 - blocked
 			mCurDCConn = NULL;
 			return 1;
@@ -448,9 +448,9 @@ int LuaPlugin::onConfigChange(const char * name, const char * value) {
 		if (!script->mL) {
 			continue;
 		}
-		script->NewCallParam((void *) name, LUA_TSTRING);
-		script->NewCallParam((void *) value, LUA_TSTRING);
-		script->CallFunc("OnConfigChange");
+		script->newCallParam((void *) name, LUA_TSTRING);
+		script->newCallParam((void *) value, LUA_TSTRING);
+		script->callFunc("OnConfigChange");
 	}
 	return 0;
 }
@@ -465,10 +465,10 @@ int LuaPlugin::onFlood(DcConnBase * dcConnBase, int type1, int type2) {
 			if (!script->mL) {
 				continue;
 			}
-			script->NewCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA);
-			script->NewCallParam(lua_Number(type1), LUA_TNUMBER);
-			script->NewCallParam(lua_Number(type2), LUA_TNUMBER);
-			ret = script->CallFunc("OnFlood");
+			script->newCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA);
+			script->newCallParam(lua_Number(type1), LUA_TNUMBER);
+			script->newCallParam(lua_Number(type2), LUA_TNUMBER);
+			ret = script->callFunc("OnFlood");
 			if (ret == 1) { // 1 - blocked
 				return 1;
 			}
@@ -491,9 +491,9 @@ int LuaPlugin::onWebData(DcConnBase * dcConnBase, WebParserBase * webParserBase)
 		if (!script->mL) {
 			continue;
 		}
-		script->NewCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA);
-		script->NewCallParam((void *) webParserBase->mParseString.c_str(), LUA_TSTRING);
-		ret = script->CallFunc("OnWebData");
+		script->newCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA);
+		script->newCallParam((void *) webParserBase->mParseString.c_str(), LUA_TSTRING);
+		ret = script->callFunc("OnWebData");
 		if (ret == 1) {
 			return 1; // 1 - blocked
 		}
@@ -512,9 +512,9 @@ int LuaPlugin::onScriptAction(const char * scriptName, const char * action) {
 		if (!script->mL) {
 			continue;
 		} else if (scriptName) {
-			script->NewCallParam((void *) scriptName, LUA_TSTRING);
+			script->newCallParam((void *) scriptName, LUA_TSTRING);
 		}
-		if (script->CallFunc(action)) {
+		if (script->callFunc(action)) {
 			return 0;
 		}
 	}
@@ -529,10 +529,10 @@ int LuaPlugin::onScriptError(LuaInterpreter * current, const char * scriptName, 
 		if (!script->mL || script == current) {
 			continue;
 		}
-		script->NewCallParam((void *)scriptName, LUA_TSTRING);
-		script->NewCallParam((void *)errMsg, LUA_TSTRING);
-		script->NewCallParam(lua_Number(stoped), LUA_TBOOLEAN);
-		if (script->CallFunc("OnScriptError")) {
+		script->newCallParam((void *)scriptName, LUA_TSTRING);
+		script->newCallParam((void *)errMsg, LUA_TSTRING);
+		script->newCallParam(lua_Number(stoped), LUA_TBOOLEAN);
+		if (script->callFunc("OnScriptError")) {
 			return 0;
 		}
 	}
@@ -549,10 +549,10 @@ int LuaPlugin::onAny(DcConnBase * dcConnBase, int type) {
 		if (!script->mL) {
 			continue;
 		}
-		script->NewCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA);
-		script->NewCallParam((void *) dcConnBase->getCommand(), LUA_TSTRING);
-		script->NewCallParam(lua_Number(type), LUA_TNUMBER);
-		ret = script->CallFunc("OnAny");
+		script->newCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA);
+		script->newCallParam((void *) dcConnBase->getCommand(), LUA_TSTRING);
+		script->newCallParam(lua_Number(type), LUA_TNUMBER);
+		ret = script->callFunc("OnAny");
 		if (ret == 1) {
 			return 1; // 1 - blocked
 		}
