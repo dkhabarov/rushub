@@ -54,20 +54,20 @@ class LuaPlugin : public Plugin {
 
 public:
 
-	string msScriptsDir; /** Scripts path (directory) */
+	string mScriptsDir; /** Scripts path (directory) */
 
 	static DcServerBase * mCurServer; /** Current server */
 	static LuaPlugin * mCurLua; /** Current plugin */
 
-	static string msLuaPath; /** lua package.path */
-	static string msLuaCPath; /** lua package.cpath */
-	static bool mbSetLuaPath; /** is set package.path and package.cpath */
+	static string mLuaPath; /** lua package.path */
+	static string mLuaCPath; /** lua package.cpath */
+	static bool mSetLuaPath; /** is set package.path and package.cpath */
 
-	typedef list<LuaInterpreter *> tvLuaInterpreter;
-	tvLuaInterpreter mLua; /** Script-list */
+	typedef list<LuaInterpreter *> LuaInterpreterList;
+	LuaInterpreterList mLua; /** Script-list */
 
 	LuaInterpreter * mCurScript; /** Current script. When script is working only! */
-	string msLastError; /** Last error in scripts */
+	string mLastError; /** Last error in scripts */
 
 	TasksList mTasksList;
 	TimerList * mTimerList;
@@ -79,12 +79,12 @@ public:
 	LuaPlugin();
 	virtual ~LuaPlugin();
 
-	virtual const string & GetScriptsDir() {
-		return msScriptsDir;
+	virtual const string & getScriptsDir() {
+		return mScriptsDir;
 	}
 
 	virtual void onLoad(DcServerBase *); /** Actions when loading plugin */
-	virtual bool regAll(PluginListBase * pluginListBase); /** Registration all events for this plugin */
+	virtual bool regAll(PluginListBase *); /** Registration all events for this plugin */
 
 	// events
 	virtual int onUserConnected(DcConnBase *);
@@ -114,37 +114,37 @@ public:
 	virtual int onFlood(DcConnBase *, int, int);
 	virtual int onWebData(DcConnBase *, WebParserBase *);
 
-	virtual int OnScriptError(LuaInterpreter * Current, const char * sScriptName, const char * sErrMsg, bool bStoped = true);
-	virtual int OnScriptAction(const char * sScriptName, const char * sAction);
+	virtual int onScriptError(LuaInterpreter *, const char * scriptName, const char * errMsg, bool stoped = true);
+	virtual int onScriptAction(const char * scriptName, const char * action);
 
-	int OnConfigChange(const char *, const char *);
+	int onConfigChange(const char * name, const char * value);
 
-	int callAll(const char *, DcConnBase * dcConnBase = NULL, bool param = true); /** Calling event for all scripts */
+	int callAll(const char * fancName, DcConnBase * dcConnBase = NULL, bool param = true); /** Calling event for all scripts */
 
-	LuaInterpreter * FindScript(const string & sScriptName);
-	LuaInterpreter * AddScript(const string & sScriptName, bool bOnlyNew = false);
+	LuaInterpreter * findScript(const string & scriptName);
+	LuaInterpreter * addScript(const string & scriptName, bool onlyNew = false);
 
-	void CheckNewScripts();
+	void checkNewScripts();
 
-	int LoadScripts(); /** Loading all scripts */
+	int loadScripts(); /** Loading all scripts */
 	int clear(); /** Stoping and removing all scripts */
 
 	/** Restarting all scripts 
 		@param iType: 0 - simple restarting, 1 - restarting except loaded script, 2 - restarting except current script
 	*/
-	int RestartScripts(LuaInterpreter * CurScript = NULL, int iType = 0);
+	int restartScripts(LuaInterpreter * curScript = NULL, int type = 0);
 
-	int StartScript(const string & sScriptName);
-	int StartScript(LuaInterpreter * Script);
-	int StopScript(LuaInterpreter * Script, bool bCurrent = false);
-	int RestartScript(LuaInterpreter * Script, bool bCurrent = false);
+	int startScript(const string & scriptName);
+	int startScript(LuaInterpreter *);
+	int stopScript(LuaInterpreter *, bool current = false);
+	int restartScript(LuaInterpreter *, bool current = false);
 
-	int CheckExists(LuaInterpreter * Script);
+	int checkExists(LuaInterpreter *);
 
 	void save(); /** Saving all scripts */
 
-	int MoveUp(LuaInterpreter * Script);
-	int MoveDown(LuaInterpreter * Script);
+	int moveUp(LuaInterpreter *);
+	int moveDown(LuaInterpreter *);
 
 }; // class LuaPlugin
 

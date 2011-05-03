@@ -29,11 +29,11 @@ using namespace ::std;
 
 namespace luaplugin {
 
-LuaInterpreter::LuaInterpreter(const string & sName, string & sPath) : 
-	mName(sName),
-	msPath(sPath),
+LuaInterpreter::LuaInterpreter(const string & name, string & path) : 
+	mName(name),
+	mPath(path),
 	mL(NULL),
-	mbEnabled(false)
+	mEnabled(false)
 {
 }
 
@@ -46,7 +46,7 @@ int LuaInterpreter::start() {
 	if (mL) {
 		return -1;
 	}
-	mbEnabled = true;
+	mEnabled = true;
 	mL = luaL_newstate();
 
 #ifdef HAVE_LUA_5_1
@@ -65,100 +65,100 @@ int LuaInterpreter::start() {
 	lua_pushliteral(mL, "package");
 	lua_gettable(mL, LUA_GLOBALSINDEX);
 
-	if (!LuaPlugin::mCurLua->mbSetLuaPath) {
+	if (!LuaPlugin::mCurLua->mSetLuaPath) {
 		lua_pushliteral(mL, "path");
 		lua_rawget(mL, -2);
-		LuaPlugin::mCurLua->msLuaPath.append(lua_tostring(mL, -1));
+		LuaPlugin::mCurLua->mLuaPath.append(lua_tostring(mL, -1));
 		lua_pop(mL, 1);
 
 		lua_pushliteral(mL, "cpath");
 		lua_rawget(mL, -2);
-		LuaPlugin::mCurLua->msLuaCPath.append(lua_tostring(mL, -1));
+		LuaPlugin::mCurLua->mLuaCPath.append(lua_tostring(mL, -1));
 		lua_pop(mL, 1);
 
-		LuaPlugin::mCurLua->mbSetLuaPath = true;
+		LuaPlugin::mCurLua->mSetLuaPath = true;
 	}
 
 	lua_pushliteral(mL, "path");
-	lua_pushstring(mL, LuaPlugin::mCurLua->msLuaPath.c_str());
+	lua_pushstring(mL, LuaPlugin::mCurLua->mLuaPath.c_str());
 	lua_settable(mL, -3);
 
 	lua_pushliteral(mL, "cpath");
-	lua_pushstring(mL, LuaPlugin::mCurLua->msLuaCPath.c_str());
+	lua_pushstring(mL, LuaPlugin::mCurLua->mLuaCPath.c_str());
 	lua_settable(mL, -3);
 
 	lua_settop(mL, 0);
 
 
 	lua_newtable(mL);
-	RegFunc("GetGVal",              &GetGVal);
-	RegFunc("SetGVal",              &SetGVal);
-	RegFunc("SendToUser",           &sendToUser);
-	RegFunc("SendToAll",            &sendToAll);
-	RegFunc("SendToAllExceptNicks", &sendToAllExceptNicks);
-	RegFunc("SendToAllExceptIPs",   &sendToAllExceptIps);
-	RegFunc("SendToProfile",        &SendToProfile);
-	RegFunc("SendToIP",             &sendToIp);
-	RegFunc("SendToNicks",          &SendToNicks);
-	RegFunc("GetUser",              &GetUser);
-	RegFunc("SetUser",              &setUser);
-	RegFunc("GetUsersCount",        &getUsersCount);
-	RegFunc("GetTotalShare",        &getTotalShare);
-	RegFunc("GetUpTime",            &getUpTime);
-	RegFunc("Disconnect",           &disconnect);
-	RegFunc("DisconnectIP",         &DisconnectIP);
-	RegFunc("RestartScripts",       &RestartScripts);
-	RegFunc("RestartScript",        &RestartScript);
-	RegFunc("StopScript",           &StopScript);
-	RegFunc("StartScript",          &StartScript);
-	RegFunc("GetScripts",           &GetScripts);
-	RegFunc("GetScript",            &GetScript);
-	RegFunc("MoveUpScript",         &MoveUpScript);
-	RegFunc("MoveDownScript",       &MoveDownScript);
-	RegFunc("SetCmd",               &SetCmd);
-	RegFunc("GetUsers",             &GetUsers);
-	RegFunc("AddTimer",             &AddTimer);
-	RegFunc("DelTimer",             &DelTimer);
-	RegFunc("GetConfig",            &getConfig);
-	RegFunc("SetConfig",            &setConfig);
-	RegFunc("GetLang",              &getLang);
-	RegFunc("SetLang",              &setLang);
-	RegFunc("Call",                 &Call);
-	RegFunc("RegBot",               &regBot);
-	RegFunc("UnregBot",             &unregBot);
-	RegFunc("SetHubState",          &SetHubState);
-	RegFunc("Redirect",             &redirect);
+	regFunc("GetGVal",              &getGVal);
+	regFunc("SetGVal",              &setGVal);
+	regFunc("SendToUser",           &sendToUser);
+	regFunc("SendToAll",            &sendToAll);
+	regFunc("SendToAllExceptNicks", &sendToAllExceptNicks);
+	regFunc("SendToAllExceptIPs",   &sendToAllExceptIps);
+	regFunc("SendToProfile",        &sendToProfile);
+	regFunc("SendToIP",             &sendToIp);
+	regFunc("SendToNicks",          &sendToNicks);
+	regFunc("GetUser",              &getUser);
+	regFunc("SetUser",              &setUser);
+	regFunc("GetUsersCount",        &getUsersCount);
+	regFunc("GetTotalShare",        &getTotalShare);
+	regFunc("GetUpTime",            &getUpTime);
+	regFunc("Disconnect",           &disconnect);
+	regFunc("DisconnectIP",         &disconnectIp);
+	regFunc("RestartScripts",       &restartScripts);
+	regFunc("RestartScript",        &restartScript);
+	regFunc("StopScript",           &stopScript);
+	regFunc("StartScript",          &startScript);
+	regFunc("GetScripts",           &getScripts);
+	regFunc("GetScript",            &getScript);
+	regFunc("MoveUpScript",         &moveUpScript);
+	regFunc("MoveDownScript",       &moveDownScript);
+	regFunc("SetCmd",               &setCmd);
+	regFunc("GetUsers",             &getUsers);
+	regFunc("AddTimer",             &addTimer);
+	regFunc("DelTimer",             &delTimer);
+	regFunc("GetConfig",            &getConfig);
+	regFunc("SetConfig",            &setConfig);
+	regFunc("GetLang",              &getLang);
+	regFunc("SetLang",              &setLang);
+	regFunc("Call",                 &call);
+	regFunc("RegBot",               &regBot);
+	regFunc("UnregBot",             &unregBot);
+	regFunc("SetHubState",          &setHubState);
+	regFunc("Redirect",             &redirect);
 
-	RegStrField("sLuaPluginVersion", PLUGIN_NAME" "PLUGIN_VERSION);
-	RegStrField("sHubVersion", LuaPlugin::mCurServer->getHubInfo().c_str());
-	RegStrField("sMainDir", LuaPlugin::mCurServer->getMainDir().c_str());
-	RegStrField("sScriptsDir", LuaPlugin::mCurLua->GetScriptsDir().c_str());
-	RegStrField("sSystem", LuaPlugin::mCurServer->getSystemVersion().c_str());
+	regStrField("sLuaPluginVersion", PLUGIN_NAME" "PLUGIN_VERSION);
+	regStrField("sHubVersion", LuaPlugin::mCurServer->getHubInfo().c_str());
+	regStrField("sMainDir", LuaPlugin::mCurServer->getMainDir().c_str());
+	regStrField("sScriptsDir", LuaPlugin::mCurLua->getScriptsDir().c_str());
+	regStrField("sSystem", LuaPlugin::mCurServer->getSystemVersion().c_str());
 
 	lua_setglobal(mL, "Core");
 
-	CreateConfigMT();
-	Config * config = (Config*)lua_newuserdata(mL, sizeof(Config));
+	createConfigMetaTable();
+	Config * config = (Config *) lua_newuserdata(mL, sizeof(Config));
 	config->isExist = 1;
 	luaL_getmetatable(mL, MT_CONFIG);
 	lua_setmetatable(mL, -2);
 	lua_setglobal(mL, "Config");
 
-	LuaInterpreter * Old = LuaPlugin::mCurLua->mCurScript;
+	LuaInterpreter * oldScript = LuaPlugin::mCurLua->mCurScript;
 	LuaPlugin::mCurLua->mCurScript = this;
 	#ifdef HAVE_LUA_5_1
-		int iStatus = luaL_dofile(mL, (char *)(msPath + mName).c_str());
+		int iStatus = luaL_dofile(mL, (char *)(mPath + mName).c_str());
 	#else
-		int iStatus = lua_dofile(mL, (char *)(msPath + mName).c_str());
+		int iStatus = lua_dofile(mL, (char *)(mPath + mName).c_str());
 	#endif
 	if (iStatus) {
-		OnError("OnError", lua_tostring(mL, -1), true);
-		LuaPlugin::mCurLua->mCurScript = Old;
+		onError("OnError", lua_tostring(mL, -1), true);
+		LuaPlugin::mCurLua->mCurScript = oldScript;
 		return iStatus;
 	}
-	CreateUserMT();
-	CallFunc("OnStartup");
-	LuaPlugin::mCurLua->mCurScript = Old;
+	createUserMetaTable();
+	callFunc("OnStartup");
+	LuaPlugin::mCurLua->mCurScript = oldScript;
 	return 0;
 }
 
@@ -166,65 +166,65 @@ int LuaInterpreter::start() {
 /** On stop script */
 int LuaInterpreter::stop() {
 	if (mL) {
-		DelTmr();
+		delTmr();
 
-		for (tBotList::iterator it = mBotList.begin(); it != mBotList.end(); ++it) {
+		for (BotList::iterator it = mBotList.begin(); it != mBotList.end(); ++it) {
 			LuaPlugin::mCurServer->unregBot(*it);
 		}
 		mBotList.clear();
 
-		CallFunc("OnExit");
+		callFunc("OnExit");
 		lua_close(mL);
-		mbEnabled = false;
+		mEnabled = false;
 		mL = NULL;
 		return 1;
 	}
-	mbEnabled = false;
+	mEnabled = false;
 	return 0;
 }
 
 
-void LuaInterpreter::RegFunc(const char * sFuncName, int (*fncptr)(lua_State *)) {
-	lua_pushstring(mL, sFuncName);
+void LuaInterpreter::regFunc(const char * funcName, int (*fncptr)(lua_State *)) {
+	lua_pushstring(mL, funcName);
 	lua_pushcfunction(mL, fncptr);
 	lua_rawset(mL, -3);
 }
 
-void LuaInterpreter::RegStrField(const char * sName, const char * sVal) {
-	lua_pushstring(mL, sName);
-	lua_pushstring(mL, sVal);
+void LuaInterpreter::regStrField(const char * name, const char * value) {
+	lua_pushstring(mL, name);
+	lua_pushstring(mL, value);
 	lua_rawset(mL, -3);
 }
 
 
 /** 1 - lock! */
-int LuaInterpreter::CallFunc(const char * sFunc) {
-	tvCallParams::iterator it;
+int LuaInterpreter::callFunc(const char * funcName) {
+	CallParams::iterator it;
 	lua_settop(mL, 0);
-	int iBase = lua_gettop(mL);
+	int base = lua_gettop(mL);
 
 	lua_pushliteral(mL, "_TRACEBACK");
 	lua_rawget(mL, LUA_GLOBALSINDEX); // lua 5.1
 	if (lua_isfunction(mL, -1)) {
-		iBase = lua_gettop(mL);
+		base = lua_gettop(mL);
 	} else {
 		lua_pop(mL, 1);
 	}
 	//lua_rawget(mL, LUA_ENVIRONINDEX); // lua 5.2
-	//lua_insert(mL, iBase);
+	//lua_insert(mL, base);
 
-	lua_getglobal(mL, sFunc);
+	lua_getglobal(mL, funcName);
 	if (lua_isnil(mL, -1)) { // function not exists
 		for (it = mCallParams.begin(); it != mCallParams.end(); ++it) {
 			delete (*it);
 		}
 		mCallParams.clear();
 		lua_pop(mL, -1); // remove nil value
-		lua_remove(mL, iBase); // remove _TRACEBACK
+		lua_remove(mL, base); // remove _TRACEBACK
 		return 0;
 	}
 
-	void ** userdata;
+	void ** userdata = NULL;
 	for (it = mCallParams.begin(); it != mCallParams.end(); ++it) {
 		switch ((*it)->type) {
 			case LUA_TLIGHTUSERDATA :
@@ -253,75 +253,75 @@ int LuaInterpreter::CallFunc(const char * sFunc) {
 		}
 		delete (*it);
 	}
-	const int iLen = mCallParams.size();
+	const int len = mCallParams.size();
 	mCallParams.clear();
 
-	LuaInterpreter * Old = LuaPlugin::mCurLua->mCurScript;
+	LuaInterpreter * oldScript = LuaPlugin::mCurLua->mCurScript;
 	LuaPlugin::mCurLua->mCurScript = this;
 
-	if (lua_pcall(mL, iLen, 1, iBase)) {
-		if (!OnError(sFunc, lua_tostring(mL, -1))) {
+	if (lua_pcall(mL, len, 1, base)) {
+		if (!onError(funcName, lua_tostring(mL, -1))) {
 			lua_pop(mL, 1);
-			lua_remove(mL, iBase); // remove _TRACEBACK
+			lua_remove(mL, base); // remove _TRACEBACK
 		}
-		LuaPlugin::mCurLua->mCurScript = Old;
+		LuaPlugin::mCurLua->mCurScript = oldScript;
 		return 0;
 	}
 
-	int iVal = 0;
+	int ret = 0;
 	if (lua_isboolean(mL, -1)) {
-		iVal = ((lua_toboolean(mL, -1) == 0) ? 0 : 1);
+		ret = ((lua_toboolean(mL, -1) == 0) ? 0 : 1);
 	} else if(lua_isnumber(mL, -1)) {
-		iVal = (int)lua_tonumber(mL, -1);
+		ret = (int)lua_tonumber(mL, -1);
 	}
 
 	lua_pop(mL, 1);
-	lua_remove(mL, iBase); // remove _TRACEBACK
+	lua_remove(mL, base); // remove _TRACEBACK
 
-	LuaPlugin::mCurLua->mCurScript = Old;
-	return iVal;
+	LuaPlugin::mCurLua->mCurScript = oldScript;
+	return ret;
 }
 
-bool LuaInterpreter::OnError(const char * sFunc, const char * sErrMsg, bool bStop) {
-	bool bStoped = true;
-	LuaPlugin::mCurLua->msLastError = sErrMsg;
-	LogError(sErrMsg);
-	if (strcmp(sFunc, "OnError")) {
-		NewCallParam((void *) sErrMsg, LUA_TSTRING);
-		bStoped = !CallFunc("OnError");
+bool LuaInterpreter::onError(const char * funcName, const char * errMsg, bool stop) {
+	bool stoped = true;
+	LuaPlugin::mCurLua->mLastError = errMsg;
+	logError(errMsg);
+	if (strcmp(funcName, "OnError")) {
+		newCallParam((void *) errMsg, LUA_TSTRING);
+		stoped = !callFunc("OnError");
 	}
-	bStoped = bStoped || bStop;
-	LuaPlugin::mCurLua->OnScriptError(this, mName.c_str(), sErrMsg, bStoped);
-	if (bStoped) {
-		return !LuaPlugin::mCurLua->StopScript(this, true);
+	stoped = stoped || stop;
+	LuaPlugin::mCurLua->onScriptError(this, mName.c_str(), errMsg, stoped);
+	if (stoped) {
+		return !LuaPlugin::mCurLua->stopScript(this, true);
 	}
 	return false;
 }
 
-void LuaInterpreter::timer(int iId, const char * sFunc) {
-	lua_getglobal(mL, sFunc);
-	lua_pushnumber(mL, iId);
-	LuaInterpreter * Old = LuaPlugin::mCurLua->mCurScript;
+void LuaInterpreter::timer(int id, const char * funcName) {
+	lua_getglobal(mL, funcName);
+	lua_pushnumber(mL, id);
+	LuaInterpreter * oldScript = LuaPlugin::mCurLua->mCurScript;
 	LuaPlugin::mCurLua->mCurScript = this;
 	if (lua_pcall(mL, 1, 0, 0)) {
-		if (!OnError("OnTimer", lua_tostring(mL, -1), true)) {
+		if (!onError("OnTimer", lua_tostring(mL, -1), true)) {
 			lua_pop(mL, 1);
 		}
 	}
-	LuaPlugin::mCurLua->mCurScript = Old;
+	LuaPlugin::mCurLua->mCurScript = oldScript;
 }
 
-void LuaInterpreter::NewCallParam(void * Data, int iType) {
-	sParam * Param = new sParam(Data, iType);
-	mCallParams.push_back(Param);
+void LuaInterpreter::newCallParam(void * data, int type) {
+	Param * param = new Param(data, type);
+	mCallParams.push_back(param);
 }
 
-void LuaInterpreter::NewCallParam(lua_Number Data, int iType) {
-	sParam * Param = new sParam(Data, iType);
-	mCallParams.push_back(Param);
+void LuaInterpreter::newCallParam(lua_Number data, int type) {
+	Param * param = new Param(data, type);
+	mCallParams.push_back(param);
 }
 
-void LuaInterpreter::CreateUserMT() {
+void LuaInterpreter::createUserMetaTable() {
 	if (!luaL_newmetatable(mL, MT_USER_CONN)) {
 		return;
 	}
@@ -348,24 +348,24 @@ void LuaInterpreter::CreateUserMT() {
 	lua_settop(mL, 0);
 }
 
-void LuaInterpreter::CreateConfigMT() {
+void LuaInterpreter::createConfigMetaTable() {
 	if (!luaL_newmetatable(mL, MT_CONFIG)) {
 		return;
 	}
 
 	lua_pushliteral(mL, "__index");
 	lua_pushstring(mL, "ConfigIndex");
-	lua_pushcclosure(mL, ConfigIndex, 1);
+	lua_pushcclosure(mL, configIndex, 1);
 	lua_settable(mL, -3);
 
 	lua_pushliteral(mL, "__newindex");
 	lua_pushstring(mL, "ConfigNewindex");
-	lua_pushcclosure(mL, ConfigNewindex, 1);
+	lua_pushcclosure(mL, configNewindex, 1);
 	lua_settable(mL, -3);
 
 	lua_pushliteral(mL, "__tostring");
 	lua_pushstring(mL, MT_CONFIG);
-	lua_pushcclosure(mL, ConfigTostring, 1);
+	lua_pushcclosure(mL, configTostring, 1);
 	lua_settable(mL, -3);
 
 	lua_pushliteral(mL, "__metatable");

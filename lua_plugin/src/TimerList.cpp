@@ -26,16 +26,16 @@
 
 namespace luaplugin {
 
-int cTmrCnt::miCount = 0;
+int TmrCnt::mCount = 0;
 
 
-Timer::Timer(int iId, int iInterval, const char * sFunc, LuaInterpreter * Script) :
-	miInterval(iInterval),
-	msFunc(sFunc),
-	miId(iId),
-	mScript(Script)
+Timer::Timer(int id, int interval, const char * func, LuaInterpreter * script) :
+	mInterval(interval),
+	mFunc(func),
+	mId(id),
+	mScript(script)
 {
-	miTime = LuaPlugin::mCurServer->getMSec();
+	mTime = LuaPlugin::mCurServer->getMSec();
 }
 
 
@@ -45,10 +45,10 @@ Timer::~Timer() {
 
 
 
-void Timer::check(int iTime) {
-	if (abs(iTime - miTime) >= miInterval) {
-		mScript->timer(miId, msFunc.c_str());
-		miTime = iTime;
+void Timer::check(int time) {
+	if (abs(time - mTime) >= mInterval) {
+		mScript->timer(mId, mFunc.c_str());
+		mTime = time;
 	}
 }
 
@@ -67,8 +67,8 @@ TimerList::~TimerList() {
 
 
 
-static void Checker(void * val) {
-	((Timer *)val)->check(LuaPlugin::mCurServer->getMSec());
+static void Checker(void * value) {
+	((Timer *) value)->check(LuaPlugin::mCurServer->getMSec());
 }
 
 
@@ -79,24 +79,24 @@ void TimerList::onTimer() {
 
 
 
-int TimerList::AddTimer(Timer * timer) {
-	cTmrCnt::miCount = 0;
-	loop(cTmrCnt(timer->miId));
+int TimerList::addTimer(Timer * timer) {
+	TmrCnt::mCount = 0;
+	loop(TmrCnt(timer->mId));
 	add(timer);
-	return ++cTmrCnt::miCount;
+	return ++TmrCnt::mCount;
 }
 
 
 
-int TimerList::DelTimer(int iId) {
-	cTmrCnt::miCount = 0;
-	removeIf(cTmrCnt(iId));
-	return cTmrCnt::miCount;
+int TimerList::delTimer(int id) {
+	TmrCnt::mCount = 0;
+	removeIf(TmrCnt(id));
+	return TmrCnt::mCount;
 }
 
 
 
-void TimerList::DelTimer() {
+void TimerList::delTimer() {
 	clear();
 }
 

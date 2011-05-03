@@ -25,32 +25,32 @@
 namespace luaplugin {
 
 enum {
-	eTB_Save           = 1 << 1,
-}; /** TasksBytes */
+	COMMONTASK_SAVE           = 1 << 1,
+}; /** CommonTask */
 
 typedef enum {
-	eT_No = 0,
-	eT_Save,
-	eT_RestartScript,
-	eT_StopScript,
-	eT_MoveUp,
-	eT_MoveDown,
-	eT_ScriptError
-} tTask; /** tTask */
+	TASKTYPE_No = 0,
+	TASKTYPE_SAVE,
+	TASKTYPE_RESTARTSCRIPT,
+	TASKTYPE_STOPSCRIPT,
+	TASKTYPE_MOVEUP,
+	TASKTYPE_MOVEDOWN,
+	TASKTYPE_SCRIPTERROR
+} TaskType; /** TaskType */
 
 
 struct Task {
 
-	Task():mParam(NULL) {
+	Task() : mParam(NULL) {
 	}
 
-	Task(tTask iType) : mType(iType), mParam(NULL) {
+	Task(TaskType type) : mType(type), mParam(NULL) {
 	}
 
 	~Task() {
 	}
 
-	tTask mType;
+	TaskType mType;
 
 	void * mParam;
 
@@ -62,25 +62,25 @@ class TasksList : public List<Task *> {
 
 public:
 
-	TasksList() : miTackChecker(0) {
+	TasksList() : mTackChecker(0) {
 	}
 
-	~TasksList() {
+	virtual ~TasksList() {
 	}
 
-	void AddTask(void * Param, tTask iType = eT_No); /** Adding tasks */
+	void addTask(void * param, TaskType type = TASKTYPE_No); /** Adding tasks */
 
-	void CheckTasks();
+	void checkTasks();
 
 	virtual void onRemove(Task *);
 
 private:
 
-	int miTackChecker; /** Bits of the common tasks */
+	int mTackChecker; /** Bits of the common tasks */
 
 private:
 
-	void CommonTasks(); /** Common tasks */
+	void commonTasks(); /** Common tasks */
 
 }; // class TasksList
 

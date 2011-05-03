@@ -25,27 +25,27 @@ namespace luaplugin {
 
 
 /** Do tasks */
-void Tasks(void * val) {
-	Task * task = (Task *) val;
-	LuaInterpreter * Param = (LuaInterpreter *) (task->mParam);
+void Tasks(void * value) {
+	Task * task = (Task *) value;
+	LuaInterpreter * param = (LuaInterpreter *) (task->mParam);
 	switch (task->mType) {
-		case eT_RestartScript :
-			LuaPlugin::mCurLua->RestartScript(Param);
+		case TASKTYPE_RESTARTSCRIPT :
+			LuaPlugin::mCurLua->restartScript(param);
 			break;
 
-		case eT_StopScript :
-			LuaPlugin::mCurLua->StopScript(Param);
+		case TASKTYPE_STOPSCRIPT :
+			LuaPlugin::mCurLua->stopScript(param);
 			break;
 
-		case eT_MoveUp :
-			LuaPlugin::mCurLua->MoveUp(Param);
+		case TASKTYPE_MOVEUP :
+			LuaPlugin::mCurLua->moveUp(param);
 			break;
 
-		case eT_MoveDown :
-			LuaPlugin::mCurLua->MoveDown(Param);
+		case TASKTYPE_MOVEDOWN :
+			LuaPlugin::mCurLua->moveDown(param);
 			break;
 
-		case eT_ScriptError :
+		case TASKTYPE_SCRIPTERROR :
 
 		default :
 			break;
@@ -55,33 +55,33 @@ void Tasks(void * val) {
 
 
 
-void TasksList::CommonTasks() {
-	if (miTackChecker & eTB_Save) {
+void TasksList::commonTasks() {
+	if (mTackChecker & COMMONTASK_SAVE) {
 		LuaPlugin::mCurLua->save();
 	}
-	miTackChecker = 0;
+	mTackChecker = 0;
 }
 
 
 
 /** Add task */
-void TasksList::AddTask(void * Param, tTask iType) {
-	if (!Param) {
-		miTackChecker = miTackChecker | (1 << iType); /** Common task */
+void TasksList::addTask(void * param, TaskType type) {
+	if (!param) {
+		mTackChecker = mTackChecker | (1 << type); /** Common task */
 	} else {
-		Task * task = new Task(iType);
-		task->mParam = Param;
+		Task * task = new Task(type);
+		task->mParam = param;
 		add(task);
 	}
 }
 
 
 
-void TasksList::CheckTasks() {
+void TasksList::checkTasks() {
 	loop(Tasks);
 	clear();
-	if (miTackChecker) {
-		CommonTasks();
+	if (mTackChecker) {
+		commonTasks();
 	}
 }
 

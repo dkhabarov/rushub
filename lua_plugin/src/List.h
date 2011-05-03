@@ -64,7 +64,7 @@ template<typename T> class List {
 
 public:
 
-	List() : mFirst(NULL), mLast(NULL), miSize(0), mbProcess(false) {
+	List() : mFirst(NULL), mLast(NULL), mSize(0), mProcess(false) {
 	}
 
 	virtual ~List() {
@@ -80,11 +80,11 @@ public:
 			delete p;
 		}
 		mFirst = mLast = NULL;
-		miSize = 0;
+		mSize = 0;
 	}
 
 	virtual int size() const {
-		return miSize;
+		return mSize;
 	}
 
 	virtual void add(T value) {
@@ -94,7 +94,7 @@ public:
 			mLast->mNext = new Item<T>(value);
 			mLast = mLast->mNext;
 		}
-		++miSize;
+		++mSize;
 	}
 
 	template<typename P> void removeIf(P pred) {
@@ -111,8 +111,8 @@ public:
 	}
 
 	template<typename P> void loop(P pred) {
-		bool proc = mbProcess;
-		mbProcess = true;
+		bool proc = mProcess;
+		mProcess = true;
 		Item<T> *next = mFirst, *curr = NULL, *prev = NULL;
 		while (next) {
 			if (next->isAlive()) {
@@ -139,10 +139,10 @@ public:
 					onRemove(curr->getValue());
 					delete curr;
 					curr = NULL;
-					--miSize;
+					--mSize;
 				}
 			}
-			mbProcess = false;
+			mProcess = false;
 		}
 	}
 
@@ -151,8 +151,8 @@ private:
 	Item<T> * mFirst;
 	Item<T> * mLast;
 
-	int miSize;
-	bool mbProcess;
+	int mSize;
+	bool mProcess;
 
 }; // template class List
 

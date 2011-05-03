@@ -38,21 +38,21 @@ class Timer {
 
 private:
 
-	int miTime, miInterval;
-	string msFunc;
+	int mTime, mInterval;
+	string mFunc;
 
 public:
 
-	int miId;
+	int mId;
 	LuaInterpreter * mScript;
 
 public:
 
-	Timer(int iId, int iInterval, const char * sFunc, LuaInterpreter * Script);
+	Timer(int id, int interval, const char * func, LuaInterpreter *);
 
 	~Timer();
 
-	void check(int iTime);
+	void check(int time);
 
 }; // Timer
 
@@ -61,13 +61,14 @@ public:
 class TimerList : public List<Timer *> {
 
 public:
+
 	TimerList();
 	virtual ~TimerList();
 
 	void onTimer();
-	int AddTimer(Timer *);
-	int DelTimer(int);
-	void DelTimer();
+	int addTimer(Timer *);
+	int delTimer(int);
+	void delTimer();
 
 	virtual void onRemove(Timer *);
 
@@ -75,30 +76,30 @@ public:
 
 
 
-class cTmrCnt {
+class TmrCnt {
 
 public:
 
-	static int miCount; // static counter
+	static int mCount; // static counter
 
 public:
 
-	cTmrCnt(int iId = 0) : miId(iId) {
+	TmrCnt(int id = 0) : mId(id) {
 	}
 
-	bool operator() (void * val) {
-		if (((Timer*)val)->miId != miId) {
+	bool operator() (void * value) {
+		if (((Timer *) value)->mId != mId) {
 			return false;
 		}
-		++ miCount;
+		++ mCount;
 		return true;
 	}
 
 private:
 
-	int miId;
+	int mId;
 
-}; // class cTmrCnt
+}; // class TmrCnt
 
 }; // namespace luaplugin
 

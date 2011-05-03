@@ -38,16 +38,16 @@ class LuaInterpreter {
 public:
 
 	string mName;
-	string & msPath;
+	string & mPath;
 	lua_State * mL;
-	bool mbEnabled;
+	bool mEnabled;
 
-	typedef list<string> tBotList;
-	tBotList mBotList;
+	typedef list<string> BotList;
+	BotList mBotList;
 
 public:
 
-	LuaInterpreter(const string & sName, string & sFullName);
+	LuaInterpreter(const string & name, string & fullName);
 	~LuaInterpreter();
 
 	LuaInterpreter & operator = (const LuaInterpreter &) {
@@ -57,47 +57,47 @@ public:
 	int start(); // (-1 - run already)
 	int stop();
 
-	int CallFunc(const char *);
-	void RegFunc(const char *, int (*)(lua_State *));
-	void RegStrField(const char *, const char *);
+	int callFunc(const char * funcName);
+	void regFunc(const char * funcName, int (*)(lua_State *));
+	void regStrField(const char * name, const char * value);
 
-	void timer(int iId, const char * sFunc);
-	bool OnError(const char * sFunc, const char * sErrMsg, bool bStop = false);
-	void NewCallParam(void * data, int type = 0);
-	void NewCallParam(lua_Number data, int type = 0);
+	void timer(int id, const char * funcName);
+	bool onError(const char * funcName, const char * errMsg, bool stop = false);
+	void newCallParam(void * data, int type = 0);
+	void newCallParam(lua_Number data, int type = 0);
 
 	inline void onTimer() {
 		mTimerList.onTimer();
 	}
-	inline int AddTmr(Timer * timer) {
-		return mTimerList.AddTimer(timer);
+	inline int addTmr(Timer * timer) {
+		return mTimerList.addTimer(timer);
 	}
 	inline int size() {
 		return mTimerList.size();
 	}
-	inline int DelTmr(int tm) {
-		return mTimerList.DelTimer(tm);
+	inline int delTmr(int tm) {
+		return mTimerList.delTimer(tm);
 	}
-	inline void DelTmr() {
-		mTimerList.DelTimer();
+	inline void delTmr() {
+		mTimerList.delTimer();
 	}
 
 private:
 
-	struct sParam {
+	struct Param {
 		void * data;
 		lua_Number num;
 		int type;
-		sParam(void * d, int t) : data(d), type(t) {
+		Param(void * d, int t) : data(d), type(t) {
 		}
-		sParam(lua_Number n, int t) : num(n), type(t) {
+		Param(lua_Number n, int t) : num(n), type(t) {
 		}
 	};
-	typedef vector<sParam *> tvCallParams;
-	tvCallParams mCallParams;
+	typedef vector<Param *> CallParams;
+	CallParams mCallParams;
 
-	void CreateUserMT();
-	void CreateConfigMT();
+	void createUserMetaTable();
+	void createConfigMetaTable();
 
 	TimerList mTimerList;
 

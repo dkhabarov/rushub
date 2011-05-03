@@ -30,13 +30,13 @@ namespace luaplugin {
 
 
 typedef enum {
-	eUV_iProfile = 1,
-	eUV_sMyINFO,
-	eUV_sData,
-	eUV_bOpList,
-	eUV_bHide,
-	eUV_bIpList
-} tUserValue; /** tUserValue */
+	USERVALUE_PROFILE = 1,
+	USERVALUE_MYINFO,
+	USERVALUE_DATA,
+	USERVALUE_OPLIST,
+	USERVALUE_HIDE,
+	USERVALUE_IPLIST
+} UserValue; /** UserValue */
 
 
 typedef struct {
@@ -47,25 +47,25 @@ typedef struct {
 DcConnBase * getDcConnBase(lua_State * L, int indx);
 
 
-int ConfigTostring(lua_State * L);
+int configTostring(lua_State * L);
 
-int ConfigTable(lua_State * L);
+int configTable(lua_State * L);
 
-int ConfigIndex(lua_State * L);
+int configIndex(lua_State * L);
 
-int ConfigNewindex(lua_State * L);
+int configNewindex(lua_State * L);
 
 
-void LogError(const char * msg = NULL);
+void logError(const char * msg = NULL);
 
-void CopyValue(lua_State * from, lua_State * to, int pos);
+void copyValue(lua_State * from, lua_State * to, int pos);
 
 
 // GetGVal(sScriptName, sParam)
-int GetGVal(lua_State * L);
+int getGVal(lua_State * L);
 
 // SetGVal(sScriptName, sParam, Value)
-int SetGVal(lua_State * L);
+int setGVal(lua_State * L);
 
 // SendToUser(UID/sToNick, sData, sNick, sFrom)
 int sendToUser(lua_State * L);
@@ -80,22 +80,22 @@ int sendToAllExceptNicks(lua_State * L);
 int sendToAllExceptIps(lua_State * L);
 
 // SendToProfile(iProfile/tProfiles, sData, sNick, sFrom)
-int SendToProfile(lua_State * L);
+int sendToProfile(lua_State * L);
 
 // SendToIp(sIP, sData, sNick, sFrom, iProfile/tProfiles)
 int sendToIp(lua_State * L);
 
 // SendToNicks(tNicks, sData, sNick, sFrom)
-int SendToNicks(lua_State * L);
+int sendToNicks(lua_State * L);
 
 // GetUser(UID/sNick, iByte)
-int GetUser(lua_State * L);
+int getUser(lua_State * L);
 
 // SetUser(UID/sNick, iType, Value)
 int setUser(lua_State * L);
 
 // GetUsers(sIP, iByte)
-int GetUsers(lua_State * L);
+int getUsers(lua_State * L);
 
 // GetUsersCount()
 int getUsersCount(lua_State * L);
@@ -110,40 +110,40 @@ int getUpTime(lua_State * L);
 int disconnect(lua_State * L);
 
 // DisconnectIP(sIP)
-int DisconnectIP(lua_State * L);
+int disconnectIp(lua_State * L);
 
 // RestartScripts(iType)
-int RestartScripts(lua_State * L);
+int restartScripts(lua_State * L);
 
 // RestartScript(sScriptName)
-int RestartScript(lua_State * L);
+int restartScript(lua_State * L);
 
 // StopScript(sScriptName)
-int StopScript(lua_State * L);
+int stopScript(lua_State * L);
 
 // StartScript(sScriptName)
-int StartScript(lua_State * L);
+int startScript(lua_State * L);
 
 // GetScripts()
-int GetScripts(lua_State * L);
+int getScripts(lua_State * L);
 
 // GetScript(sScriptName)
-int GetScript(lua_State * L);
+int getScript(lua_State * L);
 
 // MoveUpScript(sScriptName)
-int MoveUpScript(lua_State * L);
+int moveUpScript(lua_State * L);
 
 // MoveDownScript(sScriptName)
-int MoveDownScript(lua_State * L);
+int moveDownScript(lua_State * L);
 
 // SetCmd(sData)
-int SetCmd(lua_State * L);
+int setCmd(lua_State * L);
 
 // AddTimer(iId, iInterval, sFunc)
-int AddTimer(lua_State * L);
+int addTimer(lua_State * L);
 
 // DelTimer(iId)
-int DelTimer(lua_State * L);
+int delTimer(lua_State * L);
 
 // GetConfig(sName)
 int getConfig(lua_State * L);
@@ -158,7 +158,7 @@ int getLang(lua_State * L);
 int setLang(lua_State * L);
 
 // Call(sScriptName, sFunc, sParam)
-int Call(lua_State * L);
+int call(lua_State * L);
 
 // RegBot(sNick, bKey, sMyINFO, sIP)
 int regBot(lua_State * L);
@@ -167,7 +167,7 @@ int regBot(lua_State * L);
 int unregBot(lua_State * L);
 
 // SetHubState(iNumber)
-int SetHubState(lua_State * L);
+int setHubState(lua_State * L);
 
 // Redirect(UID/sNick, sAddress, [sReason])
 int redirect(lua_State * L);
