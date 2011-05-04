@@ -473,22 +473,37 @@ int Conn::recv() {
 			} else {
 				if (Log(2)) {
 					LogStream() << "Error in receive: " << SockErr;
-					switch (SockErr) {
-						case ECONNRESET : /** Connection reset by peer */
+				}
+
+				switch (SockErr) {
+
+					case ECONNRESET : /** Connection reset by peer */
+						if (Log(2)) {
 							LogStream() << "(connection reset by peer)" << endl;
-							break;
-						case ETIMEDOUT : /** Connection timed out */
+						}
+						break;
+
+					case ETIMEDOUT : /** Connection timed out */
+						if (Log(2)) {
 							LogStream() << "(connection timed out)" << endl;
-							break;
-						case EHOSTUNREACH : /** No route to host */
+						}
+						break;
+
+					case EHOSTUNREACH : /** No route to host */
+						if (Log(2)) {
 							LogStream() << "(no route to host)" << endl;
-							break;
-						case EWOULDBLOCK : /** Non-blocking socket operation */
-							return -1;
-						default :
+						}
+						break;
+
+					case EWOULDBLOCK : /** Non-blocking socket operation */
+						return -1;
+
+					default :
+						if (Log(2)) {
 							LogStream() << "(other reason)" << endl;
-							break;
-					}
+						}
+						break;
+
 				}
 				closeNow(CLOSE_REASON_ERROR_RECV);
 			}

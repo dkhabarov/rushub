@@ -309,7 +309,7 @@ void Server::step() {
 			if (new_conn) {
 				if (addConnection(new_conn) > 0) {
 
-					if (inputData(new_conn) >= 0) {
+					//if (inputData(new_conn) >= 0) { // fix close conn if not recv data
 
 						if (mNowConn->mConnFactory) {
 							// On new connection using ListenFactory
@@ -323,7 +323,7 @@ void Server::step() {
 							onNewConn(new_conn);
 						}
 
-					}
+					//}
 
 				}
 			}
