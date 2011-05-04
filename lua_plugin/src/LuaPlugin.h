@@ -35,7 +35,7 @@
 #endif
 
 #define PLUGIN_NAME "LuaPlugin"
-#define PLUGIN_VERSION "2.1[beta]"
+#define PLUGIN_VERSION "2.1"
 
 namespace dcserver {
 
