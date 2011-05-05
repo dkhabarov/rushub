@@ -1,0 +1,187 @@
+
+Installation RusHub for various Operational Systems
+
+
+
+--------------------------------
+Installation RusHub in Windows
+--------------------------------
+
+Download and unpacked the current version rushub*.rar 
+
+Starting hub file rushub.exe and then stopped, closing the console. 
+Let it name a restart.
+
+We place a file lua.dll from archive lua_plugin.rar into the folder "plugins" created by hub.
+
+	* Restart hub
+
+Download FirstRusHubBot script and unpack it into the folder "scripts"
+
+	* Restart hub
+
+Install network settings in file RusHub.xml
+
+In folder scripts/FirstRusHubBot we create file RegUsers.dat with record:
+
+tRegUsers = {
+	["admin_nick"] = {
+		["sPass"] = "password",
+		["iProfile"] = 0,
+	},
+}
+
+For activation of script we change "0" on "1" in file scripts.xml:
+
+<script Name = "FirstRusHubBot.lua" Enabled = "1"/>
+
+Start hub.
+Now you have administrative right and functions for management.
+
+
+
+--------------------------------
+Installation RusHub in Ubuntu 10.04
+--------------------------------
+
+Download files from repository:
+
+sudo su echo 'deb http://mydc.ru/ubuntu binary/' > /etc/apt/sources.list.d/mydc.list 
+aptitude update
+
+Install RusHub and lua_plugin:
+
+aptitude install rushub 
+aptitude install rushub-lua 
+su you_nick
+
+RusHub's files are saved in the directory: /etc/rushub.
+
+	* Restart hub: 
+
+sudo service rushub start
+sudo service rushub stop
+
+It is changed the rights for the folder rushub and all files enclosed in it:
+
+sudo chown -R you_nick:you_nick /etc/rushub
+
+Change the coding windows-1251 for the editor.
+
+Install the archiver:
+
+sudo aptitude install rar
+
+Having chosen in a browser (Editing-adjustment) a way for save of files
+/etc/rushub/scripts, download FirstRusHubBot
+
+Unpack:
+
+cd /etc/rushub/scripts
+rar x FirstRusHubBot_v0.2.rar
+
+	* Restart hub:
+
+sudo service rushub start
+sudo service rushub stop
+
+Install network settings in file RusHub.xml:
+
+cd..
+gedit RusHub.xml
+
+Create file RegUsers.dat and open it for editing:
+
+cd scripts/FirstRusHubBot
+touch RegUsers.dat
+gedit RegUsers.dat
+
+Record in file:
+
+tRegUsers = {
+	["admin_nick"] = {
+		["sPass"] = "password",
+		["iProfile"] = 0,
+	},
+}
+
+Open file scripts.xml from folder "plugins":
+
+cd../../plugins
+gedit scripts.xml
+
+For activation of script we change "0" on "1" in file scripts.xml:
+
+<script Name = "FirstRusHubBot.lua" Enabled = "1"/>
+
+Start hub:
+
+sudo service rushub start
+
+Note: after all manipulations it can be necessary 
+to edit nike of the administrator in RegUser.dat for failure of the coding.
+
+
+--------------------------------
+Building Lua plugin for Ubuntu 10.10
+--------------------------------
+
+Step 1, we begin...
+
+	Instal packages liblua5.1-dev and build-essential:
+	
+		apt-get install build-essential liblua5.1-dev
+
+Step 2
+
+	Download source codes from SVN:
+
+		cd ~
+		svn co https://rushub.svn.sourceforge.net/svnroot/rushub/trunk/ rushub
+
+Step 3
+
+	Go into the folder with tinyxml
+
+		cd ~/rushub/trunk/rushub/src/tinyxml
+
+	Build:
+
+		make
+
+	Leave folder:
+
+		cd
+
+Step 4
+
+	Copy file Plugin.h and folder tinyxml into the folder with source codes of the Lua plugin.
+
+	Go into the folder with source codes of the Lua plugin:
+
+		cd ~/rushub/trunk/lua_plugin/src/
+
+	Build:
+
+		make
+
+Step 5
+
+	Go into the folder with source codes of a hub
+
+		cd ~/rushub/trunk/rushub/src
+	
+	Build:
+
+		make
+
+Step 6, completion! 
+
+	Go into the folder /rushub/trunk/rushub/src
+
+	Copy binary file "RusHub" into the folder ~/rushub/.
+
+	Go into the folder /rushub/trunk/lua_plugin/src and find file "lua.so"
+	and then it copy into the folder ~/rushub/plugins. 
+
+	Restart hub - it is ready.

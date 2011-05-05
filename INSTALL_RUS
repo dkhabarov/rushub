@@ -20,7 +20,7 @@
 
 	* Перезапускаем хаб
 
-Делаем предварительные сетевые настройки в config.xml
+Делаем предварительные сетевые настройки в RusHub.xml
 
 В папке scripts/FirstRusHubBot создаем файл RegUsers.dat с записью:
 
@@ -85,10 +85,10 @@ rar x FirstRusHubBot_v0.2.rar
 sudo service rushub start
 sudo service rushub stop
 
-Делаем предварительные сетевые настройки в config.xml:
+Делаем предварительные сетевые настройки в RusHub.xml:
 
 cd ..
-gedit config.xml
+gedit RusHub.xml
 
 Создаем и открываем для редактирования файл RegUsers.dat:
 
@@ -155,7 +155,7 @@ sudo service rushub start
 
 Шаг 4
 
-	Копируем cplugin.h и папку tinyxml в дерикторию с исходниками Lua плагина.
+	Копируем Plugin.h и папку tinyxml в дерикторию с исходниками Lua плагина.
 
 	Идём в дерикторию с исходниками Lua плагина:
 
@@ -176,9 +176,6 @@ sudo service rushub start
 		make
 
 Шаг 6, завершение!
-
-	После чего в дериктории ~/rushub/ появятся дериктории logs,plugins 
-	и файлы lang.xml, config.xml.
 
 	Идём в дерикторию ~/rushub/trunk/rushub/src
 
