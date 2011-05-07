@@ -218,7 +218,6 @@ int LuaPlugin::stopScript(LuaInterpreter * script, bool current) {
 		} else {
 			ret = -1;
 			if (script->stop()) {
-				script->delTmr();
 				ret = 0;
 			}
 			if (!checkExists(script)) {

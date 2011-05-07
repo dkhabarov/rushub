@@ -166,6 +166,8 @@ int LuaInterpreter::start() {
 /** On stop script */
 int LuaInterpreter::stop() {
 	if (mL) {
+		callFunc("OnExit");
+
 		delTmr();
 
 		for (BotList::iterator it = mBotList.begin(); it != mBotList.end(); ++it) {
@@ -173,7 +175,6 @@ int LuaInterpreter::stop() {
 		}
 		mBotList.clear();
 
-		callFunc("OnExit");
 		lua_close(mL);
 		mEnabled = false;
 		mL = NULL;
@@ -260,10 +261,10 @@ int LuaInterpreter::callFunc(const char * funcName) {
 	LuaPlugin::mCurLua->mCurScript = this;
 
 	if (lua_pcall(mL, len, 1, base)) {
-		if (!onError(funcName, lua_tostring(mL, -1))) {
-			lua_pop(mL, 1);
-			lua_remove(mL, base); // remove _TRACEBACK
-		}
+		string error = lua_tostring(mL, -1);
+		lua_pop(mL, 1);
+		lua_remove(mL, base); // remove _TRACEBACK
+		onError(funcName, error.c_str());
 		LuaPlugin::mCurLua->mCurScript = oldScript;
 		return 0;
 	}
