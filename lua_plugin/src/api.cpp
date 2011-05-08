@@ -130,7 +130,7 @@ static LuaInterpreter * findInterpreter(lua_State * L, const string & name) {
 		it != LuaPlugin::mCurLua->mLua.end();
 		++it
 	) {
-		if ((*it)->mName == name) {
+		if ((*it) && (*it)->mName == name) {
 			luaInterpreter = *it;
 			break;
 		}
@@ -1132,23 +1132,25 @@ int getScripts(lua_State * L) {
 	int i = 1, top = lua_gettop(L);
 	LuaPlugin::LuaInterpreterList::iterator it;
 	for (it = LuaPlugin::mCurLua->mLua.begin(); it != LuaPlugin::mCurLua->mLua.end(); ++it) {
-		lua_pushnumber(L, i);
-		lua_newtable(L);
-		lua_pushliteral(L, "sName");
-		lua_pushstring(L, (*it)->mName.c_str());
-		lua_rawset(L, top + 2);
-		lua_pushliteral(L, "bEnabled");
-		lua_pushboolean(L, ((*it)->mEnabled == false) ? 0 : 1);
-		lua_rawset(L, top + 2);
-		lua_pushliteral(L, "iMemUsage");
-		if ((*it)->mEnabled) {
-			lua_pushnumber(L, lua_gc((*it)->mL, LUA_GCCOUNT, 0));
-		} else {
-			lua_pushnumber(L, 0);
+		if (*it) {
+			lua_pushnumber(L, i);
+			lua_newtable(L);
+			lua_pushliteral(L, "sName");
+			lua_pushstring(L, (*it)->mName.c_str());
+			lua_rawset(L, top + 2);
+			lua_pushliteral(L, "bEnabled");
+			lua_pushboolean(L, ((*it)->mEnabled == false) ? 0 : 1);
+			lua_rawset(L, top + 2);
+			lua_pushliteral(L, "iMemUsage");
+			if ((*it)->mEnabled) {
+				lua_pushnumber(L, lua_gc((*it)->mL, LUA_GCCOUNT, 0));
+			} else {
+				lua_pushnumber(L, 0);
+			}
+			lua_rawset(L, top + 2);
+			lua_rawset(L, top);
+			++i;
 		}
-		lua_rawset(L, top + 2);
-		lua_rawset(L, top);
-		++i;
 	}
 	return 1;
 }
