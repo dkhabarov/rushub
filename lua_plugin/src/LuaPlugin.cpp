@@ -525,7 +525,7 @@ int LuaPlugin::onScriptError(LuaInterpreter * current, const char * scriptName, 
 	LuaInterpreter * script = NULL;
 	for (LuaInterpreterList::iterator it = mLua.begin(); it != mLua.end(); ++it) {
 		script = *it;
-		if (!script->mL || script == current) {
+		if (!script || !script->mL || script == current) {
 			continue;
 		}
 		script->newCallParam((void *)scriptName, LUA_TSTRING);
