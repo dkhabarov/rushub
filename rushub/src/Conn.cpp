@@ -472,7 +472,7 @@ int Conn::recv() {
 				closeNow(CLOSE_REASON_CLIENT_DISCONNECT);
 			} else {
 				if (Log(2)) {
-					LogStream() << "Error in receive: " << SockErr;
+					LogStream() << "Error in receive: " << SockErr << endl;
 				}
 
 				switch (SockErr) {
