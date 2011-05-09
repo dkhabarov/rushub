@@ -388,7 +388,7 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 			if (dcConn->mDcUser) {
 				dcServer->miTotalShare -= dcConn->mDcUser->getShare();
 			} else if (conn->Log(3)) {
-					conn->LogStream() << "Del conn without user" << endl;
+				conn->LogStream() << "Del conn without user" << endl;
 			}
 		} else if (conn->Log(3)) {
 			conn->LogStream() << "Del conn without ALOWED flag: " << dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE) << endl;
