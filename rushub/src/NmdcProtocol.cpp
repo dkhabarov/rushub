@@ -30,16 +30,6 @@ namespace dcserver {
 
 namespace protocol {
 
-#define BADFLAG(CMD, FLAG) \
-if (dcConn->getLoginStatusFlag(FLAG)) { \
-	if (dcConn->Log(1)) { \
-		dcConn->LogStream() << "Attempt to attack in " CMD " (repeated sending)" << endl; \
-	} \
-	dcConn->closeNow(CLOSE_REASON_CMD_REPEAT); \
-	return -1; \
-}
-
-
 
 NmdcProtocol::NmdcProtocol() {
 	SetClassName("NmdcProtocol");
@@ -331,7 +321,9 @@ int NmdcProtocol::eventSupports(DcParser * dcparser, DcConn * dcConn) {
 }
 
 int NmdcProtocol::eventKey(DcParser *, DcConn * dcConn) {
-	BADFLAG("Key", LOGIN_STATUS_KEY);
+	if (badFlag(dcConn, "Key", LOGIN_STATUS_KEY)) {
+		return -1;
+	}
 
 	#ifndef WITHOUT_PLUGINS
 		if (mDcServer->mCalls.mOnKey.callAll(dcConn)) {
@@ -349,7 +341,9 @@ int NmdcProtocol::eventKey(DcParser *, DcConn * dcConn) {
 }
 
 int NmdcProtocol::eventValidateNick(DcParser * dcparser, DcConn * dcConn) {
-	BADFLAG("ValidateNick", LOGIN_STATUS_VALNICK);
+	if (badFlag(dcConn, "ValidateNick", LOGIN_STATUS_VALNICK)) {
+		return -1;
+	}
 
 	string &sNick = dcparser->chunkString(CHUNK_1_PARAM);
 	size_t iNickLen = sNick.length();
@@ -436,7 +430,9 @@ int NmdcProtocol::eventMyPass(DcParser *, DcConn * dcConn) {
 		dcConn->closeNice(9000, CLOSE_REASON_CMD_PASSWORD_ERR);
 		return -1;
 	}
-	BADFLAG("MyPass", LOGIN_STATUS_PASSWD);
+	if (badFlag(dcConn, "MyPass", LOGIN_STATUS_PASSWD)) {
+		return -1;
+	}
 
 	// Checking the accepted password, otherwise send $BadPass|
 	// or $Hello Nick|$LogedIn Nick|
@@ -460,7 +456,9 @@ int NmdcProtocol::eventMyPass(DcParser *, DcConn * dcConn) {
 }
 
 int NmdcProtocol::eventVersion(DcParser * dcparser, DcConn * dcConn) {
-	BADFLAG("Version", LOGIN_STATUS_VERSION);
+	if (badFlag(dcConn, "Version", LOGIN_STATUS_VERSION)) {
+		return -1;
+	}
 
 	string & sVersion = dcparser->chunkString(CHUNK_1_PARAM);
 	if (dcConn->Log(3)) {
@@ -1506,6 +1504,18 @@ string NmdcProtocol::getSeparator() {
 unsigned long NmdcProtocol::getMaxCommandLength() {
 	return mDcServer->mDcConfig.mMaxNmdcCommandLength;
 }
+
+bool NmdcProtocol::badFlag(DcConn * dcConn, const char * cmd, unsigned int flag) {
+	if (dcConn->getLoginStatusFlag(flag)) {
+		if (dcConn->Log(1)) {
+			dcConn->LogStream() << "Attempt to attack in " << cmd << " (repeated sending)" << endl;
+		}
+		dcConn->closeNow(CLOSE_REASON_CMD_REPEAT);
+		return true;
+	}
+	return false;
+}
+
 
 }; // namespace protocol
 

@@ -72,7 +72,7 @@ public:
 		}
 	}
 
-	int onNewDcConn(DcConn * dcConn);
+	int onNewDcConn(DcConn *);
 
 	static string & appendLock(string & str);
 	static string & appendHello(string & str, const string & nick);
@@ -89,16 +89,16 @@ public:
 	static string & appendForceMove(string & str, const string & address);
 	static void appendPmToAll(string & start, string & end, const string & from, const string & nick, const string & msg);
 
-	void sendMode(DcConn * dcConn, const string & str, int mode, UserList &, bool useCache = false);
+	void sendMode(DcConn *, const string & str, int mode, UserList &, bool useCache = false);
 	int sendNickList(DcConn *); /** Sending user-list and op-list */
 	static string getNormalShare(__int64); /** Get normal share size */
 
-	void addToOps(DcUser * dcUser);
-	void delFromOps(DcUser * dcUser);
-	void addToIpList(DcUser * dcUser);
-	void delFromIpList(DcUser * dcUser);
-	void addToHide(DcUser * dcUser);
-	void delFromHide(DcUser * dcUser);
+	void addToOps(DcUser *);
+	void delFromOps(DcUser *);
+	void addToIpList(DcUser *);
+	void delFromIpList(DcUser *);
+	void addToHide(DcUser *);
+	void delFromHide(DcUser *);
 
 protected:
 
@@ -130,11 +130,12 @@ private:
 	int eventQuit(DcParser *, DcConn *); /** Quit cmd */
 
 	int checkCommand(DcParser *, DcConn *);
-	bool antiflood(DcConn * dcConn, unsigned int iType);
+	bool antiflood(DcConn *, unsigned int iType);
 
 	// Check validate nick (user)
-	bool validateUser(DcConn * dcConn, const string & sNick);
-	bool checkNickLength(DcConn * dcConn, size_t iLen);
+	bool validateUser(DcConn *, const string & sNick);
+	bool checkNickLength(DcConn *, size_t iLen);
+	bool badFlag(DcConn *, const char * cmd, unsigned int flag);
 
 }; // NmdcProtocol
 
