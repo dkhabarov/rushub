@@ -51,8 +51,6 @@ DcConn::~DcConn() {
 	if (mDcUser) {
 		delete mDcUser;
 	}
-	mDcUser = NULL;
-	mDcUserBase = NULL;
 }
 
 DcServer * DcConn::server() {
