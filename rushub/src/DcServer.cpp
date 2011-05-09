@@ -481,6 +481,9 @@ bool DcServer::antiFlood(unsigned & count, Time & time, const unsigned & countLi
 
 /** Checking for this nick used */
 bool DcServer::checkNick(DcConn *dcConn) {
+	if (dcConn->mDcUser->getNick().empty()) {
+		return false;
+	}
 	UserKey key = mDcUserList.nick2Key(dcConn->mDcUser->getNick());
 	if (mDcUserList.containsKey(key)) {
 		string sMsg;

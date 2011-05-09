@@ -51,7 +51,7 @@ void UserList::ufSendProfile::operator() (UserBase * userBase) {
 }
 
 void UserList::ufSendWithNick::operator() (UserBase * userBase) {
-	if (userBase && userBase->isCanSend()) {
+	if (userBase && userBase->isCanSend() && !userBase->nick().empty()) {
 		userBase->send(mDataStart, false, false);
 		userBase->send(userBase->nick(), false, false);
 		userBase->send(mDataEnd, true); // newPolitic
@@ -67,7 +67,7 @@ void UserList::ufSendWithNickProfile::operator() (UserBase * userBase) {
 		if (profile > 31) {
 			profile = (profile % 32) - 1;
 		}
-		if (mProfile & (1 << profile)) {
+		if (mProfile & (1 << profile) && !userBase->nick().empty()) {
 			userBase->send(mDataStart, false, false);
 			userBase->send(userBase->nick(), false, false);
 			userBase->send(mDataEnd, true); // newPolitic
@@ -76,7 +76,7 @@ void UserList::ufSendWithNickProfile::operator() (UserBase * userBase) {
 }
 
 void UserList::ufDoNickList::operator() (UserBase * userBase) {
-	if (!userBase->hide()) {
+	if (!userBase->hide() && !userBase->nick().empty()) {
 		msList.append(userBase->nick());
 		msList.append(msSep);
 	}
@@ -185,7 +185,7 @@ void FullUserList::ufDoINFOList::operator() (UserBase * userBase) {
 }
 
 void FullUserList::ufDoIpList::operator() (UserBase * userBase) {
-	if (!userBase->hide() && userBase->getIp().size()) {
+	if (!userBase->hide() && userBase->getIp().size() && !userBase->nick().empty()) {
 		msList.append(userBase->nick());
 		msList.append(" ");
 		msList.append(userBase->getIp());

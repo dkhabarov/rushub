@@ -393,11 +393,10 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 		} else if (conn->Log(3)) {
 			conn->LogStream() << "Del conn without ALOWED flag: " << dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE) << endl;
 		}
-		if (dcConn->mDcUser) { // todo: refactoring
+		if (dcConn->mDcUser) {
 			if (dcConn->mDcUser->getInUserList()) {
 				dcServer->removeFromDcUserList(static_cast<DcUser *> (dcConn->mDcUser));
 			} else { // remove from enter list, if user was already added in it, but user was not added in user list
-				// todo: refactoring
 				dcServer->mEnterList.removeByNick(dcConn->mDcUser->getNick());
 			}
 			delete dcConn->mDcUser;
