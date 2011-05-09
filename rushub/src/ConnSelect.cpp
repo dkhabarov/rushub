@@ -40,14 +40,14 @@ ConnSelect::ConnSelect() :
 
 ConnSelect::~ConnSelect() {
 	tResList::iterator it;
-	sChooseRes * ChR = NULL;
+	ChooseRes * chooseRes = NULL;
 	tSocket sock;
 	for (it = mResList.begin(); it != mResList.end(); ) {
-		ChR = *it;
+		chooseRes = *it;
 		++it;
-		if (ChR) {
-			sock = ChR->mFd;
-			delete ChR;
+		if (chooseRes) {
+			sock = chooseRes->mFd;
+			delete chooseRes;
 			mResList.remove(sock);
 		}
 	}
@@ -64,11 +64,11 @@ bool ConnSelect::optIn(tSocket sock, tEventFlag mask) {
 	) {
 		return false;
 	}
-	sChooseRes * ChR = mResList.find(sock);
-	if (!ChR) {
-		mResList.add(sock, new sChooseRes(sock, mask));
+	ChooseRes * chooseRes = mResList.find(sock);
+	if (!chooseRes) {
+		mResList.add(sock, new ChooseRes(sock, mask));
 	} else {
-		ChR->mEvents |= mask;
+		chooseRes->mEvents |= mask;
 	}
 	return true;
 }
@@ -89,11 +89,11 @@ void ConnSelect::optOut(tSocket sock, tEventFlag mask) {
 		mCloseFS.clr(sock);
 	}
 
-	sChooseRes * ChR = mResList.find(sock);
-	if (ChR) {
-		ChR->mEvents -= (ChR->mEvents & mask);
-		if (!ChR->mEvents) {
-			delete ChR;
+	ChooseRes * chooseRes = mResList.find(sock);
+	if (chooseRes) {
+		chooseRes->mEvents -= (chooseRes->mEvents & mask);
+		if (!chooseRes->mEvents) {
+			delete chooseRes;
 			mResList.remove(sock);
 		}
 	}
@@ -171,39 +171,39 @@ int ConnSelect::choose(Time & timeout) {
 
 
 void ConnSelect::clearRevents(void) {
-	sChooseRes * ChR = NULL;
+	ChooseRes * chooseRes = NULL;
 	for (tResList::iterator it = mResList.begin(); it != mResList.end(); ++it) {
-		ChR = (*it);
-		if (ChR != NULL) {
-			ChR->mRevents = 0;
+		chooseRes = (*it);
+		if (chooseRes != NULL) {
+			chooseRes->mRevents = 0;
 		}
 	}
 }
 
 
 
-void ConnSelect::setRevents(cSelectFD & fdset, unsigned mask) {
+void ConnSelect::setRevents(SelectFd & fdset, unsigned mask) {
 	tSocket sock;
-	sChooseRes * ChR = NULL;
+	ChooseRes * chooseRes = NULL;
 	#ifdef _WIN32
 	for (unsigned i = 0; i < fdset.fd_count; ++i) {
 		sock = fdset.fd_array[i];
-		ChR = mResList.find(sock);
-		if (!ChR) {
-			mResList.add(sock, new sChooseRes(sock, 0, mask));
+		chooseRes = mResList.find(sock);
+		if (!chooseRes) {
+			mResList.add(sock, new ChooseRes(sock, 0, mask));
 		} else {
-			ChR->mRevents |= mask;
+			chooseRes->mRevents |= mask;
 		}
 	}
 	#else
 	for (unsigned i = 0; i < FD_SETSIZE; ++i) {
 		sock = i;
 		if (FD_ISSET(sock, &fdset)) {
-			ChR = mResList.find(sock);
-			if (!ChR) {
-				mResList.add(sock, new sChooseRes(sock, 0, mask));
+			chooseRes = mResList.find(sock);
+			if (!chooseRes) {
+				mResList.add(sock, new ChooseRes(sock, 0, mask));
 			} else {
-				ChR->mRevents |= mask;
+				chooseRes->mRevents |= mask;
 			}
 		}
 	}

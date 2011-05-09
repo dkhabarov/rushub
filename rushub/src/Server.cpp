@@ -274,7 +274,7 @@ void Server::step() {
 		LogStream() << "<new actions>: " << ret << " [" << miNumCloseConn << "]" << endl;
 	}
 
-	ConnChoose::sChooseRes res;
+	ConnChoose::ChooseRes res;
 	ConnType connType;
 	bool ok = false;
 	int activity = 0;

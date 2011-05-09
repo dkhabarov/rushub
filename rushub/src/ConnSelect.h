@@ -45,7 +45,7 @@ class ConnSelect : public ConnChoose, public Obj {
 
 public:
 
-	typedef HashTable<sChooseRes *> tResList;
+	typedef HashTable<ChooseRes *> tResList;
 	struct iterator;
 
 protected:
@@ -69,11 +69,11 @@ public:
 	int revGet(tSocket);
 	bool revTest(tSocket);
 
-	struct cSelectFD : public fd_set {
-		cSelectFD() {
+	struct SelectFd : public fd_set {
+		SelectFd() {
 			FD_ZERO(this);
 		}
-		cSelectFD & operator = (const cSelectFD &set) {
+		SelectFd & operator = (const SelectFd &set) {
 			#ifdef _WIN32
 				fd_count = set.fd_count;
 				static size_t fd_array_size = sizeof(fd_array);
@@ -102,7 +102,7 @@ public:
 	};
 
 	void clearRevents();
-	void setRevents(cSelectFD & fdset, unsigned eMask);
+	void setRevents(SelectFd & fdset, unsigned eMask);
 
 	struct iterator {
 		ConnSelect * mSel; /** for operator [] */
@@ -122,14 +122,14 @@ public:
 			return mIt != it.mIt;
 		}
 
-		sChooseRes & operator * () {
-			sChooseRes * ChR = NULL;
+		ChooseRes & operator * () {
+			ChooseRes * chooseRes = NULL;
 			
 			#ifdef _WIN32
 				__try {
-					ChR = (*mIt);
-					if (ChR->mConnBase == NULL) {
-						ChR->mConnBase = mSel->operator[] (ChR->mFd);
+					chooseRes = (*mIt);
+					if (chooseRes->mConnBase == NULL) {
+						chooseRes->mConnBase = mSel->operator[] (chooseRes->mFd);
 					}
 				} __except(1) {
 					if (mSel->ErrLog(0)) {
@@ -145,12 +145,12 @@ public:
 					}
 				}
 			#else
-				ChR = (*mIt);
-				if (ChR->mConnBase == NULL) {
-					ChR->mConnBase = mSel->operator[] (ChR->mFd);
+				chooseRes = (*mIt);
+				if (chooseRes->mConnBase == NULL) {
+					chooseRes->mConnBase = mSel->operator[] (chooseRes->mFd);
 				}
 			#endif
-			return *ChR;
+			return *chooseRes;
 		}
 
 		iterator & operator ++() {
@@ -204,21 +204,21 @@ public:
 protected:
 
 	/** For read */
-	cSelectFD mReadFS;
+	SelectFd mReadFS;
 
 	/** For write */
-	cSelectFD mWriteFS;
+	SelectFd mWriteFS;
 
 	/** Errors */
-	cSelectFD mExceptFS;
+	SelectFd mExceptFS;
 
 	/** Closed */
-	cSelectFD mCloseFS;
+	SelectFd mCloseFS;
 
 	// select results
-	cSelectFD mResReadFS;
-	cSelectFD mResWriteFS;
-	cSelectFD mResExceptFS;
+	SelectFd mResReadFS;
+	SelectFd mResWriteFS;
+	SelectFd mResExceptFS;
 
 }; // ConnSelect
 

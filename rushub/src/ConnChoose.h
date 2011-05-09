@@ -111,7 +111,7 @@ public:
 
 	/** The Structure of the result of the choice, which returns the iterator.
 	Contains the structure, which defines the type socket and pointer on structure, prestored in structure of the choice */
-	struct sChooseRes {
+	struct ChooseRes {
 
 		/** Socket descriptor */
 		tSocket mFd;
@@ -125,7 +125,7 @@ public:
 		/** Connection */
 		ConnBase * mConnBase;
 
-		sChooseRes(tSocket fd = 0, int events = 0, int revents = 0) : 
+		ChooseRes(tSocket fd = 0, int events = 0, int revents = 0) : 
 			mFd(fd),
 			mEvents(events),
 			mRevents(revents),
@@ -141,7 +141,7 @@ public:
 	struct iterator {
 		ConnChoose * mChoose; /** Pointer on ConnChoose (for operator []) */
 		tSocket * mMax; /** Max descriptor */
-		sChooseRes mRes; /** sChooseRes */
+		ChooseRes mRes; /** ChooseRes */
 
 		iterator(ConnChoose * ch, tSocket * max) : mChoose(ch), mMax(max) {
 		}
@@ -155,7 +155,7 @@ public:
 			return *this;
 		};
 
-		sChooseRes & operator * () {
+		ChooseRes & operator * () {
 			mRes.mEvents = mChoose->optGet(mRes.mFd);
 			mRes.mRevents = mChoose->revGet(mRes.mFd);
 			mRes.mConnBase = mChoose->operator[] (mRes.mFd);
