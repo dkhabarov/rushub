@@ -368,7 +368,8 @@ int NmdcProtocol::eventValidateNick(DcParser * dcparser, DcConn * dcConn) {
 	}
 
 	try {
-		DcUser * newUser = new DcUser(sNick);
+		DcUser * newUser = new DcUser();
+		newUser->setNick(sNick);
 		if (!dcConn->setUser(newUser)) {
 			dcConn->closeNow(CLOSE_REASON_USER_SET);
 			return -2;

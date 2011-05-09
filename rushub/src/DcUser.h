@@ -67,7 +67,6 @@ public:
 public:
 
 	DcUser();
-	DcUser(const string & nick);
 	virtual ~DcUser();
 
 	void send(const string & data, bool addSep = false, bool flush = true);
@@ -99,6 +98,8 @@ public:
 
 	int getProfile() const;
 	void setIp(const string & ip);
+
+	void setNick(const string & nick);
 
 	void setInOpList(bool inOpList);
 	void setInIpList(bool inIpList);

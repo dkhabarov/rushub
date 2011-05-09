@@ -41,28 +41,17 @@ DcUser::DcUser() :
 }
 
 
-DcUser::DcUser(const string & sNick) :
-	Obj("DcUser"),
-	DcUserBase(),
-	mDcServer(NULL),
-	mDcConn(NULL),
-	mInOpList(false),
-	mInIpList(false),
-	mHide(false),
-	mForceMove(false),
-	mKick(false),
-	mInUserList(false),
-	mCanSend(false)
-{
-	mDcConnBase = NULL;
-	msNick = sNick;
-}
-
 
 DcUser::~DcUser() {
 	mDcConn = NULL;
 	mDcConnBase = NULL;
 	mDcServer = NULL;
+}
+
+
+
+void DcUser::setNick(const string & nick) {
+	msNick = nick;
 }
 
 

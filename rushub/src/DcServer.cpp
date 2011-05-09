@@ -1204,7 +1204,8 @@ bool DcServer::setLang(const string & sName, const string & sValue) {
 
 
 int DcServer::regBot(const string & nick, const string & info, const string & ip, bool key) {
-	DcUser * dcUser = new DcUser(nick);
+	DcUser * dcUser = new DcUser();
+	dcUser->setNick(nick);
 	dcUser->mDcServer = this;
 	dcUser->mInOpList = key;
 
