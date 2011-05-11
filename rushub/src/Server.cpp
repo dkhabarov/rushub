@@ -422,6 +422,10 @@ void Server::step() {
 		}
 		--miNumCloseConn;
 	}
+
+	if (Log(5)) {
+		LogStream() << "<exit actions>" << endl;
+	}
 }
 
 ///////////////////////////////////add_connection/del_connection///////////////////////////////////
