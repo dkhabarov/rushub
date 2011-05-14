@@ -83,9 +83,6 @@ public:
 private:
 
 	static unsigned int getHash(const char *);
-	static void pushNumber(lua_State *, lua_Number, bool cond);
-	static void pushString(lua_State *, const char *, bool cond);
-	static void pushBoolean(lua_State *, int, bool cond);
 
 }; // class Uid
 
