@@ -298,6 +298,7 @@ bool DcConn::setUser(DcUser * dcUser) {
 	dcUser->mDcConnBase = this;
 	dcUser->mDcServer = server();
 	if (Log(3)) {
+		// TODO: nick is empty!
 		LogStream() << "User " << dcUser->getNick() << " connected ... " << endl;
 	}
 	return true;

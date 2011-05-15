@@ -125,7 +125,6 @@ int DcIpList::send(DcConn * dcConn) {
 }
 
 int DcIpList::sendWithNick(DcConn * dcConn) {
-	// todo: refactoring
 	if (!dcConn || !dcConn->mDcUser || !dcConn->mbIpRecv || dcConn->mDcUser->getNick().empty()) {
 		return 0;
 	}
