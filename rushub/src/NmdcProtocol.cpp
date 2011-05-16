@@ -41,6 +41,7 @@ NmdcProtocol::~NmdcProtocol() {
 }
 
 
+
 int NmdcProtocol::onNewDcConn(DcConn * dcConn) {
 
 	string sMsg;
@@ -109,6 +110,8 @@ int NmdcProtocol::onNewDcConn(DcConn * dcConn) {
 	return 0;
 }
 
+
+
 Conn * NmdcProtocol::getConnForUdpData(Conn * conn, Parser * parser) {
 
 	// only SR command
@@ -140,11 +143,12 @@ Conn * NmdcProtocol::getConnForUdpData(Conn * conn, Parser * parser) {
 	return NULL;
 }
 
+
+
 int NmdcProtocol::doCommand(Parser * parser, Conn * conn) {
 
 	DcParser * dcParser = static_cast<DcParser *> (parser);
 	DcConn * dcConn = static_cast<DcConn *> (conn);
-
 
 	if (checkCommand(dcParser, dcConn) < 0) {
 		return -1;
@@ -280,6 +284,8 @@ int NmdcProtocol::doCommand(Parser * parser, Conn * conn) {
 	return 0;
 }
 
+
+
 int NmdcProtocol::eventSupports(DcParser * dcparser, DcConn * dcConn) {
 
 	string feature;
@@ -320,7 +326,10 @@ int NmdcProtocol::eventSupports(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
+
+
 int NmdcProtocol::eventKey(DcParser *, DcConn * dcConn) {
+
 	if (badFlag(dcConn, "Key", LOGIN_STATUS_KEY)) {
 		return -1;
 	}
@@ -340,7 +349,10 @@ int NmdcProtocol::eventKey(DcParser *, DcConn * dcConn) {
 	return 0;
 }
 
+
+
 int NmdcProtocol::eventValidateNick(DcParser * dcparser, DcConn * dcConn) {
+
 	if (badFlag(dcConn, "ValidateNick", LOGIN_STATUS_VALNICK)) {
 		return -1;
 	}
@@ -411,7 +423,7 @@ int NmdcProtocol::eventValidateNick(DcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	if (!checkNickLength(dcConn, iNickLen)) {
+	if (!iNickLen || !checkNickLength(dcConn, iNickLen)) {
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_LEN);
 	}
 	dcConn->setTimeOut(HUB_TIME_OUT_MYINFO, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_MYINFO], mDcServer->mTime);
@@ -421,8 +433,11 @@ int NmdcProtocol::eventValidateNick(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
+
+
 int NmdcProtocol::eventMyPass(DcParser *, DcConn * dcConn) {
-	if (!dcConn->mDcUser) { /* Check of existence of the user for current connection */
+
+	if (!dcConn->mDcUser || dcConn->mDcUser->getNick().empty()) { /* Check of existence of the user for current connection */
 		if (dcConn->Log(2)) {
 			dcConn->LogStream() << "Mypass before validatenick" << endl;
 		}
@@ -455,7 +470,10 @@ int NmdcProtocol::eventMyPass(DcParser *, DcConn * dcConn) {
 	return 0;
 }
 
+
+
 int NmdcProtocol::eventVersion(DcParser * dcparser, DcConn * dcConn) {
+
 	if (badFlag(dcConn, "Version", LOGIN_STATUS_VERSION)) {
 		return -1;
 	}
@@ -475,6 +493,8 @@ int NmdcProtocol::eventVersion(DcParser * dcparser, DcConn * dcConn) {
 	dcConn->mVersion = sVersion;
 	return 0;
 }
+
+
 
 int NmdcProtocol::eventGetNickList(DcParser *, DcConn * dcConn) {
 
@@ -498,12 +518,14 @@ int NmdcProtocol::eventGetNickList(DcParser *, DcConn * dcConn) {
 	return sendNickList(dcConn);
 }
 
+
+
 int NmdcProtocol::eventMyInfo(DcParser * dcparser, DcConn * dcConn) {
 
 	const string & sNick = dcparser->chunkString(CHUNK_MI_NICK);
 
 	/** Check existence user, otherwise check support QuickList */
-	if (!dcConn->mDcUser) {
+	if (sNick.empty() || !dcConn->mDcUser) {
 		//if (QuickList)
 		//	dcConn->mDcUser->msNick = sNick;
 		//} else
@@ -551,13 +573,12 @@ int NmdcProtocol::eventMyInfo(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
+
+
 int NmdcProtocol::eventChat(DcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser) {
-		return -2;
-	}
-	if (!dcConn->mDcUser->getInUserList()) {
-		return -3;
+	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
+		return -1;
 	}
 
 	/** Check chat nick */
@@ -586,14 +607,14 @@ int NmdcProtocol::eventChat(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
+
+
 int NmdcProtocol::eventTo(DcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser) {
-		return -2;
+	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
+		return -1;
 	}
-	if (!dcConn->mDcUser->getInUserList()) {
-		return -3;
-	}
+
 	string & nick = dcparser->chunkString(CHUNK_PM_TO);
 
 	/** Checking the coincidence nicks in command */
@@ -621,13 +642,12 @@ int NmdcProtocol::eventTo(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
+
+
 int NmdcProtocol::eventMcTo(DcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser) {
-		return -2;
-	}
-	if (!dcConn->mDcUser->getInUserList()) {
-		return -3;
+	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
+		return -1;
 	}
 
 	string & nick = dcparser->chunkString(CHUNK_MC_TO);
@@ -662,17 +682,15 @@ int NmdcProtocol::eventMcTo(DcParser * dcparser, DcConn * dcConn) {
 }
 
 
+
 int NmdcProtocol::eventUserIp(DcParser * dcParser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser) {
-		return -2;
-	}
-	if (!dcConn->mDcUser->getInUserList()) {
-		return -3;
+	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
+		return -1;
 	}
 
 	if (!(dcConn->mFeatures & (SUPPORT_FEATUER_USERIP | SUPPORT_FEATUER_USERIP2))) {
-		return -4;
+		return -2;
 	}
 
 	string param = dcParser->chunkString(CHUNK_1_PARAM);
@@ -709,6 +727,7 @@ int NmdcProtocol::eventUserIp(DcParser * dcParser, DcConn * dcConn) {
 }
 
 
+
 /**
 	NMDC_TYPE_SEARCH
 	NMDC_TYPE_SEARCH_PAS
@@ -718,7 +737,7 @@ int NmdcProtocol::eventUserIp(DcParser * dcParser, DcConn * dcConn) {
 int NmdcProtocol::eventSearch(DcParser * dcparser, DcConn * dcConn) {
 
 	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
-		return -2;
+		return -1;
 	}
 
 	// TODO: Check overloading of the system
@@ -784,10 +803,12 @@ int NmdcProtocol::eventSearch(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
+
+
 int NmdcProtocol::eventSr(DcParser * dcparser, DcConn * dcConn) {
 
 	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
-		return -2;
+		return -1;
 	}
 
 	/** Check same nick in cmd (PROTOCOL NMDC) */
@@ -833,6 +854,7 @@ int NmdcProtocol::eventSr(DcParser * dcparser, DcConn * dcConn) {
 }
 
 
+
 int NmdcProtocol::eventConnectToMe(DcParser * dcparser, DcConn * dcConn) {
 
 	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
@@ -863,6 +885,8 @@ int NmdcProtocol::eventConnectToMe(DcParser * dcparser, DcConn * dcConn) {
 	dcUser->send(dcparser->mCommand, true);
 	return 0;
 }
+
+
 
 int NmdcProtocol::eventRevConnectToMe(DcParser * dcparser, DcConn * dcConn) {
 
@@ -896,11 +920,24 @@ int NmdcProtocol::eventRevConnectToMe(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
-int NmdcProtocol::eventMultiConnectToMe(DcParser *, DcConn *) {
+
+
+int NmdcProtocol::eventMultiConnectToMe(DcParser *, DcConn * dcConn) {
+
+	if (!dcConn->mDcUser->getInUserList()) {
+		return -1;
+	}
+
 	return 0;
 }
 
+
+
 int NmdcProtocol::eventKick(DcParser * dcparser, DcConn * dcConn) {
+
+	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
+		return -1;
+	}
 
 	#ifndef WITHOUT_PLUGINS
 		if (mDcServer->mCalls.mOnKick.callAll(dcConn)) {
@@ -908,7 +945,7 @@ int NmdcProtocol::eventKick(DcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	if (!dcConn->mDcUser || !dcConn->mDcUser->mKick) {
+	if (!dcConn->mDcUser->mKick) {
 		return -2;
 	}
 
@@ -924,7 +961,13 @@ int NmdcProtocol::eventKick(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
+
+
 int NmdcProtocol::eventOpForceMove(DcParser * dcparser, DcConn * dcConn) {
+
+	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
+		return -1;
+	}
 
 	#ifndef WITHOUT_PLUGINS
 		if (mDcServer->mCalls.mOnOpForceMove.callAll(dcConn)) {
@@ -932,7 +975,7 @@ int NmdcProtocol::eventOpForceMove(DcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	if (!dcConn->mDcUser || !dcConn->mDcUser->mForceMove) {
+	if (!dcConn->mDcUser->mForceMove) {
 		return -2;
 	}
 
@@ -948,7 +991,10 @@ int NmdcProtocol::eventOpForceMove(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
+
+
 int NmdcProtocol::eventGetInfo(DcParser * dcparser, DcConn * dcConn) {
+
 	if (!dcConn->mDcUser || !dcConn->mDcUser->getInUserList()) {
 		return -1;
 	}
@@ -976,9 +1022,20 @@ int NmdcProtocol::eventGetInfo(DcParser * dcparser, DcConn * dcConn) {
 	return 0;
 }
 
+
+
+int NmdcProtocol::eventQuit(DcParser *, DcConn * dcConn) {
+	dcConn->closeNice(9000, CLOSE_REASON_CMD_QUIT);
+	return 0;
+}
+
+
+
 int NmdcProtocol::eventPing(DcParser *, DcConn *) {
 	return 0;
 }
+
+
 
 int NmdcProtocol::eventUnknown(DcParser *, DcConn * dcConn) {
 
@@ -991,10 +1048,6 @@ int NmdcProtocol::eventUnknown(DcParser *, DcConn * dcConn) {
 	return 0;
 }
 
-int NmdcProtocol::eventQuit(DcParser *, DcConn * dcConn) {
-	dcConn->closeNice(9000, CLOSE_REASON_CMD_QUIT);
-	return 0;
-}
 
 
 

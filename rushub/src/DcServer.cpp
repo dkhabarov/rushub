@@ -481,9 +481,12 @@ bool DcServer::antiFlood(unsigned & count, Time & time, const unsigned & countLi
 
 /** Checking for this nick used */
 bool DcServer::checkNick(DcConn *dcConn) {
+
+	// check empty nick!
 	if (dcConn->mDcUser->getNick().empty()) {
 		return false;
 	}
+
 	UserKey key = mDcUserList.nick2Key(dcConn->mDcUser->getNick());
 	if (mDcUserList.containsKey(key)) {
 		string sMsg;
@@ -527,10 +530,13 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 		if (dcConn->Log(3)) {
 			dcConn->LogStream() << "Begin login" << endl;
 		}
+
+		// check empty nick!
 		if (!checkNick(dcConn)) {
 			dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
 			return false;
 		}
+
 		if (dcConn->mbSendNickList) {
 			if (!mDcConfig.mDelayedLogin) {
 				doUserEnter(dcConn);
@@ -573,6 +579,7 @@ void DcServer::doUserEnter(DcConn * dcConn) {
 		return;
 	}
 
+	// check empty nick!
 	if (!checkNick(dcConn)) {
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
 		return;
