@@ -243,7 +243,8 @@ static void SetTbl(lua_State * L1, lua_State * L2, int idx) {
 	lua_newtable(L2);
 	lua_pushnil(L1);
 	int top = lua_gettop(L2);
-	while (lua_next(L1, idx > 0 ? idx : idx - 1) != 0) {
+	int tabIndx = (idx > 0 ? idx : idx - 1);
+	while (lua_next(L1, tabIndx) != 0) {
 		copyValue(L1, L2, -2); // key
 		copyValue(L1, L2, -1); // value
 		lua_rawset(L2, top);
