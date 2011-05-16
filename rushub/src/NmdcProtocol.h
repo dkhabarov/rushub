@@ -104,10 +104,6 @@ protected:
 
 	DcServer * mDcServer;
 
-	typedef int (NmdcProtocol::*Event) (DcParser *, DcConn *);
-	Event events[NMDC_TYPE_UNKNOWN];
-
-
 private:
 
 	int eventSearch(DcParser *, DcConn *); /** Search request */

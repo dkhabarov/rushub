@@ -125,8 +125,8 @@ int DcIpList::send(DcConn * dcConn) {
 }
 
 int DcIpList::sendWithNick(DcConn * dcConn) {
-	// check empty nick!
-	if (!dcConn->mbIpRecv || dcConn->mDcUser->getNick().empty()) {
+	// todo: refactoring
+	if (!dcConn || !dcConn->mDcUser || !dcConn->mbIpRecv || dcConn->mDcUser->getNick().empty()) {
 		return 0;
 	}
 	string str(msData1);
