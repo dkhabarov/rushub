@@ -40,7 +40,9 @@ namespace utils {
 template <class T = unsigned long> struct Hash {
 	T operator() (const char * s) const {
 		T h = 0;
-		for(; *s; ++s) h = 33 * h + *s;
+		for(; *s; ++s) {
+			h = 33 * h + *s;
+		}
 		return h;
 	}
 	inline T operator() (const string & s) const {
