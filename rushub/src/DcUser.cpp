@@ -51,7 +51,7 @@ DcUser::~DcUser() {
 
 
 void DcUser::setNick(const string & nick) {
-	msNick = nick;
+	mNick = nick;
 }
 
 
@@ -85,13 +85,13 @@ const string & DcUser::getIp() const {
 
 /** Get nick */
 const string & DcUser::getNick() const {
-	return msNick;
+	return mNick;
 }
 
 
 
 const string & DcUser::nick() const {
-	return msNick;
+	return mNick;
 }
 
 

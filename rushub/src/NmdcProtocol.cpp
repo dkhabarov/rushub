@@ -439,7 +439,7 @@ int NmdcProtocol::eventMyInfo(DcParser * dcparser, DcConn * dcConn) {
 	/** Check existence user, otherwise check support QuickList */
 	if (sNick.empty()) {
 		//if (QuickList)
-		//	dcConn->mDcUser->msNick = sNick;
+		//	dcConn->mDcUser->setNick(sNick);
 		//} else
 		{
 			if (dcConn->Log(2)) {

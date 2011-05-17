@@ -56,7 +56,7 @@ public:
 
 
 	// TODO add param => hash for nick
-	string msNick; //< User's nick
+	string mNick; //< User's nick
 
 	bool mInOpList; //< User in op-list
 	bool mInIpList; //< User in ip-list
