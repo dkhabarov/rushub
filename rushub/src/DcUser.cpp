@@ -146,7 +146,7 @@ bool DcUser::getKick() const {
 
 int DcUser::getProfile() const {
 	// 30 profile for bot
-	return mDcConn != NULL ? mDcConn->miProfile : 30;
+	return mDcConn != NULL ? mDcConn->mProfile : 30;
 }
 
 

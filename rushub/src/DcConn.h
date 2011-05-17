@@ -151,11 +151,11 @@ public:
 	string mSupports;           //< Support cmd param (PROTOCOL NMDC)
 	string mVersion;            //< DC version (PROTOCOL NMDC)
 
-	string msData;              //< Some user's data
-	int miProfile;              //< Profile
-	bool mbSendNickList;        //< Sending user list when login
-	bool mbIpRecv;              //< Permit on reception of the messages, sending on my ip
-	bool mbNickListInProgress;  //< True while sending first nicklist
+	string mData;              //< Some user's data
+	int mProfile;               //< Profile
+	bool mSendNickList;        //< Sending user list when login
+	bool mIpRecv;              //< Permit on reception of the messages, sending on my ip
+	bool mNickListInProgress;  //< True while sending first nicklist
 	DcUser * mDcUser;           //< User object
 
 	struct Timers { /** Timers */

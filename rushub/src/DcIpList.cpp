@@ -79,7 +79,7 @@ void DcIpList::sendToIpWithNick(const char * ip, string & start, string & end, u
 }
 
 void DcIpList::sendToIp(unsigned long ip, string & data, unsigned long profile, bool addSep, bool flush) {
-	miProfile = profile;
+	mProfile = profile;
 	msData1 = data;
 	mFlush = flush;
 	mAddSep = addSep;
@@ -91,7 +91,7 @@ void DcIpList::sendToIp(unsigned long ip, string & data, unsigned long profile, 
 }
 
 void DcIpList::sendToIpWithNick(unsigned long ip, string & start, string & end, unsigned long profile, bool addSep, bool flush) {
-	miProfile = profile;
+	mProfile = profile;
 	msData1 = start;
 	msData2 = end;
 	mFlush = flush;
@@ -104,18 +104,18 @@ void DcIpList::sendToIpWithNick(unsigned long ip, string & start, string & end, 
 }
 
 int DcIpList::send(DcConn * dcConn) {
-	if (!dcConn || !dcConn->mbIpRecv) {
+	if (!dcConn || !dcConn->mIpRecv) {
 		return 0;
 	}
-	if (miProfile) {
-		int profile = dcConn->miProfile + 1;
+	if (mProfile) {
+		int profile = dcConn->mProfile + 1;
 		if (profile < 0) {
 			profile = -profile;
 		}
 		if (profile > 31) {
 			profile = (profile % 32) - 1;
 		}
-		if (miProfile & (1 << profile)) {
+		if (mProfile & (1 << profile)) {
 			return dcConn->send(msData1, mAddSep, mFlush);
 		}
 	} else {
@@ -126,20 +126,20 @@ int DcIpList::send(DcConn * dcConn) {
 
 int DcIpList::sendWithNick(DcConn * dcConn) {
 	// check empty nick!
-	if (!dcConn->mbIpRecv || dcConn->mDcUser->getNick().empty()) {
+	if (!dcConn->mIpRecv || dcConn->mDcUser->getNick().empty()) {
 		return 0;
 	}
 	string str(msData1);
 	str.append(dcConn->mDcUser->getNick());
-	if (miProfile) {
-		int profile = dcConn->miProfile + 1;
+	if (mProfile) {
+		int profile = dcConn->mProfile + 1;
 		if (profile < 0) {
 			profile = -profile;
 		}
 		if (profile > 31) {
 			profile = (profile % 32) - 1;
 		}
-		if (miProfile & (1 << profile)) {
+		if (mProfile & (1 << profile)) {
 			string str(msData1);
 			str.append(dcConn->mDcUser->getNick());
 			return dcConn->send(str.append(msData2), mAddSep, mFlush);

@@ -36,7 +36,7 @@ protected:
 
 	typedef HashTable<IpList *> IpTable;
 	bool mFlush, mAddSep;
-	unsigned long miProfile;
+	unsigned long mProfile;
 	string msData1, msData2;
 
 public:

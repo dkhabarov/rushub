@@ -48,7 +48,6 @@
 
 
 using namespace ::plugin;
-//using namespace ::webserver;
 using namespace ::webserver::protocol;
 
 namespace dcserver {
@@ -147,7 +146,7 @@ public:
 	DcConfig mDcConfig;
 
 	/** Settings of language */
-	DcLang mDCLang;
+	DcLang mDcLang;
 
 	SystemLoad mSystemLoad; /** Indicator of the system overloading */
 	static string mSysVersion; /** Verion of OS System */
@@ -171,7 +170,7 @@ public:
 
 	string mTimeBuf; /** Time buffer for plugins */
 
-	DcIpList * mIPListConn; /** IP list of connections */
+	DcIpList * mIpListConn; /** IP list of connections */
 
 public:
 
@@ -236,9 +235,9 @@ public:
 	bool minDelay(Time &then, double sec);
 
 	/** Pointer on the user (or NULL) */
-	DcUser * getDcUser(const char *sNick);
+	DcUser * getDcUser(const char * sNick);
 	const vector<DcConnBase*> & getDcConnBase(const char * sIP);
-	DcUserBase * getDcUserBase(const char *sNick);
+	DcUserBase * getDcUserBase(const char * sNick);
 
 	DcConnListIterator * getDcConnListIterator() {
 		return new DcListIterator(this);
@@ -319,8 +318,8 @@ private:
 	tCLIt conn_it; /** Iterator for optimum */
 	string mHubName; /** Hub name for plugins */
 	string sBuf; /** Temp buffer */
-	vector<DcConnBase *> mvIPConn; /** Conn with same ip for plugins */
-	vector<string> mvConfigNames; /** Config names for plugins */
+	vector<DcConnBase *> mIpConnList; /** Conn with same ip for plugins */
+	vector<string> mConfigNameList; /** Config names for plugins */
 
 	//< DC Server Conn Factory
 	DcConnFactory * mDcConnFactory;
@@ -331,19 +330,21 @@ private:
 	//< Web Protocol
 	WebProtocol * mWebProtocol;
 
-	AntiFlood mIPEnterFlood;
+	AntiFlood mIpEnterFlood;
 
+	/*
 	struct IpEnter {
 		Time mTime;
-		unsigned miCount;
-		IpEnter() : miCount(0) {
+		unsigned int mCount;
+		IpEnter() : mCount(0) {
 		}
 	};
 
-	/** List recently came ip addresses */
+	// List recently came ip addresses
 	typedef List<unsigned long, IpEnter *> tIPEnterList;
 
-	tIPEnterList * mIPEnterList;
+	tIPEnterList * mIpEnterList;
+	*/
 
 private:
 

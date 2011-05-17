@@ -33,10 +33,10 @@ DcConn::DcConn(int type, tSocket sock, Server * server) :
 	Conn(sock, server),
 	DcConnBase(type),
 	mFeatures(0),
-	miProfile(-1),
-	mbSendNickList(false),
-	mbIpRecv(false),
-	mbNickListInProgress(false),
+	mProfile(-1),
+	mSendNickList(false),
+	mIpRecv(false),
+	mNickListInProgress(false),
 	mDcUser(NULL),
 	mSrCounter(0),
 	mLoginStatus(0)
@@ -164,35 +164,35 @@ const string & DcConn::getSupports() const {
 
 //< Get profile
 int DcConn::getProfile() const {
-	return miProfile;
+	return mProfile;
 }
 
 
 
 void DcConn::setProfile(int iProfile) {
-	miProfile = iProfile;
+	mProfile = iProfile;
 }
 
 
 
 //< Get some user data
 const string & DcConn::getData() const {
-	return msData;
+	return mData;
 }
 
 
 
 void DcConn::setData(const string & sData) {
-	msData = sData;
+	mData = sData;
 }
 
 
 
 /** onFlush sending buffer */
 void DcConn::onFlush() {
-	if (mbNickListInProgress) {
+	if (mNickListInProgress) {
 		setLoginStatusFlag(LOGIN_STATUS_NICKLST);
-		mbNickListInProgress = false;
+		mNickListInProgress = false;
 		if (!mOk || !mWritable) {
 			if (Log(2)) {
 				LogStream() << "Connection closed during nicklist" << endl;
@@ -234,7 +234,7 @@ int DcConn::onTimer(Time &now) {
 				if (Log(2)) {
 					LogStream() << "Operation timeout (" << HubTimeOut(i) << ")" << endl;
 				}
-				stringReplace(dcServer->mDCLang.mTimeout, string("reason"), sMsg, dcServer->mDCLang.mTimeoutCmd[i]);
+				stringReplace(dcServer->mDcLang.mTimeout, string("reason"), sMsg, dcServer->mDcLang.mTimeoutCmd[i]);
 				dcServer->sendToUser(this, sMsg.c_str(), dcServer->mDcConfig.mHubBot.c_str());
 				this->closeNice(9000, CLOSE_REASON_TIMEOUT);
 				return 1;
@@ -247,7 +247,7 @@ int DcConn::onTimer(Time &now) {
 		if (Log(2)) {
 			LogStream() << "Any action timeout..." << endl;
 		}
-		dcServer->sendToUser(this, dcServer->mDCLang.mTimeoutAny.c_str(), dcServer->mDcConfig.mHubBot.c_str());
+		dcServer->sendToUser(this, dcServer->mDcLang.mTimeoutAny.c_str(), dcServer->mDcConfig.mHubBot.c_str());
 		closeNice(9000, CLOSE_REASON_TIMEOUT_ANYACTION);
 		return 2;
 	}*/
@@ -357,7 +357,7 @@ Conn * DcConnFactory::createConn(tSocket sock) {
 	dcConn->mProtocol = mProtocol; /** Protocol pointer */
 
 	DcServer * dcServer = static_cast<DcServer *> (mServer);
-	dcServer->mIPListConn->add(dcConn); /** Adding connection in IP-list */
+	dcServer->mIpListConn->add(dcConn); /** Adding connection in IP-list */
 
 	// Create DcUser
 	DcUser * dcUser = new DcUser();
@@ -370,7 +370,7 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 	DcServer * dcServer = static_cast<DcServer *> (mServer);
 	if (dcConn && dcServer) {
-		dcServer->mIPListConn->remove(dcConn);
+		dcServer->mIpListConn->remove(dcConn);
 		if (dcConn->getLoginStatusFlag(LOGIN_STATUS_ALOWED)) {
 			dcServer->miTotalUserCount --;
 			if (dcConn->mDcUser) {
