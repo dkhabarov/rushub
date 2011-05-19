@@ -94,6 +94,7 @@ private:
 	static int mCounterObj;
 	static int miLevel;
 	static bool mbIsErrorLog;
+	static bool mCout;
 
 	/** output log stream */
 	ostream * mToLog;

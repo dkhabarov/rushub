@@ -63,6 +63,7 @@ string * Obj::msPath = NULL; /** Logs path */
 int Obj::mCounterObj = 0; /** Objects counter */
 int Obj::miLevel = 0;
 bool Obj::mbIsErrorLog = false;
+bool Obj::mCout = false;
 
 ostringstream Obj::mSysLogOss;
 ostringstream Obj::mBufOss;
@@ -168,6 +169,8 @@ ostream & Obj::log() {
 
 	if (mOfs.is_open()) {
 		return mOfs;
+	} else if (mCout == true) {
+		return cout;
 	}
 
 	// save in buff when the config is not loaded
@@ -208,6 +211,7 @@ ostream & Obj::openLog() {
 	ostream * ret = &mOfs;
 	if (!mOfs.is_open()) {
 		ret = &cout;
+		mCout = true;
 	}
 
 	loadFromBuf(*ret);

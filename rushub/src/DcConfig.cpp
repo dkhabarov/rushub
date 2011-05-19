@@ -275,7 +275,10 @@ int DcConfig::reload() {
 		miMaxErrLevel = 2;
 		miMaxLevel = 0;
 
-		save();
+		string file(mConfigStore.mPath + mConfigStore.mName);
+		if (!Dir::isFileExist(file.c_str())) {
+			save();
+		}
 		return 1;
 	}
 	return 0;
@@ -295,14 +298,17 @@ DcLang::DcLang(ConfigLoader * configLoader, ConfigListBase * configListBase) :
 		string path, lang;
 		langPathConfig->convertTo(path);
 		langConfig->convertTo(lang);
+		if (path.size() == 0) {
+			path = "./";
+		}
+		if (lang.size() == 0) {
+			lang = "English";
+		}
 
 		// set xml file for lang
-		if (Dir::checkPath(path)) {
-			mConfigStore.mPath = path;
-			mConfigStore.mName = lang + ".xml";
-		} else {
-			mConfigStore.mPath = "./";
-		}
+		Dir::checkPath(path);
+		mConfigStore.mPath = path;
+		mConfigStore.mName = lang + ".xml";
 	}
 
 	addVars();

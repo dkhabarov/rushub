@@ -339,6 +339,9 @@ int Service::cli(int argc, char * argv[], string & configFile) {
 
 	if (installName) {
 		installService(installName, config);
+		if (startName == NULL) {
+			return 0;
+		}
 	}
 
 	if (isService) { // Service!
