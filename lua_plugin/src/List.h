@@ -138,7 +138,7 @@ public:
 					}
 					onRemove(curr->getValue());
 					delete curr;
-					curr = NULL;
+					curr = prev;
 					--mSize;
 				}
 			}
