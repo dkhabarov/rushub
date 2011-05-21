@@ -269,16 +269,16 @@ void DcConfig::addVars(Server * server) {
 
 
 int DcConfig::reload() {
-	if (load() < 0) {
+	int ret = load();
+	if (ret < 0) {
 
-		// Set default log levels
-		miMaxErrLevel = 2;
-		miMaxLevel = 0;
-
-		string file(mConfigStore.mPath + mConfigStore.mName);
-		if (!Dir::isFileExist(file.c_str())) {
-			save();
+		if (ret != -4) {
+			// Set default log levels
+			miMaxErrLevel = 2;
+			miMaxLevel = 0;
 		}
+
+		save();
 		return 1;
 	}
 	return 0;
@@ -436,20 +436,16 @@ void DcLang::addVars() {
 
 int DcLang::reload() {
 
-	if (load() < 0) {
+	int ret = load();
+	if (ret < 0) {
 
-		// save default lang file
-		string name = mConfigStore.mName;
-		mConfigStore.mName = "Russian.xml";
-
-		string file(mConfigStore.mPath + mConfigStore.mName);
-		if (!Dir::isFileExist(file.c_str())) {
-			save();
-			mConfigStore.mName = name;
-			return 2;
+		if (ret != -4) {
+			// save default lang file
+			string name = mConfigStore.mName;
+			mConfigStore.mName = "Russian.xml";
 		}
 
-		mConfigStore.mName = name;
+		save();
 		return 1;
 	}
 
