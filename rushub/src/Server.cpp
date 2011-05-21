@@ -194,7 +194,6 @@ bool Server::stopListen(Conn * conn) {
 
 /** Main cycle */
 int Server::run() {
-	Time now;
 	mRun = true;
 	if (Log(1)) {
 		LogStream() << "Main loop start" << endl;
@@ -206,9 +205,10 @@ int Server::run() {
 			step(); // Server's step
 
 			// Timers (100 msec)
-			if (abs(int(now.Get() - mTimes.mServ)) >= 100) { /** transfer of time */
-				mTimes.mServ = now;
-				onTimerBase(now);
+			long msec = mTime.MiliSec();
+			if (abs(msec - mTimes.mServ) >= 100) { // Transfer of time
+				mTimes.mServ = msec;
+				onTimerBase(mTime);
 			}
 
 			if (mStepDelay) {
@@ -608,14 +608,16 @@ int Server::outputData(Conn *conn) {
 }
 
 /** Main mase timer */
-int Server::onTimerBase(Time &now) {
+int Server::onTimerBase(Time & now) {
 	onTimer(now);
-	if (abs(int(now - mTimes.mConn)) >= mTimerConnPeriod) {
-		mTimes.mConn = now;
+	if (abs(mTimes.mServ - mTimes.mConn) >= mTimerConnPeriod) {
+		mTimes.mConn = mTimes.mServ;
 		tCLIt it_e = mConnList.end();
+		Conn * conn = NULL;
 		for (tCLIt it = mConnList.begin(); it != it_e; ++it) {
-			if ((*it)->isOk()) {
-				(*it)->onTimerBase(now);
+			conn = (*it);
+			if (conn->isOk()) {
+				conn->onTimerBase(now);
 			}
 		}
 	}

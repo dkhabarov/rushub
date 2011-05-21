@@ -137,8 +137,8 @@ protected:
 	Server * mServer;
 
 	struct Times { /** Times */
-		Time mServ; /** (mTimerServPeriod) */
-		Time mConn; /** (mTimerConnPeriod) */
+		long mServ; /** (mTimerServPeriod) */
+		long mConn; /** (mTimerConnPeriod) */
 	} mTimes;
 
 protected:
