@@ -46,9 +46,14 @@ Timer::~Timer() {
 
 
 void Timer::check(int time) {
-	if (abs(time - mTime) >= mInterval) {
+	int msec = abs(time - mTime);
+	if (msec >= mInterval) {
 		mScript->timer(mId, mFunc.c_str());
-		mTime = time;
+		if (msec >= 2 * mInterval) {
+			mTime = time; // swallowing
+		} else {
+			mTime += mInterval;
+		}
 	}
 }
 
