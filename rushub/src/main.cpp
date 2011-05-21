@@ -149,7 +149,6 @@ int main(int argc, char ** argv) {
 		signal(SIGHUP, sigHandler);
 		signal(SIGQUIT, sigHandler);
 		signal(SIGTSTP, sigHandler);
-
     sigset_t sst;
     sigemptyset(&sst);
     sigaddset(&sst, SIGPIPE);
