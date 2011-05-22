@@ -148,10 +148,7 @@ class DcConn : public Conn, public DcConnBase {
 public:
 
 	unsigned mFeatures;         //< Features (PROTOCOL NMDC)
-	string mSupports;           //< Support cmd param (PROTOCOL NMDC)
-	string mVersion;            //< DC version (PROTOCOL NMDC)
 
-	string mData;              //< Some user's data
 	int mProfile;               //< Profile
 	bool mSendNickList;        //< Sending user list when login
 	bool mIpRecv;              //< Permit on reception of the messages, sending on my ip
@@ -210,23 +207,11 @@ public:
 
 	virtual void setConnectTimeNow();
 
-	//< Client's protocol version (PROTOCOL NMDC)
-	virtual const string & getVersion() const;
-
-	//< Support string (PROTOCOL NMDC)
-	virtual const string & getSupports() const;
-
 
 	//< Get profile
 	virtual int getProfile() const;
 
 	virtual void setProfile(int iProfile);
-
-
-	//< Get some user data
-	virtual const string & getData() const;
-
-	virtual void setData(const string & sData);
 
 
 	virtual bool parseCommand(const char * cmd);

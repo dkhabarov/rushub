@@ -393,7 +393,7 @@ int sendToUser(lua_State * L) {
 			return error(L, "user was not found");
 		}
 		if (dcConnBase->mType == CLIENT_TYPE_WEB) {
-			if (!dcConnBase->send(data)) { // not newPolitic fot timers only
+			if (!dcConnBase->send(data)) { // not newPolitic for timers only
 				return error(L, "data was not sent");
 			}
 		} else if (!LuaPlugin::mCurServer->sendToUser(dcConnBase, data, nick, from)) {
@@ -815,34 +815,22 @@ int setUser(lua_State * L) {
 
 	unsigned num = (unsigned)luaL_checkinteger(L, 2);
 	if (num == USERVALUE_PROFILE) {
-		dcConnBase->setProfile(luaL_checkint(L, 3));
+		dcConnBase->mDcUserBase->setProfile(luaL_checkint(L, 3));
 	} else if (num == USERVALUE_MYINFO) {
-		if (!dcConnBase->mDcUserBase) {
-			return error(L, "user was not found");
-		}
 		string myInfo(luaL_checkstring(L, 3));
 		if (!dcConnBase->mDcUserBase->setMyINFO(myInfo)) {
 			return error(L, "wrong syntax");
 		}
 	} else if (num == USERVALUE_DATA) {
-		dcConnBase->setData(luaL_checkstring(L, 3));
+		dcConnBase->mDcUserBase->setData(luaL_checkstring(L, 3));
 	} else if (num == USERVALUE_OPLIST) {
 		luaL_checktype(L, 3, LUA_TBOOLEAN);
-		if (!dcConnBase->mDcUserBase) {
-			return error(L, "user was not found");
-		}
 		dcConnBase->mDcUserBase->setInOpList(lua_toboolean(L, 3) != 0);
 	} else if (num == USERVALUE_HIDE) {
 		luaL_checktype(L, 3, LUA_TBOOLEAN);
-		if (!dcConnBase->mDcUserBase) {
-			return error(L, "user was not found");
-		}
 		dcConnBase->mDcUserBase->setHide(lua_toboolean(L, 3) != 0);
 	} else if (num == USERVALUE_IPLIST) {
 		luaL_checktype(L, 3, LUA_TBOOLEAN);
-		if (!dcConnBase->mDcUserBase) {
-			return error(L, "user was not found");
-		}
 		dcConnBase->mDcUserBase->setInIpList(lua_toboolean(L, 3) != 0);
 	}
 	lua_settop(L, 0);
@@ -998,7 +986,7 @@ int disconnectIp(lua_State * L) {
 	} else {
 		int prf;
 		for (it = v.begin(); it != v.end(); ++it) {
-			prf = (*it)->getProfile() + 1;
+			prf = (*it)->mDcUserBase->getProfile() + 1;
 			if (prf < 0) {
 				prf = -prf;
 			}

@@ -149,19 +149,6 @@ void DcConn::setConnectTimeNow() {
 
 
 
-//< Client's protocol version
-const string & DcConn::getVersion() const {
-	return mVersion;
-}
-
-
-
-const string & DcConn::getSupports() const {
-	return mSupports;
-}
-
-
-
 //< Get profile
 int DcConn::getProfile() const {
 	return mProfile;
@@ -171,19 +158,6 @@ int DcConn::getProfile() const {
 
 void DcConn::setProfile(int iProfile) {
 	mProfile = iProfile;
-}
-
-
-
-//< Get some user data
-const string & DcConn::getData() const {
-	return mData;
-}
-
-
-
-void DcConn::setData(const string & sData) {
-	mData = sData;
 }
 
 

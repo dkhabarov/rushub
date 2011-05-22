@@ -234,7 +234,7 @@ int NmdcProtocol::eventSupports(DcParser * dcparser, DcConn * dcConn) {
 		feature.clear();
 		is >> feature;
 	}
-	dcConn->mSupports.assign(dcparser->mCommand, 10, dcparser->mCommand.size() - 10);
+	dcConn->mDcUser->mSupports.assign(dcparser->mCommand, 10, dcparser->mCommand.size() - 10);
 
 	#ifndef WITHOUT_PLUGINS
 		if (mDcServer->mCalls.mOnSupports.callAll(dcConn)) {
@@ -398,7 +398,7 @@ int NmdcProtocol::eventVersion(DcParser * dcparser, DcConn * dcConn) {
 	#endif
 
 	dcConn->setLoginStatusFlag(LOGIN_STATUS_VERSION); /** Version was checked */
-	dcConn->mVersion = sVersion;
+	dcConn->mDcUser->mVersion = sVersion;
 	return 0;
 }
 

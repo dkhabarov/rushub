@@ -150,6 +150,15 @@ int DcUser::getProfile() const {
 }
 
 
+
+void DcUser::setProfile(int iProfile) {
+	if (mDcConn != NULL) {
+		mDcConn->setProfile(iProfile);
+	}
+}
+
+
+
 void DcUser::setIp(const string & ip) {
 	if (ip.size()) {
 		mIp = ip;
@@ -264,7 +273,7 @@ const string & DcUser::getClient(/*bool real = false */) const {
 	return myInfo.dcTag.getClientName();
 }
 
-const string & DcUser::getVersion(/*bool real = false */) const {
+const string & DcUser::getClientVersion(/*bool real = false */) const {
 	return myInfo.dcTag.getClientVersion();
 }
 
@@ -310,6 +319,32 @@ const string & DcUser::getMode(/*bool real = false */) const {
 
 unsigned int DcUser::getTagNil(/*bool real = false */) const {
 	return myInfo.dcTag.getNil();
+}
+
+
+
+const string & DcUser::getData() const {
+	return mData;
+}
+
+
+
+void DcUser::setData(const string & sData) {
+	mData = sData;
+}
+
+
+
+//< User's support string (NMDC PROTOCOL)
+const string & DcUser::getSupports() const {
+	return mSupports;
+}
+
+
+
+//< User's protocol version (NMDC PROTOCOL)
+const string & DcUser::getVersion() const {
+	return mVersion;
 }
 
 

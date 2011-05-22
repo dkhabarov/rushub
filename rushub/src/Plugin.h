@@ -75,7 +75,7 @@ using namespace ::std;
 
 //< Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10016
+	#define INTERNAL_PLUGIN_VERSION 10017
 #endif
 
 //< NMDC protocol separator
@@ -184,25 +184,6 @@ public:
 	//< Get enter time
 	virtual long getConnectTime() const = 0;
 
-	//< Client's protocol version
-	virtual const string & getVersion() const = 0;
-
-	//< Get all support cmd parameters, except of cmd name
-	virtual const string & getSupports() const = 0;
-
-
-	//< Get client profile
-	virtual int getProfile() const = 0;
-
-	//< Set client profile
-	virtual void setProfile(int) = 0;
-
-
-	//< Get some client data
-	virtual const string & getData() const = 0;
-
-	//< Set some client data
-	virtual void setData(const string &) = 0;
 
 	virtual bool parseCommand(const char * cmd) = 0;
 
@@ -269,6 +250,13 @@ public:
 	virtual void setKick(bool) = 0;
 
 
+	//< Get user's profile
+	virtual int getProfile() const = 0;
+
+	//< Set client profile
+	virtual void setProfile(int) = 0;
+
+
 	//< Get user's MyINFO cmd
 	virtual const string & getMyINFO(/*bool real = false*/) const = 0;
 
@@ -299,7 +287,7 @@ public:
 	virtual const string & getClient(/*bool real = false*/) const = 0;
 
 	//< Get user's client version
-	virtual const string & getVersion(/*bool real = false*/) const = 0;
+	virtual const string & getClientVersion(/*bool real = false*/) const = 0;
 
 	//< Get user's mode
 	virtual const string & getMode(/*bool real = false*/) const = 0;
@@ -335,6 +323,18 @@ public:
 	//< Get user's tagNil param
 	virtual unsigned int getTagNil(/*bool real = false*/) const = 0;
 
+
+	//< Get some user data
+	virtual const string & getData() const = 0;
+
+	//< Set some user data
+	virtual void setData(const string &) = 0;
+
+	//< Get all support cmd parameters, except of cmd name (PROTOCOL NMDC)
+	virtual const string & getSupports() const = 0;
+
+	//< User's protocol version
+	virtual const string & getVersion() const = 0;
 
 }; // class DcUserBase
 
