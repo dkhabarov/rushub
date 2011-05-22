@@ -95,8 +95,8 @@ using namespace ::std;
 namespace dcserver {
 
 enum ClientType {
-	CLIENT_TYPE_NMDC,
-	CLIENT_TYPE_WEB,
+	CLIENT_TYPE_NMDC = 1000,
+	CLIENT_TYPE_WEB = 1001,
 }; // enum ClientType
 
 /** Params with null values flags */
@@ -509,6 +509,33 @@ public:
 namespace webserver {
 
 
+// ================ WebUserBase ================
+
+class WebUserBase {
+
+public:
+
+	//< Connection type (for protection and compatibility)
+	const int mType;
+
+public:
+
+	WebUserBase(int type) :
+		mType(type)
+	{
+	}
+
+	virtual ~WebUserBase() {
+	}
+
+	virtual WebUserBase & operator = (const WebUserBase &) {
+		return *this;
+	}
+
+}; // class WebUserBase
+
+
+
 // ================ WebParserBase ================
 
 /** Base web parser */
@@ -702,7 +729,7 @@ public:
 		return 1;
 	}
 
-	virtual int onWebData(DcConnBase *, WebParserBase *) {
+	virtual int onWebData(WebUserBase *, WebParserBase *) {
 		return 1;
 	}
 

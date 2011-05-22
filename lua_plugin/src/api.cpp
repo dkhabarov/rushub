@@ -149,7 +149,7 @@ namespace luaplugin {
 DcConnBase * getDcConnBase(lua_State * L, int indx) {
 	void ** userdata = (void **) lua_touserdata(L, indx);
 	DcConnBase * dcConnBase = (DcConnBase *) *userdata;
-	if (dcConnBase->mType != CLIENT_TYPE_NMDC && dcConnBase->mType != CLIENT_TYPE_WEB) {
+	if (dcConnBase->mType != CLIENT_TYPE_NMDC) {
 		return NULL;
 	}
 	return dcConnBase;

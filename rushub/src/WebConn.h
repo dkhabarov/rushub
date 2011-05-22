@@ -20,12 +20,16 @@
 #ifndef WEB_CONN_H
 #define WEB_CONN_H
 
-#include "DcConn.h"
+#include "Conn.h"
 #include "Plugin.h"
 #include "Server.h"
 
 using namespace ::server;
 using namespace ::dcserver;
+
+namespace dcserver {
+	class DcServer;
+};
 
 namespace webserver {
 
@@ -45,7 +49,28 @@ public:
 
 
 
-class WebConn : public DcConn {
+class WebConn;
+
+
+
+class WebUser : public WebUserBase {
+
+public:
+
+	WebConn * mWebConn;
+
+public:
+	WebUser(int type) : WebUserBase(type) {}
+	virtual ~WebUser() {}
+}; // class WebUser
+
+
+
+class WebConn : public Conn {
+
+public:
+
+	WebUser * mWebUser;
 
 public:
 
@@ -70,11 +95,13 @@ public:
 	/** Get conn port */
 	virtual int getPortConn();
 
-	virtual unsigned long getNetIp();
+	virtual unsigned long getNetIp() const;
 
 	virtual int send(const string & data, bool flush = true);
 
 	virtual void disconnect();
+
+	DcServer * server();
 
 }; // class WebConn
 

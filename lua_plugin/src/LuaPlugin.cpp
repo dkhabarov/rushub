@@ -489,7 +489,7 @@ int LuaPlugin::onFlood(DcUserBase * dcUserBase, int type1, int type2) {
 }
 
 /// onWebData(WebID, sData)
-int LuaPlugin::onWebData(DcConnBase * dcConnBase, WebParserBase * webParserBase) {
+int LuaPlugin::onWebData(WebUserBase * webUserBase, WebParserBase * webParserBase) {
 	int ret = 0, block = 0; // On defaults don't block
 	LuaInterpreter * script = NULL;
 	for (LuaInterpreterList::iterator it = mLua.begin(); it != mLua.end(); ++it) {
@@ -497,7 +497,7 @@ int LuaPlugin::onWebData(DcConnBase * dcConnBase, WebParserBase * webParserBase)
 		if (!script || !script->mL) {
 			continue;
 		}
-		script->newCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA);
+		script->newCallParam((void *) webUserBase, LUA_TLIGHTUSERDATA);
 		script->newCallParam((void *) webParserBase->mParseString.c_str(), LUA_TSTRING);
 		ret = script->callFunc("OnWebData");
 		if (ret == 1) {

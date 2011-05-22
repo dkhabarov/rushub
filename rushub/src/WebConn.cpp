@@ -52,6 +52,10 @@ Conn * WebConnFactory::createConn(tSocket sock) {
 	webConn->mConnFactory = this; /** Fuctory current connection (WebConnFactory) */
 	webConn->mProtocol = mProtocol; /** Protocol (WebProtocol) */
 
+	WebUser * webUser = new WebUser(CLIENT_TYPE_WEB);
+	webConn->mWebUser = webUser;
+	webUser->mWebConn = webConn;
+
 	return static_cast<Conn *> (webConn);
 
 }
@@ -59,6 +63,11 @@ Conn * WebConnFactory::createConn(tSocket sock) {
 
 
 void WebConnFactory::deleteConn(Conn * &conn) {
+
+	WebConn * webConn = static_cast<WebConn *> (conn);
+	delete webConn->mWebUser;
+	webConn->mWebUser = NULL;
+
 	ConnFactory::deleteConn(conn);
 }
 
@@ -82,7 +91,7 @@ void WebConnFactory::onNewData(Conn * conn, string * str) {
 	}
 #ifndef WITHOUT_PLUGINS
 	WebParser * webParser = static_cast<WebParser *> (webConn->mParser);
-	if (webParser && !dcServer->mCalls.mOnWebData.callAll(webConn, webParser))
+	if (webParser && !dcServer->mCalls.mOnWebData.callAll(webConn->mWebUser, webParser))
 #endif
 	{
 		conn->closeNice(9000, CLOSE_REASON_WEB);
@@ -100,7 +109,7 @@ int WebConnFactory::onNewConn(Conn * conn) {
 
 
 WebConn::WebConn(tSocket sock, Server * server) : 
-	DcConn(CLIENT_TYPE_WEB, sock, server)
+	Conn(sock, server)
 {
 	SetClassName("WebConn");
 }
@@ -108,6 +117,12 @@ WebConn::WebConn(tSocket sock, Server * server) :
 
 
 WebConn::~WebConn() {
+}
+
+
+
+DcServer * WebConn::server() {
+	return static_cast<DcServer *> (mServer);
 }
 
 
@@ -163,7 +178,7 @@ int WebConn::getPortConn() {
 
 
 
-unsigned long WebConn::getNetIp() {
+unsigned long WebConn::getNetIp() const {
 	return mNetIp;
 }
 

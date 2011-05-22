@@ -229,38 +229,38 @@ public:
 	int listening();
 
 	/** Main timer */
-	int onTimer(Time &now);
+	int onTimer(Time &);
 
 	/** Function checks min interval */
-	bool minDelay(Time &then, double sec);
+	bool minDelay(Time &, double sec);
 
 	/** Pointer on the user (or NULL) */
-	DcUser * getDcUser(const char * sNick);
-	const vector<DcConnBase*> & getDcConnBase(const char * sIP);
-	DcUserBase * getDcUserBase(const char * sNick);
+	DcUser * getDcUser(const char * nick);
+	const vector<DcConnBase*> & getDcConnBase(const char * ip);
+	DcUserBase * getDcUserBase(const char * nick);
 
 	DcConnListIterator * getDcConnListIterator() {
 		return new DcListIterator(this);
 	}
 
-	bool sendToUser(DcUserBase * dcUserBase, const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
-	bool sendToNick(const char * sTo, const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
-	bool sendToAll(const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
-	bool sendToProfiles(unsigned long iProfile, const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
-	bool sendToIp(const char * sIP, const char * sData, unsigned long iProfile = 0, const char * sNick = NULL, const char * sFrom = NULL);
-	bool sendToAllExceptNicks(const vector<string> & NickList, const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
-	bool sendToAllExceptIps(const vector<string> & IPList, const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
+	bool sendToUser(DcUserBase *, const char * data, const char * nick = NULL, const char * from = NULL);
+	bool sendToNick(const char * to, const char * data, const char * nick = NULL, const char * from = NULL);
+	bool sendToAll(const char * data, const char * nick = NULL, const char * from = NULL);
+	bool sendToProfiles(unsigned long profile, const char * data, const char * nick = NULL, const char * from = NULL);
+	bool sendToIp(const char * ip, const char * data, unsigned long profile = 0, const char * nick = NULL, const char * from = NULL);
+	bool sendToAllExceptNicks(const vector<string> & nickList, const char * data, const char * nick = NULL, const char * from = NULL);
+	bool sendToAllExceptIps(const vector<string> & ipList, const char * data, const char * nick = NULL, const char * from = NULL);
 
-	void forceMove(DcUserBase *, const char * sAddress, const char * sReason = NULL); //< Redirection client
+	void forceMove(DcUserBase *, const char * address, const char * reason = NULL); //< Redirection client
 
 	const vector<string> & getConfig();
-	const char * getConfig(const string & sName);
-	const char * getLang(const string & sName);
-	bool setConfig(const string & sName, const string & sValue);
-	bool setLang(const string & sName, const string & sValue);
+	const char * getConfig(const string & name);
+	const char * getLang(const string & name);
+	bool setConfig(const string & name, const string & value);
+	bool setLang(const string & name, const string & value);
 
-	int regBot(const string & sNick, const string & sMyINFO, const string & sIP, bool bKey = true);
-	int unregBot(const string & sNick);
+	int regBot(const string & nick, const string & myInfo, const string & ip, bool key = true);
+	int unregBot(const string & nick);
 
 	void stopHub() {
 		stop(0);
@@ -270,7 +270,7 @@ public:
 		stop(1);
 	}
 
-	static void getAddresses(const string & sAddresses, vector<pair<string, int> > & vec, int iDefPort);
+	static void getAddresses(const string & addresses, vector<pair<string, int> > &, int defaultPort);
 
 	/** Function action when joining the client */
 	int onNewConn(Conn *);
@@ -286,10 +286,10 @@ protected:
 	void onNewUdpData(Conn *, string *);
 
 	/** Antiflood function */
-	bool antiFlood(unsigned &iCount, Time & time, const unsigned &iCountLimit, const double &iTimeLimit);
+	bool antiFlood(unsigned & iCount, Time &, const unsigned & countLimit, const double & timeLimit);
 
 	/** Check nick used */
-	bool checkNick(DcConn *dcConn);
+	bool checkNick(DcConn *);
 
 	/** Actions before user entry */
 	bool beforeUserEnter(DcConn *);
@@ -348,7 +348,7 @@ private:
 
 private:
 
-	void deleteConn(Conn * conn);
+	void deleteConn(Conn *);
 
 	bool listeningServer(const char * name, const string & addresses, unsigned port, ConnFactory * connFactory, bool udp = false);
 
@@ -386,32 +386,32 @@ private:
 		{
 		}
 
-		CallListUser          mOnUserConnected;
-		CallListUser          mOnUserDisconnected;
-		CallListUser          mOnUserEnter;
-		CallListUser          mOnUserExit;
-		CallListUser          mOnSupports;
-		CallListUser          mOnKey;
-		CallListUser          mOnValidateNick;
-		CallListUser          mOnMyPass;
-		CallListUser          mOnVersion;
-		CallListUser          mOnGetNickList;
-		CallListUser          mOnMyINFO;
-		CallListUser          mOnChat;
-		CallListUser          mOnTo;
-		CallListUser          mOnConnectToMe;
-		CallListUser          mOnRevConnectToMe;
-		CallListUser          mOnSearch;
-		CallListUser          mOnSR;
-		CallListUser          mOnKick;
-		CallListUser          mOnOpForceMove;
-		CallListUser          mOnGetINFO;
-		CallListUser          mOnMCTo;
-		CallListSimple        mOnTimer;
-		CallListUserInt       mOnAny;
-		CallListUser          mOnUnknown;
-		CallListUserIntInt    mOnFlood;
-		CallListConnWebParser mOnWebData;
+		CallListUser             mOnUserConnected;
+		CallListUser             mOnUserDisconnected;
+		CallListUser             mOnUserEnter;
+		CallListUser             mOnUserExit;
+		CallListUser             mOnSupports;
+		CallListUser             mOnKey;
+		CallListUser             mOnValidateNick;
+		CallListUser             mOnMyPass;
+		CallListUser             mOnVersion;
+		CallListUser             mOnGetNickList;
+		CallListUser             mOnMyINFO;
+		CallListUser             mOnChat;
+		CallListUser             mOnTo;
+		CallListUser             mOnConnectToMe;
+		CallListUser             mOnRevConnectToMe;
+		CallListUser             mOnSearch;
+		CallListUser             mOnSR;
+		CallListUser             mOnKick;
+		CallListUser             mOnOpForceMove;
+		CallListUser             mOnGetINFO;
+		CallListUser             mOnMCTo;
+		CallListSimple           mOnTimer;
+		CallListUserInt          mOnAny;
+		CallListUser             mOnUnknown;
+		CallListUserIntInt       mOnFlood;
+		CallListWebUserWebParser mOnWebData;
 
 	} mCalls;
 

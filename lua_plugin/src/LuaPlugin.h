@@ -112,7 +112,7 @@ public:
 	virtual int onAny(DcUserBase *, int);
 	virtual int onUnknown(DcUserBase *);
 	virtual int onFlood(DcUserBase *, int, int);
-	virtual int onWebData(DcConnBase *, WebParserBase *);
+	virtual int onWebData(WebUserBase *, WebParserBase *);
 
 	virtual int onScriptError(LuaInterpreter *, const char * scriptName, const char * errMsg, bool stoped = true);
 	virtual int onScriptAction(const char * scriptName, const char * action);
