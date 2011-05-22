@@ -209,8 +209,8 @@ int DcConn::onTimer(Time &now) {
 					LogStream() << "Operation timeout (" << HubTimeOut(i) << ")" << endl;
 				}
 				stringReplace(dcServer->mDcLang.mTimeout, string("reason"), sMsg, dcServer->mDcLang.mTimeoutCmd[i]);
-				dcServer->sendToUser(this, sMsg.c_str(), dcServer->mDcConfig.mHubBot.c_str());
-				this->closeNice(9000, CLOSE_REASON_TIMEOUT);
+				dcServer->sendToUser(mDcUserBase, sMsg.c_str(), dcServer->mDcConfig.mHubBot.c_str());
+				closeNice(9000, CLOSE_REASON_TIMEOUT);
 				return 1;
 			}
 		}
@@ -221,7 +221,7 @@ int DcConn::onTimer(Time &now) {
 		if (Log(2)) {
 			LogStream() << "Any action timeout..." << endl;
 		}
-		dcServer->sendToUser(this, dcServer->mDcLang.mTimeoutAny.c_str(), dcServer->mDcConfig.mHubBot.c_str());
+		dcServer->sendToUser(mDcUserBase, dcServer->mDcLang.mTimeoutAny.c_str(), dcServer->mDcConfig.mHubBot.c_str());
 		closeNice(9000, CLOSE_REASON_TIMEOUT_ANYACTION);
 		return 2;
 	}*/
@@ -357,7 +357,7 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 		}
 
 		#ifndef WITHOUT_PLUGINS
-			dcServer->mCalls.mOnUserDisconnected.callAll(dcConn);
+			dcServer->mCalls.mOnUserDisconnected.callAll(dcConn->mDcUser);
 		#endif
 
 		if (dcConn->mDcUser) {

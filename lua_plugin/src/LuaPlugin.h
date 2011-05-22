@@ -87,31 +87,31 @@ public:
 	virtual bool regAll(PluginListBase *); /** Registration all events for this plugin */
 
 	// events
-	virtual int onUserConnected(DcConnBase *);
-	virtual int onUserDisconnected(DcConnBase *);
-	virtual int onUserEnter(DcConnBase *);
-	virtual int onUserExit(DcConnBase *);
-	virtual int onSupports(DcConnBase *);
-	virtual int onKey(DcConnBase *);
-	virtual int onValidateNick(DcConnBase *);
-	virtual int onMyPass(DcConnBase *);
-	virtual int onVersion(DcConnBase *);
-	virtual int onGetNickList(DcConnBase *);
-	virtual int onMyINFO(DcConnBase *);
-	virtual int onChat(DcConnBase *);
-	virtual int onTo(DcConnBase *);
-	virtual int onConnectToMe(DcConnBase *);
-	virtual int onRevConnectToMe(DcConnBase *);
-	virtual int onSearch(DcConnBase *);
-	virtual int onSR(DcConnBase *);
-	virtual int onKick(DcConnBase *);
-	virtual int onOpForceMove(DcConnBase *);
-	virtual int onGetINFO(DcConnBase *);
-	virtual int onMCTo(DcConnBase *);
+	virtual int onUserConnected(DcUserBase *);
+	virtual int onUserDisconnected(DcUserBase *);
+	virtual int onUserEnter(DcUserBase *);
+	virtual int onUserExit(DcUserBase *);
+	virtual int onSupports(DcUserBase *);
+	virtual int onKey(DcUserBase *);
+	virtual int onValidateNick(DcUserBase *);
+	virtual int onMyPass(DcUserBase *);
+	virtual int onVersion(DcUserBase *);
+	virtual int onGetNickList(DcUserBase *);
+	virtual int onMyINFO(DcUserBase *);
+	virtual int onChat(DcUserBase *);
+	virtual int onTo(DcUserBase *);
+	virtual int onConnectToMe(DcUserBase *);
+	virtual int onRevConnectToMe(DcUserBase *);
+	virtual int onSearch(DcUserBase *);
+	virtual int onSR(DcUserBase *);
+	virtual int onKick(DcUserBase *);
+	virtual int onOpForceMove(DcUserBase *);
+	virtual int onGetINFO(DcUserBase *);
+	virtual int onMCTo(DcUserBase *);
 	virtual int onTimer();
-	virtual int onAny(DcConnBase *, int);
-	virtual int onUnknown(DcConnBase *);
-	virtual int onFlood(DcConnBase *, int, int);
+	virtual int onAny(DcUserBase *, int);
+	virtual int onUnknown(DcUserBase *);
+	virtual int onFlood(DcUserBase *, int, int);
 	virtual int onWebData(DcConnBase *, WebParserBase *);
 
 	virtual int onScriptError(LuaInterpreter *, const char * scriptName, const char * errMsg, bool stoped = true);
@@ -119,7 +119,7 @@ public:
 
 	int onConfigChange(const char * name, const char * value);
 
-	int callAll(const char * fancName, DcConnBase * dcConnBase = NULL, bool param = true); /** Calling event for all scripts */
+	int callAll(const char * fancName, DcUserBase * dcUserBase, bool param = true); /** Calling event for all scripts */
 
 	LuaInterpreter * findScript(const string & scriptName);
 	LuaInterpreter * addScript(const string & scriptName, bool onlyNew = false);

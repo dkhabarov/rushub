@@ -275,48 +275,11 @@ protected:
 
 }; // class CallListType3
 
-class CallListConnection : public CallListBase {
 
-public:
-
-	typedef int (Plugin::*tpFuncConn) (DcConnBase *);
-
-public:
-
-	CallListConnection(PluginList * pluginList, const char * id, tpFuncConn func) :
-		CallListBase(pluginList, id),
-		mFunc(func)
-	{
-		mDcConnBase = NULL;
-	}
-
-	virtual ~CallListConnection() {
-	}
-
-	virtual int callOne(Plugin * plugin) {
-		return (plugin->*mFunc) (mDcConnBase);
-	}
-
-	virtual int callAll(DcConnBase * dcConnBase) {
-		mDcConnBase = dcConnBase;
-		if (mDcConnBase != NULL) {
-			return this->CallList::callAll();
-		} else {
-			return 1;
-		}
-	}
-
-protected:
-
-	tpFuncConn mFunc;
-	DcConnBase * mDcConnBase;
-
-}; // class CallListConnection
-
-typedef CallListType1<DcConnBase *> CallListConn;
+typedef CallListType1<DcUserBase *> CallListUser;
 typedef CallListType2<DcConnBase *, WebParserBase *> CallListConnWebParser;
-typedef CallListType2<DcConnBase *, int> CallListConnInt;
-typedef CallListType3<DcConnBase *, int, int> CallListConnIntInt;
+typedef CallListType2<DcUserBase *, int> CallListUserInt;
+typedef CallListType3<DcUserBase *, int, int> CallListUserIntInt;
 
 
 }; // namespace plugin

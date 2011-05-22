@@ -176,9 +176,6 @@ public:
 	virtual ~DcConn();
 
 
-
-	// === DcConnBase functions ===
-
 	//< Sending RAW command to the client
 	virtual int send(const string & data, bool addSep = false, bool flush = true);
 

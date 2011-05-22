@@ -243,7 +243,7 @@ public:
 		return new DcListIterator(this);
 	}
 
-	bool sendToUser(DcConnBase * dcConnBase, const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
+	bool sendToUser(DcUserBase * dcUserBase, const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
 	bool sendToNick(const char * sTo, const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
 	bool sendToAll(const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
 	bool sendToProfiles(unsigned long iProfile, const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
@@ -251,7 +251,7 @@ public:
 	bool sendToAllExceptNicks(const vector<string> & NickList, const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
 	bool sendToAllExceptIps(const vector<string> & IPList, const char * sData, const char * sNick = NULL, const char * sFrom = NULL);
 
-	void forceMove(DcConnBase * dcConnBase, const char * sAddress, const char * sReason = NULL); //< Redirection client
+	void forceMove(DcUserBase *, const char * sAddress, const char * sReason = NULL); //< Redirection client
 
 	const vector<string> & getConfig();
 	const char * getConfig(const string & sName);
@@ -386,31 +386,31 @@ private:
 		{
 		}
 
-		CallListConnection    mOnUserConnected;
-		CallListConnection    mOnUserDisconnected;
-		CallListConnection    mOnUserEnter;
-		CallListConnection    mOnUserExit;
-		CallListConnection    mOnSupports;
-		CallListConnection    mOnKey;
-		CallListConnection    mOnValidateNick;
-		CallListConnection    mOnMyPass;
-		CallListConnection    mOnVersion;
-		CallListConnection    mOnGetNickList;
-		CallListConnection    mOnMyINFO;
-		CallListConnection    mOnChat;
-		CallListConnection    mOnTo;
-		CallListConnection    mOnConnectToMe;
-		CallListConnection    mOnRevConnectToMe;
-		CallListConnection    mOnSearch;
-		CallListConnection    mOnSR;
-		CallListConnection    mOnKick;
-		CallListConnection    mOnOpForceMove;
-		CallListConnection    mOnGetINFO;
-		CallListConnection    mOnMCTo;
+		CallListUser          mOnUserConnected;
+		CallListUser          mOnUserDisconnected;
+		CallListUser          mOnUserEnter;
+		CallListUser          mOnUserExit;
+		CallListUser          mOnSupports;
+		CallListUser          mOnKey;
+		CallListUser          mOnValidateNick;
+		CallListUser          mOnMyPass;
+		CallListUser          mOnVersion;
+		CallListUser          mOnGetNickList;
+		CallListUser          mOnMyINFO;
+		CallListUser          mOnChat;
+		CallListUser          mOnTo;
+		CallListUser          mOnConnectToMe;
+		CallListUser          mOnRevConnectToMe;
+		CallListUser          mOnSearch;
+		CallListUser          mOnSR;
+		CallListUser          mOnKick;
+		CallListUser          mOnOpForceMove;
+		CallListUser          mOnGetINFO;
+		CallListUser          mOnMCTo;
 		CallListSimple        mOnTimer;
-		CallListConnInt       mOnAny;
-		CallListConnection    mOnUnknown;
-		CallListConnIntInt    mOnFlood;
+		CallListUserInt       mOnAny;
+		CallListUser          mOnUnknown;
+		CallListUserIntInt    mOnFlood;
 		CallListConnWebParser mOnWebData;
 
 	} mCalls;

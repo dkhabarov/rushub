@@ -502,7 +502,7 @@ bool DcServer::checkNick(DcConn *dcConn) {
 
 			stringReplace(mDcLang.mUsedNick, string("nick"), sMsg, dcConn->mDcUser->getNick());
 
-			sendToUser(dcConn, sMsg.c_str(), mDcConfig.mHubBot.c_str());
+			sendToUser(dcConn->mDcUserBase, sMsg.c_str(), mDcConfig.mHubBot.c_str());
 
 			dcConn->send(NmdcProtocol::appendValidateDenide(sMsg.erase(), dcConn->mDcUser->getNick()));
 			return false;
@@ -684,7 +684,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 	if (mDcUserList.containsKey(key)) {
 		#ifndef WITHOUT_PLUGINS
 			if (dcUser->mDcConn) {
-				mCalls.mOnUserExit.callAll(dcUser->mDcConn);
+				mCalls.mOnUserExit.callAll(dcUser);
 			}
 		#endif
 
@@ -803,7 +803,7 @@ void DcServer::afterUserEnter(DcConn *dcConn) {
 		dcConn->LogStream() << "Entered the hub." << endl;
 	}
 	#ifndef WITHOUT_PLUGINS
-		mCalls.mOnUserEnter.callAll(dcConn);
+		mCalls.mOnUserEnter.callAll(dcConn->mDcUser);
 	#endif
 }
 
@@ -853,10 +853,11 @@ const vector<DcConnBase *> & DcServer::getDcConnBase(const char * sIP) {
 
 
 /** Send data to user */
-bool DcServer::sendToUser(DcConnBase * dcConnBase, const char * sData, const char * sNick, const char * sFrom) {
-	if (!dcConnBase || !sData) {
+bool DcServer::sendToUser(DcUserBase * dcUserBase, const char * sData, const char * sNick, const char * sFrom) {
+	if (!dcUserBase || !dcUserBase->mDcConnBase || !sData) {
 		return false;
 	}
+	DcConnBase * dcConnBase = dcUserBase->mDcConnBase;
 
 	// PM
 	if (sFrom && sNick) {
@@ -1104,11 +1105,11 @@ bool DcServer::sendToAllExceptIps(const vector<string> & IPList, const char *sDa
 
 
 
-void DcServer::forceMove(DcConnBase * dcConnBase, const char * sAddress, const char * sReason /* = NULL */) {
-	if (!dcConnBase || !sAddress) {
+void DcServer::forceMove(DcUserBase * dcUserBase, const char * sAddress, const char * sReason /* = NULL */) {
+	if (!sAddress) {
 		return;
 	}
-	DcConn * dcConn = static_cast<DcConn *> (dcConnBase);
+	DcConn * dcConn = static_cast<DcConn *> (dcUserBase->mDcConnBase);
 
 	string sMsg, sForce, sNick("<unknown>");
 	if (dcConn->mDcUser && !dcConn->mDcUser->getNick().empty()) {

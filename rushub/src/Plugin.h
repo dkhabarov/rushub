@@ -123,7 +123,6 @@ class DcUserBase;
 
 
 
-// ================ DcConnBase ================
 
 /** Base DC connection */
 class DcConnBase {
@@ -392,7 +391,7 @@ public:
 
 	//< Send comand to user
 	virtual bool sendToUser(
-		DcConnBase *,
+		DcUserBase *,
 		const char * data,
 		const char * nick = NULL,
 		const char * from = NULL
@@ -449,7 +448,7 @@ public:
 
 	//< Redirection client
 	virtual void forceMove(
-		DcConnBase *,
+		DcUserBase *,
 		const char * address,
 		const char * reason = NULL
 	) = 0;
@@ -603,87 +602,87 @@ public:
 
 	/// Events
 
-	virtual int onUserConnected(DcConnBase *) {
+	virtual int onUserConnected(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onUserDisconnected(DcConnBase *) {
+	virtual int onUserDisconnected(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onUserEnter(DcConnBase *) {
+	virtual int onUserEnter(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onUserExit(DcConnBase *) {
+	virtual int onUserExit(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onSupports(DcConnBase *) {
+	virtual int onSupports(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onKey(DcConnBase *) {
+	virtual int onKey(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onValidateNick(DcConnBase *) {
+	virtual int onValidateNick(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onMyPass(DcConnBase *) {
+	virtual int onMyPass(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onVersion(DcConnBase *) {
+	virtual int onVersion(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onGetNickList(DcConnBase *) {
+	virtual int onGetNickList(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onMyINFO(DcConnBase *) {
+	virtual int onMyINFO(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onChat(DcConnBase *) {
+	virtual int onChat(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onTo(DcConnBase *) {
+	virtual int onTo(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onConnectToMe(DcConnBase *) {
+	virtual int onConnectToMe(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onRevConnectToMe(DcConnBase *) {
+	virtual int onRevConnectToMe(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onSearch(DcConnBase *) {
+	virtual int onSearch(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onSR(DcConnBase *) {
+	virtual int onSR(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onKick(DcConnBase *) {
+	virtual int onKick(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onOpForceMove(DcConnBase *) {
+	virtual int onOpForceMove(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onGetINFO(DcConnBase *) {
+	virtual int onGetINFO(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onMCTo(DcConnBase *) {
+	virtual int onMCTo(DcUserBase *) {
 		return 1;
 	}
 
@@ -691,15 +690,15 @@ public:
 		return 1;
 	}
 
-	virtual int onAny(DcConnBase *, int) {
+	virtual int onAny(DcUserBase *, int) {
 		return 1;
 	}
 
-	virtual int onUnknown(DcConnBase *) {
+	virtual int onUnknown(DcUserBase *) {
 		return 1;
 	}
 
-	virtual int onFlood(DcConnBase *, int, int) {
+	virtual int onFlood(DcUserBase *, int, int) {
 		return 1;
 	}
 

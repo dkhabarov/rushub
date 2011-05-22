@@ -396,7 +396,7 @@ int sendToUser(lua_State * L) {
 			if (!dcConnBase->send(data)) { // not newPolitic for timers only
 				return error(L, "data was not sent");
 			}
-		} else if (!LuaPlugin::mCurServer->sendToUser(dcConnBase, data, nick, from)) {
+		} else if (!LuaPlugin::mCurServer->sendToUser(dcConnBase->mDcUserBase, data, nick, from)) {
 			return error(L, "user was not found");
 		}
 	} else if (type == LUA_TSTRING) {
@@ -1535,7 +1535,7 @@ int redirect(lua_State * L) {
 		return error(L, "user was not found");
 	}
 
-	LuaPlugin::mCurServer->forceMove(dcConnBase, address, reason);
+	LuaPlugin::mCurServer->forceMove(dcConnBase->mDcUserBase, address, reason);
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
 	return 1;
