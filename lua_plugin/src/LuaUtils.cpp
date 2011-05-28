@@ -128,6 +128,6 @@ LuaInterpreter * LuaUtils::findInterpreter(lua_State * L, const string & name) {
 }; // namespace luaplugin
 
 /**
- * $Id: LuaUtils.cpp 286 2011-05-13 13:39:49Z setuper $
- * $HeadURL: https://rushub.svn.sourceforge.net/svnroot/rushub/trunk/lua_plugin/src/LuaUtils.cpp $
+ * $Id$
+ * $HeadURL$
  */

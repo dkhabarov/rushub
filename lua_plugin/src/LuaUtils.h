@@ -53,6 +53,6 @@ public:
 #endif // LUA_UTILS_H
 
 /**
- * $Id: LuaUtils.h 286 2011-05-13 13:39:49Z setuper $
- * $HeadURL: https://rushub.svn.sourceforge.net/svnroot/rushub/trunk/lua_plugin/src/LuaUtils.h $
+ * $Id$
+ * $HeadURL$
  */

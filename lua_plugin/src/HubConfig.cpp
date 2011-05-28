@@ -138,6 +138,6 @@ int HubConfig::configNewindex(lua_State * L) {
 }; // namespace luaplugin
 
 /**
- * $Id: HubConfig.cpp 286 2011-05-13 13:39:49Z setuper $
- * $HeadURL: https://rushub.svn.sourceforge.net/svnroot/rushub/trunk/lua_plugin/src/HubConfig.cpp $
+ * $Id$
+ * $HeadURL$
  */
