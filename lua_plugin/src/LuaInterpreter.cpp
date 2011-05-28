@@ -20,14 +20,19 @@
 #include "LuaInterpreter.h"
 #include "LuaPlugin.h" // for dirs
 #include "Uid.h"
+#include "Dir.h"
 
 #include <string.h>
+#include <fstream>
 
 #define HAVE_LUA_5_1
 
 using namespace ::std;
+using namespace ::utils;
+
 
 namespace luaplugin {
+
 
 LuaInterpreter::LuaInterpreter(const string & name, string & path) : 
 	mName(name),
@@ -37,9 +42,13 @@ LuaInterpreter::LuaInterpreter(const string & name, string & path) :
 {
 }
 
+
+
 LuaInterpreter::~LuaInterpreter() {
 	stop();
 }
+
+
 
 /** On start script (-1 - run already)*/
 int LuaInterpreter::start() {
@@ -129,7 +138,7 @@ int LuaInterpreter::start() {
 	regFunc("SetHubState",          &setHubState);
 	regFunc("Redirect",             &redirect);
 
-	regStrField("sLuaPluginVersion", PLUGIN_NAME" "PLUGIN_VERSION);
+	regStrField("sLuaPluginVersion", PLUGIN_NAME " " PLUGIN_VERSION);
 	regStrField("sHubVersion", LuaPlugin::mCurServer->getHubInfo().c_str());
 	regStrField("sMainDir", LuaPlugin::mCurServer->getMainDir().c_str());
 	regStrField("sScriptsDir", LuaPlugin::mCurLua->getScriptsDir().c_str());
@@ -137,12 +146,12 @@ int LuaInterpreter::start() {
 
 	lua_setglobal(mL, "Core");
 
-	createConfigMetaTable();
-	Config * config = (Config *) lua_newuserdata(mL, sizeof(Config));
-	config->isExist = 1;
-	luaL_getmetatable(mL, MT_CONFIG);
-	lua_setmetatable(mL, -2);
-	lua_setglobal(mL, "Config");
+	// Creating Config metatable
+	LuaPlugin::mCurLua->mHubConfig.createMetaTable(mL);
+
+	// Creating UID metatable
+	Uid::createMetaTable(mL);
+
 
 	LuaInterpreter * oldScript = LuaPlugin::mCurLua->mCurScript;
 	LuaPlugin::mCurLua->mCurScript = this;
@@ -156,11 +165,11 @@ int LuaInterpreter::start() {
 		LuaPlugin::mCurLua->mCurScript = oldScript;
 		return iStatus;
 	}
-	createUserMetaTable();
 	callFunc("OnStartup");
 	LuaPlugin::mCurLua->mCurScript = oldScript;
 	return 0;
 }
+
 
 
 /** On stop script */
@@ -185,18 +194,6 @@ int LuaInterpreter::stop() {
 }
 
 
-void LuaInterpreter::regFunc(const char * funcName, int (*fncptr)(lua_State *)) {
-	lua_pushstring(mL, funcName);
-	lua_pushcfunction(mL, fncptr);
-	lua_rawset(mL, -3);
-}
-
-void LuaInterpreter::regStrField(const char * name, const char * value) {
-	lua_pushstring(mL, name);
-	lua_pushstring(mL, value);
-	lua_rawset(mL, -3);
-}
-
 
 /** 1 - lock! */
 int LuaInterpreter::callFunc(const char * funcName) {
@@ -206,6 +203,7 @@ int LuaInterpreter::callFunc(const char * funcName) {
 
 	lua_pushliteral(mL, "_TRACEBACK");
 	lua_rawget(mL, LUA_GLOBALSINDEX); // lua 5.1
+
 	if (lua_isfunction(mL, -1)) {
 		base = lua_gettop(mL);
 	} else {
@@ -283,6 +281,8 @@ int LuaInterpreter::callFunc(const char * funcName) {
 	return ret;
 }
 
+
+
 bool LuaInterpreter::onError(const char * funcName, const char * errMsg, bool stop) {
 	bool stoped = true;
 	LuaPlugin::mCurLua->mLastError = errMsg;
@@ -299,6 +299,8 @@ bool LuaInterpreter::onError(const char * funcName, const char * errMsg, bool st
 	return false;
 }
 
+
+
 void LuaInterpreter::timer(int id, const char * funcName) {
 	lua_getglobal(mL, funcName);
 	lua_pushnumber(mL, id);
@@ -312,69 +314,54 @@ void LuaInterpreter::timer(int id, const char * funcName) {
 	LuaPlugin::mCurLua->mCurScript = oldScript;
 }
 
+
+
 void LuaInterpreter::newCallParam(void * data, int type) {
 	Param * param = new Param(data, type);
 	mCallParams.push_back(param);
 }
+
+
 
 void LuaInterpreter::newCallParam(lua_Number data, int type) {
 	Param * param = new Param(data, type);
 	mCallParams.push_back(param);
 }
 
-void LuaInterpreter::createUserMetaTable() {
-	if (!luaL_newmetatable(mL, MT_USER_CONN)) {
-		return;
+
+
+void LuaInterpreter::logError(const char * msg) {
+	string logs(LuaPlugin::mCurServer->getMainDir() + "logs/");
+
+	Dir::checkPath(logs);
+
+	string logFile(logs + "lua_errors.log");
+	ofstream ofs(logFile.c_str(), ios_base::app);
+	if (msg) {
+		ofs << "[" << LuaPlugin::mCurServer->getTime() << "] " << string(msg) << endl;
+	} else {
+		ofs << "[" << LuaPlugin::mCurServer->getTime() << "] unknown LUA error" << endl;
 	}
-
-	lua_pushliteral(mL, "__index");
-	lua_pushstring(mL, "userIndex");
-	lua_pushcclosure(mL, Uid::userIndex, 1);
-	lua_settable(mL, -3);
-
-	lua_pushliteral(mL, "__newindex");
-	lua_pushstring(mL, "userNewIndex");
-	lua_pushcclosure(mL, Uid::userNewIndex, 1);
-	lua_settable(mL, -3);
-
-	lua_pushliteral(mL, "__tostring");
-	lua_pushstring(mL, MT_USER_CONN);
-	lua_pushcclosure(mL, Uid::uidToString, 1);
-	lua_settable(mL, -3);
-
-	lua_pushliteral(mL, "__metatable");
-	lua_pushliteral(mL, "You're not allowed to get this metatable");
-	lua_settable(mL, -3);
-
-	lua_settop(mL, 0);
+	ofs.flush();
+	ofs.close();
 }
 
-void LuaInterpreter::createConfigMetaTable() {
-	if (!luaL_newmetatable(mL, MT_CONFIG)) {
-		return;
-	}
 
-	lua_pushliteral(mL, "__index");
-	lua_pushstring(mL, "ConfigIndex");
-	lua_pushcclosure(mL, configIndex, 1);
-	lua_settable(mL, -3);
 
-	lua_pushliteral(mL, "__newindex");
-	lua_pushstring(mL, "ConfigNewindex");
-	lua_pushcclosure(mL, configNewindex, 1);
-	lua_settable(mL, -3);
-
-	lua_pushliteral(mL, "__tostring");
-	lua_pushstring(mL, MT_CONFIG);
-	lua_pushcclosure(mL, configTostring, 1);
-	lua_settable(mL, -3);
-
-	lua_pushliteral(mL, "__metatable");
-	lua_pushliteral(mL, "You're not allowed to get this metatable");
-	lua_settable(mL, -3);
-
-	lua_settop(mL, 0);
+void LuaInterpreter::regFunc(const char * funcName, int (*fncptr)(lua_State *)) {
+	lua_pushstring(mL, funcName);
+	lua_pushcfunction(mL, fncptr);
+	lua_rawset(mL, -3);
 }
+
+
+
+void LuaInterpreter::regStrField(const char * name, const char * value) {
+	lua_pushstring(mL, name);
+	lua_pushstring(mL, value);
+	lua_rawset(mL, -3);
+}
+
 
 }; // namespace luaplugin
 

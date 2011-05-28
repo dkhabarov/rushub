@@ -31,8 +31,6 @@ using namespace ::std;
 
 namespace luaplugin {
 
-#define MT_CONFIG "Config object"
-
 class LuaInterpreter {
 
 public:
@@ -48,21 +46,23 @@ public:
 public:
 
 	LuaInterpreter(const string & name, string & fullName);
+
 	~LuaInterpreter();
 
 	LuaInterpreter & operator = (const LuaInterpreter &) {
 		return *this;
 	}
 
-	int start(); // (-1 - run already)
+	int start(); // (-1 - is running already)
 	int stop();
 
 	int callFunc(const char * funcName);
-	void regFunc(const char * funcName, int (*)(lua_State *));
-	void regStrField(const char * name, const char * value);
 
-	void timer(int id, const char * funcName);
 	bool onError(const char * funcName, const char * errMsg, bool stop = false);
+	void timer(int id, const char * funcName);
+
+	static void logError(const char * msg);
+
 	void newCallParam(void * data, int type = 0);
 	void newCallParam(lua_Number data, int type = 0);
 
@@ -92,14 +92,17 @@ private:
 		}
 		Param(lua_Number n, int t) : num(n), type(t) {
 		}
-	};
+	}; // struct Param
+
 	typedef vector<Param *> CallParams;
 	CallParams mCallParams;
 
-	void createUserMetaTable();
-	void createConfigMetaTable();
-
 	TimerList mTimerList;
+
+private:
+
+	void regFunc(const char * funcName, int (*)(lua_State *));
+	void regStrField(const char * name, const char * value);
 
 }; // class LuaInterpreter
 

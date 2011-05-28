@@ -24,6 +24,34 @@
 namespace luaplugin {
 
 
+void Uid::createMetaTable(lua_State * L) {
+	if (!luaL_newmetatable(L, MT_USER_CONN)) {
+		return;
+	}
+
+	lua_pushliteral(L, "__index");
+	lua_pushstring(L, "userIndex");
+	lua_pushcclosure(L, userIndex, 1);
+	lua_settable(L, -3);
+
+	lua_pushliteral(L, "__newindex");
+	lua_pushstring(L, "userNewIndex");
+	lua_pushcclosure(L, userNewIndex, 1);
+	lua_settable(L, -3);
+
+	lua_pushliteral(L, "__tostring");
+	lua_pushstring(L, MT_USER_CONN);
+	lua_pushcclosure(L, uidToString, 1);
+	lua_settable(L, -3);
+
+	lua_pushliteral(L, "__metatable");
+	lua_pushliteral(L, "You're not allowed to get this metatable");
+	lua_settable(L, -3);
+
+	lua_settop(L, 0);
+}
+
+
 
 int Uid::uidToString(lua_State * L) {
 	char buf[9] = { '\0' };

@@ -24,6 +24,7 @@
 #include "LuaInterpreter.h"
 #include "TaskList.h"
 #include "api.h"
+#include "HubConfig.h"
 
 #include <vector>
 #include <list>
@@ -69,6 +70,7 @@ public:
 	LuaInterpreter * mCurScript; /** Current script. When script is working only! */
 	string mLastError; /** Last error in scripts */
 
+	HubConfig mHubConfig;
 	TasksList mTasksList;
 	TimerList * mTimerList;
 

@@ -29,6 +29,7 @@ using namespace ::dcserver;
 namespace luaplugin {
 
 
+//! deprecated
 typedef enum {
 	USERVALUE_PROFILE = 1,
 	USERVALUE_MYINFO,
@@ -39,24 +40,7 @@ typedef enum {
 } UserValue; /** UserValue */
 
 
-typedef struct {
-	short isExist;
-} Config;
-
-
 DcConnBase * getDcConnBase(lua_State * L, int indx);
-
-
-int configTostring(lua_State * L);
-
-int configTable(lua_State * L);
-
-int configIndex(lua_State * L);
-
-int configNewindex(lua_State * L);
-
-
-void logError(const char * msg = NULL);
 
 void copyValue(lua_State * from, lua_State * to, int pos);
 

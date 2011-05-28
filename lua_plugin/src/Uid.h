@@ -76,11 +76,13 @@ class Uid {
 
 public:
 
-	static int uidToString(lua_State * L);
-	static int userIndex(lua_State * L);
-	static int userNewIndex(lua_State * L);
+	static void createMetaTable(lua_State *);
 
 private:
+
+	static int uidToString(lua_State *);
+	static int userIndex(lua_State *);
+	static int userNewIndex(lua_State *);
 
 	static unsigned int getHash(const char *);
 
