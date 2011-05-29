@@ -31,7 +31,7 @@ namespace protocol {
 
 
 
-class WebParser : public Parser, public WebParserBase {
+class WebParser : public Parser {
 
 public:
 

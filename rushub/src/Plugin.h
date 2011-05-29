@@ -524,35 +524,10 @@ public:
 		return *this;
 	}
 
+	virtual const char * getCommand() = 0;
+
 }; // class WebUserBase
 
-
-
-// ================ WebParserBase ================
-
-/** Base web parser */
-class WebParserBase {
-
-public:
-
-	//< Ref to string with command
-	string & mParseString;
-
-public:
-
-	WebParserBase(string & parseString) :
-		mParseString(parseString)
-	{
-	}
-
-	virtual ~WebParserBase() {
-	}
-
-	virtual WebParserBase & operator = (const WebParserBase &) {
-		return *this;
-	}
-
-}; // class WebParserBase
 
 }; // namespace webserver
 
@@ -721,7 +696,7 @@ public:
 		return 1;
 	}
 
-	virtual int onWebData(WebUserBase *, WebParserBase *) {
+	virtual int onWebData(WebUserBase *) {
 		return 1;
 	}
 

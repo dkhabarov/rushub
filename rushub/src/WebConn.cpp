@@ -89,9 +89,9 @@ void WebConnFactory::onNewData(Conn * conn, string * str) {
 	if (!dcServer || !webConn) {
 		return;
 	}
+
 #ifndef WITHOUT_PLUGINS
-	WebParser * webParser = static_cast<WebParser *> (webConn->mParser);
-	if (webParser && !dcServer->mCalls.mOnWebData.callAll(webConn->mWebUser, webParser))
+	if (!dcServer->mCalls.mOnWebData.callAll(webConn->mWebUser))
 #endif
 	{
 		conn->closeNice(9000, CLOSE_REASON_WEB);
@@ -103,6 +103,14 @@ void WebConnFactory::onNewData(Conn * conn, string * str) {
 int WebConnFactory::onNewConn(Conn * conn) {
 	mServer->inputData(conn);
 	return 0;
+}
+
+
+
+
+const char * WebUser::getCommand() {
+	WebParser * webParser = static_cast<WebParser *> (mWebConn->mParser);
+	return webParser->mCommand.c_str();
 }
 
 

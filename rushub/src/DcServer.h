@@ -386,32 +386,32 @@ private:
 		{
 		}
 
-		CallListUser             mOnUserConnected;
-		CallListUser             mOnUserDisconnected;
-		CallListUser             mOnUserEnter;
-		CallListUser             mOnUserExit;
-		CallListUser             mOnSupports;
-		CallListUser             mOnKey;
-		CallListUser             mOnValidateNick;
-		CallListUser             mOnMyPass;
-		CallListUser             mOnVersion;
-		CallListUser             mOnGetNickList;
-		CallListUser             mOnMyINFO;
-		CallListUser             mOnChat;
-		CallListUser             mOnTo;
-		CallListUser             mOnConnectToMe;
-		CallListUser             mOnRevConnectToMe;
-		CallListUser             mOnSearch;
-		CallListUser             mOnSR;
-		CallListUser             mOnKick;
-		CallListUser             mOnOpForceMove;
-		CallListUser             mOnGetINFO;
-		CallListUser             mOnMCTo;
-		CallListSimple           mOnTimer;
-		CallListUserInt          mOnAny;
-		CallListUser             mOnUnknown;
-		CallListUserIntInt       mOnFlood;
-		CallListWebUserWebParser mOnWebData;
+		CallListUser       mOnUserConnected;
+		CallListUser       mOnUserDisconnected;
+		CallListUser       mOnUserEnter;
+		CallListUser       mOnUserExit;
+		CallListUser       mOnSupports;
+		CallListUser       mOnKey;
+		CallListUser       mOnValidateNick;
+		CallListUser       mOnMyPass;
+		CallListUser       mOnVersion;
+		CallListUser       mOnGetNickList;
+		CallListUser       mOnMyINFO;
+		CallListUser       mOnChat;
+		CallListUser       mOnTo;
+		CallListUser       mOnConnectToMe;
+		CallListUser       mOnRevConnectToMe;
+		CallListUser       mOnSearch;
+		CallListUser       mOnSR;
+		CallListUser       mOnKick;
+		CallListUser       mOnOpForceMove;
+		CallListUser       mOnGetINFO;
+		CallListUser       mOnMCTo;
+		CallListSimple     mOnTimer;
+		CallListUserInt    mOnAny;
+		CallListUser       mOnUnknown;
+		CallListUserIntInt mOnFlood;
+		CallListWebUser    mOnWebData;
 
 	} mCalls;
 

@@ -277,7 +277,7 @@ protected:
 
 
 typedef CallListType1<DcUserBase *> CallListUser;
-typedef CallListType2<WebUserBase *, WebParserBase *> CallListWebUserWebParser;
+typedef CallListType1<WebUserBase *> CallListWebUser;
 typedef CallListType2<DcUserBase *, int> CallListUserInt;
 typedef CallListType3<DcUserBase *, int, int> CallListUserIntInt;
 

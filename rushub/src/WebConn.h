@@ -60,8 +60,12 @@ public:
 	WebConn * mWebConn;
 
 public:
+
 	WebUser(int type) : WebUserBase(type) {}
 	virtual ~WebUser() {}
+
+	virtual const char * getCommand();
+
 }; // class WebUser
 
 
