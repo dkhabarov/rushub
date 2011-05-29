@@ -36,14 +36,15 @@ public:
 
 public:
 
-	static int errCount(lua_State * L, const char * countStr);
-	static bool checkCount(lua_State * L, int argNumber);
-	static int pushError(lua_State * L, const char * msg);
-	static bool checkMsgLen(lua_State * L, size_t len);
-	static bool checkNickLen(lua_State * L, size_t len);
-	static bool checkFileLen(lua_State * L, size_t len);
-	static bool checkScriptName(lua_State * L, string & name);
-	static LuaInterpreter * findInterpreter(lua_State * L, const string & name);
+	static int errCount(lua_State *, const char * countStr);
+	static int deprecatedFunc(lua_State *, const char * instead);
+	static bool checkCount(lua_State *, int argNumber);
+	static int pushError(lua_State *, const char * msg);
+	static bool checkMsgLen(lua_State *, size_t len);
+	static bool checkNickLen(lua_State *, size_t len);
+	static bool checkFileLen(lua_State *, size_t len);
+	static bool checkScriptName(lua_State *, string & name);
+	static LuaInterpreter * findInterpreter(lua_State *, const string & name);
 
 
 }; // LuaUtils

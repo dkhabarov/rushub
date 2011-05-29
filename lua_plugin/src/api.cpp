@@ -179,6 +179,7 @@ int setGVal(lua_State * L) {
 
 
 /// SendToUser(UID/sToNick/tNicks, sData, sNick, sFrom)
+// TODO Web.Send
 int sendToUser(lua_State * L) {
 	size_t len;
 	int type;
@@ -221,11 +222,6 @@ int sendToUser(lua_State * L) {
 		DcConnBase * dcConnBase = getDcConnBase(L, 1);
 		if (!dcConnBase) {
 			return LuaUtils::pushError(L, "user was not found");
-		}
-		if (dcConnBase->mType == CLIENT_TYPE_WEB) {
-			if (!dcConnBase->send(data)) { // not newPolitic for timers only
-				return LuaUtils::pushError(L, "data was not sent");
-			}
 		} else if (!LuaPlugin::mCurServer->sendToUser(dcConnBase->mDcUserBase, data, nick, from)) {
 			return LuaUtils::pushError(L, "user was not found");
 		}
@@ -261,6 +257,9 @@ int sendToUser(lua_State * L) {
 //! deprecated
 /// SendToNicks(tNicks, sData, sNick, sFrom)
 int sendToNicks(lua_State * L) {
+
+	LuaUtils::deprecatedFunc(L, "SendToUser");
+
 	size_t len;
 	const char *data = NULL, *nick = NULL, *from = NULL, *to = NULL;
 	switch (lua_gettop(L)) {
@@ -634,6 +633,9 @@ int getUser(lua_State * L) {
 //! deprecated
 /// SetUser(UID/sNick, iType, Value)
 int setUser(lua_State * L) {
+
+	LuaUtils::deprecatedFunc(L, "UID[sName] = Value");
+
 	if (!LuaUtils::checkCount(L, 3)) {
 		return 0;
 	}
@@ -1168,6 +1170,9 @@ int delTimer(lua_State * L) {
 //! deprecated
 /// GetConfig(sName)
 int getConfig(lua_State * L) {
+
+	LuaUtils::deprecatedFunc(L, "Config[sName]");
+
 	if (!LuaUtils::checkCount(L, 1)) {
 		return 0;
 	}
@@ -1185,6 +1190,9 @@ int getConfig(lua_State * L) {
 //! deprecated
 /// SetConfig(sName, sValue)
 int setConfig(lua_State * L) {
+
+	LuaUtils::deprecatedFunc(L, "Config[sName] = Value");
+
 	if (!LuaUtils::checkCount(L, 2)) {
 		return 0;
 	}

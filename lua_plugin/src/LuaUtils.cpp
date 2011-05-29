@@ -19,8 +19,11 @@
 
 #include "LuaUtils.h"
 
+#include <sstream>
+
 
 namespace luaplugin {
+
 
 const size_t LuaUtils::minMsgLen = 1;
 const size_t LuaUtils::maxMsgLen = 128000;
@@ -28,6 +31,7 @@ const size_t LuaUtils::minNickLen = 1;
 const size_t LuaUtils::maxNickLen = 64;
 const size_t LuaUtils::minFileLen = 1;
 const size_t LuaUtils::maxFileLen = 255;
+
 
 int LuaUtils::errCount(lua_State * L, const char * countStr) {
 	lua_Debug ar;
@@ -39,6 +43,33 @@ int LuaUtils::errCount(lua_State * L, const char * countStr) {
 		ar.name = "?";
 	}
 	return luaL_error(L, "bad argument count to " LUA_QS " (%s expected, got %d)", ar.name, countStr, lua_gettop(L));
+}
+
+
+
+int LuaUtils::deprecatedFunc(lua_State * L, const char * instead) {
+	lua_Debug ar1, ar2;
+	if (!lua_getstack(L, 1, &ar1) || !lua_getstack(L, 0, &ar2)) {
+		return 0;
+	}
+
+	::std::ostringstream oss;
+
+	lua_getinfo(L, "Sl", &ar1);  /* get info about it */
+	if (ar1.currentline > 0) {  /* is there info? */
+		oss << ar1.short_src << ":" << ar1.currentline << ": ";
+	}
+
+	lua_getinfo(L, "n", &ar2);
+	if (ar2.name == NULL) {
+		ar2.name = "?";
+	}
+
+	oss << "warning: function '" << ar2.name << 
+		"' was deprecated. Use '" << instead << "' instead";
+
+	LuaInterpreter::logError(oss.str().c_str());
+	return 1;
 }
 
 
