@@ -75,7 +75,7 @@ using namespace ::std;
 
 //< Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10017
+	#define INTERNAL_PLUGIN_VERSION 10018
 #endif
 
 //< NMDC protocol separator
@@ -149,14 +149,6 @@ public:
 	virtual DcConnBase & operator = (const DcConnBase &) {
 		return *this;
 	}
-
-
-	//< Sending RAW cmd to the client
-	virtual int send(
-		const string & data,
-		bool addSep = false,
-		bool flush = true
-	) = 0;
 
 	//< Disconnect this client
 	virtual void disconnect() = 0;

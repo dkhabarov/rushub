@@ -831,9 +831,10 @@ DcUser * DcServer::getDcUser(const char * nick) {
 
 
 
+// TODO: return user with conn only?
 DcUserBase * DcServer::getDcUserBase(const char * nick) {
 	DcUser * dcUser = getDcUser(nick);
-	return dcUser != NULL ? static_cast<DcUserBase *> (dcUser) : NULL;
+	return (dcUser != NULL && dcUser->mDcConn != NULL) ? static_cast<DcUserBase *> (dcUser) : NULL;
 }
 
 
@@ -857,31 +858,31 @@ bool DcServer::sendToUser(DcUserBase * dcUserBase, const char * sData, const cha
 	if (!dcUserBase || !dcUserBase->mDcConnBase || !sData) {
 		return false;
 	}
-	DcConnBase * dcConnBase = dcUserBase->mDcConnBase;
+	DcConn * dcConn = static_cast<DcConn *> (dcUserBase->mDcConnBase);
 
 	// PM
 	if (sFrom && sNick) {
 		string sTo("<unknown>"), sStr;
-		if (dcConnBase->mDcUserBase && !dcConnBase->mDcUserBase->getNick().empty()) {
-			sTo = dcConnBase->mDcUserBase->getNick();
+		if (dcConn->mDcUser && !dcConn->mDcUser->getNick().empty()) {
+			sTo = dcConn->mDcUser->getNick();
 		}
-		dcConnBase->send(NmdcProtocol::appendPm(sStr, sTo, sFrom, sNick, sData));
+		dcConn->send(NmdcProtocol::appendPm(sStr, sTo, sFrom, sNick, sData));
 		return true;
 	}
 
 	// Chat
 	if (sNick) {
 		string sStr;
-		dcConnBase->send(NmdcProtocol::appendChat(sStr, sNick, sData));
+		dcConn->send(NmdcProtocol::appendChat(sStr, sNick, sData));
 		return true;
 	}
 
 	// Simple Msg
 	string sMsg(sData);
-	if (dcConnBase->mType == CLIENT_TYPE_NMDC && sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
+	if (dcConn->mType == CLIENT_TYPE_NMDC && sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
 		sMsg.append(NMDC_SEPARATOR);
 	}
-	dcConnBase->send(sMsg);
+	dcConn->send(sMsg);
 	return true;
 }
 
