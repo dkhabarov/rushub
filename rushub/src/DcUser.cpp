@@ -357,7 +357,7 @@ void DcUser::disconnect() {
 
 //< Get string of IP
 const string & DcUser::getIp() const {
-	return mDcConn->getIp();
+	return mIp;
 }
 
 
