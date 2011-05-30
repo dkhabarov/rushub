@@ -77,7 +77,7 @@ void DcUser::send(const string & data, bool addSep, bool flush) {
 
 
 /** Get IP address of user */
-const string & DcUser::getIp() const {
+const string & DcUser::ip() const {
 	return mIp;
 }
 
@@ -345,6 +345,61 @@ const string & DcUser::getSupports() const {
 //< User's protocol version (NMDC PROTOCOL)
 const string & DcUser::getVersion() const {
 	return mVersion;
+}
+
+
+void DcUser::disconnect() {
+	mDcConn->closeNice(9000, CLOSE_REASON_PLUGIN);
+}
+
+
+
+
+//< Get string of IP
+const string & DcUser::getIp() const {
+	return mDcConn->getIp();
+}
+
+
+
+//< Get string of server ip (host)
+const string & DcUser::getIpConn() const{
+	return mDcConn->getIpConn();
+}
+
+
+
+//< Get numeric IP
+unsigned long DcUser::getNetIp() const {
+	return mDcConn->getNetIp();
+}
+
+
+
+//< Get enter time (in unix time sec)
+long DcUser::getConnectTime() const {
+	return mDcConn->getConnectTime();
+}
+
+
+
+//< Get real clients port
+int DcUser::getPort() const {
+	return mDcConn->getPort();
+}
+
+
+
+//< Get connection port
+int DcUser::getPortConn() const {
+	return mDcConn->getPortConn();
+}
+
+
+
+//< Get mac address
+const string & DcUser::getMacAddress() const {
+	return mDcConn->getMacAddress();
 }
 
 

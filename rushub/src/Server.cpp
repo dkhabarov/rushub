@@ -434,13 +434,13 @@ int Server::addConnection(Conn *conn) {
 
 	if (!conn->isOk()) {
 		if (conn->Log(2)) {
-			conn->LogStream() << "Not reserved connection: " << conn->ip() << endl;
+			conn->LogStream() << "Not reserved connection: " << conn->getIp() << endl;
 		}
 		if (conn->mConnFactory != NULL && conn->getCreatedByFactory()) {
 			conn->mConnFactory->deleteConn(conn);
 		} else {
 			if (conn->Log(2)) {
-				conn->LogStream() << "Connection without factory: " << conn->ip() << endl;
+				conn->LogStream() << "Connection without factory: " << conn->getIp() << endl;
 			}
 			delete conn;
 		}

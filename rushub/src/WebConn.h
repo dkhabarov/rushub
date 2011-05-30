@@ -66,23 +66,8 @@ public:
 
 	virtual const char * getCommand();
 
-}; // class WebUser
-
-
-
-class WebConn : public Conn {
-
-public:
-
-	WebUser * mWebUser;
-
-public:
-
-	WebConn(tSocket sock = 0, Server * server = NULL);
-	virtual ~WebConn();
-
-	/** Timer of the connection */
-	virtual int onTimer(Time & now);
+	//< Disconnect this client
+	virtual void disconnect();
 
 	/** Get string of ip */
 	virtual const string & getIp();
@@ -101,11 +86,28 @@ public:
 
 	virtual unsigned long getNetIp() const;
 
+}; // class WebUser
+
+
+
+class WebConn : public Conn {
+
+public:
+
+	WebUser * mWebUser;
+
+public:
+
+	WebConn(tSocket sock = 0, Server * server = NULL);
+	virtual ~WebConn();
+
+	/** Timer of the connection */
+	virtual int onTimer(Time & now);
+
 	virtual int send(const string & data, bool flush = true);
 
-	virtual void disconnect();
-
 	DcServer * server();
+
 
 }; // class WebConn
 

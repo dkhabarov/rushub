@@ -91,64 +91,6 @@ int DcConn::send(const string & data, bool addSep, bool flush) {
 
 
 
-void DcConn::disconnect() {
-	closeNice(9000, CLOSE_REASON_PLUGIN);
-}
-
-//< Get real port
-int DcConn::getPort() const {
-	return mPort;
-}
-
-
-
-//< Get connection port
-int DcConn::getPortConn() const {
-	return mPortConn;
-}
-
-
-
-//< Get numeric IP
-unsigned long DcConn::getNetIp() const {
-	return mNetIp;
-}
-
-
-
-//< Get string of IP
-const string & DcConn::getIp() const {
-	return mIp;
-}
-
-
-
-//< Get string of server IP (host)
-const string & DcConn::getIpConn() const {
-	return mIpConn;
-}
-
-
-
-//< Get mac address
-const string & DcConn::getMacAddress() const {
-	return mMac;
-}
-
-
-
-long DcConn::getConnectTime() const {
-	return mTimes.mConnect.Sec();
-}
-
-
-
-void DcConn::setConnectTimeNow() {
-	mTimes.mConnect.Get();
-}
-
-
-
 //< Get profile
 int DcConn::getProfile() const {
 	return mProfile;
@@ -233,7 +175,7 @@ int DcConn::onTimer(Time &now) {
 	Time Ago(now);
 	Ago -= dcServer->mDcConfig.mStartPing;
 	if (
-		dcServer->minDelay(mTimes.mPingServer, dcServer->mDcConfig.mPingInterval) &&
+		dcServer->minDelay(mPingServer, dcServer->mDcConfig.mPingInterval) &&
 		mDcUser->getInUserList() && mDcUser->mTimeEnter < Ago
 	) {
 		string s;

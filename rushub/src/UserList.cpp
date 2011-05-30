@@ -185,10 +185,10 @@ void FullUserList::ufDoINFOList::operator() (UserBase * userBase) {
 }
 
 void FullUserList::ufDoIpList::operator() (UserBase * userBase) {
-	if (!userBase->hide() && userBase->getIp().size() && !userBase->nick().empty()) {
+	if (!userBase->hide() && userBase->ip().size() && !userBase->nick().empty()) {
 		msList.append(userBase->nick());
 		msList.append(" ");
-		msList.append(userBase->getIp());
+		msList.append(userBase->ip());
 		msList.append(msSep);
 	}
 }

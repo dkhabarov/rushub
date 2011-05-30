@@ -19,6 +19,9 @@
 
 #include "HubConfig.h"
 #include "LuaPlugin.h"
+#include <string.h>
+
+using namespace ::std;
 
 namespace luaplugin {
 

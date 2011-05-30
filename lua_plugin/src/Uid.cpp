@@ -84,7 +84,7 @@ int Uid::userIndex(lua_State * L) {
 			break;
 
 		case PARAM_HASH_IP :
-			lua_pushstring(L, dcConnBase->getIp().c_str()); // TODO refactoring
+			lua_pushstring(L, dcUserBase->getIp().c_str()); // TODO refactoring
 			break;
 
 		case PARAM_HASH_PROFILE :
@@ -244,19 +244,19 @@ int Uid::userIndex(lua_State * L) {
 			break;
 
 		case PARAM_HASH_PORT :
-			lua_pushnumber(L, dcConnBase->getPort()); // TODO refactoring
+			lua_pushnumber(L, dcUserBase->getPort()); // TODO refactoring
 			break;
 
 		case PARAM_HASH_PORTCONN :
-			lua_pushnumber(L, dcConnBase->getPortConn()); // TODO refactoring
+			lua_pushnumber(L, dcUserBase->getPortConn()); // TODO refactoring
 			break;
 
 		case PARAM_HASH_IPCONN :
-			lua_pushstring(L, dcConnBase->getIpConn().c_str()); // TODO refactoring
+			lua_pushstring(L, dcUserBase->getIpConn().c_str()); // TODO refactoring
 			break;
 
 		case PARAM_HASH_MACADDRESS :
-			lua_pushstring(L, dcConnBase->getMacAddress().size() ? dcConnBase->getMacAddress().c_str() : "n/a"); // TODO refactoring
+			lua_pushstring(L, dcUserBase->getMacAddress().size() ? dcUserBase->getMacAddress().c_str() : "n/a"); // TODO refactoring
 			break;
 
 		case PARAM_HASH_SUPPORTS :
@@ -272,7 +272,7 @@ int Uid::userIndex(lua_State * L) {
 			break;
 
 		case PARAM_HASH_ENTERTIME :
-			lua_pushnumber(L, (lua_Number)dcConnBase->getConnectTime()); // TODO refactoring
+			lua_pushnumber(L, (lua_Number)dcUserBase->getConnectTime()); // TODO refactoring
 			break;
 
 		case PARAM_HASH_UID :

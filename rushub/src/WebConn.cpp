@@ -115,6 +115,12 @@ const char * WebUser::getCommand() {
 
 
 
+void WebUser::disconnect() {
+	mWebConn->closeNice(9000, CLOSE_REASON_WEB);
+}
+
+
+
 
 WebConn::WebConn(tSocket sock, Server * server) : 
 	Conn(sock, server)
@@ -152,42 +158,42 @@ int WebConn::onTimer(Time &) {
 
 
 /** Get string of ip */
-const string & WebConn::getIp() {
-	return mIp;
+const string & WebUser::getIp() {
+	return mWebConn->getIp();
 }
 
 
 
 /** Get string of server IP (host) */
-const string & WebConn::getIpConn() const {
-	return mIpConn;
+const string & WebUser::getIpConn() const {
+	return mWebConn->getIpConn();
 }
 
 
 
 /** Get mac address */
-const string & WebConn::getMacAddress() {
-	return mMac;
+const string & WebUser::getMacAddress() {
+	return mWebConn->getMacAddress();
 }
 
 
 
 /** Get real port */
-int WebConn::getPort() {
-	return mPort;
+int WebUser::getPort() {
+	return mWebConn->getPort();
 }
 
 
 
 /** Get conn port */
-int WebConn::getPortConn() {
-	return mPortConn;
+int WebUser::getPortConn() {
+	return mWebConn->getPortConn();
 }
 
 
 
-unsigned long WebConn::getNetIp() const {
-	return mNetIp;
+unsigned long WebUser::getNetIp() const {
+	return mWebConn->getNetIp();
 }
 
 
@@ -198,13 +204,6 @@ int WebConn::send(const string & data, bool flush /* = true */) {
 	}
 	return writeData(data, flush);
 }
-
-
-
-void WebConn::disconnect() {
-	closeNice(9000, CLOSE_REASON_WEB);
-}
-
 
 
 }; // namespace webserver

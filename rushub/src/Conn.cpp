@@ -90,7 +90,7 @@ Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 		mPort = ntohs(saddr.sin_port); /** port */
 
 		if (mServer->mMac) {
-			getMac();
+			calcMacAddress();
 		}
 	}
 }
@@ -525,16 +525,165 @@ int Conn::recv() {
 
 
 
-/** Get string ip */
-const string & Conn::ip() const {
+
+
+bool Conn::isClosed() const {
+	return mClosed;
+}
+
+
+//< Get string of IP
+const string & Conn::getIp() const {
 	return mIp;
 }
 
 
 
-const string & Conn::ipUdp() const {
+//< Get string of server IP (host)
+const string & Conn::getIpConn() const {
+	return mIpConn;
+}
+
+
+
+//< Get numeric IP
+unsigned long Conn::getNetIp() const {
+	return mNetIp;
+}
+
+
+
+//< Get IP for UDP
+const string & Conn::getIpUdp() const {
 	return mIpUdp;
 }
+
+
+
+//< Get enter time (in unix time sec)
+long Conn::getConnectTime() const {
+	return mConnect.Sec();
+}
+
+
+
+//< Get real port
+int Conn::getPort() const {
+	return mPort;
+}
+
+
+
+//< Get connection port
+int Conn::getPortConn() const {
+	return mPortConn;
+}
+
+
+
+//< Get mac-address
+const string & Conn::getMacAddress() const {
+	return mMac;
+}
+
+
+
+//< Get host
+bool Conn::getHost() {
+	if (mHost.size()) {
+		return true;
+	}
+	struct hostent * h;
+	if ((h = gethostbyaddr(mIp.c_str(), sizeof(mIp), AF_INET)) != NULL) {
+		mHost = h->h_name;
+	}
+	return h != NULL;
+}
+
+
+
+//< Get IP for host
+unsigned long Conn::ipByHost(const string &sHost) {
+	struct sockaddr_in saddr;
+	memset(&saddr, 0, sizeof(sockaddr_in));
+	struct hostent * h;
+	if ((h = gethostbyname(sHost.c_str())) != NULL) {
+		saddr.sin_addr = *((struct in_addr *)h->h_addr);
+	}
+	return saddr.sin_addr.s_addr;
+}
+
+
+
+//< Get host for IP
+bool Conn::hostByIp(const string & sIp, string &sHost) {
+	struct hostent * h;
+	struct in_addr addr;
+#ifndef _WIN32
+	if (!inet_aton(sIp.c_str(), &addr)) {
+		return false;
+	}
+#else
+	addr.s_addr = inet_addr(sIp.c_str());
+#endif
+	if ((h = gethostbyaddr((char *)&addr, sizeof(addr), AF_INET)) != NULL) {
+		sHost = h->h_name;
+	}
+	return h != NULL;
+}
+
+
+
+//< Check IP
+bool Conn::checkIp(const string &ip) {
+	int i = -1;
+	char c;
+	istringstream is(ip);
+	is >> i >> c;
+	if (i < 0 || i > 255 || c != '.') {
+		return false;
+	}
+	is >> i >> c;
+	if (i < 0 || i > 255 || c != '.') {
+		return false;
+	}
+	is >> i >> c;
+	if (i < 0 || i > 255 || c != '.') {
+		return false;
+	}
+	is >> i >> (c = '\0');
+	if (i < 0 || i > 255 || c) {
+		return false;
+	}
+	return true;
+}
+
+
+
+//< Calculate mac-address
+void Conn::calcMacAddress() {
+#ifdef _WIN32
+	char buf[18] = { '\0' };
+	unsigned long ip = ip2Num(mIp.c_str());
+	unsigned long size = 0x0;
+	::GetIpNetTable(NULL, &size, false);
+	MIB_IPNETTABLE * pT = (MIB_IPNETTABLE *) new char[size];
+	if (0L == ::GetIpNetTable(pT, &size, true)) {
+		for (unsigned long i = 0; i < pT->dwNumEntries; ++i) {
+			if ((pT->table[i].dwAddr == ip) && (pT->table[i].dwType != 2)) {
+				sprintf(buf, "%02x-%02x-%02x-%02x-%02x-%02x",
+					pT->table[i].bPhysAddr[0], pT->table[i].bPhysAddr[1],
+					pT->table[i].bPhysAddr[2], pT->table[i].bPhysAddr[3],
+					pT->table[i].bPhysAddr[4], pT->table[i].bPhysAddr[5]);
+				mMac = string(buf);
+				break;
+			}
+		}
+		delete[] pT;
+	}
+#endif
+}
+
 
 
 
@@ -852,88 +1001,6 @@ bool Conn::strLog() {
 	return true;
 }
 
-bool Conn::checkIp(const string &ip) {
-	int i = -1;
-	char c;
-	istringstream is(ip);
-	is >> i >> c;
-	if (i < 0 || i > 255 || c != '.') {
-		return false;
-	}
-	is >> i >> c;
-	if (i < 0 || i > 255 || c != '.') {
-		return false;
-	}
-	is >> i >> c;
-	if (i < 0 || i > 255 || c != '.') {
-		return false;
-	}
-	is >> i >> (c = '\0');
-	if (i < 0 || i > 255 || c) {
-		return false;
-	}
-	return true;
-}
-
-void Conn::getMac() {
-#ifdef _WIN32
-	char buf[18] = { '\0' };
-	unsigned long ip = ip2Num(mIp.c_str());
-	unsigned long size = 0x0;
-	::GetIpNetTable(NULL, &size, false);
-	MIB_IPNETTABLE * pT = (MIB_IPNETTABLE *) new char[size];
-	if (0L == ::GetIpNetTable(pT, &size, true)) {
-		for (unsigned long i = 0; i < pT->dwNumEntries; ++i) {
-			if ((pT->table[i].dwAddr == ip) && (pT->table[i].dwType != 2)) {
-				sprintf(buf, "%02x-%02x-%02x-%02x-%02x-%02x",
-					pT->table[i].bPhysAddr[0], pT->table[i].bPhysAddr[1],
-					pT->table[i].bPhysAddr[2], pT->table[i].bPhysAddr[3],
-					pT->table[i].bPhysAddr[4], pT->table[i].bPhysAddr[5]);
-				mMac = string(buf);
-				break;
-			}
-		}
-		delete[] pT;
-	}
-#endif
-}
-
-bool Conn::getHost() {
-	if (mHost.size()) {
-		return true;
-	}
-	struct hostent * h;
-	if ((h = gethostbyaddr(mIp.c_str(), sizeof(mIp), AF_INET)) != NULL) {
-		mHost = h->h_name;
-	}
-	return h != NULL;
-}
-
-unsigned long Conn::ipByHost(const string &sHost) {
-	struct sockaddr_in saddr;
-	memset(&saddr, 0, sizeof(sockaddr_in));
-	struct hostent * h;
-	if ((h = gethostbyname(sHost.c_str())) != NULL) {
-		saddr.sin_addr = *((struct in_addr *)h->h_addr);
-	}
-	return saddr.sin_addr.s_addr;
-}
-
-bool Conn::hostByIp(const string & sIp, string &sHost) {
-	struct hostent * h;
-	struct in_addr addr;
-#ifndef _WIN32
-	if (!inet_aton(sIp.c_str(), &addr)) {
-		return false;
-	}
-#else
-	addr.s_addr = inet_addr(sIp.c_str());
-#endif
-	if ((h = gethostbyaddr((char *)&addr, sizeof(addr), AF_INET)) != NULL) {
-		sHost = h->h_name;
-	}
-	return h != NULL;
-}
 
 
 /////////////////////ConnFactory/////////////////////

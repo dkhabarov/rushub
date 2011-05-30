@@ -787,7 +787,7 @@ int disconnect(lua_State * L) {
 		return LuaUtils::pushError(L, "user was not found");
 	}
 
-	dcUserBase->mDcConnBase->disconnect(); // TODO refactoring
+	dcUserBase->disconnect();
 
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);

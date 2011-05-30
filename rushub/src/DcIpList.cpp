@@ -41,12 +41,12 @@ DcIpList::~DcIpList() {
 	}
 }
 
-bool DcIpList::add(DcConn * conn) {
-	IpList * ipList = IpTable::find(conn->getNetIp());
+bool DcIpList::add(DcConn * dcConn) {
+	IpList * ipList = IpTable::find(dcConn->getNetIp());
 	if (ipList == NULL) {
-		IpTable::add(conn->getNetIp(), new IpList((tSocket)(*conn), conn));
+		IpTable::add(dcConn->getNetIp(), new IpList((tSocket)(*dcConn), dcConn));
 	} else {
-		ipList->add((tSocket)(*conn), conn);
+		ipList->add((tSocket)(*dcConn), dcConn);
 	}
 	return true;
 }

@@ -179,31 +179,6 @@ public:
 	//< Sending RAW command to the client
 	virtual int send(const string & data, bool addSep = false, bool flush = true);
 
-	virtual void disconnect();
-
-
-	//< Get real port
-	virtual int getPort() const;
-
-	//< Get connection port
-	virtual int getPortConn() const;
-
-	//< Get numeric IP
-	virtual unsigned long getNetIp() const;
-
-	//< Get string of IP
-	virtual const string & getIp() const;
-
-	//< Get string of server IP (host)
-	virtual const string & getIpConn() const;
-
-	//< Get mac address
-	virtual const string & getMacAddress() const;
-
-	virtual long getConnectTime() const;
-
-	virtual void setConnectTimeNow();
-
 
 	//< Get profile
 	virtual int getProfile() const;
@@ -272,16 +247,8 @@ protected:
 
 	TimeOut mTimeOut[HUB_TIME_OUT_MAX];
 
-	//< Timers
-	struct Times {
-
-		//< Time entering into the hub
-		Time mConnect;
-
-		//< Time last ping from server to client
-		Time mPingServer;
-
-	} mTimes;
+	//< Time last ping from server to client
+	Time mPingServer;
 
 protected:
 

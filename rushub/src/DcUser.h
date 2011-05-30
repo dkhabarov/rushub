@@ -98,7 +98,7 @@ public:
 	virtual int getProfile() const;
 	virtual void setProfile(int iProfile);
 
-	const string & getIp() const;
+	const string & ip() const;
 	void setIp(const string & ip);
 
 	void setNick(const string & nick);
@@ -150,6 +150,30 @@ public:
 
 	//< User's protocol version (PROTOCOL NMDC)
 	virtual const string & getVersion() const;
+
+	virtual void disconnect();
+
+
+	//< Get string of IP
+	virtual const string & getIp() const;
+
+	//< Get string of server ip (host)
+	virtual const string & getIpConn() const;
+
+	//< Get numeric IP
+	virtual unsigned long getNetIp() const;
+
+	//< Get enter time (in unix time sec)
+	long getConnectTime() const;
+
+	//< Get real clients port
+	virtual int getPort() const;
+
+	//< Get connection port
+	virtual int getPortConn() const;
+
+	//< Get mac address
+	virtual const string & getMacAddress() const;
 
 private:
 

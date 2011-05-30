@@ -119,68 +119,7 @@ enum TagNil {
 
 
 
-class DcUserBase;
-
-
-
-
-/** Base DC connection */
-class DcConnBase {
-
-public:
-
-	//< User
-	DcUserBase * mDcUserBase;
-
-	//< Connection type (for protection and compatibility)
-	const int mType;
-
-public:
-
-	DcConnBase(int type) :
-		mDcUserBase(NULL),
-		mType(type)
-	{
-	}
-
-	virtual ~DcConnBase() {
-	}
-
-	virtual DcConnBase & operator = (const DcConnBase &) {
-		return *this;
-	}
-
-	//< Disconnect this client
-	virtual void disconnect() = 0;
-
-
-	//< Get real clients port
-	virtual int getPort() const = 0;
-
-	//< Get connection port
-	virtual int getPortConn() const = 0;
-
-	//< Get numeric IP
-	virtual unsigned long getNetIp() const = 0;
-
-	//< Get string of IP
-	virtual const string & getIp() const = 0;
-
-	//< Get string of server ip (host)
-	virtual const string & getIpConn() const = 0;
-
-	//< Get mac address
-	virtual const string & getMacAddress() const = 0;
-
-	//< Get enter time
-	virtual long getConnectTime() const = 0;
-
-
-	virtual bool parseCommand(const char * cmd) = 0;
-
-	virtual const char * getCommand() = 0;
-
-}; // class DcConnBase
+class DcConnBase;
 
 
 
@@ -327,7 +266,74 @@ public:
 	//< User's protocol version
 	virtual const string & getVersion() const = 0;
 
+	//< Disconnect this client
+	virtual void disconnect() = 0;
+
+
+	//< Get string of IP
+	virtual const string & getIp() const = 0;
+
+	//< Get string of server ip (host)
+	virtual const string & getIpConn() const = 0;
+
+	//< Get numeric IP
+	virtual unsigned long getNetIp() const = 0;
+
+	//< Get enter time (in unix time sec)
+	virtual long getConnectTime() const = 0;
+
+	//< Get real clients port
+	virtual int getPort() const = 0;
+
+	//< Get connection port
+	virtual int getPortConn() const = 0;
+
+	//< Get mac address
+	virtual const string & getMacAddress() const = 0;
+
 }; // class DcUserBase
+
+
+
+/** Base DC connection */
+class DcConnBase {
+
+public:
+
+	//< User
+	DcUserBase * mDcUserBase;
+
+	//< Connection type (for protection and compatibility)
+	const int mType;
+
+public:
+
+	DcConnBase(int type) :
+		mDcUserBase(NULL),
+		mType(type)
+	{
+	}
+
+	virtual ~DcConnBase() {
+	}
+
+	virtual DcConnBase & operator = (const DcConnBase &) {
+		return *this;
+	}
+
+	//< Disconnect this client
+	virtual void disconnect() {
+		if (mDcUserBase != NULL) {
+			mDcUserBase->disconnect();
+		}
+	}
+
+
+	virtual bool parseCommand(const char * cmd) = 0;
+
+	virtual const char * getCommand() = 0;
+
+}; // class DcConnBase
 
 
 
@@ -525,6 +531,9 @@ public:
 	}
 
 	virtual const char * getCommand() = 0;
+
+	//< Disconnect this client
+	virtual void disconnect() = 0;
 
 }; // class WebUserBase
 

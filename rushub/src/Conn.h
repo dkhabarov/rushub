@@ -217,6 +217,15 @@ public:
 	void flush(); /** Flush buffer */
 
 
+	virtual bool strLog();
+
+	/** Main base timer */
+	int onTimerBase(Time &now);
+
+	/** Main timer */
+	virtual int onTimer(Time &now);
+
+
 
 	static unsigned long ip2Num(const char * ip) {
 		return inet_addr(ip);
@@ -227,36 +236,45 @@ public:
 		in.s_addr = ip;
 		return inet_ntoa(in);
 	}
-	
-	/** Get string ip */
-	const string & ip() const;
 
-	const string & ipUdp() const;
-	
-	void getMac();
+	//< Is closed
+	bool isClosed() const;
 
-	/** Get host */
+	//< Get string of IP
+	const string & getIp() const;
+
+	//< Get string of server IP (host)
+	const string & getIpConn() const;
+
+	//< Get numeric IP
+	unsigned long getNetIp() const;
+
+	//< Get IP for UDP
+	const string & getIpUdp() const;
+
+	//< Get enter time (in unix time sec)
+	long getConnectTime() const;
+
+	//< Get real port
+	int getPort() const;
+
+	//< Get connection port
+	int getPortConn() const;
+
+	//< Get mac-address
+	const string & getMacAddress() const;
+
+	//< Get host
 	bool getHost();
 	
-	/** Get ip by host */
+	//< Get IP for host
 	static unsigned long ipByHost(const string & host);
 	
-	/** Get host by ip */
+	//< Get host for IP
 	static bool hostByIp(const string & ip, string & host);
 
+	//< Check IP
 	static bool checkIp(const string &ip);
-
-	bool isClosed() {
-		return mClosed;
-	}
-
-	virtual bool strLog();
-
-	/** Main base timer */
-	int onTimerBase(Time &now);
-
-	/** Main timer */
-	virtual int onTimer(Time &now);
 
 protected:
 
@@ -281,6 +299,9 @@ protected:
 	unsigned long mSendBufMax; /** Max size sending buf */
 
 	list<Conn *>::iterator mIterator; /** Optimisation */
+
+	//< Time entering into the hub
+	Time mConnect;
 
 protected:
 
@@ -333,6 +354,9 @@ private:
 
 	//< Accept new conn
 	tSocket socketAccept();
+
+	//< Calculate mac-address
+	void calcMacAddress();
 
 }; // class Conn
 

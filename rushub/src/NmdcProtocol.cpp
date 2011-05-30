@@ -151,7 +151,7 @@ Conn * NmdcProtocol::getConnForUdpData(Conn * conn, Parser * parser) {
 
 			// NMDC
 			DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcParser->chunkString(CHUNK_SR_FROM)));
-			if (dcUser && dcUser->mDcConn && conn->ipUdp() == dcUser->getIp()) {
+			if (dcUser && dcUser->mDcConn && conn->getIpUdp() == dcUser->getIp()) {
 				return dcUser->mDcConn;
 			} else {
 				if (conn->Log(3)) {
@@ -267,7 +267,6 @@ int NmdcProtocol::eventKey(DcParser *, DcConn * dcConn) {
 	dcConn->setLoginStatusFlag(LOGIN_STATUS_KEY); /** User has sent key */
 	dcConn->clearTimeOut(HUB_TIME_OUT_KEY);
 	dcConn->setTimeOut(HUB_TIME_OUT_VALNICK, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_VALNICK], mDcServer->mTime);
-	dcConn->setConnectTimeNow();
 	return 0;
 }
 
@@ -612,7 +611,7 @@ int NmdcProtocol::eventUserIp(DcParser * dcParser, DcConn * dcConn) {
 			// NMDC
 			UserBase * userBase = mDcServer->mDcUserList.getUserBaseByNick(nick);
 			if (userBase != NULL) {
-				result.append(nick).append(" ").append(userBase->getIp()).append("$$");
+				result.append(nick).append(" ").append(userBase->ip()).append("$$");
 			}
 		}
 		cur = pos + 2;
@@ -625,7 +624,7 @@ int NmdcProtocol::eventUserIp(DcParser * dcParser, DcConn * dcConn) {
 		// NMDC
 		UserBase * userBase = mDcServer->mDcUserList.getUserBaseByNick(nick);
 		if (userBase != NULL) {
-			result.append(nick).append(" ").append(userBase->getIp());
+			result.append(nick).append(" ").append(userBase->ip());
 		}
 	}
 

@@ -492,11 +492,11 @@ bool DcServer::checkNick(DcConn *dcConn) {
 		string sMsg;
 		DcUser * us = static_cast<DcUser *> (mDcUserList.find(key));
 
-		if (!us->mDcConn || (us->getProfile() == -1 && us->getIp() != dcConn->ip())) {
+		if (!us->mDcConn || (us->getProfile() == -1 && us->getIp() != dcConn->getIp())) {
 			if (dcConn->Log(2)) {
 				dcConn->LogStream() << "Bad nick (used): '" 
 					<< dcConn->mDcUser->getNick() << "'["
-					<< dcConn->ip() << "] vs '" << us->getNick() 
+					<< dcConn->getIp() << "] vs '" << us->getNick() 
 					<< "'[" << us->getIp() << "]" << endl;
 			}
 
