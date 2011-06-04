@@ -811,17 +811,20 @@ void DcServer::afterUserEnter(DcConn *dcConn) {
 
 /** Get user by nick (or NULL) */
 DcUser * DcServer::getDcUser(const char * nick) {
-	string sN(nick);
-	if (sN.size()) {
+	if (nick == NULL) {
+		return NULL;
+	}
+	string nickStr(nick);
+	if (nickStr.size()) {
 		// NMDC
-		UserBase * userBase = mDcUserList.getUserBaseByNick(sN);
+		UserBase * userBase = mDcUserList.getUserBaseByNick(nickStr);
 		if (userBase) {
 			return static_cast<DcUser *> (userBase);
 		}
 		DcConn * dcConn;
 		for (tCLIt it = mConnList.begin(); it != mConnList.end(); ++it) {
 			dcConn = static_cast<DcConn *> (*it);
-			if (dcConn && dcConn->mType == CLIENT_TYPE_NMDC && dcConn->mDcUser && dcConn->mDcUser->getNick() == sN) {
+			if (dcConn && dcConn->mType == CLIENT_TYPE_NMDC && dcConn->mDcUser && dcConn->mDcUser->getNick() == nickStr) {
 				return static_cast<DcUser *> (dcConn->mDcUser);
 			}
 		}
@@ -854,179 +857,155 @@ const vector<DcConnBase *> & DcServer::getDcConnBase(const char * sIP) {
 
 
 /** Send data to user */
-bool DcServer::sendToUser(DcUserBase * dcUserBase, const char * sData, const char * sNick, const char * sFrom) {
-	if (!dcUserBase || !dcUserBase->mDcConnBase || !sData) {
+bool DcServer::sendToUser(DcUserBase * dcUserBase, const char * data, const char * nick, const char * from) {
+	if (!dcUserBase || !dcUserBase->mDcConnBase || !data) {
 		return false;
 	}
 	DcConn * dcConn = static_cast<DcConn *> (dcUserBase->mDcConnBase);
 
 	// PM
-	if (sFrom && sNick) {
-		string sTo("<unknown>"), sStr;
+	if (from && nick) {
+		string to("<unknown>"), str;
 		if (dcConn->mDcUser && !dcConn->mDcUser->getNick().empty()) {
-			sTo = dcConn->mDcUser->getNick();
+			to = dcConn->mDcUser->getNick();
 		}
-		dcConn->send(NmdcProtocol::appendPm(sStr, sTo, sFrom, sNick, sData));
+		dcConn->send(NmdcProtocol::appendPm(str, to, from, nick, data));
 		return true;
 	}
 
 	// Chat
-	if (sNick) {
-		string sStr;
-		dcConn->send(NmdcProtocol::appendChat(sStr, sNick, sData));
+	if (nick) {
+		string str;
+		dcConn->send(NmdcProtocol::appendChat(str, nick, data));
 		return true;
 	}
 
 	// Simple Msg
-	string sMsg(sData);
-	if (dcConn->mType == CLIENT_TYPE_NMDC && sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
-		sMsg.append(NMDC_SEPARATOR);
+	string msg(data);
+	if (dcConn->mType == CLIENT_TYPE_NMDC && msg.substr(msg.size() - 1, 1) != NMDC_SEPARATOR) {
+		msg.append(NMDC_SEPARATOR);
 	}
-	dcConn->send(sMsg);
+	dcConn->send(msg);
 	return true;
 }
 
 
 
 /** Send data to nick */
-bool DcServer::sendToNick(const char *sTo, const char *sData, const char *sNick, const char *sFrom) {
-	if (!sTo || !sData) {
+bool DcServer::sendToNick(const char * to, const char * data, const char * nick, const char * from) {
+	DcUser * dcUser = getDcUser(to);
+	if (!dcUser || !dcUser->mDcConn) { // Check exist and not bot
 		return false;
 	}
-	DcUser * dcUser = getDcUser(sTo);
-	if (!dcUser || !dcUser->mDcConn) {
-		return false;
-	}
-
-	// PM
-	if (sFrom && sNick) {
-		string sStr;
-		dcUser->mDcConn->send(NmdcProtocol::appendPm(sStr, sTo, sFrom, sNick, sData));
-		return true;
-	}
-
-	// Chat
-	if (sNick) {
-		string sStr;
-		dcUser->mDcConn->send(NmdcProtocol::appendChat(sStr, sNick, sData));
-		return true;
-	}
-
-	// Simple Msg
-	string sMsg(sData);
-	if (sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
-		sMsg.append(NMDC_SEPARATOR);
-	}
-	dcUser->mDcConn->send(sMsg);
-	return true;
+	return sendToUser(dcUser, data, nick, from);
 }
 
 
 
 /** Send data to all */
-bool DcServer::sendToAll(const char *sData, const char *sNick, const char *sFrom) {
-	if (!sData) {
+bool DcServer::sendToAll(const char * data, const char * nick, const char * from) {
+	if (!data) {
 		return false;
 	}
 
 	// PM
-	if (sFrom && sNick) {
-		string sStart, sEnd;
-		NmdcProtocol::appendPmToAll(sStart, sEnd, sFrom, sNick, sData);
-		mDcUserList.sendWithNick(sStart, sEnd);
+	if (from && nick) {
+		string start, end;
+		NmdcProtocol::appendPmToAll(start, end, from, nick, data);
+		mDcUserList.sendWithNick(start, end);
 		return true;
 	}
 
 	// Chat
-	if (sNick) {
-		string sStr;
-		mDcUserList.sendToAll(NmdcProtocol::appendChat(sStr, sNick, sData), false, false);
+	if (nick) {
+		string str;
+		mDcUserList.sendToAll(NmdcProtocol::appendChat(str, nick, data), false, false);
 		return true;
 	}
 
 	// Simple Msg
-	string sMsg(sData);
-	if (sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
-		sMsg.append(NMDC_SEPARATOR);
+	string msg(data);
+	if (msg.substr(msg.size() - 1, 1) != NMDC_SEPARATOR) {
+		msg.append(NMDC_SEPARATOR);
 	}
-	mDcUserList.sendToAll(sMsg, false, false);
+	mDcUserList.sendToAll(msg, false, false);
 	return true;
 }
 
 
 
 /** Send data to profiles */
-bool DcServer::sendToProfiles(unsigned long iProfile, const char *sData, const char *sNick, const char *sFrom) {
-	if (!sData) {
+bool DcServer::sendToProfiles(unsigned long profile, const char * data, const char * nick, const char * from) {
+	if (!data) {
 		return false;
 	}
 
 	// PM
-	if (sFrom && sNick) {
-		string sStart, sEnd;
-		NmdcProtocol::appendPmToAll(sStart, sEnd, sFrom, sNick, sData);
-		mDcUserList.sendWithNick(sStart, sEnd, iProfile);
+	if (from && nick) {
+		string start, end;
+		NmdcProtocol::appendPmToAll(start, end, from, nick, data);
+		mDcUserList.sendWithNick(start, end, profile);
 		return true;
 	}
 
 	// Chat
-	if (sNick) {
-		string sStr;
-		mDcUserList.sendToProfiles(iProfile, NmdcProtocol::appendChat(sStr, sNick, sData), false);
+	if (nick) {
+		string str;
+		mDcUserList.sendToProfiles(profile, NmdcProtocol::appendChat(str, nick, data), false);
 		return true;
 	}
 
 	// Simple Msg
-	string sMsg(sData);
-	if (sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
-		sMsg.append(NMDC_SEPARATOR);
+	string msg(data);
+	if (msg.substr(msg.size() - 1, 1) != NMDC_SEPARATOR) {
+		msg.append(NMDC_SEPARATOR);
 	}
-	mDcUserList.sendToProfiles(iProfile, sMsg, false);
+	mDcUserList.sendToProfiles(profile, msg, false);
 	return true;
 }
 
 
 
-bool DcServer::sendToIp(const char *sIP, const char *sData, unsigned long iProfile, const char *sNick, const char *sFrom) {
-	if (!sIP || !sData || !Conn::checkIp(sIP)) {
+bool DcServer::sendToIp(const char * ip, const char * data, unsigned long profile, const char * nick, const char * from) {
+	if (!ip || !data || !Conn::checkIp(string(ip))) {
 		return false;
 	}
 
 	// PM
-	if (sFrom && sNick) {
-		string sStart, sEnd;
-		NmdcProtocol::appendPmToAll(sStart, sEnd, sFrom, sNick, sData);
-		mIpListConn->sendToIpWithNick(sIP, sStart, sEnd, iProfile);
+	if (from && nick) {
+		string start, end;
+		NmdcProtocol::appendPmToAll(start, end, from, nick, data);
+		mIpListConn->sendToIpWithNick(ip, start, end, profile);
 		return true;
 	}
 
 	// Chat
-	if (sNick) {
-		string sStr;
-		mIpListConn->sendToIp(sIP, NmdcProtocol::appendChat(sStr, sNick, sData), iProfile); // newPolitic
+	if (nick) {
+		string str;
+		mIpListConn->sendToIp(ip, NmdcProtocol::appendChat(str, nick, data), profile); // newPolitic
 		return true;
 	}
 
 	// Simple Msg
-	string sMsg(sData);
-	if (sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
-		sMsg.append(NMDC_SEPARATOR);
+	string msg(data);
+	if (msg.substr(msg.size() - 1, 1) != NMDC_SEPARATOR) {
+		msg.append(NMDC_SEPARATOR);
 	}
-	mIpListConn->sendToIp(sIP, sMsg, iProfile); // newPolitic
+	mIpListConn->sendToIp(ip, msg, profile); // newPolitic
 	return true;
 }
 
 
 
 /** Send data to all except nick list */
-bool DcServer::sendToAllExceptNicks(const vector<string> & NickList, const char *sData, const char *sNick, const char *sFrom) {
-	if (!sData) {
+bool DcServer::sendToAllExceptNicks(const vector<string> & nickList, const char * data, const char * nick, const char * from) {
+	if (!data) {
 		return false;
 	}
 
-	DcUser * dcUser;
+	DcUser * dcUser = NULL;
 	vector<DcUser *> ul;
-	for (List_t::const_iterator it = NickList.begin(); it != NickList.end(); ++it) {
+	for (List_t::const_iterator it = nickList.begin(); it != nickList.end(); ++it) {
 		// NMDC
 		dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByNick(*it));
 		if (dcUser && dcUser->isCanSend()) {
@@ -1035,19 +1014,19 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & NickList, const char 
 		}
 	}
 
-	if (sFrom && sNick) { // PM
-		string sStart, sEnd;
-		NmdcProtocol::appendPmToAll(sStart, sEnd, sFrom, sNick, sData);
-		mDcUserList.sendWithNick(sStart, sEnd);
-	} else if (sNick) { // Chat
-		string sStr;
-		mDcUserList.sendToAll(NmdcProtocol::appendChat(sStr, sNick, sData), false, false);
+	if (from && nick) { // PM
+		string start, end;
+		NmdcProtocol::appendPmToAll(start, end, from, nick, data);
+		mDcUserList.sendWithNick(start, end);
+	} else if (nick) { // Chat
+		string str;
+		mDcUserList.sendToAll(NmdcProtocol::appendChat(str, nick, data), false, false);
 	} else { // Simple Msg
-		string sMsg(sData);
-		if (sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
-			sMsg.append(NMDC_SEPARATOR);
+		string msg(data);
+		if (msg.substr(msg.size() - 1, 1) != NMDC_SEPARATOR) {
+			msg.append(NMDC_SEPARATOR);
 		}
-		mDcUserList.sendToAll(sMsg, false, false);
+		mDcUserList.sendToAll(msg, false, false);
 	}
 
 	for (vector<DcUser *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
@@ -1059,17 +1038,17 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & NickList, const char 
 
 
 
-bool DcServer::sendToAllExceptIps(const vector<string> & IPList, const char *sData, const char *sNick, const char *sFrom) {
-	if (!sData) {
+bool DcServer::sendToAllExceptIps(const vector<string> & ipList, const char * data, const char * nick, const char * from) {
+	if (!data) {
 		return false;
 	}
 
-	DcConn * dcConn;
+	DcConn * dcConn = NULL;
 	vector<DcConn*> ul;
-	bool bBadIP = false;
-	for (List_t::const_iterator it = IPList.begin(); it != IPList.end(); ++it) {
+	bool badIp = false;
+	for (List_t::const_iterator it = ipList.begin(); it != ipList.end(); ++it) {
 		if (!DcConn::checkIp(*it)) {
-			bBadIP = true;
+			badIp = true;
 		}
 		for (DcIpList::iterator mit = mIpListConn->begin(DcConn::ip2Num((*it).c_str())); mit != mIpListConn->end(); ++mit) {
 			dcConn = static_cast<DcConn *> (*mit);
@@ -1080,20 +1059,20 @@ bool DcServer::sendToAllExceptIps(const vector<string> & IPList, const char *sDa
 		}
 	}
 
-	if (!bBadIP) {
-		if (sFrom && sNick) { // PM
-			string sStart, sEnd;
-			NmdcProtocol::appendPmToAll(sStart, sEnd, sFrom, sNick, sData);
-			mDcUserList.sendWithNick(sStart, sEnd);
-		} else if (sNick) { // Chat
-			string sStr;
-			mDcUserList.sendToAll(NmdcProtocol::appendChat(sStr, sNick, sData), false, false);
+	if (!badIp) {
+		if (from && nick) { // PM
+			string start, end;
+			NmdcProtocol::appendPmToAll(start, end, from, nick, data);
+			mDcUserList.sendWithNick(start, end);
+		} else if (nick) { // Chat
+			string str;
+			mDcUserList.sendToAll(NmdcProtocol::appendChat(str, nick, data), false, false);
 		} else { // Simple Msg
-			string sMsg(sData);
-			if (sMsg.substr(sMsg.size() - 1, 1) != NMDC_SEPARATOR) {
-				sMsg.append(NMDC_SEPARATOR);
+			string msg(data);
+			if (msg.substr(msg.size() - 1, 1) != NMDC_SEPARATOR) {
+				msg.append(NMDC_SEPARATOR);
 			}
-			mDcUserList.sendToAll(sMsg, false, false);
+			mDcUserList.sendToAll(msg, false, false);
 		}
 	}
 
@@ -1101,27 +1080,27 @@ bool DcServer::sendToAllExceptIps(const vector<string> & IPList, const char *sDa
 		(*ul_it)->mDcUser->setCanSend(true);
 	}
 
-	return (bBadIP == true) ? false : true;
+	return (badIp == true) ? false : true;
 }
 
 
 
-void DcServer::forceMove(DcUserBase * dcUserBase, const char * sAddress, const char * sReason /* = NULL */) {
-	if (!sAddress) {
+void DcServer::forceMove(DcUserBase * dcUserBase, const char * address, const char * reason /* = NULL */) {
+	if (!address) {
 		return;
 	}
 	DcConn * dcConn = static_cast<DcConn *> (dcUserBase->mDcConnBase);
 
-	string sMsg, sForce, sNick("<unknown>");
+	string msg, force, nick("<unknown>");
 	if (dcConn->mDcUser && !dcConn->mDcUser->getNick().empty()) {
-		sNick = dcConn->mDcUser->getNick();
+		nick = dcConn->mDcUser->getNick();
 	}
 
-	stringReplace(mDcLang.mForceMove, string("address"), sForce, string(sAddress));
-	stringReplace(sForce, string("reason"), sForce, string(sReason != NULL ? sReason : ""));
-	NmdcProtocol::appendPm(sMsg, sNick, mDcConfig.mHubBot, mDcConfig.mHubBot, sForce);
-	NmdcProtocol::appendChat(sMsg, mDcConfig.mHubBot, sForce);
-	dcConn->send(NmdcProtocol::appendForceMove(sMsg, sAddress));
+	stringReplace(mDcLang.mForceMove, string("address"), force, string(address));
+	stringReplace(force, string("reason"), force, string(reason != NULL ? reason : ""));
+	NmdcProtocol::appendPm(msg, nick, mDcConfig.mHubBot, mDcConfig.mHubBot, force);
+	NmdcProtocol::appendChat(msg, mDcConfig.mHubBot, force);
+	dcConn->send(NmdcProtocol::appendForceMove(msg, address));
 	dcConn->closeNice(9000, CLOSE_REASON_CMD_FORCE_MOVE);
 }
 
@@ -1160,24 +1139,24 @@ const char * DcServer::getLang(const string & sName) {
 
 
 
-bool DcServer::setConfig(const string & sName, const string & sValue) {
-	if (sName == "sAddresses") {
+bool DcServer::setConfig(const string & name, const string & value) {
+	if (name == "sAddresses") {
 		return false;
 	}
 
-	if (sName == "sLocale" && !setlocale(LC_ALL, sValue.c_str())) {
+	if (name == "sLocale" && !setlocale(LC_ALL, value.c_str())) {
 		return false;
 	}
 
-	Config * config = mDcConfig[sName];
+	Config * config = mDcConfig[name];
 	if (!config) {
 		return false;
 	}
 
-	if (sName == "sHubBot") {
+	if (name == "sHubBot") {
 		unregBot(mDcConfig.mHubBot);
-	} else if (sName == "bRegMainBot") {
-		if (sValue == "true" || 0 != atoi(sValue.c_str()) ) {
+	} else if (name == "bRegMainBot") {
+		if (value == "true" || 0 != atoi(value.c_str()) ) {
 			regBot(mDcConfig.mHubBot, mDcConfig.mMainBotMyinfo, 
 				mDcConfig.mMainBotIp, mDcConfig.mMainBotKey);
 		} else {
@@ -1185,16 +1164,16 @@ bool DcServer::setConfig(const string & sName, const string & sValue) {
 		}
 	}
 
-	config->convertFrom(sValue);
+	config->convertFrom(value);
 
-	if (sName == "sHubBot") {
+	if (name == "sHubBot") {
 		if (mDcConfig.mRegMainBot) { /** Registration bot */
 			regBot(mDcConfig.mHubBot, mDcConfig.mMainBotMyinfo, 
 				mDcConfig.mMainBotIp, mDcConfig.mMainBotKey);
 		}
-	} else if (sName == "sHubName" || sName == "sTopic") {
-		string sMsg;
-		sendToAll(NmdcProtocol::appendHubName(sMsg, mDcConfig.mHubName, mDcConfig.mTopic).c_str()); // use cache ?
+	} else if (name == "sHubName" || name == "sTopic") {
+		string msg;
+		sendToAll(NmdcProtocol::appendHubName(msg, mDcConfig.mHubName, mDcConfig.mTopic).c_str()); // use cache ?
 	}
 
 	mDcConfig.save();
@@ -1203,12 +1182,12 @@ bool DcServer::setConfig(const string & sName, const string & sValue) {
 
 
 
-bool DcServer::setLang(const string & sName, const string & sValue) {
-	Config * config = mDcLang[sName];
+bool DcServer::setLang(const string & name, const string & value) {
+	Config * config = mDcLang[name];
 	if (!config) {
 		return false;
 	}
-	config->convertFrom(sValue);
+	config->convertFrom(value);
 	mDcLang.save();
 	return true;
 }
@@ -1280,15 +1259,15 @@ int DcServer::unregBot(const string & nick) {
 
 string DcServer::getSysVersion() {
 	OSVERSIONINFOEX osvi;
-	int bOsVersionInfoEx;
+	int osVersionInfoEx;
 
 	string version;
 
 	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
 	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 
-	bOsVersionInfoEx = GetVersionEx((OSVERSIONINFO *) &osvi);
-	if (!bOsVersionInfoEx) {
+	osVersionInfoEx = GetVersionEx((OSVERSIONINFO *) &osvi);
+	if (!osVersionInfoEx) {
 		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 		if (!GetVersionEx((OSVERSIONINFO *) &osvi)) {
 			return string("unknown");
@@ -1307,7 +1286,7 @@ string DcServer::getSysVersion() {
 				version.append("Microsoft Windows 2000 ");
 			}
 
-			if (bOsVersionInfoEx) {
+			if (osVersionInfoEx) {
 
 				// Check workstation type
 				if (osvi.wProductType == VER_NT_WORKSTATION) {

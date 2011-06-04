@@ -344,7 +344,7 @@ private:
 	tSocket socketCreate(bool udp = false);
 
 	//< Bind
-	tSocket socketBind(tSocket, int port, const char * ip = NULL);
+	tSocket socketBind(tSocket, int port, const char * address = NULL);
 
 	//< Listen TCP
 	tSocket socketListen(tSocket);

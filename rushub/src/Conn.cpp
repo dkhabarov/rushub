@@ -145,9 +145,9 @@ tSocket Conn::makeSocket(int port, const char * ip, bool udp) {
 }
 
 /** Create socket (default TCP) */
-tSocket Conn::socketCreate(bool bUDP) {
+tSocket Conn::socketCreate(bool udp) {
 	tSocket sock;
-	if (!bUDP) { /* Create socket TCP */
+	if (!udp) { /* Create socket TCP */
 		if (SOCK_INVALID(sock = socket(AF_INET, SOCK_STREAM, 0))) {
 			return INVALID_SOCKET;
 		}
@@ -172,35 +172,34 @@ tSocket Conn::socketCreate(bool bUDP) {
 
 
 /** Bind */
-tSocket Conn::socketBind(tSocket sock, int iPort, const char *sIp) {
+tSocket Conn::socketBind(tSocket sock, int port, const char * address) {
 	if (sock == INVALID_SOCKET) {
 		return INVALID_SOCKET;
 	}
-	string sIP(sIp);
 	memset(&mSockAddrIn, 0, sizeof(struct sockaddr_in));
 	mSockAddrIn.sin_family = AF_INET;
-	mSockAddrIn.sin_port = htons((u_short)iPort);
+	mSockAddrIn.sin_port = htons((u_short) port);
 
-	if (!checkIp(sIP)) {
-		struct hostent * host = gethostbyname(sIp);
+	if (!checkIp(string(address))) {
+		struct hostent * host = gethostbyname(address);
 		if (host) {
-			mSockAddrIn.sin_addr = *((struct in_addr *)host->h_addr);
+			mSockAddrIn.sin_addr = *((struct in_addr *) host->h_addr);
 			host = NULL;
 		}
 	} else {
 		mSockAddrIn.sin_addr.s_addr = INADDR_ANY; /* INADDR_ANY == 0 */
-		if (sIp) {
+		if (address) {
 			#ifdef _WIN32
-				mSockAddrIn.sin_addr.s_addr = inet_addr(sIp);
+				mSockAddrIn.sin_addr.s_addr = inet_addr(address);
 			#else
-				inet_aton(sIp, &mSockAddrIn.sin_addr);
+				inet_aton(address, &mSockAddrIn.sin_addr);
 			#endif
 		}
 	}
 	memset(&(mSockAddrIn.sin_zero), '\0', 8);
 
 	/** Bind */
-	if (SOCK_ERROR(bind(sock, (struct sockaddr *)&mSockAddrIn, mSockAddrInSize))) {
+	if (SOCK_ERROR(bind(sock, (struct sockaddr *) &mSockAddrIn, mSockAddrInSize))) {
 		if (ErrLog(0)) {
 			LogStream() << "Error bind: " << SockErrMsg << endl;
 		}
@@ -271,21 +270,21 @@ void Conn::close() {
 }
 
 /** closeNice */
-void Conn::closeNice(int imsec /* = 0 */, int iReason /* = 0 */) {
+void Conn::closeNice(int msec /* = 0 */, int reason /* = 0 */) {
 	mWritable = false;
-	if (iReason) {
-		mCloseReason = iReason;
+	if (reason) {
+		mCloseReason = reason;
 	}
-	if ((imsec <= 0) || (!mSendBuf.size())) {
-		closeNow(iReason);
+	if ((msec <= 0) || (!mSendBuf.size())) {
+		closeNow(reason);
 		return;
 	}
 	mCloseTime.Get();
-	mCloseTime += int(imsec);
+	mCloseTime += int(msec);
 }
 
 /** closeNow */
-void Conn::closeNow(int iReason /* = 0 */) {
+void Conn::closeNow(int reason /* = 0 */) {
 	mWritable = false;
 	setOk(false);
 	if (mServer) {
@@ -293,8 +292,8 @@ void Conn::closeNow(int iReason /* = 0 */) {
 			++ mServer->miNumCloseConn;
 			mClosed = true; // poll conflict
 
-			if (iReason) {
-				mCloseReason = iReason;
+			if (reason) {
+				mCloseReason = reason;
 			}
 			if (Log(3)) {
 				LogStream() << "closeNow (reason " << mCloseReason << ")" << endl;
@@ -311,7 +310,7 @@ void Conn::closeNow(int iReason /* = 0 */) {
 			
 		} else {
 			if (Log(3)) {
-				LogStream() << "Re-closure (reason " << iReason << ")" << endl;
+				LogStream() << "Re-closure (reason " << reason << ")" << endl;
 			}
 		}
 	} else {
@@ -635,24 +634,18 @@ bool Conn::hostByIp(const string & sIp, string &sHost) {
 
 
 //< Check IP
-bool Conn::checkIp(const string &ip) {
-	int i = -1;
+bool Conn::checkIp(const string & ip) {
+	int n = -1;
 	char c;
 	istringstream is(ip);
-	is >> i >> c;
-	if (i < 0 || i > 255 || c != '.') {
-		return false;
+	for (int i = 0; i < 3; ++i) {
+		is >> n >> c;
+		if (n < 0 || n > 255 || c != '.') {
+			return false;
+		}
 	}
-	is >> i >> c;
-	if (i < 0 || i > 255 || c != '.') {
-		return false;
-	}
-	is >> i >> c;
-	if (i < 0 || i > 255 || c != '.') {
-		return false;
-	}
-	is >> i >> (c = '\0');
-	if (i < 0 || i > 255 || c) {
+	is >> n >> (c = '\0');
+	if (n < 0 || n > 255 || c) {
 		return false;
 	}
 	return true;
