@@ -502,7 +502,7 @@ bool DcServer::checkNick(DcConn *dcConn) {
 
 			stringReplace(mDcLang.mUsedNick, string("nick"), sMsg, dcConn->mDcUser->getNick());
 
-			sendToUser(dcConn->mDcUserBase, sMsg.c_str(), mDcConfig.mHubBot.c_str());
+			sendToUser(dcConn->mDcUser, sMsg.c_str(), mDcConfig.mHubBot.c_str());
 
 			dcConn->send(NmdcProtocol::appendValidateDenide(sMsg.erase(), dcConn->mDcUser->getNick()));
 			return false;
