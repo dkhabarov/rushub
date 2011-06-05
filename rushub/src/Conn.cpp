@@ -626,7 +626,7 @@ const string & Conn::getMacAddress() const {
 //< Check IP
 bool Conn::checkIp(const string & ip) {
 	#ifndef _WIN32
-		char dst[INET_ADDRSTRLEN6];
+		char dst[256];
 		if (inet_pton(AF_INET, ip.c_str(), dst) > 0) {
 			return true;
 		} else if (inet_pton(AF_INET6, ip.c_str(), dst) > 0) {
