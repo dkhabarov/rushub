@@ -23,6 +23,7 @@
  */
 
 #include "stringutils.h"
+#include <string.h> // strlen
 
 namespace utils {
 
