@@ -133,7 +133,7 @@ tSocket Conn::makeSocket(int port, const char * address, bool udp) {
 /** Create socket (default TCP) */
 tSocket Conn::socketCreate(int port, const char * address, bool udp) {
 	tSocket sock;
-	ADDRINFO hints = { 0 };
+	struct addrinfo hints = { 0 };
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_flags = AI_NUMERICHOST | AI_PASSIVE;
