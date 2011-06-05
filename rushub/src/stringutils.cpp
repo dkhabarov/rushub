@@ -233,11 +233,11 @@ bool limitLines(const string & str, int max) {
 
 
 
-void stringSplit(const string & str, char sDelim, vector<string> & vRes) {
+void stringSplit(const string & str, const char * sDelim, vector<string> & vRes) {
 	size_t i, j = 0;
-	while ((i = str.find_first_of(sDelim, j)) != str.npos) {
+	while ((i = str.find(sDelim, j)) != str.npos) {
 		vRes.push_back(str.substr(j, i - j));
-		j = i + 1;
+		j = i + strlen(sDelim);
 	}
 	vRes.push_back(str.substr(j));
 }

@@ -149,7 +149,7 @@ tSocket Conn::socketCreate(int port, const char * address, bool udp) {
 
 	// TODO check address for host (gethostbyname) !!!
 	// getaddrinfo
-	if (::getaddrinfo(address/*"::"*/, portBuf, &hints, &mAddrInfo) != 0) {
+	if (::getaddrinfo(address, portBuf, &hints, &mAddrInfo) != 0) {
 		if (ErrLog(0)) {
 			LogStream() << "Error in getaddrinfo: " << SockErrMsg << endl;
 		}

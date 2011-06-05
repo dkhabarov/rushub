@@ -71,7 +71,7 @@ __int64 stringToInt64(const string &);
 int countLines(const string &);
 bool limitLines(const string &, int);
 
-void stringSplit(const string &, char sDelim, vector<string> &);
+void stringSplit(const string &, const char * sDelim, vector<string> &);
 
 string & trim(string &);
 

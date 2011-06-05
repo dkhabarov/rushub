@@ -202,10 +202,18 @@ void DcServer::getAddresses(
 	int iDefPort
 ) {
 	vector<string> vAddresses;
-	stringSplit(sAddresses, ' ', vAddresses);
+	stringSplit(sAddresses, " ", vAddresses);
 	for (vector<string>::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
 		vector<string> vIpPort;
-		stringSplit(*it, ':', vIpPort);
+		string part = (*it);
+		size_t pos = part.find('[');
+		const char * delim = ":";
+		if (pos == 0) {
+			part = part.substr(1);
+			pos = part.find("]:");
+			delim = "]:";
+		}
+		stringSplit(part, delim, vIpPort);
 		if (2 < vIpPort.size() || vIpPort.size() < 1 || vIpPort[0].size() == 0) {
 			continue;
 		}
@@ -237,12 +245,12 @@ bool DcServer::listeningServer(const char * name, const string & addresses, unsi
 		if (Server::listening(connFactory, (*it).first, (*it).second, udp) == 0) {
 			ret = true;
 			if (Log(0)) {
-				LogStream() << name << " is running on " 
-					<< ((*it).first) << ":" << ((*it).second) 
+				LogStream() << name << " is running on [" 
+					<< ((*it).first) << "]:" << ((*it).second) 
 					<< (udp ? " UDP" : " TCP") << endl;
 			}
-			cout << name << " is running on " 
-				<< ((*it).first) << ":" << ((*it).second) 
+			cout << name << " is running on [" 
+				<< ((*it).first) << "]:" << ((*it).second) 
 				<< (udp ? " UDP" : " TCP") << endl;
 		}
 	}
