@@ -196,7 +196,6 @@ void DcConn::closeNow(int iReason) {
 bool DcConn::setUser(DcUser * dcUser) {
 	mDcUser = dcUser;
 	mDcUserBase = dcUser;
-	dcUser->setIp(mIp);
 	dcUser->mDcConn = this;
 	dcUser->mDcConnBase = this;
 	dcUser->mDcServer = server();

@@ -368,7 +368,7 @@ int DcServer::onNewConn(Conn *conn) {
 	}
 
 	/** Checking flood-entry (by ip) */
-	if (mIpEnterFlood.check(dcConn->getNetIp(), mTime)) {
+	if (mIpEnterFlood.check(dcConn->getIp(), mTime)) {
 		dcConn->closeNow(CLOSE_REASON_FLOOD_IP_ENTRY);
 		return -2;
 	}
@@ -845,7 +845,7 @@ DcUserBase * DcServer::getDcUserBase(const char * nick) {
 const vector<DcConnBase *> & DcServer::getDcConnBase(const char * sIP) {
 	DcIpList::iterator it;
 	mIpConnList.clear();
-	for (it = mIpListConn->begin(DcConn::ip2Num(sIP)); it != mIpListConn->end(); ++it) {
+	for (it = mIpListConn->begin(mIpListConn->mHash(sIP)); it != mIpListConn->end(); ++it) {
 		DcConn * dcConn = static_cast<DcConn *> (*it);
 		if (dcConn->mType == CLIENT_TYPE_NMDC) {
 			mIpConnList.push_back(dcConn);
@@ -1050,7 +1050,7 @@ bool DcServer::sendToAllExceptIps(const vector<string> & ipList, const char * da
 		if (!DcConn::checkIp(*it)) {
 			badIp = true;
 		}
-		for (DcIpList::iterator mit = mIpListConn->begin(DcConn::ip2Num((*it).c_str())); mit != mIpListConn->end(); ++mit) {
+		for (DcIpList::iterator mit = mIpListConn->begin(mIpListConn->mHash((*it).c_str())); mit != mIpListConn->end(); ++mit) {
 			dcConn = static_cast<DcConn *> (*mit);
 			if (dcConn->mDcUser && dcConn->mDcUser->isCanSend()) {
 				dcConn->mDcUser->setCanSend(false);

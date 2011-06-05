@@ -84,8 +84,6 @@ public:
 	/** Get conn port */
 	virtual int getPortConn();
 
-	virtual unsigned long getNetIp() const;
-
 }; // class WebUser
 
 

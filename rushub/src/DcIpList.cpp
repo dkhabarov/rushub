@@ -42,9 +42,10 @@ DcIpList::~DcIpList() {
 }
 
 bool DcIpList::add(DcConn * dcConn) {
-	IpList * ipList = IpTable::find(dcConn->getNetIp());
+	unsigned long hash = mHash(dcConn->getIp());
+	IpList * ipList = IpTable::find(hash);
 	if (ipList == NULL) {
-		IpTable::add(dcConn->getNetIp(), new IpList((tSocket)(*dcConn), dcConn));
+		IpTable::add(hash, new IpList((tSocket)(*dcConn), dcConn));
 	} else {
 		ipList->add((tSocket)(*dcConn), dcConn);
 	}
@@ -52,7 +53,8 @@ bool DcIpList::add(DcConn * dcConn) {
 }
 
 bool DcIpList::remove(DcConn * dcConn) {
-	IpList * ipList = NULL, * ipLists = IpTable::find(dcConn->getNetIp());
+	unsigned long hash = mHash(dcConn->getIp());
+	IpList * ipList = NULL, * ipLists = IpTable::find(hash);
 	if (ipLists == NULL) {
 		return false;
 	}
@@ -60,9 +62,9 @@ bool DcIpList::remove(DcConn * dcConn) {
 	Conn * conn = ipLists->remove((tSocket)(*dcConn), ipList);
 	if (ipList != ipLists) {
 		if (ipList) {
-			IpTable::update(dcConn->getNetIp(), ipList);
+			IpTable::update(hash, ipList);
 		} else {
-			IpTable::remove(dcConn->getNetIp()); /** Removing the list from hash-table */
+			IpTable::remove(hash); /** Removing the list from hash-table */
 		}
 		delete ipLists; /** removing old start element in the list */
 		ipLists = NULL;
@@ -71,11 +73,11 @@ bool DcIpList::remove(DcConn * dcConn) {
 }
 
 void DcIpList::sendToIp(const char * ip, string & data, unsigned long profile, bool addSep, bool flush) {
-	sendToIp(Conn::ip2Num(ip), data, profile, addSep, flush);
+	sendToIp(mHash(ip), data, profile, addSep, flush);
 }
 
 void DcIpList::sendToIpWithNick(const char * ip, string & start, string & end, unsigned long profile, bool addSep, bool flush) {
-	sendToIpWithNick(Conn::ip2Num(ip), start, end, profile, addSep, flush);
+	sendToIpWithNick(mHash(ip), start, end, profile, addSep, flush);
 }
 
 void DcIpList::sendToIp(unsigned long ip, string & data, unsigned long profile, bool addSep, bool flush) {

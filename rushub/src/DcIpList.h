@@ -32,12 +32,9 @@ typedef List<tSocket, DcConn *> IpList;
 
 class DcIpList : public Obj, public HashTable<IpList *> {
 
-protected:
+public:
 
-	typedef HashTable<IpList *> IpTable;
-	bool mFlush, mAddSep;
-	unsigned long mProfile;
-	string msData1, msData2;
+	Hash<unsigned long> mHash;
 
 public:
 
@@ -92,7 +89,7 @@ public:
 	}; // iterator
 
 	inline iterator begin(const char * ip) {
-		return begin(Conn::ip2Num(ip));
+		return begin(mHash(ip));
 	}
 	iterator begin(unsigned long ip) {
 		iterator it;
@@ -102,6 +99,13 @@ public:
 	inline iterator end() {
 		return iterator();
 	}
+
+protected:
+
+	typedef HashTable<IpList *> IpTable;
+	bool mFlush, mAddSep;
+	unsigned long mProfile;
+	string msData1, msData2;
 
 protected:
 

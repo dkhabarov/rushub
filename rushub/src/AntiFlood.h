@@ -46,6 +46,7 @@ public:
 
 private:
 
+	Hash<unsigned long> mHash;
 	unsigned & miCount;
 	double & mTime;
 
@@ -58,7 +59,7 @@ public:
 		return *this;
 	}
 
-	bool check(HashType_t hash, Time now);
+	bool check(const string & ip, Time now);
 	void del(Time & now);
 
 }; // AntiFlood

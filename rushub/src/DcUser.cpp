@@ -357,7 +357,10 @@ void DcUser::disconnect() {
 
 //< Get string of IP
 const string & DcUser::getIp() const {
-	return mIp;
+	if (mDcConn != NULL) {
+		return mDcConn->getIp();
+	}
+	return mIp; // TODO remove this param (now for bot only)
 }
 
 
@@ -365,13 +368,6 @@ const string & DcUser::getIp() const {
 //< Get string of server ip (host)
 const string & DcUser::getIpConn() const{
 	return mDcConn->getIpConn();
-}
-
-
-
-//< Get numeric IP
-unsigned long DcUser::getNetIp() const {
-	return mDcConn->getNetIp();
 }
 
 

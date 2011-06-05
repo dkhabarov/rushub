@@ -27,6 +27,10 @@
 #include "stringutils.h" // for shrinkStringToFit, strCutLeft
 
 #include <iostream> // cout, endl
+#include <ctype.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
 
 #ifdef _WIN32
 	#include <Iphlpapi.h> // mac address
@@ -35,6 +39,11 @@
 		#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
 	#endif
 #endif
+
+#define NS_INADDRSZ 4
+#define NS_IN6ADDRSZ 16
+#define NS_INT16SZ 2
+
 
 using namespace ::utils; // shrinkStringToFit, strCutLeft
 
@@ -54,45 +63,22 @@ Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 	mConnType(connType),
 	mOk(socket > 0),
 	mWritable(true),
-	mNetIp(0),
 	mPort(0),
 	mPortConn(0),
 	mSendBufMax(MAX_SEND_SIZE),
 	mSocket(socket),
 	mRecvBufEnd(0),
 	mRecvBufRead(0),
+	mAddrInfo(NULL),
 	mBlockInput(false),
 	mBlockOutput(true),
+	mCommand(NULL),
 	mClosed(false),
 	mCloseReason(0),
 	mCreatedByFactory(false)
 {
 	clearCommandPtr();
 	memset(&mCloseTime, 0, sizeof(mCloseTime));
-
-	if (mSocket) {
-		struct sockaddr_in saddr;
-		if (getpeername(mSocket, (struct sockaddr *)&saddr, &mSockAddrInSize) < 0) {
-			if (Log(2)) {
-				LogStream() << "Error in getpeername, closing" << endl;
-			}
-			closeNow(CLOSE_REASON_GETPEERNAME);
-		}
-
-		#ifdef _WIN32
-			mIp = inet_ntoa(saddr.sin_addr);
-		#else
-			char ip[INET_ADDRSTRLEN];
-			inet_ntop(AF_INET, &(saddr.sin_addr), ip, INET_ADDRSTRLEN);
-			mIp = ip; /** String ip */
-		#endif
-		mNetIp = saddr.sin_addr.s_addr; /** Numeric ip */
-		mPort = ntohs(saddr.sin_port); /** port */
-
-		if (mServer->mMac) {
-			calcMacAddress();
-		}
-	}
 }
 
 Conn::~Conn() {
@@ -128,37 +114,68 @@ void Conn::onOk(bool) {
 	
 
 /** makeSocket */
-tSocket Conn::makeSocket(int port, const char * ip, bool udp) {
+tSocket Conn::makeSocket(int port, const char * address, bool udp) {
 	if (mSocket > 0) {
 		return INVALID_SOCKET; /** Socket is already created */
 	}
-	mSocket = socketCreate(udp); /** Create socket */
-	mSocket = socketBind(mSocket, port, ip); /** Bind */
+	mSocket = socketCreate(port, address, udp); /** Create socket */
+	mSocket = socketBind(mSocket); /** Bind */
 	if (!udp) {
 		mSocket = socketListen(mSocket);
 		mSocket = socketNonBlock(mSocket);
 	}
-	mPort = port; /** Set port */
-	mIp = ip; /** Set ip (host) */
-	setOk(mSocket > 0); /** Reg conn */
+	mPort = port; // Set port
+	mIp = address; // Set ip (host)
+	setOk(mSocket > 0); // Reg conn
 	return mSocket;
 }
 
 /** Create socket (default TCP) */
-tSocket Conn::socketCreate(bool udp) {
+tSocket Conn::socketCreate(int port, const char * address, bool udp) {
 	tSocket sock;
-	if (!udp) { /* Create socket TCP */
-		if (SOCK_INVALID(sock = socket(AF_INET, SOCK_STREAM, 0))) {
-			return INVALID_SOCKET;
+	ADDRINFO hints = { 0 };
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_flags = AI_NUMERICHOST | AI_PASSIVE;
+
+	if (!udp) { // Create socket TCP
+		hints.ai_socktype = SOCK_STREAM;
+	} else {
+		hints.ai_socktype = SOCK_DGRAM;
+	}
+
+	char portBuf[8];
+	sprintf(portBuf, "%d", port);
+
+	// TODO check address for host (gethostbyname) !!!
+	// getaddrinfo
+	if (::getaddrinfo(address/*"::"*/, portBuf, &hints, &mAddrInfo) != 0) {
+		if (ErrLog(0)) {
+			LogStream() << "Error in getaddrinfo: " << SockErrMsg << endl;
 		}
+		return INVALID_SOCKET;
+	}
+
+	if (Log(3)) {
+		LogStream() << "Using " << (mAddrInfo->ai_family == AF_INET6 ? "IPv6" : "IPv4") << " socket" << endl;
+	}
+
+	// socket
+	if (SOCK_INVALID(sock = socket(mAddrInfo->ai_family, mAddrInfo->ai_socktype, 0))) {
+		if (ErrLog(0)) {
+			LogStream() << "Error in socket: " << SockErrMsg << endl;
+		}
+		return INVALID_SOCKET;
+	}
+
+	if (!udp) {
 		sockoptval_t yes = 1;
 
-		/* TIME_WAIT after close conn. Reuse address after disconn */
+		// TIME_WAIT after close conn. Reuse address after disconn
 		if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(sockoptval_t)))) {
-			return INVALID_SOCKET;
-		}
-	} else {/* Create socket UDP */
-		if (SOCK_INVALID(sock = socket(AF_INET, SOCK_DGRAM, 0))) {
+			if (ErrLog(0)) {
+				LogStream() << "Error in setsockopt: " << SockErrMsg << endl;
+			}
 			return INVALID_SOCKET;
 		}
 	}
@@ -172,34 +189,13 @@ tSocket Conn::socketCreate(bool udp) {
 
 
 /** Bind */
-tSocket Conn::socketBind(tSocket sock, int port, const char * address) {
+tSocket Conn::socketBind(tSocket sock) {
 	if (sock == INVALID_SOCKET) {
 		return INVALID_SOCKET;
 	}
-	memset(&mSockAddrIn, 0, sizeof(struct sockaddr_in));
-	mSockAddrIn.sin_family = AF_INET;
-	mSockAddrIn.sin_port = htons((u_short) port);
 
-	if (!checkIp(string(address))) {
-		struct hostent * host = gethostbyname(address);
-		if (host) {
-			mSockAddrIn.sin_addr = *((struct in_addr *) host->h_addr);
-			host = NULL;
-		}
-	} else {
-		mSockAddrIn.sin_addr.s_addr = INADDR_ANY; /* INADDR_ANY == 0 */
-		if (address) {
-			#ifdef _WIN32
-				mSockAddrIn.sin_addr.s_addr = inet_addr(address);
-			#else
-				inet_aton(address, &mSockAddrIn.sin_addr);
-			#endif
-		}
-	}
-	memset(&(mSockAddrIn.sin_zero), '\0', 8);
-
-	/** Bind */
-	if (SOCK_ERROR(bind(sock, (struct sockaddr *) &mSockAddrIn, mSockAddrInSize))) {
+	// Bind
+	if (SOCK_ERROR(bind(sock, mAddrInfo->ai_addr, mAddrInfo->ai_addrlen))) {
 		if (ErrLog(0)) {
 			LogStream() << "Error bind: " << SockErrMsg << endl;
 		}
@@ -246,7 +242,7 @@ void Conn::close() {
 	mWritable = false;
 	setOk(false);
 
-	/** onClose */
+	// onClose
 	if (mServer) {
 		mServer->onClose(this);
 	}
@@ -266,6 +262,7 @@ void Conn::close() {
 		LogStream() << "Socket not closed: " << SockErr << endl;
 	}
 
+	freeaddrinfo(mAddrInfo);
 	mSocket = 0;
 }
 
@@ -322,7 +319,10 @@ void Conn::closeNow(int reason /* = 0 */) {
 
 /** createNewConn */
 Conn * Conn::createNewConn() {
-	tSocket sock = socketAccept();
+
+	struct sockaddr_storage storage;
+
+	tSocket sock = socketAccept(storage);
 	if (sock == INVALID_SOCKET) {
 		return NULL;
 	}
@@ -345,24 +345,26 @@ Conn * Conn::createNewConn() {
 		throw "Fatal error: Can't create new connection object";
 	}
 
+	if (new_conn->defineConnInfo(storage) == -1) {
+		if (mConnFactory != NULL) {
+			mConnFactory->deleteConn(new_conn);
+		} else {
+			delete new_conn;
+		}
+		return NULL;
+	}
 	return new_conn;
 }
 
 /** Accept new conn */
-tSocket Conn::socketAccept() {
-	#ifdef _WIN32
-		static struct sockaddr client;
-	#else
-		static struct sockaddr_in client;
-	#endif
-	static socklen_t namelen = sizeof(client);
-	tSocket sock;
+tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 	int i = 0;
-	memset(&client, 0, namelen);
-	sock = accept(mSocket, (struct sockaddr *)&client, (socklen_t*)&namelen);
+	socklen_t namelen = sizeof(storage);
+	memset(&storage, 0, namelen);
+	tSocket sock = accept(mSocket, (struct sockaddr *) &storage, (socklen_t*) &namelen);
 	while (SOCK_INVALID(sock) && ((SockErr == SOCK_EAGAIN) || (SockErr == SOCK_EINTR)) && (++i <= 10)) {
 		/** Try to accept connection not more than 10 once */
-		sock = ::accept(mSocket, (struct sockaddr *)&client, (socklen_t*)&namelen);
+		sock = ::accept(mSocket, (struct sockaddr *) &storage, (socklen_t*) &namelen);
 		#ifdef _WIN32
 			Sleep(1);
 		#else
@@ -376,9 +378,11 @@ tSocket Conn::socketAccept() {
 		return INVALID_SOCKET;
 	}
 
-	static sockoptval_t yes = 1;
-	static socklen_t yeslen = sizeof(yes);
-	if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &yes, yeslen))) {
+	sockoptval_t yes = 1;
+	if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(int)))) {
+		if (ErrLog(1)) {
+			LogStream() << "Socket not SO_KEEPALIVE: " << SockErr << endl;
+		}
 #ifdef _WIN32
 		int err = TEMP_FAILURE_RETRY(SOCK_CLOSE(sock));
 		if (SOCK_ERROR(err))
@@ -413,6 +417,45 @@ tSocket Conn::socketAccept() {
 	return sock;
 }
 
+
+int Conn::defineConnInfo(sockaddr_storage & storage) {
+	if (mSocket) {
+		char host[NI_MAXHOST] = { 0 };
+		char port[NI_MAXSERV] = { 0 };
+		if (getnameinfo((struct sockaddr *) &storage, sizeof(storage), host, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV) != 0) {
+			if (Log(2)) {
+				LogStream() << "Error in getnameinfo: " << SockErrMsg << endl;
+			}
+			closeNow(CLOSE_REASON_GETPEERNAME);
+			return -1;
+		}
+		mIp = host;
+		mPort = atoi(port);
+
+/*
+		struct sockaddr_in saddr;
+		if (getpeername(mSocket, (struct sockaddr *)&saddr, &mSockAddrInSize) < 0) {
+			if (Log(2)) {
+				LogStream() << "Error in getpeername: " << SockErrMsg << endl;
+			}
+			closeNow(CLOSE_REASON_GETPEERNAME);
+			return -1;
+		}
+		char ip[INET_ADDRSTRLEN];
+		inetNtop(AF_INET, &(saddr.sin_addr), ip, INET_ADDRSTRLEN);
+		mIp = ip;
+		mPort = ntohs(saddr.sin_port);
+*/
+
+		if (mServer->mMac) {
+			calcMacAddress();
+		}
+		return 0;
+	}
+	return -1;
+}
+
+
 /** Reading all data from socket to buffer of the conn */
 int Conn::recv() {
 	if (!mOk || !mWritable) {
@@ -445,7 +488,7 @@ int Conn::recv() {
 				mRecvBuf,
 				MAX_RECV_SIZE,
 				0,
-				(struct sockaddr *) &mSockAddrInUdp,
+				(struct sockaddr *) &mSockAddrIn,
 				(socklen_t *) &mSockAddrInSize
 			))) && (++i <= 100)
 		) {
@@ -512,7 +555,7 @@ int Conn::recv() {
 
 	} else {
 		if (bUdp) {
-			mIpUdp = inet_ntoa(mSockAddrInUdp.sin_addr);
+			mIpUdp = inet_ntoa(mSockAddrIn.sin_addr);
 		}
 		mRecvBufEnd = iBufLen; /** End buf pos */
 		mRecvBufRead = 0; /** Pos for reading from buf */
@@ -541,13 +584,6 @@ const string & Conn::getIp() const {
 //< Get string of server IP (host)
 const string & Conn::getIpConn() const {
 	return mIpConn;
-}
-
-
-
-//< Get numeric IP
-unsigned long Conn::getNetIp() const {
-	return mNetIp;
 }
 
 
@@ -587,68 +623,32 @@ const string & Conn::getMacAddress() const {
 
 
 
-//< Get host
-bool Conn::getHost() {
-	if (mHost.size()) {
-		return true;
-	}
-	struct hostent * h;
-	if ((h = gethostbyaddr(mIp.c_str(), sizeof(mIp), AF_INET)) != NULL) {
-		mHost = h->h_name;
-	}
-	return h != NULL;
-}
-
-
-
-//< Get IP for host
-unsigned long Conn::ipByHost(const string &sHost) {
-	struct sockaddr_in saddr;
-	memset(&saddr, 0, sizeof(sockaddr_in));
-	struct hostent * h;
-	if ((h = gethostbyname(sHost.c_str())) != NULL) {
-		saddr.sin_addr = *((struct in_addr *)h->h_addr);
-	}
-	return saddr.sin_addr.s_addr;
-}
-
-
-
-//< Get host for IP
-bool Conn::hostByIp(const string & sIp, string &sHost) {
-	struct hostent * h;
-	struct in_addr addr;
-#ifndef _WIN32
-	if (!inet_aton(sIp.c_str(), &addr)) {
-		return false;
-	}
-#else
-	addr.s_addr = inet_addr(sIp.c_str());
-#endif
-	if ((h = gethostbyaddr((char *)&addr, sizeof(addr), AF_INET)) != NULL) {
-		sHost = h->h_name;
-	}
-	return h != NULL;
-}
-
-
-
 //< Check IP
 bool Conn::checkIp(const string & ip) {
-	int n = -1;
-	char c;
-	istringstream is(ip);
-	for (int i = 0; i < 3; ++i) {
-		is >> n >> c;
-		if (n < 0 || n > 255 || c != '.') {
-			return false;
+	#ifndef _WIN32
+		char dst[INET_ADDRSTRLEN6];
+		if (inet_pton(AF_INET, ip.c_str(), dst) > 0) {
+			return true;
+		} else if (inet_pton(AF_INET6, ip.c_str(), dst) > 0) {
+			return true;
 		}
-	}
-	is >> n >> (c = '\0');
-	if (n < 0 || n > 255 || c) {
 		return false;
-	}
-	return true;
+	#else
+		struct sockaddr_in sockaddrIn;
+		int size = sizeof(struct sockaddr_in);
+		struct sockaddr * addr = (struct sockaddr*) &sockaddrIn;
+		if (WSAStringToAddress((char*) ip.c_str(), AF_INET, NULL, addr, &size) != -1) {
+			return true;
+		}
+
+		struct sockaddr_in6 sockaddrIn6;
+		size = sizeof(struct sockaddr_in6);
+		addr = (struct sockaddr*) &sockaddrIn6;
+		if (WSAStringToAddress((char*) ip.c_str(), AF_INET6, NULL, addr, &size) != -1) {
+			return true;
+		}
+		return false;
+	#endif // _WIN32
 }
 
 
@@ -656,24 +656,51 @@ bool Conn::checkIp(const string & ip) {
 //< Calculate mac-address
 void Conn::calcMacAddress() {
 #ifdef _WIN32
-	char buf[18] = { '\0' };
-	unsigned long ip = ip2Num(mIp.c_str());
-	unsigned long size = 0x0;
-	::GetIpNetTable(NULL, &size, false);
-	MIB_IPNETTABLE * pT = (MIB_IPNETTABLE *) new char[size];
-	if (0L == ::GetIpNetTable(pT, &size, true)) {
-		for (unsigned long i = 0; i < pT->dwNumEntries; ++i) {
-			if ((pT->table[i].dwAddr == ip) && (pT->table[i].dwType != 2)) {
-				sprintf(buf, "%02x-%02x-%02x-%02x-%02x-%02x",
-					pT->table[i].bPhysAddr[0], pT->table[i].bPhysAddr[1],
-					pT->table[i].bPhysAddr[2], pT->table[i].bPhysAddr[3],
-					pT->table[i].bPhysAddr[4], pT->table[i].bPhysAddr[5]);
-				mMac = string(buf);
-				break;
-			}
-		}
-		delete[] pT;
+	DWORD size;
+	DWORD ret = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, NULL, NULL, &size);
+	if (ret != ERROR_BUFFER_OVERFLOW) {
+		return;
 	}
+	PIP_ADAPTER_ADDRESSES addr = (PIP_ADAPTER_ADDRESSES) malloc(size);
+	if (addr == NULL) {
+		return;
+	}
+
+	ret = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, NULL, addr, &size);
+	if (ret == NO_ERROR) {
+		PIP_ADAPTER_ADDRESSES curr = addr;
+		while (curr) {
+			if (curr->PhysicalAddressLength == 6) {
+				int i;
+				PIP_ADAPTER_UNICAST_ADDRESS pIpAdapterPrefix;
+				for (i = 0, pIpAdapterPrefix= curr->FirstUnicastAddress;
+					pIpAdapterPrefix;
+					i++, pIpAdapterPrefix = pIpAdapterPrefix->Next
+				) {
+					char address[NI_MAXHOST];
+					if (getnameinfo(pIpAdapterPrefix->Address.lpSockaddr,
+						pIpAdapterPrefix->Address.iSockaddrLength,
+						address, sizeof(address), NULL, 0,
+						NI_NUMERICHOST)
+					) {
+						continue;
+					}
+					if (strcmp(mIp.c_str(), address) == 0) {
+						char buf[18] = { '\0' };
+						sprintf(buf, "%02x-%02x-%02x-%02x-%02x-%02x",
+							curr->PhysicalAddress[0], curr->PhysicalAddress[1],
+							curr->PhysicalAddress[2], curr->PhysicalAddress[3],
+							curr->PhysicalAddress[4], curr->PhysicalAddress[5]);
+						mMac = string(buf);
+						free(addr);
+						return;
+					}
+				}
+			}
+			curr = curr->Next;
+		}
+	}
+	free(addr);
 #endif
 }
 
@@ -917,7 +944,7 @@ int Conn::send(const char *buf, size_t &len) {
 	if (mConnType != CONN_TYPE_CLIENTUDP) {
 		len = ::send(mSocket, buf, len, 0);
 	} else {
-		len = ::sendto(mSocket, buf, len, 0, (struct sockaddr *) &mSockAddrInUdp, mSockAddrInSize);
+		len = ::sendto(mSocket, buf, len, 0, (struct sockaddr *) &mSockAddrIn, mSockAddrInSize);
 	}
 	return SOCK_ERROR(len) ? -1 : 0; /* return -1 - fail, 0 - ok */
 #else
@@ -951,7 +978,7 @@ int Conn::send(const char *buf, size_t &len) {
 			*/
 
 		} else {
-			n = ::sendto(mSocket, buf + total, bytesleft, 0, (struct sockaddr *) &mSockAddrInUdp, mSockAddrInSize);
+			n = ::sendto(mSocket, buf + total, bytesleft, 0, (struct sockaddr *) &mSockAddrIn, mSockAddrInSize);
 		}
 
 /*		if (Log(5)) {
@@ -993,6 +1020,79 @@ bool Conn::strLog() {
 	LogStream() << "(sock " << mSocket << ") ";
 	return true;
 }
+
+
+
+const char * Conn::inetNtop(int af, const void * src, char * dst, socklen_t cnt) {
+	#ifndef _WIN32
+	if (inet_ntop(af, src, dst, cnt)) {
+		if (af == AF_INET6 && strncmp(dst, "::ffff:", 7) == 0) {
+			memmove(dst, dst + 7, cnt - 7);
+		}
+		return dst;
+	}
+	return NULL;
+	#else
+		struct sockaddr * addr = NULL;
+		size_t size;
+		DWORD len = cnt;
+
+		if (af == AF_INET) {
+			struct in_addr * inAddr = (struct in_addr*) src;
+			struct sockaddr_in sockaddrIn;
+			sockaddrIn.sin_family = AF_INET;
+			sockaddrIn.sin_port = 0;
+			sockaddrIn.sin_addr = *inAddr;
+			addr = (struct sockaddr *) &sockaddrIn;
+			size = sizeof(sockaddrIn);
+		} else if (af == AF_INET6) {
+			struct in6_addr * in6Addr = (struct in6_addr*) src;
+			struct sockaddr_in6 sockaddrIn6;
+			sockaddrIn6.sin6_family = AF_INET6;
+			sockaddrIn6.sin6_port = 0;
+			sockaddrIn6.sin6_addr = *in6Addr;
+			addr = (struct sockaddr *) &sockaddrIn6;
+			size = sizeof(sockaddrIn6);
+		} else {
+			return NULL;
+		}
+
+		if (WSAAddressToString(addr, size, NULL, dst, &len) == 0) {
+			return dst;
+		}
+		return NULL;
+	#endif // _WIN32
+}
+
+
+
+int Conn::inetPton(int af, const char * src, void * dst) {
+	#ifndef _WIN32
+		return inet_pton(af, src, dst);
+	#else
+		if (af == AF_INET) {
+			struct sockaddr_in sockaddrIn;
+			int size = sizeof(struct sockaddr_in);
+			struct sockaddr * addr = (struct sockaddr*) &sockaddrIn;
+			if (WSAStringToAddress((char*) src, af, NULL, addr, &size) == -1) {
+				return -1;
+			}
+			memcpy(dst, &sockaddrIn.sin_addr, sizeof(sockaddrIn.sin_addr));
+		} else if (af == AF_INET6) {
+			struct sockaddr_in6 sockaddrIn6;
+			int size = sizeof(struct sockaddr_in6);
+			struct sockaddr * addr = (struct sockaddr*) &sockaddrIn6;
+			if (WSAStringToAddress((char*) src, af, NULL, addr, &size) == -1) {
+				return -1;
+			}
+			memcpy(dst, &sockaddrIn6.sin6_addr, sizeof(sockaddrIn6.sin6_addr));
+		} else {
+			return -1;
+		}
+		return 1;
+	#endif // _WIN32
+}
+
 
 
 

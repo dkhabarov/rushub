@@ -33,8 +33,10 @@
 	#endif /* FD_SETSIZE */
 
 	#include <winsock2.h>
+	#include <ws2tcpip.h>
 	#define socklen_t int /** unix type for socket (size_t) */
 	#define sockoptval_t char /** for setsockopt */
+
 	#ifdef ECONNRESET
 		#undef ECONNRESET
 	#endif
@@ -46,6 +48,9 @@
 	#endif
 	#ifdef EWOULDBLOCK
 		#undef EWOULDBLOCK
+	#endif
+	#ifndef EAFNOSUPPORT
+		#define EAFNOSUPPORT EINVAL
 	#endif
 	#define ECONNRESET WSAECONNRESET
 	#define ETIMEDOUT WSAETIMEDOUT

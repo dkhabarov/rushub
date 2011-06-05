@@ -160,9 +160,6 @@ public:
 	//< Get string of server ip (host)
 	virtual const string & getIpConn() const;
 
-	//< Get numeric IP
-	virtual unsigned long getNetIp() const;
-
 	//< Get enter time (in unix time sec)
 	long getConnectTime() const;
 

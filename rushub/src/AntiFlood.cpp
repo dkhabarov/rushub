@@ -73,7 +73,8 @@ void AntiFlood::del(Time & now) {
 
 
 
-bool AntiFlood::check(HashType_t hash, Time now) {
+bool AntiFlood::check(const string & ip, Time now) {
+	unsigned long hash = mHash(ip);
 	sItem * Item = NULL;
 	if (!mList) {
 		Item = new sItem();

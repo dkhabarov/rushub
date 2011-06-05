@@ -75,7 +75,7 @@ using namespace ::std;
 
 //< Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10018
+	#define INTERNAL_PLUGIN_VERSION 10019
 #endif
 
 //< NMDC protocol separator
@@ -275,9 +275,6 @@ public:
 
 	//< Get string of server ip (host)
 	virtual const string & getIpConn() const = 0;
-
-	//< Get numeric IP
-	virtual unsigned long getNetIp() const = 0;
 
 	//< Get enter time (in unix time sec)
 	virtual long getConnectTime() const = 0;

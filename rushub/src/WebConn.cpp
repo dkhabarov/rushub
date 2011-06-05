@@ -192,12 +192,6 @@ int WebUser::getPortConn() {
 
 
 
-unsigned long WebUser::getNetIp() const {
-	return mWebConn->getNetIp();
-}
-
-
-
 int WebConn::send(const string & data, bool flush /* = true */) {
 	if (!mWritable) {
 		return 0;

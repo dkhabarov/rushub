@@ -226,17 +226,10 @@ public:
 	virtual int onTimer(Time &now);
 
 
+	static const char * inetNtop(int af, const void * src, char * dst, socklen_t cnt);
+	static int inetPton(int af, const char * src, void * dst);
 
-	static unsigned long ip2Num(const char * ip) {
-		return inet_addr(ip);
-	}
 	
-	static char * num2Ip(unsigned long ip) {
-		struct in_addr in;
-		in.s_addr = ip;
-		return inet_ntoa(in);
-	}
-
 	//< Is closed
 	bool isClosed() const;
 
@@ -245,9 +238,6 @@ public:
 
 	//< Get string of server IP (host)
 	const string & getIpConn() const;
-
-	//< Get numeric IP
-	unsigned long getNetIp() const;
 
 	//< Get IP for UDP
 	const string & getIpUdp() const;
@@ -264,15 +254,6 @@ public:
 	//< Get mac-address
 	const string & getMacAddress() const;
 
-	//< Get host
-	bool getHost();
-	
-	//< Get IP for host
-	static unsigned long ipByHost(const string & host);
-	
-	//< Get host for IP
-	static bool hostByIp(const string & ip, string & host);
-
 	//< Check IP
 	static bool checkIp(const string &ip);
 
@@ -284,7 +265,6 @@ protected:
 	bool mOk; /** Points that given connection is registered (socket of connection is created and bound) */
 	bool mWritable; /** Points that data can be read and be written */
 	
-	unsigned long mNetIp; /** Numeric ip */
 	string mIp; /** String ip */
 	string mIpConn; /** String ip (host) of server */
 	string mIpUdp;
@@ -323,9 +303,11 @@ private:
 
 	/** struct sockaddr_in */
 	struct sockaddr_in mSockAddrIn;
-	struct sockaddr_in mSockAddrInUdp;
-
 	static socklen_t mSockAddrInSize;
+
+	// ipv6
+	ADDRINFO * mAddrInfo;
+	//struct sockaddr_storage mSockaddr;
 
 	bool mBlockInput; /** Blocking enterring channel for given conn */
 	bool mBlockOutput; /** Blocking coming channel for given conn */
@@ -341,10 +323,10 @@ private:
 private:
 
 	//< Create socket (default TCP)
-	tSocket socketCreate(bool udp = false);
+	tSocket socketCreate(int port, const char * address, bool udp = false);
 
 	//< Bind
-	tSocket socketBind(tSocket, int port, const char * address = NULL);
+	tSocket socketBind(tSocket);
 
 	//< Listen TCP
 	tSocket socketListen(tSocket);
@@ -353,10 +335,13 @@ private:
 	tSocket socketNonBlock(tSocket);
 
 	//< Accept new conn
-	tSocket socketAccept();
+	tSocket socketAccept(struct sockaddr_storage &);
+
+	int defineConnInfo(struct sockaddr_storage &);
 
 	//< Calculate mac-address
 	void calcMacAddress();
+
 
 }; // class Conn
 
