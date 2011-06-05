@@ -306,7 +306,7 @@ private:
 	static socklen_t mSockAddrInSize;
 
 	// ipv6
-	ADDRINFO * mAddrInfo;
+	struct addrinfo * mAddrInfo;
 	//struct sockaddr_storage mSockaddr;
 
 	bool mBlockInput; /** Blocking enterring channel for given conn */
