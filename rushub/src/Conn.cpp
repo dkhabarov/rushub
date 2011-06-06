@@ -154,9 +154,9 @@ tSocket Conn::socketCreate(int port, const char * address, bool udp) {
 		if (ErrLog(0)) {
 			LogStream() << "Error in getaddrinfo: " << 
 			#ifdef _WIN32
-				SockErrMsg 
+				SockErrMsg
 			#else
-				gai_strerror(ret) << " (" << ret
+				gai_strerror(ret) << " (" << ret << ")"
 			#endif
 			<< endl;
 		}
