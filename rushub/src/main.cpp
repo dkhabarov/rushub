@@ -148,12 +148,8 @@ int main(int argc, char ** argv) {
 		signal(SIGIO, sigHandler);
 		signal(SIGHUP, sigHandler);
 		signal(SIGQUIT, sigHandler);
+		signal(SIGPIPE, sigHandler);
 		signal(SIGTSTP, sigHandler);
-    sigset_t sst;
-    sigemptyset(&sst);
-    sigaddset(&sst, SIGPIPE);
-    sigaddset(&sst, SIGURG);
-    sigaddset(&sst, SIGALRM);
 	#else
 		SetUnhandledExceptionFilter(&Exception::exceptionFilter);
 	#endif
