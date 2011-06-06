@@ -151,7 +151,7 @@ public:
 	void setOk(bool);
 
 	/** Create, bind and listen socket */
-	tSocket makeSocket(int port, const char * ip = NULL, bool udp = false);
+	tSocket makeSocket(const char * port, const char * ip = NULL, bool udp = false);
 
 	void close(); /** Close connection (socket) */
 	void closeNice(int msec = 0, int reason = 0); /** Nice close conn (socket) */
@@ -323,7 +323,7 @@ private:
 private:
 
 	//< Create socket (default TCP)
-	tSocket socketCreate(int port, const char * address, bool udp = false);
+	tSocket socketCreate(const char * port, const char * address, bool udp = false);
 
 	//< Bind
 	tSocket socketBind(tSocket);

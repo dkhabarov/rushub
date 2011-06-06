@@ -197,9 +197,9 @@ void DcServer::deleteConn(Conn * conn) {
 
 
 void DcServer::getAddresses(
-	const string & sAddresses,
-	vector<pair<string, int> > & vec,
-	int iDefPort
+	const char * sAddresses,
+	vector<pair<string, string> > & vec,
+	const char * defPort
 ) {
 	vector<string> vAddresses;
 	stringSplit(sAddresses, " ", vAddresses);
@@ -217,21 +217,14 @@ void DcServer::getAddresses(
 		if (2 < vIpPort.size() || vIpPort.size() < 1 || vIpPort[0].size() == 0) {
 			continue;
 		}
-		int iPort = iDefPort;
-		if (vIpPort.size() == 2) {
-			iPort = atoi(vIpPort[1].c_str());
-			if (iPort < 0 || iPort > 65535) {
-				continue;
-			}
-		}
-		vec.push_back(pair<string, int>(vIpPort[0], iPort));
+		vec.push_back(pair<string, string>(vIpPort[0], vIpPort.size() == 2 ? vIpPort[1] : defPort));
 	}
 }
 
 
 
-bool DcServer::listeningServer(const char * name, const string & addresses, unsigned port, ConnFactory * connFactory, bool udp /*= false*/) {
-	vector<pair<string, int> > vAddresses;
+bool DcServer::listeningServer(const char * name, const char * addresses, const char * port, ConnFactory * connFactory, bool udp /*= false*/) {
+	vector<pair<string, string> > vAddresses;
 	getAddresses(addresses, vAddresses, port);
 
 	if (vAddresses.size() == 0) {
@@ -241,8 +234,8 @@ bool DcServer::listeningServer(const char * name, const string & addresses, unsi
 	}
 
 	bool ret = false;
-	for (vector<pair<string, int> >::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
-		if (Server::listening(connFactory, (*it).first, (*it).second, udp) == 0) {
+	for (vector<pair<string, string> >::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
+		if (Server::listening(connFactory, ((*it).first).c_str(), ((*it).second).c_str(), udp) == 0) {
 			ret = true;
 			if (Log(0)) {
 				LogStream() << name << " is running on [" 
@@ -275,18 +268,18 @@ int DcServer::listening() {
 	}
 
 	// DC Server
-	if (!listeningServer("DC Server " INTERNALNAME " " INTERNALVERSION, mDcConfig.mAddresses, 411, mDcConnFactory)) {
+	if (!listeningServer("DC Server " INTERNALNAME " " INTERNALVERSION, mDcConfig.mAddresses.c_str(), "411", mDcConnFactory)) {
 		return -1;
 	}
 
 	// Web Server
 	if (mDcConfig.mWebServer) {
-		listeningServer("Web Server", mDcConfig.mWebAddresses, 80, mWebConnFactory);
+		listeningServer("Web Server", mDcConfig.mWebAddresses.c_str(), "80", mWebConnFactory);
 	}
 
 	// UDP DC Server
 	if (mDcConfig.mUdpServer) {
-		listeningServer("DC Server (UDP)", mDcConfig.mUdpAddresses, 1209, mDcConnFactory, true);
+		listeningServer("DC Server (UDP)", mDcConfig.mUdpAddresses.c_str(), "1209", mDcConnFactory, true);
 	}
 	return 0;
 }

@@ -270,7 +270,7 @@ public:
 		stop(1);
 	}
 
-	static void getAddresses(const string & addresses, vector<pair<string, int> > &, int defaultPort);
+	static void getAddresses(const char * addresses, vector<pair<string, string> > &, const char * defaultPort);
 
 	/** Function action when joining the client */
 	int onNewConn(Conn *);
@@ -350,7 +350,7 @@ private:
 
 	void deleteConn(Conn *);
 
-	bool listeningServer(const char * name, const string & addresses, unsigned port, ConnFactory * connFactory, bool udp = false);
+	bool listeningServer(const char * name, const char * addresses, const char * port, ConnFactory * connFactory, bool udp = false);
 
 	static string getSysVersion();
 

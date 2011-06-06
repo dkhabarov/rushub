@@ -114,7 +114,7 @@ void Conn::onOk(bool) {
 	
 
 /** makeSocket */
-tSocket Conn::makeSocket(int port, const char * address, bool udp) {
+tSocket Conn::makeSocket(const char * port, const char * address, bool udp) {
 	if (mSocket > 0) {
 		return INVALID_SOCKET; /** Socket is already created */
 	}
@@ -124,19 +124,18 @@ tSocket Conn::makeSocket(int port, const char * address, bool udp) {
 		mSocket = socketListen(mSocket);
 		mSocket = socketNonBlock(mSocket);
 	}
-	mPort = port; // Set port
+	mPort = atoi(port); // Set port
 	mIp = address; // Set ip (host)
 	setOk(mSocket > 0); // Reg conn
 	return mSocket;
 }
 
 /** Create socket (default TCP) */
-tSocket Conn::socketCreate(int port, const char * address, bool udp) {
+tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 	tSocket sock;
 	struct addrinfo hints;
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
-	hints.ai_flags = AI_NUMERICHOST | AI_PASSIVE;
 
 	if (!udp) { // Create socket TCP
 		hints.ai_socktype = SOCK_STREAM;
@@ -144,12 +143,8 @@ tSocket Conn::socketCreate(int port, const char * address, bool udp) {
 		hints.ai_socktype = SOCK_DGRAM;
 	}
 
-	char portBuf[8];
-	sprintf(portBuf, "%d", port);
-
-	// TODO check address for host (gethostbyname) !!!
 	// getaddrinfo
-	int ret = getaddrinfo(address, portBuf, &hints, &mAddrInfo);
+	int ret = getaddrinfo(address, port, &hints, &mAddrInfo);
 	if (ret != 0) {
 		if (ErrLog(0)) {
 			LogStream() << "Error in getaddrinfo: " << 

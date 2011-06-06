@@ -109,7 +109,7 @@ Server::~Server() {
 }
 
 /** Set and Listen port */
-int Server::listening(ConnFactory * connFactory, const string & ip, int port, bool udp /*= false*/) {
+int Server::listening(ConnFactory * connFactory, const char * ip, const char * port, bool udp /*= false*/) {
 	Conn * conn = listen(ip, port, udp);
 	if (conn == NULL) {
 		return -1;
@@ -127,7 +127,7 @@ int Server::listening(ConnFactory * connFactory, const string & ip, int port, bo
 
 
 /** Listen port (TCP/UDP) */
-Conn * Server::listen(const string & ip, int port, bool udp) {
+Conn * Server::listen(const char * ip, const char * port, bool udp) {
 	Conn * conn = NULL;
 
 	if (!udp) { // Create socket listening server for TCP port
@@ -146,10 +146,10 @@ Conn * Server::listen(const string & ip, int port, bool udp) {
 
 
 /** Create, bind and add connection for port */
-Conn *Server::addListen(Conn * conn, const string & ip, int port, bool udp) {
+Conn * Server::addListen(Conn * conn, const char * ip, const char * port, bool udp) {
 	// Socket object was created
 	if (conn) {
-		if (conn->makeSocket(port, ip.c_str(), udp) == INVALID_SOCKET) {
+		if (conn->makeSocket(port, ip, udp) == INVALID_SOCKET) {
 			if (ErrLog(0)) {
 				LogStream() << "Fatal error: Can't listen on " << ip << ":" << port << (udp ? " UDP" : " TCP") << endl;
 			}
@@ -170,7 +170,7 @@ Conn *Server::addListen(Conn * conn, const string & ip, int port, bool udp) {
 		}
 
 		if (Log(0)) {
-			LogStream() << "Listening on " << ip << ":" << port << (udp ? " UDP" : " TCP") << endl;
+			LogStream() << "Listening on " << string(ip) << ":" << string(port) << (udp ? " UDP" : " TCP") << endl;
 		}
 		return conn;
 	} else {

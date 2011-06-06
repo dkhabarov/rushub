@@ -76,13 +76,13 @@ public:
 	virtual ~Server();
 
 	/** Set and Listen port */
-	virtual int listening(ConnFactory *, const string & ip, int port = 0, bool udp = false);
+	virtual int listening(ConnFactory *, const char * ip, const char * port = 0, bool udp = false);
 
 	/** Listen port (TCP/UDP) */
-	virtual Conn * listen(const string & ip, int port, bool udp = false);
+	virtual Conn * listen(const char * ip, const char * port, bool udp = false);
 
 	/** Create, bind and add connection for port */
-	virtual Conn * addListen(Conn *, const string & ip, int port, bool udp = false);
+	virtual Conn * addListen(Conn *, const char * ip, const char * port, bool udp = false);
 
 	/** Stop listen conn */
 	virtual bool stopListen(Conn *);
