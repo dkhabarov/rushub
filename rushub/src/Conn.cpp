@@ -149,9 +149,16 @@ tSocket Conn::socketCreate(int port, const char * address, bool udp) {
 
 	// TODO check address for host (gethostbyname) !!!
 	// getaddrinfo
-	if (::getaddrinfo(address, portBuf, &hints, &mAddrInfo) != 0) {
+	int ret = getaddrinfo(address, portBuf, &hints, &mAddrInfo);
+	if (ret != 0) {
 		if (ErrLog(0)) {
-			LogStream() << "Error in getaddrinfo: " << SockErrMsg << endl;
+			LogStream() << "Error in getaddrinfo: " << 
+			#ifdef _WIN32
+				SockErrMsg 
+			#else
+				gai_strerror(ret) << " (" << ret
+			#endif
+			<< endl;
 		}
 		return INVALID_SOCKET;
 	}
