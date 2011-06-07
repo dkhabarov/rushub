@@ -254,6 +254,11 @@ void Server::step() {
 			#ifdef _WIN32
 				//Sleep(0);
 			#else
+				if (ret < 0) {
+					if (ErrLog(1)) {
+						LogStream() << SockErr << endl;
+					}
+				}
 				usleep(50); // 50 usec
 			#endif
 			return;
