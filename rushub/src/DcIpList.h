@@ -44,9 +44,7 @@ public:
 	bool add(DcConn *);
 	bool remove(DcConn *);
 
-	void sendToIp(unsigned long ip, string & data, unsigned long profile = 0, bool addSep = false, bool flush = true);
 	void sendToIp(const char * ip, string & data, unsigned long profile = 0, bool addSep = false, bool flush = true);
-	void sendToIpWithNick(unsigned long ip, string & start, string & end, unsigned long profile = 0, bool addSep = false, bool flush = true);
 	void sendToIpWithNick(const char * ip, string & start, string & end, unsigned long profile = 0, bool addSep = false, bool flush = true);
 
 	virtual void onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
@@ -88,26 +86,23 @@ public:
 
 	}; // iterator
 
-	inline iterator begin(const char * ip) {
-		return begin(mHash(ip));
-	}
-	iterator begin(unsigned long ip) {
+	iterator begin(const char * ip) {
 		iterator it;
-		it.mIpList = find(ip);
+		it.mIpList = find(mHash(ip));
 		return it;
 	}
-	inline iterator end() {
+	iterator end() {
 		return iterator();
 	}
 
-protected:
+private:
 
 	typedef HashTable<IpList *> IpTable;
 	bool mFlush, mAddSep;
 	unsigned long mProfile;
 	string msData1, msData2;
 
-protected:
+private:
 
 	int send(DcConn * conn);
 	int sendWithNick(DcConn * conn);

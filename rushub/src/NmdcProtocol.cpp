@@ -1121,9 +1121,9 @@ void NmdcProtocol::sendMode(DcConn * dcConn, const string & str, int iMode, User
 	} else if (iMode == 4) { /** Send to all except users with ip of the current user */
 		DcConn * conn = NULL;
 		vector<DcConn *> ul;
-		for (DcIpList::iterator mit = mDcServer->mIpListConn->begin(mDcServer->mIpListConn->mHash(dcConn->getIp().c_str())); mit != mDcServer->mIpListConn->end(); ++mit) {
+		for (DcIpList::iterator mit = mDcServer->mIpListConn->begin(dcConn->getIp().c_str()); mit != mDcServer->mIpListConn->end(); ++mit) {
 			conn = static_cast<DcConn *> (*mit);
-			if(conn->mDcUser && conn->mDcUser->isCanSend()) {
+			if(conn->mDcUser && conn->mDcUser->isCanSend() && dcConn->getIp() == conn->getIp()) {
 				conn->mDcUser->setCanSend(false);
 				ul.push_back(conn);
 			}

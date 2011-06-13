@@ -33,6 +33,18 @@ class AntiFlood {
 
 public:
 
+	AntiFlood(unsigned & iCount, double & time);
+	~AntiFlood();
+
+	AntiFlood & operator = (const AntiFlood &) {
+		return *this;
+	}
+
+	bool check(const string & ip, Time now);
+	void del(Time & now);
+
+private:
+
 	struct sItem {
 		Time mTime;
 		unsigned miCount;
@@ -44,23 +56,10 @@ public:
 	typedef List<HashType_t, sItem *> List_t;
 	List_t * mList;
 
-private:
 
-	Hash<unsigned long> mHash;
+	Hash<HashType_t> mHash;
 	unsigned & miCount;
 	double & mTime;
-
-public:
-
-	AntiFlood(unsigned & iCount, double & time);
-	~AntiFlood();
-
-	AntiFlood & operator = (const AntiFlood &) {
-		return *this;
-	}
-
-	bool check(const string & ip, Time now);
-	void del(Time & now);
 
 }; // AntiFlood
 

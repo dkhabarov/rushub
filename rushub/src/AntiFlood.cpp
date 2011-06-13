@@ -74,7 +74,7 @@ void AntiFlood::del(Time & now) {
 
 
 bool AntiFlood::check(const string & ip, Time now) {
-	unsigned long hash = mHash(ip);
+	HashType_t hash = mHash(ip);
 	sItem * Item = NULL;
 	if (!mList) {
 		Item = new sItem();
@@ -92,13 +92,12 @@ bool AntiFlood::check(const string & ip, Time now) {
 	if (Item->miCount < miCount) {
 		++Item->miCount;
 	} else {
+		Item->miCount = 0;
 		if (::fabs(double(now - Item->mTime)) < mTime) {
 			Item->mTime = now;
-			Item->miCount = 0;
 			return true;
 		}
 		Item->mTime = now;
-		Item->miCount = 0;
 	}
 	return false;
 }

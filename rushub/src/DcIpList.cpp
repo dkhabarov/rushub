@@ -22,6 +22,7 @@
 
 namespace dcserver {
 
+
 DcIpList::DcIpList() : 
 	Obj("DcIpList"),
 	HashTable<IpList *> (1024),
@@ -29,6 +30,8 @@ DcIpList::DcIpList() :
 	mAddSep(false)
 {
 }
+
+
 
 DcIpList::~DcIpList() {
 	IpList * ipList = NULL;
@@ -41,6 +44,8 @@ DcIpList::~DcIpList() {
 	}
 }
 
+
+
 bool DcIpList::add(DcConn * dcConn) {
 	unsigned long hash = mHash(dcConn->getIp());
 	IpList * ipList = IpTable::find(hash);
@@ -51,6 +56,8 @@ bool DcIpList::add(DcConn * dcConn) {
 	}
 	return true;
 }
+
+
 
 bool DcIpList::remove(DcConn * dcConn) {
 	unsigned long hash = mHash(dcConn->getIp());
@@ -64,46 +71,50 @@ bool DcIpList::remove(DcConn * dcConn) {
 		if (ipList) {
 			IpTable::update(hash, ipList);
 		} else {
-			IpTable::remove(hash); /** Removing the list from hash-table */
+			IpTable::remove(hash); // Removing the list from hash-table
 		}
-		delete ipLists; /** removing old start element in the list */
+		delete ipLists; // Removing old start element in the list
 		ipLists = NULL;
 	}
 	return conn != NULL;
 }
 
+
+
 void DcIpList::sendToIp(const char * ip, string & data, unsigned long profile, bool addSep, bool flush) {
-	sendToIp(mHash(ip), data, profile, addSep, flush);
-}
-
-void DcIpList::sendToIpWithNick(const char * ip, string & start, string & end, unsigned long profile, bool addSep, bool flush) {
-	sendToIpWithNick(mHash(ip), start, end, profile, addSep, flush);
-}
-
-void DcIpList::sendToIp(unsigned long ip, string & data, unsigned long profile, bool addSep, bool flush) {
+	unsigned long ipHash = mHash(ip);
 	mProfile = profile;
 	msData1 = data;
 	mFlush = flush;
 	mAddSep = addSep;
-	IpList * ipList = IpTable::find(ip);
+	IpList * ipList = IpTable::find(ipHash);
 	while (ipList != NULL) {
-		send(ipList->mData);
+		if (ipList->mData->getIp() == string(ip)) {
+			send(ipList->mData);
+		}
 		ipList = ipList->mNext;
 	}
 }
 
-void DcIpList::sendToIpWithNick(unsigned long ip, string & start, string & end, unsigned long profile, bool addSep, bool flush) {
+
+
+void DcIpList::sendToIpWithNick(const char * ip, string & start, string & end, unsigned long profile, bool addSep, bool flush) {
+	unsigned long ipHash = mHash(ip);
 	mProfile = profile;
 	msData1 = start;
 	msData2 = end;
 	mFlush = flush;
 	mAddSep = addSep;
-	IpList * ipList = IpTable::find(ip);
+	IpList * ipList = IpTable::find(ipHash);
 	while (ipList != NULL) {
-		sendWithNick(ipList->mData);
+		if (ipList->mData->getIp() == string(ip)) {
+			sendWithNick(ipList->mData);
+		}
 		ipList = ipList->mNext;
 	}
 }
+
+
 
 int DcIpList::send(DcConn * dcConn) {
 	if (!dcConn || !dcConn->mIpRecv) {
@@ -125,6 +136,8 @@ int DcIpList::send(DcConn * dcConn) {
 	}
 	return 0;
 }
+
+
 
 int DcIpList::sendWithNick(DcConn * dcConn) {
 	// check empty nick!
@@ -151,6 +164,7 @@ int DcIpList::sendWithNick(DcConn * dcConn) {
 	}
 	return 0;
 }
+
 
 }; // namespace dcserver
 

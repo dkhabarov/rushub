@@ -843,12 +843,11 @@ DcUserBase * DcServer::getDcUserBase(const char * nick) {
 
 
 
-const vector<DcConnBase *> & DcServer::getDcConnBase(const char * sIP) {
-	DcIpList::iterator it;
+const vector<DcConnBase *> & DcServer::getDcConnBase(const char * ip) {
 	mIpConnList.clear();
-	for (it = mIpListConn->begin(mIpListConn->mHash(sIP)); it != mIpListConn->end(); ++it) {
+	for (DcIpList::iterator it = mIpListConn->begin(ip); it != mIpListConn->end(); ++it) {
 		DcConn * dcConn = static_cast<DcConn *> (*it);
-		if (dcConn->mType == CLIENT_TYPE_NMDC) {
+		if (dcConn->mType == CLIENT_TYPE_NMDC && dcConn->getIp() == ip) {
 			mIpConnList.push_back(dcConn);
 		}
 	}
@@ -1051,9 +1050,9 @@ bool DcServer::sendToAllExceptIps(const vector<string> & ipList, const char * da
 		if (!DcConn::checkIp(*it)) {
 			badIp = true;
 		}
-		for (DcIpList::iterator mit = mIpListConn->begin(mIpListConn->mHash((*it).c_str())); mit != mIpListConn->end(); ++mit) {
+		for (DcIpList::iterator mit = mIpListConn->begin((*it).c_str()); mit != mIpListConn->end(); ++mit) {
 			dcConn = static_cast<DcConn *> (*mit);
-			if (dcConn->mDcUser && dcConn->mDcUser->isCanSend()) {
+			if (dcConn->mDcUser && dcConn->mDcUser->isCanSend() && dcConn->getIp() == (*it)) {
 				dcConn->mDcUser->setCanSend(false);
 				ul.push_back(dcConn);
 			}
