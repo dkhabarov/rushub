@@ -67,6 +67,7 @@ static void sigHandler(int sig) {
 			}
 			cout << "Received a " << sig << " signal, quiting" << endl;
 			DcServer::currentDcServer->stop(0);
+			signal(sig, sigHandler);
 			break;
 
 		default :
