@@ -51,6 +51,7 @@ Server::Server() :
 	mTimerServPeriod(1000),
 	mTimerConnPeriod(4000),
 	mMac(true),
+	mRun(true), // run by default
 	mMainLoopCode(0),
 	miNumCloseConn(0),
 	mMeanFrequency(mTime, 90.0, 20),
@@ -192,9 +193,9 @@ bool Server::stopListen(Conn * conn) {
 
 
 
-/** Main cycle */
+// Main cycle
 int Server::run() {
-	mRun = true;
+	// mRun = true; // by default server was run
 	if (Log(1)) {
 		LogStream() << "Main loop start" << endl;
 	}
