@@ -271,9 +271,6 @@ Conn * DcConnFactory::createConn(tSocket sock) {
 	dcConn->mConnFactory = this; /** Connection factory for current connection (DcConnFactory) */
 	dcConn->mProtocol = mProtocol; /** Protocol pointer */
 
-	DcServer * dcServer = static_cast<DcServer *> (mServer);
-	dcServer->mIpListConn->add(dcConn); /** Adding connection in IP-list */
-
 	// Create DcUser
 	DcUser * dcUser = new DcUser();
 	dcConn->setUser(dcUser);

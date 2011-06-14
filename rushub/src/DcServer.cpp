@@ -374,6 +374,9 @@ int DcServer::onNewConn(Conn *conn) {
 		return -2;
 	}
 
+	// TODO fix me (refactoring)
+	mIpListConn->add(dcConn); // Adding connection in IP-list
+
 	if (dcConn->Log(5)) {
 		dcConn->LogStream() << "[S]Stage onNewConn" << endl;
 	}
