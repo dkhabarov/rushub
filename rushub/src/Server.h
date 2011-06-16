@@ -26,7 +26,7 @@
 #define SERVER_H
 
 #define INTERNALNAME "RusHub"
-#define INTERNALVERSION "2.3.3" // without space!
+#define INTERNALVERSION "2.3.3a" // without space!
 
 #include "Obj.h"
 #include "ConnChoose.h"
