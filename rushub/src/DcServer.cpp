@@ -376,6 +376,7 @@ int DcServer::onNewConn(Conn *conn) {
 
 	// TODO fix me (refactoring)
 	mIpListConn->add(dcConn); // Adding connection in IP-list
+	dcConn->mDcUser->setIp(dcConn->getIp());
 
 	if (dcConn->Log(5)) {
 		dcConn->LogStream() << "[S]Stage onNewConn" << endl;
@@ -771,7 +772,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 
 	bool canSend = dcUser->isCanSend();
 
-	/** Prevention of the double sending MyINFO string */
+	// Prevention of the double sending
 	if (!mDcConfig.mDelayedLogin) {
 			dcUser->setCanSend(false);
 			mDcUserList.flushCache();
@@ -780,18 +781,16 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 	}
 
 	if (mDcConfig.mSendUserIp) {
-		string sStr;
-		dcUser->setCanSend(false);
-		NmdcProtocol::appendUserIp(sStr, dcUser->getNick(), dcUser->getIp());
-		if (sStr.length()) {
-			mIpList.sendToAll(sStr, true);
+		string ipList;
+		NmdcProtocol::appendUserIp(ipList, dcUser->getNick(), dcUser->getIp());
+		if (ipList.length()) {
+			mIpList.sendToAll(ipList, true, false);
 		}
-		dcUser->setCanSend(canSend);
 
 		if (dcUser->mInIpList) {
 			dcUser->send(mDcUserList.getIpList(), true, false);
-		} else if (dcUser->mDcConn && (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_USERIP2)) { // UserIP2
-			dcUser->send(sStr, false, false);
+		} else if (ipList.length() && dcUser->mDcConn && (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_USERIP2)) { // UserIP2
+			dcUser->send(ipList, false, false);
 		}
 	}
 
