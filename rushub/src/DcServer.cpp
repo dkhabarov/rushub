@@ -741,10 +741,10 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 	string sMsg1, sMsg2;
 	if (dcUser->mHide && dcUser->mDcConn) {
 		if (dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
-			dcUser->mDcConn->send(string(dcUser->getMyINFO()), true, false);
+			dcUser->mDcConn->send(dcUser->getMyINFO(), true, false);
 		} else if (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
 			dcUser->mDcConn->send(NmdcProtocol::appendHello(sMsg1, dcUser->getNick()), false, false);
-			dcUser->mDcConn->send(string(dcUser->getMyINFO()), true, false);
+			dcUser->mDcConn->send(dcUser->getMyINFO(), true, false);
 		} else {
 			dcUser->mDcConn->send(NmdcProtocol::appendHello(sMsg1, dcUser->getNick()), false, false);
 		}
@@ -794,8 +794,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 		}
 	}
 
-	static string s;
-	dcUser->send(s, false, true);
+	dcUser->send("", 0, false, true);
 	return true;
 }
 
@@ -884,7 +883,9 @@ bool DcServer::sendToUser(DcUserBase * dcUserBase, const char * data, const char
 
 	// Simple Msg
 	string msg(data);
-	if (dcConn->mType == CLIENT_TYPE_NMDC && msg.substr(msg.size() - 1, 1) != NMDC_SEPARATOR) {
+	if (dcConn->mType == CLIENT_TYPE_NMDC && 
+		msg.substr(msg.size() - NMDC_SEPARATOR_LEN, NMDC_SEPARATOR_LEN) != NMDC_SEPARATOR
+	) {
 		msg.append(NMDC_SEPARATOR);
 	}
 	dcConn->send(msg);

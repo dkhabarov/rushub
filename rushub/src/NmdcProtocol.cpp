@@ -242,8 +242,7 @@ int NmdcProtocol::eventSupports(DcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	static string msg("$Supports UserCommand NoGetINFO NoHello UserIP UserIP2 MCTo"NMDC_SEPARATOR);
-	dcConn->send(msg, false, false);
+	dcConn->send("$Supports UserCommand NoGetINFO NoHello UserIP UserIP2 MCTo"NMDC_SEPARATOR, 59 + NMDC_SEPARATOR_LEN, false, false);
 
 	return 0;
 }
@@ -720,13 +719,13 @@ int NmdcProtocol::eventSr(DcParser * dcparser, DcConn * dcConn) {
 
 	/** Check same nick in cmd (PROTOCOL NMDC) */
 	if (mDcServer->mDcConfig.mCheckSrNick && (dcConn->mDcUser->getNick() != dcparser->chunkString(CHUNK_SR_FROM))) {
-		string sMsg = mDcServer->mDcLang.mBadSrNick;
+		string msg = mDcServer->mDcLang.mBadSrNick;
 		if (dcConn->Log(2)) {
 			dcConn->LogStream() << "Bad nick in search response, closing" << endl;
 		}
-		stringReplace(sMsg, "nick", sMsg, dcparser->chunkString(CHUNK_SR_FROM));
-		stringReplace(sMsg, "real_nick", sMsg, dcConn->mDcUser->getNick());
-		mDcServer->sendToUser(dcConn->mDcUser, sMsg.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+		stringReplace(msg, "nick", msg, dcparser->chunkString(CHUNK_SR_FROM));
+		stringReplace(msg, "real_nick", msg, dcConn->mDcUser->getNick());
+		mDcServer->sendToUser(dcConn->mDcUser, msg.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_SR);
 		return -1;
 	}
@@ -754,8 +753,8 @@ int NmdcProtocol::eventSr(DcParser * dcparser, DcConn * dcConn) {
 		(dcUser->mDcConn->getSrCounter() <= unsigned(mDcServer->mDcConfig.mMaxPassiveRes))
 	)) {
 		dcUser->mDcConn->increaseSrCounter();
-		string sStr(dcparser->mCommand, 0, dcparser->mChunks[CHUNK_SR_TO].first - 1); /** Remove nick on the end of cmd */
-		dcUser->mDcConn->send(sStr, true, false);
+		string str(dcparser->mCommand, 0, dcparser->mChunks[CHUNK_SR_TO].first - 1); /** Remove nick on the end of cmd */
+		dcUser->mDcConn->send(str, true, false);
 	}
 	return 0;
 }
@@ -970,134 +969,94 @@ int NmdcProtocol::eventUnknown(DcParser *, DcConn * dcConn) {
 
 // $Lock ...|
 string & NmdcProtocol::appendLock(string & str) {
-	static const char * cmd = "$Lock EXTENDEDPROTOCOL_" INTERNALNAME "_by_setuper_" INTERNALVERSION " Pk=" INTERNALNAME NMDC_SEPARATOR;
-	static size_t cmdLen = strlen(cmd);
-	return str.append(cmd, cmdLen);
+	return str.append("$Lock EXTENDEDPROTOCOL_" INTERNALNAME "_by_setuper_" INTERNALVERSION " Pk=" INTERNALNAME NMDC_SEPARATOR);
 }
 
 // $Hello nick|
 string & NmdcProtocol::appendHello(string & str, const string & nick) {
-	static const char * cmd = "$Hello ";
-	static size_t cmdLen = 7 + NMDC_SEPARATOR_LEN;
-	str.reserve(str.size() + nick.size() + cmdLen);
-	return str.append(cmd, 7).append(nick).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	str.reserve(str.size() + nick.size() + 7 + NMDC_SEPARATOR_LEN);
+	return str.append("$Hello ", 7).append(nick).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
 }
 
 // $HubIsFull|
 string & NmdcProtocol::appendHubIsFull(string & str) {
-	static const char * cmd = "$HubIsFull" NMDC_SEPARATOR;
-	static size_t cmdLen = 10 + NMDC_SEPARATOR_LEN;
-	return str.append(cmd, cmdLen);
+	return str.append("$HubIsFull" NMDC_SEPARATOR, 10 + NMDC_SEPARATOR_LEN);
 }
 
 // $GetPass|
 string & NmdcProtocol::appendGetPass(string & str) {
-	static const char * cmd = "$GetPass" NMDC_SEPARATOR;
-	static size_t cmdLen = 8 + NMDC_SEPARATOR_LEN;
-	return str.append(cmd, cmdLen);
+	return str.append("$GetPass" NMDC_SEPARATOR, 8 + NMDC_SEPARATOR_LEN);
 }
 
 // $ValidateDenide nick|
 string & NmdcProtocol::appendValidateDenide(string & str, const string & nick) {
-	static const char * cmd = "$ValidateDenide ";
-	static size_t cmdLen = 16 + NMDC_SEPARATOR_LEN;
-	str.reserve(str.size() + nick.size() + cmdLen);
-	return str.append(cmd, 16).append(nick).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	str.reserve(str.size() + nick.size() + 16 + NMDC_SEPARATOR_LEN);
+	return str.append("$ValidateDenide ", 16).append(nick).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
 }
 
 // $HubName hubName - topic|
 string & NmdcProtocol::appendHubName(string & str, const string & hubName, const string & topic) {
-	static const char * cmd = "$HubName ";
-	static const char * cmd2 = " - ";
-	static size_t cmdLen = 9 + NMDC_SEPARATOR_LEN;
-	static size_t cmdLen2 = 12 + NMDC_SEPARATOR_LEN;
 	if (topic.length()) {
-		str.reserve(str.size() + hubName.size() + topic.size() + cmdLen2);
-		return str.append(cmd, 9).append(hubName).append(cmd2, 3).append(topic).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+		str.reserve(str.size() + hubName.size() + topic.size() + 12 + NMDC_SEPARATOR_LEN);
+		return str.append("$HubName ", 9).append(hubName).append(" - ", 3).append(topic).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
 	} else {
-		str.reserve(str.size() + hubName.size() + cmdLen);
-		return str.append(cmd, 9).append(hubName).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+		str.reserve(str.size() + hubName.size() + 9 + NMDC_SEPARATOR_LEN);
+		return str.append("$HubName ", 9).append(hubName).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
 	}
 }
 
 // $HubTopic hubTopic|
 string & NmdcProtocol::appendHubTopic(string & str, const string & hubTopic) {
-	static const char * cmd = "$HubTopic ";
-	static size_t cmdLen = 10 + NMDC_SEPARATOR_LEN;
-	str.reserve(str.size() + hubTopic.size() + cmdLen);
-	return str.append(cmd, 10).append(hubTopic).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	str.reserve(str.size() + hubTopic.size() + 10 + NMDC_SEPARATOR_LEN);
+	return str.append("$HubTopic ", 10).append(hubTopic).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
 }
 
 // <nick> msg|
 string & NmdcProtocol::appendChat(string & str, const string & nick, const string & msg) {
-	static const char * cmd = "<";
-	static const char * cmd2 = "> ";
-	static size_t cmdLen = 3 + NMDC_SEPARATOR_LEN;
-	str.reserve(str.size() + nick.size() + msg.size() + cmdLen);
-	return str.append(cmd, 1).append(nick).append(cmd2, 2).append(msg).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	str.reserve(str.size() + nick.size() + msg.size() + 3 + NMDC_SEPARATOR_LEN);
+	return str.append("<", 1).append(nick).append("> ", 2).append(msg).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
 }
 
 // $To: to From: from $<nick> msg|
 string & NmdcProtocol::appendPm(string & str, const string & to, const string & from, const string & nick, const string & msg) {
-	static const char * cmd = "$To: ";
-	static const char * cmd2 = " From: ";
-	static const char * cmd3 = " $<";
-	static const char * cmd4 = "> ";
-	static size_t cmdLen = 17 + NMDC_SEPARATOR_LEN;
-	str.reserve(str.size() + to.size() + from.size() + nick.size() + msg.size() + cmdLen);
-	str.append(cmd, 5).append(to).append(cmd2, 7).append(from).append(cmd3, 3).append(nick);
-	return str.append(cmd4, 2).append(msg).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	str.reserve(str.size() + to.size() + from.size() + nick.size() + msg.size() + 17 + NMDC_SEPARATOR_LEN);
+	str.append("$To: ", 5).append(to).append(" From: ", 7).append(from).append(" $<", 3).append(nick);
+	return str.append("> ", 2).append(msg).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
 }
 
 // $To: to From: from $<nick> msg|
 void NmdcProtocol::appendPmToAll(string & start, string & end, const string & from, const string & nick, const string & msg) {
-	static const char * cmd = "$To: ";
-	static const char * cmd2 = " From: ";
-	static const char * cmd3 = " $<";
-	static const char * cmd4 = "> ";
-	static size_t cmdLen = 12 + NMDC_SEPARATOR_LEN;
-	start.append(cmd, 5);
-	end.reserve(end.size() + from.size() + nick.size() + msg.size() + cmdLen);
-	end.append(cmd2, 7).append(from).append(cmd3, 3).append(nick);
-	end.append(cmd4, 2).append(msg).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	start.append("$To: ", 5);
+	end.reserve(end.size() + from.size() + nick.size() + msg.size() + 12 + NMDC_SEPARATOR_LEN);
+	end.append(" From: ", 7).append(from).append(" $<", 3).append(nick);
+	end.append("> ", 2).append(msg).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
 }
 
 // $Quit nick|
 string & NmdcProtocol::appendQuit(string & str, const string & nick) {
-	static const char * cmd = "$Quit ";
-	static size_t cmdLen = 6 + NMDC_SEPARATOR_LEN;
-	str.reserve(str.size() + nick.size() + cmdLen);
-	return str.append(cmd, 6).append(nick).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	str.reserve(str.size() + nick.size() + 6 + NMDC_SEPARATOR_LEN);
+	return str.append("$Quit ", 6).append(nick).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
 }
 
 // $OpList nick$$|
 string & NmdcProtocol::appendOpList(string & str, const string & nick) {
-	static const char * cmd = "$OpList ";
-	static const char * cmd2 = "$$"NMDC_SEPARATOR;
-	static size_t cmdLen = 10 + NMDC_SEPARATOR_LEN;
-	static size_t cmdLen2 = 2 + NMDC_SEPARATOR_LEN;
-	str.reserve(str.size() + nick.size() + cmdLen);
-	return str.append(cmd, 8).append(nick).append(cmd2, cmdLen2);
+	str.reserve(str.size() + nick.size() + 10 + NMDC_SEPARATOR_LEN);
+	return str.append("$OpList ", 8).append(nick).append("$$"NMDC_SEPARATOR, 2 + NMDC_SEPARATOR_LEN);
 }
 
 // $UserIP nick ip$$|
 string & NmdcProtocol::appendUserIp(string & str, const string & nick, const string & ip) {
-	static const char * cmd = "$UserIP ";
-	static const char * cmd2 = " ";
-	static const char * cmd3 = "$$"NMDC_SEPARATOR;
-	static size_t cmdLen = 11 + NMDC_SEPARATOR_LEN;
-	static size_t cmdLen2 = 2 + NMDC_SEPARATOR_LEN;
 	if (ip.length()) {
-		str.reserve(str.size() + nick.size() + ip.size() + cmdLen);
-		str.append(cmd, 8).append(nick).append(cmd2, 1).append(ip).append(cmd3, cmdLen2);
+		str.reserve(str.size() + nick.size() + ip.size() + 11 + NMDC_SEPARATOR_LEN);
+		str.append("$UserIP ", 8).append(nick).append(" ", 1).append(ip).append("$$"NMDC_SEPARATOR, 2 + NMDC_SEPARATOR_LEN);
 	}
 	return str;
 }
 
+// $ForceMove address|
 string & NmdcProtocol::appendForceMove(string & str, const string & address) {
-	static const char * cmd = "$forceMove ";
 	str.reserve(address.size() + 11 + NMDC_SEPARATOR_LEN);
-	return str.append(cmd, 11).append(address).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	return str.append("$ForceMove ", 11).append(address).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
 }
 
 
@@ -1182,8 +1141,7 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 			if (!dcConn->sendBufIsEmpty()) { // buf would not flush, if it was empty
 				dcConn->flush(); // newPolitic
 			} else {
-				static string s(NMDC_SEPARATOR);
-				dcConn->send(s);
+				dcConn->send("", 0 , true, true);
 			}
 		}
 	} catch(...) {
@@ -1283,8 +1241,7 @@ bool NmdcProtocol::antiflood(DcConn * dcConn, unsigned int iType) {
 bool NmdcProtocol::validateUser(DcConn * dcConn, const string & sNick) {
 
 	/** Checking for bad symbols in nick */
-	static string forbidedChars("$| ");
-	if (sNick.npos != sNick.find_first_of(forbidedChars)) {
+	if (sNick.npos != sNick.find_first_of("$| ")) {
 		if (dcConn->Log(2)) {
 			dcConn->LogStream() << "Bad nick chars: '" << sNick << "'" << endl;
 		}
@@ -1359,13 +1316,12 @@ void NmdcProtocol::delFromOps(DcUser * dcUser) {
 				if (dcUser->mDcConn == NULL) {
 					return;
 				}
-				string s = dcUser->getMyINFO();
 				dcUser->send(appendQuit(sMsg1, dcUser->getNick()), false, false);
 				if (dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
-					dcUser->send(s, true, false);
+					dcUser->send(dcUser->getMyINFO(), true, false);
 				} else if (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
 					dcUser->send(appendHello(sMsg2, dcUser->getNick()), false, false);
-					dcUser->send(s, true, false);
+					dcUser->send(dcUser->getMyINFO(), true, false);
 				} else {
 					dcUser->send(appendHello(sMsg2, dcUser->getNick()), false, false);
 				}
@@ -1373,8 +1329,7 @@ void NmdcProtocol::delFromOps(DcUser * dcUser) {
 				if ((dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_USERIP2) || dcUser->mInIpList) {
 					dcUser->send(appendUserIp(sMsg3, dcUser->getNick(), dcUser->getIp()));
 				} else {
-					s.clear();
-					dcUser->send(s);
+					dcUser->send("", 0, false, true);
 				}
 			} else {
 				mDcServer->mDcUserList.sendToAll(appendQuit(sMsg1, dcUser->getNick()), true/*mDcServer->mDcConfig.mDelayedMyinfo*/, false);

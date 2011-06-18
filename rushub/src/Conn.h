@@ -211,9 +211,6 @@ public:
 	/** Get pointer for string with data */
 	string * getCommandPtr();
 
-	/** Write data in sending buffer */
-	virtual int writeData(const string & data, bool flush);
-
 	void flush(); /** Flush buffer */
 
 
@@ -285,13 +282,13 @@ protected:
 
 protected:
 
-	/** onFlush */
+	//< Write data in sending buffer
+	int writeData(const char * data, size_t len, bool flush);
+
+	//< onFlush
 	virtual void onFlush();
 
 	virtual void onOk(bool);
-
-	/** Send len byte from buf */
-	int send(const char * buf, size_t & len);
 
 private:
 
@@ -341,6 +338,9 @@ private:
 
 	//< Calculate mac-address
 	void calcMacAddress();
+
+	//< Send len byte from buf
+	int send(const char * buf, size_t & len);
 
 
 }; // class Conn

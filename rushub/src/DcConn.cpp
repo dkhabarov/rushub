@@ -58,35 +58,40 @@ DcServer * DcConn::server() {
 }
 
 
+
 int DcConn::send(const string & data, bool addSep, bool flush) {
-	int iRet;
-	if (!mWritable) {
-		return 0;
-	}
+	return send(data.c_str(), data.size(), addSep, flush);
+}
 
-	if (data.size() >= mSendBufMax) {
-		string msg(data);
-		if (Log(0)) {
-			LogStream() << "Too long message. Size: " << msg.size() << ". Max size: "
-				<< mSendBufMax << " Message starts with: " << msg.substr(0, 25) << endl;
-		}
-		msg.resize(mSendBufMax - 1);
 
-		if (addSep) {
-			writeData(msg, false);
-			iRet = writeData(NMDC_SEPARATOR, flush);
+
+int DcConn::send(const char * data, size_t len, bool addSep, bool flush) {
+	int ret = 0;
+	if (mWritable) {
+		if (len >= mSendBufMax) {
+			string msg(data);
+			if (Log(0)) {
+				LogStream() << "Too long message. Size: " << len << ". Max size: "
+					<< mSendBufMax << " Message starts with: " << msg.substr(0, 25) << endl;
+			}
+			msg.resize(mSendBufMax - 1);
+
+			if (addSep) {
+				writeData(msg.c_str(), mSendBufMax, false);
+				ret = writeData(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN, flush);
+			} else {
+				ret = writeData(msg.c_str(), mSendBufMax, flush);
+			}
 		} else {
-			iRet = writeData(msg, flush);
-		}
-	} else {
-		if (addSep) {
-			writeData(data, false);
-			iRet = writeData(NMDC_SEPARATOR, flush);
-		} else {
-			iRet = writeData(data, flush);
+			if (addSep) {
+				writeData(data, len, false);
+				ret = writeData(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN, flush);
+			} else {
+				ret = writeData(data, len, flush);
+			}
 		}
 	}
-	return iRet;
+	return ret;
 }
 
 

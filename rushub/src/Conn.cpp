@@ -24,7 +24,6 @@
 
 #include "Conn.h"
 #include "Server.h" // for mServer
-#include "stringutils.h" // for shrinkStringToFit, strCutLeft
 
 #include <iostream> // cout, endl
 #include <ctype.h>
@@ -45,7 +44,6 @@
 #define NS_INT16SZ 2
 
 
-using namespace ::utils; // shrinkStringToFit, strCutLeft
 
 namespace server {
 
@@ -709,7 +707,7 @@ void Conn::calcMacAddress() {
 
 
 
-/** Clear params */
+//< Clear params
 void Conn::clearCommandPtr() {
 	mCommand = NULL;
 	mStrStatus = STRING_STATUS_NO_STR;
@@ -717,7 +715,7 @@ void Conn::clearCommandPtr() {
 
 
 
-/** Get pointer for string with data */
+//< Get pointer for string with data
 string * Conn::getCommandPtr() {
 	return mCommand;
 }
@@ -743,7 +741,9 @@ void Conn::setCommandPtr(string * pStr) {
 	mStrStatus = STRING_STATUS_PARTLY;
 }
 
-/** Reading data from buffer and record in line of the protocol */
+
+
+//< Reading data from buffer and record in line of the protocol
 int Conn::readFromRecvBuf() {
 	if (!mCommand) {
 		if (ErrLog(0)) {
@@ -779,7 +779,9 @@ int Conn::readFromRecvBuf() {
 	return len;
 }
 
-/** Get pointer for string */
+
+
+//< Get pointer for string
 string * Conn::getParserCommandPtr() {
 	if (mParser == NULL) {
 		mParser = createParser();
@@ -791,12 +793,16 @@ string * Conn::getParserCommandPtr() {
 	return &(mParser->mCommand);
 }
 
+
+
 Parser * Conn::createParser() {
 	if (mProtocol == NULL) {
 		return NULL;
 	}
 	return mProtocol->createParser();
 }
+
+
 
 void Conn::deleteParser(Parser * parser) {
 	if (parser != NULL) {
@@ -808,7 +814,9 @@ void Conn::deleteParser(Parser * parser) {
 	}
 }
 
-/** remaining (for web-server) */
+
+
+//< remaining (for web-server)
 int Conn::remaining() {
 
 	unsigned long maxCommandLength = (mProtocol != NULL ? mProtocol->getMaxCommandLength() : 10240);
@@ -824,44 +832,44 @@ int Conn::remaining() {
 	return len;
 }
 
-/** Write data in sending buffer and send to conn */
-int Conn::writeData(const string & sData, bool bFlush) {
+
+
+//< Write data in sending buffer and send to conn
+int Conn::writeData(const char * data, size_t len, bool flush) {
 	size_t bufLen = mSendBuf.size();
-	if (bufLen + sData.size() >= mSendBufMax) {
+	if (bufLen + len >= mSendBufMax) {
 		if (Log(0)) {
 			LogStream() << "Sending buffer has big size, closing" << endl;
 		}
 		closeNow(CLOSE_REASON_MAXSIZE_SEND);
 		return -1;
 	}
-	bFlush = bFlush || (bufLen > (mSendBufMax >> 1));
+	flush = flush || (bufLen > (mSendBufMax >> 1));
 
-	if (!bFlush) { 
-		mSendBuf.append(sData.c_str(), sData.size());
+	if (!flush) { 
+		mSendBuf.append(data, len);
 		return 0;
 	}
 
 	const char * send_buf = NULL; 
-	size_t size; 
-	bool appended = false;
+	size_t size;
 
-	if (bufLen) {
-		mSendBuf.append(sData.c_str(), sData.size());
+	if (bufLen != 0) {
+		mSendBuf.append(data, len);
 		size = mSendBuf.size();
 		send_buf = mSendBuf.c_str();
-		appended = true;
 	} else { 
-		size = sData.size();
-		if (!size) {
+		size = len;
+		if (size == 0) { // buff is empty and no data
 			return 0;
 		}
-		send_buf = sData.c_str();
+		send_buf = data;
 	}
 
-	/** Sending */
+	// Sending
 	if (send(send_buf, size) < 0) {
 
-		if ((SockErr != SOCK_EAGAIN) /*&& (SockErr != SOCK_EINTR)*/) {
+		if (SockErr != SOCK_EAGAIN) {
 			if (Log(2)) {
 				LogStream() << "Error in sending: " << SockErr << "(not EAGAIN), closing" << endl;
 			}
@@ -872,10 +880,10 @@ int Conn::writeData(const string & sData, bool bFlush) {
 		if (Log(3)) {
 			LogStream() << "Block sent. Was sent " << size << " bytes" << endl;
 		}
-		if (!appended) {
-			strCutLeft(sData, mSendBuf, size);
+		if (bufLen == 0) {
+			mSendBuf.append(data + size, len - size); // Now sData.size() != size
 		} else {
-			strCutLeft(mSendBuf, size); /** del from buf sent data */
+			string(mSendBuf, size, mSendBuf.size() - size).swap(mSendBuf); // Del from buf sent data
 		}
 
 		if (bool(mCloseTime)) {
@@ -893,12 +901,12 @@ int Conn::writeData(const string & sData, bool bFlush) {
 			}
 
 			bufLen = mSendBuf.size();
-			if (mBlockInput && bufLen < MAX_SEND_UNBLOCK_SIZE) { /** Unset block of input */
+			if (mBlockInput && bufLen < MAX_SEND_UNBLOCK_SIZE) { // Unset block of input
 				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::eEF_INPUT);
 				if (Log(3)) {
 					LogStream() << "Unblock input channel" << endl;
 				}
-			} else if (!mBlockInput && bufLen >= MAX_SEND_BLOCK_SIZE) { /** Set block of input */
+			} else if (!mBlockInput && bufLen >= MAX_SEND_BLOCK_SIZE) { // Set block of input
 				mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::eEF_INPUT);
 				if (Log(3)) {
 					LogStream() << "Block input channel" << endl;
@@ -906,10 +914,10 @@ int Conn::writeData(const string & sData, bool bFlush) {
 			}
 		}
 	} else {
-		if (appended) {
-			mSendBuf.erase(0, mSendBuf.size());
+		if (bufLen != 0) {
+			mSendBuf.erase();
+			mSendBuf.reserve();
 		}
-		shrinkStringToFit(mSendBuf);
 
 		if (bool(mCloseTime)) {
 			closeNow();
@@ -928,21 +936,26 @@ int Conn::writeData(const string & sData, bool bFlush) {
 	return size;
 }
 
-/** onFlush */
+
+
+//< onFlush
 void Conn::onFlush() {
 }
 
-/** Flush */
+
+
+//< Flush
 void Conn::flush() {
-	static string empty("");
-	if (mSendBuf.length()) {
-		writeData(empty, true);
+	if (mSendBuf.size() != 0) {
+		writeData("", 0, true);
 	}
 }
 
-/** Send len byte from buf */
+
+
+//< Send len byte from buf
 int Conn::send(const char *buf, size_t &len) {
-#ifdef QUICK_SEND /** Quick send */
+#ifdef QUICK_SEND // Quick send
 	if (mConnType != CONN_TYPE_CLIENTUDP) {
 		len = ::send(mSocket, buf, len, 0);
 	} else {
@@ -996,12 +1009,14 @@ int Conn::send(const char *buf, size_t &len) {
 		total += n;
 		bytesleft -= n;
 	}
-	len = total; /* Number sending bytes */
-	return SOCK_ERROR(n) ? -1 : 0; /* return -1 - fail, 0 - ok */
+	len = total; // Number sending bytes
+	return SOCK_ERROR(n) ? -1 : 0; // return -1 - fail, 0 - ok
 #endif
 }
 
-/** Main base timer */
+
+
+//< Main base timer
 int Conn::onTimerBase(Time &now) {
 	if (bool(mCloseTime) && mCloseTime > now) {
 		closeNow();
@@ -1012,10 +1027,14 @@ int Conn::onTimerBase(Time &now) {
 	return 0;
 }
 
-/** Main timer */
+
+
+//< Main timer
 int Conn::onTimer(Time &) {
 	return 0;
 }
+
+
 
 bool Conn::strLog() {
 	Obj::strLog();
@@ -1105,8 +1124,12 @@ ConnFactory::ConnFactory(Protocol * protocol, Server * server) :
 {
 }
 
+
+
 ConnFactory::~ConnFactory() {
 }
+
+
 
 Conn * ConnFactory::createConn(tSocket sock) {
 	Conn * conn = new Conn(sock, mServer); /** CONN_TYPE_CLIENTTCP */
@@ -1116,19 +1139,26 @@ Conn * ConnFactory::createConn(tSocket sock) {
 	return conn;
 }
 
+
+
 void ConnFactory::deleteConn(Conn * &conn) {
 	conn->close(); /** close socket */
 	delete conn;
 	conn = NULL;
 }
 
+
+
 void ConnFactory::onNewData(Conn * conn, string * str) {
 	mServer->onNewData(conn, str);
 }
 
+
+
 int ConnFactory::onNewConn(Conn * conn) {
 	return mServer->onNewConn(conn);
 }
+
 
 }; // server
 

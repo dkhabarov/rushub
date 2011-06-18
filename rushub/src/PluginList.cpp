@@ -24,7 +24,6 @@
 
 #include "PluginList.h"
 #include "PluginLoader.h"
-#include "stringutils.h" // strCompare
 #include "Dir.h"
 
 
@@ -92,9 +91,9 @@ bool PluginList::loadAll() {
 	while (NULL != (entry = readdir(dir))) {
 		file = entry->d_name;
 		#ifdef _WIN32
-			if ((file.size() > 4) && (0 == strCompare(file, file.size() - 4, 4, ".dll")))
+			if ((file.size() > 4) && (0 == file.compare(file.size() - 4, 4, ".dll")))
 		#else
-			if ((file.size() > 3) && (0 == strCompare(file, file.size() - 3, 3, ".so")))
+			if ((file.size() > 3) && (0 == file.compare(file.size() - 3, 3, ".so")))
 		#endif
 		{
 			if (Log(3)) {

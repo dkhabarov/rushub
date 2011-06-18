@@ -23,14 +23,12 @@
  */
 
 #include "DcParser.h"
-#include "stringutils.h"
 
 namespace dcserver {
 
 namespace protocol {
 
 using namespace ::dcserver::protoenums;
-using namespace ::utils;
 
 
 /** Protocol command */
@@ -58,7 +56,7 @@ public:
 
 	/** Checking that string contains command */
 	bool check(const string & str) {
-		return 0 == strCompare(str, 0, mLength, mKey);
+		return 0 == str.compare(0, mLength, mKey);
 	}
 
 }; // ProtocolCommand

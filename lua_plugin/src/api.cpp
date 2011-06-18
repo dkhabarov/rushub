@@ -23,9 +23,7 @@
 #include "LuaUtils.h"
 
 #include <vector>
-#ifndef _WIN32
-	#include <string.h> // strlen
-#else
+#ifdef _WIN32
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
 		#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
 	#endif

@@ -196,7 +196,7 @@ int WebConn::send(const string & data, bool flush /* = true */) {
 	if (!mWritable) {
 		return 0;
 	}
-	return writeData(data, flush);
+	return writeData(data.c_str(), data.size(), flush);
 }
 
 

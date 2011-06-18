@@ -146,6 +146,7 @@ int DcIpList::sendWithNick(DcConn * dcConn) {
 	}
 	string str(msData1);
 	str.append(dcConn->mDcUser->getNick());
+	str.append(msData2);
 	if (mProfile) {
 		int profile = dcConn->mProfile + 1;
 		if (profile < 0) {
@@ -155,12 +156,10 @@ int DcIpList::sendWithNick(DcConn * dcConn) {
 			profile = (profile % 32) - 1;
 		}
 		if (mProfile & (1 << profile)) {
-			string str(msData1);
-			str.append(dcConn->mDcUser->getNick());
-			return dcConn->send(str.append(msData2), mAddSep, mFlush);
+			return dcConn->send(str, mAddSep, mFlush);
 		}
 	} else {
-		return dcConn->send(str.append(msData2), mAddSep, mFlush);
+		return dcConn->send(str, mAddSep, mFlush);
 	}
 	return 0;
 }

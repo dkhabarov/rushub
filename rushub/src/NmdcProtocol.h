@@ -43,6 +43,7 @@ class UserList;
 
 namespace protocol {
 
+
 class NmdcProtocol : public Protocol {
 
 public:

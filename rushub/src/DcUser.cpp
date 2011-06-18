@@ -76,6 +76,14 @@ void DcUser::send(const string & data, bool addSep, bool flush) {
 
 
 
+void DcUser::send(const char * data, size_t len, bool addSep, bool flush) {
+	if (mDcConn) {
+		mDcConn->send(data, len, addSep, flush);
+	}
+}
+
+
+
 /** Get IP address of user */
 const string & DcUser::ip() const {
 	return mIp;

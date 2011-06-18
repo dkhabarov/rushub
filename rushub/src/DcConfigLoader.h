@@ -45,10 +45,6 @@ public:
 	int load(ConfigListBase *, const ConfigStore &);
 	int save(ConfigListBase *, const ConfigStore &);
 
-	int loadFromFile(ConfigListBase *, const char * fileName);
-	int saveToFile(ConfigListBase *, const char * fileName);
-	int saveToStream(ConfigListBase *, ostream &);
-
 	int loadFromXml(ConfigListBase *, const char * fileName);
 	int saveToXml(ConfigListBase *, const char * fileName);
 

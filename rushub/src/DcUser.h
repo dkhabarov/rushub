@@ -73,6 +73,7 @@ public:
 	virtual ~DcUser();
 
 	virtual void send(const string & data, bool addSep = false, bool flush = true);
+	virtual void send(const char * data, size_t len, bool addSep = false, bool flush = true);
 
 	void setInUserList(bool);
 

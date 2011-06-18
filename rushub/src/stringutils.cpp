@@ -28,42 +28,6 @@
 namespace utils {
 
 
-
-/** Function of the comparison of the substring from string str1 with string str2
-  (0 - equal, 1 - not equal, -1 - not is faithfully given size of the substring str1) */
-int strCompare(const string & str1, size_t start, size_t count, const string & str2) {
-	return str1.compare(start, count, str2);
-}
-
-
-
-/** Removing the spare reserved place in internal buffer of the string */
-void shrinkStringToFit(string & str) {
-	string(str.data(), str.size()).swap(str);
-}
-
-
-
-/** Removing symbols on the left */
-void strCutLeft(string & str, size_t iCut) {
-	if (iCut > str.length()) {
-		iCut = str.length();
-	}
-	string(str, iCut, str.size() - iCut).swap(str);
-}
-
-
-
-/** Removing symbols on the left and record result in other string */
-void strCutLeft(const string & str1, string & str2, size_t cut) {
-	if (cut > str1.size()) {
-		cut = str1.size();
-	}
-	string(str1, cut, str1.size() - cut).swap(str2);
-}
-
-
-
 /** Record from the file to the string */
 bool loadFileInString(const string & fileName, string & str) {
 	string buf;
@@ -140,37 +104,6 @@ string & stringReplace(const string & str, const string & varname, string & dest
 /** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
 string & stringReplace(const string & str, const string & varname, string & dest, __int64 by, bool b) {
 	return stringReplace(str, varname, dest, int64ToString(by), b);
-}
-
-
-
-string replaceSp(const string & str, bool to) {
-	string dest(str), search, rep;
-	if (to) {
-		search = "\\n";
-		rep = "\n";
-	} else {
-		search = "\n";
-		rep = "\\n";
-	}
-	size_t pos = dest.find(search);
-	while (pos != dest.npos) {
-		dest.replace(pos, search.size(), rep);
-		pos = dest.find(search, pos);
-	}
-	if (to) {
-		search = "\\t";
-		rep = "\t";
-	} else {
-		search = "\t";
-		rep = "\\t";
-	}
-	pos = dest.find(search);
-	while (pos != dest.npos) {
-		dest.replace(pos, search.size(), rep);
-		pos = dest.find(search, pos);
-	}
-	return dest;
 }
 
 
