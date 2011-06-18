@@ -24,6 +24,7 @@
 
 #include "Conn.h"
 #include "Server.h" // for mServer
+#include "stringutils.h" // for atoi
 
 #include <iostream> // cout, endl
 #include <ctype.h>
