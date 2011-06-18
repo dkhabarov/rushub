@@ -494,7 +494,6 @@ bool DcServer::checkNick(DcConn *dcConn) {
 
 	UserKey key = mDcUserList.nick2Key(dcConn->mDcUser->getNick());
 	if (mDcUserList.containsKey(key)) {
-		string sMsg;
 		DcUser * us = static_cast<DcUser *> (mDcUserList.find(key));
 
 		if (!us->mDcConn || (us->getProfile() == -1 && us->getIp() != dcConn->getIp())) {
@@ -504,12 +503,10 @@ bool DcServer::checkNick(DcConn *dcConn) {
 					<< dcConn->getIp() << "] vs '" << us->getNick() 
 					<< "'[" << us->getIp() << "]" << endl;
 			}
-
-			stringReplace(mDcLang.mUsedNick, string("nick"), sMsg, dcConn->mDcUser->getNick());
-
-			sendToUser(dcConn->mDcUser, sMsg.c_str(), mDcConfig.mHubBot.c_str());
-
-			dcConn->send(NmdcProtocol::appendValidateDenide(sMsg.erase(), dcConn->mDcUser->getNick()));
+			string msg;
+			stringReplace(mDcLang.mUsedNick, "nick", msg, dcConn->mDcUser->getNick());
+			sendToUser(dcConn->mDcUser, msg.c_str(), mDcConfig.mHubBot.c_str());
+			dcConn->send(NmdcProtocol::appendValidateDenide(msg.erase(), dcConn->mDcUser->getNick()));
 			return false;
 		}
 		if (us->mDcConn->Log(3)) {
@@ -724,11 +721,11 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 		dcUser->setInUserList(false);
 
 		if (!dcUser->getHide()) {
-			string sMsg;
-			NmdcProtocol::appendQuit(sMsg, dcUser->getNick());
+			string msg;
+			NmdcProtocol::appendQuit(msg, dcUser->getNick());
 
 			/** Delay in sending MyINFO (and Quit) */
-			mDcUserList.sendToAll(sMsg, true/*mDcConfig.mDelayedMyinfo*/, false);
+			mDcUserList.sendToAll(msg, true/*mDcConfig.mDelayedMyinfo*/, false);
 		}
 	}
 	return true;
@@ -738,24 +735,25 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 
 /** Show user to all */
 bool DcServer::showUserToAll(DcUser * dcUser) {
-	string sMsg1, sMsg2;
+	string hello;
 	if (dcUser->mHide && dcUser->mDcConn) {
 		if (dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
 			dcUser->mDcConn->send(dcUser->getMyINFO(), true, false);
 		} else if (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
-			dcUser->mDcConn->send(NmdcProtocol::appendHello(sMsg1, dcUser->getNick()), false, false);
+			dcUser->mDcConn->send(NmdcProtocol::appendHello(hello, dcUser->getNick()), false, false);
 			dcUser->mDcConn->send(dcUser->getMyINFO(), true, false);
 		} else {
-			dcUser->mDcConn->send(NmdcProtocol::appendHello(sMsg1, dcUser->getNick()), false, false);
+			dcUser->mDcConn->send(NmdcProtocol::appendHello(hello, dcUser->getNick()), false, false);
 		}
 
 		if (dcUser->mInOpList) {
-			dcUser->mDcConn->send(NmdcProtocol::appendOpList(sMsg2, dcUser->getNick()), false, false);
+			string opList;
+			dcUser->mDcConn->send(NmdcProtocol::appendOpList(opList, dcUser->getNick()), false, false);
 		}
 	} else {
 
 		/** Sending the greeting for all users, not supporting feature NoHello (except enterring users) */
-		mHelloList.sendToAll(NmdcProtocol::appendHello(sMsg1, dcUser->getNick()), true/*mDcConfig.mDelayedMyinfo*/, false);
+		mHelloList.sendToAll(NmdcProtocol::appendHello(hello, dcUser->getNick()), true/*mDcConfig.mDelayedMyinfo*/, false);
 
 		/** Show MyINFO string to all users */
 		mDcUserList.sendToAll(dcUser->getMyINFO(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
@@ -765,8 +763,9 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 
 		/** Op entry */
 		if (dcUser->mInOpList) {
-			mDcUserList.sendToAll(NmdcProtocol::appendOpList(sMsg2, dcUser->getNick()), true/*mDcConfig.mDelayedMyinfo*/, false);
-			mEnterList.sendToAll(sMsg2, true/*mDcConfig.mDelayedMyinfo*/, false);
+			string opList;
+			mDcUserList.sendToAll(NmdcProtocol::appendOpList(opList, dcUser->getNick()), true/*mDcConfig.mDelayedMyinfo*/, false);
+			mEnterList.sendToAll(opList, true/*mDcConfig.mDelayedMyinfo*/, false);
 		}
 	}
 
@@ -823,10 +822,12 @@ DcUser * DcServer::getDcUser(const char * nick) {
 		if (userBase) {
 			return static_cast<DcUser *> (userBase);
 		}
-		DcConn * dcConn;
+		DcConn * dcConn = NULL;
 		for (tCLIt it = mConnList.begin(); it != mConnList.end(); ++it) {
 			dcConn = static_cast<DcConn *> (*it);
-			if (dcConn && dcConn->mType == CLIENT_TYPE_NMDC && dcConn->mDcUser && dcConn->mDcUser->getNick() == nickStr) {
+			if (dcConn && dcConn->mType == CLIENT_TYPE_NMDC && 
+				dcConn->mDcUser && dcConn->mDcUser->getNick() == nickStr
+			) {
 				return static_cast<DcUser *> (dcConn->mDcUser);
 			}
 		}
@@ -886,9 +887,10 @@ bool DcServer::sendToUser(DcUserBase * dcUserBase, const char * data, const char
 	if (dcConn->mType == CLIENT_TYPE_NMDC && 
 		msg.substr(msg.size() - NMDC_SEPARATOR_LEN, NMDC_SEPARATOR_LEN) != NMDC_SEPARATOR
 	) {
-		msg.append(NMDC_SEPARATOR);
+		dcConn->send(msg, true);
+	} else {
+		dcConn->send(msg);
 	}
-	dcConn->send(msg);
 	return true;
 }
 
@@ -970,7 +972,7 @@ bool DcServer::sendToProfiles(unsigned long profile, const char * data, const ch
 
 
 bool DcServer::sendToIp(const char * ip, const char * data, unsigned long profile, const char * nick, const char * from) {
-	if (!ip || !data || !Conn::checkIp(string(ip))) {
+	if (!ip || !data || !Conn::checkIp(ip)) {
 		return false;
 	}
 
@@ -1099,8 +1101,8 @@ void DcServer::forceMove(DcUserBase * dcUserBase, const char * address, const ch
 		nick = dcConn->mDcUser->getNick();
 	}
 
-	stringReplace(mDcLang.mForceMove, string("address"), force, string(address));
-	stringReplace(force, string("reason"), force, string(reason != NULL ? reason : ""));
+	stringReplace(mDcLang.mForceMove, "address", force, string(address));
+	stringReplace(force, "reason", force, string(reason != NULL ? reason : ""));
 	NmdcProtocol::appendPm(msg, nick, mDcConfig.mHubBot, mDcConfig.mHubBot, force);
 	NmdcProtocol::appendChat(msg, mDcConfig.mHubBot, force);
 	dcConn->send(NmdcProtocol::appendForceMove(msg, address));
@@ -1211,8 +1213,10 @@ int DcServer::regBot(const string & nick, const string & info, const string & ip
 	if (!nick.length() || nick.length() > 64 || nick.find_first_of(" |$") != nick.npos) {
 		return -1;
 	}
-	if (!dcUser->setMyINFO(string("$MyINFO $ALL ") + nick + " " + info)) {
-		if (!dcUser->setMyINFO(string("$MyINFO $ALL ") + nick + " $ $$$0$")) {
+	string myInfo("$MyINFO $ALL ");
+	if (!dcUser->setMyINFO(myInfo.append(nick).append(" ", 1).append(info))) {
+		myInfo = "$MyINFO $ALL ";
+		if (!dcUser->setMyINFO(myInfo.append(nick).append(" $ $$$0$", 9))) {
 			delete dcUser;
 			return -2;
 		}

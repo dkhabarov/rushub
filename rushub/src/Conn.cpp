@@ -691,7 +691,7 @@ void Conn::calcMacAddress() {
 							curr->PhysicalAddress[0], curr->PhysicalAddress[1],
 							curr->PhysicalAddress[2], curr->PhysicalAddress[3],
 							curr->PhysicalAddress[4], curr->PhysicalAddress[5]);
-						mMac = string(buf);
+						mMac = buf;
 						free(addr);
 						return;
 					}
@@ -753,17 +753,17 @@ int Conn::readFromRecvBuf() {
 	}
 
 	char * buf = mRecvBuf + mRecvBufRead;
-	size_t pos, len = (mRecvBufEnd - mRecvBufRead);
-
-	string separator("\0");
+	string sep = "\0";
+	size_t len = (mRecvBufEnd - mRecvBufRead);
 	unsigned long maxCommandLength = 10240;
 	
 	if (mProtocol != NULL) {
-		separator = mProtocol->getSeparator();
+		sep = mProtocol->getSeparator();
 		maxCommandLength = mProtocol->getMaxCommandLength();
 	}
 
-	if ((pos = string(buf).find(separator)) == string::npos) {
+	const char * pos_sep = NULL;
+	if ((pos_sep = strstr(buf, sep.c_str())) == NULL) {
 		if (mCommand->size() + len > maxCommandLength) {
 			closeNow(CLOSE_REASON_MAXSIZE_RECV);
 			return 0;
@@ -772,7 +772,8 @@ int Conn::readFromRecvBuf() {
 		mRecvBufRead = mRecvBufEnd = 0;
 		return len;
 	}
-	len = pos + separator.length();
+	size_t pos = pos_sep - buf;
+	len = pos + sep.size();
 	mCommand->append(buf, pos);
 	mRecvBufRead += len;
 	mStrStatus = STRING_STATUS_STR_DONE;

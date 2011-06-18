@@ -47,7 +47,7 @@ public:
 	ProtocolCommand() {
 	}
 
-	ProtocolCommand(string sKey) : mKey(sKey) {
+	ProtocolCommand(const char * key) : mKey(key) {
 		mLength = mKey.length();
 	}
 
@@ -180,12 +180,10 @@ bool DcParser::isPassive(const string & description) {
 	if (i == description.npos) {
 		return false;
 	}
-	string chunk;
-	chunk.assign(description, int(i), int(l - i));
 	if (
-		(chunk.find("M:P") == description.npos) || 
-		(chunk.find("M:5") == description.npos) || 
-		(chunk.find("M:S") == description.npos)
+		(description.find("M:P", i, l - i) == description.npos) || 
+		(description.find("M:5", i, l - i) == description.npos) || 
+		(description.find("M:S", i, l - i) == description.npos)
 	) {
 		return false;
 	}

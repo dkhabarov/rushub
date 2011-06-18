@@ -177,9 +177,9 @@ void DcConfig::addVars(Server * server) {
 	add("iWebStrSizeMax",         mMaxWebCommandLength,                 10240);
 	add("sWebAddresses",          mWebAddresses,
 		#ifdef _WIN32
-			string("0.0.0.0:80")
+			"0.0.0.0:80"
 		#else
-			string("0.0.0.0:8080")
+			"0.0.0.0:8080"
 		#endif
 	);
 	add("bWebServer",             mWebServer,                           false);
@@ -203,9 +203,7 @@ void DcConfig::addVars(Server * server) {
 
 	for (int i = 0; i < 5; ++i) {
 		mTimeout[i] = timeoutDefault[i];
-		string s("iTimeout");
-		s.append(timeoutName[i]);
-		add(s, mTimeout[i], timeoutDefault[i]);
+		add(string("iTimeout").append(timeoutName[i]), mTimeout[i], timeoutDefault[i]);
 	}
 
 	add("iTimeoutAny",            mTimeoutAny,                          600.);
@@ -233,36 +231,32 @@ void DcConfig::addVars(Server * server) {
 	add("iMaxLevel",              miMaxLevel,                           miMaxLevel); // set this default value for log
 	add("iMaxErrLevel",           miMaxErrLevel,                        miMaxErrLevel); // set this default value for log
 
-	add("sUDPAddresses",          mUdpAddresses,                        string("0.0.0.0:1209") );
+	add("sUDPAddresses",          mUdpAddresses,                        "0.0.0.0:1209");
 	add("bUDPServer",             mUdpServer,                           false);
 	
-	add("sLocale",                mLocale,                              string(setlocale(LC_ALL, "")) );
-	add("sMainBotIP",             mMainBotIp,                           string("127.0.0.1") );
-	add("sMainBotMyINFO",         mMainBotMyinfo,                       string("RusHub bot<Bot V:1.0,M:A,H:0/0/1,S:0>$ $$$0$") );
+	add("sLocale",                mLocale,                              setlocale(LC_ALL, ""));
+	add("sMainBotIP",             mMainBotIp,                           "127.0.0.1");
+	add("sMainBotMyINFO",         mMainBotMyinfo,                       "RusHub bot<Bot V:1.0,M:A,H:0/0/1,S:0>$ $$$0$");
 	add("bMainBotKey",            mMainBotKey,                          true);
-	add("sHubBot",                mHubBot,                              string("RusHub") );
+	add("sHubBot",                mHubBot,                              "RusHub");
 	add("bRegMainBot",            mRegMainBot,                          true);
-	add("sTopic",                 mTopic,                               string("Russian hub software") );
-	add("sHubName",               mHubName,                             string("RusHub") );
+	add("sTopic",                 mTopic,                               "Russian hub software");
+	add("sHubName",               mHubName,                             "RusHub");
 	add("sAddresses",             mAddresses,
 		#ifdef _WIN32
-			string("0.0.0.0:411")
+			"0.0.0.0:411"
 		#else
-			string("0.0.0.0:4111")
+			"0.0.0.0:4111"
 		#endif
 	);
 
 	string mainPath(Dir::pathForFile(mConfigStore.mPath.c_str()));
 
-	string langPath(mainPath + "lang/");
-	string logPath(mainPath + "logs/");
-	string pluginPath(mainPath + "plugins/");
-
 	// TODO: auto detect lang
-	add("sLang",       mLang,       string("Russian") );
-	add("sLangPath",   mLangPath,   langPath);
-	add("sLogPath",    mLogPath,    logPath);
-	add("sPluginPath", mPluginPath, pluginPath);
+	add("sLang",       mLang,       "Russian");
+	add("sLangPath",   mLangPath,   string(mainPath).append("lang/"));
+	add("sLogPath",    mLogPath,    string(mainPath).append("logs/"));
+	add("sPluginPath", mPluginPath, string(mainPath).append("plugins/"));
 	add("sMainPath",   mMainPath,   mainPath);
 }
 
@@ -295,20 +289,18 @@ DcLang::DcLang(ConfigLoader * configLoader, ConfigListBase * configListBase) :
 	Config * langConfig = configListBase->operator[] ("sLang");
 	Config * langPathConfig = configListBase->operator[] ("sLangPath");
 	if (langConfig && langPathConfig) {
-		string path, lang;
-		langPathConfig->convertTo(path);
-		langConfig->convertTo(lang);
-		if (path.size() == 0) {
-			path = "./";
+		langPathConfig->convertTo(mConfigStore.mPath);
+		langConfig->convertTo(mConfigStore.mName);
+		if (mConfigStore.mPath.size() == 0) {
+			mConfigStore.mPath = "./";
 		}
-		if (lang.size() == 0) {
-			lang = "English";
+		if (mConfigStore.mName.size() == 0) {
+			mConfigStore.mName = "English";
 		}
 
 		// set xml file for lang
-		Dir::checkPath(path);
-		mConfigStore.mPath = path;
-		mConfigStore.mName = lang + ".xml";
+		Dir::checkPath(mConfigStore.mPath);
+		mConfigStore.mName.append(".xml", 4);
 	}
 
 	addVars();
@@ -324,39 +316,39 @@ DcLang::~DcLang() {
 
 void DcLang::addVars() {
 
-	add("sFirstMsg", mFirstMsg, string("Этот хаб работает под управлением %[HUB] (Время работы: %[uptime] / Юзеров: %[users] / Шара: %[share])."));
-	add("sBadChatNick", mBadChatNick, string("Неверный ник: %[nick]."));
-	add("sBadLoginSequence", mBadLoginSequence, string("Не правильная последовательность отосланных команд при входе."));
-	add("sBadMyinfoNick", mBadMyinfoNick, string("Неверный ник в MyINFO команде."));
-	add("sBadRevConNick", mBadRevConNick, string("Неверный ник при соединении: %[nick]. Ваш реальный ник: %[real_nick]."));
-	add("sTimeout", mTimeout, string("Тайм-аут %[reason]."));
-	add("sTimeoutAny", mTimeoutAny, string("Тайм-аут соединения."));
-	add("sBadCTMIp", mBadCtmIp, string("В запросе на подключение вы отсылаете неверный ip адрес: %[ip], ваш реальный ip: %[real_ip]."));
-	add("sBadSRNick", mBadSrNick, string("Неверный ник в результатах поиска: %[nick]. Ваш реальный ник: %[real_nick]."));
-	add("sBadSearchIp", mBadSearchIp, string("В поисковом запросе вы отсылаете неверный ip адрес: %[ip], ваш реальный ip: %[real_ip]."));
-	add("sUsedNick", mUsedNick, string("Этот ник %[nick] уже используется другим пользователем."));
+	add("sFirstMsg", mFirstMsg, "Этот хаб работает под управлением %[HUB] (Время работы: %[uptime] / Юзеров: %[users] / Шара: %[share]).");
+	add("sBadChatNick", mBadChatNick, "Неверный ник: %[nick].");
+	add("sBadLoginSequence", mBadLoginSequence, "Не правильная последовательность отосланных команд при входе.");
+	add("sBadMyinfoNick", mBadMyinfoNick, "Неверный ник в MyINFO команде.");
+	add("sBadRevConNick", mBadRevConNick, "Неверный ник при соединении: %[nick]. Ваш реальный ник: %[real_nick].");
+	add("sTimeout", mTimeout, "Тайм-аут %[reason].");
+	add("sTimeoutAny", mTimeoutAny, "Тайм-аут соединения.");
+	add("sBadCTMIp", mBadCtmIp, "В запросе на подключение вы отсылаете неверный ip адрес: %[ip], ваш реальный ip: %[real_ip].");
+	add("sBadSRNick", mBadSrNick, "Неверный ник в результатах поиска: %[nick]. Ваш реальный ник: %[real_nick].");
+	add("sBadSearchIp", mBadSearchIp, "В поисковом запросе вы отсылаете неверный ip адрес: %[ip], ваш реальный ip: %[real_ip].");
+	add("sUsedNick", mUsedNick, "Этот ник %[nick] уже используется другим пользователем.");
 
-	add("sBadNickLen", mBadNickLen, string("Недопустимая длина ника. Допустимая длина ника от %[min] до %[max] символов."));
-	add("sBadChars", mBadChars, string("Недопустимые символы в нике."));
-	add("sUsersLimit", mUsersLimit, string("Достигнут придел по количеству подключенных пользователей."));
-	add("sForceMove", mForceMove, string("Вы были перенаправлены на хаб dchub://%[address] причина: %[reason]"));
+	add("sBadNickLen", mBadNickLen, "Недопустимая длина ника. Допустимая длина ника от %[min] до %[max] символов.");
+	add("sBadChars", mBadChars, "Недопустимые символы в нике.");
+	add("sUsersLimit", mUsersLimit, "Достигнут придел по количеству подключенных пользователей.");
+	add("sForceMove", mForceMove, "Вы были перенаправлены на хаб dchub://%[address] причина: %[reason]");
 
-	add("sFloodMyINFO", mFlood[NMDC_TYPE_MYNIFO], string("Пожалуйста не флудите командой MyINFO."));
-	add("sFloodSearch", mFlood[NMDC_TYPE_SEARCH], string("Пожалуйста не используйте поиск так часто."));
-	add("sFloodSearchPassive", mFlood[NMDC_TYPE_SEARCH_PAS], string("Пожалуйста не используйте поиск так часто."));
-	add("sFloodMultiSearch", mFlood[NMDC_TYPE_MSEARCH], string("Пожалуйста не используйте поиск так часто."));
-	add("sFloodMultiSearchPassive", mFlood[NMDC_TYPE_MSEARCH_PAS], string("Пожалуйста не используйте поиск так часто."));
-	add("sFloodSR", mFlood[NMDC_TYPE_SR], string("Не флудите результатами поиска."));
-	add("sFloodSRUDP", mFlood[NMDC_TYPE_SR_UDP], string("Не флудите результатами поиска."));
-	add("sFloodChat", mFlood[NMDC_TYPE_CHAT], string("Пожалуйста не флудите!"));
-	add("sFloodTo", mFlood[NMDC_TYPE_TO], string("Пожалуйста не флудите в привате."));
-	add("sFloodNickList", mFlood[NMDC_TYPE_GETNICKLIST], string("Пожалуйста не флудите с помощью слишком частого получения списка пользователей."));
-	add("sFloodCTM", mFlood[NMDC_TYPE_CONNECTTOME], string("Пожалуйста не флудите частыми запросами на соединение с пользователями хаба."));
-	add("sFloodRCTM", mFlood[NMDC_TYPE_RCONNECTTOME], string("Пожалуйста не флудите частыми запросами на соединение с активнми пользователями хаба."));
-	add("sFloodMCTo", mFlood[NMDC_TYPE_MCTO], string("Пожалуйста не флудите!"));
-	add("sFloodUserIp", mFlood[NMDC_TYPE_USERIP], string("Пожалуйста не флудите запросами UserIP!"));
-	add("sFloodPing", mFlood[NMDC_TYPE_PING], string("Ваш клиент слишком часто пингует хаб."));
-	add("sFloodUnknown", mFlood[NMDC_TYPE_UNKNOWN], string("Не флудите неизвестными командами."));
+	add("sFloodMyINFO", mFlood[NMDC_TYPE_MYNIFO], "Пожалуйста не флудите командой MyINFO.");
+	add("sFloodSearch", mFlood[NMDC_TYPE_SEARCH], "Пожалуйста не используйте поиск так часто.");
+	add("sFloodSearchPassive", mFlood[NMDC_TYPE_SEARCH_PAS], "Пожалуйста не используйте поиск так часто.");
+	add("sFloodMultiSearch", mFlood[NMDC_TYPE_MSEARCH], "Пожалуйста не используйте поиск так часто.");
+	add("sFloodMultiSearchPassive", mFlood[NMDC_TYPE_MSEARCH_PAS], "Пожалуйста не используйте поиск так часто.");
+	add("sFloodSR", mFlood[NMDC_TYPE_SR], "Не флудите результатами поиска.");
+	add("sFloodSRUDP", mFlood[NMDC_TYPE_SR_UDP], "Не флудите результатами поиска.");
+	add("sFloodChat", mFlood[NMDC_TYPE_CHAT], "Пожалуйста не флудите!");
+	add("sFloodTo", mFlood[NMDC_TYPE_TO], "Пожалуйста не флудите в привате.");
+	add("sFloodNickList", mFlood[NMDC_TYPE_GETNICKLIST], "Пожалуйста не флудите с помощью слишком частого получения списка пользователей.");
+	add("sFloodCTM", mFlood[NMDC_TYPE_CONNECTTOME], "Пожалуйста не флудите частыми запросами на соединение с пользователями хаба.");
+	add("sFloodRCTM", mFlood[NMDC_TYPE_RCONNECTTOME], "Пожалуйста не флудите частыми запросами на соединение с активнми пользователями хаба.");
+	add("sFloodMCTo", mFlood[NMDC_TYPE_MCTO], "Пожалуйста не флудите!");
+	add("sFloodUserIp", mFlood[NMDC_TYPE_USERIP], "Пожалуйста не флудите запросами UserIP!");
+	add("sFloodPing", mFlood[NMDC_TYPE_PING], "Ваш клиент слишком часто пингует хаб.");
+	add("sFloodUnknown", mFlood[NMDC_TYPE_UNKNOWN], "Не флудите неизвестными командами.");
 
 	const char * reason[] = {
 		"получения ключа",
@@ -375,9 +367,7 @@ void DcLang::addVars() {
 	};
 
 	for (int i = 0; i < 5; ++i) {
-		string s("sTimeout");
-		s.append(name[i]);
-		add(s, mTimeoutCmd[i], reason[i]);
+		add(string("sTimeout").append(name[i]), mTimeoutCmd[i], reason[i]);
 	}
 
 	const char * units[] = {
@@ -402,9 +392,7 @@ void DcLang::addVars() {
 
 	for (int i = 0; i < 7; ++i) {
 		mUnits[i] = unitsDef[i];
-		string s("sUnit");
-		s.append(units[i]);
-		add(s, mUnits[i], unitsDef[i]);
+		add(string("sUnit").append(units[i]), mUnits[i], unitsDef[i]);
 	}
 
 	const char * times[] = {
@@ -425,9 +413,7 @@ void DcLang::addVars() {
 
 	for (int i = 0; i < 5; ++i) {
 		mTimes[i] = timesDef[i];
-		string s("sTimes");
-		s.append(times[i]);
-		add(s, mTimes[i], timesDef[i]);
+		add(string("sTimes").append(times[i]), mTimes[i], timesDef[i]);
 	}
 
 }
@@ -441,7 +427,6 @@ int DcLang::reload() {
 
 		if (ret != -4) {
 			// save default lang file
-			string name = mConfigStore.mName;
 			mConfigStore.mName = "Russian.xml";
 		}
 

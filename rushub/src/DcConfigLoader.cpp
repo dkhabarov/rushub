@@ -42,8 +42,7 @@ DcConfigLoader::~DcConfigLoader() {
 int DcConfigLoader::load(ConfigListBase * configListBase, const ConfigStore & configStore) {
 
 	// TODO: choose loader
-	string file(configStore.mPath + configStore.mName);
-	return loadFromXml(configListBase, file.c_str());
+	return loadFromXml(configListBase, string(configStore.mPath).append(configStore.mName).c_str());
 }
 
 
@@ -52,8 +51,7 @@ int DcConfigLoader::load(ConfigListBase * configListBase, const ConfigStore & co
 int DcConfigLoader::save(ConfigListBase * configListBase, const ConfigStore & configStore) {
 
 	// TODO: choose loader
-	string file(configStore.mPath + configStore.mName);
-	return saveToXml(configListBase, file.c_str());
+	return saveToXml(configListBase, string(configStore.mPath).append(configStore.mName).c_str());
 }
 
 

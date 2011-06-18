@@ -69,26 +69,16 @@ int DcConn::send(const char * data, size_t len, bool addSep, bool flush) {
 	int ret = 0;
 	if (mWritable) {
 		if (len >= mSendBufMax) {
-			string msg(data);
+			len = mSendBufMax;
 			if (Log(0)) {
-				LogStream() << "Too long message. Size: " << len << ". Max size: "
-					<< mSendBufMax << " Message starts with: " << msg.substr(0, 25) << endl;
+				LogStream() << "Too long message. Size: " << len << ". Max size: " << mSendBufMax << endl;
 			}
-			msg.resize(mSendBufMax - 1);
-
-			if (addSep) {
-				writeData(msg.c_str(), mSendBufMax, false);
-				ret = writeData(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN, flush);
-			} else {
-				ret = writeData(msg.c_str(), mSendBufMax, flush);
-			}
+		}
+		if (addSep) {
+			writeData(data, len, false);
+			ret = writeData(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN, flush);
 		} else {
-			if (addSep) {
-				writeData(data, len, false);
-				ret = writeData(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN, flush);
-			} else {
-				ret = writeData(data, len, flush);
-			}
+			ret = writeData(data, len, flush);
 		}
 	}
 	return ret;
@@ -151,11 +141,11 @@ int DcConn::onTimer(Time &now) {
 	if (!mDcUser->getInUserList()) { // Optimisation
 		for (int i = 0; i < HUB_TIME_OUT_MAX; ++i) {
 			if (!checkTimeOut(HubTimeOut(i), now)) {
-				string sMsg;
 				if (Log(2)) {
 					LogStream() << "Operation timeout (" << HubTimeOut(i) << ")" << endl;
 				}
-				stringReplace(dcServer->mDcLang.mTimeout, string("reason"), sMsg, dcServer->mDcLang.mTimeoutCmd[i]);
+				string sMsg;
+				stringReplace(dcServer->mDcLang.mTimeout, "reason", sMsg, dcServer->mDcLang.mTimeoutCmd[i]);
 				dcServer->sendToUser(mDcUser, sMsg.c_str(), dcServer->mDcConfig.mHubBot.c_str());
 				closeNice(9000, CLOSE_REASON_TIMEOUT);
 				return 1;
@@ -183,8 +173,7 @@ int DcConn::onTimer(Time &now) {
 		dcServer->minDelay(mPingServer, dcServer->mDcConfig.mPingInterval) &&
 		mDcUser->getInUserList() && mDcUser->mTimeEnter < Ago
 	) {
-		string s;
-		send(s, true, true);
+		send("", 0, true, true);
 	}
 	return 0;
 }

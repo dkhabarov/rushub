@@ -20,6 +20,8 @@
 #include "DcIpList.h"
 #include "DcConn.h"
 
+#include <string.h>
+
 namespace dcserver {
 
 
@@ -89,7 +91,7 @@ void DcIpList::sendToIp(const char * ip, string & data, unsigned long profile, b
 	mAddSep = addSep;
 	IpList * ipList = IpTable::find(ipHash);
 	while (ipList != NULL) {
-		if (ipList->mData->getIp() == string(ip)) {
+		if (0 == strcmp(ipList->mData->getIp().c_str(), ip)) {
 			send(ipList->mData);
 		}
 		ipList = ipList->mNext;
@@ -107,7 +109,7 @@ void DcIpList::sendToIpWithNick(const char * ip, string & start, string & end, u
 	mAddSep = addSep;
 	IpList * ipList = IpTable::find(ipHash);
 	while (ipList != NULL) {
-		if (ipList->mData->getIp() == string(ip)) {
+		if (0 == strcmp(ipList->mData->getIp().c_str(), ip)) {
 			sendWithNick(ipList->mData);
 		}
 		ipList = ipList->mNext;
@@ -144,9 +146,6 @@ int DcIpList::sendWithNick(DcConn * dcConn) {
 	if (!dcConn->mIpRecv || dcConn->mDcUser->getNick().empty()) {
 		return 0;
 	}
-	string str(msData1);
-	str.append(dcConn->mDcUser->getNick());
-	str.append(msData2);
 	if (mProfile) {
 		int profile = dcConn->mProfile + 1;
 		if (profile < 0) {
@@ -156,10 +155,14 @@ int DcIpList::sendWithNick(DcConn * dcConn) {
 			profile = (profile % 32) - 1;
 		}
 		if (mProfile & (1 << profile)) {
-			return dcConn->send(str, mAddSep, mFlush);
+			dcConn->send(msData1, false, false);
+			dcConn->send(dcConn->mDcUser->getNick(), false, false);
+			return dcConn->send(msData2, mAddSep, mFlush);
 		}
 	} else {
-		return dcConn->send(str, mAddSep, mFlush);
+		dcConn->send(msData1, false, false);
+		dcConn->send(dcConn->mDcUser->getNick(), false, false);
+		return dcConn->send(msData2, mAddSep, mFlush);
 	}
 	return 0;
 }
