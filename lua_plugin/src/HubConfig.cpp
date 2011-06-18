@@ -124,11 +124,12 @@ int HubConfig::configNewindex(lua_State * L) {
 	if (!name) {
 		return luaL_error(L, "bad argument #%d to " LUA_QS " (%s expected, got %s)", 2, "Config", "string", luaL_typename(L, 2));
 	}
-	char * value = (char *) lua_tostring(L, 3);
-	if (!value) {
-		value = (char *) lua_toboolean(L, 3);
-	}
-	if (!value) {
+	const char * value = NULL;
+	if (lua_isstring(L, 3)) {
+		value = lua_tostring(L, 3);
+	} else if (lua_isboolean(L, 3)) {
+		value = lua_toboolean(L, 3) == 0 ? "0" : "1";
+	} else {
 		return luaL_error(L, "bad argument #%d to " LUA_QS " (%s expected, got %s)", 3, "Config", "string or boolean", luaL_typename(L, 3));
 	}
 	LuaPlugin::mCurServer->setConfig(name, value);

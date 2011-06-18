@@ -291,12 +291,12 @@ int LuaPlugin::loadScripts() {
 		TiXmlHandle mainHandle(&file);
 		TiXmlElement * mainItem = mainHandle.FirstChild("Scripts").Element();
 		if (mainItem != NULL) {
-			char * name = NULL, *enabled = NULL;
+			const char * name = NULL, *enabled = NULL;
 			TiXmlNode * value = NULL;
 			while ((value = mainItem->IterateChildren(value)) != NULL) {
 				if (value->ToElement() == NULL || 
-					(name = (char *) value->ToElement()->Attribute("Name")) == NULL || 
-					(enabled = (char *) value->ToElement()->Attribute("Enabled")) == NULL
+					(name = value->ToElement()->Attribute("Name")) == NULL || 
+					(enabled = value->ToElement()->Attribute("Enabled")) == NULL
 				) {
 					continue;
 				}

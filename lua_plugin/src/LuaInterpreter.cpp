@@ -156,9 +156,9 @@ int LuaInterpreter::start() {
 	LuaInterpreter * oldScript = LuaPlugin::mCurLua->mCurScript;
 	LuaPlugin::mCurLua->mCurScript = this;
 	#ifdef HAVE_LUA_5_1
-		int iStatus = luaL_dofile(mL, (char *)(mPath + mName).c_str());
+		int iStatus = luaL_dofile(mL, (mPath + mName).c_str());
 	#else
-		int iStatus = lua_dofile(mL, (char *)(mPath + mName).c_str());
+		int iStatus = lua_dofile(mL, (mPath + mName).c_str());
 	#endif
 	if (iStatus) {
 		onError("OnError", lua_tostring(mL, -1), true);

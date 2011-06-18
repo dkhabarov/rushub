@@ -1133,13 +1133,13 @@ int addTimer(lua_State * L) {
 	if (top < 2 || top > 3) {
 		return LuaUtils::errCount(L, "2 or 3");
 	}
-	string func("OnTimer");
+	const char * func = "OnTimer";
 	int id(luaL_checkint(L, 1)), interval(luaL_checkint(L, 2));
 	if (top == 3) {
-		func = (char *)luaL_checkstring(L, 3);
+		func = luaL_checkstring(L, 3);
 	}
 
-	lua_getglobal(L, func.c_str());
+	lua_getglobal(L, func);
 	if (lua_isnil(L, lua_gettop(L)) || lua_type(L, -1) != LUA_TFUNCTION) {
 		return LuaUtils::pushError(L, "timer function was not found");
 	}
@@ -1147,7 +1147,7 @@ int addTimer(lua_State * L) {
 	if (LuaPlugin::mCurLua->mCurScript->size() > maxTimers) {
 		return luaL_error(L, "bad count timers for this script (max %d)", maxTimers);
 	}
-	Timer * timer = new Timer(id, interval, func.c_str(), LuaPlugin::mCurLua->mCurScript);
+	Timer * timer = new Timer(id, interval, func, LuaPlugin::mCurLua->mCurScript);
 	lua_settop(L, 0);
 	lua_pushinteger(L, LuaPlugin::mCurLua->mCurScript->addTmr(timer));
 	return 1;
@@ -1197,9 +1197,9 @@ int setConfig(lua_State * L) {
 	if (!LuaUtils::checkCount(L, 2)) {
 		return 0;
 	}
-	char * value = (char *) lua_tostring(L, 2);
+	const char * value = lua_tostring(L, 2);
 	if (!value) {
-		value = (char *) lua_toboolean(L, 2);
+		value = lua_toboolean(L, 2) == 0 ? "0" : "1";
 	}
 	bool res = LuaPlugin::mCurServer->setConfig(luaL_checkstring(L, 1), value);
 	if (!res) {
@@ -1233,9 +1233,9 @@ int setLang(lua_State * L) {
 	if (!LuaUtils::checkCount(L, 2)) {
 		return 0;
 	}
-	char * value = (char *) lua_tostring(L, 2);
+	const char * value = lua_tostring(L, 2);
 	if (!value) {
-		value = (char *) lua_toboolean(L, 2);
+		value = lua_toboolean(L, 2) == 0 ? "0" : "1";
 	}
 	bool res = LuaPlugin::mCurServer->setLang(luaL_checkstring(L, 1), value);
 	if (!res) {
