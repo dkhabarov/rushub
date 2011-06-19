@@ -76,7 +76,7 @@ public:
 
 public:
 
-	CallList(PluginList *, string id);
+	CallList(PluginList *, const string & id);
 
 	virtual ~CallList();
 
@@ -94,9 +94,6 @@ public:
 
 	/** Call one plugin */
 	virtual int callOne(Plugin *) = 0;
-
-	/** Show plugins list for this call */
-	virtual void listRegs(ostream & os, const char * sep);
 
 private:
 
@@ -128,8 +125,8 @@ class CallListBase : public CallList {
 
 public:
 
-	CallListBase(PluginList * pluginList, const char * id) :
-		CallList(pluginList, string(id))
+	CallListBase(PluginList * pluginList, const string & id) :
+		CallList(pluginList, id)
 	{
 	}
 
@@ -147,7 +144,7 @@ public:
 
 public:
 
-	CallListSimple(PluginList * pluginList, const char * id, tpFunc func) :
+	CallListSimple(PluginList * pluginList, const string & id, tpFunc func) :
 		CallListBase(pluginList, id),
 		mFunc(func)
 	{
@@ -176,7 +173,7 @@ public:
 
 public:
 
-	CallListType1(PluginList * pluginList, const char * id, tpFunc func) :
+	CallListType1(PluginList * pluginList, const string & id, tpFunc func) :
 		CallListBase(pluginList, id),
 		mFunc(func)
 	{
@@ -212,7 +209,7 @@ public:
 
 public:
 
-	CallListType2(PluginList * pluginList, const char * id, tpFunc func) :
+	CallListType2(PluginList * pluginList, const string & id, tpFunc func) :
 		CallListBase(pluginList, id),
 		mFunc(func)
 	{
@@ -248,7 +245,7 @@ public:
 
 public:
 
-	CallListType3(PluginList * pluginList, const char * id, tpFunc func) :
+	CallListType3(PluginList * pluginList, const string & id, tpFunc func) :
 		CallListBase(pluginList, id),
 		mFunc(func)
 	{

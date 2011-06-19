@@ -29,7 +29,7 @@ namespace plugin {
 
 
 
-CallList::CallList(PluginList * pluginList, string id) :
+CallList::CallList(PluginList * pluginList, const string & id) :
 	Obj("CallList"),
 	mPluginList(pluginList),
 	mName(id)
@@ -159,17 +159,6 @@ int CallList::callAll() {
 	}
 
 	return mCallOne.mCallReturn;
-}
-
-
-
-/** Show plugins list for this call */
-void CallList::listRegs(ostream & os, const char * sep) {
-
-	for (tPlugins::iterator i = mPlugins.begin(); i != mPlugins.end(); ++i) {
-		os << sep << (*i)->getName() << "\n";
-	}
-
 }
 
 

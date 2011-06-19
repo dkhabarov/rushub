@@ -36,7 +36,7 @@ namespace dcserver {
 
 
 
-DcConfig::DcConfig(ConfigLoader * configLoader, Server * server, const char * cfgFile) : 
+DcConfig::DcConfig(ConfigLoader * configLoader, Server * server, const string & cfgFile) : 
 	mConfigLoader(configLoader)
 {
 

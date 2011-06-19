@@ -45,8 +45,8 @@ public:
 	int load(ConfigListBase *, const ConfigStore &);
 	int save(ConfigListBase *, const ConfigStore &);
 
-	int loadFromXml(ConfigListBase *, const char * fileName);
-	int saveToXml(ConfigListBase *, const char * fileName);
+	int loadFromXml(ConfigListBase *, const string & fileName);
+	int saveToXml(ConfigListBase *, const string & fileName);
 
 }; // class DcConfigLoader
 

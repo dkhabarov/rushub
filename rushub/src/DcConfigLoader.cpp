@@ -56,8 +56,8 @@ int DcConfigLoader::save(ConfigListBase * configListBase, const ConfigStore & co
 
 
 
-int DcConfigLoader::loadFromXml(ConfigListBase * configListBase, const char * fileName) {
-	TiXmlDocument file(fileName);
+int DcConfigLoader::loadFromXml(ConfigListBase * configListBase, const string & fileName) {
+	TiXmlDocument file(fileName.c_str());
 	if (!file.LoadFile()) {
 		if (Log(0)) {
 			LogStream() << "Can't open file '" << fileName <<
@@ -109,8 +109,8 @@ int DcConfigLoader::loadFromXml(ConfigListBase * configListBase, const char * fi
 
 
 
-int DcConfigLoader::saveToXml(ConfigListBase * configListBase, const char * fileName) {
-	TiXmlDocument file(fileName);
+int DcConfigLoader::saveToXml(ConfigListBase * configListBase, const string & fileName) {
+	TiXmlDocument file(fileName.c_str());
 	file.InsertEndChild(TiXmlDeclaration("1.0", "windows-1251", "yes"));
 	TiXmlElement mainItem(INTERNALNAME);
 	mainItem.SetAttribute("Version", INTERNALVERSION);
