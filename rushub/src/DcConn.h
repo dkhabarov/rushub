@@ -149,7 +149,6 @@ public:
 
 	unsigned mFeatures;         //< Features (PROTOCOL NMDC)
 
-	int mProfile;               //< Profile
 	bool mSendNickList;        //< Sending user list when login
 	bool mIpRecv;              //< Permit on reception of the messages, sending on my ip
 	bool mNickListInProgress;  //< True while sending first nicklist
@@ -179,13 +178,6 @@ public:
 	//< Sending RAW command to the client
 	virtual int send(const string & data, bool addSep = false, bool flush = true);
 	virtual int send(const char * data, size_t len, bool addSep = false, bool flush = true);
-
-
-	//< Get profile
-	virtual int getProfile() const;
-
-	virtual void setProfile(int iProfile);
-
 
 	virtual bool parseCommand(const char * cmd);
 

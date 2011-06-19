@@ -72,34 +72,35 @@ public:
 	DcUser();
 	virtual ~DcUser();
 
-	virtual void send(const string & data, bool addSep = false, bool flush = true);
-	virtual void send(const char * data, size_t len, bool addSep = false, bool flush = true);
-
-	void setInUserList(bool);
-
-	void setCanSend(bool canSend);
-
+	// UserBase params
+	virtual const string & uid() const;
+	virtual const string & myInfoString() const;
+	virtual const string & ip() const;
+	virtual bool hide() const;
+	virtual int getProfile() const;
 	inline bool isCanSend() {
 		return mCanSend;
 	}
+	virtual void send(const string & data, bool addSep = false, bool flush = true);
 
 
-	/** Get nick */
+	virtual void send(const char * data, size_t len, bool addSep = false, bool flush = true);
+
+
+	void setInUserList(bool);
+	void setCanSend(bool canSend);
+
 	virtual const string & getUid() const;
-	virtual const string & uid() const;
-	virtual const string & myInfoString() const;
+
 	virtual bool getInUserList() const;
 	virtual bool getInOpList() const;
 	virtual bool getInIpList() const;
 	virtual bool getHide() const;
-	virtual bool hide() const;
 	virtual bool getForceMove() const;
 	virtual bool getKick() const;
 
-	virtual int getProfile() const;
-	virtual void setProfile(int iProfile);
+	virtual void setProfile(int profile);
 
-	const string & ip() const;
 	void setIp(const string & ip);
 
 	void setUid(const string & uid);
@@ -116,35 +117,15 @@ public:
 	virtual bool setMyINFO(const string & myInfo);
 	bool setMyINFO(DcParser * parser);
 
-	virtual const string & getDesc(/*bool real = false*/) const;
-	virtual const string & getEmail(/*bool real = false*/) const;
-	virtual const string & getConnection(/*bool real = false*/) const;
-	virtual unsigned getByte(/*bool real = false*/) const;
-
 	// setShare ?
 	virtual __int64 getShare(/*bool real = false*/) const;
 
 	// setPassive ?
 	bool isPassive() const;
 
-	virtual const string & getTag(/*bool real = false*/) const;
-	virtual const string & getClient(/*bool real = false*/) const;
-	virtual const string & getClientVersion(/*bool real = false*/) const;
-	virtual unsigned getUnregHubs(/*bool real = false*/) const;
-	virtual unsigned getRegHubs(/*bool real = false*/) const;
-	virtual unsigned getOpHubs(/*bool real = false*/) const;
-	virtual unsigned getSlots(/*bool real = false*/) const;
-	virtual unsigned getLimit(/*bool real = false*/) const;
-	virtual unsigned getOpen(/*bool real = false*/) const;
-	virtual unsigned getBandwidth(/*bool real = false*/) const;
-	virtual unsigned getDownload(/*bool real = false*/) const;
-	virtual const string & getFraction(/*bool real = false*/) const;
-	virtual const string & getMode(/*bool real = false*/) const;
-
-	virtual unsigned int getTagNil(/*bool real = false*/) const;
 
 	virtual const string & getData() const;
-	virtual void setData(const string & sData);
+	virtual void setData(const string & data);
 
 	//< Support string (PROTOCOL NMDC)
 	virtual const string & getSupports() const;
@@ -173,8 +154,33 @@ public:
 	//< Get mac address
 	virtual const string & getMacAddress() const;
 
+
+	// Used in plugins only
+	// =====================================================================
+	virtual const string & getDesc(/*bool real = false*/) const;
+	virtual const string & getEmail(/*bool real = false*/) const;
+	virtual const string & getConnection(/*bool real = false*/) const;
+	virtual unsigned getByte(/*bool real = false*/) const;
+
+	virtual unsigned int getTagNil(/*bool real = false*/) const;
+	virtual const string & getTag(/*bool real = false*/) const;
+	virtual const string & getClient(/*bool real = false*/) const;
+	virtual const string & getClientVersion(/*bool real = false*/) const;
+	virtual unsigned getUnregHubs(/*bool real = false*/) const;
+	virtual unsigned getRegHubs(/*bool real = false*/) const;
+	virtual unsigned getOpHubs(/*bool real = false*/) const;
+	virtual unsigned getSlots(/*bool real = false*/) const;
+	virtual unsigned getLimit(/*bool real = false*/) const;
+	virtual unsigned getOpen(/*bool real = false*/) const;
+	virtual unsigned getBandwidth(/*bool real = false*/) const;
+	virtual unsigned getDownload(/*bool real = false*/) const;
+	virtual const string & getFraction(/*bool real = false*/) const;
+	virtual const string & getMode(/*bool real = false*/) const;
+	// =====================================================================
+
 private:
 
+	int mProfile; //< Profile
 	bool mInUserList; //< User in user-list
 	bool mCanSend;
 	MyInfo myInfo;

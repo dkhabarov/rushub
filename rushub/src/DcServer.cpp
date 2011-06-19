@@ -1202,6 +1202,7 @@ bool DcServer::setLang(const string & name, const string & value) {
 int DcServer::regBot(const string & nick, const string & info, const string & ip, bool key) {
 	DcUser * dcUser = new DcUser();
 	dcUser->setUid(nick);
+	dcUser->setProfile(30);
 	dcUser->mDcServer = this;
 	dcUser->mInOpList = key;
 

@@ -34,6 +34,7 @@ DcUser::DcUser() :
 	mHide(false),
 	mForceMove(false),
 	mKick(false),
+	mProfile(-1),
 	mInUserList(false),
 	mCanSend(false)
 {
@@ -153,16 +154,13 @@ bool DcUser::getKick() const {
 
 
 int DcUser::getProfile() const {
-	// 30 profile for bot
-	return mDcConn != NULL ? mDcConn->mProfile : 30;
+	return mProfile;
 }
 
 
 
-void DcUser::setProfile(int iProfile) {
-	if (mDcConn != NULL) {
-		mDcConn->setProfile(iProfile);
-	}
+void DcUser::setProfile(int profile) {
+	mProfile = profile;
 }
 
 
@@ -253,6 +251,65 @@ bool DcUser::isPassive() const {
 
 
 
+
+const string & DcUser::getData() const {
+	return mData;
+}
+
+void DcUser::setData(const string & data) {
+	mData = data;
+}
+
+//< User's support string (NMDC PROTOCOL)
+const string & DcUser::getSupports() const {
+	return mSupports;
+}
+
+//< User's protocol version (NMDC PROTOCOL)
+const string & DcUser::getVersion() const {
+	return mVersion;
+}
+
+void DcUser::disconnect() {
+	mDcConn->closeNice(9000, CLOSE_REASON_PLUGIN);
+}
+
+//< Get string of IP
+const string & DcUser::getIp() const {
+	if (mDcConn != NULL) {
+		return mDcConn->getIp();
+	}
+	return mIp; // TODO remove this param (now for bot only)
+}
+
+//< Get string of server ip (host)
+const string & DcUser::getIpConn() const{
+	return mDcConn->getIpConn();
+}
+
+//< Get enter time (in unix time sec)
+long DcUser::getConnectTime() const {
+	return mDcConn->getConnectTime();
+}
+
+//< Get real clients port
+int DcUser::getPort() const {
+	return mDcConn->getPort();
+}
+
+//< Get connection port
+int DcUser::getPortConn() const {
+	return mDcConn->getPortConn();
+}
+
+//< Get mac address
+const string & DcUser::getMacAddress() const {
+	return mDcConn->getMacAddress();
+}
+
+
+
+
 // Used in plugins only
 // =====================================================================
 const string & DcUser::getDesc(/*bool real = false */) const {
@@ -263,12 +320,16 @@ const string & DcUser::getEmail(/*bool real = false */) const {
 	return myInfo.getEmail();
 }
 
+const string & DcUser::getConnection(/*bool real = false */) const {
+	return myInfo.getConnection();
+}
+
 unsigned DcUser::getByte(/*bool real = false */) const {
 	return myInfo.getMagicByte();
 }
 
-const string & DcUser::getConnection(/*bool real = false */) const {
-	return myInfo.getConnection();
+unsigned int DcUser::getTagNil(/*bool real = false */) const {
+	return myInfo.dcTag.getNil();
 }
 
 const string & DcUser::getTag(/*bool real = false */) const {
@@ -323,68 +384,7 @@ const string & DcUser::getMode(/*bool real = false */) const {
 	return myInfo.dcTag.getMode();
 }
 
-unsigned int DcUser::getTagNil(/*bool real = false */) const {
-	return myInfo.dcTag.getNil();
-}
-
 // =====================================================================
-
-
-
-const string & DcUser::getData() const {
-	return mData;
-}
-
-void DcUser::setData(const string & sData) {
-	mData = sData;
-}
-
-//< User's support string (NMDC PROTOCOL)
-const string & DcUser::getSupports() const {
-	return mSupports;
-}
-
-//< User's protocol version (NMDC PROTOCOL)
-const string & DcUser::getVersion() const {
-	return mVersion;
-}
-
-void DcUser::disconnect() {
-	mDcConn->closeNice(9000, CLOSE_REASON_PLUGIN);
-}
-
-//< Get string of IP
-const string & DcUser::getIp() const {
-	if (mDcConn != NULL) {
-		return mDcConn->getIp();
-	}
-	return mIp; // TODO remove this param (now for bot only)
-}
-
-//< Get string of server ip (host)
-const string & DcUser::getIpConn() const{
-	return mDcConn->getIpConn();
-}
-
-//< Get enter time (in unix time sec)
-long DcUser::getConnectTime() const {
-	return mDcConn->getConnectTime();
-}
-
-//< Get real clients port
-int DcUser::getPort() const {
-	return mDcConn->getPort();
-}
-
-//< Get connection port
-int DcUser::getPortConn() const {
-	return mDcConn->getPortConn();
-}
-
-//< Get mac address
-const string & DcUser::getMacAddress() const {
-	return mDcConn->getMacAddress();
-}
 
 
 }; // namespace dcserver

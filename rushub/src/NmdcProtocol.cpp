@@ -1259,7 +1259,7 @@ bool NmdcProtocol::validateUser(DcConn * dcConn, const string & nick) {
 bool NmdcProtocol::checkNickLength(DcConn * dcConn, size_t len) {
 
 	if (
-		dcConn->mProfile == -1 && (
+		dcConn->mDcUser->getProfile() == -1 && (
 			len > mDcServer->mDcConfig.mMaxNickLen ||
 			len < mDcServer->mDcConfig.mMinNickLen
 		)

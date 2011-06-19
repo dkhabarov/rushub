@@ -123,7 +123,7 @@ int DcIpList::send(DcConn * dcConn) {
 		return 0;
 	}
 	if (mProfile) {
-		int profile = dcConn->mProfile + 1;
+		int profile = dcConn->mDcUser->getProfile() + 1;
 		if (profile < 0) {
 			profile = -profile;
 		}
@@ -147,7 +147,7 @@ int DcIpList::sendWithNick(DcConn * dcConn) {
 		return 0;
 	}
 	if (mProfile) {
-		int profile = dcConn->mProfile + 1;
+		int profile = dcConn->mDcUser->getProfile() + 1;
 		if (profile < 0) {
 			profile = -profile;
 		}
