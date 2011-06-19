@@ -54,14 +54,6 @@ public:
 
 	Time mTimeEnter; //< Enter time on the hub
 
-	string mUid; //< UserID
-
-	bool mInOpList; //< User in op-list
-	bool mInIpList; //< User in ip-list
-	bool mHide; //< User was hide
-	bool mForceMove; //< User can redirect other users
-	bool mKick; //< User can kick other users
-
 	string mSupports; //< Support cmd param (PROTOCOL NMDC)
 	string mVersion; //< DC version (PROTOCOL NMDC)
 
@@ -162,10 +154,18 @@ public:
 
 private:
 
+	string mUid; //< UserID
 	int mProfile; //< Profile
+
+	bool mInOpList; //< User in op-list
+	bool mInIpList; //< User in ip-list
+	bool mHide; //< User was hide
+	bool mForceMove; //< User can redirect other users
+	bool mKick; //< User can kick other users
 	bool mInUserList; //< User in user-list
-	bool mCanSend;
-	MyInfo myInfo;
+	bool mCanSend; //< Can send to user
+
+	MyInfo myInfo; //< User params
 	string mIp; //< IP address of user/bot
 	string mData; //< Some user's data
 

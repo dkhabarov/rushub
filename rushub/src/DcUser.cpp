@@ -29,12 +29,12 @@ DcUser::DcUser() :
 	DcUserBase(),
 	mDcServer(NULL),
 	mDcConn(NULL),
+	mProfile(-1),
 	mInOpList(false),
 	mInIpList(false),
 	mHide(false),
 	mForceMove(false),
 	mKick(false),
-	mProfile(-1),
 	mInUserList(false),
 	mCanSend(false)
 {
@@ -183,9 +183,15 @@ void DcUser::setIp(const string & ip) {
 /** Set/unset user in OpList (for plugins) */
 void DcUser::setInOpList(bool inOpList) {
 	if (inOpList) {
-		mDcServer->mDcProtocol.addToOps(this);
+		if (!mInOpList) {
+			mDcServer->mDcProtocol.addToOps(this);
+			mInOpList = true;
+		}
 	} else {
-		mDcServer->mDcProtocol.delFromOps(this);
+		if (mInOpList) {
+			mDcServer->mDcProtocol.delFromOps(this);
+			mInOpList = false;
+		}
 	}
 }
 
@@ -193,9 +199,15 @@ void DcUser::setInOpList(bool inOpList) {
 /** Set/unset user in IpList (for plugins) */
 void DcUser::setInIpList(bool inIpList) {
 	if (inIpList) {
-		mDcServer->mDcProtocol.addToIpList(this);
+		if (!mInIpList) {
+			mDcServer->mDcProtocol.addToIpList(this);
+			mInIpList = true;
+		}
 	} else {
-		mDcServer->mDcProtocol.delFromIpList(this);
+		if (mInIpList) {
+			mDcServer->mDcProtocol.delFromIpList(this);
+			mInIpList = false;
+		}
 	}
 }
 
@@ -203,9 +215,15 @@ void DcUser::setInIpList(bool inIpList) {
 /** Set/unset user in HideList (for plugins) */
 void DcUser::setHide(bool hide) {
 	if (hide) {
-		mDcServer->mDcProtocol.addToHide(this);
+		if (!mHide) {
+			mDcServer->mDcProtocol.addToHide(this);
+			mHide = true;
+		}
 	} else {
-		mDcServer->mDcProtocol.delFromHide(this);
+		if (mHide) {
+			mDcServer->mDcProtocol.delFromHide(this);
+			mHide = false;
+		}
 	}
 }
 

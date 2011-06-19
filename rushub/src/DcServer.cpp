@@ -651,10 +651,10 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 	if (!dcUser->isPassive()) {
 		mActiveList.addWithKey(key, dcUser);
 	}
-	if (dcUser->mInOpList) {
+	if (dcUser->getInOpList()) {
 		mOpList.addWithKey(key, dcUser);
 	}
-	if (dcUser->mInIpList) {
+	if (dcUser->getInIpList()) {
 		mIpList.addWithKey(key, dcUser);
 	}
 
@@ -736,7 +736,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 /** Show user to all */
 bool DcServer::showUserToAll(DcUser * dcUser) {
 	string hello;
-	if (dcUser->mHide && dcUser->mDcConn) {
+	if (dcUser->getHide() && dcUser->mDcConn) {
 		if (dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
 			dcUser->mDcConn->send(dcUser->getMyInfo(), true, false);
 		} else if (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
@@ -746,7 +746,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 			dcUser->mDcConn->send(NmdcProtocol::appendHello(hello, dcUser->getUid()), false, false);
 		}
 
-		if (dcUser->mInOpList) {
+		if (dcUser->getInOpList()) {
 			string opList;
 			dcUser->mDcConn->send(NmdcProtocol::appendOpList(opList, dcUser->getUid()), false, false);
 		}
@@ -762,7 +762,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 		mEnterList.sendToAll(dcUser->getMyInfo(), true/*mDcConfig.mDelayedMyinfo*/);
 
 		/** Op entry */
-		if (dcUser->mInOpList) {
+		if (dcUser->getInOpList()) {
 			string opList;
 			mDcUserList.sendToAll(NmdcProtocol::appendOpList(opList, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false);
 			mEnterList.sendToAll(opList, true/*mDcConfig.mDelayedMyinfo*/, false);
@@ -786,7 +786,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 			mIpList.sendToAll(ipList, true, false);
 		}
 
-		if (dcUser->mInIpList) {
+		if (dcUser->getInIpList()) {
 			dcUser->send(mDcUserList.getIpList(), true, false);
 		} else if (ipList.length() && dcUser->mDcConn && (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_USERIP2)) { // UserIP2
 			dcUser->send(ipList, false, false);
@@ -1204,7 +1204,7 @@ int DcServer::regBot(const string & nick, const string & info, const string & ip
 	dcUser->setUid(nick);
 	dcUser->setProfile(30);
 	dcUser->mDcServer = this;
-	dcUser->mInOpList = key;
+	dcUser->setInOpList(key);
 
 	if (DcConn::checkIp(ip)) {
 		dcUser->setIp(ip);
