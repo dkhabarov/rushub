@@ -470,9 +470,6 @@ public:
 		return (Items->update(key, Data) != (V)NULL); /** Update data in list */
 	}
 
-	virtual void onAdd(V) {}
-	virtual void onRemove(V) {}
-
 
 	/** Iterator through all NON-NULL elements of the container */
 	class iterator 
@@ -558,8 +555,18 @@ public:
 		return false;
 	}
 
+protected:
+
+	virtual void onAdd(V) {
+	}
+
+	virtual void onRemove(V) {
+	}
+
 	virtual void onResize(size_t & /* currentSize */, size_t & /* oldCapacity */, size_t & /* newCapacity */) {
 	}
+
+private:
 
 	/** Resize */
 	size_t resize(size_t newCapacity) {
