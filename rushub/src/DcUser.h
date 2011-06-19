@@ -56,7 +56,7 @@ public:
 
 
 	// TODO add param => hash for nick
-	string mNick; //< User's nick
+	string mUid; //< UserID
 
 	bool mInOpList; //< User in op-list
 	bool mInIpList; //< User in ip-list
@@ -85,8 +85,8 @@ public:
 
 
 	/** Get nick */
-	virtual const string & getNick() const;
-	virtual const string & nick() const;
+	virtual const string & getUid() const;
+	virtual const string & uid() const;
 	virtual const string & myInfoString() const;
 	virtual bool getInUserList() const;
 	virtual bool getInOpList() const;
@@ -102,7 +102,7 @@ public:
 	const string & ip() const;
 	void setIp(const string & ip);
 
-	void setNick(const string & nick);
+	void setUid(const string & uid);
 
 	virtual void setInOpList(bool inOpList);
 	virtual void setInIpList(bool inIpList);

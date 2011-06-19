@@ -33,7 +33,7 @@ public:
 
 	virtual bool isCanSend() = 0;
 	virtual void send(const string & msg, bool sep = false, bool flush = true) = 0;
-	virtual const string & nick() const = 0;
+	virtual const string & uid() const = 0;
 	virtual const string & myInfoString() const = 0;
 	virtual const string & ip() const = 0;
 	virtual bool hide() const = 0;

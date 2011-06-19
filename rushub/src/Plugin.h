@@ -75,7 +75,7 @@ using namespace ::std;
 
 //< Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10020
+	#define INTERNAL_PLUGIN_VERSION 10021
 #endif
 
 //< NMDC protocol separator
@@ -139,7 +139,7 @@ public:
 	}
 
 	//< Get user's nick
-	virtual const string & getNick() const = 0;
+	virtual const string & getUid() const = 0;
 
 	//< User in user-list
 	virtual bool getInUserList() const = 0;

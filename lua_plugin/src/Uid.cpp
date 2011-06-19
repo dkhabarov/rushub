@@ -80,7 +80,7 @@ int Uid::userIndex(lua_State * L) {
 	switch(getHash(str)) {
 
 		case PARAM_HASH_NICK :
-			lua_pushstring(L, dcUserBase->getNick().c_str());
+			lua_pushstring(L, dcUserBase->getUid().c_str());
 			break;
 
 		case PARAM_HASH_IP :

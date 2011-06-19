@@ -144,9 +144,9 @@ int DcConn::onTimer(Time &now) {
 				if (Log(2)) {
 					LogStream() << "Operation timeout (" << HubTimeOut(i) << ")" << endl;
 				}
-				string sMsg;
-				stringReplace(dcServer->mDcLang.mTimeout, "reason", sMsg, dcServer->mDcLang.mTimeoutCmd[i]);
-				dcServer->sendToUser(mDcUser, sMsg.c_str(), dcServer->mDcConfig.mHubBot.c_str());
+				string msg;
+				stringReplace(dcServer->mDcLang.mTimeout, "reason", msg, dcServer->mDcLang.mTimeoutCmd[i]);
+				dcServer->sendToUser(mDcUser, msg.c_str(), dcServer->mDcConfig.mHubBot.c_str());
 				closeNice(9000, CLOSE_REASON_TIMEOUT);
 				return 1;
 			}
@@ -296,7 +296,7 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 			if (dcConn->mDcUser->getInUserList()) {
 				dcServer->removeFromDcUserList(static_cast<DcUser *> (dcConn->mDcUser));
 			} else { // remove from enter list, if user was already added in it, but user was not added in user list
-				dcServer->mEnterList.removeByNick(dcConn->mDcUser->getNick());
+				dcServer->mEnterList.removeByNick(dcConn->mDcUser->getUid());
 			}
 
 			// Remove DcUser

@@ -401,8 +401,8 @@ int DcParser::checkCmd(DcParser & dcParser, const string & sData, DcUserBase * d
 	}
 
 	if (dcParser.mType == NMDC_TYPE_MYNIFO && (dcUserBase == NULL ||
-			dcUserBase->getNick().empty() ||
-			dcUserBase->getNick() != dcParser.chunkString(CHUNK_MI_NICK))
+			dcUserBase->getUid().empty() ||
+			dcUserBase->getUid() != dcParser.chunkString(CHUNK_MI_NICK))
 	) {
 		return -2;
 	}

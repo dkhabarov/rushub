@@ -143,7 +143,7 @@ int DcIpList::send(DcConn * dcConn) {
 
 int DcIpList::sendWithNick(DcConn * dcConn) {
 	// check empty nick!
-	if (!dcConn->mIpRecv || dcConn->mDcUser->getNick().empty()) {
+	if (!dcConn->mIpRecv || dcConn->mDcUser->getUid().empty()) {
 		return 0;
 	}
 	if (mProfile) {
@@ -156,12 +156,12 @@ int DcIpList::sendWithNick(DcConn * dcConn) {
 		}
 		if (mProfile & (1 << profile)) {
 			dcConn->send(msData1, false, false);
-			dcConn->send(dcConn->mDcUser->getNick(), false, false);
+			dcConn->send(dcConn->mDcUser->getUid(), false, false);
 			return dcConn->send(msData2, mAddSep, mFlush);
 		}
 	} else {
 		dcConn->send(msData1, false, false);
-		dcConn->send(dcConn->mDcUser->getNick(), false, false);
+		dcConn->send(dcConn->mDcUser->getUid(), false, false);
 		return dcConn->send(msData2, mAddSep, mFlush);
 	}
 	return 0;

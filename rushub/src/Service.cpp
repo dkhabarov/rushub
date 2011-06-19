@@ -317,13 +317,13 @@ int Service::cli(int argc, char * argv[], string & configFile) {
 
 	if (config) {
 
-		size_t iLen = strlen(config);
-		if (!iLen) {
+		size_t len = strlen(config);
+		if (!len) {
 			cout << "Please, set config file." << endl;
 			return -5;
 		}
 
-		if (iLen < 4 || (config[1] != ':' || (config[2] != '\\' && config[2] != '/'))) {
+		if (len < 4 || (config[1] != ':' || (config[2] != '\\' && config[2] != '/'))) {
 			cout << "Cinfig file must have absolute path." << endl;
 			return -6;
 		}

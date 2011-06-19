@@ -80,7 +80,7 @@ public:
 		void operator() (UserBase *); /** Sending operator */
 	};
 
-	/** Unary function for sending data sDataS+sNick+sDataE to each user */
+	/** Unary function for sending data dataS + nick + dataE to each user */
 	struct ufSendWithNick : public unary_function<void, iterator> {
 		string &mDataStart, &mDataEnd; /** Data for sending */
 
@@ -97,7 +97,7 @@ public:
 		void operator() (UserBase *); /** Sending operator */
 	};
 
-	/** Unary function for sending data sDataS+sNick+sDataE to each user with profile */
+	/** Unary function for sending data dataS + nick + dataE to each user with profile */
 	struct ufSendWithNickProfile : public unary_function<void, iterator> {
 		string &mDataStart, &mDataEnd; /** Data for sending */
 		unsigned long mProfile;

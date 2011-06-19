@@ -132,7 +132,7 @@ public:
 	int clear(); /** Stoping and removing all scripts */
 
 	/** Restarting all scripts 
-		@param iType: 0 - simple restarting, 1 - restarting except loaded script, 2 - restarting except current script
+		@param type: 0 - simple restarting, 1 - restarting except loaded script, 2 - restarting except current script
 	*/
 	int restartScripts(LuaInterpreter * curScript = NULL, int type = 0);
 

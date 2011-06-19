@@ -179,14 +179,14 @@ void stringSplit(const string & str, const char * sDelim, vector<string> & vRes)
 
 
 string & trim(string & str) {
-	int begin = 0, iLen = str.size();
-	while (iLen && str[iLen - 1] == ' ') {
-		--iLen;
+	int begin = 0, len = str.size();
+	while (len && str[len - 1] == ' ') {
+		--len;
 	}
 	while (str[begin] == ' ') {
 		++begin;
 	}
-	return str.assign(str, begin, iLen - begin);
+	return str.assign(str, begin, len - begin);
 }
 
 

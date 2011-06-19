@@ -135,11 +135,11 @@ private:
 	int eventQuit(DcParser *, DcConn *); /** Quit cmd */
 
 	int checkCommand(DcParser *, DcConn *);
-	bool antiflood(DcConn *, unsigned int iType);
+	bool antiflood(DcConn *, unsigned int type);
 
 	// Check validate nick (user)
-	bool validateUser(DcConn *, const string & sNick);
-	bool checkNickLength(DcConn *, size_t iLen);
+	bool validateUser(DcConn *, const string & nick);
+	bool checkNickLength(DcConn *, size_t len);
 	bool badFlag(DcConn *, const char * cmd, unsigned int flag);
 
 }; // NmdcProtocol

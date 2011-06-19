@@ -51,9 +51,9 @@ void UserList::ufSendProfile::operator() (UserBase * userBase) {
 }
 
 void UserList::ufSendWithNick::operator() (UserBase * userBase) {
-	if (userBase && userBase->isCanSend() && !userBase->nick().empty()) {
+	if (userBase && userBase->isCanSend() && !userBase->uid().empty()) {
 		userBase->send(mDataStart, false, false);
-		userBase->send(userBase->nick(), false, false);
+		userBase->send(userBase->uid(), false, false);
 		userBase->send(mDataEnd, true); // newPolitic
 	}
 }
@@ -67,17 +67,17 @@ void UserList::ufSendWithNickProfile::operator() (UserBase * userBase) {
 		if (profile > 31) {
 			profile = (profile % 32) - 1;
 		}
-		if (mProfile & (1 << profile) && !userBase->nick().empty()) {
+		if (mProfile & (1 << profile) && !userBase->uid().empty()) {
 			userBase->send(mDataStart, false, false);
-			userBase->send(userBase->nick(), false, false);
+			userBase->send(userBase->uid(), false, false);
 			userBase->send(mDataEnd, true); // newPolitic
 		}
 	}
 }
 
 void UserList::ufDoNickList::operator() (UserBase * userBase) {
-	if (!userBase->hide() && !userBase->nick().empty()) {
-		msList.append(userBase->nick());
+	if (!userBase->hide() && !userBase->uid().empty()) {
+		msList.append(userBase->uid());
 		msList.append(msSep);
 	}
 }
@@ -127,16 +127,16 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 
 /** Sending data to profiles */
 void UserList::sendToProfiles(unsigned long profile, const string & data, bool addSep) {
-	string sMsg(data);
+	string msg(data);
 	if (addSep) {
-		sMsg.append(NMDC_SEPARATOR);
+		msg.append(NMDC_SEPARATOR);
 	}
 
 	if (Log(4)) {
 		LogStream() << "sendToProfiles begin" << endl;
 	}
 
-	for_each(begin(), end(), ufSendProfile(sMsg, profile));
+	for_each(begin(), end(), ufSendProfile(msg, profile));
 
 	if (Log(4)) {
 		LogStream() << "sendToProfiles end" << endl;
@@ -185,8 +185,8 @@ void FullUserList::ufDoINFOList::operator() (UserBase * userBase) {
 }
 
 void FullUserList::ufDoIpList::operator() (UserBase * userBase) {
-	if (!userBase->hide() && userBase->ip().size() && !userBase->nick().empty()) {
-		msList.append(userBase->nick());
+	if (!userBase->hide() && userBase->ip().size() && !userBase->uid().empty()) {
+		msList.append(userBase->uid());
 		msList.append(" ");
 		msList.append(userBase->ip());
 		msList.append(msSep);
