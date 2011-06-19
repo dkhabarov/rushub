@@ -747,17 +747,18 @@ int Conn::readFromRecvBuf() {
 	}
 
 	char * buf = mRecvBuf + mRecvBufRead;
-	string sep = "\0";
-	size_t len = (mRecvBufEnd - mRecvBufRead);
+	const char * sep = "\0";
+	size_t sep_len = 1, len = (mRecvBufEnd - mRecvBufRead);
 	unsigned long maxCommandLength = 10240;
 	
 	if (mProtocol != NULL) {
 		sep = mProtocol->getSeparator();
+		sep_len = mProtocol->getSeparatorLen();
 		maxCommandLength = mProtocol->getMaxCommandLength();
 	}
 
 	const char * pos_sep = NULL;
-	if ((pos_sep = strstr(buf, sep.c_str())) == NULL) {
+	if ((pos_sep = strstr(buf, sep)) == NULL) {
 		if (mCommand->size() + len > maxCommandLength) {
 			closeNow(CLOSE_REASON_MAXSIZE_RECV);
 			return 0;
@@ -767,7 +768,7 @@ int Conn::readFromRecvBuf() {
 		return len;
 	}
 	size_t pos = pos_sep - buf;
-	len = pos + sep.size();
+	len = pos + sep_len;
 	mCommand->append(buf, pos);
 	mRecvBufRead += len;
 	mStrStatus = STRING_STATUS_STR_DONE;

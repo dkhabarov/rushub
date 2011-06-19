@@ -63,7 +63,8 @@ public:
 		return new DcParser;
 	}
 
-	virtual string getSeparator();
+	virtual const char * getSeparator();
+	virtual size_t getSeparatorLen();
 	virtual unsigned long getMaxCommandLength();
 	
 	/** Removing protocol parser */

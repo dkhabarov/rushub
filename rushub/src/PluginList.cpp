@@ -205,7 +205,7 @@ bool PluginList::reloadPlugin(const string & name) {
 
 
 /** Set call list */
-bool PluginList::setCallList(string id, CallList * callList) {
+bool PluginList::setCallList(const string & id, CallList * callList) {
 	if (!callList || id.size() == 0) {
 		return false;
 	}

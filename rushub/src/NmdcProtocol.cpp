@@ -277,7 +277,7 @@ int NmdcProtocol::eventValidateNick(DcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	string & nick = dcparser->chunkString(CHUNK_1_PARAM);
+	const string & nick = dcparser->chunkString(CHUNK_1_PARAM);
 	size_t iNickLen = nick.length();
 
 	/** Additional checking the nick length */
@@ -521,7 +521,7 @@ int NmdcProtocol::eventTo(DcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	string & nick = dcparser->chunkString(CHUNK_PM_TO);
+	const string & nick = dcparser->chunkString(CHUNK_PM_TO);
 
 	/** Checking the coincidence nicks in command */
 	if (dcparser->chunkString(CHUNK_PM_FROM) != dcConn->mDcUser->getUid() || dcparser->chunkString(CHUNK_PM_NICK) != dcConn->mDcUser->getUid()) {
@@ -556,7 +556,7 @@ int NmdcProtocol::eventMcTo(DcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	string & nick = dcparser->chunkString(CHUNK_MC_TO);
+	const string & nick = dcparser->chunkString(CHUNK_MC_TO);
 
 	/** Checking the coincidence nicks in command */
 	if (dcparser->chunkString(CHUNK_MC_FROM) != dcConn->mDcUser->getUid()) {
@@ -599,7 +599,7 @@ int NmdcProtocol::eventUserIp(DcParser * dcParser, DcConn * dcConn) {
 		return -2;
 	}
 
-	string param = dcParser->chunkString(CHUNK_1_PARAM);
+	const string & param = dcParser->chunkString(CHUNK_1_PARAM);
 	string nick, result("$UserIP ");
 
 	size_t pos = param.find("$$");
@@ -717,11 +717,11 @@ int NmdcProtocol::eventSr(DcParser * dcparser, DcConn * dcConn) {
 
 	/** Check same nick in cmd (PROTOCOL NMDC) */
 	if (mDcServer->mDcConfig.mCheckSrNick && (dcConn->mDcUser->getUid() != dcparser->chunkString(CHUNK_SR_FROM))) {
-		string msg = mDcServer->mDcLang.mBadSrNick;
 		if (dcConn->Log(2)) {
 			dcConn->LogStream() << "Bad nick in search response, closing" << endl;
 		}
-		stringReplace(msg, "nick", msg, dcparser->chunkString(CHUNK_SR_FROM));
+		string msg;
+		stringReplace(mDcServer->mDcLang.mBadSrNick, "nick", msg, dcparser->chunkString(CHUNK_SR_FROM));
 		stringReplace(msg, "real_nick", msg, dcConn->mDcUser->getUid());
 		mDcServer->sendToUser(dcConn->mDcUser, msg.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_SR);
@@ -1393,8 +1393,12 @@ void NmdcProtocol::delFromHide(DcUser * dcUser) {
 	}
 }
 
-string NmdcProtocol::getSeparator() {
+const char * NmdcProtocol::getSeparator() {
 	return NMDC_SEPARATOR;
+}
+
+size_t NmdcProtocol::getSeparatorLen() {
+	return NMDC_SEPARATOR_LEN;
 }
 
 unsigned long NmdcProtocol::getMaxCommandLength() {

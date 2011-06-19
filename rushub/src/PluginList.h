@@ -96,7 +96,7 @@ public:
 	bool reloadPlugin(const string & name);
 
 	/** Set call list */
-	bool setCallList(string id, CallList *);
+	bool setCallList(const string & id, CallList *);
 
 
 	virtual bool regCallList(const char * id, Plugin *);
