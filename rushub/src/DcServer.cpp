@@ -738,10 +738,10 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 	string hello;
 	if (dcUser->mHide && dcUser->mDcConn) {
 		if (dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
-			dcUser->mDcConn->send(dcUser->getMyINFO(), true, false);
+			dcUser->mDcConn->send(dcUser->getMyInfo(), true, false);
 		} else if (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
 			dcUser->mDcConn->send(NmdcProtocol::appendHello(hello, dcUser->getUid()), false, false);
-			dcUser->mDcConn->send(dcUser->getMyINFO(), true, false);
+			dcUser->mDcConn->send(dcUser->getMyInfo(), true, false);
 		} else {
 			dcUser->mDcConn->send(NmdcProtocol::appendHello(hello, dcUser->getUid()), false, false);
 		}
@@ -756,10 +756,10 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 		mHelloList.sendToAll(NmdcProtocol::appendHello(hello, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false);
 
 		/** Show MyINFO string to all users */
-		mDcUserList.sendToAll(dcUser->getMyINFO(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
+		mDcUserList.sendToAll(dcUser->getMyInfo(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
 
 		/** Show MyINFO string of the current user to all enterring users */
-		mEnterList.sendToAll(dcUser->getMyINFO(), true/*mDcConfig.mDelayedMyinfo*/);
+		mEnterList.sendToAll(dcUser->getMyInfo(), true/*mDcConfig.mDelayedMyinfo*/);
 
 		/** Op entry */
 		if (dcUser->mInOpList) {
@@ -1215,9 +1215,9 @@ int DcServer::regBot(const string & nick, const string & info, const string & ip
 		return -1;
 	}
 	string myInfo("$MyINFO $ALL ");
-	if (!dcUser->setMyINFO(myInfo.append(nick).append(" ", 1).append(info))) {
+	if (!dcUser->setMyInfo(myInfo.append(nick).append(" ", 1).append(info))) {
 		myInfo = "$MyINFO $ALL ";
-		if (!dcUser->setMyINFO(myInfo.append(nick).append(" $ $$$0$", 9))) {
+		if (!dcUser->setMyInfo(myInfo.append(nick).append(" $ $$$0$", 9))) {
 			delete dcUser;
 			return -2;
 		}

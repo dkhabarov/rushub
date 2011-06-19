@@ -663,7 +663,7 @@ int setUser(lua_State * L) {
 		dcUserBase->setProfile(luaL_checkint(L, 3));
 	} else if (num == USERVALUE_MYINFO) {
 		string myInfo(luaL_checkstring(L, 3));
-		if (!dcUserBase->setMyINFO(myInfo)) {
+		if (!dcUserBase->setMyInfo(myInfo)) {
 			return LuaUtils::pushError(L, "wrong syntax");
 		}
 	} else if (num == USERVALUE_DATA) {

@@ -239,9 +239,6 @@ public:
 	//< Get IP for UDP
 	const string & getIpUdp() const;
 
-	//< Get enter time (in unix time sec)
-	long getConnectTime() const;
-
 	//< Get real port
 	int getPort() const;
 

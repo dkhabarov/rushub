@@ -51,20 +51,33 @@ DcUser::~DcUser() {
 
 
 
-void DcUser::setUid(const string & uid) {
-	mUid = uid;
+const string & DcUser::uid() const {
+	return mUid;
 }
 
 
 
-void DcUser::setInUserList(bool inUserList) {
-	mInUserList = inUserList;
+const string & DcUser::myInfoString() const {
+	return myInfo.getMyInfo();
 }
 
 
 
-void DcUser::setCanSend(bool canSend) {
-	mCanSend = (mInUserList && mDcConn && mDcConn->isOk() && canSend);
+/** Get IP address of user */
+const string & DcUser::ip() const {
+	return mIp;
+}
+
+
+
+bool DcUser::hide() const {
+	return mHide;
+}
+
+
+
+int DcUser::getProfile() const {
+	return mProfile;
 }
 
 
@@ -85,10 +98,25 @@ void DcUser::send(const char * data, size_t len, bool addSep, bool flush) {
 
 
 
-/** Get IP address of user */
-const string & DcUser::ip() const {
-	return mIp;
+
+
+
+void DcUser::setUid(const string & uid) {
+	mUid = uid;
 }
+
+
+
+void DcUser::setInUserList(bool inUserList) {
+	mInUserList = inUserList;
+}
+
+
+
+void DcUser::setCanSend(bool canSend) {
+	mCanSend = (mInUserList && mDcConn && mDcConn->isOk() && canSend);
+}
+
 
 
 
@@ -99,15 +127,6 @@ const string & DcUser::getUid() const {
 
 
 
-const string & DcUser::uid() const {
-	return mUid;
-}
-
-
-
-const string & DcUser::myInfoString() const {
-	return myInfo.getMyInfo();
-}
 
 
 
@@ -135,12 +154,6 @@ bool DcUser::getHide() const {
 
 
 
-bool DcUser::hide() const {
-	return mHide;
-}
-
-
-
 bool DcUser::getForceMove() const {
 	return mForceMove;
 }
@@ -149,12 +162,6 @@ bool DcUser::getForceMove() const {
 
 bool DcUser::getKick() const {
 	return mKick;
-}
-
-
-
-int DcUser::getProfile() const {
-	return mProfile;
 }
 
 
@@ -216,12 +223,12 @@ void DcUser::setKick(bool kick) {
 
 
 /** Get MyINFO */
-const string & DcUser::getMyINFO(/*bool real = false */) const {
+const string & DcUser::getMyInfo(/*bool real = false */) const {
 	return myInfo.getMyInfo();
 }
 
 /** Set MyINFO string (for plugins). With cmd & nick check */
-bool DcUser::setMyINFO(const string & newMyInfo) {
+bool DcUser::setMyInfo(const string & newMyInfo) {
 
 	// TODO remove DcParser class from this function
 
@@ -233,7 +240,7 @@ bool DcUser::setMyINFO(const string & newMyInfo) {
 	return true;
 }
 
-bool DcUser::setMyINFO(DcParser * parser) {
+bool DcUser::setMyInfo(DcParser * parser) {
 	myInfo.setMyInfo(parser->mCommand, parser, mDcServer->miTotalShare);
 	return true;
 }
@@ -251,25 +258,6 @@ bool DcUser::isPassive() const {
 
 
 
-
-const string & DcUser::getData() const {
-	return mData;
-}
-
-void DcUser::setData(const string & data) {
-	mData = data;
-}
-
-//< User's support string (NMDC PROTOCOL)
-const string & DcUser::getSupports() const {
-	return mSupports;
-}
-
-//< User's protocol version (NMDC PROTOCOL)
-const string & DcUser::getVersion() const {
-	return mVersion;
-}
-
 void DcUser::disconnect() {
 	mDcConn->closeNice(9000, CLOSE_REASON_PLUGIN);
 }
@@ -285,11 +273,6 @@ const string & DcUser::getIp() const {
 //< Get string of server ip (host)
 const string & DcUser::getIpConn() const{
 	return mDcConn->getIpConn();
-}
-
-//< Get enter time (in unix time sec)
-long DcUser::getConnectTime() const {
-	return mDcConn->getConnectTime();
 }
 
 //< Get real clients port
@@ -312,6 +295,26 @@ const string & DcUser::getMacAddress() const {
 
 // Used in plugins only
 // =====================================================================
+const string & DcUser::getSupports() const {
+	return mSupports;
+}
+
+const string & DcUser::getVersion() const {
+	return mVersion;
+}
+
+long DcUser::getConnectTime() const {
+	return mTimeEnter.Sec();
+}
+
+const string & DcUser::getData() const {
+	return mData;
+}
+
+void DcUser::setData(const string & data) {
+	mData = data;
+}
+
 const string & DcUser::getDesc(/*bool real = false */) const {
 	return myInfo.getDescription();
 }

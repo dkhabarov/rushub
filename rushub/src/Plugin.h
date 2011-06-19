@@ -75,7 +75,7 @@ using namespace ::std;
 
 //< Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10021
+	#define INTERNAL_PLUGIN_VERSION 10022
 #endif
 
 //< NMDC protocol separator
@@ -188,10 +188,10 @@ public:
 
 
 	//< Get user's MyINFO cmd
-	virtual const string & getMyINFO(/*bool real = false*/) const = 0;
+	virtual const string & getMyInfo(/*bool real = false*/) const = 0;
 
 	//< Set user's MyINFO cmd
-	virtual bool setMyINFO(const string & myInfo) = 0;
+	virtual bool setMyInfo(const string & myInfo) = 0;
 
 
 	//< Get user's description

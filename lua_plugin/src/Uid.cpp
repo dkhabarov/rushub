@@ -92,7 +92,7 @@ int Uid::userIndex(lua_State * L) {
 			break;
 
 		case PARAM_HASH_MYINFO :
-			lua_pushstring(L, dcUserBase->getMyINFO().c_str());
+			lua_pushstring(L, dcUserBase->getMyInfo().c_str());
 			break;
 
 		case PARAM_HASH_SHARE :
@@ -317,7 +317,7 @@ int Uid::userNewIndex(lua_State * L) {
 			if (!s) {
 				ERR_TYPEMETA(3, "UID", "string");
 			}
-			dcUserBase->setMyINFO(s);
+			dcUserBase->setMyInfo(s);
 			break;
 
 		case PARAM_HASH_INOPLIST :

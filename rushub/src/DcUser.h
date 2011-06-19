@@ -54,8 +54,6 @@ public:
 
 	Time mTimeEnter; //< Enter time on the hub
 
-
-	// TODO add param => hash for nick
 	string mUid; //< UserID
 
 	bool mInOpList; //< User in op-list
@@ -84,26 +82,22 @@ public:
 	virtual void send(const string & data, bool addSep = false, bool flush = true);
 
 
+
 	virtual void send(const char * data, size_t len, bool addSep = false, bool flush = true);
 
 
-	void setInUserList(bool);
-	void setCanSend(bool canSend);
-
 	virtual const string & getUid() const;
-
 	virtual bool getInUserList() const;
+	virtual const string & getMyInfo(/*bool real = false*/) const;
+	virtual bool setMyInfo(const string & myInfo);
+	bool setMyInfo(DcParser * parser);
+	virtual __int64 getShare(/*bool real = false*/) const;
+
 	virtual bool getInOpList() const;
 	virtual bool getInIpList() const;
 	virtual bool getHide() const;
 	virtual bool getForceMove() const;
 	virtual bool getKick() const;
-
-	virtual void setProfile(int profile);
-
-	void setIp(const string & ip);
-
-	void setUid(const string & uid);
 
 	virtual void setInOpList(bool inOpList);
 	virtual void setInIpList(bool inIpList);
@@ -112,51 +106,39 @@ public:
 	virtual void setKick(bool kick);
 
 
-
-	virtual const string & getMyINFO(/*bool real = false*/) const;
-	virtual bool setMyINFO(const string & myInfo);
-	bool setMyINFO(DcParser * parser);
-
-	// setShare ?
-	virtual __int64 getShare(/*bool real = false*/) const;
-
-	// setPassive ?
+	void setUid(const string & uid);
+	void setIp(const string & ip);
+	void setInUserList(bool);
+	void setCanSend(bool canSend);
 	bool isPassive() const;
 
 
-	virtual const string & getData() const;
-	virtual void setData(const string & data);
-
-	//< Support string (PROTOCOL NMDC)
-	virtual const string & getSupports() const;
-
-	//< User's protocol version (PROTOCOL NMDC)
-	virtual const string & getVersion() const;
+	virtual void setProfile(int profile);
 
 	virtual void disconnect();
 
 
-	//< Get string of IP
+	// From Conn
 	virtual const string & getIp() const;
-
-	//< Get string of server ip (host)
 	virtual const string & getIpConn() const;
-
-	//< Get enter time (in unix time sec)
-	long getConnectTime() const;
-
-	//< Get real clients port
 	virtual int getPort() const;
-
-	//< Get connection port
 	virtual int getPortConn() const;
-
-	//< Get mac address
 	virtual const string & getMacAddress() const;
 
 
 	// Used in plugins only
 	// =====================================================================
+
+	// NMDC
+	virtual const string & getSupports() const;
+	virtual const string & getVersion() const;
+
+
+	virtual long getConnectTime() const;
+	virtual const string & getData() const;
+	virtual void setData(const string & data);
+
+	// myinfo
 	virtual const string & getDesc(/*bool real = false*/) const;
 	virtual const string & getEmail(/*bool real = false*/) const;
 	virtual const string & getConnection(/*bool real = false*/) const;

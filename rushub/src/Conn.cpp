@@ -596,13 +596,6 @@ const string & Conn::getIpUdp() const {
 
 
 
-//< Get enter time (in unix time sec)
-long Conn::getConnectTime() const {
-	return mConnect.Sec();
-}
-
-
-
 //< Get real port
 int Conn::getPort() const {
 	return mPort;
