@@ -204,9 +204,8 @@ ostream & Obj::openLog() {
 	char buf[64] = { '\0' };
 	strftime(buf, 64, LOG_FILE, &tmr);
 
-	string path = *msPath;
-	path.append(buf);
-	mOfs.open(path.c_str(), ios_base::app);
+	string path(*msPath);
+	mOfs.open(path.append(buf).c_str(), ios_base::app);
 
 	ostream * ret = &mOfs;
 	if (!mOfs.is_open()) {

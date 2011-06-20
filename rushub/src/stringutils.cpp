@@ -41,11 +41,11 @@ bool loadFileInString(const string & fileName, string & str) {
 	while (!ifs.eof()) {
 		getline(ifs, buf);
 		if (addLine) {
-			str += "\r\n";
+			str.append("\r\n", 2);
 		} else {
 			addLine = true;
 		}
-		str += buf;
+		str.append(buf);
 	}
 	ifs.close();
 	return true;
@@ -58,8 +58,8 @@ string & stringReplace(const string & str, const string & varname, string & dest
 	string search;
 	if (!b) {
 		search = "%[";
-		search += varname;
-		search += "]";
+		search.append(varname.data(), varname.size());
+		search.append("]", 1);
 	} else {
 		search = varname;
 	}

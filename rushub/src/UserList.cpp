@@ -82,7 +82,7 @@ void UserList::ufDoNickList::operator() (UserBase * userBase) {
 	}
 }
 
-UserList::UserList(string name, bool keepNickList) :
+UserList::UserList(const string & name, bool keepNickList) :
 	Obj("UserList"),
 	HashTable<UserBase *> (1024), // 1024 for big hubs and big check interval of resize
 	mName(name),
@@ -170,8 +170,8 @@ void UserList::flushForUser(UserBase * userBase) {
 /** Flush common cache */
 void UserList::flushCache() {
 	if (mCache.size()) {
-		string sStr;
-		sendToAll(sStr, false, false);
+		string str;
+		sendToAll(str, false, false);
 	}
 }
 
@@ -199,7 +199,7 @@ void FullUserList::ufDoIpList::operator() (UserBase * userBase) {
 	}
 }
 
-FullUserList::FullUserList(string name, bool keepNickList, bool keepInfoList, bool keepIpList) :
+FullUserList::FullUserList(const string & name, bool keepNickList, bool keepInfoList, bool keepIpList) :
 	UserList(name, keepNickList),
 	mInfoListMaker(mInfoList, mInfoListComplete),
 	mIpListMaker(mIpList),

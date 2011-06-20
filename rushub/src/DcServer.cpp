@@ -1101,8 +1101,8 @@ void DcServer::forceMove(DcUserBase * dcUserBase, const char * address, const ch
 		nick = dcConn->mDcUser->getUid();
 	}
 
-	stringReplace(mDcLang.mForceMove, "address", force, string(address));
-	stringReplace(force, "reason", force, string(reason != NULL ? reason : ""));
+	stringReplace(mDcLang.mForceMove, "address", force, address);
+	stringReplace(force, "reason", force, reason != NULL ? reason : "");
 	NmdcProtocol::appendPm(msg, nick, mDcConfig.mHubBot, mDcConfig.mHubBot, force);
 	NmdcProtocol::appendChat(msg, mDcConfig.mHubBot, force);
 	dcConn->send(NmdcProtocol::appendForceMove(msg, address));
@@ -1278,7 +1278,7 @@ string DcServer::getSysVersion() {
 	if (!osVersionInfoEx) {
 		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 		if (!GetVersionEx((OSVERSIONINFO *) &osvi)) {
-			return string("unknown");
+			return "unknown";
 		}
 	}
 
@@ -1351,13 +1351,13 @@ string DcServer::getSysVersion() {
 				LONG lRet = RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\ProductOptions", 0, KEY_QUERY_VALUE, &hKey);
 
 				if (lRet != ERROR_SUCCESS) {
-					return string("unknown");
+					return "unknown";
 				}
 
 				lRet = RegQueryValueExA( hKey, "ProductType", NULL, NULL, (LPBYTE) szProductType, &dwBufLen);
 
 				if ((lRet != ERROR_SUCCESS) || (dwBufLen > 80)) {
-					return string("unknown");
+					return "unknown";
 				}
 
 				RegCloseKey(hKey);
@@ -1419,16 +1419,17 @@ string DcServer::getSysVersion() {
 #else
 
 string DcServer::getSysVersion() {
-	string version;
 	utsname osname;
 	if (uname(&osname) == 0) {
-		version = string(osname.sysname) + " " + 
-			string(osname.release) + " (" + 
-			string(osname.machine) + ")";
-	} else {
-		version = "unknown";
+		string version(osname.sysname);
+		version.append(" ", 1);
+		version.append(osname.release);
+		version.append(" (", 2);
+		version.append(osname.machine);
+		version.append(")", 1);
+		return version;
 	}
-	return version;
+	return "unknown";
 }
 
 #endif

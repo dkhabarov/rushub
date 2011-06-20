@@ -128,7 +128,7 @@ public:
 		string msStart; /** Prefix */
 		string msSep; /** Separator */
 
-		ufDoNickList(string & sList) : msList(sList){
+		ufDoNickList(string & list) : msList(list){
 		}
 
 		virtual ~ufDoNickList() {
@@ -164,7 +164,7 @@ protected:
 
 public:
 
-	explicit UserList(string sName, bool bKeepNickList = false);
+	explicit UserList(const string & name, bool keepNickList = false);
 
 	virtual ~UserList() {
 	}
@@ -277,9 +277,9 @@ public:
 	/** Unary function for constructing MyINFO list */
 	struct ufDoINFOList : public UserList::ufDoNickList {
 		string & msListComplete;
-		ufDoINFOList(string & sList, string & sListComplete) :
-			ufDoNickList(sList),
-			msListComplete(sListComplete)
+		ufDoINFOList(string & list, string & listComplete) :
+			ufDoNickList(list),
+			msListComplete(listComplete)
 		{
 			msSep = NMDC_SEPARATOR;
 			msStart = "";
@@ -303,7 +303,7 @@ public:
 
 	/** Unary function for constructing ip-list */
 	struct ufDoIpList : public UserList::ufDoNickList {
-		ufDoIpList(string & sList) : ufDoNickList(sList) {
+		ufDoIpList(string & list) : ufDoNickList(list) {
 			msSep = "$$";
 			msStart = "$UserIP ";
 		}
@@ -336,7 +336,7 @@ protected:
 
 public:
 
-	explicit FullUserList(string sName, bool bKeepNickList = false, bool bKeepInfoList = false, bool bKeepIpList = false);
+	explicit FullUserList(const string & name, bool keepNickList = false, bool keepInfoList = false, bool keepIpList = false);
 
 	virtual ~FullUserList() {
 	}
@@ -346,7 +346,7 @@ public:
 	}
 
 	virtual string & getNickList();
-	virtual string & getInfoList(bool bComplete = false);
+	virtual string & getInfoList(bool complete = false);
 	virtual string & getIpList();
 
 	inline void remake() {

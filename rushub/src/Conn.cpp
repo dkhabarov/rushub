@@ -278,7 +278,7 @@ void Conn::closeNice(int msec /* = 0 */, int reason /* = 0 */) {
 		return;
 	}
 	mCloseTime.Get();
-	mCloseTime += int(msec);
+	mCloseTime += msec;
 }
 
 /** closeNow */

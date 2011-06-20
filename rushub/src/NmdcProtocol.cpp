@@ -125,7 +125,7 @@ int NmdcProtocol::onNewDcConn(DcConn * dcConn) {
 			useCache = false;
 		}
 		if (!useCache) {
-			stringReplace(mDcServer->mDcLang.mFirstMsg, "HUB", sCache, string(INTERNALNAME " " INTERNALVERSION));
+			stringReplace(mDcServer->mDcLang.mFirstMsg, "HUB", sCache, INTERNALNAME " " INTERNALVERSION);
 			stringReplace(sCache, "uptime", sCache, sTimeCache);
 			stringReplace(sCache, "users", sCache, iUsersVal);
 			stringReplace(sCache, "share", sCache, sShareCache);
@@ -689,9 +689,9 @@ int NmdcProtocol::eventSearch(DcParser * dcparser, DcConn * dcConn) {
 				return -1;
 			}
 			msg = "$Search ";
-			msg += dcparser->chunkString(CHUNK_AS_ADDR);
-			msg += ' ';
-			msg += dcparser->chunkString(CHUNK_AS_QUERY);
+			msg.append(dcparser->chunkString(CHUNK_AS_ADDR));
+			msg.append(" ", 1);
+			msg.append(dcparser->chunkString(CHUNK_AS_QUERY));
 			sendMode(dcConn, msg, iMode, mDcServer->mDcUserList, true); // Use cache for send to all
 			break;
 
