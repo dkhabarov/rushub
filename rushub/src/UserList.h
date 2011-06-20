@@ -53,9 +53,10 @@ public:
 
 	/** Unary function for sending data to users */
 	struct ufSend : public unary_function<void, iterator> {
-		string & mData; /** Data for sending */
+		const string & mData; /** Data for sending */
+		bool mAddSep;
 
-		ufSend(string & data) : mData(data) {
+		ufSend(const string & data, bool addSep) : mData(data), mAddSep(addSep) {
 		}
 
 		ufSend & operator = (const ufSend &) {
@@ -67,10 +68,13 @@ public:
 
 	/** Unary function for sending data to users with profile */
 	struct ufSendProfile : public unary_function<void, iterator> {
-		string & mData; /** Data for sending */
+		const string & mData; /** Data for sending */
 		unsigned long mProfile;
+		bool mAddSep;
 
-		ufSendProfile(string & data, unsigned long profile) : mData(data), mProfile(profile) {
+		ufSendProfile(const string & data, unsigned long profile, bool addSep) : 
+			mData(data), mProfile(profile), mAddSep(addSep)
+		{
 		}
 
 		ufSendProfile & operator = (const ufSendProfile &) {
@@ -82,9 +86,9 @@ public:
 
 	/** Unary function for sending data dataS + nick + dataE to each user */
 	struct ufSendWithNick : public unary_function<void, iterator> {
-		string &mDataStart, &mDataEnd; /** Data for sending */
+		const string &mDataStart, &mDataEnd; /** Data for sending */
 
-		ufSendWithNick(string & dataStart, string & dataEnd) : 
+		ufSendWithNick(const string & dataStart, const string & dataEnd) : 
 			mDataStart(dataStart),
 			mDataEnd(dataEnd)
 		{
@@ -99,10 +103,10 @@ public:
 
 	/** Unary function for sending data dataS + nick + dataE to each user with profile */
 	struct ufSendWithNickProfile : public unary_function<void, iterator> {
-		string &mDataStart, &mDataEnd; /** Data for sending */
+		const string &mDataStart, &mDataEnd; /** Data for sending */
 		unsigned long mProfile;
 
-		ufSendWithNickProfile(string & dataStart, string & dataEnd, unsigned long profile) : 
+		ufSendWithNickProfile(const string & dataStart, const string & dataEnd, unsigned long profile) : 
 			mDataStart(dataStart),
 			mDataEnd(dataEnd),
 			mProfile(profile)
@@ -229,10 +233,10 @@ public:
 	void sendToProfiles(unsigned long profile, const string & data, bool addSep = true);
 
 	/** Sending data sStart+Nick+sEnd to all list */
-	void sendWithNick(string & start, string & end);
+	void sendWithNick(const string & dataStart, const string & dataEnd);
 
 	/** Sending data sStart+Nick+sEnd to profiles */
-	void sendWithNick(string & start, string & end, unsigned long profile);
+	void sendWithNick(const string & dataStart, const string & dataEnd, unsigned long profile);
 
 	/** Sending data from cache to user */
 	void flushForUser(UserBase * userBase);
@@ -329,8 +333,6 @@ protected:
 
 	bool mKeepIpList;
 	bool mRemakeNextIpList;
-
-	string & mCompositeInfoList;
 
 public:
 

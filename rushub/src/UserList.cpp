@@ -31,7 +31,7 @@ namespace dcserver {
 
 void UserList::ufSend::operator() (UserBase * userBase) {
 	if (userBase && userBase->isCanSend()) {
-		userBase->send(mData, false); // newPolitic
+		userBase->send(mData, mAddSep);
 	}
 }
 
@@ -45,7 +45,7 @@ void UserList::ufSendProfile::operator() (UserBase * userBase) {
 			profile = (profile % 32) - 1;
 		}
 		if (mProfile & (1 << profile)) {
-			userBase->send(mData, false); // newPolitic
+			userBase->send(mData, mAddSep);
 		}
 	}
 }
@@ -54,7 +54,7 @@ void UserList::ufSendWithNick::operator() (UserBase * userBase) {
 	if (userBase && userBase->isCanSend() && !userBase->uid().empty()) {
 		userBase->send(mDataStart, false, false);
 		userBase->send(userBase->uid(), false, false);
-		userBase->send(mDataEnd, true); // newPolitic
+		userBase->send(mDataEnd, true);
 	}
 }
 
@@ -70,7 +70,7 @@ void UserList::ufSendWithNickProfile::operator() (UserBase * userBase) {
 		if (mProfile & (1 << profile) && !userBase->uid().empty()) {
 			userBase->send(mDataStart, false, false);
 			userBase->send(userBase->uid(), false, false);
-			userBase->send(mDataEnd, true); // newPolitic
+			userBase->send(mDataEnd, true);
 		}
 	}
 }
@@ -109,34 +109,40 @@ string & UserList::getNickList() {
  addSep - add sep to end of list
  */
 void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
-	mCache.append(data.c_str(), data.size());
-	if (addSep) {
-		mCache.append(NMDC_SEPARATOR);
-	}
 	if (!useCache) {
 		if (Log(4)) {
 			LogStream() << "sendToAll begin" << endl;
 		}
-		for_each(begin(), end(), ufSend(mCache));
+
+		if (mCache.size()) {
+			mCache.append(data.c_str(), data.size());
+			if (addSep) {
+				mCache.append(NMDC_SEPARATOR);
+			}
+			for_each(begin(), end(), ufSend(mCache, false));
+			mCache.erase(0, mCache.size());
+		} else {
+			for_each(begin(), end(), ufSend(data, addSep));
+		}
+
 		if (Log(4)) {
 			LogStream() << "sendToAll end" << endl;
 		}
-		mCache.erase(0, mCache.size());
+	} else {
+		mCache.append(data.c_str(), data.size());
+		if (addSep) {
+			mCache.append(NMDC_SEPARATOR);
+		}
 	}
 }
 
 /** Sending data to profiles */
 void UserList::sendToProfiles(unsigned long profile, const string & data, bool addSep) {
-	string msg(data);
-	if (addSep) {
-		msg.append(NMDC_SEPARATOR);
-	}
-
 	if (Log(4)) {
 		LogStream() << "sendToProfiles begin" << endl;
 	}
 
-	for_each(begin(), end(), ufSendProfile(msg, profile));
+	for_each(begin(), end(), ufSendProfile(data, profile, addSep));
 
 	if (Log(4)) {
 		LogStream() << "sendToProfiles end" << endl;
@@ -146,25 +152,25 @@ void UserList::sendToProfiles(unsigned long profile, const string & data, bool a
 /** Sending data start+Nick+end to all
     Nick - user's nick
     Use for private send to all */
-void UserList::sendWithNick(string & s, string & e) {
-	for_each(begin(), end(), ufSendWithNick(s, e));
+void UserList::sendWithNick(const string & dataStart, const string & dataEnd) {
+	for_each(begin(), end(), ufSendWithNick(dataStart, dataEnd));
 }
 
-void UserList::sendWithNick(string & s, string & e, unsigned long profile) {
-	for_each(begin(), end(), ufSendWithNickProfile(s, e, profile));
+void UserList::sendWithNick(const string & dataStart, const string & dataEnd, unsigned long profile) {
+	for_each(begin(), end(), ufSendWithNickProfile(dataStart, dataEnd, profile));
 }
 
 /** Flush user cache */
 void UserList::flushForUser(UserBase * userBase) {
 	if (mCache.size()) {
-		ufSend(mCache).operator() (userBase);
+		ufSend(mCache, false).operator() (userBase);
 	}
 }
 
 /** Flush common cache */
 void UserList::flushCache() {
-	string sStr;
 	if (mCache.size()) {
+		string sStr;
 		sendToAll(sStr, false, false);
 	}
 }
@@ -200,8 +206,7 @@ FullUserList::FullUserList(string name, bool keepNickList, bool keepInfoList, bo
 	mKeepInfoList(keepInfoList),
 	mRemakeNextInfoList(true),
 	mKeepIpList(keepIpList),
-	mRemakeNextIpList(true),
-	mCompositeInfoList(mInfoList)
+	mRemakeNextIpList(true)
 {
 	SetClassName("FullUserList");
 }
@@ -221,13 +226,8 @@ string & FullUserList::getInfoList(bool complete) {
 			for_each(begin(), end(), mInfoListMaker);
 			mRemakeNextInfoList = mOptRemake = false;
 		}
-		if (complete) {
-			mCompositeInfoList = mInfoListComplete;
-		} else {
-			mCompositeInfoList = mInfoList;
-		}
 	}
-	return mCompositeInfoList;
+	return complete ? mInfoListComplete : mInfoList;
 }
 
 string & FullUserList::getIpList() {
