@@ -124,11 +124,11 @@ public:
 
 	/** Unary function for constructing nick-list */
 	struct ufDoNickList : public unary_function<void, iterator> {
-		string & msList; /** List */
-		string msStart; /** Prefix */
-		string msSep; /** Separator */
+		string & mList; /** List */
+		string mStart; /** Prefix */
+		string mSep; /** Separator */
 
-		ufDoNickList(string & list) : msList(list){
+		ufDoNickList(string & list) : mList(list){
 		}
 
 		virtual ~ufDoNickList() {
@@ -139,28 +139,12 @@ public:
 		}
 
 		virtual void clear() { /** Clear var and record prefix */
-			msList.erase(0, msList.size());
-			msList.append(msStart.c_str(), msStart.size());
+			mList.erase(0, mList.size());
+			mList.append(mStart.c_str(), mStart.size());
 		}
 
 		virtual void operator() (UserBase *);
 	};
-
-private:
-
-	typedef HashTable<UserBase *> List_t;
-
-	string mName; //< Name of list
-	string mCache;
-
-	ufDoNickList mNickListMaker;
-
-protected:
-
-	string mNickList;
-	bool mKeepNickList;
-	bool mRemakeNextNickList;
-	bool mOptRemake; /** Flag of the absence of the change between remake */
 
 public:
 
@@ -215,11 +199,11 @@ public:
 	virtual const string & getNickList();
 
 	void setNickListStart(const char * start) {
-		mNickListMaker.msStart = start;
+		mNickListMaker.mStart = start;
 	}
 
 	void setNickListSeparator(const char * sep) {
-		mNickListMaker.msSep = sep;
+		mNickListMaker.mSep = sep;
 	}
 	
 	void remake() {
@@ -244,6 +228,29 @@ public:
 	/** Sending data from cache to all and clear cache */
 	void flushCache();
 
+	/** Redefining log level function */
+	virtual bool strLog();
+
+protected:
+
+	string mNickList;
+	bool mKeepNickList;
+	bool mRemakeNextNickList;
+	bool mOptRemake; /** Flag of the absence of the change between remake */
+
+protected:
+
+	virtual void onAdd(UserBase * userBase) {
+		if (!mRemakeNextNickList && mKeepNickList) {
+			mNickListMaker(userBase);
+		}
+	}
+
+	virtual void onRemove(UserBase *) {
+		mRemakeNextNickList = mKeepNickList;
+		mOptRemake = false;
+	}
+
 	virtual void onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
 		if (Log(3)) {
 			LogStream() << "Autoresizing: size = " << currentSize << 
@@ -251,20 +258,15 @@ public:
 		}
 	}
 
-	/** onAdd */
-	virtual void onAdd(UserBase * userBase) {
-		if (!mRemakeNextNickList && mKeepNickList) {
-			mNickListMaker(userBase);
-		}
-	}
-	/** onRemove */
-	virtual void onRemove(UserBase *) {
-		mRemakeNextNickList = mKeepNickList;
-		mOptRemake = false;
-	}
+private:
 
-	/** Redefining log level function */
-	virtual bool strLog();
+	typedef HashTable<UserBase *> List_t;
+
+	string mName; //< Name of list
+	string mCache;
+
+	ufDoNickList mNickListMaker;
+
 
 }; // UserList
 
@@ -281,8 +283,8 @@ public:
 			ufDoNickList(list),
 			msListComplete(listComplete)
 		{
-			msSep = NMDC_SEPARATOR;
-			msStart = "";
+			mSep = NMDC_SEPARATOR;
+			mStart = "";
 		}
 
 		virtual ~ufDoINFOList() {
@@ -295,7 +297,7 @@ public:
 		virtual void clear() { /** Clear var and record prefix */
 			ufDoNickList::clear();
 			msListComplete.erase(0, msListComplete.size());
-			msListComplete.append(msStart.data(), msStart.size());
+			msListComplete.append(mStart.data(), mStart.size());
 		}
 
 		virtual void operator() (UserBase *);
@@ -304,8 +306,8 @@ public:
 	/** Unary function for constructing ip-list */
 	struct ufDoIpList : public UserList::ufDoNickList {
 		ufDoIpList(string & list) : ufDoNickList(list) {
-			msSep = "$$";
-			msStart = "$UserIP ";
+			mSep = "$$";
+			mStart = "$UserIP ";
 		}
 
 		virtual ~ufDoIpList() {
@@ -317,22 +319,6 @@ public:
 
 		virtual void operator() (UserBase *);
 	};
-
-private:
-
-	string mInfoList;
-	string mInfoListComplete;
-	string mIpList;
-	ufDoINFOList mInfoListMaker;
-	ufDoIpList mIpListMaker;
-
-protected:
-
-	bool mKeepInfoList;
-	bool mRemakeNextInfoList;
-
-	bool mKeepIpList;
-	bool mRemakeNextIpList;
 
 public:
 
@@ -358,19 +344,36 @@ public:
 	}
 
 
-	/** onAdd */
+protected:
+
+	bool mKeepInfoList;
+	bool mRemakeNextInfoList;
+
+	bool mKeepIpList;
+	bool mRemakeNextIpList;
+
+protected:
+
 	virtual void onAdd(UserBase * userBase) {
 		UserList::onAdd(userBase);
 		if(!mRemakeNextInfoList && mKeepInfoList) mInfoListMaker(userBase);
 		if(!mRemakeNextIpList && mKeepIpList) mIpListMaker(userBase);
 	}
 
-	/** onRemove */
 	virtual void onRemove(UserBase * userBase) {
 		UserList::onRemove(userBase);
 		mRemakeNextInfoList = mKeepInfoList;
 		mRemakeNextIpList = mKeepIpList;
 	}
+
+private:
+
+	string mInfoList;
+	string mInfoListComplete;
+	string mIpList;
+	ufDoINFOList mInfoListMaker;
+	ufDoIpList mIpListMaker;
+
 
 }; // FullUserList
 

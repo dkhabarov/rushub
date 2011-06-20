@@ -77,19 +77,19 @@ void UserList::ufSendWithNickProfile::operator() (UserBase * userBase) {
 
 void UserList::ufDoNickList::operator() (UserBase * userBase) {
 	if (!userBase->hide() && !userBase->uid().empty()) {
-		msList.append(userBase->uid());
-		msList.append(msSep);
+		mList.append(userBase->uid());
+		mList.append(mSep);
 	}
 }
 
 UserList::UserList(const string & name, bool keepNickList) :
 	Obj("UserList"),
 	HashTable<UserBase *> (1024), // 1024 for big hubs and big check interval of resize
-	mName(name),
-	mNickListMaker(mNickList),
 	mKeepNickList(keepNickList),
 	mRemakeNextNickList(true),
-	mOptRemake(false)
+	mOptRemake(false),
+	mName(name),
+	mNickListMaker(mNickList)
 {
 }
 
@@ -186,27 +186,27 @@ bool UserList::strLog() {
 void FullUserList::ufDoINFOList::operator() (UserBase * userBase) {
 	if (!userBase->hide()) {
 		msListComplete.append(userBase->myInfoString());
-		msListComplete.append(msSep);
+		msListComplete.append(mSep);
 	}
 }
 
 void FullUserList::ufDoIpList::operator() (UserBase * userBase) {
 	if (!userBase->hide() && userBase->ip().size() && !userBase->uid().empty()) {
-		msList.append(userBase->uid());
-		msList.append(" ");
-		msList.append(userBase->ip());
-		msList.append(msSep);
+		mList.append(userBase->uid());
+		mList.append(" ");
+		mList.append(userBase->ip());
+		mList.append(mSep);
 	}
 }
 
 FullUserList::FullUserList(const string & name, bool keepNickList, bool keepInfoList, bool keepIpList) :
 	UserList(name, keepNickList),
-	mInfoListMaker(mInfoList, mInfoListComplete),
-	mIpListMaker(mIpList),
 	mKeepInfoList(keepInfoList),
 	mRemakeNextInfoList(true),
 	mKeepIpList(keepIpList),
-	mRemakeNextIpList(true)
+	mRemakeNextIpList(true),
+	mInfoListMaker(mInfoList, mInfoListComplete),
+	mIpListMaker(mIpList)
 {
 	SetClassName("FullUserList");
 }
