@@ -200,17 +200,18 @@ FullUserList::FullUserList(string name, bool keepNickList, bool keepInfoList, bo
 	mKeepInfoList(keepInfoList),
 	mRemakeNextInfoList(true),
 	mKeepIpList(keepIpList),
-	mRemakeNextIpList(true)
+	mRemakeNextIpList(true),
+	mCompositeInfoList(mInfoList)
 {
 	SetClassName("FullUserList");
 }
 
 string & FullUserList::getNickList() {
 	if (mKeepNickList) {
-		mCompositeNickList = UserList::getNickList();
+		UserList::getNickList();
 		mOptRemake = false;
 	}
-	return mCompositeNickList;
+	return mNickList;
 }
 
 string & FullUserList::getInfoList(bool complete) {

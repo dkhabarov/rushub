@@ -149,11 +149,11 @@ private:
 	string mName; //< Name of list
 	string mCache;
 
-	string mNickList;
 	ufDoNickList mNickListMaker;
 
 protected:
 
+	string mNickList;
 	bool mKeepNickList;
 	bool mRemakeNextNickList;
 	bool mOptRemake; /** Flag of the absence of the change between remake */
@@ -330,14 +330,17 @@ protected:
 	bool mKeepIpList;
 	bool mRemakeNextIpList;
 
-	string mCompositeNickList;
-	string mCompositeInfoList;
+	string & mCompositeInfoList;
 
 public:
 
 	explicit FullUserList(string sName, bool bKeepNickList = false, bool bKeepInfoList = false, bool bKeepIpList = false);
 
 	virtual ~FullUserList() {
+	}
+
+	virtual FullUserList & operator = (const FullUserList &) {
+		return *this;
 	}
 
 	virtual string & getNickList();
