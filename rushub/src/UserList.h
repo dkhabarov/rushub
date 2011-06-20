@@ -212,7 +212,7 @@ public:
 		return List_t::remove(key);
 	}
 
-	virtual string & getNickList();
+	virtual const string & getNickList();
 
 	void setNickListStart(const char * start) {
 		mNickListMaker.msStart = start;
@@ -345,9 +345,9 @@ public:
 		return *this;
 	}
 
-	virtual string & getNickList();
-	virtual string & getInfoList(bool complete = false);
-	virtual string & getIpList();
+	virtual const string & getNickList();
+	virtual const string & getInfoList(bool complete = false);
+	virtual const string & getIpList();
 
 	inline void remake() {
 		if (!mOptRemake) {

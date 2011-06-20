@@ -93,7 +93,7 @@ UserList::UserList(const string & name, bool keepNickList) :
 {
 }
 
-string & UserList::getNickList() {
+const string & UserList::getNickList() {
 	if (mRemakeNextNickList && mKeepNickList) {
 		mNickListMaker.clear();
 		for_each(begin(), end(), mNickListMaker);
@@ -211,7 +211,7 @@ FullUserList::FullUserList(const string & name, bool keepNickList, bool keepInfo
 	SetClassName("FullUserList");
 }
 
-string & FullUserList::getNickList() {
+const string & FullUserList::getNickList() {
 	if (mKeepNickList) {
 		UserList::getNickList();
 		mOptRemake = false;
@@ -219,7 +219,7 @@ string & FullUserList::getNickList() {
 	return mNickList;
 }
 
-string & FullUserList::getInfoList(bool complete) {
+const string & FullUserList::getInfoList(bool complete) {
 	if (mKeepInfoList) {
 		if (mRemakeNextInfoList && mKeepInfoList) {
 			mInfoListMaker.clear();
@@ -230,7 +230,7 @@ string & FullUserList::getInfoList(bool complete) {
 	return complete ? mInfoListComplete : mInfoList;
 }
 
-string & FullUserList::getIpList() {
+const string & FullUserList::getIpList() {
 	if (mRemakeNextIpList && mKeepIpList) {
 		mIpListMaker.clear();
 		for_each(begin(), end(), mIpListMaker);
