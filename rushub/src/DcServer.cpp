@@ -217,8 +217,9 @@ void DcServer::getAddresses(
 		if (2 < vIpPort.size() || vIpPort.size() < 1 || vIpPort[0].size() == 0) {
 			continue;
 		}
-		if (vIpPort[0].operator[](vIpPort[0].size() - 1) == ']') {
-			vIpPort[0].assign(vIpPort[0].c_str(), vIpPort[0].size() - 1);
+		size_t last = vIpPort[0].size() - 1;
+		if (vIpPort[0].at(last) == ']') {
+			vIpPort[0].assign(vIpPort[0].c_str(), last);
 		}
 		vec.push_back(pair<string, string>(vIpPort[0], vIpPort.size() == 2 ? vIpPort[1] : defPort));
 	}
