@@ -55,7 +55,6 @@ PluginList::~PluginList() {
 		if (pluginLoader) {
 			unloadPlugin(pluginLoader->mPlugin->getName());
 		}
-		mPluginLoaders.remove(hash);
 	}
 
 	// Removing call lists
