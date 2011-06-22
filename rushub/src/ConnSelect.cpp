@@ -32,7 +32,7 @@ namespace server {
 
 ConnSelect::ConnSelect() :
 	ConnChoose(),
-	Obj("ConnSelect")
+	Obj("ConnSelect", true)
 {
 }
 

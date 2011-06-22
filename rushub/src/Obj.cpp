@@ -82,6 +82,15 @@ Obj::Obj(const char * name) :
 
 
 
+// Without Count Control (use only if you control this object). For owner objects!
+Obj::Obj(const char * name, bool) :
+	mClassName(name),
+	mToLog(&cout)
+{
+}
+
+
+
 Obj::Obj() :
 	mClassName("Obj"),
 	mToLog(&cout)

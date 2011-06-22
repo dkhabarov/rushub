@@ -50,6 +50,7 @@ public:
 
 	Obj();
 	Obj(const char * name);
+	Obj(const char * name, bool); // Without Count Control (use only if you control this object)
 	virtual ~Obj();
 
 	/** Get counts of objects */

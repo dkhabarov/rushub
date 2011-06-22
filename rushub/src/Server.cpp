@@ -46,7 +46,7 @@ namespace server {
 
 //////////////////////////////////////////////constructor////////////////////////////////////////
 Server::Server() :
-	Obj("Server"),
+	Obj("Server", true),
 	mStepDelay(0),
 	mTimerServPeriod(1000),
 	mTimerConnPeriod(4000),
@@ -96,12 +96,7 @@ Server::~Server() {
 	initWSA = false;
 #endif
 	if (Log(1)) {
-		LogStream() << endl << "Allocated objects: " << 
-		#ifdef _WIN32
-			Obj::GetCount() - 3 // except DcServer, Service, ConnSelect
-		#else
-			Obj::GetCount() - 1 // except DcServer
-		#endif
+		LogStream() << endl << "Allocated objects: " << Obj::GetCount()
 		<< endl << "Unclosed sockets: " << Conn::mConnCounter << endl;
 	}
 	if (mOfs.is_open()) {
