@@ -305,7 +305,7 @@ int Service::cli(int argc, char * argv[], string & configFile) {
 					"  -c,\t--config <dir>\t\tset main config file for hub" << endl <<
 					"  -i,\t--install <name>\tinstall service" << endl <<
 					"  -u,\t--uninstall <name>\tuninstall service, then exit" << endl <<
-					"  -q,\t--quit <name>\tstop service, then exit" << endl <<
+					"  -q,\t--quit <name>\t\tstop service, then exit" << endl <<
 					"  -h,\t--help\t\t\tprint this help, then exit" << endl;
 				return 0;
 
@@ -363,7 +363,21 @@ int Service::cli(int argc, char * argv[], string & configFile) {
 		return 0;
 	}
 
-	return 2; // Simple start
+	if (config) {
+		return 2; // Simple start
+	} else {
+		// Unknown params
+		cout << INTERNALNAME " " INTERNALVERSION " build on "__DATE__" "__TIME__ << endl << endl <<
+			"Usage: rushub [OPTIONS] ..." << endl << endl <<
+			"Options:" << endl <<
+			"  -s,\t--service <name>\tstart hub as service" << endl <<
+			"  -c,\t--config <dir>\t\tset main config file for hub" << endl <<
+			"  -i,\t--install <name>\tinstall service" << endl <<
+			"  -u,\t--uninstall <name>\tuninstall service, then exit" << endl <<
+			"  -q,\t--quit <name>\t\tstop service, then exit" << endl <<
+			"  -h,\t--help\t\t\tprint this help, then exit" << endl;
+		return 0;
+	}
 }
 
 void WINAPI Service::ctrlHandler(DWORD dwCtrl) {
