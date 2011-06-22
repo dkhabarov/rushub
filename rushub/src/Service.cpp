@@ -382,19 +382,35 @@ int Service::cli(int argc, char * argv[], string & configFile) {
 
 void WINAPI Service::ctrlHandler(DWORD dwCtrl) {
 
+	int i;
+
 	switch (dwCtrl) {
 
 		case SERVICE_CONTROL_SHUTDOWN :
 			// Fallthrough
 
 		case SERVICE_CONTROL_STOP :
-			ss.dwCurrentState = SERVICE_STOP_PENDING;
-			ss.dwWin32ExitCode = NO_ERROR;
 			if (Service::mCurService->Log(0)) {
 				Service::mCurService->LogStream() << "Received a " << dwCtrl << " signal, service stop" << endl;
 			}
+
+			ss.dwCurrentState = SERVICE_STOP_PENDING;
+			ss.dwWin32ExitCode = NO_ERROR;
+			ss.dwCheckPoint = 0;
+			ss.dwWaitHint = 10 * 1000;
+			if (SetServiceStatus(ssh, &ss) == false) {
+				if (Service::mCurService->ErrLog(0)) {
+					Service::mCurService->LogStream() << "Set Service status failed (" << (unsigned long)GetLastError() << ")" << endl;
+					return;
+				}
+			}
+
 			// Service stop
 			DcServer::currentDcServer->stop(0);
+			i = 0;
+			while (isService && i++ < 10) { // Wait 10 times
+				Sleep(1000);
+			}
 			break;
 
 		case SERVICE_CONTROL_INTERROGATE :
@@ -409,11 +425,6 @@ void WINAPI Service::ctrlHandler(DWORD dwCtrl) {
 			}
 			break;
 
-	}
-	if (SetServiceStatus(ssh, &ss) == false) {
-		if (Service::mCurService->ErrLog(0)) {
-			Service::mCurService->LogStream() << "Set Service status failed (" << (unsigned long)GetLastError() << ")" << endl;
-		}
 	}
 }
 
@@ -481,6 +492,7 @@ void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 
 	isService = true;
 	runHub(argc, argv, true);
+	isService = false;
 }
 
 #endif // _WIN32
