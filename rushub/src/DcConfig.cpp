@@ -253,20 +253,19 @@ void DcConfig::addVars(Server * server) {
 		#endif
 	);
 
-	string mainPath("./");
-
 	// TODO: auto detect lang
 	add("sLang",       mLang,       "Russian");
-	add("sLangPath",   mLangPath,   string(mainPath).append("lang/"));
-	add("sLogPath",    mLogPath,    string(mainPath).append("logs/"));
-	add("sPluginPath", mPluginPath, string(mainPath).append("plugins/"));
-	add("sMainPath",   mMainPath,   mainPath);
+	add("sLangPath",   mLangPath,   "./lang/");
+	add("sLogPath",    mLogPath,    "./logs/");
+	add("sPluginPath", mPluginPath, "./plugins/");
+	add("sMainPath",   mMainPath,   "./");
 }
 
 
 
 int DcConfig::load() {
 	int res = mConfigLoader->load(this, mConfigStore);
+	// Replace in start of the string only
 	stringReplace(mMainPath,   "./", mMainPath,   mConfigPath, true, true);
 	stringReplace(mPluginPath, "./", mPluginPath, mConfigPath, true, true);
 	stringReplace(mLogPath,    "./", mLogPath,    mConfigPath, true, true);
@@ -277,6 +276,7 @@ int DcConfig::load() {
 
 
 int DcConfig::save() {
+	// Replace in start of the string only
 	stringReplace(mMainPath,   mConfigPath, mMainPath,   "./", true, true);
 	stringReplace(mPluginPath, mConfigPath, mPluginPath, "./", true, true);
 	stringReplace(mLogPath,    mConfigPath, mLogPath,    "./", true, true);
