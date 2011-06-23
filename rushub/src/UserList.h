@@ -140,7 +140,7 @@ public:
 
 		virtual void clear() { /** Clear var and record prefix */
 			mList.erase(0, mList.size());
-			mList.append(mStart.c_str(), mStart.size());
+			mList.append(mStart);
 		}
 
 		virtual void operator() (UserBase *);
@@ -297,7 +297,7 @@ public:
 		virtual void clear() { /** Clear var and record prefix */
 			ufDoNickList::clear();
 			msListComplete.erase(0, msListComplete.size());
-			msListComplete.append(mStart.data(), mStart.size());
+			msListComplete.append(mStart);
 		}
 
 		virtual void operator() (UserBase *);

@@ -115,7 +115,7 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 		}
 
 		if (mCache.size()) {
-			mCache.append(data.c_str(), data.size());
+			mCache.append(data);
 			if (addSep) {
 				mCache.append(NMDC_SEPARATOR);
 			}
@@ -129,7 +129,7 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 			LogStream() << "sendToAll end" << endl;
 		}
 	} else {
-		mCache.append(data.c_str(), data.size());
+		mCache.append(data);
 		if (addSep) {
 			mCache.append(NMDC_SEPARATOR);
 		}

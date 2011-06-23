@@ -58,7 +58,7 @@ string & stringReplace(const string & str, const string & varname, string & dest
 	dest = str;
 	if (!b) {
 		string search("%[");
-		search.append(varname.data(), varname.size());
+		search.append(varname);
 		search.append("]", 1);
 		size_t pos = dest.find(search);
 		if (first == true && pos != 0) {
