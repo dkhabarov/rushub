@@ -70,6 +70,7 @@ typedef enum { /** Types of the commands */
 	the protocol DC in variable mChunks, are used in function 
 	DcServer::DC_* as well as in DcParser::splitChunks... 
 	they must correspond
+	Now max number of chunks = 9 !
 */
 
 /** A number of the chunks for simple commands (without parameter) */

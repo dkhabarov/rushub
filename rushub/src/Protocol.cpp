@@ -44,7 +44,7 @@ Parser::Parser(int max) :
 	mIsParsed(false),
 	mMaxChunks(max)
 {
-	mStrings = new std::string[2 * mMaxChunks];
+	mStrings = new std::string[mMaxChunks];
 }
 
 Parser::~Parser() {

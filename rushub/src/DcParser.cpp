@@ -95,7 +95,7 @@ ProtocolCommand aDC_Commands[] = {
 
 
 DcParser::DcParser() :
-	Parser(10), // Max number of chunks - 10
+	Parser(9), // Max number of chunks - 9 !!!
 	mError(false),
 	mKeyLength(0)
 { 
@@ -146,6 +146,9 @@ string & DcParser::chunkString(unsigned int n) {
 		return mCommand; /** Empty line always full, and this pointer for empty line */
 	}
 	if (n > mChunks.size()) { /** This must not never happen, but if this happens, we are prepared */
+		if (ErrLog(0)) {
+			LogStream() << "Error number of chunks" << endl;
+		}
 		return mStrings[0];
 	}
 
