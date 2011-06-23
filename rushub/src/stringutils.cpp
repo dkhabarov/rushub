@@ -190,14 +190,8 @@ void stringSplit(const string & str, const char * sDelim, vector<string> & vRes)
 
 
 string & trim(string & str) {
-	int begin = 0, len = str.size();
-	while (len && str[len - 1] == ' ') {
-		--len;
-	}
-	while (str[begin] == ' ') {
-		++begin;
-	}
-	return str.assign(str, begin, len - begin);
+	str.erase(0, str.find_first_not_of(' '));
+	return str.erase(str.find_last_not_of(' ') + 1);
 }
 
 
