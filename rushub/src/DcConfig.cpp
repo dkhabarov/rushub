@@ -43,6 +43,9 @@ DcConfig::DcConfig(ConfigLoader * configLoader, Server * server, const string & 
 	mConfigStore.mPath = cfgFile;
 	mConfigStore.mName = "";
 
+	// Path of RusHub.xml
+	mConfigPath = Dir::pathForFile(mConfigStore.mPath.c_str());
+
 	addVars(server);
 	reload();
 
@@ -250,7 +253,7 @@ void DcConfig::addVars(Server * server) {
 		#endif
 	);
 
-	string mainPath(Dir::pathForFile(mConfigStore.mPath.c_str()));
+	string mainPath("./");
 
 	// TODO: auto detect lang
 	add("sLang",       mLang,       "Russian");
@@ -258,6 +261,27 @@ void DcConfig::addVars(Server * server) {
 	add("sLogPath",    mLogPath,    string(mainPath).append("logs/"));
 	add("sPluginPath", mPluginPath, string(mainPath).append("plugins/"));
 	add("sMainPath",   mMainPath,   mainPath);
+}
+
+
+
+int DcConfig::load() {
+	int res = mConfigLoader->load(this, mConfigStore);
+	stringReplace(mMainPath,   "./", mMainPath,   mConfigPath, true, true);
+	stringReplace(mPluginPath, "./", mPluginPath, mConfigPath, true, true);
+	stringReplace(mLogPath,    "./", mLogPath,    mConfigPath, true, true);
+	stringReplace(mLangPath,   "./", mLangPath,   mConfigPath, true, true);
+	return res;
+}
+
+
+
+int DcConfig::save() {
+	stringReplace(mMainPath,   mConfigPath, mMainPath,   "./", true, true);
+	stringReplace(mPluginPath, mConfigPath, mPluginPath, "./", true, true);
+	stringReplace(mLogPath,    mConfigPath, mLogPath,    "./", true, true);
+	stringReplace(mLangPath,   mConfigPath, mLangPath,   "./", true, true);
+	return mConfigLoader->save(this, mConfigStore);
 }
 
 
@@ -416,6 +440,18 @@ void DcLang::addVars() {
 		add(string("sTimes").append(times[i]), mTimes[i], timesDef[i]);
 	}
 
+}
+
+
+
+int DcLang::load() {
+	return mConfigLoader->load(this, mConfigStore);
+}
+
+
+
+int DcLang::save() {
+	return mConfigLoader->save(this, mConfigStore);
 }
 
 

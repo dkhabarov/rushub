@@ -54,56 +54,67 @@ bool loadFileInString(const string & fileName, string & str) {
 
 
 /** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & stringReplace(const string & str, const string & varname, string & dest, const string & by, bool b) {
-	string search;
+string & stringReplace(const string & str, const string & varname, string & dest, const string & by, bool b, bool first) {
+	dest = str;
 	if (!b) {
-		search = "%[";
+		string search("%[");
 		search.append(varname.data(), varname.size());
 		search.append("]", 1);
+		size_t pos = dest.find(search);
+		if (first == true && pos != 0) {
+			return dest;
+		}
+		while (pos != dest.npos) {
+			dest.replace(pos, search.size(), by);
+			pos = dest.find(search, pos);
+		}
 	} else {
-		search = varname;
+		size_t pos = dest.find(varname);
+		if (first == true && pos != 0) {
+			return dest;
+		}
+		while (pos != dest.npos) {
+			dest.replace(pos, varname.size(), by);
+			pos = dest.find(varname, pos);
+		}
 	}
-	dest = str;
-	size_t pos = dest.find(search);
-	while (pos != dest.npos) {
-		dest.replace(pos, search.size(), by);
-		pos = dest.find(search, pos);
-	}
+	
+	
 	return dest;
 }
 
 
 
 /** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & stringReplace(const string & str, const string & varname, string & dest, int by, bool b) {
+string & stringReplace(const string & str, const string & varname, string & dest, int by, bool b, bool first) {
 	ostringstream os;
 	os << by;
-	return stringReplace(str, varname, dest, os.str(), b);
+	return stringReplace(str, varname, dest, os.str(), b, first);
 }
 
 
 
 /** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & stringReplace(const string & str, const string & varname, string & dest, double by, bool b) {
+string & stringReplace(const string & str, const string & varname, string & dest, double by, bool b, bool first) {
 	ostringstream os;
 	os << by;
-	return stringReplace(str, varname, dest, os.str(), b);
+	return stringReplace(str, varname, dest, os.str(), b, first);
 }
 
 
 
 /** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & stringReplace(const string & str, const string & varname, string & dest, long by, bool b) {
+string & stringReplace(const string & str, const string & varname, string & dest, long by, bool b, bool first) {
 	ostringstream os;
 	os << by;
-	return stringReplace(str, varname, dest, os.str(), b);
+	return stringReplace(str, varname, dest, os.str(), b, first);
 }
 
 
 
 /** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & stringReplace(const string & str, const string & varname, string & dest, __int64 by, bool b) {
-	return stringReplace(str, varname, dest, int64ToString(by), b);
+string & stringReplace(const string & str, const string & varname, string & dest, __int64 by, bool b, bool first) {
+	return stringReplace(str, varname, dest, int64ToString(by), b, first);
 }
 
 

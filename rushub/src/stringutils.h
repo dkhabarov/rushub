@@ -44,11 +44,11 @@ namespace utils {
 
 bool loadFileInString(const string &, string &);
 
-string & stringReplace(const string &, const string &, string &, const string &, bool b = false);
-string & stringReplace(const string &, const string &, string &, double, bool b = false);
-string & stringReplace(const string &, const string &, string &, int, bool b = false);
-string & stringReplace(const string &, const string &, string &, long, bool b = false);
-string & stringReplace(const string &, const string &, string &, __int64, bool b = false);
+string & stringReplace(const string &, const string &, string &, const string &, bool b = false, bool first = false);
+string & stringReplace(const string &, const string &, string &, double, bool b = false, bool first = false);
+string & stringReplace(const string &, const string &, string &, int, bool b = false, bool first = false);
+string & stringReplace(const string &, const string &, string &, long, bool b = false, bool first = false);
+string & stringReplace(const string &, const string &, string &, __int64, bool b = false, bool first = false);
 
 string int64ToString(__int64 const &);
 __int64 stringToInt64(const string &);

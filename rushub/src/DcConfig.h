@@ -117,20 +117,15 @@ public:
 	virtual ~DcConfig();
 	void addVars(Server *);
 
-	inline int load() {
-		return mConfigLoader->load(this, mConfigStore);
-	}
-
-	inline int save() {
-		return mConfigLoader->save(this, mConfigStore);
-	}
-
+	int load();
+	int save();
 	int reload();
 
 private:
 
 	ConfigLoader * mConfigLoader;
 	ConfigStore mConfigStore;
+	string mConfigPath;
 	
 }; // DcConfig
 
@@ -169,14 +164,8 @@ public:
 	~DcLang();
 	void addVars();
 
-	inline int load() {
-		return mConfigLoader->load(this, mConfigStore);
-	}
-
-	inline int save() {
-		return mConfigLoader->save(this, mConfigStore);
-	}
-
+	int load();
+	int save();
 	int reload();
 
 private:
