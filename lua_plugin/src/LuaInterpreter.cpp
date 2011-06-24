@@ -335,16 +335,13 @@ void LuaInterpreter::newCallParam(lua_Number data, int type) {
 
 void LuaInterpreter::logError(const char * msg) {
 	string logs(LuaPlugin::mCurServer->getMainDir() + "logs/");
-
 	Dir::checkPath(logs);
-
 	string logFile(logs + "lua_errors.log");
+
 	ofstream ofs(logFile.c_str(), ios_base::app);
-	if (msg) {
-		ofs << "[" << LuaPlugin::mCurServer->getTime() << "] " << string(msg) << endl;
-	} else {
-		ofs << "[" << LuaPlugin::mCurServer->getTime() << "] unknown LUA error" << endl;
-	}
+	ofs << "[" << LuaPlugin::mCurServer->getTime() << "] "
+		<< (msg != NULL ? string(msg) : "unknown LUA error") << endl;
+
 	ofs.flush();
 	ofs.close();
 }
