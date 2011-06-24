@@ -66,7 +66,7 @@ string & stringReplace(const string & str, const string & varname, string & dest
 		}
 		while (pos != dest.npos) {
 			dest.replace(pos, search.size(), by);
-			pos = dest.find(search, pos);
+			pos = dest.find(search, pos + 1);
 		}
 	} else {
 		size_t pos = dest.find(varname);
@@ -75,7 +75,7 @@ string & stringReplace(const string & str, const string & varname, string & dest
 		}
 		while (pos != dest.npos) {
 			dest.replace(pos, varname.size(), by);
-			pos = dest.find(varname, pos);
+			pos = dest.find(varname, pos + 1);
 		}
 	}
 	
