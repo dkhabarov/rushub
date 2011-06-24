@@ -119,7 +119,9 @@ DcServer::~DcServer() {
 		LogStream() << "Destruct DcServer" << endl;
 	}
 
-	if (mDcConfig.mRegMainBot) { /** Main bot unreg */
+	mPluginList.unloadAll(); // Unload all plugins
+
+	if (mDcConfig.mRegMainBot) { // Main bot unreg
 		if (Log(3)) {
 			LogStream() << "Unreg main bot '" << mDcConfig.mHubBot << "'" << endl;
 		}

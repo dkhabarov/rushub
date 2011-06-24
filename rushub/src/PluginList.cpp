@@ -46,6 +46,12 @@ PluginList::PluginList(const string & path) :
 
 
 PluginList::~PluginList() {
+	unloadAll();
+}
+
+
+
+bool PluginList::unloadAll() {
 	// Removing plugins
 	Hash_t hash(0);
 	PluginLoader * pluginLoader = NULL;
@@ -61,6 +67,10 @@ PluginList::~PluginList() {
 	for (vector<Hash_t>::iterator it = mKeyList.begin(); it != mKeyList.end(); ++it) {
 		mCallLists.remove(*it);
 	}
+
+	mKeyList.clear();
+	mPluginLoaderHash.clear();
+	return true;
 }
 
 

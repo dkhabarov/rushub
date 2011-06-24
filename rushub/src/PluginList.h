@@ -86,6 +86,9 @@ public:
 	/** Load all plugins */
 	bool loadAll();
 
+	/** UnLoad all plugins */
+	bool unloadAll();
+
 	/** Load plugin by lib */
 	bool loadPlugin(const string & filePath);
 
