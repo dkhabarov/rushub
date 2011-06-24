@@ -64,7 +64,7 @@ string & stringReplace(const string & str, const string & varname, string & dest
 		if (first != true || pos == 0) {
 			while (pos != dest.npos) {
 				dest.replace(pos, search.size(), by);
-				pos = dest.find(search, pos + 1);
+				pos = dest.find(search, pos + by.size());
 			}
 		}
 	} else {
@@ -72,7 +72,7 @@ string & stringReplace(const string & str, const string & varname, string & dest
 		if (first != true || pos == 0) {
 			while (pos != dest.npos) {
 				dest.replace(pos, varname.size(), by);
-				pos = dest.find(varname, pos + 1);
+				pos = dest.find(varname, pos + by.size());
 			}
 		}
 	}
