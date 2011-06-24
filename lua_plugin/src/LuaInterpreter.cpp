@@ -259,10 +259,10 @@ int LuaInterpreter::callFunc(const char * funcName) {
 	LuaPlugin::mCurLua->mCurScript = this;
 
 	if (lua_pcall(mL, len, 1, base)) {
-		string error = lua_tostring(mL, -1);
+		const char * error = lua_tostring(mL, -1);
 		lua_pop(mL, 1);
 		lua_remove(mL, base); // remove _TRACEBACK
-		onError(funcName, error.c_str());
+		onError(funcName, error);
 		LuaPlugin::mCurLua->mCurScript = oldScript;
 		return 0;
 	}
@@ -285,6 +285,9 @@ int LuaInterpreter::callFunc(const char * funcName) {
 
 bool LuaInterpreter::onError(const char * funcName, const char * errMsg, bool stop) {
 	bool stoped = true;
+	if (errMsg == NULL) {
+		errMsg = "unknown LUA error";
+	}
 	LuaPlugin::mCurLua->mLastError = errMsg;
 	logError(errMsg);
 	if (strcmp(funcName, "OnError")) {
