@@ -211,11 +211,11 @@ int NmdcProtocol::doCommand(Parser * parser, Conn * conn) {
 int NmdcProtocol::eventSupports(DcParser * dcparser, DcConn * dcConn) {
 
 	string feature;
-	istringstream is(dcparser->mCommand);
-	is >> feature;
+	size_t posNext, posPrev = 10;
 	dcConn->mFeatures = 0;
-	is >> feature;
-	while (feature.size()) {
+	while((posNext = dcparser->mCommand.find(' ', posPrev)) != feature.npos) {
+		feature.assign(dcparser->mCommand, posPrev, posNext - posPrev);
+		posPrev = posNext + 1;
 		if (feature == "UserCommand") {
 			dcConn->mFeatures |= SUPPORT_FEATUER_USERCOMMAND;
 		} else if (feature == "NoGetINFO") {
@@ -231,8 +231,6 @@ int NmdcProtocol::eventSupports(DcParser * dcparser, DcConn * dcConn) {
 		} else if (feature == "QuickList") {
 			dcConn->mFeatures |= SUPPORT_FEATUER_QUICKLIST;
 		}
-		feature.clear();
-		is >> feature;
 	}
 	dcConn->mDcUser->mSupports.assign(dcparser->mCommand, 10, dcparser->mCommand.size() - 10);
 
