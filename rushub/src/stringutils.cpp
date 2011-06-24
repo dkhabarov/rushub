@@ -61,25 +61,21 @@ string & stringReplace(const string & str, const string & varname, string & dest
 		search.append(varname);
 		search.append("]", 1);
 		size_t pos = dest.find(search);
-		if (first == true && pos != 0) {
-			return dest;
-		}
-		while (pos != dest.npos) {
-			dest.replace(pos, search.size(), by);
-			pos = dest.find(search, pos + 1);
+		if (first != true || pos == 0) {
+			while (pos != dest.npos) {
+				dest.replace(pos, search.size(), by);
+				pos = dest.find(search, pos + 1);
+			}
 		}
 	} else {
 		size_t pos = dest.find(varname);
-		if (first == true && pos != 0) {
-			return dest;
-		}
-		while (pos != dest.npos) {
-			dest.replace(pos, varname.size(), by);
-			pos = dest.find(varname, pos + 1);
+		if (first != true || pos == 0) {
+			while (pos != dest.npos) {
+				dest.replace(pos, varname.size(), by);
+				pos = dest.find(varname, pos + 1);
+			}
 		}
 	}
-	
-	
 	return dest;
 }
 
