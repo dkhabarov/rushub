@@ -63,10 +63,13 @@ void Parser::reInit() {
 	mCommand.reserve(512);
 	mType = NMDC_TYPE_UNPARSED;
 	mLength = 0;
-	mChunks.clear();
-	mChunks.resize(mMaxChunks);
 	mStrMap = 0l;
 	mIsParsed = false;
+	for(int i = 0; i < mMaxChunks; ++i) {
+		tChunk & p = mChunks[i];
+		p.first = 0;
+		p.second = 0;
+	}
 }
 
 size_t Parser::getCommandLen() {
