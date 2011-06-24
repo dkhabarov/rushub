@@ -31,15 +31,15 @@ namespace protocol {
 using namespace ::dcserver::protoenums;
 
 
-/** Protocol command */
+//< Protocol command
 class ProtocolCommand {
 
 public:
 
-	/** Key-word of cmd */
+	//< Key-word of cmd
 	string mKey;
 
-	/** Cmd len */
+	//< Cmd len
 	size_t mLength;
 
 public:
@@ -54,7 +54,7 @@ public:
 	virtual ~ProtocolCommand() {
 	}
 
-	/** Checking that string contains command */
+	//< Checking that string contains command
 	bool check(const string & str) {
 		return 0 == str.compare(0, mLength, mKey);
 	}
@@ -63,7 +63,7 @@ public:
 
 
 
-/** Main NMDC commands keywords */
+//< Main NMDC commands keywords
 ProtocolCommand aDC_Commands[] = {
 	ProtocolCommand("$MultiSearch "),      // check: ip, delay
 	ProtocolCommand("$MultiSearch Hub:"),  // check: nick, delay
@@ -109,22 +109,20 @@ DcParser::~DcParser() {
 
 
 
-/** Do parse for command and return type of this command */
+//< Do parse for command and return type of this command
 int DcParser::parse() {
-	mLength = mCommand.size(); /** Set cmd len */
+	mLength = mCommand.size(); // Set cmd len
 	if (mLength) {
 		for (int i = 0; i < NMDC_TYPE_UNKNOWN; ++i) {
-			if (aDC_Commands[i].check(mCommand)) { /** Check cmd from mCommand */
-				mType = NmdcType(i); /** Set cmd type */
-				mKeyLength = aDC_Commands[i].mLength; /** Set length of key word for command */
+			if (aDC_Commands[i].check(mCommand)) { // Check cmd from mCommand
+				mType = NmdcType(i); // Set cmd type
+				mKeyLength = aDC_Commands[i].mLength; // Set length of key word for command
 				return mType;
 			}
 		}
-	}
-	if (!mLength) {
+		mType = NMDC_TYPE_UNKNOWN; // Unknown cmd
+	} else {
 		mType = NMDC_TYPE_PING;
-	} else if(mType == NMDC_TYPE_UNPARSED) {
-		mType = NMDC_TYPE_UNKNOWN; /** Unknown cmd */
 	}
 	return mType;
 }
@@ -140,12 +138,12 @@ void DcParser::reInit() {
 
 
 
-/** Get string address for the chunk of command */
+//< Get string address for the chunk of command
 string & DcParser::chunkString(unsigned int n) {
 	if (!n) {
-		return mCommand; /** Empty line always full, and this pointer for empty line */
+		return mCommand; // Empty line always full, and this pointer for empty line
 	}
-	if (n > mChunks.size()) { /** This must not never happen, but if this happens, we are prepared */
+	if (n > mChunks.size()) { // This must not never happen, but if this happens, we are prepared
 		if (ErrLog(0)) {
 			LogStream() << "Error number of chunks" << endl;
 		}
@@ -158,7 +156,7 @@ string & DcParser::chunkString(unsigned int n) {
 		try {
 			tChunk &c = mChunks[n];
 			if (c.first < mCommand.length() && c.second < mCommand.length()) {
-				mStrings[n].assign(mCommand, c.first, c.second); /** Record n part in n element of the array of the lines */
+				mStrings[n].assign(mCommand, c.first, c.second); // Record n part in n element of the array of the lines
 			} else if (ErrLog(1)) {
 				LogStream() << "Badly parsed message : " << mCommand << endl;
 			}
@@ -193,7 +191,7 @@ bool DcParser::isPassive(const string & description) {
 	return true;
 }
 
-/** Split command to chunks */
+//< Split command to chunks
 bool DcParser::splitChunks() {
 
 	if (mIsParsed) {
@@ -201,7 +199,7 @@ bool DcParser::splitChunks() {
 	}
 	mIsParsed = true;
 
-	setChunk(0, 0, mCommand.length()); /** Zero part - always whole command */
+	setChunk(0, 0, mCommand.length()); // Zero part - always whole command
 
 	switch (mType) {
 
@@ -225,7 +223,7 @@ bool DcParser::splitChunks() {
 			if (!splitOnTwo(mKeyLength, ' ', CHUNK_PS_NICK, CHUNK_PS_QUERY)) {
 				mError = true;
 			} else if (!splitOnTwo('?', CHUNK_PS_QUERY, CHUNK_PS_SEARCHLIMITS, CHUNK_PS_SEARCHPATTERN, 0)) {
-				mError = true; /** Searching for on the right */
+				mError = true; // Searching for on the right
 			}
 			break;
 
@@ -296,10 +294,10 @@ bool DcParser::splitChunks() {
 			}
 			break;
 
-		case NMDC_TYPE_SUPPORTS : /** This command has a different number parameters */
+		case NMDC_TYPE_SUPPORTS : // This command has a different number parameters
 			break;
 
-		/** Commands with one parameter */
+		// Commands with one parameter
 		case NMDC_TYPE_KEY : /* $Key [key] */
 			// Fallthrough
 
@@ -319,7 +317,7 @@ bool DcParser::splitChunks() {
 			// Fallthrough
 
 		case NMDC_TYPE_KICK : /* $Kick [nick] */
-			/* can be an empty line? */
+			// Can be an empty line?
 			if (mLength == mKeyLength) {
 				mError = true;
 			} else {
@@ -382,7 +380,7 @@ bool DcParser::splitChunks() {
 			}
 			break;
 
-		case NMDC_TYPE_UNKNOWN : /* Cmd without $ in begining position */
+		case NMDC_TYPE_UNKNOWN : // Cmd without $ in begining position
 			if (mCommand.compare(0, 1, "$")) {
 				mError = true;
 			}
