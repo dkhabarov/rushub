@@ -29,6 +29,7 @@ DcUser::DcUser() :
 	DcUserBase(),
 	mDcServer(NULL),
 	mDcConn(NULL),
+	mUidHash(0),
 	mProfile(-1),
 	mInOpList(false),
 	mInIpList(false),
@@ -103,6 +104,9 @@ void DcUser::send(const char * data, size_t len, bool addSep, bool flush) {
 
 void DcUser::setUid(const string & uid) {
 	mUid = uid;
+
+	// Calc uid hash
+	mUidHash = UserList::nick2Key(uid);
 }
 
 
@@ -125,6 +129,11 @@ const string & DcUser::getUid() const {
 	return mUid;
 }
 
+
+
+unsigned long DcUser::getUidHash() const {
+	return mUidHash;
+}
 
 
 

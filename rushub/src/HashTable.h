@@ -337,7 +337,7 @@ public:
 
 	typedef UINT_PTR Key;
 	class iterator;
-	Hash<Key> mHash; /** Hesh function */
+	static Hash<Key> mHash; /** Hesh function */
 
 private:
 
@@ -600,6 +600,9 @@ private:
 	}
 
 }; // HashTable
+
+template <class V>
+Hash<UINT_PTR> HashTable<V>::mHash;
 
 }; // namespace utils
 

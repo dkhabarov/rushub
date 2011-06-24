@@ -157,43 +157,15 @@ public:
 		return *this;
 	}
 
-	Key nick2Key(const string & nick) {
+	static Key nick2Key(const string & nick) {
 		string key;
 		key.resize(nick.length());
 		::transform(nick.begin(), nick.end(), key.begin(), ::tolower);
-		return List_t::mHash(key);
+		return mHash(key);
 	}
 
 	UserBase * getUserBaseByNick(const string & nick) {
 		return List_t::find(nick2Key(nick));
-	}
-
-	UserBase * getUserBaseByKey(const Key & key) {
-		return List_t::find(key);
-	}
-
-	bool containsNick(const string & nick) {
-		return List_t::contain(nick2Key(nick));
-	}
-
-	bool containsKey(const Key & key) {
-		return List_t::contain(key);
-	}
-
-	bool addWithNick(const string & nick, UserBase * userBase) {
-		return List_t::add(nick2Key(nick), userBase);
-	}
-
-	bool addWithKey(const Key & key, UserBase * userBase) {
-		return List_t::add(key, userBase);
-	}
-
-	bool removeByNick(const string & nick) {
-		return List_t::remove(nick2Key(nick));
-	}
-
-	bool removeByKey(const Key & key) {
-		return List_t::remove(key);
 	}
 
 	virtual const string & getNickList();

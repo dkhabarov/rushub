@@ -496,9 +496,9 @@ bool DcServer::checkNick(DcConn *dcConn) {
 		return false;
 	}
 
-	UserKey key = mDcUserList.nick2Key(dcConn->mDcUser->getUid());
-	if (mDcUserList.containsKey(key)) {
-		DcUser * us = static_cast<DcUser *> (mDcUserList.find(key));
+	unsigned long uidHash = dcConn->mDcUser->getUidHash();
+	if (mDcUserList.contain(uidHash)) {
+		DcUser * us = static_cast<DcUser *> (mDcUserList.find(uidHash));
 
 		if (!us->mDcConn || (us->getProfile() == -1 && us->getIp() != dcConn->getIp())) {
 			if (dcConn->Log(2)) {
@@ -547,7 +547,7 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 			if (!mDcConfig.mDelayedLogin) {
 				doUserEnter(dcConn);
 			} else {
-				mEnterList.addWithNick(dcConn->mDcUser->getUid(), dcConn->mDcUser);
+				mEnterList.add(dcConn->mDcUser->getUidHash(), dcConn->mDcUser);
 			}
 
 			/** Can happen so that list not to send at a time */
@@ -591,13 +591,13 @@ void DcServer::doUserEnter(DcConn * dcConn) {
 		return;
 	}
 
-	UserKey key = mDcUserList.nick2Key(dcConn->mDcUser->getUid());
+	unsigned long uidHash = dcConn->mDcUser->getUidHash();
 
 	/** User is already considered came */
-	if (mEnterList.containsKey(key)) {
+	if (mEnterList.contain(uidHash)) {
 		/** We send user contents of cache without clear this cache */
 		mEnterList.flushForUser(dcConn->mDcUser);
-		mEnterList.removeByKey(key);
+		mEnterList.remove(uidHash);
 	}
 
 	/** Adding user to the user list */
@@ -632,15 +632,15 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 		return false;
 	}
 
-	UserKey key = mDcUserList.nick2Key(dcUser->getUid());
+	unsigned long uidHash = dcUser->getUidHash();
 
 	if (mDcUserList.Log(4)) {
 		mDcUserList.LogStream() << "Before add: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
 	}
 
-	if (!mDcUserList.addWithKey(key, dcUser)) {
+	if (!mDcUserList.add(uidHash, dcUser)) {
 		if (Log(1)) {
-			LogStream() << "Adding twice user with same nick " << dcUser->getUid() << " (" << mDcUserList.find(key)->uid() << ")" << endl;
+			LogStream() << "Adding twice user with same nick " << dcUser->getUid() << " (" << mDcUserList.find(uidHash)->uid() << ")" << endl;
 		}
 		dcUser->setInUserList(false);
 		return false;
@@ -653,21 +653,21 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 	dcUser->setInUserList(true);
 	dcUser->setCanSend(true);
 	if (!dcUser->isPassive()) {
-		mActiveList.addWithKey(key, dcUser);
+		mActiveList.add(uidHash, dcUser);
 	}
 	if (dcUser->getInOpList()) {
-		mOpList.addWithKey(key, dcUser);
+		mOpList.add(uidHash, dcUser);
 	}
 	if (dcUser->getInIpList()) {
-		mIpList.addWithKey(key, dcUser);
+		mIpList.add(uidHash, dcUser);
 	}
 
 	if (dcUser->mDcConn) {
 		dcUser->mDcConn->mIpRecv = true; /** Installing the permit on reception of the messages on ip */
-		mChatList.addWithKey(key, dcUser);
+		mChatList.add(uidHash, dcUser);
 
 		if (!(dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO)) {
-			mHelloList.addWithKey(key, dcUser);
+			mHelloList.add(uidHash, dcUser);
 		}
 		if (dcUser->mDcConn->Log(3)) {
 			dcUser->mDcConn->LogStream() << "Adding at the end of Nicklist" << endl;
@@ -683,11 +683,11 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 
 /** Removing user from the user list */
 bool DcServer::removeFromDcUserList(DcUser * dcUser) {
-	UserKey key = mDcUserList.nick2Key(dcUser->getUid());
+	unsigned long uidHash = dcUser->getUidHash();
 	if (mDcUserList.Log(4)) {
 		mDcUserList.LogStream() << "Before leave: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
 	}
-	if (mDcUserList.containsKey(key)) {
+	if (mDcUserList.contain(uidHash)) {
 		#ifndef WITHOUT_PLUGINS
 			if (dcUser->mDcConn) {
 				mCalls.mOnUserExit.callAll(dcUser);
@@ -695,11 +695,11 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 		#endif
 
 		/** We make sure that user with such nick one! */
-		DcUser * other = static_cast<DcUser *> (mDcUserList.getUserBaseByNick(dcUser->getUid())); // NMDC
+		DcUser * other = static_cast<DcUser *> (mDcUserList.find(dcUser->getUidHash())); // NMDC
 		if (!dcUser->mDcConn) { /** Removing the bot */
-			mDcUserList.removeByKey(key);
+			mDcUserList.remove(uidHash);
 		} else if (other && other->mDcConn && dcUser->mDcConn && other->mDcConn == dcUser->mDcConn) {
-			mDcUserList.removeByKey(key);
+			mDcUserList.remove(uidHash);
 			if (mDcUserList.Log(4)) {
 				mDcUserList.LogStream() << "After leave: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
 			}
@@ -713,13 +713,13 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 	}
 
 	/** Removing from lists */
-	mOpList.removeByKey(key);
-	mIpList.removeByKey(key);
-	mHelloList.removeByKey(key);
-	mEnterList.removeByKey(key);
-	mChatList.removeByKey(key);
-	mActiveList.removeByKey(key);
-	mBotList.removeByKey(key);
+	mOpList.remove(uidHash);
+	mIpList.remove(uidHash);
+	mHelloList.remove(uidHash);
+	mEnterList.remove(uidHash);
+	mChatList.remove(uidHash);
+	mActiveList.remove(uidHash);
+	mBotList.remove(uidHash);
 
 	if (dcUser->getInUserList()) {
 		dcUser->setInUserList(false);
@@ -1236,7 +1236,7 @@ int DcServer::regBot(const string & nick, const string & info, const string & ip
 		delete dcUser;
 		return -3;
 	}
-	mBotList.addWithNick(nick, dcUser);
+	mBotList.add(dcUser->getUidHash(), dcUser);
 	showUserToAll(dcUser);
 	return 0;
 }

@@ -79,6 +79,7 @@ public:
 
 
 	virtual const string & getUid() const;
+	unsigned long getUidHash() const;
 	virtual bool getInUserList() const;
 	virtual const string & getMyInfo(/*bool real = false*/) const;
 	virtual bool setMyInfo(const string & myInfo);
@@ -155,6 +156,7 @@ public:
 private:
 
 	string mUid; //< UserID
+	unsigned long mUidHash; //< UserID Hash
 	int mProfile; //< Profile
 
 	bool mInOpList; //< User in op-list

@@ -282,7 +282,7 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 			if (dcConn->mDcUser->getInUserList()) {
 				dcServer->removeFromDcUserList(static_cast<DcUser *> (dcConn->mDcUser));
 			} else { // remove from enter list, if user was already added in it, but user was not added in user list
-				dcServer->mEnterList.removeByNick(dcConn->mDcUser->getUid());
+				dcServer->mEnterList.remove(dcConn->mDcUser->getUidHash());
 			}
 
 			// Remove DcUser

@@ -1289,7 +1289,7 @@ bool NmdcProtocol::checkNickLength(DcConn * dcConn, size_t len) {
 void NmdcProtocol::addToOps(DcUser * dcUser) {
 	if (dcUser->getInUserList()) {
 		string msg;
-		mDcServer->mOpList.addWithNick(dcUser->getUid(), dcUser);
+		mDcServer->mOpList.add(dcUser->getUidHash(), dcUser);
 		if (dcUser->getHide()) {
 			dcUser->send(appendOpList(msg, dcUser->getUid()), false, true);
 		} else {
@@ -1304,7 +1304,7 @@ void NmdcProtocol::addToOps(DcUser * dcUser) {
 void NmdcProtocol::delFromOps(DcUser * dcUser) {
 	if (dcUser->getInUserList()) {
 		string sMsg1, sMsg2, sMsg3;
-		mDcServer->mOpList.removeByNick(dcUser->getUid());
+		mDcServer->mOpList.remove(dcUser->getUidHash());
 		if (dcUser->getHide()) {
 			if (dcUser->mDcConn == NULL) {
 				return;
@@ -1339,7 +1339,7 @@ void NmdcProtocol::delFromOps(DcUser * dcUser) {
 
 void NmdcProtocol::addToIpList(DcUser * dcUser) {
 	if (dcUser->getInUserList()) {
-		mDcServer->mIpList.addWithNick(dcUser->getUid(), dcUser);
+		mDcServer->mIpList.add(dcUser->getUidHash(), dcUser);
 		dcUser->send(mDcServer->mDcUserList.getIpList(), true);
 	}
 }
@@ -1348,7 +1348,7 @@ void NmdcProtocol::addToIpList(DcUser * dcUser) {
 
 void NmdcProtocol::delFromIpList(DcUser * dcUser) {
 	if (dcUser->getInUserList()) {
-		mDcServer->mIpList.removeByNick(dcUser->getUid());
+		mDcServer->mIpList.remove(dcUser->getUidHash());
 	}
 }
 
