@@ -198,7 +198,7 @@ void Dir::checkEndSlash(string & path) {
 		pos = path.find("\\", pos);
 	}
 
-	if (path.size() == 0 || path.substr(path.size() - 1, 1) != "/") {
+	if (path.size() == 0 || path.find('/', path.size() - 1) == path.npos) {
 		path.append("/");
 	}
 
@@ -210,7 +210,7 @@ bool Dir::checkPath(string & path) {
 
 	// Check MAX_PATH size
 	if (path.size() >= MAX_PATH) {
-		path = path.substr(0, MAX_PATH - 1);
+		path.assign(path, 0, MAX_PATH - 1);
 	}
 
 	checkEndSlash(path);

@@ -209,8 +209,7 @@ void DcServer::getAddresses(
 		size_t pos = part.find('[');
 		const char * delim = ":";
 		if (pos == 0) {
-			part = part.substr(1);
-			pos = part.find("]:");
+			pos = part.assign(part, 1, part.size() - 1).find("]:");
 			delim = "]:";
 		}
 		stringSplit(part, delim, vIpPort);
@@ -889,7 +888,7 @@ bool DcServer::sendToUser(DcUserBase * dcUserBase, const char * data, const char
 	// Simple Msg
 	string msg(data);
 	if (dcConn->mType == CLIENT_TYPE_NMDC && 
-		msg.substr(msg.size() - NMDC_SEPARATOR_LEN, NMDC_SEPARATOR_LEN) != NMDC_SEPARATOR
+		msg.find(NMDC_SEPARATOR, msg.size() - NMDC_SEPARATOR_LEN) == msg.npos
 	) {
 		dcConn->send(msg, true);
 	} else {
@@ -934,7 +933,7 @@ bool DcServer::sendToAll(const char * data, const char * nick, const char * from
 
 	// Simple Msg
 	string msg(data);
-	if (msg.substr(msg.size() - 1, 1) != NMDC_SEPARATOR) {
+	if (msg.find(NMDC_SEPARATOR, msg.size() - NMDC_SEPARATOR_LEN) == msg.npos) {
 		msg.append(NMDC_SEPARATOR);
 	}
 	mDcUserList.sendToAll(msg, false, false);
@@ -966,7 +965,7 @@ bool DcServer::sendToProfiles(unsigned long profile, const char * data, const ch
 
 	// Simple Msg
 	string msg(data);
-	if (msg.substr(msg.size() - 1, 1) != NMDC_SEPARATOR) {
+	if (msg.find(NMDC_SEPARATOR, msg.size() - NMDC_SEPARATOR_LEN) == msg.npos) {
 		msg.append(NMDC_SEPARATOR);
 	}
 	mDcUserList.sendToProfiles(profile, msg, false);
@@ -997,7 +996,7 @@ bool DcServer::sendToIp(const char * ip, const char * data, unsigned long profil
 
 	// Simple Msg
 	string msg(data);
-	if (msg.substr(msg.size() - 1, 1) != NMDC_SEPARATOR) {
+	if (msg.find(NMDC_SEPARATOR, msg.size() - NMDC_SEPARATOR_LEN) == msg.npos) {
 		msg.append(NMDC_SEPARATOR);
 	}
 	mIpListConn->sendToIp(ip, msg, profile); // newPolitic
@@ -1032,7 +1031,7 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & nickList, const char 
 		mDcUserList.sendToAll(NmdcProtocol::appendChat(str, nick, data), false, false);
 	} else { // Simple Msg
 		string msg(data);
-		if (msg.substr(msg.size() - 1, 1) != NMDC_SEPARATOR) {
+		if (msg.find(NMDC_SEPARATOR, msg.size() - NMDC_SEPARATOR_LEN) == msg.npos) {
 			msg.append(NMDC_SEPARATOR);
 		}
 		mDcUserList.sendToAll(msg, false, false);
@@ -1078,7 +1077,7 @@ bool DcServer::sendToAllExceptIps(const vector<string> & ipList, const char * da
 			mDcUserList.sendToAll(NmdcProtocol::appendChat(str, nick, data), false, false);
 		} else { // Simple Msg
 			string msg(data);
-			if (msg.substr(msg.size() - 1, 1) != NMDC_SEPARATOR) {
+			if (msg.find(NMDC_SEPARATOR, msg.size() - NMDC_SEPARATOR_LEN) == msg.npos) {
 				msg.append(NMDC_SEPARATOR);
 			}
 			mDcUserList.sendToAll(msg, false, false);

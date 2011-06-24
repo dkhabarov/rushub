@@ -255,9 +255,9 @@ int NmdcProtocol::eventKey(DcParser *, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
 		if (mDcServer->mCalls.mOnKey.callAll(dcConn->mDcUser)) {
-			//string sLock, sKey;
-			//sLock = appendLock(sLock).substr(1, sLock.size() - 1);
-			//Lock2Key(sLock, sKey);
+			//string lock, key;
+			//appendLock(lock);
+			//Lock2Key(lock.assign(lock, 1, lock.size() - 1), key);
 		}
 	#endif
 
@@ -1061,7 +1061,7 @@ string & NmdcProtocol::appendForceMove(string & str, const string & address) {
 
 void NmdcProtocol::sendMode(DcConn * dcConn, const string & str, int iMode, UserList & UL, bool bUseCache) {
 	bool bAddSep = false;
-	if (str.substr(str.size() - 1, 1) != NMDC_SEPARATOR) {
+	if (str.find(NMDC_SEPARATOR, str.size() - NMDC_SEPARATOR_LEN) == str.npos) {
 		bAddSep = true;
 	}
 
