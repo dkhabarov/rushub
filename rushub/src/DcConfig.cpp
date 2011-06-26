@@ -281,7 +281,15 @@ int DcConfig::save() {
 	stringReplace(mPluginPath, mConfigPath, mPluginPath, "./", true, true);
 	stringReplace(mLogPath,    mConfigPath, mLogPath,    "./", true, true);
 	stringReplace(mLangPath,   mConfigPath, mLangPath,   "./", true, true);
-	return mConfigLoader->save(this, mConfigStore);
+
+	int res = mConfigLoader->save(this, mConfigStore);
+
+	stringReplace(mMainPath,   "./", mMainPath,   mConfigPath, true, true);
+	stringReplace(mPluginPath, "./", mPluginPath, mConfigPath, true, true);
+	stringReplace(mLogPath,    "./", mLogPath,    mConfigPath, true, true);
+	stringReplace(mLangPath,   "./", mLangPath,   mConfigPath, true, true);
+
+	return res;
 }
 
 
