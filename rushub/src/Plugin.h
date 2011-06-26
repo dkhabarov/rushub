@@ -75,7 +75,7 @@ using namespace ::std;
 
 //< Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10022
+	#define INTERNAL_PLUGIN_VERSION 10023
 #endif
 
 //< NMDC protocol separator
