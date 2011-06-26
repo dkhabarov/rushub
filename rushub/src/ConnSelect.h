@@ -27,7 +27,6 @@
 
 #include "ConnChoose.h"
 #include "HashTable.h"
-#include "Obj.h"
 
 #if USE_SELECT
 
@@ -41,7 +40,7 @@
 namespace server {
 
 /** ConnSelect */
-class ConnSelect : public ConnChoose, public Obj {
+class ConnSelect : public ConnChoose {
 
 public:
 
@@ -124,62 +123,20 @@ public:
 
 		ChooseRes & operator * () {
 			ChooseRes * chooseRes = NULL;
-			
-			#ifdef _WIN32
-				__try {
-					chooseRes = (*mIt);
-					if (chooseRes->mConnBase == NULL) {
-						chooseRes->mConnBase = mSel->operator[] (chooseRes->mFd);
-					}
-				} __except(1) {
-					if (mSel->ErrLog(0)) {
-						mSel->LogStream() << "Fatal error: " << endl
-							<< "error in operator *()" << endl
-							<< "item = " << mIt.mItem << endl
-							<< "hash = " << mIt.i.i << endl
-							<< "end = " << mIt.i.end << endl;
-					}
-					if (mSel->ErrLog(0)) {
-						mSel->LogStream()	<< "connBase = " << (*mIt)->mConnBase << endl
-							<< "socket = " << (*mIt)->mFd << endl;
-					}
-				}
-			#else
-				chooseRes = (*mIt);
-				if (chooseRes->mConnBase == NULL) {
-					chooseRes->mConnBase = mSel->operator[] (chooseRes->mFd);
-				}
-			#endif
+			chooseRes = (*mIt);
+			if (chooseRes->mConnBase == NULL) {
+				chooseRes->mConnBase = mSel->operator[] (chooseRes->mFd);
+			}
 			return *chooseRes;
 		}
 
 		iterator & operator ++() {
-			#ifdef _WIN32
-				__try {
-					while (
-						!(++mIt).isEnd() &&
-						!(*mIt)->mRevents &&
-						!((*mIt)->mEvents & eEF_CLOSE)
-					) {
-					}
-				} __except(1) {
-					if(mSel->ErrLog(0)) {
-						mSel->LogStream() << "Fatal error: " << endl
-							<< "error in operator ++()" << endl
-							<< "item = " << mIt.mItem << endl
-							<< "hash = " << mIt.i.i << endl
-							<< "end = " << mIt.i.end << endl
-							<< "socket = " << (*mIt)->mFd << endl;
-					}
-				}
-			#else
-				while (
-					!(++mIt).isEnd() &&
-					!(*mIt)->mRevents &&
-					!((*mIt)->mEvents & eEF_CLOSE)
-				) {
-				}
-			#endif
+			while (
+				!(++mIt).isEnd() &&
+				!(*mIt)->mRevents &&
+				!((*mIt)->mEvents & eEF_CLOSE)
+			) {
+			}
 			return *this;
 		}
 	}; // iterator
