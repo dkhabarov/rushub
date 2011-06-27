@@ -93,7 +93,7 @@ public:
 
 	void sendMode(DcConn *, const string & str, int mode, UserList &, bool useCache = false);
 	int sendNickList(DcConn *); /** Sending user-list and op-list */
-	static string getNormalShare(__int64); /** Get normal share size */
+	static void getNormalShare(__int64, string &); /** Get normal share size */
 
 	void addToOps(DcUser *);
 	void delFromOps(DcUser *);
