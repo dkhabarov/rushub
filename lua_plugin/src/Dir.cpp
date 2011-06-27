@@ -180,12 +180,12 @@ void Dir::execPath(string & path) {
 
 
 
-string Dir::pathForFile(const char * filePath) {
-	const char * slash = strrchr(filePath, '/');
+void Dir::pathForFile(const char * file, string & path) {
+	const char * slash = strrchr(file, '/');
 	if (!slash) {
-		slash = strrchr(filePath, '\\');
+		slash = strrchr(file, '\\');
 	}
-	return slash ? string(filePath, slash - filePath + 1) : ".";
+	path = slash ? string(file, slash - file + 1) : ".";
 }
 
 

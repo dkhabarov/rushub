@@ -328,7 +328,8 @@ int Service::cli(int argc, char * argv[], string & configFile) {
 			return -6;
 		}
 
-		string configPath(Dir::pathForFile(config));
+		string configPath;
+		Dir::pathForFile(config, configPath);
 		if (!Dir::checkPath(configPath)) {
 			cout << "Directory for config file not exist and can't be created." << endl;
 			return -7;

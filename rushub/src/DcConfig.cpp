@@ -44,7 +44,7 @@ DcConfig::DcConfig(ConfigLoader * configLoader, Server * server, const string & 
 	mConfigStore.mName = "";
 
 	// Path of RusHub.xml
-	mConfigPath = Dir::pathForFile(mConfigStore.mPath.c_str());
+	Dir::pathForFile(mConfigStore.mPath.c_str(), mConfigPath);
 
 	addVars(server);
 	reload();

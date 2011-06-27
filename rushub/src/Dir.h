@@ -82,7 +82,7 @@ public:
 
 	static void execPath(string &);
 
-	static string pathForFile(const char * filePath);
+	static void pathForFile(const char * file, string & path);
 
 	static void checkEndSlash(string &);
 

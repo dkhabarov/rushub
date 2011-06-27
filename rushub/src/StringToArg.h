@@ -17,8 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STR_TO_ARG_H
-#define STR_TO_ARG_H
+#ifndef STRING_TO_ARG_H
+#define STRING_TO_ARG_H
 
 #ifdef _WIN32
 
@@ -38,7 +38,7 @@ private:
 public:
 
 	static int String2Arg(char const * str, int * argc, char *** argv);
-	static int String2Arg(string str, int * argc, char *** argv) {
+	static int String2Arg(const string & str, int * argc, char *** argv) {
 		return String2Arg(str.c_str(), argc, argv);
 	}
 
@@ -48,7 +48,7 @@ public:
 
 #endif // _WIN32
 
-#endif // STR_TO_ARG_H
+#endif // STRING_TO_ARG_H
 
 /**
  * $Id$
