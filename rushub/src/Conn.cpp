@@ -56,6 +56,7 @@ char Conn::mRecvBuf[MAX_RECV_SIZE + 1];
 
 Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 	Obj("Conn"),
+	mLastRecv(true),
 	mConnFactory(NULL),
 	mServer(server),
 	mProtocol(NULL),
@@ -66,6 +67,7 @@ Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 	mPort(0),
 	mPortConn(0),
 	mSendBufMax(MAX_SEND_SIZE),
+	mConnect(true),
 	mSocket(socket),
 	mRecvBufEnd(0),
 	mRecvBufRead(0),

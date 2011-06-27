@@ -162,7 +162,6 @@ public:
 		Timers() {
 			for (int i = 0; i <= NMDC_TYPE_UNKNOWN; ++i) { // PROTOCOL NMDC !
 				mCount[i] = 0;
-				mTime[i].Null();
 			}
 		}
 

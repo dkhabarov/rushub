@@ -51,14 +51,14 @@ public:
 	int mNumFill; /** Amount filled period */
 
 	MeanFrequency() {
-		Time now;
+		Time now(true);
 		mResolution = max_size;
 		mOverPeriod = Time(0.);
 		mPeriodPart = 0;
 		reset(now);
 	}
 
-	MeanFrequency(const Time & now) {
+	MeanFrequency(const Time & now) : mOverPeriod(true), mPeriodPart(true) {
 		mResolution = max_size;
 		setPeriod(1.);
 		reset(now);

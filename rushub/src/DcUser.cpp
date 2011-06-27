@@ -29,6 +29,7 @@ DcUser::DcUser() :
 	DcUserBase(),
 	mDcServer(NULL),
 	mDcConn(NULL),
+	mTimeEnter(true),
 	mUidHash(0),
 	mProfile(-1),
 	mInOpList(false),

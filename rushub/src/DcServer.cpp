@@ -59,6 +59,7 @@ DcServer::DcServer(const string & configFile, const string &):
 	mDcConfig(&mDcConfigLoader, mServer, configFile.c_str()),
 	mDcLang(&mDcConfigLoader, &mDcConfig),
 	mSystemLoad(SYSTEM_LOAD_OK),
+	mStartTime(true),
 	mDcUserList("UserList", true, true, true),
 	mBotList("BotList", true),
 	mOpList("OpList", true),

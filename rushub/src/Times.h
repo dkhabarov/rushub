@@ -51,6 +51,7 @@ class Time : public timeval {
 public:
 
 	Time();
+	Time(bool now);
 	Time(double sec);
 	Time(long sec, long usec = 0);
 	Time(const Time &);
@@ -96,9 +97,6 @@ public:
 	/*bool LocalTime(struct tm &result){ return localtime_r(this, &result) == &result;}*/
 	Time & Get();
 	Time & Normalize();
-	inline void Null() {
-		tv_sec = tv_usec = 0;
-	}
 	string AsString() const;
 	void AsTimeVals(int & w, int & d, int & h, int & m) const;
 	friend std::ostream & operator << (std::ostream & os, const Time & t);

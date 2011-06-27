@@ -37,6 +37,7 @@ DcConn::DcConn(int type, tSocket sock, Server * server) :
 	mIpRecv(false),
 	mNickListInProgress(false),
 	mDcUser(NULL),
+	mPingServer(true),
 	mSrCounter(0),
 	mLoginStatus(0)
 {

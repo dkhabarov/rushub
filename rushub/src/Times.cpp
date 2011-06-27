@@ -55,7 +55,15 @@ namespace utils {
 
 
 Time::Time() : mPrintType(0) {
-	Get();
+	tv_sec = tv_usec = 0l;
+}
+
+Time::Time(bool now) : mPrintType(0) {
+	if (now) {
+		Get();
+	} else {
+		tv_sec = tv_usec = 0l;
+	}
 }
 
 Time::Time(double sec) : mPrintType(0) {

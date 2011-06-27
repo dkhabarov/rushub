@@ -40,7 +40,7 @@ public:
 		return *this;
 	}
 
-	bool check(const string & ip, Time now);
+	bool check(const string & ip, const Time & now);
 	void del(Time & now);
 
 private:
@@ -48,7 +48,7 @@ private:
 	struct sItem {
 		Time mTime;
 		unsigned miCount;
-		sItem() : miCount(0) {
+		sItem() : mTime(true), miCount(0) {
 		}
 	};
 

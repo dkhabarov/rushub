@@ -907,7 +907,7 @@ int NmdcProtocol::eventGetInfo(DcParser * dcparser, DcConn * dcConn) {
 		return -2;
 	}
 
-	if (dcConn->mDcUser->mTimeEnter < dcUser->mTimeEnter && Time() < (dcUser->mTimeEnter + 60000)) {
+	if (dcConn->mDcUser->mTimeEnter < dcUser->mTimeEnter && Time().Get() < (dcUser->mTimeEnter + 60000)) {
 		return 0;
 	}
 

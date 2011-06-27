@@ -206,13 +206,13 @@ public:
 	}
 
 	int getMSec() const {
-		Time tm;
+		Time tm(true);
 		return tm;
 	}
 
 	/** Work time (sec) */
 	int getUpTime() const {
-		Time tm;
+		Time tm(true);
 		tm -= mStartTime;
 		return tm.Sec();
 	}
@@ -336,7 +336,7 @@ private:
 	struct IpEnter {
 		Time mTime;
 		unsigned int mCount;
-		IpEnter() : mCount(0) {
+		IpEnter() : mTime(true), mCount(0) {
 		}
 	};
 
