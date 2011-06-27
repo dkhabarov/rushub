@@ -132,101 +132,35 @@ public:
 	Conn(tSocket socket = 0, Server * server = NULL, ConnType connType = CONN_TYPE_CLIENTTCP);
 	virtual ~Conn();
 
-	/** Get socket */
-	virtual operator tSocket() const;
-
-	/** Get type connection */
-	ConnType getConnType() const {
-		return mConnType;
-	}
-
-	bool isOk() const {
-		return mOk;
-	}
-
-	bool isWritable() const {
-		return mWritable;
-	}
-
-	void setOk(bool);
-
-	/** Create, bind and listen socket */
-	tSocket makeSocket(const char * port, const char * ip = NULL, bool udp = false);
-
-	void close(); /** Close connection (socket) */
-	void closeNice(int msec = 0, int reason = 0); /** Nice close conn (socket) */
-	void closeNow(int reason = 0); /** Now close conn */
-
-	/** Creating the new object for enterring connection */
-	virtual Conn * createNewConn();
-
-	/** Reading all data from socket to buffer of the conn */
-	virtual int recv();
-
-	/** Check empty recv buf */
-	int recvBufIsEmpty() const {
-		return mRecvBufEnd == mRecvBufRead;
-	}
-
-	/** Check empty recv buf */
-	int sendBufIsEmpty() const {
-		return mSendBuf.length() == 0;
-	}
-
-	/** Get status */
-	int strStatus() const {
-		return mStrStatus;
-	}
-
-	void setCreatedByFactory(bool createdByFactory) {
-		mCreatedByFactory = createdByFactory;
-	}
-
-	bool getCreatedByFactory() const {
-		return mCreatedByFactory;
-	}
-
-	/** remaining (for web-server) */
-	virtual int remaining();
-
-	/** Clear params */
-	void clearCommandPtr();
-
-	/** Installing the string, in which will be recorded received data, 
-	and installation main parameter */
-	void setCommandPtr(string *);
-
-	/** Reading data from buffer and record in line of the protocol */
-	int readFromRecvBuf();
-
-	/** Get pointer for string */
-	virtual string * getParserCommandPtr();
-
-	/** Get parser */
-	virtual Parser * createParser();
-
-	/** Remove parser */
-	virtual void deleteParser(Parser *);
-
-	/** Get pointer for string with data */
-	string * getCommandPtr();
-
-	void flush(); /** Flush buffer */
-
-
-	virtual bool strLog();
-
-	/** Main base timer */
-	int onTimerBase(Time &now);
-
-	/** Main timer */
-	virtual int onTimer(Time &now);
-
+	// === static functions ===
 
 	static const char * inetNtop(int af, const void * src, char * dst, socklen_t cnt);
+
 	static int inetPton(int af, const char * src, void * dst);
 
-	
+	static bool checkIp(const string &ip);
+
+
+	virtual operator tSocket() const;
+
+
+	// === getter / setter ===
+
+	//< Get connection type
+	ConnType getConnType() const;
+
+	//< Get status
+	int getStatus() const;
+
+	//< Is OK
+	bool isOk() const;
+
+	//< Set OK
+	void setOk(bool);
+
+	//< Is writable
+	bool isWritable() const;
+
 	//< Is closed
 	bool isClosed() const;
 
@@ -248,12 +182,80 @@ public:
 	//< Get mac-address
 	const string & getMacAddress() const;
 
-	//< Check IP
-	static bool checkIp(const string &ip);
+
+	//< Create, bind and listen socket
+	tSocket makeSocket(const char * port, const char * ip = NULL, bool udp = false);
+
+	//< Close connection (socket)
+	void close();
+
+	//< Nice close conn (socket)
+	void closeNice(int msec = 0, int reason = 0);
+
+	//< Now close conn
+	void closeNow(int reason = 0);
+
+	//< Creating the new object for enterring connection
+	virtual Conn * createNewConn();
+
+	//< Reading all data from socket to buffer of the conn
+	virtual int recv();
+
+	//< Check empty recv buf
+	int recvBufIsEmpty() const {
+		return mRecvBufEnd == mRecvBufRead;
+	}
+
+	//< Check empty recv buf
+	int sendBufIsEmpty() const {
+		return mSendBuf.length() == 0;
+	}
+
+	void setCreatedByFactory(bool createdByFactory) {
+		mCreatedByFactory = createdByFactory;
+	}
+
+	bool getCreatedByFactory() const {
+		return mCreatedByFactory;
+	}
+
+	//< Clear params
+	void clearCommandPtr();
+
+	/** Installing the string, in which will be recorded received data, 
+	and installation main parameter */
+	void setCommandPtr(string *);
+
+	//< Reading data from buffer and record in line of the protocol
+	int readFromRecvBuf();
+
+	//< Get pointer for string
+	virtual string * getParserCommandPtr();
+
+	//< Get parser
+	virtual Parser * createParser();
+
+	//< Remove parser
+	virtual void deleteParser(Parser *);
+
+	//< Get pointer for string with data
+	string * getCommandPtr();
+
+	//< Flush buffer
+	void flush();
+
+
+	virtual bool strLog();
+
+	//< Main base timer
+	int onTimerBase(Time &now);
+
+	//< Main timer
+	virtual int onTimer(Time &now);
 
 protected:
 
-	/** Socket type */
+	//< Socket type
 	ConnType mConnType;
 
 	bool mOk; /** Points that given connection is registered (socket of connection is created and bound) */
@@ -282,6 +284,9 @@ protected:
 	//< Write data in sending buffer
 	int writeData(const char * data, size_t len, bool flush);
 
+	//< Remaining (for web-server)
+	virtual int remaining();
+
 	//< onFlush
 	virtual void onFlush();
 
@@ -293,7 +298,7 @@ private:
 	Time mCloseTime; /** Time before closing the conn */
 	int mRecvBufEnd; /** Final position of the buffer mRecvBuf */
 	int mRecvBufRead; /** Current position of the buffer mRecvBuf */
-	int mStrStatus; /** Status of the line */
+	int mStatus; /** Status of the line */
 
 	/** struct sockaddr_in */
 	struct sockaddr_in mSockAddrIn;
@@ -301,7 +306,6 @@ private:
 
 	// ipv6
 	struct addrinfo * mAddrInfo;
-	//struct sockaddr_storage mSockaddr;
 
 	bool mBlockInput; /** Blocking enterring channel for given conn */
 	bool mBlockOutput; /** Blocking coming channel for given conn */

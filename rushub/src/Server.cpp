@@ -561,13 +561,13 @@ int Server::inputData(Conn *conn) {
 
 	int bytes = 0;
 	while (conn->isOk() && conn->isWritable()) {
-		if (conn->strStatus() == STRING_STATUS_NO_STR) {
+		if (conn->getStatus() == STRING_STATUS_NO_STR) {
 			conn->setCommandPtr(createCommandPtr(conn));
 		}
 
 		bytes += conn->readFromRecvBuf();
 
-		if (conn->strStatus() == STRING_STATUS_STR_DONE) {
+		if (conn->getStatus() == STRING_STATUS_STR_DONE) {
 
 			if (conn->mConnFactory != NULL) {
 				// On new data using ListenFactory

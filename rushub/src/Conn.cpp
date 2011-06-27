@@ -48,6 +48,7 @@
 
 namespace server {
 
+
 unsigned long Conn::mConnCounter = 0;
 socklen_t Conn::mSockAddrInSize = sizeof(struct sockaddr_in);
 
@@ -80,6 +81,8 @@ Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 	memset(&mCloseTime, 0, sizeof(mCloseTime));
 }
 
+
+
 Conn::~Conn() {
 	if (mParser) {
 		deleteParser(mParser);
@@ -93,17 +96,96 @@ Conn::~Conn() {
 
 
 
-/** Get socket */
+//< Get socket
 Conn::operator tSocket() const {
 	return mSocket;
 }
 
 
 
+//< Get connection type
+ConnType Conn::getConnType() const {
+	return mConnType;
+}
+
+
+
+//< Get status
+int Conn::getStatus() const {
+	return mStatus;
+}
+
+
+
+//< Is OK
+bool Conn::isOk() const {
+	return mOk;
+}
+
+
+
+//< Set OK
 void Conn::setOk(bool ok) {
 	mOk = ok;
 	onOk(ok);
 }
+
+
+
+//< Is writable
+bool Conn::isWritable() const {
+	return mWritable;
+}
+
+
+
+//< Is closed
+bool Conn::isClosed() const {
+	return mClosed;
+}
+
+
+
+//< Get string of IP
+const string & Conn::getIp() const {
+	return mIp;
+}
+
+
+
+//< Get string of server IP (host)
+const string & Conn::getIpConn() const {
+	return mIpConn;
+}
+
+
+
+//< Get IP for UDP
+const string & Conn::getIpUdp() const {
+	return mIpUdp;
+}
+
+
+
+//< Get real port
+int Conn::getPort() const {
+	return mPort;
+}
+
+
+
+//< Get connection port
+int Conn::getPortConn() const {
+	return mPortConn;
+}
+
+
+
+//< Get mac-address
+const string & Conn::getMacAddress() const {
+	return mMac;
+}
+
 
 
 
@@ -433,21 +515,6 @@ int Conn::defineConnInfo(sockaddr_storage & storage) {
 		mIp = host;
 		mPort = atoi(port);
 
-/*
-		struct sockaddr_in saddr;
-		if (getpeername(mSocket, (struct sockaddr *)&saddr, &mSockAddrInSize) < 0) {
-			if (Log(2)) {
-				LogStream() << "Error in getpeername: " << SockErrMsg << endl;
-			}
-			closeNow(CLOSE_REASON_GETPEERNAME);
-			return -1;
-		}
-		char ip[INET_ADDRSTRLEN];
-		inetNtop(AF_INET, &(saddr.sin_addr), ip, INET_ADDRSTRLEN);
-		mIp = ip;
-		mPort = ntohs(saddr.sin_port);
-*/
-
 		if (mServer->mMac) {
 			calcMacAddress();
 		}
@@ -568,55 +635,6 @@ int Conn::recv() {
 
 
 
-
-
-bool Conn::isClosed() const {
-	return mClosed;
-}
-
-
-//< Get string of IP
-const string & Conn::getIp() const {
-	return mIp;
-}
-
-
-
-//< Get string of server IP (host)
-const string & Conn::getIpConn() const {
-	return mIpConn;
-}
-
-
-
-//< Get IP for UDP
-const string & Conn::getIpUdp() const {
-	return mIpUdp;
-}
-
-
-
-//< Get real port
-int Conn::getPort() const {
-	return mPort;
-}
-
-
-
-//< Get connection port
-int Conn::getPortConn() const {
-	return mPortConn;
-}
-
-
-
-//< Get mac-address
-const string & Conn::getMacAddress() const {
-	return mMac;
-}
-
-
-
 //< Check IP
 bool Conn::checkIp(const string & ip) {
 	#ifndef _WIN32
@@ -704,7 +722,7 @@ void Conn::calcMacAddress() {
 //< Clear params
 void Conn::clearCommandPtr() {
 	mCommand = NULL;
-	mStrStatus = STRING_STATUS_NO_STR;
+	mStatus = STRING_STATUS_NO_STR;
 }
 
 
@@ -719,7 +737,7 @@ string * Conn::getCommandPtr() {
 /** Installing the string, in which will be recorded received data, 
 	and installation main parameter */
 void Conn::setCommandPtr(string * pStr) {
-	if (mStrStatus != STRING_STATUS_NO_STR) {
+	if (mStatus != STRING_STATUS_NO_STR) {
 		if (ErrLog(0)) {
 			LogStream() << "Fatal error: Bad setCommandPtr" << endl;
 		}
@@ -732,7 +750,7 @@ void Conn::setCommandPtr(string * pStr) {
 		throw "Fatal error: Bad setCommandPtr. Null string pointer";
 	}
 	mCommand = pStr;
-	mStrStatus = STRING_STATUS_PARTLY;
+	mStatus = STRING_STATUS_PARTLY;
 }
 
 
@@ -771,7 +789,7 @@ int Conn::readFromRecvBuf() {
 	len = pos + sep_len;
 	mCommand->append(buf, pos);
 	mRecvBufRead += len;
-	mStrStatus = STRING_STATUS_STR_DONE;
+	mStatus = STRING_STATUS_STR_DONE;
 	return len;
 }
 
