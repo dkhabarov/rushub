@@ -36,32 +36,32 @@ namespace protoenums {
 
 typedef enum { /** Types of the commands */
 	NMDC_TYPE_NO = -1,
-	NMDC_TYPE_MSEARCH,        //< 0  = $MultiSearch
-	NMDC_TYPE_MSEARCH_PAS,    //< 1  = $MultiSearch Hub:
-	NMDC_TYPE_SEARCH_PAS,     //< 2  = $Search Hub:
-	NMDC_TYPE_SEARCH,         //< 3  = $Search
-	NMDC_TYPE_SR,             //< 4  = $SR
-	NMDC_TYPE_SR_UDP,         //< 5  = $SR UDP
-	NMDC_TYPE_MYNIFO,         //< 6  = $MyNIFO
-	NMDC_TYPE_SUPPORTS,       //< 7  = $Support
-	NMDC_TYPE_KEY,            //< 8  = $Key
-	NMDC_TYPE_VALIDATENICK,   //< 9  = $ValidateNick
-	NMDC_TYPE_VERSION,        //< 10 = $Version
-	NMDC_TYPE_GETNICKLIST,    //< 11 = $GetNickList
-	NMDC_TYPE_CHAT,           //< 12 = Chat
-	NMDC_TYPE_TO,             //< 13 = $To
-	NMDC_TYPE_QUIT,           //< 14 = $Quit
-	NMDC_TYPE_MYPASS,         //< 15 = $MyPass
-	NMDC_TYPE_CONNECTTOME,    //< 16 = $ConnecToMe
-	NMDC_TYPE_RCONNECTTOME,   //< 17 = $RevConnectToMe
-	NMDC_TYPE_MCONNECTTOME,   //< 18 = $MultiConnectToMe
-	NMDC_TYPE_KICK,           //< 19 = $Kick
-	NMDC_TYPE_OPFORCEMOVE,    //< 20 = $OpForceMove
-	NMDC_TYPE_GETINFO,        //< 21 = $GetINFO
-	NMDC_TYPE_MCTO,           //< 22 = $MCTo
-	NMDC_TYPE_USERIP,         //< 23 = $UserIP
-	NMDC_TYPE_PING,           //< 24 = |
-	NMDC_TYPE_UNKNOWN,        //< 25 = $Unknown
+	NMDC_TYPE_MSEARCH,        ///< 0  = $MultiSearch
+	NMDC_TYPE_MSEARCH_PAS,    ///< 1  = $MultiSearch Hub:
+	NMDC_TYPE_SEARCH_PAS,     ///< 2  = $Search Hub:
+	NMDC_TYPE_SEARCH,         ///< 3  = $Search
+	NMDC_TYPE_SR,             ///< 4  = $SR
+	NMDC_TYPE_SR_UDP,         ///< 5  = $SR UDP
+	NMDC_TYPE_MYNIFO,         ///< 6  = $MyNIFO
+	NMDC_TYPE_SUPPORTS,       ///< 7  = $Support
+	NMDC_TYPE_KEY,            ///< 8  = $Key
+	NMDC_TYPE_VALIDATENICK,   ///< 9  = $ValidateNick
+	NMDC_TYPE_VERSION,        ///< 10 = $Version
+	NMDC_TYPE_GETNICKLIST,    ///< 11 = $GetNickList
+	NMDC_TYPE_CHAT,           ///< 12 = Chat
+	NMDC_TYPE_TO,             ///< 13 = $To
+	NMDC_TYPE_QUIT,           ///< 14 = $Quit
+	NMDC_TYPE_MYPASS,         ///< 15 = $MyPass
+	NMDC_TYPE_CONNECTTOME,    ///< 16 = $ConnecToMe
+	NMDC_TYPE_RCONNECTTOME,   ///< 17 = $RevConnectToMe
+	NMDC_TYPE_MCONNECTTOME,   ///< 18 = $MultiConnectToMe
+	NMDC_TYPE_KICK,           ///< 19 = $Kick
+	NMDC_TYPE_OPFORCEMOVE,    ///< 20 = $OpForceMove
+	NMDC_TYPE_GETINFO,        ///< 21 = $GetINFO
+	NMDC_TYPE_MCTO,           ///< 22 = $MCTo
+	NMDC_TYPE_USERIP,         ///< 23 = $UserIP
+	NMDC_TYPE_PING,           ///< 24 = |
+	NMDC_TYPE_UNKNOWN,        ///< 25 = $Unknown
 } NmdcType;
 
 
@@ -246,7 +246,7 @@ public:
 private:
 
 	bool mError;
-	size_t mKeyLength; //< Key-word len
+	size_t mKeyLength; ///< Key-word len
 
 }; // class DcParser
 

@@ -289,7 +289,7 @@ void DcUser::disconnect() {
 	mDcConn->closeNice(9000, CLOSE_REASON_PLUGIN);
 }
 
-//< Get string of IP
+/// Get string of IP
 const string & DcUser::getIp() const {
 	if (mDcConn != NULL) {
 		return mDcConn->getIp();
@@ -297,22 +297,22 @@ const string & DcUser::getIp() const {
 	return mIp; // TODO remove this param (now for bot only)
 }
 
-//< Get string of server ip (host)
+/// Get string of server ip (host)
 const string & DcUser::getIpConn() const{
 	return mDcConn->getIpConn();
 }
 
-//< Get real clients port
+/// Get real clients port
 int DcUser::getPort() const {
 	return mDcConn->getPort();
 }
 
-//< Get connection port
+/// Get connection port
 int DcUser::getPortConn() const {
 	return mDcConn->getPortConn();
 }
 
-//< Get mac address
+/// Get mac address
 const string & DcUser::getMacAddress() const {
 	return mDcConn->getMacAddress();
 }

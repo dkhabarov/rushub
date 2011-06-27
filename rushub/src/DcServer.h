@@ -61,11 +61,11 @@ using namespace ::utils; /** for stringReplace */
 /** Индикаторы загруженности хаба */
 typedef enum {
 
-	SYSTEM_LOAD_OK,         //< OK
-	SYSTEM_LOAD_LOWER,      //< LOWER
-	SYSTEM_LOAD_MIDDLE,     //< MIDDLE
-	SYSTEM_LOAD_CRITICAL,   //< CRITICAL
-	SYSTEM_LOAD_SYSTEM_DOWN //< SYSTEM_DOWN
+	SYSTEM_LOAD_OK,         ///< OK
+	SYSTEM_LOAD_LOWER,      ///< LOWER
+	SYSTEM_LOAD_MIDDLE,     ///< MIDDLE
+	SYSTEM_LOAD_CRITICAL,   ///< CRITICAL
+	SYSTEM_LOAD_SYSTEM_DOWN ///< SYSTEM_DOWN
 
 } SystemLoad;
 
@@ -251,7 +251,7 @@ public:
 	bool sendToAllExceptNicks(const vector<string> & nickList, const char * data, const char * nick = NULL, const char * from = NULL);
 	bool sendToAllExceptIps(const vector<string> & ipList, const char * data, const char * nick = NULL, const char * from = NULL);
 
-	void forceMove(DcUserBase *, const char * address, const char * reason = NULL); //< Redirection client
+	void forceMove(DcUserBase *, const char * address, const char * reason = NULL); ///< Redirection client
 
 	const vector<string> & getConfig();
 	const char * getConfig(const string & name);
@@ -321,13 +321,13 @@ private:
 	vector<DcConnBase *> mIpConnList; /** Conn with same ip for plugins */
 	vector<string> mConfigNameList; /** Config names for plugins */
 
-	//< DC Server Conn Factory
+	/// DC Server Conn Factory
 	DcConnFactory * mDcConnFactory;
 
-	//< Web Server Conn Factory
+	/// Web Server Conn Factory
 	WebConnFactory * mWebConnFactory;
 
-	//< Web Protocol
+	/// Web Protocol
 	WebProtocol * mWebProtocol;
 
 	AntiFlood mIpEnterFlood;

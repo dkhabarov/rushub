@@ -22,9 +22,9 @@
 
 #if defined(_WIN32) || defined(__APPLE__)
 
-	#define RTLD_LAZY 0x001 //< Lazy function call binding
-	#define RTLD_NOW 0x002 //< Immediate function call binding
-	#define RTLD_BINDING_MASK 0x3 //< Mask of binding time value
+	#define RTLD_LAZY 0x001 ///< Lazy function call binding
+	#define RTLD_NOW 0x002 ///< Immediate function call binding
+	#define RTLD_BINDING_MASK 0x3 ///< Mask of binding time value
 
 	char * dlerror();
 	void * dlsym(void * handle, const char * symbol);

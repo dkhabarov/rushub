@@ -99,21 +99,21 @@ private:
 
 	typedef list<Plugin *> tPlugins;
 
-	//< Plugin list of call list
+	/// Plugin list of call list
 	tPlugins mPlugins;
 
-	//< Pointer on common plugin list
+	/// Pointer on common plugin list
 	PluginList * mPluginList;
 
-	//< Unary function
+	/// Unary function
 	ufCallOne mCallOne;
 
-	//< Name of the call list
+	/// Name of the call list
 	string mName;
 
 	typedef vector<Plugin *> RemovedPlugins_t;
 
-	//< Removed plugins
+	/// Removed plugins
 	RemovedPlugins_t removedPlugins;
 
 

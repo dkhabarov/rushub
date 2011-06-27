@@ -89,10 +89,10 @@ public:
 
 protected:
 
-	size_t mLength; //< Command len
+	size_t mLength; ///< Command len
 
-	string * mStrings; //< String array for chunks
-	unsigned long mStrMap; //< Chunk already existed
+	string * mStrings; ///< String array for chunks
+	unsigned long mStrMap; ///< Chunk already existed
 	bool mIsParsed;
 
 protected:

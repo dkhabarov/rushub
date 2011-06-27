@@ -48,16 +48,16 @@ class DcConfig : public ConfigList {
 
 public:
 
-	int mStartPing;       //< Time interval in sec, after which begins ping user
-	int mMaxPassiveRes;   //< Max results in the passive search
+	int mStartPing;       ///< Time interval in sec, after which begins ping user
+	int mMaxPassiveRes;   ///< Max results in the passive search
 
-	int mUsersLimit;	//< User's limit
+	int mUsersLimit;	///< User's limit
 
 	unsigned long mMaxNmdcCommandLength;
-	unsigned long mMaxWebCommandLength; //< Max size of web cmd
+	unsigned long mMaxWebCommandLength; ///< Max size of web cmd
 	unsigned mMaxCmdLen[NMDC_TYPE_UNKNOWN + 1];
-	unsigned mMaxNickLen;	//< Max length of nick
-	unsigned mMinNickLen; //< Min length of nick
+	unsigned mMaxNickLen;	///< Max length of nick
+	unsigned mMinNickLen; ///< Min length of nick
 
 	/** Allowed number reconnection during miTimeReconnIp sec */
 	unsigned mFloodCountReconnIp;
@@ -70,45 +70,45 @@ public:
 	double mFloodTime[NMDC_TYPE_UNKNOWN + 1];
 	double mFloodTime2[NMDC_TYPE_UNKNOWN + 1];
 
-	double mPingInterval;       //< User's ping interval
-	double mTimeout[5];         //< Timeouts of the protocol entering commands
-	double mTimeoutAny;         //< Timeout connection
-	double mWebTimeout;         //< Timeout connection with web-client (in sec)
-	double mSysLoading;         //< Factor of the system loading
+	double mPingInterval;       ///< User's ping interval
+	double mTimeout[5];         ///< Timeouts of the protocol entering commands
+	double mTimeoutAny;         ///< Timeout connection
+	double mWebTimeout;         ///< Timeout connection with web-client (in sec)
+	double mSysLoading;         ///< Factor of the system loading
 
-	bool mUdpServer;            //< UDP server on/off
+	bool mUdpServer;            ///< UDP server on/off
 
-	bool mWebServer;            //< Web-server on/off
-	bool mDisableNoDCCmd;       //< Allow DC commands only
+	bool mWebServer;            ///< Web-server on/off
+	bool mDisableNoDCCmd;       ///< Allow DC commands only
 
-	bool mNicklistOnLogin;      //< Send user-list on login
-	bool mDelayedLogin;         //< Logined user after send to it full user-list only (to big hubs)
+	bool mNicklistOnLogin;      ///< Send user-list on login
+	bool mDelayedLogin;         ///< Logined user after send to it full user-list only (to big hubs)
 
-	bool mCheckSearchIp;        //< Check IP in passive search
-	bool mCheckSrNick;          //< Check nick in SR commands
-	bool mCheckCtmIp;           //< Check IP in CTM commands
-	bool mCheckRctmNick;        //< Check nick in RCTM commands
+	bool mCheckSearchIp;        ///< Check IP in passive search
+	bool mCheckSrNick;          ///< Check nick in SR commands
+	bool mCheckCtmIp;           ///< Check IP in CTM commands
+	bool mCheckRctmNick;        ///< Check nick in RCTM commands
 
-	bool mDelayedMyinfo;        //< Delay in sending cmds: $MyINFO, $Hello, $Quit (optimisation)
-	bool mSendUserIp;           //< Use UserIP & UserIP2 features
-	bool mRegMainBot;           //< Reg main bot
-	bool mMainBotKey;           //< Key for main bot
+	bool mDelayedMyinfo;        ///< Delay in sending cmds: $MyINFO, $Hello, $Quit (optimisation)
+	bool mSendUserIp;           ///< Use UserIP & UserIP2 features
+	bool mRegMainBot;           ///< Reg main bot
+	bool mMainBotKey;           ///< Key for main bot
 
-	string mAddresses;          // "Ip1[:port1] Ip2[:port2] ... IpN[:portN]" - addresses of server
+	string mAddresses;          ///< "Ip1[:port1] Ip2[:port2] ... IpN[:portN]" - addresses of server
 	string mUdpAddresses;
-	string mWebAddresses;       //< Wib addresses "ip1[:port1] host2[:port2] ... ipN[:portN]"
-	string mHubBot;             //< Nick of the main bot
-	string mHubName;            //< Name of the hub
-	string mTopic;              //< Hub topic
-	string mLocale;             //< Main hub locale
-	string mMainBotMyinfo;			//< MyINFO string for the main bot
-	string mMainBotIp;          //< IP for the main bot
+	string mWebAddresses;       ///< Wib addresses "ip1[:port1] host2[:port2] ... ipN[:portN]"
+	string mHubBot;             ///< Nick of the main bot
+	string mHubName;            ///< Name of the hub
+	string mTopic;              ///< Hub topic
+	string mLocale;             ///< Main hub locale
+	string mMainBotMyinfo;		///< MyINFO string for the main bot
+	string mMainBotIp;          ///< IP for the main bot
 
-	string mMainPath;           //< Main path
-	string mLogPath;            //< Logs path
-	string mPluginPath;         //< Plugin path
-	string mLangPath;           //< Langage path
-	string mLang;               //< Langage
+	string mMainPath;           ///< Main path
+	string mLogPath;            ///< Logs path
+	string mPluginPath;         ///< Plugin path
+	string mLangPath;           ///< Langage path
+	string mLang;               ///< Langage
 	
 
 public:
@@ -136,27 +136,27 @@ class DcLang : public ConfigList {
 
 public:
 
-	string mFirstMsg;          //< First message
-	string mBadChatNick;       //< Message about bad nick in the chat
-	string mBadLoginSequence;  //< Message about bad login sequence
-	string mBadMyinfoNick;     //< Message about bad nick in MyINFO command
-	string mUnits[7];          //< Units: B, KB, MB, GB, TB, PB, EB
-	string mTimeout;           //< Message about timeout with the reason
-	string mTimeoutCmd[5];     //< Timeouts names
-	string mTimeoutAny;        //< Message about connection timeout
-	string mForceMove;         //< Redirection message
+	string mFirstMsg;          ///< First message
+	string mBadChatNick;       ///< Message about bad nick in the chat
+	string mBadLoginSequence;  ///< Message about bad login sequence
+	string mBadMyinfoNick;     ///< Message about bad nick in MyINFO command
+	string mUnits[7];          ///< Units: B, KB, MB, GB, TB, PB, EB
+	string mTimeout;           ///< Message about timeout with the reason
+	string mTimeoutCmd[5];     ///< Timeouts names
+	string mTimeoutAny;        ///< Message about connection timeout
+	string mForceMove;         ///< Redirection message
 	string mUsersLimit;
 
 	string mFlood[NMDC_TYPE_UNKNOWN + 1];
 
-	string mBadSearchIp;   //< Message about bad IP in the active search
-	string mBadSrNick;     //< Message about bad nick in the SR commands
-	string mBadCtmIp;      //< Message about bad IP in the CTM commands
-	string mBadRevConNick; //< Message about bad nick in the passive search
-	string mUsedNick;      //< Message about occupied nick
-	string mBadNickLen;    //< Message about ban length for the nick
-	string mBadChars;      //< Message about bad symbols in the nick
-	string mTimes[5];      //< weeks, days, hours, min, sec
+	string mBadSearchIp;   ///< Message about bad IP in the active search
+	string mBadSrNick;     ///< Message about bad nick in the SR commands
+	string mBadCtmIp;      ///< Message about bad IP in the CTM commands
+	string mBadRevConNick; ///< Message about bad nick in the passive search
+	string mUsedNick;      ///< Message about occupied nick
+	string mBadNickLen;    ///< Message about ban length for the nick
+	string mBadChars;      ///< Message about bad symbols in the nick
+	string mTimes[5];      ///< weeks, days, hours, min, sec
 
 public:
 

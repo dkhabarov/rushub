@@ -40,12 +40,12 @@ namespace dcserver {
 /** Time outs during entering on hub only (HubTimeOut) */
 typedef enum {
 
-	HUB_TIME_OUT_KEY = 0, //< Waiting $Key after $Lock
-	HUB_TIME_OUT_VALNICK, //< Waiting $ValidateNick after $Lock
-	HUB_TIME_OUT_LOGIN,   //< Life time of the connection object before full entry (doUserEnter)
-	HUB_TIME_OUT_MYINFO,  //< After $ValidateNick and before $MyINFO timeout
-	HUB_TIME_OUT_PASS,    //< Waiting pass
-	HUB_TIME_OUT_MAX      //< Max timeout type
+	HUB_TIME_OUT_KEY = 0, ///< Waiting $Key after $Lock
+	HUB_TIME_OUT_VALNICK, ///< Waiting $ValidateNick after $Lock
+	HUB_TIME_OUT_LOGIN,   ///< Life time of the connection object before full entry (doUserEnter)
+	HUB_TIME_OUT_MYINFO,  ///< After $ValidateNick and before $MyINFO timeout
+	HUB_TIME_OUT_PASS,    ///< Waiting pass
+	HUB_TIME_OUT_MAX      ///< Max timeout type
 
 } HubTimeOut;
 
@@ -54,13 +54,13 @@ typedef enum {
 /** Login steps (LoginStatus) */
 enum LoginStatus {
 
-	LOGIN_STATUS_KEY        = 1 << 0, //< Key was checked (once)
-	LOGIN_STATUS_ALOWED     = 1 << 1, //< It allow for entry
-	LOGIN_STATUS_VALNICK    = 1 << 2, //< Nick was checked (once)
-	LOGIN_STATUS_PASSWD     = 1 << 3, //< Password was right or password was not need
-	LOGIN_STATUS_VERSION    = 1 << 4, //< Version was checked
-	LOGIN_STATUS_MYINFO     = 1 << 5, //< MyINFO string was received
-	LOGIN_STATUS_NICKLST    = 1 << 6, //< GetNickList flag
+	LOGIN_STATUS_KEY        = 1 << 0, ///< Key was checked (once)
+	LOGIN_STATUS_ALOWED     = 1 << 1, ///< It allow for entry
+	LOGIN_STATUS_VALNICK    = 1 << 2, ///< Nick was checked (once)
+	LOGIN_STATUS_PASSWD     = 1 << 3, ///< Password was right or password was not need
+	LOGIN_STATUS_VERSION    = 1 << 4, ///< Version was checked
+	LOGIN_STATUS_MYINFO     = 1 << 5, ///< MyINFO string was received
+	LOGIN_STATUS_NICKLST    = 1 << 6, ///< GetNickList flag
 	LOGIN_STATUS_LOGIN_DONE = LOGIN_STATUS_KEY|LOGIN_STATUS_ALOWED|LOGIN_STATUS_VALNICK|LOGIN_STATUS_PASSWD|LOGIN_STATUS_VERSION|LOGIN_STATUS_MYINFO|LOGIN_STATUS_NICKLST
 
 }; // enum LoginStatus
@@ -70,14 +70,14 @@ enum LoginStatus {
 /** Supports features (SupportFeature) */
 enum SupportFeature {
 
-	SUPPORT_FEATUER_USERCOMMAND = 1     , //< UserCommand feature
-	SUPPORT_FEATUER_NOGETINFO   = 1 << 1, //< NoGetINFO feature
-	SUPPORT_FEATURE_NOHELLO     = 1 << 2, //< NoHello feature
-	SUPPORT_FEATUER_USERIP2     = 1 << 3, //< UserIP2 feature
-	SUPPORT_FEATUER_TTHSEARCH   = 1 << 4, //< TTHSearch feature
-	SUPPORT_FEATUER_QUICKLIST   = 1 << 5, //< Quicklist feature
-	SUPPORT_FEATUER_PASSIVE     = 1 << 6, //< Passive mode feature
-	SUPPORT_FEATUER_USERIP      = 1 << 7, //< UserIP feature
+	SUPPORT_FEATUER_USERCOMMAND = 1     , ///< UserCommand feature
+	SUPPORT_FEATUER_NOGETINFO   = 1 << 1, ///< NoGetINFO feature
+	SUPPORT_FEATURE_NOHELLO     = 1 << 2, ///< NoHello feature
+	SUPPORT_FEATUER_USERIP2     = 1 << 3, ///< UserIP2 feature
+	SUPPORT_FEATUER_TTHSEARCH   = 1 << 4, ///< TTHSearch feature
+	SUPPORT_FEATUER_QUICKLIST   = 1 << 5, ///< Quicklist feature
+	SUPPORT_FEATUER_PASSIVE     = 1 << 6, ///< Passive mode feature
+	SUPPORT_FEATUER_USERIP      = 1 << 7, ///< UserIP feature
 
 }; // enum SupportFeature
 
@@ -147,12 +147,12 @@ class DcConn : public Conn, public DcConnBase {
 
 public:
 
-	unsigned mFeatures;         //< Features (PROTOCOL NMDC)
+	unsigned mFeatures;         ///< Features (PROTOCOL NMDC)
 
-	bool mSendNickList;        //< Sending user list when login
-	bool mIpRecv;              //< Permit on reception of the messages, sending on my ip
-	bool mNickListInProgress;  //< True while sending first nicklist
-	DcUser * mDcUser;           //< User object
+	bool mSendNickList;        ///< Sending user list when login
+	bool mIpRecv;              ///< Permit on reception of the messages, sending on my ip
+	bool mNickListInProgress;  ///< True while sending first nicklist
+	DcUser * mDcUser;           ///< User object
 
 	struct Timers { /** Timers */
 
@@ -175,7 +175,7 @@ public:
 	virtual ~DcConn();
 
 
-	//< Sending RAW command to the client
+	/// Sending RAW command to the client
 	virtual int send(const string & data, bool addSep = false, bool flush = true);
 	virtual int send(const char * data, size_t len, bool addSep = false, bool flush = true);
 
@@ -187,7 +187,7 @@ public:
 
 
 
-	//< Timer for current connection
+	/// Timer for current connection
 	virtual int onTimer(Time & now);
 
 	virtual void closeNow(int iReason = 0);
@@ -211,28 +211,28 @@ public:
 
 
 
-	//< Setting entry status flag
+	/// Setting entry status flag
 	void setLoginStatusFlag(unsigned int s) {
 		mLoginStatus |= s;
 	}
 
-	//< Reset flag
+	/// Reset flag
 	void resetLoginStatusFlag(unsigned int s) {
 		mLoginStatus = s;
 	}
 
-	//< Get flag
+	/// Get flag
 	unsigned int getLoginStatusFlag(unsigned int s) {
 		return mLoginStatus & s;
 	}
 
-	//< Set timeout
+	/// Set timeout
 	void setTimeOut(HubTimeOut, double Sec, Time & now);
 
-	//< Clear timeout
+	/// Clear timeout
 	void clearTimeOut(HubTimeOut);
 
-	// Check timeout
+	/// Check timeout
 	int checkTimeOut(HubTimeOut t, Time & now);
 
 
@@ -240,22 +240,22 @@ protected:
 
 	TimeOut mTimeOut[HUB_TIME_OUT_MAX];
 
-	//< Time last ping from server to client
+	/// Time last ping from server to client
 	Time mPingServer;
 
 protected:
 
-	/** Flush sending buffer */
+	/// Flush sending buffer
 	virtual void onFlush();
 
 	virtual void onOk(bool);
 
 private:
 
-	//< Counter search results
+	/// Counter search results
 	unsigned int mSrCounter;
 
-	//< Login status
+	/// Login status
 	unsigned int mLoginStatus;
 
 

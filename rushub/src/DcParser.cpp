@@ -31,15 +31,15 @@ namespace protocol {
 using namespace ::dcserver::protoenums;
 
 
-//< Protocol command
+/// Protocol command
 class ProtocolCommand {
 
 public:
 
-	//< Key-word of cmd
+	/// Key-word of cmd
 	string mKey;
 
-	//< Cmd len
+	/// Cmd len
 	size_t mLength;
 
 public:
@@ -54,7 +54,7 @@ public:
 	virtual ~ProtocolCommand() {
 	}
 
-	//< Checking that string contains command
+	/// Checking that string contains command
 	bool check(const string & str) {
 		return 0 == str.compare(0, mLength, mKey);
 	}
@@ -63,7 +63,7 @@ public:
 
 
 
-//< Main NMDC commands keywords
+/// Main NMDC commands keywords
 ProtocolCommand aDC_Commands[] = {
 	ProtocolCommand("$MultiSearch "),      // check: ip, delay
 	ProtocolCommand("$MultiSearch Hub:"),  // check: nick, delay
@@ -109,7 +109,7 @@ DcParser::~DcParser() {
 
 
 
-//< Do parse for command and return type of this command
+/// Do parse for command and return type of this command
 int DcParser::parse() {
 	mLength = mCommand.size(); // Set cmd len
 	if (mLength) {
@@ -138,7 +138,7 @@ void DcParser::reInit() {
 
 
 
-//< Get string address for the chunk of command
+/// Get string address for the chunk of command
 string & DcParser::chunkString(unsigned int n) {
 	if (!n) {
 		return mCommand; // Empty line always full, and this pointer for empty line
@@ -191,7 +191,7 @@ bool DcParser::isPassive(const string & description) {
 	return true;
 }
 
-//< Split command to chunks
+/// Split command to chunks
 bool DcParser::splitChunks() {
 
 	if (mIsParsed) {

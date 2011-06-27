@@ -73,11 +73,11 @@ protected:
 /** Connections types */
 enum ConnType {
 
-	CONN_TYPE_LISTEN,    //< Listen TCP
-	CONN_TYPE_CLIENTTCP, //< Client TCP
-	CONN_TYPE_CLIENTUDP, //< Client UDP
-	CONN_TYPE_SERVERTCP, //< Server TCP
-	CONN_TYPE_SERVERUDP  //< Server UDP
+	CONN_TYPE_LISTEN,    ///< Listen TCP
+	CONN_TYPE_CLIENTTCP, ///< Client TCP
+	CONN_TYPE_CLIENTUDP, ///< Client UDP
+	CONN_TYPE_SERVERTCP, ///< Server TCP
+	CONN_TYPE_SERVERUDP  ///< Server UDP
 
 };
 
@@ -86,10 +86,10 @@ enum ConnType {
 /** Status of string */
 enum StringStatus {
 
-	STRING_STATUS_NO_STR,   //< No str
-	STRING_STATUS_PARTLY,   //< String is partly received
-	STRING_STATUS_STR_DONE, //< String is completely received
-	STRING_STATUS_ERROR     //< Error
+	STRING_STATUS_NO_STR,   ///< No str
+	STRING_STATUS_PARTLY,   ///< String is partly received
+	STRING_STATUS_STR_DONE, ///< String is completely received
+	STRING_STATUS_ERROR     ///< Error
 
 };
 
@@ -146,67 +146,67 @@ public:
 
 	// === getter / setter ===
 
-	//< Get connection type
+	/// Get connection type
 	ConnType getConnType() const;
 
-	//< Get status
+	/// Get status
 	int getStatus() const;
 
-	//< Is OK
+	/// Is OK
 	bool isOk() const;
 
-	//< Set OK
+	/// Set OK
 	void setOk(bool);
 
-	//< Is writable
+	/// Is writable
 	bool isWritable() const;
 
-	//< Is closed
+	/// Is closed
 	bool isClosed() const;
 
-	//< Get string of IP
+	/// Get string of IP
 	const string & getIp() const;
 
-	//< Get string of server IP (host)
+	/// Get string of server IP (host)
 	const string & getIpConn() const;
 
-	//< Get IP for UDP
+	/// Get IP for UDP
 	const string & getIpUdp() const;
 
-	//< Get real port
+	/// Get real port
 	int getPort() const;
 
-	//< Get connection port
+	/// Get connection port
 	int getPortConn() const;
 
-	//< Get mac-address
+	/// Get mac-address
 	const string & getMacAddress() const;
 
 
-	//< Create, bind and listen socket
+	/// Create, bind and listen socket
 	tSocket makeSocket(const char * port, const char * ip = NULL, bool udp = false);
 
-	//< Close connection (socket)
+	/// Close connection (socket)
 	void close();
 
-	//< Nice close conn (socket)
+	/// Nice close conn (socket)
 	void closeNice(int msec = 0, int reason = 0);
 
-	//< Now close conn
+	/// Now close conn
 	void closeNow(int reason = 0);
 
-	//< Creating the new object for enterring connection
+	/// Creating the new object for enterring connection
 	virtual Conn * createNewConn();
 
-	//< Reading all data from socket to buffer of the conn
+	/// Reading all data from socket to buffer of the conn
 	virtual int recv();
 
-	//< Check empty recv buf
+	/// Check empty recv buf
 	int recvBufIsEmpty() const {
 		return mRecvBufEnd == mRecvBufRead;
 	}
 
-	//< Check empty recv buf
+	/// Check empty recv buf
 	int sendBufIsEmpty() const {
 		return mSendBuf.length() == 0;
 	}
@@ -219,128 +219,128 @@ public:
 		return mCreatedByFactory;
 	}
 
-	//< Clear params
+	/// Remaining (for web-server)
+	virtual int remaining();
+
+	/// Clear params
 	void clearCommandPtr();
 
 	/** Installing the string, in which will be recorded received data, 
 	and installation main parameter */
 	void setCommandPtr(string *);
 
-	//< Reading data from buffer and record in line of the protocol
+	/// Reading data from buffer and record in line of the protocol
 	int readFromRecvBuf();
 
-	//< Get pointer for string
+	/// Get pointer for string
 	virtual string * getParserCommandPtr();
 
-	//< Get parser
+	/// Get parser
 	virtual Parser * createParser();
 
-	//< Remove parser
+	/// Remove parser
 	virtual void deleteParser(Parser *);
 
-	//< Get pointer for string with data
+	/// Get pointer for string with data
 	string * getCommandPtr();
 
-	//< Flush buffer
+	/// Flush buffer
 	void flush();
 
 
 	virtual bool strLog();
 
-	//< Main base timer
+	/// Main base timer
 	int onTimerBase(Time &now);
 
-	//< Main timer
+	/// Main timer
 	virtual int onTimer(Time &now);
 
 protected:
 
-	//< Socket type
+	/// Socket type
 	ConnType mConnType;
 
-	bool mOk; /** Points that given connection is registered (socket of connection is created and bound) */
-	bool mWritable; /** Points that data can be read and be written */
+	bool mOk; ///< Points that given connection is registered (socket of connection is created and bound)
+	bool mWritable; ///< Points that data can be read and be written
 	
-	string mIp; /** String ip */
-	string mIpConn; /** String ip (host) of server */
+	string mIp; ///< String ip
+	string mIpConn; ///< String ip (host) of server
 	string mIpUdp;
-	int mPort; /** port */
-	int mPortConn; /** listen-conn port */
+	int mPort; ///< port
+	int mPortConn; ///< listen-conn port
 
-	string mMac; /** mac address */
-	string mHost; /** DNS */
+	string mMac; ///< mac address
+	string mHost; ///< DNS
 
-	static char mRecvBuf[MAX_RECV_SIZE + 1]; /** Recv buffer */
-	string mSendBuf; /** Buffer for sending */
-	unsigned long mSendBufMax; /** Max size sending buf */
+	static char mRecvBuf[MAX_RECV_SIZE + 1]; ///< Recv buffer
+	string mSendBuf; ///< Buffer for sending
+	unsigned long mSendBufMax; ///< Max size sending buf
 
-	list<Conn *>::iterator mIterator; /** Optimisation */
+	list<Conn *>::iterator mIterator; ///< Optimisation
 
-	//< Time entering into the hub
+	/// Time entering into the hub
 	Time mConnect;
 
 protected:
 
-	//< Write data in sending buffer
+	/// Write data in sending buffer
 	int writeData(const char * data, size_t len, bool flush);
 
-	//< Remaining (for web-server)
-	virtual int remaining();
-
-	//< onFlush
+	/// onFlush
 	virtual void onFlush();
 
 	virtual void onOk(bool);
 
 private:
 
-	tSocket mSocket; /** Socket descriptor */
-	Time mCloseTime; /** Time before closing the conn */
-	int mRecvBufEnd; /** Final position of the buffer mRecvBuf */
-	int mRecvBufRead; /** Current position of the buffer mRecvBuf */
-	int mStatus; /** Status of the line */
+	tSocket mSocket; ///< Socket descriptor
+	Time mCloseTime; ///< Time before closing the conn
+	int mRecvBufEnd; ///< Final position of the buffer mRecvBuf
+	int mRecvBufRead; ///< Current position of the buffer mRecvBuf
+	int mStatus; ///< Status of the line
 
-	/** struct sockaddr_in */
+	/// struct sockaddr_in
 	struct sockaddr_in mSockAddrIn;
 	static socklen_t mSockAddrInSize;
 
-	// ipv6
+	/// ipv6
 	struct addrinfo * mAddrInfo;
 
-	bool mBlockInput; /** Blocking enterring channel for given conn */
-	bool mBlockOutput; /** Blocking coming channel for given conn */
+	bool mBlockInput; ///< Blocking enterring channel for given conn
+	bool mBlockOutput; ///< Blocking coming channel for given conn
 
-	string * mCommand; /** Pointer to line, in which will be written data from buffer */
+	string * mCommand; ///< Pointer to line, in which will be written data from buffer
 
-	bool mClosed; /** closed flag, for close counter */
-	int mCloseReason; /** Reason of close connection */
+	bool mClosed; ///< closed flag, for close counter
+	int mCloseReason; ///< Reason of close connection
 
-	//< Created by ConnFactory
+	/// Created by ConnFactory
 	bool mCreatedByFactory;
 
 private:
 
-	//< Create socket (default TCP)
+	/// Create socket (default TCP)
 	tSocket socketCreate(const char * port, const char * address, bool udp = false);
 
-	//< Bind
+	/// Bind
 	tSocket socketBind(tSocket);
 
-	//< Listen TCP
+	/// Listen TCP
 	tSocket socketListen(tSocket);
 
-	//< Set non-block socket
+	/// Set non-block socket
 	tSocket socketNonBlock(tSocket);
 
-	//< Accept new conn
+	/// Accept new conn
 	tSocket socketAccept(struct sockaddr_storage &);
 
 	int defineConnInfo(struct sockaddr_storage &);
 
-	//< Calculate mac-address
+	/// Calculate mac-address
 	void calcMacAddress();
 
-	//< Send len byte from buf
+	/// Send len byte from buf
 	int send(const char * buf, size_t & len);
 
 

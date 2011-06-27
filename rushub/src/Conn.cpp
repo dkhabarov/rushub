@@ -96,35 +96,35 @@ Conn::~Conn() {
 
 
 
-//< Get socket
+/// Get socket
 Conn::operator tSocket() const {
 	return mSocket;
 }
 
 
 
-//< Get connection type
+/// Get connection type
 ConnType Conn::getConnType() const {
 	return mConnType;
 }
 
 
 
-//< Get status
+/// Get status
 int Conn::getStatus() const {
 	return mStatus;
 }
 
 
 
-//< Is OK
+/// Is OK
 bool Conn::isOk() const {
 	return mOk;
 }
 
 
 
-//< Set OK
+/// Set OK
 void Conn::setOk(bool ok) {
 	mOk = ok;
 	onOk(ok);
@@ -132,56 +132,56 @@ void Conn::setOk(bool ok) {
 
 
 
-//< Is writable
+/// Is writable
 bool Conn::isWritable() const {
 	return mWritable;
 }
 
 
 
-//< Is closed
+/// Is closed
 bool Conn::isClosed() const {
 	return mClosed;
 }
 
 
 
-//< Get string of IP
+/// Get string of IP
 const string & Conn::getIp() const {
 	return mIp;
 }
 
 
 
-//< Get string of server IP (host)
+/// Get string of server IP (host)
 const string & Conn::getIpConn() const {
 	return mIpConn;
 }
 
 
 
-//< Get IP for UDP
+/// Get IP for UDP
 const string & Conn::getIpUdp() const {
 	return mIpUdp;
 }
 
 
 
-//< Get real port
+/// Get real port
 int Conn::getPort() const {
 	return mPort;
 }
 
 
 
-//< Get connection port
+/// Get connection port
 int Conn::getPortConn() const {
 	return mPortConn;
 }
 
 
 
-//< Get mac-address
+/// Get mac-address
 const string & Conn::getMacAddress() const {
 	return mMac;
 }
@@ -635,7 +635,7 @@ int Conn::recv() {
 
 
 
-//< Check IP
+/// Check IP
 bool Conn::checkIp(const string & ip) {
 	#ifndef _WIN32
 		char dst[256];
@@ -665,7 +665,7 @@ bool Conn::checkIp(const string & ip) {
 
 
 
-//< Calculate mac-address
+/// Calculate mac-address
 void Conn::calcMacAddress() {
 #ifdef _WIN32
 	DWORD size;
@@ -719,7 +719,7 @@ void Conn::calcMacAddress() {
 
 
 
-//< Clear params
+/// Clear params
 void Conn::clearCommandPtr() {
 	mCommand = NULL;
 	mStatus = STRING_STATUS_NO_STR;
@@ -727,7 +727,7 @@ void Conn::clearCommandPtr() {
 
 
 
-//< Get pointer for string with data
+/// Get pointer for string with data
 string * Conn::getCommandPtr() {
 	return mCommand;
 }
@@ -755,7 +755,7 @@ void Conn::setCommandPtr(string * pStr) {
 
 
 
-//< Reading data from buffer and record in line of the protocol
+/// Reading data from buffer and record in line of the protocol
 int Conn::readFromRecvBuf() {
 	if (!mCommand) {
 		if (ErrLog(0)) {
@@ -795,7 +795,7 @@ int Conn::readFromRecvBuf() {
 
 
 
-//< Get pointer for string
+/// Get pointer for string
 string * Conn::getParserCommandPtr() {
 	if (mParser == NULL) {
 		mParser = createParser();
@@ -830,7 +830,7 @@ void Conn::deleteParser(Parser * parser) {
 
 
 
-//< remaining (for web-server)
+/// Remaining (for web-server)
 int Conn::remaining() {
 
 	unsigned long maxCommandLength = (mProtocol != NULL ? mProtocol->getMaxCommandLength() : 10240);
@@ -848,7 +848,7 @@ int Conn::remaining() {
 
 
 
-//< Write data in sending buffer and send to conn
+/// Write data in sending buffer and send to conn
 int Conn::writeData(const char * data, size_t len, bool flush) {
 	size_t bufLen = mSendBuf.size();
 	if (bufLen + len >= mSendBufMax) {
@@ -952,13 +952,13 @@ int Conn::writeData(const char * data, size_t len, bool flush) {
 
 
 
-//< onFlush
+/// onFlush
 void Conn::onFlush() {
 }
 
 
 
-//< Flush
+/// Flush
 void Conn::flush() {
 	if (mSendBuf.size() != 0) {
 		writeData("", 0, true);
@@ -967,7 +967,7 @@ void Conn::flush() {
 
 
 
-//< Send len byte from buf
+/// Send len byte from buf
 int Conn::send(const char *buf, size_t &len) {
 #ifdef QUICK_SEND // Quick send
 	if (mConnType != CONN_TYPE_CLIENTUDP) {
@@ -1030,7 +1030,7 @@ int Conn::send(const char *buf, size_t &len) {
 
 
 
-//< Main base timer
+/// Main base timer
 int Conn::onTimerBase(Time &now) {
 	if (bool(mCloseTime) && mCloseTime > now) {
 		closeNow();
@@ -1043,7 +1043,7 @@ int Conn::onTimerBase(Time &now) {
 
 
 
-//< Main timer
+/// Main timer
 int Conn::onTimer(Time &) {
 	return 0;
 }

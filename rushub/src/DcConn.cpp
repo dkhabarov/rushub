@@ -85,7 +85,7 @@ int DcConn::send(const char * data, size_t len, bool addSep, bool flush) {
 
 
 
-//< onFlush sending buffer
+/// onFlush sending buffer
 void DcConn::onFlush() {
 	if (mNickListInProgress) {
 		setLoginStatusFlag(LOGIN_STATUS_NICKLST);
@@ -103,23 +103,23 @@ void DcConn::onFlush() {
 	}
 }
 
-//< Set timeout for this connection
+/// Set timeout for this connection
 void DcConn::setTimeOut(HubTimeOut to, double Sec, Time &now) {
 	mTimeOut[to].setMaxDelay(Sec);
 	mTimeOut[to].reset(now);
 }
 
-//< Clear timeout
+/// Clear timeout
 void DcConn::clearTimeOut(HubTimeOut to) {
 	mTimeOut[to].disable();
 }
 
-//< Check timeout
+/// Check timeout
 int DcConn::checkTimeOut(HubTimeOut to, Time &now) {
 	return 0 == mTimeOut[to].check(now);
 }
 
-//< Timer for the current connection
+/// Timer for the current connection
 int DcConn::onTimer(Time &now) {
 	DcServer * dcServer = server();
 
@@ -172,7 +172,7 @@ void DcConn::closeNow(int iReason) {
 	Conn::closeNow(iReason);
 }
 
-//< Set user object for current connection
+/// Set user object for current connection
 bool DcConn::setUser(DcUser * dcUser) {
 	mDcUser = dcUser;
 	mDcUserBase = dcUser;

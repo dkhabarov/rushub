@@ -66,7 +66,7 @@ public:
 
 	virtual const char * getCommand();
 
-	//< Disconnect this client
+	/// Disconnect this client
 	virtual void disconnect();
 
 	/** Get string of ip */

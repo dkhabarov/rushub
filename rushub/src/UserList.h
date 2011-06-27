@@ -234,7 +234,7 @@ private:
 
 	typedef HashTable<UserBase *> List_t;
 
-	string mName; //< Name of list
+	string mName; ///< Name of list
 	string mCache;
 
 	ufDoNickList mNickListMaker;
