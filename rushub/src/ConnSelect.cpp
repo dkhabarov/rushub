@@ -170,12 +170,8 @@ int ConnSelect::choose(Time & timeout) {
 
 
 void ConnSelect::clearRevents(void) {
-	ChooseRes * chooseRes = NULL;
 	for (tResList::iterator it = mResList.begin(); it != mResList.end(); ++it) {
-		chooseRes = (*it);
-		if (chooseRes != NULL) {
-			chooseRes->mRevents = 0;
-		}
+		(*it)->mRevents = 0;
 	}
 }
 
