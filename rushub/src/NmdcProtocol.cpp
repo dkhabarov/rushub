@@ -1059,21 +1059,21 @@ string & NmdcProtocol::appendForceMove(string & str, const string & address) {
 
 
 
-void NmdcProtocol::sendMode(DcConn * dcConn, const string & str, int iMode, UserList & UL, bool bUseCache) {
-	bool bAddSep = false;
+void NmdcProtocol::sendMode(DcConn * dcConn, const string & str, int mode, UserList & userList, bool useCache) {
+	bool addSep = false;
 	if (str.find(NMDC_SEPARATOR, str.size() - NMDC_SEPARATOR_LEN) == str.npos) {
-		bAddSep = true;
+		addSep = true;
 	}
 
-	if (iMode == 0) { /** Send to all */
-		UL.sendToAll(str, bUseCache, bAddSep);
-	} else if (iMode == 3) { /** Send to all except current user */
+	if (mode == 0) { // Send to all
+		userList.sendToAll(str, useCache, addSep);
+	} else if (mode == 3) { // Send to all except current user
 		if (dcConn->mDcUser->isCanSend()) {
 			dcConn->mDcUser->setCanSend(false);
-			UL.sendToAll(str, bUseCache, bAddSep);
+			userList.sendToAll(str, useCache, addSep);
 			dcConn->mDcUser->setCanSend(true);
 		}
-	} else if (iMode == 4) { /** Send to all except users with ip of the current user */
+	} else if (mode == 4) { // Send to all except users with ip of the current user
 		DcConn * conn = NULL;
 		vector<DcConn *> ul;
 		for (DcIpList::iterator mit = mDcServer->mIpListConn->begin(dcConn->getIp().c_str()); mit != mDcServer->mIpListConn->end(); ++mit) {
@@ -1083,7 +1083,7 @@ void NmdcProtocol::sendMode(DcConn * dcConn, const string & str, int iMode, User
 				ul.push_back(conn);
 			}
 		}
-		UL.sendToAll(str, bUseCache, bAddSep);
+		userList.sendToAll(str, useCache, addSep);
 		for (vector<DcConn *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
 			(*ul_it)->mDcUser->setCanSend(true);
 		}
