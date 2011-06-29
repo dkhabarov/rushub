@@ -34,13 +34,7 @@ using namespace ::utils; // HashTable, Time
 #ifdef _WIN32
 	#define USE_SELECT 1
 #else
-	//#define USE_SELECT 1
-/*	#if HAVE_SYS_POLL_H // for configure
-		#define USE_SELECT 0
-	#else
-		#define USE_SELECT 1
-	#endif
-*/
+	//#define USE_EPOLL 1
 #endif
 
 namespace server {
@@ -53,25 +47,18 @@ protected:
 
 public:
 
-		/** Hash-table for connections */
-		typedef HashTable<ConnBase *> tConnBaseList;
-/*
-		#ifdef USE_OLD_CONNLIST
-			typedef HashMap <ConnBase *, tSocket> tConnBaseList;
-		#else
-			typedef vector <ConnBase *> tConnBaseList;
-		#endif
-*/
+	/// Hash-table for connections
+	typedef HashTable<ConnBase *> tConnBaseList;
 
-	/** Hash-table */
+	/// Hash-table
 	tConnBaseList mConnBaseList;
 
-	/** Events flags */
+	/// Events flags
 	enum tEventFlag {
-		eEF_INPUT = 1 << 0, /** For read (1) */
-		eEF_OUTPUT= 1 << 1, /** For write (2) */
-		eEF_ERROR = 1 << 2, /** Socket contains errors (4) */
-		eEF_CLOSE = 1 << 3, /** Closed socket (8) */
+		eEF_INPUT = 1 << 0, ///< For read (1)
+		eEF_OUTPUT= 1 << 1, ///< For write (2)
+		eEF_ERROR = 1 << 2, ///< Socket contains errors (4)
+		eEF_CLOSE = 1 << 3, ///< Closed socket (8)
 		eEF_ALL   = eEF_INPUT | eEF_OUTPUT | eEF_ERROR,
 		eEF_ALL_AND_CLOSE = eEF_ALL | eEF_CLOSE
 	};
@@ -84,7 +71,7 @@ public:
 	virtual ~ConnChoose() {
 	}
 
-	/** virtual function for select limit detect */
+	/// virtual function for select limit detect
 	virtual size_t size() {
 		return 0;
 	}
@@ -113,16 +100,16 @@ public:
 	Contains the structure, which defines the type socket and pointer on structure, prestored in structure of the choice */
 	struct ChooseRes {
 
-		/** Socket descriptor */
+		/// Socket descriptor
 		tSocket mFd;
 
-		/** Events */
+		/// Events
 		int mEvents;
 
-		/** Revents */
+		/// Revents
 		int mRevents;
 
-		/** Connection */
+		/// Connection
 		ConnBase * mConnBase;
 
 		ChooseRes(tSocket fd = 0, int events = 0, int revents = 0) : 
@@ -139,9 +126,9 @@ public:
 	/** The Iterator, which returns the object of the result of the choice.
 	Return only objects, in which have entered the data! */
 	struct iterator {
-		ConnChoose * mChoose; /** Pointer on ConnChoose (for operator []) */
-		tSocket * mMax; /** Max descriptor */
-		ChooseRes mRes; /** ChooseRes */
+		ConnChoose * mChoose; ///< Pointer on ConnChoose (for operator [])
+		tSocket * mMax; ///< Max descriptor
+		ChooseRes mRes; ///< ChooseRes
 
 		iterator(ConnChoose * ch, tSocket * max) : mChoose(ch), mMax(max) {
 		}

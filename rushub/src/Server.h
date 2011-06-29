@@ -34,12 +34,12 @@
 #include "MeanFrequency.h"
 
 #if USE_SELECT
-	#include "ConnSelect.h" /** Check sockets by method select */
+	#include "ConnSelect.h" // Check sockets by method select
 #else
 	#ifdef USE_EPOLL
-		#include "ConnEpoll.h" /** Check sockets by method epoll */
+		#include "ConnEpoll.h" // Check sockets by method epoll
 	#else
-		#include "ConnPoll.h" /** Check sockets by method poll */
+		#include "ConnPoll.h" // Check sockets by method poll
 	#endif
 #endif
 
@@ -116,7 +116,11 @@ protected:
 		ConnSelect mConnChooser;
 		typedef ConnSelect::iterator ChooserIterator;
 	#else
-		ConnPoll mConnChooser;
+		#ifdef USE_EPOLL
+			ConnEpoll mConnChooser;
+		#else
+			ConnPoll mConnChooser;
+		#endif
 		typedef ConnChoose::iterator ChooserIterator;
 	#endif
 
