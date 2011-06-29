@@ -235,9 +235,6 @@ public:
 	virtual int parse();
 	
 	virtual void reInit();
-
-	/** Get string address for the chunk of command */
-	string & chunkString(unsigned int n);
 	
 	bool splitChunks();
 	static bool isPassive(const string & description);

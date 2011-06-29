@@ -84,6 +84,12 @@ using namespace ::std;
 	#define NMDC_SEPARATOR_LEN 1
 #endif
 
+/// ADC protocol separator
+#ifndef ADC_SEPARATOR
+	#define ADC_SEPARATOR "\n"
+	#define ADC_SEPARATOR_LEN 1
+#endif
+
 /// Web protocol separator
 #ifndef WEB_SEPARATOR
 	#define WEB_SEPARATOR "\r\n\r\n"

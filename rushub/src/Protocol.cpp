@@ -26,11 +26,16 @@
 
 namespace server {
 
+
 Protocol::Protocol() : Obj("Protocol") {
 }
 
+
+
 Protocol::~Protocol(){
 }
+
+
 
 
 
@@ -47,6 +52,8 @@ Parser::Parser(int max) :
 	mStrings = new std::string[mMaxChunks];
 }
 
+
+
 Parser::~Parser() {
 	mChunks.clear();
 	if (mStrings != NULL) {
@@ -57,7 +64,7 @@ Parser::~Parser() {
 
 
 
-/** reInit() */
+/// reInit()
 void Parser::reInit() {
 	mCommand.resize(0);
 	mCommand.reserve(512);
@@ -72,15 +79,54 @@ void Parser::reInit() {
 	}
 }
 
+
+
 size_t Parser::getCommandLen() {
 	return mLength;
 }
+
+
 
 void Parser::setChunk(int n, size_t start, size_t len) {
 	tChunk & chunk = mChunks[n];
 	chunk.first = start;
 	chunk.second = len;
 }
+
+
+
+/// Get string address for the chunk of command
+string & Parser::chunkString(unsigned int n) {
+	if (!n) {
+		return mCommand; // Empty line always full, and this pointer for empty line
+	}
+	if (n > mChunks.size()) { // This must not never happen, but if this happens, we are prepared
+		if (ErrLog(0)) {
+			LogStream() << "Error number of chunks" << endl;
+		}
+		return mStrings[0];
+	}
+
+	unsigned long flag = 1 << n;
+	if (!(mStrMap & flag)) {
+		mStrMap |= flag;
+		try {
+			tChunk &c = mChunks[n];
+			if (c.first < mCommand.length() && c.second < mCommand.length()) {
+				mStrings[n].assign(mCommand, c.first, c.second); // Record n part in n element of the array of the lines
+			} else if (ErrLog(1)) {
+				LogStream() << "Badly parsed message : " << mCommand << endl;
+			}
+		} catch(...) {
+			if (ErrLog(1)) {
+				LogStream() << "Ecxeption in chunk string" << endl;
+			}
+		}
+	}
+	return mStrings[n];
+}
+
+
 
 bool Parser::splitOnTwo(size_t start, const string & lim, int cn1, int cn2, size_t len, bool left) {
 	size_t i = 0;
@@ -103,6 +149,8 @@ bool Parser::splitOnTwo(size_t start, const string & lim, int cn1, int cn2, size
 	return true;
 }
 
+
+
 bool Parser::splitOnTwo(size_t start, const char lim, int cn1, int cn2, size_t len, bool left) {
 	size_t i = 0;
 	if (len == 0) {
@@ -124,10 +172,14 @@ bool Parser::splitOnTwo(size_t start, const char lim, int cn1, int cn2, size_t l
 	return true;
 }
 
+
+
 bool Parser::splitOnTwo(const string &lim, int ch, int cn1, int cn2, bool left) {
 	tChunk & chunk = mChunks[ch];
 	return splitOnTwo(chunk.first, lim, cn1, cn2, chunk.second, left);
 }
+
+
 
 bool Parser::splitOnTwo(const char lim, int ch, int cn1, int cn2, bool left) {
 	tChunk & chunk = mChunks[ch];
@@ -135,10 +187,13 @@ bool Parser::splitOnTwo(const char lim, int ch, int cn1, int cn2, bool left) {
 }
 
 
+
 bool Parser::chunkRedRight(int cn, size_t amount) {
 	mChunks[cn].second -= amount;
 	return true;
 }
+
+
 
 bool Parser::chunkRedLeft(int cn, size_t amount) {
 	tChunk & chunk = mChunks[cn];
@@ -149,6 +204,7 @@ bool Parser::chunkRedLeft(int cn, size_t amount) {
 	}
 	return false;
 }
+
 
 };
 

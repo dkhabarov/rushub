@@ -37,7 +37,7 @@ namespace dcserver {
 
 
 
-/** Time outs during entering on hub only (HubTimeOut) */
+/// Time outs during entering on hub only (HubTimeOut)
 typedef enum {
 
 	HUB_TIME_OUT_KEY = 0, ///< Waiting $Key after $Lock
@@ -51,7 +51,7 @@ typedef enum {
 
 
 
-/** Login steps (LoginStatus) */
+/// Login steps (LoginStatus)
 enum LoginStatus {
 
 	LOGIN_STATUS_KEY        = 1 << 0, ///< Key was checked (once)
@@ -67,7 +67,7 @@ enum LoginStatus {
 
 
 
-/** Supports features (SupportFeature) */
+/// Supports features (SupportFeature)
 enum SupportFeature {
 
 	SUPPORT_FEATUER_USERCOMMAND = 1     , ///< UserCommand feature
@@ -83,7 +83,7 @@ enum SupportFeature {
 
 
 
-/** Enumeration of reasons to closing connection (CloseReason) */
+/// Enumeration of reasons to closing connection (CloseReason)
 enum CloseReason {
 
 	CLOSE_REASON_CMD_REPEAT = CLOSE_REASON_MAX,
@@ -126,7 +126,7 @@ enum CloseReason {
 
 
 
-class DcServer; /** server() */
+class DcServer; // server()
 
 
 
@@ -154,7 +154,7 @@ public:
 	bool mNickListInProgress;  ///< True while sending first nicklist
 	DcUser * mDcUser;           ///< User object
 
-	struct Timers { /** Timers */
+	struct Timers { ///< Timers
 
 		Time mTime[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !
 		unsigned mCount[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !
@@ -194,11 +194,10 @@ public:
 
 
 
-	/** Pointer to the server */
+	/// Pointer to the server
 	DcServer * server();
 
-	/** Set user object for current connection */
-	// PROTOCOL NMDC ?
+	/// Set user object for current connection
 	bool setUser(DcUser * dcUser);
 
 	unsigned int getSrCounter() {

@@ -41,22 +41,20 @@ enum {
 };
 
 
-/**
-  * Main proto class
-  */
+/// Main proto class
 class Protocol : public Obj {
 
 public:
 
 	Protocol();
 	virtual ~Protocol();
-	virtual int doCommand(Parser *, Conn *) = 0; /** doCommand */
-	virtual Parser * createParser() = 0; /** createParser */
-	virtual void deleteParser(Parser *) = 0; /** deleteParser */
+	virtual int doCommand(Parser *, Conn *) = 0; ///< doCommand
+	virtual Parser * createParser() = 0; ///< createParser
+	virtual void deleteParser(Parser *) = 0; ///< deleteParser
 
-	virtual const char * getSeparator() = 0; /** protocol separator */
-	virtual size_t getSeparatorLen() = 0; /** protocol separator length */
-	virtual unsigned long getMaxCommandLength() = 0; /** protocol max command length */
+	virtual const char * getSeparator() = 0; ///< protocol separator
+	virtual size_t getSeparatorLen() = 0; ///< protocol separator length
+	virtual unsigned long getMaxCommandLength() = 0; ///< protocol max command length
 
 	virtual Conn * getConnForUdpData(Conn *, Parser *) = 0;
 
@@ -64,26 +62,28 @@ public:
 
 
 
-/** Parser class
-*/
+/// Parser class
 class Parser : public Obj {
 
 public:
 
-	string mCommand; /** Main string with cmd */
-	int mType; /** Type of cmd */
+	string mCommand; ///< Main string with cmd
+	int mType; ///< Type of cmd
 
-	typedef pair<size_t, size_t> tChunk; /** Pair for chunk (begin, end) */
-	vector<tChunk> mChunks; /** List */
+	typedef pair<size_t, size_t> tChunk; ///< Pair for chunk (begin, end)
+	vector<tChunk> mChunks; ///< List
 
 public:
 
 	Parser(int max);
 	virtual ~Parser();
 
-	virtual int parse() = 0; /** Parse */
+	virtual int parse() = 0; ///< Parse
 
-	virtual void reInit(); /** reInit */
+	virtual void reInit(); ///< reInit
+
+	/// Get string address for the chunk of command
+	string & chunkString(unsigned int n);
 
 	size_t getCommandLen();
 
@@ -111,7 +111,7 @@ protected:
 
 private:
 
-	int mMaxChunks; /** Common (max) number of chunks */
+	int mMaxChunks; ///< Common (max) number of chunks
 
 }; // Parser
 

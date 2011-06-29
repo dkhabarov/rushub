@@ -80,21 +80,21 @@ DcServer::DcServer(const string & configFile, const string &):
 {
 	SetClassName("DcServer");
 
-	/** Current server */
+	// Current server
 	currentDcServer = this;
 
-	/** Define OS */
+	// Define OS
 	if (mSysVersion.empty()) {
 		mSysVersion = getSysVersion();
 	}
 
-	/** DcIpList */
+	// DcIpList
 	mIpListConn = new DcIpList();
 
 	mDcProtocol.setServer(this);
 	mPluginList.setServer(this);
 
-	mPluginList.loadAll(); /** Load plugins */
+	mPluginList.loadAll(); // Load plugins
 
 
 	mDcUserList.setNickListStart("$NickList ");
@@ -104,7 +104,7 @@ DcServer::DcServer(const string & configFile, const string &):
 	mOpList.setNickListSeparator("$$");
 
 
-	if (mDcConfig.mRegMainBot) { /** Main bot registration */
+	if (mDcConfig.mRegMainBot) { // Main bot registration
 		if (Log(3)) {
 			LogStream() << "Reg main bot '" << mDcConfig.mHubBot << "'" << endl;
 		}
@@ -130,7 +130,7 @@ DcServer::~DcServer() {
 	}
 
 	DcUser * Us = NULL;
-	UserList::iterator it, it_e = mDcUserList.end();	
+	UserList::iterator it, it_e = mDcUserList.end();
 	for (it = mDcUserList.begin(); it != it_e;) {
 		Us = static_cast<DcUser *> (*it);
 		++it;
@@ -696,8 +696,8 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 			}
 		#endif
 
-		/** We make sure that user with such nick one! */
-		DcUser * other = static_cast<DcUser *> (mDcUserList.find(dcUser->getUidHash())); // NMDC
+		// We make sure that user with such nick one!
+		DcUser * other = static_cast<DcUser *> (mDcUserList.find(dcUser->getUidHash()));
 		if (!dcUser->mDcConn) { /** Removing the bot */
 			mDcUserList.remove(uidHash);
 		} else if (other && other->mDcConn && dcUser->mDcConn && other->mDcConn == dcUser->mDcConn) {
@@ -706,7 +706,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 				mDcUserList.LogStream() << "After leave: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
 			}
 		} else {
-			/** Such can happen only for users without connection or with different connection */
+			// Such can happen only for users without connection or with different connection
 			if (dcUser->ErrLog(1)) {
 				dcUser->LogStream() << "Not found the correct user for nick: " << dcUser->getUid() << endl;
 			}
@@ -714,7 +714,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 		}
 	}
 
-	/** Removing from lists */
+	// Removing from lists
 	mOpList.remove(uidHash);
 	mIpList.remove(uidHash);
 	mHelloList.remove(uidHash);
@@ -730,7 +730,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 			string msg;
 			NmdcProtocol::appendQuit(msg, dcUser->getUid());
 
-			/** Delay in sending MyINFO (and Quit) */
+			// Delay in sending MyINFO (and Quit)
 			mDcUserList.sendToAll(msg, true/*mDcConfig.mDelayedMyinfo*/, false);
 		}
 	}
@@ -739,7 +739,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 
 
 
-/** Show user to all */
+/// Show user to all
 bool DcServer::showUserToAll(DcUser * dcUser) {
 	string hello;
 	if (dcUser->getHide() && dcUser->mDcConn) {
@@ -758,16 +758,16 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 		}
 	} else {
 
-		/** Sending the greeting for all users, not supporting feature NoHello (except enterring users) */
+		// Sending the greeting for all users, not supporting feature NoHello (except enterring users)
 		mHelloList.sendToAll(NmdcProtocol::appendHello(hello, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false);
 
-		/** Show MyINFO string to all users */
+		// Show MyINFO string to all users
 		mDcUserList.sendToAll(dcUser->getMyInfo(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
 
-		/** Show MyINFO string of the current user to all enterring users */
+		// Show MyINFO string of the current user to all enterring users
 		mEnterList.sendToAll(dcUser->getMyInfo(), true/*mDcConfig.mDelayedMyinfo*/);
 
-		/** Op entry */
+		// Op entry
 		if (dcUser->getInOpList()) {
 			string opList;
 			mDcUserList.sendToAll(NmdcProtocol::appendOpList(opList, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false);
@@ -816,7 +816,7 @@ void DcServer::afterUserEnter(DcConn *dcConn) {
 
 
 
-/** Get user by nick (or NULL) */
+/// Get user by nick (or NULL)
 DcUser * DcServer::getDcUser(const char * nick) {
 	if (nick == NULL) {
 		return NULL;
@@ -1183,6 +1183,7 @@ bool DcServer::setConfig(const string & name, const string & value) {
 				mDcConfig.mMainBotIp, mDcConfig.mMainBotKey);
 		}
 	} else if (name == "sHubName" || name == "sTopic") {
+		// NMDC
 		string msg;
 		sendToAll(NmdcProtocol::appendHubName(msg, mDcConfig.mHubName, mDcConfig.mTopic).c_str()); // use cache ?
 	}

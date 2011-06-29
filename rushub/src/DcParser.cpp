@@ -138,37 +138,6 @@ void DcParser::reInit() {
 
 
 
-/// Get string address for the chunk of command
-string & DcParser::chunkString(unsigned int n) {
-	if (!n) {
-		return mCommand; // Empty line always full, and this pointer for empty line
-	}
-	if (n > mChunks.size()) { // This must not never happen, but if this happens, we are prepared
-		if (ErrLog(0)) {
-			LogStream() << "Error number of chunks" << endl;
-		}
-		return mStrings[0];
-	}
-
-	unsigned long flag = 1 << n;
-	if (!(mStrMap & flag)) {
-		mStrMap |= flag;
-		try {
-			tChunk &c = mChunks[n];
-			if (c.first < mCommand.length() && c.second < mCommand.length()) {
-				mStrings[n].assign(mCommand, c.first, c.second); // Record n part in n element of the array of the lines
-			} else if (ErrLog(1)) {
-				LogStream() << "Badly parsed message : " << mCommand << endl;
-			}
-		} catch(...) {
-			if (ErrLog(1)) {
-				LogStream() << "Ecxeption in chunk string" << endl;
-			}
-		}
-	}
-	return mStrings[n];
-}
-
 bool DcParser::isPassive(const string & description) {
 	if (!description.size()) {
 		return false;

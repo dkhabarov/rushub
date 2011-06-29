@@ -536,8 +536,8 @@ int NmdcProtocol::eventTo(DcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	/** Search user */
-	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(nick)); // NMDC
+	// Search user (PROTOCOL NMDC)
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(nick));
 	if (!dcUser) {
 		return -2;
 	}
@@ -571,8 +571,8 @@ int NmdcProtocol::eventMcTo(DcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	/** Search user */
-	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(nick)); // NMDC
+	// Search user (PROTOCOL NMDC)
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(nick));
 	if (!dcUser) {
 		return -2;
 	}
@@ -605,7 +605,7 @@ int NmdcProtocol::eventUserIp(DcParser * dcParser, DcConn * dcConn) {
 	while (pos != param.npos) {
 		nick.assign(param, cur, pos - cur);
 		if (nick.size()) {
-			// NMDC
+			// PROTOCOL NMDC
 			UserBase * userBase = mDcServer->mDcUserList.getUserBaseByNick(nick);
 			if (userBase != NULL) {
 				result.append(nick).append(" ").append(userBase->ip()).append("$$");
@@ -618,7 +618,7 @@ int NmdcProtocol::eventUserIp(DcParser * dcParser, DcConn * dcConn) {
 	// last param
 	nick.assign(param, cur, param.size() - cur);
 	if (nick.size()) {
-		// NMDC
+		// PROTOCOL NMDC
 		UserBase * userBase = mDcServer->mDcUserList.getUserBaseByNick(nick);
 		if (userBase != NULL) {
 			result.append(nick).append(" ").append(userBase->ip());
@@ -713,7 +713,7 @@ int NmdcProtocol::eventSr(DcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	/** Check same nick in cmd (PROTOCOL NMDC) */
+	// Check same nick in cmd (PROTOCOL NMDC)
 	if (mDcServer->mDcConfig.mCheckSrNick && (dcConn->mDcUser->getUid() != dcparser->chunkString(CHUNK_SR_FROM))) {
 		if (dcConn->Log(2)) {
 			dcConn->LogStream() << "Bad nick in search response, closing" << endl;
@@ -772,7 +772,7 @@ int NmdcProtocol::eventConnectToMe(DcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	// NMDC
+	// PROTOCOL NMDC
 	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcparser->chunkString(CHUNK_CM_NICK)));
 	if (!dcUser) {
 		return -1;
@@ -796,7 +796,7 @@ int NmdcProtocol::eventRevConnectToMe(DcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	/** Checking the nick (PROTOCOL NMDC) */
+	// Checking the nick (PROTOCOL NMDC)
 	if (mDcServer->mDcConfig.mCheckRctmNick && (dcparser->chunkString(CHUNK_RC_NICK) != dcConn->mDcUser->getUid())) {
 		string msg;
 		stringReplace(mDcServer->mDcLang.mBadRevConNick, "nick", msg, dcparser->chunkString(CHUNK_RC_NICK));
@@ -806,8 +806,8 @@ int NmdcProtocol::eventRevConnectToMe(DcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	/** Searching the user */
-	DcUser * other = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcparser->chunkString(CHUNK_RC_OTHER))); // NMDC
+	// Searching the user (PROTOCOL NMDC)
+	DcUser * other = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcparser->chunkString(CHUNK_RC_OTHER)));
 	if (!other) {
 		return -2;
 	}
@@ -851,10 +851,10 @@ int NmdcProtocol::eventKick(DcParser * dcparser, DcConn * dcConn) {
 		return -2;
 	}
 
-	// NMDC
+	// PROTOCOL NMDC
 	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcparser->chunkString(CHUNK_1_PARAM)));
 
-	/** Is user exist? */
+	// Is user exist?
 	if (!dcUser || !dcUser->mDcConn) {
 		return -3;
 	}
@@ -881,10 +881,10 @@ int NmdcProtocol::eventOpForceMove(DcParser * dcparser, DcConn * dcConn) {
 		return -2;
 	}
 
-	// NMDC
+	// PROTOCOL NMDC
 	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcparser->chunkString(CHUNK_FM_NICK)));
 
-	/** Is user exist? */
+	// Is user exist?
 	if (!dcUser || !dcUser->mDcConn || !dcparser->chunkString(CHUNK_FM_DEST).size()) {
 		return -3;
 	}
@@ -901,7 +901,7 @@ int NmdcProtocol::eventGetInfo(DcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	// NMDC
+	// PROTOCOL NMDC
 	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcparser->chunkString(CHUNK_GI_OTHER)));
 	if (!dcUser) {
 		return -2;
