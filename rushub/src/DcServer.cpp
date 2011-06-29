@@ -91,7 +91,7 @@ DcServer::DcServer(const string & configFile, const string &):
 	// DcIpList
 	mIpListConn = new DcIpList();
 
-	mDcProtocol.setServer(this);
+	mNmdcProtocol.setServer(this);
 	mPluginList.setServer(this);
 
 	mPluginList.loadAll(); // Load plugins
@@ -231,7 +231,7 @@ bool DcServer::listeningServer(const char * name, const char * addresses, const 
 int DcServer::listening() {
 
 	if (!mDcConnFactory) {
-		mDcConnFactory = new DcConnFactory(&mDcProtocol, this);
+		mDcConnFactory = new DcConnFactory(&mNmdcProtocol, this); // NMDC PROTOCOL
 	}
 
 	if (!mWebProtocol) {
@@ -357,7 +357,7 @@ int DcServer::onNewConn(Conn *conn) {
 		dcConn->LogStream() << "[S]Stage onNewConn" << endl;
 	}
 
-	mDcProtocol.onNewDcConn(dcConn);
+	mNmdcProtocol.onNewDcConn(dcConn); // NMDC
 
 	if (dcConn->Log(5)) {
 		dcConn->LogStream() << "[E]Stage onNewConn" << endl;
@@ -481,7 +481,7 @@ bool DcServer::checkNick(DcConn *dcConn) {
 			string msg;
 			stringReplace(mDcLang.mUsedNick, "nick", msg, dcConn->mDcUser->getUid());
 			sendToUser(dcConn->mDcUser, msg.c_str(), mDcConfig.mHubBot.c_str());
-			dcConn->send(NmdcProtocol::appendValidateDenide(msg.erase(), dcConn->mDcUser->getUid()));
+			dcConn->send(NmdcProtocol::appendValidateDenide(msg.erase(), dcConn->mDcUser->getUid())); // NMDC
 			return false;
 		}
 		if (us->mDcConn->Log(3)) {
@@ -522,7 +522,7 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 			}
 
 			// Can happen so that list not to send at a time
-			mDcProtocol.sendNickList(dcConn);
+			mNmdcProtocol.sendNickList(dcConn); // NMDC
 
 			dcConn->mSendNickList = false;
 			return true;
@@ -697,7 +697,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 
 		if (!dcUser->getHide()) {
 			string msg;
-			NmdcProtocol::appendQuit(msg, dcUser->getUid());
+			NmdcProtocol::appendQuit(msg, dcUser->getUid()); // NMDC
 
 			// Delay in sending MyINFO (and Quit)
 			mDcUserList.sendToAll(msg, true/*mDcConfig.mDelayedMyinfo*/, false);
@@ -715,20 +715,20 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 		if (dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
 			dcUser->mDcConn->send(dcUser->getMyInfo(), true, false);
 		} else if (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
-			dcUser->mDcConn->send(NmdcProtocol::appendHello(hello, dcUser->getUid()), false, false);
+			dcUser->mDcConn->send(NmdcProtocol::appendHello(hello, dcUser->getUid()), false, false); // NMDC
 			dcUser->mDcConn->send(dcUser->getMyInfo(), true, false);
 		} else {
-			dcUser->mDcConn->send(NmdcProtocol::appendHello(hello, dcUser->getUid()), false, false);
+			dcUser->mDcConn->send(NmdcProtocol::appendHello(hello, dcUser->getUid()), false, false); // NMDC
 		}
 
 		if (dcUser->getInOpList()) {
 			string opList;
-			dcUser->mDcConn->send(NmdcProtocol::appendOpList(opList, dcUser->getUid()), false, false);
+			dcUser->mDcConn->send(NmdcProtocol::appendOpList(opList, dcUser->getUid()), false, false); // NMDC
 		}
 	} else {
 
 		// Sending the greeting for all users, not supporting feature NoHello (except enterring users)
-		mHelloList.sendToAll(NmdcProtocol::appendHello(hello, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false);
+		mHelloList.sendToAll(NmdcProtocol::appendHello(hello, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false); // NMDC
 
 		// Show MyINFO string to all users
 		mDcUserList.sendToAll(dcUser->getMyInfo(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
@@ -739,7 +739,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 		// Op entry
 		if (dcUser->getInOpList()) {
 			string opList;
-			mDcUserList.sendToAll(NmdcProtocol::appendOpList(opList, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false);
+			mDcUserList.sendToAll(NmdcProtocol::appendOpList(opList, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false); // NMDC
 			mEnterList.sendToAll(opList, true/*mDcConfig.mDelayedMyinfo*/, false);
 		}
 	}
@@ -756,7 +756,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 
 	if (mDcConfig.mSendUserIp) {
 		string ipList;
-		NmdcProtocol::appendUserIp(ipList, dcUser->getUid(), dcUser->getIp());
+		NmdcProtocol::appendUserIp(ipList, dcUser->getUid(), dcUser->getIp()); // NMDC
 		if (ipList.length()) {
 			mIpList.sendToAll(ipList, true, false);
 		}
@@ -846,14 +846,14 @@ bool DcServer::sendToUser(DcUserBase * dcUserBase, const char * data, const char
 		if (dcConn->mDcUser && !dcConn->mDcUser->getUid().empty()) {
 			to = dcConn->mDcUser->getUid();
 		}
-		dcConn->send(NmdcProtocol::appendPm(str, to, from, nick, data));
+		dcConn->send(NmdcProtocol::appendPm(str, to, from, nick, data)); // NMDC
 		return true;
 	}
 
 	// Chat
 	if (nick) {
 		string str;
-		dcConn->send(NmdcProtocol::appendChat(str, nick, data));
+		dcConn->send(NmdcProtocol::appendChat(str, nick, data)); // NMDC
 		return true;
 	}
 
@@ -891,7 +891,7 @@ bool DcServer::sendToAll(const char * data, const char * nick, const char * from
 	// PM
 	if (from && nick) {
 		string start, end;
-		NmdcProtocol::appendPmToAll(start, end, from, nick, data);
+		NmdcProtocol::appendPmToAll(start, end, from, nick, data); // NMDC
 		mDcUserList.sendWithNick(start, end);
 		return true;
 	}
@@ -899,7 +899,7 @@ bool DcServer::sendToAll(const char * data, const char * nick, const char * from
 	// Chat
 	if (nick) {
 		string str;
-		mDcUserList.sendToAll(NmdcProtocol::appendChat(str, nick, data), false, false);
+		mDcUserList.sendToAll(NmdcProtocol::appendChat(str, nick, data), false, false); // NMDC
 		return true;
 	}
 
@@ -923,7 +923,7 @@ bool DcServer::sendToProfiles(unsigned long profile, const char * data, const ch
 	// PM
 	if (from && nick) {
 		string start, end;
-		NmdcProtocol::appendPmToAll(start, end, from, nick, data);
+		NmdcProtocol::appendPmToAll(start, end, from, nick, data); // NMDC
 		mDcUserList.sendWithNick(start, end, profile);
 		return true;
 	}
@@ -931,7 +931,7 @@ bool DcServer::sendToProfiles(unsigned long profile, const char * data, const ch
 	// Chat
 	if (nick) {
 		string str;
-		mDcUserList.sendToProfiles(profile, NmdcProtocol::appendChat(str, nick, data), false);
+		mDcUserList.sendToProfiles(profile, NmdcProtocol::appendChat(str, nick, data), false); // NMDC
 		return true;
 	}
 
@@ -954,7 +954,7 @@ bool DcServer::sendToIp(const char * ip, const char * data, unsigned long profil
 	// PM
 	if (from && nick) {
 		string start, end;
-		NmdcProtocol::appendPmToAll(start, end, from, nick, data);
+		NmdcProtocol::appendPmToAll(start, end, from, nick, data); // NMDC
 		mIpListConn->sendToIpWithNick(ip, start, end, profile);
 		return true;
 	}
@@ -962,7 +962,7 @@ bool DcServer::sendToIp(const char * ip, const char * data, unsigned long profil
 	// Chat
 	if (nick) {
 		string str;
-		mIpListConn->sendToIp(ip, NmdcProtocol::appendChat(str, nick, data), profile); // newPolitic
+		mIpListConn->sendToIp(ip, NmdcProtocol::appendChat(str, nick, data), profile); // NMDC
 		return true;
 	}
 
@@ -996,11 +996,11 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & nickList, const char 
 
 	if (from && nick) { // PM
 		string start, end;
-		NmdcProtocol::appendPmToAll(start, end, from, nick, data);
+		NmdcProtocol::appendPmToAll(start, end, from, nick, data); // NMDC
 		mDcUserList.sendWithNick(start, end);
 	} else if (nick) { // Chat
 		string str;
-		mDcUserList.sendToAll(NmdcProtocol::appendChat(str, nick, data), false, false);
+		mDcUserList.sendToAll(NmdcProtocol::appendChat(str, nick, data), false, false); // NMDC
 	} else { // Simple Msg
 		string msg(data);
 		if (msg.find(NMDC_SEPARATOR, msg.size() - NMDC_SEPARATOR_LEN) == msg.npos) {
@@ -1042,11 +1042,11 @@ bool DcServer::sendToAllExceptIps(const vector<string> & ipList, const char * da
 	if (!badIp) {
 		if (from && nick) { // PM
 			string start, end;
-			NmdcProtocol::appendPmToAll(start, end, from, nick, data);
+			NmdcProtocol::appendPmToAll(start, end, from, nick, data); // NMDC
 			mDcUserList.sendWithNick(start, end);
 		} else if (nick) { // Chat
 			string str;
-			mDcUserList.sendToAll(NmdcProtocol::appendChat(str, nick, data), false, false);
+			mDcUserList.sendToAll(NmdcProtocol::appendChat(str, nick, data), false, false); // NMDC
 		} else { // Simple Msg
 			string msg(data);
 			if (msg.find(NMDC_SEPARATOR, msg.size() - NMDC_SEPARATOR_LEN) == msg.npos) {
@@ -1078,9 +1078,9 @@ void DcServer::forceMove(DcUserBase * dcUserBase, const char * address, const ch
 
 	stringReplace(mDcLang.mForceMove, "address", force, address);
 	stringReplace(force, "reason", force, reason != NULL ? reason : "");
-	NmdcProtocol::appendPm(msg, nick, mDcConfig.mHubBot, mDcConfig.mHubBot, force);
-	NmdcProtocol::appendChat(msg, mDcConfig.mHubBot, force);
-	dcConn->send(NmdcProtocol::appendForceMove(msg, address));
+	NmdcProtocol::appendPm(msg, nick, mDcConfig.mHubBot, mDcConfig.mHubBot, force); // NMDC
+	NmdcProtocol::appendChat(msg, mDcConfig.mHubBot, force); // NMDC
+	dcConn->send(NmdcProtocol::appendForceMove(msg, address)); // NMDC
 	dcConn->closeNice(9000, CLOSE_REASON_CMD_FORCE_MOVE);
 }
 

@@ -48,13 +48,14 @@ public:
 
 	Protocol();
 	virtual ~Protocol();
-	virtual int doCommand(Parser *, Conn *) = 0; ///< doCommand
-	virtual Parser * createParser() = 0; ///< createParser
-	virtual void deleteParser(Parser *) = 0; ///< deleteParser
 
 	virtual const char * getSeparator() = 0; ///< protocol separator
 	virtual size_t getSeparatorLen() = 0; ///< protocol separator length
 	virtual unsigned long getMaxCommandLength() = 0; ///< protocol max command length
+
+	virtual int doCommand(Parser *, Conn *) = 0; ///< doCommand
+	virtual Parser * createParser() = 0; ///< createParser
+	virtual void deleteParser(Parser *) = 0; ///< deleteParser
 
 	virtual Conn * getConnForUdpData(Conn *, Parser *) = 0;
 

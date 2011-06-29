@@ -70,6 +70,24 @@ NmdcProtocol::~NmdcProtocol() {
 
 
 
+const char * NmdcProtocol::getSeparator() {
+	return NMDC_SEPARATOR;
+}
+
+
+
+size_t NmdcProtocol::getSeparatorLen() {
+	return NMDC_SEPARATOR_LEN;
+}
+
+
+
+unsigned long NmdcProtocol::getMaxCommandLength() {
+	return mDcServer->mDcConfig.mMaxNmdcCommandLength;
+}
+
+
+
 int NmdcProtocol::onNewDcConn(DcConn * dcConn) {
 
 	string msg;
@@ -1391,17 +1409,7 @@ void NmdcProtocol::delFromHide(DcUser * dcUser) {
 	}
 }
 
-const char * NmdcProtocol::getSeparator() {
-	return NMDC_SEPARATOR;
-}
 
-size_t NmdcProtocol::getSeparatorLen() {
-	return NMDC_SEPARATOR_LEN;
-}
-
-unsigned long NmdcProtocol::getMaxCommandLength() {
-	return mDcServer->mDcConfig.mMaxNmdcCommandLength;
-}
 
 bool NmdcProtocol::badFlag(DcConn * dcConn, const char * cmd, unsigned int flag) {
 	if (dcConn->getLoginStatusFlag(flag)) {

@@ -194,12 +194,12 @@ void DcUser::setIp(const string & ip) {
 void DcUser::setInOpList(bool inOpList) {
 	if (inOpList) {
 		if (!mInOpList) {
-			mDcServer->mDcProtocol.addToOps(this);
+			mDcServer->mNmdcProtocol.addToOps(this); // NMDC
 			mInOpList = true;
 		}
 	} else {
 		if (mInOpList) {
-			mDcServer->mDcProtocol.delFromOps(this);
+			mDcServer->mNmdcProtocol.delFromOps(this); // NMDC
 			mInOpList = false;
 		}
 	}
@@ -210,12 +210,12 @@ void DcUser::setInOpList(bool inOpList) {
 void DcUser::setInIpList(bool inIpList) {
 	if (inIpList) {
 		if (!mInIpList) {
-			mDcServer->mDcProtocol.addToIpList(this);
+			mDcServer->mNmdcProtocol.addToIpList(this); // NMDC
 			mInIpList = true;
 		}
 	} else {
 		if (mInIpList) {
-			mDcServer->mDcProtocol.delFromIpList(this);
+			mDcServer->mNmdcProtocol.delFromIpList(this); // NMDC
 			mInIpList = false;
 		}
 	}
@@ -226,12 +226,12 @@ void DcUser::setInIpList(bool inIpList) {
 void DcUser::setHide(bool hide) {
 	if (hide) {
 		if (!mHide) {
-			mDcServer->mDcProtocol.addToHide(this);
+			mDcServer->mNmdcProtocol.addToHide(this); // NMDC
 			mHide = true;
 		}
 	} else {
 		if (mHide) {
-			mDcServer->mDcProtocol.delFromHide(this);
+			mDcServer->mNmdcProtocol.delFromHide(this); // NMDC
 			mHide = false;
 		}
 	}

@@ -51,30 +51,30 @@ public:
 	NmdcProtocol();
 	virtual ~NmdcProtocol();
 	
-	inline void setServer(DcServer * dcServer) {
-		mDcServer = dcServer;
-	}
-	virtual int doCommand(Parser *, Conn *); /** Do command */
-	
-	virtual Conn * getConnForUdpData(Conn *, Parser *);
-
-	/** Creating protocol parser */
-	virtual Parser * createParser() {
-		return new DcParser;
-	}
-
 	virtual const char * getSeparator();
 	virtual size_t getSeparatorLen();
 	virtual unsigned long getMaxCommandLength();
+
+	/// Creating protocol parser
+	virtual Parser * createParser() {
+		return new DcParser;
+	}
 	
-	/** Removing protocol parser */
+	/// Removing protocol parser
 	virtual void deleteParser(Parser * parser) {
 		if (parser != NULL) {
 			delete parser;
 		}
 	}
 
+	virtual int doCommand(Parser *, Conn *); ///< Do command
+	virtual Conn * getConnForUdpData(Conn *, Parser *);
+
 	int onNewDcConn(DcConn *);
+
+	void setServer(DcServer * dcServer) {
+		mDcServer = dcServer;
+	}
 
 	static string & appendLock(string & str);
 	static string & appendHello(string & str, const string & nick);
@@ -91,9 +91,8 @@ public:
 	static string & appendForceMove(string & str, const string & address);
 	static void appendPmToAll(string & start, string & end, const string & from, const string & nick, const string & msg);
 
-	void sendMode(DcConn *, const string & str, int mode, UserList &, bool useCache = false);
-	int sendNickList(DcConn *); /** Sending user-list and op-list */
-	static void getNormalShare(__int64, string &); /** Get normal share size */
+	int sendNickList(DcConn *); ///< Sending user-list and op-list
+	static void getNormalShare(__int64, string &); ///< Get normal share size
 
 	void addToOps(DcUser *);
 	void delFromOps(DcUser *);
@@ -112,33 +111,34 @@ protected:
 
 private:
 
-	int eventSearch(DcParser *, DcConn *); /** Search request */
-	int eventSr(DcParser *, DcConn *); /** Answer to search request */
-	int eventMyInfo(DcParser *, DcConn *); /** MyINFO event */
-	int eventSupports(DcParser *, DcConn *); /** Support of the additional expansions */
-	int eventKey(DcParser *, DcConn *); /** Checking the key */
-	int eventValidateNick(DcParser *, DcConn *); /** Checking and reg nick */
-	int eventVersion(DcParser *, DcConn *); /** Checking a version */
-	int eventGetNickList(DcParser *, DcConn *); /** Sending user-list */
-	int eventChat(DcParser *, DcConn *); /** Chat message */
-	int eventTo(DcParser *, DcConn *); /** Private message */
-	int eventMyPass(DcParser *, DcConn *); /** Checking password */
-	int eventConnectToMe(DcParser *, DcConn *); /** Active connection */
-	int eventRevConnectToMe(DcParser *, DcConn *); /** Passive connection */
-	int eventMultiConnectToMe(DcParser *, DcConn *); /** Multi connection (for linked hubs) */
-	int eventKick(DcParser *, DcConn *); /** Kick */
-	int eventOpForceMove(DcParser *, DcConn *); /** Force move */
-	int eventGetInfo(DcParser *, DcConn *); /** Get user's MyINFO */
-	int eventMcTo(DcParser *, DcConn *); /** Private message in chat */
-	int eventUserIp(DcParser *, DcConn *); /** UserIP cmd */
-	int eventPing(DcParser *, DcConn *); /** Ping cmd */
-	int eventUnknown(DcParser *, DcConn *); /** Unknown cmd */
-	int eventQuit(DcParser *, DcConn *); /** Quit cmd */
+	int eventSearch(DcParser *, DcConn *); ///< Search request
+	int eventSr(DcParser *, DcConn *); ///< Answer to search request
+	int eventMyInfo(DcParser *, DcConn *); ///< MyINFO event
+	int eventSupports(DcParser *, DcConn *); ///< Support of the additional expansions
+	int eventKey(DcParser *, DcConn *); ///< Checking the key
+	int eventValidateNick(DcParser *, DcConn *); ///< Checking and reg nick
+	int eventVersion(DcParser *, DcConn *); ///< Checking a version
+	int eventGetNickList(DcParser *, DcConn *); ///< Sending user-list
+	int eventChat(DcParser *, DcConn *); ///< Chat message
+	int eventTo(DcParser *, DcConn *); ///< Private message
+	int eventMyPass(DcParser *, DcConn *); ///< Checking password
+	int eventConnectToMe(DcParser *, DcConn *); ///< Active connection
+	int eventRevConnectToMe(DcParser *, DcConn *); ///< Passive connection
+	int eventMultiConnectToMe(DcParser *, DcConn *); ///< Multi connection (for linked hubs)
+	int eventKick(DcParser *, DcConn *); ///< Kick
+	int eventOpForceMove(DcParser *, DcConn *); ///< Force move
+	int eventGetInfo(DcParser *, DcConn *); ///< Get user's MyINFO
+	int eventMcTo(DcParser *, DcConn *); ///< Private message in chat
+	int eventUserIp(DcParser *, DcConn *); ///< UserIP cmd
+	int eventPing(DcParser *, DcConn *); ///< Ping cmd
+	int eventUnknown(DcParser *, DcConn *); ///< Unknown cmd
+	int eventQuit(DcParser *, DcConn *); ///< Quit cmd
 
 	int checkCommand(DcParser *, DcConn *);
 	bool antiflood(DcConn *, unsigned int type);
+	void sendMode(DcConn *, const string & str, int mode, UserList &, bool useCache = false);
 
-	// Check validate nick (user)
+	/// Check validate nick (user)
 	bool validateUser(DcConn *, const string & nick);
 	bool checkNickLength(DcConn *, size_t len);
 	bool badFlag(DcConn *, const char * cmd, unsigned int flag);

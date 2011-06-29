@@ -52,13 +52,13 @@ using namespace ::webserver::protocol;
 
 namespace dcserver {
 
-using namespace ::server; /** for Server */
+using namespace ::server; // for Server
 using namespace ::dcserver::protocol;
-using namespace ::utils; /** for stringReplace */
+using namespace ::utils; // for stringReplace
 
 
 
-/** Индикаторы загруженности хаба */
+/// Busy indicators
 typedef enum {
 
 	SYSTEM_LOAD_OK,         ///< OK
@@ -71,7 +71,8 @@ typedef enum {
 
 
 
-enum FloodType { /** Flood types */
+/// Flood types
+enum FloodType {
 
 	FLOOD_TYPE_NO = -1,
 	FLOOD_TYPE_CHAT,
@@ -136,41 +137,41 @@ public:
 	typedef vector<string> List_t;
 	typedef UserList::Key UserKey;
 
-	/** Current server */
+	/// Current server
 	static DcServer * currentDcServer;
 
-	/** Config loader */
+	/// Config loader
 	DcConfigLoader mDcConfigLoader;
 
-	/** Config settings of the server */
+	/// Config settings of the server
 	DcConfig mDcConfig;
 
-	/** Settings of language */
+	/// Settings of language
 	DcLang mDcLang;
 
-	SystemLoad mSystemLoad; /** Indicator of the system overloading */
-	static string mSysVersion; /** Verion of OS System */
+	SystemLoad mSystemLoad; ///< Indicator of the system overloading
+	static string mSysVersion; ///< Verion of OS System
 
-	Time mStartTime; /** Start time of the hub */
-	NmdcProtocol mDcProtocol; /** DC Protocol */
+	Time mStartTime; ///< Start time of the hub
+	NmdcProtocol mNmdcProtocol; ///< NMDC Protocol
 
-	FullUserList mDcUserList; /** User list */
-	UserList mBotList; /** Bot list */
-	UserList mOpList; /** Op list */
-	UserList mIpList; /** ip list */
-	UserList mActiveList; /** Active user list */
-	UserList mHelloList; /** Hello user list */
-	UserList mEnterList; /** Enter list */
-	UserList mChatList; /** Chat list */
+	FullUserList mDcUserList; ///< User list
+	UserList mBotList; ///< Bot list
+	UserList mOpList; ///< Op list
+	UserList mIpList; ///< ip list
+	UserList mActiveList; ///< Active user list
+	UserList mHelloList; ///< Hello user list (NMDC)
+	UserList mEnterList; ///< Enter list (NMDC)
+	UserList mChatList; ///< Chat list
 
-	int miTotalUserCount; /** Total number of the users */
-	__int64 miTotalShare; /** Total hub share size */
+	int miTotalUserCount; ///< Total number of the users
+	__int64 miTotalShare; ///< Total hub share size
 
 	PluginList mPluginList;
 
-	string mTimeBuf; /** Time buffer for plugins */
+	string mTimeBuf; ///< Time buffer for plugins
 
-	DcIpList * mIpListConn; /** IP list of connections */
+	DcIpList * mIpListConn; ///< IP list of connections
 
 public:
 
@@ -210,7 +211,7 @@ public:
 		return tm;
 	}
 
-	/** Work time (sec) */
+	/// Work time (sec)
 	int getUpTime() const {
 		Time tm(true);
 		tm -= mStartTime;
@@ -225,16 +226,16 @@ public:
 		return miTotalShare;
 	}
 
-	/** Listebing of ports */
+	/// Listebing of ports
 	int listening();
 
-	/** Main timer */
+	/// Main timer
 	int onTimer(Time &);
 
-	/** Function checks min interval */
+	/// Function checks min interval
 	bool minDelay(Time &, double sec);
 
-	/** Pointer on the user (or NULL) */
+	/// Pointer on the user (or NULL)
 	DcUser * getDcUser(const char * nick);
 	const vector<DcConnBase*> & getDcConnBase(const char * ip);
 	DcUserBase * getDcUserBase(const char * nick);
@@ -272,51 +273,51 @@ public:
 
 	static void getAddresses(const char * addresses, vector<pair<string, string> > &, const char * defaultPort);
 
-	/** Function action when joining the client */
+	/// Function action when joining the client
 	int onNewConn(Conn *);
 
 protected:
 
-	/** Returns pointer to line of the connection, in which will be recorded got data */
+	/// Returns pointer to line of the connection, in which will be recorded got data
 	string * createCommandPtr(Conn *);
 
-	/** Function of the processing enterring data */
+	/// Function of the processing enterring data
 	void onNewData(Conn *, string *);
 
 	void onNewUdpData(Conn *, string *);
 
-	/** Antiflood function */
+	/// Antiflood function
 	bool antiFlood(unsigned & iCount, Time &, const unsigned & countLimit, const double & timeLimit);
 
-	/** Check nick used */
+	/// Check nick used
 	bool checkNick(DcConn *);
 
-	/** Actions before user entry */
+	/// Actions before user entry
 	bool beforeUserEnter(DcConn *);
 
-	/** User entry */
+	/// User entry
 	void doUserEnter(DcConn *);
 
-	/** Adding user in the user list */
+	/// Adding user in the user list
 	bool addToUserList(DcUser *);
 
-	/** Removing user from the user list */
+	/// Removing user from the user list
 	bool removeFromDcUserList(DcUser *);
 
-	/** Show user to all */
+	/// Show user to all
 	bool showUserToAll(DcUser *);
 
-	/** Actions after user entry */
+	/// Actions after user entry
 	void afterUserEnter(DcConn *);
 
 private:
 
-	Time mChecker; /** Checking time */
-	tCLIt conn_it; /** Iterator for optimum */
-	string mHubName; /** Hub name for plugins */
-	string sBuf; /** Temp buffer */
-	vector<DcConnBase *> mIpConnList; /** Conn with same ip for plugins */
-	vector<string> mConfigNameList; /** Config names for plugins */
+	Time mChecker; ///< Checking time
+	tCLIt conn_it; ///< Iterator for optimum
+	string mHubName; ///< Hub name for plugins
+	string sBuf; ///< Temp buffer
+	vector<DcConnBase *> mIpConnList; ///< Conn with same ip for plugins
+	vector<string> mConfigNameList; ///< Config names for plugins
 
 	/// DC Server Conn Factory
 	DcConnFactory * mDcConnFactory;
