@@ -604,7 +604,7 @@ int Server::outputData(Conn *conn) {
 }
 
 /** Main mase timer */
-int Server::onTimerBase(Time & now) {
+void Server::onTimerBase(Time & now) {
 	onTimer(now);
 	if (abs(mTimes.mServ - mTimes.mConn) >= mTimerConnPeriod) {
 		mTimes.mConn = mTimes.mServ;
@@ -617,7 +617,6 @@ int Server::onTimerBase(Time & now) {
 			}
 		}
 	}
-	return 0;
 }
 
 /** Main timer */

@@ -251,7 +251,7 @@ public:
 	virtual bool strLog();
 
 	/// Main base timer
-	int onTimerBase(Time &now);
+	void onTimerBase(Time &now);
 
 	/// Main timer
 	virtual int onTimer(Time &now);

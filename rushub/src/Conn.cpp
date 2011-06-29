@@ -1033,14 +1033,13 @@ int Conn::send(const char *buf, size_t &len) {
 
 
 /// Main base timer
-int Conn::onTimerBase(Time &now) {
+void Conn::onTimerBase(Time &now) {
 	if (bool(mCloseTime) && mCloseTime > now) {
 		closeNow();
-		return 0;
+	} else {
+		flush();
+		onTimer(now);
 	}
-	flush();
-	onTimer(now);
-	return 0;
 }
 
 

@@ -57,62 +57,62 @@ class ConnFactory;
 
 class Server : public Obj {
 
-friend class Conn; /** for closeNow and miNumCloseConn */
-friend class ConnFactory; /* onNewData */
+friend class Conn; // for closeNow and miNumCloseConn
+friend class ConnFactory; // onNewData
 
 public:
 
-	Time mTime; /** Current time of main cycle on the server */
-	int mStepDelay; /** Step delay (for testing) */
+	Time mTime; ///< Current time of main cycle on the server
+	int mStepDelay; ///< Step delay (for testing)
 
-	int mTimerServPeriod; /** Serv period (msec) */
-	int mTimerConnPeriod; /** Conn period (msec) */
+	int mTimerServPeriod; ///< Serv period (msec)
+	int mTimerConnPeriod; ///< Conn period (msec)
 
-	bool mMac; /** allow to define MAC address */
+	bool mMac; ///< allow to define MAC address
 
 public:
 
 	Server();
 	virtual ~Server();
 
-	/** Set and Listen port */
+	/// Set and Listen port
 	virtual int listening(ConnFactory *, const char * ip, const char * port = 0, bool udp = false);
 
-	/** Listen port (TCP/UDP) */
+	/// Listen port (TCP/UDP)
 	virtual Conn * listen(const char * ip, const char * port, bool udp = false);
 
-	/** Create, bind and add connection for port */
+	/// Create, bind and add connection for port
 	virtual Conn * addListen(Conn *, const char * ip, const char * port, bool udp = false);
 
-	/** Stop listen conn */
+	/// Stop listen conn
 	virtual bool stopListen(Conn *);
 
-	/** Main cycle */
+	/// Main cycle
 	int run();
 
-	/** Stop cycle */
+	/// Stop cycle
 	void stop(int);
 
-	/** inputData */
+	/// inputData
 	int inputData(Conn *);
 
-	/** outputData */
+	/// outputData
 	int outputData(Conn *);
 
-	/** onNewConn */
+	/// onNewConn
 	virtual int onNewConn(Conn *);
 
 protected:
 
-	typedef list<Conn *> tConnList; /** tConnList */
+	typedef list<Conn *> tConnList; ///< tConnList
 	typedef tConnList::iterator tCLIt;
-	tConnList mConnList; /** ConnList */
+	tConnList mConnList; ///< ConnList
 
-	typedef list<Conn *> tListenList; /** tListenList */
+	typedef list<Conn *> tListenList; ///< tListenList
 	typedef tListenList::iterator tLLIt;
-	tListenList mListenList; /** ListenList */
+	tListenList mListenList; ///< ListenList
 
-	/** select or poll object */
+	// select or poll object
 	#if USE_SELECT
 		ConnSelect mConnChooser;
 		typedef ConnSelect::iterator tChIt;
@@ -121,66 +121,66 @@ protected:
 		typedef ConnChoose::iterator tChIt;
 	#endif
 
-	/** Run-flag */
+	/// Run-flag
 	bool mRun;
 
-	/** MainLoopCode (0) If 1 then restart hub! */
+	/// MainLoopCode (0) If 1 then restart hub!
 	int mMainLoopCode;
 	
-	/** Strong close conn flag */
+	/// Strong close conn flag
 	int miNumCloseConn;
 	
-	/** Mean frequency */
+	/// Mean frequency
 	MeanFrequency<unsigned, 21> mMeanFrequency;
 
-	/** Point to Server (for config) */
+	/// Point to Server (for config)
 	Server * mServer;
 
-	struct Times { /** Times */
-		long mServ; /** (mTimerServPeriod) */
-		long mConn; /** (mTimerConnPeriod) */
+	struct Times { ///< Times
+		long mServ; ///< Timer Serv Period
+		long mConn; ///< Timer Conn Period
 	} mTimes;
 
 protected:
 
-	/** addConnection */
+	/// addConnection
 	int addConnection(Conn *);
 
-	/** delConnection */
+	/// delConnection
 	int delConnection(Conn *);
 
-	/** main timer */
+	/// Main timer
 	virtual int onTimer(Time & now);
 	
-	/** createCommandPtr */
+	/// createCommandPtr
 	virtual string * createCommandPtr(Conn *);
 
-	/** onNewData */
+	/// onNewData
 	virtual void onNewData(Conn *, string *);
 
-	/** close server */
+	/// close server
 	virtual void close() {
 	}
 	
-	/** onClose conn */
+	/// onClose conn
 	void onClose(Conn *);
 
 private:
 
-	/** Current connection */
+	/// Current connection
 	Conn * mNowConn;
 
 	#ifdef _WIN32
-		static bool initWSA; /** Windows init flag for WSA (Windows Sockets API) */
+		static bool initWSA; ///< Windows init flag for WSA (Windows Sockets API)
 	#endif
 	
 private:
 
-	/** Main step in the cycle */
+	/// Main step in the cycle
 	void step();
 
-	/** Main base timer */
-	int onTimerBase(Time & now);
+	/// Main base timer
+	void onTimerBase(Time & now);
 
 }; // Server
 
