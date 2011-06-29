@@ -39,9 +39,10 @@
 namespace server {
 
 #ifdef _WIN32
-	/** Set flag WS */
+	// Set flag WS
 	bool Server::initWSA = false;
 #endif
+
 
 
 //////////////////////////////////////////////constructor////////////////////////////////////////
@@ -60,7 +61,7 @@ Server::Server() :
 {
 
 #ifdef _WIN32
-	/** WSA for windows */
+	// WSA for windows
 	if (!initWSA) {
 		WSADATA lpWSAData;
 		//WORD wVersionRequested = MAKEWORD(2, 2);
@@ -70,14 +71,14 @@ Server::Server() :
 			return;
 		}
 
-		/** DLL support version 2.2 */
+		// DLL support version 2.2
 		if (HIBYTE(lpWSAData.wVersion) != 2 || LOBYTE(lpWSAData.wVersion) != 2) {
 			printf("Error version WinSock DLL %d.%d != 2.2\n", HIBYTE(lpWSAData.wVersion), LOBYTE(lpWSAData.wVersion));
 			::WSACleanup();
 			return;
 		}
 
-		/** WinSock DLL was found */
+		// WinSock DLL was found
 		initWSA = true;
 	}
 #endif
@@ -87,11 +88,13 @@ Server::Server() :
 }
 
 
+
+
 ////////////////////////////////////////////destructor////////////////////////////////////////////
 Server::~Server() {
 	mNowConn = NULL;
 #ifdef _WIN32
-	/** Close WSA DLL lib */
+	// Close WSA DLL lib
 	::WSACleanup();
 	initWSA = false;
 #endif
@@ -104,7 +107,9 @@ Server::~Server() {
 	}
 }
 
-/** Set and Listen port */
+
+
+/// Set and Listen port
 int Server::listening(ConnFactory * connFactory, const char * ip, const char * port, bool udp /*= false*/) {
 	Conn * conn = listen(ip, port, udp);
 	if (conn == NULL) {
@@ -122,7 +127,7 @@ int Server::listening(ConnFactory * connFactory, const char * ip, const char * p
 
 
 
-/** Listen port (TCP/UDP) */
+/// Listen port (TCP/UDP)
 Conn * Server::listen(const char * ip, const char * port, bool udp) {
 	Conn * conn = NULL;
 
@@ -141,7 +146,7 @@ Conn * Server::listen(const char * ip, const char * port, bool udp) {
 
 
 
-/** Create, bind and add connection for port */
+/// Create, bind and add connection for port
 Conn * Server::addListen(Conn * conn, const char * ip, const char * port, bool udp) {
 	// Socket object was created
 	if (conn) {
@@ -177,7 +182,9 @@ Conn * Server::addListen(Conn * conn, const char * ip, const char * port, bool u
 	return NULL;
 }
 
-/** StopListen */
+
+
+/// Stop listen
 bool Server::stopListen(Conn * conn) {
 	if (conn) {
 		mConnChooser.deleteConn(conn);
@@ -188,7 +195,7 @@ bool Server::stopListen(Conn * conn) {
 
 
 
-// Main cycle
+/// Main cycle
 int Server::run() {
 	// mRun = true; // by default server was run
 	if (Log(1)) {
@@ -232,13 +239,17 @@ int Server::run() {
 	return mMainLoopCode;
 }
 
-/** Stop main cycle */
+
+
+/// Stop main cycle
 void Server::stop(int code) {
 	mRun = false;
 	mMainLoopCode = code; // 1 - restart
 }
 
-/** step */
+
+
+/// Step
 void Server::step() {
 	int ret;
 	static Time tmout(0, 1000l); // timeout 1 msec
@@ -276,7 +287,7 @@ void Server::step() {
 	int activity = 0;
 	int forDel = miNumCloseConn;
 
-	for (tChIt it = mConnChooser.begin(); it != mConnChooser.end();) {
+	for (ChooserIterator it = mConnChooser.begin(); it != mConnChooser.end();) {
 		res = (*it);
 		++it;
 
@@ -424,9 +435,11 @@ void Server::step() {
 	}
 }
 
+
+
 ///////////////////////////////////add_connection/del_connection///////////////////////////////////
 
-int Server::addConnection(Conn *conn) {
+int Server::addConnection(Conn * conn) {
 
 	if (!conn->isOk()) {
 		if (conn->Log(2)) {
@@ -479,9 +492,11 @@ int Server::addConnection(Conn *conn) {
 	return 1;
 }
 
-/** delConnection(Conn *old_conn) */
-int Server::delConnection(Conn *old_conn) {
-	if (!old_conn) {
+
+
+/// delConnection
+int Server::delConnection(Conn * conn) {
+	if (!conn) {
 		if (mNowConn && mNowConn->ErrLog(0)) {
 			mNowConn->LogStream() << "Fatal error: delConnection null pointer" << endl;
 		}
@@ -492,31 +507,31 @@ int Server::delConnection(Conn *old_conn) {
 		LogStream() << "Num clients before del: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.size() << endl;
 	}
 	if (Log(4)) {
-		LogStream() << "Delete connection on socket: " << (tSocket)(*old_conn) << endl;
+		LogStream() << "Delete connection on socket: " << (tSocket)(*conn) << endl;
 	}*/
 
-	tCLIt it = old_conn->mIterator;
+	tCLIt it = conn->mIterator;
 	Conn *found = (*it);
-	if ((it == mConnList.end()) || (found != old_conn)) {
-		if (old_conn->ErrLog(0)) {
-			old_conn->LogStream() << "Fatal error: Delete unknown connection: " << old_conn << endl;
+	if ((it == mConnList.end()) || (found != conn)) {
+		if (conn->ErrLog(0)) {
+			conn->LogStream() << "Fatal error: Delete unknown connection: " << conn << endl;
 		}
 		throw "Fatal error: Delete unknown connection";
 	}
 
 	mConnList.erase(it);
 	tCLIt empty_it;
-	old_conn->mIterator = empty_it;
+	conn->mIterator = empty_it;
 
-	mConnChooser.deleteConn(old_conn);
+	mConnChooser.deleteConn(conn);
 
-	if (old_conn->mConnFactory != NULL && old_conn->getCreatedByFactory()) {
-		old_conn->mConnFactory->deleteConn(old_conn); 
+	if (conn->mConnFactory != NULL && conn->getCreatedByFactory()) {
+		conn->mConnFactory->deleteConn(conn); 
 	} else {
-		if (old_conn->Log(0)) {
-			old_conn->LogStream() << "Deleting conn without factory!" << endl;
+		if (conn->Log(0)) {
+			conn->LogStream() << "Deleting conn without factory!" << endl;
 		}
-		delete old_conn;
+		delete conn;
 	}
 
 	/*if (Log(4)) {
@@ -525,29 +540,32 @@ int Server::delConnection(Conn *old_conn) {
 	return 1;
 }
 
-/** onNewConn */
-int Server::onNewConn(Conn *conn) {
-	if (!conn) {
-		return -1;
-	}
-	return 0;
+
+
+/// onNewConn
+int Server::onNewConn(Conn * conn) {
+	return conn == NULL ? -1 : 0;
 }
 
-/** onClose */
-void Server::onClose(Conn *conn) {
+
+
+/// onClose
+void Server::onClose(Conn * conn) {
 	if (!conn) {
 		return;
 	}
 	mConnChooser.deleteConn(conn);
 }
 
-/** inputData */
-int Server::inputData(Conn *conn) {
+
+
+/// inputData
+int Server::inputData(Conn * conn) {
 	try {
 		if (conn->recv() <= 0) {
 			return 0;
 		}
-	} catch(const char *str) {
+	} catch(const char * str) {
 		if (ErrLog(0)) {
 			LogStream() << "Exception in recv: " << str << endl;
 		}
@@ -587,23 +605,31 @@ int Server::inputData(Conn *conn) {
 	return bytes;
 }
 
-/** createCommandPtr */
+
+
+/// createCommandPtr
 string * Server::createCommandPtr(Conn *) {
 	return new string;
 }
 
-/** onNewData */
+
+
+/// onNewData
 void Server::onNewData(Conn *, string * str) {
 	delete str;
 }
 
-/** outputData */
-int Server::outputData(Conn *conn) {
+
+
+/// outputData
+int Server::outputData(Conn * conn) {
 	conn->flush();
 	return 0;
 }
 
-/** Main mase timer */
+
+
+/// Main mase timer
 void Server::onTimerBase(Time & now) {
 	onTimer(now);
 	if (abs(mTimes.mServ - mTimes.mConn) >= mTimerConnPeriod) {
@@ -619,7 +645,9 @@ void Server::onTimerBase(Time & now) {
 	}
 }
 
-/** Main timer */
+
+
+/// Main timer
 int Server::onTimer(Time &) {
 	return 0;
 }

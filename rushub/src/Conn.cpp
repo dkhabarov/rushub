@@ -196,13 +196,13 @@ void Conn::onOk(bool) {
 
 	
 
-/** makeSocket */
+/// makeSocket
 tSocket Conn::makeSocket(const char * port, const char * address, bool udp) {
 	if (mSocket > 0) {
-		return INVALID_SOCKET; /** Socket is already created */
+		return INVALID_SOCKET; // Socket is already created
 	}
-	mSocket = socketCreate(port, address, udp); /** Create socket */
-	mSocket = socketBind(mSocket); /** Bind */
+	mSocket = socketCreate(port, address, udp); // Create socket
+	mSocket = socketBind(mSocket); // Bind
 	if (!udp) {
 		mSocket = socketListen(mSocket);
 		mSocket = socketNonBlock(mSocket);
@@ -213,7 +213,9 @@ tSocket Conn::makeSocket(const char * port, const char * address, bool udp) {
 	return mSocket;
 }
 
-/** Create socket (default TCP) */
+
+
+/// Create socket (default TCP)
 tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 	tSocket sock;
 	struct addrinfo hints;
@@ -273,7 +275,8 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 }
 
 
-/** Bind */
+
+/// Bind
 tSocket Conn::socketBind(tSocket sock) {
 	if (sock == INVALID_SOCKET) {
 		return INVALID_SOCKET;
@@ -290,7 +293,9 @@ tSocket Conn::socketBind(tSocket sock) {
 	return sock;
 }
 
-/** Listen TCP socket */
+
+
+/// Listen TCP socket
 tSocket Conn::socketListen(tSocket sock) {
 	if (sock == INVALID_SOCKET) {
 		return INVALID_SOCKET;
@@ -305,7 +310,9 @@ tSocket Conn::socketListen(tSocket sock) {
 	return sock;
 }
 
-/** Set non-block socket */
+
+
+/// Set non-block socket
 tSocket Conn::socketNonBlock(tSocket sock) {
 	if (sock == INVALID_SOCKET) {
 		return INVALID_SOCKET;
@@ -319,7 +326,7 @@ tSocket Conn::socketNonBlock(tSocket sock) {
 
 
 ////////////////////////////////////////////////////////
-/** Close socket */
+/// Close socket
 void Conn::close() {
 	if (mSocket <= 0) {
 		return;
@@ -351,7 +358,9 @@ void Conn::close() {
 	mSocket = 0;
 }
 
-/** closeNice */
+
+
+/// closeNice
 void Conn::closeNice(int msec /* = 0 */, int reason /* = 0 */) {
 	mWritable = false;
 	if (reason) {
@@ -365,7 +374,9 @@ void Conn::closeNice(int msec /* = 0 */, int reason /* = 0 */) {
 	mCloseTime += msec;
 }
 
-/** closeNow */
+
+
+/// closeNow
 void Conn::closeNow(int reason /* = 0 */) {
 	mWritable = false;
 	setOk(false);
@@ -402,7 +413,9 @@ void Conn::closeNow(int reason /* = 0 */) {
 	}
 }
 
-/** createNewConn */
+
+
+/// createNewConn
 Conn * Conn::createNewConn() {
 
 	struct sockaddr_storage storage;
@@ -441,14 +454,16 @@ Conn * Conn::createNewConn() {
 	return new_conn;
 }
 
-/** Accept new conn */
+
+
+/// Accept new conn
 tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 	int i = 0;
 	socklen_t namelen = sizeof(storage);
 	memset(&storage, 0, namelen);
 	tSocket sock = accept(mSocket, (struct sockaddr *) &storage, (socklen_t*) &namelen);
 	while (SOCK_INVALID(sock) && ((SockErr == SOCK_EAGAIN) || (SockErr == SOCK_EINTR)) && (++i <= 10)) {
-		/** Try to accept connection not more than 10 once */
+		// Try to accept connection not more than 10 once
 		sock = ::accept(mSocket, (struct sockaddr *) &storage, (socklen_t*) &namelen);
 		#ifdef _WIN32
 			Sleep(1);
@@ -485,7 +500,7 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 		return INVALID_SOCKET;
 	}
 
-	/** Non-block socket */
+	// Non-block socket
 	if (socketNonBlock(sock) == INVALID_SOCKET) {
 		if (ErrLog(1)) {
 			LogStream() << "Couldn't set non-block flag for accepted socket" << endl;
@@ -493,7 +508,7 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 		return INVALID_SOCKET;
 	}
 
-	/** Accept new socket */
+	// Accept new socket
 	if (Log(3)) {
 		LogStream() << "Accept new socket: " << sock << endl;
 	}
@@ -501,6 +516,7 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 	++mConnCounter;
 	return sock;
 }
+
 
 
 int Conn::defineConnInfo(sockaddr_storage & storage) {
@@ -526,7 +542,8 @@ int Conn::defineConnInfo(sockaddr_storage & storage) {
 }
 
 
-/** Reading all data from socket to buffer of the conn */
+
+/// Reading all data from socket to buffer of the conn
 int Conn::recv() {
 	if (!mOk || !mWritable) {
 		return -1;
@@ -536,7 +553,7 @@ int Conn::recv() {
 
 
 	bool bUdp = (this->mConnType == CONN_TYPE_CLIENTUDP);
-	if (!bUdp) { /** TCP */
+	if (!bUdp) { // TCP
 
 		while (
 			(SOCK_ERROR(iBufLen = ::recv(mSocket, mRecvBuf, MAX_RECV_SIZE, 0))) &&
@@ -548,7 +565,7 @@ int Conn::recv() {
 			#endif
 		}
 
-	} else { /** bUdp */
+	} else { // UDP
 		if (Log(4)) {
 			LogStream() << "Start read (UDP)" << endl;
 		}
@@ -589,25 +606,25 @@ int Conn::recv() {
 
 				switch (SockErr) {
 
-					case ECONNRESET : /** Connection reset by peer */
+					case ECONNRESET : // Connection reset by peer
 						if (Log(2)) {
 							LogStream() << "(connection reset by peer)" << endl;
 						}
 						break;
 
-					case ETIMEDOUT : /** Connection timed out */
+					case ETIMEDOUT : // Connection timed out
 						if (Log(2)) {
 							LogStream() << "(connection timed out)" << endl;
 						}
 						break;
 
-					case EHOSTUNREACH : /** No route to host */
+					case EHOSTUNREACH : // No route to host
 						if (Log(2)) {
 							LogStream() << "(no route to host)" << endl;
 						}
 						break;
 
-					case EWOULDBLOCK : /** Non-blocking socket operation */
+					case EWOULDBLOCK : // Non-blocking socket operation
 						return -1;
 
 					default :
@@ -627,10 +644,10 @@ int Conn::recv() {
 		if (bUdp) {
 			mIpUdp = inet_ntoa(mSockAddrIn.sin_addr);
 		}
-		mRecvBufEnd = iBufLen; /** End buf pos */
-		mRecvBufRead = 0; /** Pos for reading from buf */
-		mRecvBuf[mRecvBufEnd] = '\0'; /** Adding 0 symbol to end of str */
-		mLastRecv.Get(); /** Write time last recv action */
+		mRecvBufEnd = iBufLen; // End buf pos
+		mRecvBufRead = 0; // Pos for reading from buf
+		mRecvBuf[mRecvBufEnd] = '\0'; // Adding 0 symbol to end of str
+		mLastRecv.Get(); // Write time last recv action
 	}
 	return iBufLen;
 }
@@ -970,7 +987,7 @@ void Conn::flush() {
 
 
 /// Send len byte from buf
-int Conn::send(const char *buf, size_t &len) {
+int Conn::send(const char * buf, size_t & len) {
 #ifdef QUICK_SEND // Quick send
 	if (mConnType != CONN_TYPE_CLIENTUDP) {
 		len = ::send(mSocket, buf, len, 0);
@@ -1033,7 +1050,7 @@ int Conn::send(const char *buf, size_t &len) {
 
 
 /// Main base timer
-void Conn::onTimerBase(Time &now) {
+void Conn::onTimerBase(Time & now) {
 	if (bool(mCloseTime) && mCloseTime > now) {
 		closeNow();
 	} else {
@@ -1147,17 +1164,17 @@ ConnFactory::~ConnFactory() {
 
 
 Conn * ConnFactory::createConn(tSocket sock) {
-	Conn * conn = new Conn(sock, mServer); /** CONN_TYPE_CLIENTTCP */
+	Conn * conn = new Conn(sock, mServer); // CONN_TYPE_CLIENTTCP
 	conn->setCreatedByFactory(true);
 	conn->mConnFactory = this;
-	conn->mProtocol = mProtocol; /** proto */
+	conn->mProtocol = mProtocol; // proto
 	return conn;
 }
 
 
 
-void ConnFactory::deleteConn(Conn * &conn) {
-	conn->close(); /** close socket */
+void ConnFactory::deleteConn(Conn * & conn) {
+	conn->close(); // close socket
 	delete conn;
 	conn = NULL;
 }

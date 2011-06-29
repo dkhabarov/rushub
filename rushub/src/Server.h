@@ -63,11 +63,10 @@ friend class ConnFactory; // onNewData
 public:
 
 	Time mTime; ///< Current time of main cycle on the server
-	int mStepDelay; ///< Step delay (for testing)
 
+	int mStepDelay; ///< Step delay (for testing)
 	int mTimerServPeriod; ///< Serv period (msec)
 	int mTimerConnPeriod; ///< Conn period (msec)
-
 	bool mMac; ///< allow to define MAC address
 
 public:
@@ -112,13 +111,13 @@ protected:
 	typedef tListenList::iterator tLLIt;
 	tListenList mListenList; ///< ListenList
 
-	// select or poll object
+	// select/poll/epoll/kqueue objects
 	#if USE_SELECT
 		ConnSelect mConnChooser;
-		typedef ConnSelect::iterator tChIt;
+		typedef ConnSelect::iterator ChooserIterator;
 	#else
 		ConnPoll mConnChooser;
-		typedef ConnChoose::iterator tChIt;
+		typedef ConnChoose::iterator ChooserIterator;
 	#endif
 
 	/// Run-flag
