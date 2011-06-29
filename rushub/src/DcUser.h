@@ -122,9 +122,8 @@ public:
 	// Used in plugins only
 	// =====================================================================
 
-	// NMDC
-	virtual const string & getSupports() const;
-	virtual const string & getVersion() const;
+	virtual const string & getSupports() const; // NMDC
+	virtual const string & getVersion() const; // NMDC
 
 
 	virtual long getConnectTime() const;

@@ -1109,7 +1109,8 @@ void NmdcProtocol::sendMode(DcConn * dcConn, const string & str, int mode, UserL
 }
 
 
-/** Sending the user-list and op-list */
+
+/// Sending the user-list and op-list
 int NmdcProtocol::sendNickList(DcConn * dcConn) {
 	try {
 		if ((dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE) != LOGIN_STATUS_LOGIN_DONE) && mDcServer->mDcConfig.mNicklistOnLogin) {

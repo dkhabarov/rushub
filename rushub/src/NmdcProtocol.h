@@ -76,20 +76,22 @@ public:
 		mDcServer = dcServer;
 	}
 
-	static string & appendLock(string & str);
-	static string & appendHello(string & str, const string & nick);
-	static string & appendHubIsFull(string & str);
-	static string & appendGetPass(string & str);
-	static string & appendValidateDenide(string & str, const string & nick);
-	static string & appendHubName(string & str, const string & hubName, const string & topic);
-	static string & appendHubTopic(string & str, const string & hubTopic);
-	static string & appendChat(string & str, const string & nick, const string & msg);
-	static string & appendPm(string & str, const string & to, const string & from, const string & nick, const string & msg);
-	static string & appendQuit(string & str, const string & nick);
-	static string & appendOpList(string & str, const string & nick);
-	static string & appendUserIp(string & str, const string & nick, const string & ip);
-	static string & appendForceMove(string & str, const string & address);
-	static void appendPmToAll(string & start, string & end, const string & from, const string & nick, const string & msg);
+
+	string & appendLock(string & str);
+	string & appendHello(string & str, const string & nick);
+	string & appendHubIsFull(string & str);
+	string & appendGetPass(string & str);
+	string & appendValidateDenide(string & str, const string & nick);
+	string & appendHubName(string & str, const string & hubName, const string & topic);
+	string & appendHubTopic(string & str, const string & hubTopic);
+	string & appendChat(string & str, const string & nick, const string & msg);
+	string & appendPm(string & str, const string & to, const string & from, const string & nick, const string & msg);
+	string & appendQuit(string & str, const string & nick);
+	string & appendOpList(string & str, const string & nick);
+	string & appendUserIp(string & str, const string & nick, const string & ip);
+	string & appendForceMove(string & str, const string & address);
+	void appendPmToAll(string & start, string & end, const string & from, const string & nick, const string & msg);
+
 
 	int sendNickList(DcConn *); ///< Sending user-list and op-list
 	static void getNormalShare(__int64, string &); ///< Get normal share size
