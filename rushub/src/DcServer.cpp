@@ -167,10 +167,11 @@ DcServer::~DcServer() {
 
 
 
+// static
 void DcServer::getAddresses(
 	const char * sAddresses,
 	vector<pair<string, string> > & vec,
-	const char * defPort
+	const char * defaultPort
 ) {
 	vector<string> vAddresses;
 	stringSplit(sAddresses, " ", vAddresses);
@@ -191,15 +192,15 @@ void DcServer::getAddresses(
 		if (vIpPort[0].at(last) == ']') {
 			vIpPort[0].assign(vIpPort[0].c_str(), last);
 		}
-		vec.push_back(pair<string, string>(vIpPort[0], vIpPort.size() == 2 ? vIpPort[1] : defPort));
+		vec.push_back(pair<string, string>(vIpPort[0], vIpPort.size() == 2 ? vIpPort[1] : defaultPort));
 	}
 }
 
 
 
-bool DcServer::listeningServer(const char * name, const char * addresses, const char * port, ConnFactory * connFactory, bool udp /*= false*/) {
+bool DcServer::listeningServer(const char * name, const char * addresses, const char * defaultPort, ConnFactory * connFactory, bool udp /*= false*/) {
 	vector<pair<string, string> > vAddresses;
-	getAddresses(addresses, vAddresses, port);
+	getAddresses(addresses, vAddresses, defaultPort);
 
 	if (vAddresses.size() == 0) {
 		if (ErrLog(0)) {
@@ -226,7 +227,7 @@ bool DcServer::listeningServer(const char * name, const char * addresses, const 
 
 
 
-/** Listening all servers */
+/// Listening all servers
 int DcServer::listening() {
 
 	if (!mDcConnFactory) {
@@ -241,7 +242,7 @@ int DcServer::listening() {
 		mWebConnFactory = new WebConnFactory(mWebProtocol, this);
 	}
 
-	// DC Server
+	// NMDC Server
 	if (!listeningServer("DC Server " INTERNALNAME " " INTERNALVERSION, mDcConfig.mAddresses.c_str(), "411", mDcConnFactory)) {
 		return -1;
 	}
@@ -251,7 +252,7 @@ int DcServer::listening() {
 		listeningServer("Web Server", mDcConfig.mWebAddresses.c_str(), "80", mWebConnFactory);
 	}
 
-	// UDP DC Server
+	// UDP NMDC Server
 	if (mDcConfig.mUdpServer) {
 		listeningServer("DC Server (UDP)", mDcConfig.mUdpAddresses.c_str(), "1209", mDcConnFactory, true);
 	}
@@ -262,15 +263,15 @@ int DcServer::listening() {
 
 int DcServer::onTimer(Time & now) {
 
-	/** Execute each second */
+	// Execute each second
 	if (abs(int(now - mChecker)) >= mTimerServPeriod) {
 
 		mChecker = now;
 
-		mHelloList.flushCache();
+		mHelloList.flushCache(); // NMDC
 		mDcUserList.flushCache();
 		mBotList.flushCache();
-		mEnterList.flushCache();
+		mEnterList.flushCache(); // NMDC
 		mOpList.flushCache();
 		mIpList.flushCache();
 		mChatList.flushCache();
@@ -311,8 +312,8 @@ int DcServer::onTimer(Time & now) {
 
 		mDcUserList.autoResize();
 		mBotList.autoResize();
-		mHelloList.autoResize();
-		mEnterList.autoResize();
+		mHelloList.autoResize(); // NMDC
+		mEnterList.autoResize(); // NMDC
 		mActiveList.autoResize();
 		mChatList.autoResize();
 		mOpList.autoResize();
@@ -330,7 +331,7 @@ int DcServer::onTimer(Time & now) {
 
 
 
-/** Function action after joining the client */
+/// Function action after joining the client
 int DcServer::onNewConn(Conn *conn) {
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 
@@ -342,7 +343,7 @@ int DcServer::onNewConn(Conn *conn) {
 		return -1;
 	}
 
-	/** Checking flood-entry (by ip) */
+	// Checking flood-entry (by ip)
 	if (mIpEnterFlood.check(dcConn->getIp(), mTime)) {
 		dcConn->closeNow(CLOSE_REASON_FLOOD_IP_ENTRY);
 		return -2;
@@ -366,14 +367,14 @@ int DcServer::onNewConn(Conn *conn) {
 
 
 
-/** Returns pointer to line of the connection, in which will be recorded got data */
+/// Returns pointer to line of the connection, in which will be recorded got data
 string * DcServer::createCommandPtr(Conn * conn) {
 	return conn->getParserCommandPtr();
 }
 
 
 
-/** Function of the processing enterring data */
+/// Function of the processing enterring data
 void DcServer::onNewData(Conn * conn, string * data) {
 
 	if (conn->Log(4)) {
@@ -427,7 +428,7 @@ void DcServer::onNewUdpData(Conn * conn, string *) {
 
 
 
-/** Function checks min interval */
+/// Function checks min interval
 bool DcServer::minDelay(Time & time, double sec) {
 	if (::fabs(double(mTime - time)) >= sec) {
 		time = mTime;
@@ -438,7 +439,7 @@ bool DcServer::minDelay(Time & time, double sec) {
 
 
 
-/** Antiflood function */
+/// Antiflood function
 bool DcServer::antiFlood(unsigned & count, Time & time, const unsigned & countLimit, const double & timeLimit) {
 	if (!timeLimit) {
 		return false;
@@ -458,7 +459,7 @@ bool DcServer::antiFlood(unsigned & count, Time & time, const unsigned & countLi
 
 
 
-/** Checking for this nick used */
+/// Checking for this nick used
 bool DcServer::checkNick(DcConn *dcConn) {
 
 	// check empty nick!
@@ -520,7 +521,7 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 				mEnterList.add(dcConn->mDcUser->getUidHash(), dcConn->mDcUser);
 			}
 
-			/** Can happen so that list not to send at a time */
+			// Can happen so that list not to send at a time
 			mDcProtocol.sendNickList(dcConn);
 
 			dcConn->mSendNickList = false;
@@ -530,7 +531,7 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 			doUserEnter(dcConn);
 		}
 		return true;
-	} else { /** Invalid sequence of the sent commands */
+	} else { // Invalid sequence of the sent commands
 		if (dcConn->Log(2)) {
 			dcConn->LogStream() << "Invalid sequence of the sent commands (" 
 				<< dcConn->getLoginStatusFlag(iWantedMask) << "), wanted: " 
@@ -543,9 +544,9 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 
 
 
-/** User entry */
+/// User entry
 void DcServer::doUserEnter(DcConn * dcConn) {
-	/** Check entry stages */
+	// Check entry stages
 	if (LOGIN_STATUS_LOGIN_DONE != dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE)) {
 		if (dcConn->Log(2)) {
 			dcConn->LogStream() << "User Login when not all done (" 
@@ -563,20 +564,20 @@ void DcServer::doUserEnter(DcConn * dcConn) {
 
 	unsigned long uidHash = dcConn->mDcUser->getUidHash();
 
-	/** User is already considered came */
+	// User is already considered came
 	if (mEnterList.contain(uidHash)) {
-		/** We send user contents of cache without clear this cache */
+		// We send user contents of cache without clear this cache
 		mEnterList.flushForUser(dcConn->mDcUser);
 		mEnterList.remove(uidHash);
 	}
 
-	/** Adding user to the user list */
+	// Adding user to the user list
 	if (!addToUserList(static_cast<DcUser *> (dcConn->mDcUser))) {
 		dcConn->closeNow(CLOSE_REASON_USER_ADD);
 		return;
 	}
 
-	/** Show to all */
+	// Show to all
 	showUserToAll(dcConn->mDcUser);
 
 	afterUserEnter(dcConn);
@@ -587,7 +588,7 @@ void DcServer::doUserEnter(DcConn * dcConn) {
 
 
 
-/** Adding user in the user list */
+/// Adding user in the user list
 bool DcServer::addToUserList(DcUser * dcUser) {
 	if (!dcUser) {
 		if (ErrLog(1)) {
@@ -633,7 +634,7 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 	}
 
 	if (dcUser->mDcConn) {
-		dcUser->mDcConn->mIpRecv = true; /** Installing the permit on reception of the messages on ip */
+		dcUser->mDcConn->mIpRecv = true; // Installing the permit on reception of the messages on ip
 		mChatList.add(uidHash, dcUser);
 
 		if (!(dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO)) {
@@ -651,7 +652,7 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 
 
 
-/** Removing user from the user list */
+/// Removing user from the user list
 bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 	unsigned long uidHash = dcUser->getUidHash();
 	if (mDcUserList.Log(4)) {
@@ -666,7 +667,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 
 		// We make sure that user with such nick one!
 		DcUser * other = static_cast<DcUser *> (mDcUserList.find(dcUser->getUidHash()));
-		if (!dcUser->mDcConn) { /** Removing the bot */
+		if (!dcUser->mDcConn) { // Removing the bot
 			mDcUserList.remove(uidHash);
 		} else if (other && other->mDcConn && dcUser->mDcConn && other->mDcConn == dcUser->mDcConn) {
 			mDcUserList.remove(uidHash);
@@ -832,7 +833,7 @@ const vector<DcConnBase *> & DcServer::getDcConnBase(const char * ip) {
 
 
 
-/** Send data to user */
+/// Send data to user
 bool DcServer::sendToUser(DcUserBase * dcUserBase, const char * data, const char * nick, const char * from) {
 	if (!dcUserBase || !dcUserBase->mDcConnBase || !data) {
 		return false;
@@ -870,7 +871,7 @@ bool DcServer::sendToUser(DcUserBase * dcUserBase, const char * data, const char
 
 
 
-/** Send data to nick */
+/// Send data to nick
 bool DcServer::sendToNick(const char * to, const char * data, const char * nick, const char * from) {
 	DcUser * dcUser = getDcUser(to);
 	if (!dcUser || !dcUser->mDcConn) { // Check exist and not bot
@@ -881,7 +882,7 @@ bool DcServer::sendToNick(const char * to, const char * data, const char * nick,
 
 
 
-/** Send data to all */
+/// Send data to all
 bool DcServer::sendToAll(const char * data, const char * nick, const char * from) {
 	if (!data) {
 		return false;
@@ -913,7 +914,7 @@ bool DcServer::sendToAll(const char * data, const char * nick, const char * from
 
 
 
-/** Send data to profiles */
+/// Send data to profiles
 bool DcServer::sendToProfiles(unsigned long profile, const char * data, const char * nick, const char * from) {
 	if (!data) {
 		return false;
@@ -976,7 +977,7 @@ bool DcServer::sendToIp(const char * ip, const char * data, unsigned long profil
 
 
 
-/** Send data to all except nick list */
+/// Send data to all except nick list
 bool DcServer::sendToAllExceptNicks(const vector<string> & nickList, const char * data, const char * nick, const char * from) {
 	if (!data) {
 		return false;
@@ -1146,7 +1147,7 @@ bool DcServer::setConfig(const string & name, const string & value) {
 	config->convertFrom(value);
 
 	if (name == "sHubBot") {
-		if (mDcConfig.mRegMainBot) { /** Registration bot */
+		if (mDcConfig.mRegMainBot) { // Registration bot
 			regBot(mDcConfig.mHubBot, mDcConfig.mMainBotMyinfo, 
 				mDcConfig.mMainBotIp, mDcConfig.mMainBotKey);
 		}

@@ -345,7 +345,7 @@ private:
 
 private:
 
-	bool listeningServer(const char * name, const char * addresses, const char * port, ConnFactory * connFactory, bool udp = false);
+	bool listeningServer(const char * name, const char * addresses, const char * defaultPort, ConnFactory * connFactory, bool udp = false);
 
 	static string getSysVersion();
 
