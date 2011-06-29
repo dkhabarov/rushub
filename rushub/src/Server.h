@@ -80,11 +80,8 @@ public:
 	/// Listen port (TCP/UDP)
 	virtual Conn * listen(const char * ip, const char * port, bool udp = false);
 
-	/// Create, bind and add connection for port
-	virtual Conn * addListen(Conn *, const char * ip, const char * port, bool udp = false);
-
-	/// Stop listen conn
-	virtual bool stopListen(Conn *);
+	/// Add simple connection
+	virtual Conn * addSimpleConn(Conn *, const char * ip, const char * port, int connType);
 
 	/// Main cycle
 	int run();

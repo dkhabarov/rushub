@@ -197,16 +197,41 @@ void Conn::onOk(bool) {
 	
 
 /// makeSocket
-tSocket Conn::makeSocket(const char * port, const char * address, bool udp) {
+tSocket Conn::makeSocket(const char * port, const char * address, int connType /*= CONN_TYPE_LISTEN*/) {
 	if (mSocket > 0) {
 		return INVALID_SOCKET; // Socket is already created
 	}
-	mSocket = socketCreate(port, address, udp); // Create socket
-	mSocket = socketBind(mSocket); // Bind
-	if (!udp) {
-		mSocket = socketListen(mSocket);
-		mSocket = socketNonBlock(mSocket);
+	
+	switch (connType) {
+		case CONN_TYPE_LISTEN :
+			mSocket = socketCreate(port, address, false);
+			mSocket = socketBind(mSocket);
+			mSocket = socketListen(mSocket);
+			mSocket = socketNonBlock(mSocket);
+			break;
+
+		case CONN_TYPE_INCOMING_UDP :
+			mSocket = socketCreate(port, address, true);
+			mSocket = socketBind(mSocket);
+			mSocket = socketNonBlock(mSocket);
+			break;
+
+		case CONN_TYPE_OUTGOING_TCP :
+			mSocket = socketCreate(port, address, false);
+			mSocket = socketConnect(mSocket);
+			mSocket = socketNonBlock(mSocket);
+			break;
+
+		case CONN_TYPE_OUTGOING_UDP :
+			mSocket = socketCreate(port, address, true);
+			mSocket = socketNonBlock(mSocket);
+			break;
+
+		default :
+			break;
+
 	}
+
 	mPort = atoi(port); // Set port
 	mIp = address; // Set ip (host)
 	setOk(mSocket > 0); // Reg conn
@@ -303,7 +328,24 @@ tSocket Conn::socketListen(tSocket sock) {
 	if (SOCK_ERROR(listen(sock, SOCK_BACKLOG))) {
 		SOCK_CLOSE(sock);
 		if (ErrLog(1)) {
-			LogStream() << "Error listening" << endl;
+			LogStream() << "Error listening: " << SockErrMsg << endl;
+		}
+		return INVALID_SOCKET;
+	}
+	return sock;
+}
+
+
+
+/// Connect to TCP socket
+tSocket Conn::socketConnect(tSocket sock) {
+	if (sock == INVALID_SOCKET) {
+		return INVALID_SOCKET;
+	}
+	if (SOCK_ERROR(connect(sock, mAddrInfo->ai_addr, mAddrInfo->ai_addrlen))) {
+		SOCK_CLOSE(sock);
+		if (ErrLog(1)) {
+			LogStream() << "Error connecting: " << SockErrMsg << endl;
 		}
 		return INVALID_SOCKET;
 	}
@@ -428,12 +470,12 @@ Conn * Conn::createNewConn() {
 	Conn * new_conn = NULL;
 
 	if (mConnFactory != NULL) {
-		new_conn = mConnFactory->createConn(sock); // Create connection object by factory (CONN_TYPE_CLIENTTCP)
+		new_conn = mConnFactory->createConn(sock); // Create connection object by factory (CONN_TYPE_INCOMING_TCP)
 	} else {
 		if (Log(3)) {
 			LogStream() << "Create simple connection object for socket: " << sock << endl;
 		}
-		new_conn = new Conn(sock, mServer); // Create simple connection object (CONN_TYPE_CLIENTTCP)
+		new_conn = new Conn(sock, mServer); // Create simple connection object (CONN_TYPE_INCOMING_TCP)
 		new_conn->mProtocol = mProtocol;
 	}
 	if (!new_conn) {
@@ -552,7 +594,7 @@ int Conn::recv() {
 	int iBufLen = 0, i = 0;
 
 
-	bool bUdp = (this->mConnType == CONN_TYPE_CLIENTUDP);
+	bool bUdp = (this->mConnType == CONN_TYPE_INCOMING_UDP);
 	if (!bUdp) { // TCP
 
 		while (
@@ -989,7 +1031,7 @@ void Conn::flush() {
 /// Send len byte from buf
 int Conn::send(const char * buf, size_t & len) {
 #ifdef QUICK_SEND // Quick send
-	if (mConnType != CONN_TYPE_CLIENTUDP) {
+	if (mConnType != CONN_TYPE_INCOMING_UDP) {
 		len = ::send(mSocket, buf, len, 0);
 	} else {
 		len = ::sendto(mSocket, buf, len, 0, (struct sockaddr *) &mSockAddrIn, mSockAddrInSize);
@@ -999,7 +1041,7 @@ int Conn::send(const char * buf, size_t & len) {
 	int n = -1;
 	size_t total = 0, bytesleft = len;
 
-	bool bUDP = (this->mConnType == CONN_TYPE_CLIENTUDP);
+	bool bUDP = (this->mConnType == CONN_TYPE_INCOMING_UDP);
 
 	while (total < len) { // EMSGSIZE (WSAEMSGSIZE)
 
@@ -1164,7 +1206,7 @@ ConnFactory::~ConnFactory() {
 
 
 Conn * ConnFactory::createConn(tSocket sock) {
-	Conn * conn = new Conn(sock, mServer); // CONN_TYPE_CLIENTTCP
+	Conn * conn = new Conn(sock, mServer); // CONN_TYPE_INCOMING_TCP
 	conn->setCreatedByFactory(true);
 	conn->mConnFactory = this;
 	conn->mProtocol = mProtocol; // proto

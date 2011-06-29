@@ -45,12 +45,12 @@ class Conn; // for ConnFactory
 class Protocol; // *mProtocol
 class Parser; // *mParser
 
-/** Connection-factory for create and delete connection */
+/// Connection-factory for create and delete connection
 class ConnFactory {
 
 public:
 
-	Protocol * mProtocol; /** Protocal */
+	Protocol * mProtocol; ///< Protocal
 
 public:
 
@@ -64,26 +64,26 @@ public:
 
 protected:
 
-	Server * mServer; /** Pointer on server */
+	Server * mServer; ///< Pointer on server
 
 }; // class ConnFactory
 
 
 
-/** Connections types */
+/// Connections types
 enum ConnType {
 
-	CONN_TYPE_LISTEN,    ///< Listen TCP
-	CONN_TYPE_CLIENTTCP, ///< Client TCP
-	CONN_TYPE_CLIENTUDP, ///< Client UDP
-	CONN_TYPE_SERVERTCP, ///< Server TCP
-	CONN_TYPE_SERVERUDP  ///< Server UDP
+	CONN_TYPE_LISTEN,       ///< Listen TCP connection
+	CONN_TYPE_INCOMING_TCP, ///< Incoming TCP connection
+	CONN_TYPE_INCOMING_UDP, ///< Incoming UDP connection
+	CONN_TYPE_OUTGOING_TCP, ///< Outgoing TCP connection
+	CONN_TYPE_OUTGOING_UDP  ///< Outgoing UDP connection
 
 };
 
 
 
-/** Status of string */
+/// Status of string
 enum StringStatus {
 
 	STRING_STATUS_NO_STR,   ///< No str
@@ -95,7 +95,7 @@ enum StringStatus {
 
 
 
-/** Enumeration of reasons to closing connection (Close Reason) */
+/// Enumeration of reasons to closing connection (Close Reason)
 enum {
 
 	CLOSE_REASON_CLIENT_DISCONNECT = 1,
@@ -111,33 +111,31 @@ enum {
 
 
 
-/** Main connection class for server */
+/// Main connection class for server
 class Conn : public Obj, public ConnBase {
 
-	friend class Server; /* for ports and mIterator */
+	friend class Server; // for ports and mIterator
 
 public:
 
-	static unsigned long mConnCounter; /** Conn counter */
+	static unsigned long mConnCounter; ///< Conn counter
 
-	Time mLastRecv; /** Time of the last recv action from the client */
+	Time mLastRecv; ///< Time of the last recv action from the client
 
-	ConnFactory * mConnFactory; /** Conn factory */
-	Server * mServer; /** Server */
-	Protocol * mProtocol; /** Protocol */
-	Parser * mParser; /** Parser */
+	ConnFactory * mConnFactory; ///< Conn factory
+	Server * mServer; ///< Server
+	Protocol * mProtocol; ///< Protocol
+	Parser * mParser; ///< Parser
 
 public:
 
-	Conn(tSocket socket = 0, Server * server = NULL, ConnType connType = CONN_TYPE_CLIENTTCP);
+	Conn(tSocket socket = 0, Server * server = NULL, ConnType connType = CONN_TYPE_INCOMING_TCP);
 	virtual ~Conn();
 
 	// === static functions ===
 
 	static const char * inetNtop(int af, const void * src, char * dst, socklen_t cnt);
-
 	static int inetPton(int af, const char * src, void * dst);
-
 	static bool checkIp(const string &ip);
 
 
@@ -184,7 +182,7 @@ public:
 
 
 	/// Create, bind and listen socket
-	tSocket makeSocket(const char * port, const char * ip = NULL, bool udp = false);
+	tSocket makeSocket(const char * port, const char * ip = NULL, int connType = CONN_TYPE_LISTEN);
 
 	/// Close connection (socket)
 	void close();
@@ -328,6 +326,9 @@ private:
 
 	/// Listen TCP
 	tSocket socketListen(tSocket);
+
+	/// Connect to TCP socket
+	tSocket socketConnect(tSocket);
 
 	/// Set non-block socket
 	tSocket socketNonBlock(tSocket);

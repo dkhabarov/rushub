@@ -155,30 +155,35 @@ int Server::listening(ConnFactory * connFactory, const char * ip, const char * p
 
 /// Listen port (TCP/UDP)
 Conn * Server::listen(const char * ip, const char * port, bool udp) {
-	Conn * conn = NULL;
 
-	if (!udp) { // Create socket listening server for TCP port
-		conn = new Conn(0, this, CONN_TYPE_LISTEN);
-	} else { // Create socket server for UDP port
-		conn = new Conn(0, this, CONN_TYPE_CLIENTUDP);
-	}
+	ConnType connType = udp ? CONN_TYPE_INCOMING_UDP : CONN_TYPE_LISTEN;
+	Conn * conn = new Conn(0, this, connType);
 
-	if (!addListen(conn, ip, port, udp)) { // Listen conn
+	if (!addSimpleConn(conn, ip, port, connType)) { // Listen conn
 		delete conn;
-		return NULL;
+		conn = NULL;
 	}
 	return conn;
 }
 
 
 
-/// Create, bind and add connection for port
-Conn * Server::addListen(Conn * conn, const char * ip, const char * port, bool udp) {
-	// Socket object was created
+/// Add simple connection
+Conn * Server::addSimpleConn(Conn * conn, const char * ip, const char * port, int connType) {
 	if (conn) {
-		if (conn->makeSocket(port, ip, udp) == INVALID_SOCKET) {
+		if (conn->makeSocket(port, ip, connType) == INVALID_SOCKET) {
 			if (ErrLog(0)) {
-				LogStream() << "Fatal error: Can't listen on " << ip << ":" << port << (udp ? " UDP" : " TCP") << endl;
+				if (connType == CONN_TYPE_LISTEN) {
+					LogStream() << "Fatal error: Can't listen on " << ip << ":" << port << " TCP" << endl;
+				} else if (connType == CONN_TYPE_INCOMING_UDP) {
+					LogStream() << "Fatal error: Can't listen on " << ip << ":" << port << " UDP" << endl;
+				} else if (connType == CONN_TYPE_OUTGOING_TCP) {
+					LogStream() << "Fatal error: Can't connect to " << ip << ":" << port << " TCP" << endl;
+				} else if (connType == CONN_TYPE_OUTGOING_UDP) {
+					LogStream() << "Fatal error: Can't connect to " << ip << ":" << port << " UDP" << endl;
+				} else {
+					LogStream() << "Fatal error: Unknown connection" << endl;
+				}
 			}
 			return NULL;
 		}
@@ -197,26 +202,23 @@ Conn * Server::addListen(Conn * conn, const char * ip, const char * port, bool u
 		}
 
 		if (Log(0)) {
-			LogStream() << "Listening on " << string(ip) << ":" << string(port) << (udp ? " UDP" : " TCP") << endl;
+			if (connType == CONN_TYPE_LISTEN) {
+				LogStream() << "Listening on " << ip << ":" << port << " TCP" << endl;
+			} else if (connType == CONN_TYPE_INCOMING_UDP) {
+				LogStream() << "Listening on " << ip << ":" << port << " UDP" << endl;
+			} else if (connType == CONN_TYPE_OUTGOING_TCP) {
+				LogStream() << "Connected to " << ip << ":" << port << " TCP" << endl;
+			} else if (connType == CONN_TYPE_OUTGOING_UDP) {
+				LogStream() << "Connected to " << ip << ":" << port << " UDP" << endl;
+			}
 		}
 		return conn;
 	} else {
 		if (ErrLog(0)) {
-			LogStream() << "Fatal error: Can't create conn object" << endl;
+			LogStream() << "Fatal error: Connection object is empty" << endl;
 		}
 	}
 	return NULL;
-}
-
-
-
-/// Stop listen
-bool Server::stopListen(Conn * conn) {
-	if (conn) {
-		mConnChooser.deleteConn(conn);
-		return true;
-	}
-	return false;
 }
 
 
@@ -248,9 +250,9 @@ int Server::run() {
 				#endif
 			}
 			mMeanFrequency.insert(mTime); // MeanFrequency
-		} catch(const char *str) {
+		} catch(const char * exception) {
 			if (ErrLog(0)) {
-				LogStream() << "Exception: " << str << endl;
+				LogStream() << "Exception: " << exception << endl;
 			}
 		} catch(...) {
 			if (ErrLog(0)) {
@@ -285,15 +287,15 @@ void Server::step() {
 		ret = mConnChooser.choose(tmout);
 		if (ret <= 0 && !miNumCloseConn) { 
 			#ifdef _WIN32
-				//Sleep(0);
+				Sleep(1);
 			#else
 				usleep(50); // 50 usec
 			#endif
 			return;
 		}
-	} catch(const char *str) {
+	} catch(const char * exception) {
 		if (ErrLog(0)) {
-			LogStream() << "Exception in choose: " << str << endl;
+			LogStream() << "Exception in choose: " << exception << endl;
 		}
 		return;
 	} catch(...) {
@@ -337,7 +339,7 @@ void Server::step() {
 			// Create new connection:
 			// 1. Accept new socket
 			// 2. Create new connection object (using ConnFactory from ListenFactory else create simple Conn)
-			Conn * new_conn = mNowConn->createNewConn(); /** CONN_TYPE_CLIENTTCP (Conn) */
+			Conn * new_conn = mNowConn->createNewConn(); /** CONN_TYPE_INCOMING_TCP (Conn) */
 
 			if (new_conn) {
 				if (addConnection(new_conn) > 0) {
@@ -366,7 +368,12 @@ void Server::step() {
 
 		} else { // not listening socket (optimization)
 
-			if (ok && (activity & ConnChoose::eEF_INPUT) && ((connType == CONN_TYPE_CLIENTTCP) || (connType == CONN_TYPE_CLIENTUDP))) {
+			if (ok && (activity & ConnChoose::eEF_INPUT) && (
+					connType == CONN_TYPE_INCOMING_TCP ||
+					connType == CONN_TYPE_INCOMING_UDP ||
+					connType == CONN_TYPE_OUTGOING_TCP ||
+					connType == CONN_TYPE_OUTGOING_UDP
+			)) {
 				try {
 					if (mNowConn->Log(5)) {
 						mNowConn->LogStream() << "::(s)inputData" << endl;
@@ -379,9 +386,9 @@ void Server::step() {
 					if (mNowConn->Log(5)) {
 						mNowConn->LogStream() << "::(e)inputData" << endl;
 					}
-				} catch (const char * str) {
+				} catch (const char * exception) {
 					if (ErrLog(0)) {
-						LogStream() << "Exception in inputData: " << str << endl;
+						LogStream() << "Exception in inputData: " << exception << endl;
 					}
 					throw "Exception in inputData";
 				} catch (...) {
@@ -403,9 +410,9 @@ void Server::step() {
 					if (mNowConn->Log(5)) {
 						mNowConn->LogStream() << "::(e)outputData" << endl;
 					}
-				} catch (const char * str) {
+				} catch (const char * exception) {
 					if (ErrLog(0)) {
-						LogStream() << "Exception in outputData: " << str << endl;
+						LogStream() << "Exception in outputData: " << exception << endl;
 					}
 					throw "Exception in outputData";
 				} catch (...) {
@@ -434,9 +441,9 @@ void Server::step() {
 					if (Log(5)) {
 						LogStream() << "::(e)delConnection. Number connections: " << mConnChooser.mConnBaseList.size() << endl;
 					}
-				} catch (const char * str) {
+				} catch (const char * exception) {
 					if (ErrLog(0)) {
-						LogStream() << "Exception in delConnection: " << str << endl;
+						LogStream() << "Exception in delConnection: " << exception << endl;
 					}
 					throw "Exception in delConnection";
 				} catch (...) {
@@ -591,9 +598,9 @@ int Server::inputData(Conn * conn) {
 		if (conn->recv() <= 0) {
 			return 0;
 		}
-	} catch(const char * str) {
+	} catch(const char * exception) {
 		if (ErrLog(0)) {
-			LogStream() << "Exception in recv: " << str << endl;
+			LogStream() << "Exception in recv: " << exception << endl;
 		}
 		return 0;
 	} catch(...) {

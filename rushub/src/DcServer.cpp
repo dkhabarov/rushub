@@ -393,7 +393,7 @@ void DcServer::onNewData(Conn * conn, string * data) {
 		parser->parse();
 
 		// UDP data
-		if (conn->getConnType() == CONN_TYPE_CLIENTUDP) {
+		if (conn->getConnType() == CONN_TYPE_INCOMING_UDP) {
 			onNewUdpData(conn, data);
 			return;
 		}
