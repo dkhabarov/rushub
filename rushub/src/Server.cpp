@@ -92,18 +92,44 @@ Server::Server() :
 
 ////////////////////////////////////////////destructor////////////////////////////////////////////
 Server::~Server() {
+	mRun = false;
 	mNowConn = NULL;
+
+	for (tCLIt it = mConnList.begin(); it != mConnList.end(); ++it) {
+		deleteConn(*it);
+	}
+	for (tLLIt it = mListenList.begin(); it != mListenList.end(); ++it) {
+		deleteConn(*it);
+	}
+
 #ifdef _WIN32
 	// Close WSA DLL lib
 	::WSACleanup();
 	initWSA = false;
 #endif
+
 	if (Log(1)) {
 		LogStream() << endl << "Allocated objects: " << Obj::GetCount()
 		<< endl << "Unclosed sockets: " << Conn::mConnCounter << endl;
 	}
 	if (mOfs.is_open()) {
 		mOfs.close();
+	}
+}
+
+
+
+void Server::deleteConn(Conn * conn) {
+	if (conn != NULL) {
+		mConnChooser.deleteConn(conn);
+
+		ConnFactory * connFactory = conn->mConnFactory;
+		if (connFactory != NULL && conn->getCreatedByFactory()) {
+			connFactory->deleteConn(conn);
+		} else {
+			delete conn;
+		}
+		conn = NULL;
 	}
 }
 

@@ -160,13 +160,9 @@ protected:
 
 	/// onNewData
 	virtual void onNewData(Conn *, string *);
-
-	/// close server
-	virtual void close() {
-	}
 	
 	/// onClose conn
-	void onClose(Conn *);
+	virtual void onClose(Conn *);
 
 private:
 
@@ -184,6 +180,8 @@ private:
 
 	/// Main base timer
 	void onTimerBase(Time & now);
+
+	void deleteConn(Conn *);
 
 }; // Server
 

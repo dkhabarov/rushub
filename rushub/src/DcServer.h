@@ -309,9 +309,6 @@ protected:
 	/** Actions after user entry */
 	void afterUserEnter(DcConn *);
 
-	/** Close server */
-	void close();
-
 private:
 
 	Time mChecker; /** Checking time */
@@ -347,8 +344,6 @@ private:
 	*/
 
 private:
-
-	void deleteConn(Conn *);
 
 	bool listeningServer(const char * name, const char * addresses, const char * port, ConnFactory * connFactory, bool udp = false);
 

@@ -144,9 +144,6 @@ DcServer::~DcServer() {
 		}
 	}
 
-	// Remove users
-	close();
-
 	if (mIpListConn != NULL) {
 		delete mIpListConn;
 		mIpListConn = NULL;
@@ -165,35 +162,6 @@ DcServer::~DcServer() {
 	if (mWebProtocol != NULL) {
 		delete mWebProtocol;
 		mWebProtocol = NULL;
-	}
-}
-
-
-
-/** Close server */
-void DcServer::close() {
-	mRun = false;
-	for (tCLIt it = mConnList.begin(); it != mConnList.end(); ++it) {
-		deleteConn(*it);
-	}
-	for (tLLIt it = mListenList.begin(); it != mListenList.end(); ++it) {
-		deleteConn(*it);
-	}
-}
-
-
-
-void DcServer::deleteConn(Conn * conn) {
-	if (conn != NULL) {
-		mConnChooser.deleteConn(conn);
-
-		ConnFactory * connFactory = conn->mConnFactory;
-		if (connFactory != NULL && conn->getCreatedByFactory()) {
-			connFactory->deleteConn(conn);
-		} else {
-			delete conn;
-		}
-		conn = NULL;
 	}
 }
 
