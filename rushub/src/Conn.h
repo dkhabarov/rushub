@@ -206,7 +206,7 @@ public:
 
 	/// Check empty recv buf
 	int sendBufIsEmpty() const {
-		return mSendBuf.length() == 0;
+		return mSendBuf.size() == 0;
 	}
 
 	void setCreatedByFactory(bool createdByFactory) {

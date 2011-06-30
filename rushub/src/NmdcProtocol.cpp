@@ -294,7 +294,7 @@ int NmdcProtocol::eventValidateNick(DcParser * dcparser, DcConn * dcConn) {
 	}
 
 	const string & nick = dcparser->chunkString(CHUNK_1_PARAM);
-	size_t iNickLen = nick.length();
+	size_t iNickLen = nick.size();
 
 	/** Additional checking the nick length */
 	if (iNickLen > 0xFF) {
@@ -1010,7 +1010,7 @@ string & NmdcProtocol::appendValidateDenied(string & str, const string & nick) {
 
 // $HubName hubName - topic|
 string & NmdcProtocol::appendHubName(string & str, const string & hubName, const string & topic) {
-	if (topic.length()) {
+	if (topic.size()) {
 		str.reserve(str.size() + hubName.size() + topic.size() + 12 + NMDC_SEPARATOR_LEN);
 		return str.append("$HubName ", 9).append(hubName).append(" - ", 3).append(topic).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
 	} else {
@@ -1060,7 +1060,7 @@ string & NmdcProtocol::appendOpList(string & str, const string & nick) {
 
 // $UserIP nick ip$$|
 string & NmdcProtocol::appendUserIp(string & str, const string & nick, const string & ip) {
-	if (ip.length()) {
+	if (ip.size()) {
 		str.reserve(str.size() + nick.size() + ip.size() + 11 + NMDC_SEPARATOR_LEN);
 		str.append("$UserIP ", 8).append(nick).append(" ", 1).append(ip).append("$$"NMDC_SEPARATOR, 2 + NMDC_SEPARATOR_LEN);
 	}

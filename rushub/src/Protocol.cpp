@@ -112,7 +112,7 @@ string & Parser::chunkString(unsigned int n) {
 		mStrMap |= flag;
 		try {
 			tChunk &c = mChunks[n];
-			if (c.first < mCommand.length() && c.second < mCommand.length()) {
+			if (c.first < mCommand.size() && c.second < mCommand.size()) {
 				mStrings[n].assign(mCommand, c.first, c.second); // Record n part in n element of the array of the lines
 			} else if (ErrLog(1)) {
 				LogStream() << "Badly parsed message : " << mCommand << endl;
@@ -130,6 +130,7 @@ string & Parser::chunkString(unsigned int n) {
 
 bool Parser::splitOnTwo(size_t start, const string & lim, int cn1, int cn2, size_t len, bool left) {
 	size_t i = 0;
+	size_t lim_len = lim.size();
 	if (len == 0) {
 		len = mLength;
 	}
@@ -139,13 +140,13 @@ bool Parser::splitOnTwo(size_t start, const string & lim, int cn1, int cn2, size
 			return false;
 		}
 	} else { 
-		i = mCommand.rfind(lim, start + len - lim.length()); 
+		i = mCommand.rfind(lim, start + len - lim_len); 
 		if (i == mCommand.npos || i < start) {
 			return false;
 		}
 	}
 	setChunk(cn1, start, i - start);
-	setChunk(cn2, i + lim.length(), mLength - i - lim.length());
+	setChunk(cn2, i + lim_len, mLength - i - lim_len);
 	return true;
 }
 

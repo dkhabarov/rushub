@@ -757,13 +757,13 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 	if (mDcConfig.mSendUserIp) {
 		string ipList;
 		mNmdcProtocol.appendUserIp(ipList, dcUser->getUid(), dcUser->getIp()); // refactoring to DcProtocol pointer
-		if (ipList.length()) {
+		if (ipList.size()) {
 			mIpList.sendToAll(ipList, true, false);
 		}
 
 		if (dcUser->getInIpList()) {
 			dcUser->send(mDcUserList.getIpList(), true, false);
-		} else if (ipList.length() && dcUser->mDcConn && (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_USERIP2)) { // UserIP2
+		} else if (ipList.size() && dcUser->mDcConn && (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_USERIP2)) { // UserIP2
 			dcUser->send(ipList, false, false);
 		}
 	}
@@ -1187,7 +1187,8 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 	}
 
 	// Protocol dependence
-	if (!uid.length() || uid.length() > 0x40 || uid.find_first_of(" |$") != uid.npos) {
+	if (!uid.size() || uid.size() > 0x40 || uid.find_first_of(" |$") != uid.npos) {
+		delete dcUser;
 		return -1;
 	}
 	string myInfo("$MyINFO $ALL ");

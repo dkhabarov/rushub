@@ -159,7 +159,7 @@ public:
 
 	static Key nick2Key(const string & nick) {
 		string key;
-		key.resize(nick.length());
+		key.resize(nick.size());
 		::transform(nick.begin(), nick.end(), key.begin(), ::tolower);
 		return mHash(key);
 	}

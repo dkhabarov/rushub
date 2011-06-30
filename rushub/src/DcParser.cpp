@@ -48,7 +48,7 @@ public:
 	}
 
 	ProtocolCommand(const string & key) : mKey(key) {
-		mLength = mKey.length();
+		mLength = mKey.size();
 	}
 
 	virtual ~ProtocolCommand() {
@@ -168,7 +168,7 @@ bool DcParser::splitChunks() {
 	}
 	mIsParsed = true;
 
-	setChunk(0, 0, mCommand.length()); // Zero part - always whole command
+	setChunk(0, 0, mCommand.size()); // Zero part - always whole command
 
 	switch (mType) {
 
