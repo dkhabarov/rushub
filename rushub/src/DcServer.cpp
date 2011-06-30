@@ -481,7 +481,7 @@ bool DcServer::checkNick(DcConn *dcConn) {
 			string msg;
 			stringReplace(mDcLang.mUsedNick, "nick", msg, dcConn->mDcUser->getUid());
 			sendToUser(dcConn->mDcUser, msg.c_str(), mDcConfig.mHubBot.c_str());
-			dcConn->send(mNmdcProtocol.appendValidateDenide(msg.erase(), dcConn->mDcUser->getUid())); // refactoring to DcProtocol pointer
+			dcConn->send(mNmdcProtocol.appendValidateDenied(msg.erase(), dcConn->mDcUser->getUid())); // refactoring to DcProtocol pointer
 			return false;
 		}
 		if (us->mDcConn->Log(3)) {
@@ -1175,9 +1175,9 @@ bool DcServer::setLang(const string & name, const string & value) {
 
 
 
-int DcServer::regBot(const string & nick, const string & info, const string & ip, bool key) {
+int DcServer::regBot(const string & uid, const string & info, const string & ip, bool key) {
 	DcUser * dcUser = new DcUser();
-	dcUser->setUid(nick);
+	dcUser->setUid(uid);
 	dcUser->setProfile(30);
 	dcUser->mDcServer = this;
 	dcUser->setInOpList(key);
@@ -1187,13 +1187,13 @@ int DcServer::regBot(const string & nick, const string & info, const string & ip
 	}
 
 	// Protocol dependence
-	if (!nick.length() || nick.length() > 64 || nick.find_first_of(" |$") != nick.npos) {
+	if (!uid.length() || uid.length() > 0x40 || uid.find_first_of(" |$") != uid.npos) {
 		return -1;
 	}
 	string myInfo("$MyINFO $ALL ");
-	if (!dcUser->setMyInfo(myInfo.append(nick).append(" ", 1).append(info))) {
+	if (!dcUser->setMyInfo(myInfo.append(uid).append(" ", 1).append(info))) {
 		myInfo = "$MyINFO $ALL ";
-		if (!dcUser->setMyInfo(myInfo.append(nick).append(" $ $$$0$", 9))) {
+		if (!dcUser->setMyInfo(myInfo.append(uid).append(" $ $$$0$", 9))) {
 			delete dcUser;
 			return -2;
 		}
@@ -1201,7 +1201,7 @@ int DcServer::regBot(const string & nick, const string & info, const string & ip
 	////
 
 	if (Log(3)) {
-		LogStream() << "Reg bot: " << nick << endl;
+		LogStream() << "Reg bot: " << uid << endl;
 	}
 
 	if (!addToUserList(dcUser)) {

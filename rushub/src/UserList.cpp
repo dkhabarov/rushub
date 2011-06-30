@@ -193,7 +193,7 @@ void FullUserList::ufDoINFOList::operator() (UserBase * userBase) {
 void FullUserList::ufDoIpList::operator() (UserBase * userBase) {
 	if (!userBase->hide() && userBase->ip().size() && !userBase->uid().empty()) {
 		mList.append(userBase->uid());
-		mList.append(" ");
+		mList.append(" ", 1);
 		mList.append(userBase->ip());
 		mList.append(mSep);
 	}

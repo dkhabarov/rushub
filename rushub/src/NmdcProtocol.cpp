@@ -382,7 +382,7 @@ int NmdcProtocol::eventMyPass(DcParser *, DcConn * dcConn) {
 	dcConn->setLoginStatusFlag(LOGIN_STATUS_PASSWD); /** Password is accepted */
 	appendHello(msg, dcConn->mDcUser->getUid());
 	if (bOp) { /** If entered operator, that sends command LoggedIn ($LogedIn !) */
-		msg.append("$LogedIn ");
+		msg.append("$LogedIn ", 9);
 		msg.append(dcConn->mDcUser->getUid());
 		msg.append(NMDC_SEPARATOR);
 	}
@@ -626,7 +626,7 @@ int NmdcProtocol::eventUserIp(DcParser * dcParser, DcConn * dcConn) {
 			// PROTOCOL NMDC
 			UserBase * userBase = mDcServer->mDcUserList.getUserBaseByNick(nick);
 			if (userBase != NULL) {
-				result.append(nick).append(" ").append(userBase->ip()).append("$$");
+				result.append(nick).append(" ", 1).append(userBase->ip()).append("$$", 2);
 			}
 		}
 		cur = pos + 2;
@@ -639,7 +639,7 @@ int NmdcProtocol::eventUserIp(DcParser * dcParser, DcConn * dcConn) {
 		// PROTOCOL NMDC
 		UserBase * userBase = mDcServer->mDcUserList.getUserBaseByNick(nick);
 		if (userBase != NULL) {
-			result.append(nick).append(" ").append(userBase->ip());
+			result.append(nick).append(" ", 1).append(userBase->ip());
 		}
 	}
 
@@ -1003,7 +1003,7 @@ string & NmdcProtocol::appendGetPass(string & str) {
 }
 
 // $ValidateDenide nick|
-string & NmdcProtocol::appendValidateDenide(string & str, const string & nick) {
+string & NmdcProtocol::appendValidateDenied(string & str, const string & nick) {
 	str.reserve(str.size() + nick.size() + 16 + NMDC_SEPARATOR_LEN);
 	return str.append("$ValidateDenide ", 16).append(nick).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
 }

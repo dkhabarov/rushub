@@ -81,7 +81,7 @@ public:
 	string & appendHello(string & str, const string & nick);
 	string & appendHubIsFull(string & str);
 	string & appendGetPass(string & str);
-	string & appendValidateDenide(string & str, const string & nick);
+	string & appendValidateDenied(string & str, const string & nick);
 	string & appendHubName(string & str, const string & hubName, const string & topic);
 	string & appendHubTopic(string & str, const string & hubTopic);
 	string & appendChat(string & str, const string & nick, const string & msg);
