@@ -1216,14 +1216,14 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 
 
 
-int DcServer::unregBot(const string & nick) {
+int DcServer::unregBot(const string & uid) {
 
 	if (Log(3)) {
-		LogStream() << "Unreg bot: " << nick << endl;
+		LogStream() << "Unreg bot: " << uid << endl;
 	}
 
 	// NMDC
-	DcUser * dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByNick(nick));
+	DcUser * dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByNick(uid));
 	if (!dcUser) {
 		return -1;
 	}
