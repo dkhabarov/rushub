@@ -198,7 +198,7 @@ void Dir::checkEndSlash(string & path) {
 	}
 
 	if (path.size() == 0 || path.find('/', path.size() - 1) == path.npos) {
-		path.append("/");
+		path.append("/", 1);
 	}
 
 }

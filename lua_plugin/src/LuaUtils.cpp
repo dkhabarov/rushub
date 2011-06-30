@@ -131,7 +131,7 @@ bool LuaUtils::checkScriptName(lua_State * L, string & name) {
 		return false;
 	}
 	if (fileSize <= 4 || (0 != name.compare(fileSize - 4, 4, ".lua"))) {
-		name.append(".lua");
+		name.append(".lua", 4);
 	}
 	return true;
 }

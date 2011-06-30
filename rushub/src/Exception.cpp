@@ -98,7 +98,7 @@ long __stdcall Exception::exceptionFilter(LPEXCEPTION_POINTERS e) {
 		<< "Time: " << tm << endl << endl;
 
 	WIN32_FIND_DATA fd;
-	if (FindFirstFile(path.append("\\rushub.pdb").c_str(), &fd) == INVALID_HANDLE_VALUE) {
+	if (FindFirstFile(path.append("\\rushub.pdb", 11).c_str(), &fd) == INVALID_HANDLE_VALUE) {
 		#ifndef _DEBUG
 			f << "Debug symbols was not found" << endl;
 			f.close();
@@ -136,12 +136,12 @@ int Exception::init(const char * path) {
 		symbolPath.append(";", 1);
 		symbolPath.append(buf);
 	}
-	if (GetEnvironmentVariableA( "SYSTEMROOT", buf, BUFFERSIZE)) {
+	if (GetEnvironmentVariableA("SYSTEMROOT", buf, BUFFERSIZE)) {
 		symbolPath.append(";", 1);
 		symbolPath.append(buf);
 		symbolPath.append(";", 1);
 		symbolPath.append(buf);
-		symbolPath.append("\\System32");
+		symbolPath.append("\\System32", 9);
 	}
 	if (path != NULL && path[0] != '\0') {
 		symbolPath.append(";", 1);

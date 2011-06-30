@@ -302,7 +302,7 @@ int LuaPlugin::loadScripts() {
 				}
 				string file(name);
 				if ((file.size() <= 4) || (0 != file.compare(file.size() - 4, 4, ".lua"))) {
-					file.append(".lua");
+					file.append(".lua", 4);
 				}
 				LuaInterpreter * script = addScript(file, true);
 				if (strcmp(enabled, "false") != 0 && strcmp(enabled, "0") != 0) {
