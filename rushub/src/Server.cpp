@@ -123,9 +123,9 @@ void Server::deleteConn(Conn * conn) {
 	if (conn != NULL) {
 		mConnChooser.deleteConn(conn);
 
-		ConnFactory * connFactory = conn->mConnFactory;
-		if (connFactory != NULL && conn->getCreatedByFactory()) {
-			connFactory->deleteConn(conn);
+		ConnFactory * selfConnFactory = conn->mSelfConnFactory;
+		if (selfConnFactory != NULL) {
+			selfConnFactory->deleteConn(conn);
 		} else {
 			delete conn;
 		}
@@ -143,9 +143,9 @@ int Server::listening(ConnFactory * connFactory, const char * ip, const char * p
 	}
 
 	// Set server listen factory
-	conn->mConnFactory = connFactory;
+	conn->mCreatorConnFactory = connFactory;
 
-	// Set protocol for UDP conn without factory
+	// Set protocol for Conn without factory
 	conn->mProtocol = connFactory->mProtocol;
 
 	return 0;
@@ -346,9 +346,9 @@ void Server::step() {
 
 					//if (inputData(new_conn) >= 0) { // fix close conn if not recv data
 
-						if (mNowConn->mConnFactory) {
+						if (mNowConn->mCreatorConnFactory) {
 							// On new connection using ListenFactory
-							mNowConn->mConnFactory->onNewConn(new_conn);
+							mNowConn->mCreatorConnFactory->onNewConn(new_conn);
 						} else {
 							if (Log(4)) {
 								LogStream() << "ListenFactory is empty" << endl;
@@ -478,8 +478,8 @@ int Server::addConnection(Conn * conn) {
 		if (conn->Log(2)) {
 			conn->LogStream() << "Not reserved connection: " << conn->getIp() << endl;
 		}
-		if (conn->mConnFactory != NULL && conn->getCreatedByFactory()) {
-			conn->mConnFactory->deleteConn(conn);
+		if (conn->mSelfConnFactory != NULL) {
+			conn->mSelfConnFactory->deleteConn(conn);
 		} else {
 			if (conn->Log(2)) {
 				conn->LogStream() << "Connection without factory: " << conn->getIp() << endl;
@@ -503,8 +503,8 @@ int Server::addConnection(Conn * conn) {
 		if (conn->ErrLog(0)) {
 			conn->LogStream() << "Error: Can't add socket!" << endl;
 		}
-		if (conn->mConnFactory != NULL && conn->getCreatedByFactory()) {
-			conn->mConnFactory->deleteConn(conn);
+		if (conn->mSelfConnFactory != NULL) {
+			conn->mSelfConnFactory->deleteConn(conn);
 		} else {
 			delete conn;
 		}
@@ -558,8 +558,8 @@ int Server::delConnection(Conn * conn) {
 
 	mConnChooser.deleteConn(conn);
 
-	if (conn->mConnFactory != NULL && conn->getCreatedByFactory()) {
-		conn->mConnFactory->deleteConn(conn); 
+	if (conn->mSelfConnFactory != NULL) {
+		conn->mSelfConnFactory->deleteConn(conn); 
 	} else {
 		if (conn->Log(0)) {
 			conn->LogStream() << "Deleting conn without factory!" << endl;
@@ -620,9 +620,9 @@ int Server::inputData(Conn * conn) {
 
 		if (conn->getStatus() == STRING_STATUS_STR_DONE) {
 
-			if (conn->mConnFactory != NULL) {
-				// On new data using ListenFactory
-				conn->mConnFactory->onNewData(conn, conn->getCommandPtr());
+			if (conn->mSelfConnFactory != NULL) {
+				// On new data using selfConnFactory
+				conn->mSelfConnFactory->onNewData(conn, conn->getCommandPtr());
 			} else {
 				// On new data by server
 				onNewData(conn, conn->getCommandPtr());

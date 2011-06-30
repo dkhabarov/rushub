@@ -122,7 +122,8 @@ public:
 
 	Time mLastRecv; ///< Time of the last recv action from the client
 
-	ConnFactory * mConnFactory; ///< Conn factory
+	ConnFactory * mSelfConnFactory; ///< Self Conn Factory
+	ConnFactory * mCreatorConnFactory; ///< Conn Factory Creator
 	Server * mServer; ///< Server
 	Protocol * mProtocol; ///< Protocol
 	Parser * mParser; ///< Parser
@@ -207,14 +208,6 @@ public:
 	/// Check empty recv buf
 	int sendBufIsEmpty() const {
 		return mSendBuf.size() == 0;
-	}
-
-	void setCreatedByFactory(bool createdByFactory) {
-		mCreatedByFactory = createdByFactory;
-	}
-
-	bool getCreatedByFactory() const {
-		return mCreatedByFactory;
 	}
 
 	/// Remaining (for web-server)
@@ -312,9 +305,6 @@ private:
 
 	bool mClosed; ///< closed flag, for close counter
 	int mCloseReason; ///< Reason of close connection
-
-	/// Created by ConnFactory
-	bool mCreatedByFactory;
 
 private:
 

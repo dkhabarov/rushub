@@ -248,8 +248,7 @@ Conn * DcConnFactory::createConn(tSocket sock) {
 	}
 
 	DcConn * dcConn = new DcConn(CLIENT_TYPE_NMDC, sock, mServer);
-	dcConn->setCreatedByFactory(true);
-	dcConn->mConnFactory = this; /** Connection factory for current connection (DcConnFactory) */
+	dcConn->mSelfConnFactory = this; /** Connection factory for current connection (DcConnFactory) */
 	dcConn->mProtocol = mProtocol; /** Protocol pointer */
 
 	// Create DcUser

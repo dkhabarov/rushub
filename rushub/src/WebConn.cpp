@@ -48,8 +48,7 @@ Conn * WebConnFactory::createConn(tSocket sock) {
 	}
 
 	WebConn * webConn = new WebConn(sock, mServer);
-	webConn->setCreatedByFactory(true);
-	webConn->mConnFactory = this; /** Fuctory current connection (WebConnFactory) */
+	webConn->mSelfConnFactory = this; /** Fuctory current connection (WebConnFactory) */
 	webConn->mProtocol = mProtocol; /** Protocol (WebProtocol) */
 
 	WebUser * webUser = new WebUser(CLIENT_TYPE_WEB);

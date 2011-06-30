@@ -57,7 +57,8 @@ char Conn::mRecvBuf[MAX_RECV_SIZE + 1];
 Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 	Obj("Conn"),
 	mLastRecv(true),
-	mConnFactory(NULL),
+	mSelfConnFactory(NULL),
+	mCreatorConnFactory(NULL),
 	mServer(server),
 	mProtocol(NULL),
 	mParser(NULL),
@@ -76,8 +77,7 @@ Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 	mBlockOutput(true),
 	mCommand(NULL),
 	mClosed(false),
-	mCloseReason(0),
-	mCreatedByFactory(false)
+	mCloseReason(0)
 {
 	clearCommandPtr();
 	memset(&mCloseTime, 0, sizeof(mCloseTime));
@@ -90,7 +90,8 @@ Conn::~Conn() {
 		deleteParser(mParser);
 		mParser = NULL;
 	}
-	mConnFactory = NULL;
+	mSelfConnFactory = NULL;
+	mCreatorConnFactory = NULL;
 	mServer = NULL;
 	mProtocol = NULL;
 	close();
@@ -469,14 +470,14 @@ Conn * Conn::createNewConn() {
 
 	Conn * new_conn = NULL;
 
-	if (mConnFactory != NULL) {
-		new_conn = mConnFactory->createConn(sock); // Create connection object by factory (CONN_TYPE_INCOMING_TCP)
+	if (mCreatorConnFactory != NULL) {
+		new_conn = mCreatorConnFactory->createConn(sock); // Create connection object by factory (CONN_TYPE_INCOMING_TCP)
 	} else {
 		if (Log(3)) {
 			LogStream() << "Create simple connection object for socket: " << sock << endl;
 		}
 		new_conn = new Conn(sock, mServer); // Create simple connection object (CONN_TYPE_INCOMING_TCP)
-		new_conn->mProtocol = mProtocol;
+		new_conn->mProtocol = mProtocol; // Set protocol by this Conn
 	}
 	if (!new_conn) {
 		if (ErrLog(0)) {
@@ -486,8 +487,8 @@ Conn * Conn::createNewConn() {
 	}
 
 	if (new_conn->defineConnInfo(storage) == -1) {
-		if (mConnFactory != NULL) {
-			mConnFactory->deleteConn(new_conn);
+		if (mCreatorConnFactory != NULL) {
+			mCreatorConnFactory->deleteConn(new_conn);
 		} else {
 			delete new_conn;
 		}
@@ -1207,9 +1208,8 @@ ConnFactory::~ConnFactory() {
 
 Conn * ConnFactory::createConn(tSocket sock) {
 	Conn * conn = new Conn(sock, mServer); // CONN_TYPE_INCOMING_TCP
-	conn->setCreatedByFactory(true);
-	conn->mConnFactory = this;
-	conn->mProtocol = mProtocol; // proto
+	conn->mSelfConnFactory = this;
+	conn->mProtocol = mProtocol; // protocol
 	return conn;
 }
 
