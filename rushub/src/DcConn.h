@@ -175,7 +175,9 @@ public:
 
 
 	/// Sending RAW command to the client
-	virtual int send(const string & data, bool addSep = false, bool flush = true);
+	inline int send(const string & data, bool addSep = false, bool flush = true) {
+		return send(data.c_str(), data.size(), addSep, flush);
+	}
 	virtual int send(const char * data, size_t len, bool addSep = false, bool flush = true);
 
 	virtual bool parseCommand(const char * cmd);

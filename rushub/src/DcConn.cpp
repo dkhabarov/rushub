@@ -59,12 +59,6 @@ DcServer * DcConn::server() {
 
 
 
-int DcConn::send(const string & data, bool addSep, bool flush) {
-	return send(data.c_str(), data.size(), addSep, flush);
-}
-
-
-
 int DcConn::send(const char * data, size_t len, bool addSep, bool flush) {
 	int ret = 0;
 	if (mWritable) {
@@ -74,6 +68,7 @@ int DcConn::send(const char * data, size_t len, bool addSep, bool flush) {
 				LogStream() << "Too long message. Size: " << len << ". Max size: " << mSendBufMax << endl;
 			}
 		}
+
 		if (addSep) {
 			writeData(data, len, false);
 			ret = writeData(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN, flush);

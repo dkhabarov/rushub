@@ -920,9 +920,8 @@ int Conn::writeData(const char * data, size_t len, bool flush) {
 		closeNow(CLOSE_REASON_MAXSIZE_SEND);
 		return -1;
 	}
-	flush = flush || (bufLen > (mSendBufMax >> 1));
 
-	if (!flush) { 
+	if (!flush && (bufLen < (mSendBufMax >> 1))) { 
 		mSendBuf.append(data, len);
 		return 0;
 	}
@@ -935,10 +934,10 @@ int Conn::writeData(const char * data, size_t len, bool flush) {
 		size = mSendBuf.size();
 		send_buf = mSendBuf.c_str();
 	} else { 
-		size = len;
-		if (size == 0) { // buff is empty and no data
+		if (len == 0) { // buff is empty and no new data
 			return 0;
 		}
+		size = len;
 		send_buf = data;
 	}
 
