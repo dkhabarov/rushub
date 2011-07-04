@@ -65,8 +65,8 @@ public:
 	Time mTime; ///< Current time of main cycle on the server
 
 	int mStepDelay; ///< Step delay (for testing)
-	int mTimerServPeriod; ///< Serv period (msec)
-	int mTimerConnPeriod; ///< Conn period (msec)
+	unsigned int mTimerServPeriod; ///< Serv period (msec)
+	unsigned int mTimerConnPeriod; ///< Conn period (msec)
 	bool mMac; ///< allow to define MAC address
 
 public:
@@ -137,8 +137,8 @@ protected:
 	Server * mServer;
 
 	struct Times { ///< Times
-		long mServ; ///< Timer Serv Period
-		long mConn; ///< Timer Conn Period
+		unsigned long mServ; ///< Timer Serv Period
+		unsigned long mConn; ///< Timer Conn Period
 	} mTimes;
 
 protected:

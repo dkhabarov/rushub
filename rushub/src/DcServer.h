@@ -206,7 +206,7 @@ public:
 		return mSysVersion;
 	}
 
-	int getMSec() const {
+	unsigned long getMSec() const {
 		Time tm(true);
 		return tm;
 	}

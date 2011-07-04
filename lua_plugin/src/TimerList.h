@@ -38,7 +38,8 @@ class Timer {
 
 private:
 
-	int mTime, mInterval;
+	unsigned long mTime;
+	int mInterval;
 	string mFunc;
 
 public:
@@ -52,7 +53,7 @@ public:
 
 	~Timer();
 
-	void check(int time);
+	void check(unsigned long time);
 
 }; // Timer
 

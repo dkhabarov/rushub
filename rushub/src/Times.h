@@ -80,7 +80,7 @@ public:
 
 	operator double();
 	operator long();
-	operator int();
+	operator unsigned long();
 	operator bool();
 	int operator ! ();
 
@@ -91,7 +91,19 @@ public:
 
 	/** Get milisec */
 	inline unsigned long MiliSec() const {
-		return (unsigned long)(tv_sec) * 1000 + (unsigned long)(tv_usec) / 1000;
+		if (tv_sec > 0) {
+			if (tv_usec > 0) {
+				return (unsigned long)(tv_sec) * 1000 + (unsigned long)(tv_usec) / 1000;
+			} else {
+				return (unsigned long)(tv_sec) * 1000 + (unsigned long)(-tv_usec) / 1000;
+			}
+		} else {
+			if (tv_usec < 0) {
+				return (unsigned long)(-tv_sec) * 1000 + (unsigned long)(tv_usec) / 1000;
+			} else {
+				return (unsigned long)(-tv_sec) * 1000 + (unsigned long)(-tv_usec) / 1000;
+			}
+		}
 	}
 
 	/*bool LocalTime(struct tm &result){ return localtime_r(this, &result) == &result;}*/

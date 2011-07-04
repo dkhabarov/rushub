@@ -193,7 +193,7 @@ Time::operator long() {
 	return long(tv_sec) * 1000000 + long(tv_usec);
 }
 
-Time::operator int() {
+Time::operator unsigned long() {
 	return int(tv_sec * 1000 + double(tv_usec) / 1000.);
 }
 

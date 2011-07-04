@@ -236,8 +236,8 @@ int Server::run() {
 			step(); // Server's step
 
 			// Timers (100 msec)
-			long msec = mTime.MiliSec();
-			if (abs(msec - mTimes.mServ) >= 100) { // Transfer of time
+			unsigned long msec = mTime.MiliSec();
+			if (msec > mTimes.mServ ? msec - mTimes.mServ >= 100 : mTimes.mServ - msec >= 100) { // Transfer of time
 				mTimes.mServ = msec;
 				onTimerBase(mTime);
 			}
@@ -664,7 +664,11 @@ void Server::outputData(Conn * conn) {
 /// Main mase timer
 void Server::onTimerBase(Time & now) {
 	onTimer(now);
-	if (abs(mTimes.mServ - mTimes.mConn) >= mTimerConnPeriod) {
+	if (
+		mTimes.mServ > mTimes.mConn ? 
+		(mTimes.mServ - mTimes.mConn >= mTimerConnPeriod) :
+		(mTimes.mConn - mTimes.mServ >= mTimerConnPeriod)
+	) {
 		mTimes.mConn = mTimes.mServ;
 		tCLIt it_e = mConnList.end();
 		Conn * conn = NULL;

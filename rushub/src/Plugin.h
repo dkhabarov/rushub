@@ -75,7 +75,7 @@ using namespace ::std;
 
 /// Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10023
+	#define INTERNAL_PLUGIN_VERSION 10024
 #endif
 
 /// NMDC protocol separator
@@ -379,7 +379,7 @@ public:
 	virtual const string & getSystemVersion() const = 0;
 
 	/// Get time in milliseconds (now)
-	virtual int getMSec() const = 0;
+	virtual unsigned long getMSec() const = 0;
 
 	/// Get hub work time in sec
 	virtual int getUpTime() const = 0;
