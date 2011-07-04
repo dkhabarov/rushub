@@ -26,14 +26,12 @@
 #include "Conn.h" // Conn, ConnFactory
 
 #include <iostream> // cout, endl
-#include <math.h> // abs
 
 #ifdef _WIN32
 	#pragma comment(lib, "ws2_32.lib")
 #else
 	#include <sys/socket.h>
 	#include <unistd.h> // for usleep function
-	#include <cstdlib> // for abs
 #endif
 
 namespace server {

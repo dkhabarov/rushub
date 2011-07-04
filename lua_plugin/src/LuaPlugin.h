@@ -28,7 +28,6 @@
 
 #include <vector>
 #include <list>
-#include <math.h> // abs
 #include <string>
 
 // Visual Leak Detector

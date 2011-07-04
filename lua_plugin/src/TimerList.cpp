@@ -20,10 +20,6 @@
 #include "TimerList.h"
 #include "LuaPlugin.h"
 
-#ifndef _WIN32
-	#include <cstdlib> // abs
-#endif
-
 namespace luaplugin {
 
 int TmrCnt::mCount = 0;
