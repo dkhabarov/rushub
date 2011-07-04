@@ -28,7 +28,8 @@
 
 #include <signal.h>
 
-#if defined(_DEBUG) && defined(VLD)
+// Visual Leak Detector
+#ifdef VLD
 	#include <vld.h>
 #endif
 

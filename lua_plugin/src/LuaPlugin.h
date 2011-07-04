@@ -31,7 +31,8 @@
 #include <math.h> // abs
 #include <string>
 
-#if defined(_DEBUG) && defined(VLD)
+// Visual Leak Detector
+#ifdef VLD
 	#include <vld.h>
 #endif
 
