@@ -211,7 +211,7 @@ public:
 	}
 
 	/// Remaining (for web-server)
-	virtual int remaining();
+	virtual size_t remaining();
 
 	/// Clear params
 	void clearCommandPtr();
@@ -221,7 +221,7 @@ public:
 	void setCommandPtr(string *);
 
 	/// Reading data from buffer and record in line of the protocol
-	int readFromRecvBuf();
+	size_t readFromRecvBuf();
 
 	/// Get pointer for string
 	virtual string * getParserCommandPtr();
@@ -276,7 +276,7 @@ protected:
 protected:
 
 	/// Write data in sending buffer
-	int writeData(const char * data, size_t len, bool flush);
+	size_t writeData(const char * data, size_t len, bool flush);
 
 	/// onFlush
 	virtual void onFlush();
@@ -287,8 +287,8 @@ private:
 
 	tSocket mSocket; ///< Socket descriptor
 	Time mCloseTime; ///< Time before closing the conn
-	int mRecvBufEnd; ///< Final position of the buffer mRecvBuf
-	int mRecvBufRead; ///< Current position of the buffer mRecvBuf
+	size_t mRecvBufEnd; ///< Final position of the buffer mRecvBuf
+	size_t mRecvBufRead; ///< Current position of the buffer mRecvBuf
 	int mStatus; ///< Status of the line
 
 	/// struct sockaddr_in

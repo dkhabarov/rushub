@@ -104,8 +104,8 @@ private:
 
 private:
 
-	int send(DcConn * conn);
-	int sendWithNick(DcConn * conn);
+	size_t send(DcConn * conn);
+	size_t sendWithNick(DcConn * conn);
 
 }; // class DcIpList
 

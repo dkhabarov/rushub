@@ -118,7 +118,7 @@ void DcIpList::sendToIpWithNick(const char * ip, string & start, string & end, u
 
 
 
-int DcIpList::send(DcConn * dcConn) {
+size_t DcIpList::send(DcConn * dcConn) {
 	if (!dcConn || !dcConn->mIpRecv) {
 		return 0;
 	}
@@ -141,7 +141,7 @@ int DcIpList::send(DcConn * dcConn) {
 
 
 
-int DcIpList::sendWithNick(DcConn * dcConn) {
+size_t DcIpList::sendWithNick(DcConn * dcConn) {
 	// check empty nick!
 	if (!dcConn->mIpRecv || dcConn->mDcUser->getUid().empty()) {
 		return 0;

@@ -154,7 +154,7 @@ int ConnSelect::choose(Time & timeout) {
 	mResExceptFS = mExceptFS;
 
 	/** select */
-	int ret = ::select(mMaxSocket, &mResReadFS, &mResWriteFS, &mResExceptFS, (timeval *)(&timeout));
+	int ret = ::select(static_cast<int> (mMaxSocket), &mResReadFS, &mResWriteFS, &mResExceptFS, (timeval *)(&timeout));
 	if (SOCK_ERROR(ret)) {
 		return -1;
 	}

@@ -90,10 +90,10 @@ public:
 	void stop(int);
 
 	/// inputData
-	int inputData(Conn *);
+	size_t inputData(Conn *);
 
 	/// outputData
-	int outputData(Conn *);
+	void outputData(Conn *);
 
 	/// onNewConn
 	virtual int onNewConn(Conn *);

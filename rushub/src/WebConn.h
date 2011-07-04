@@ -102,7 +102,7 @@ public:
 	/** Timer of the connection */
 	virtual int onTimer(Time & now);
 
-	virtual int send(const string & data, bool flush = true);
+	virtual size_t send(const string & data, bool flush = true);
 
 	DcServer * server();
 

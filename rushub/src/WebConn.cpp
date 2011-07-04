@@ -79,7 +79,8 @@ void WebConnFactory::onNewData(Conn * conn, string * str) {
 	}
 
 	(*str).append(WEB_SEPARATOR);
-	if (conn->remaining() < 0) {
+	conn->remaining();
+	if (!conn->isOk()) {
 		return;
 	}
 
@@ -191,7 +192,7 @@ int WebUser::getPortConn() {
 
 
 
-int WebConn::send(const string & data, bool flush /* = true */) {
+size_t WebConn::send(const string & data, bool flush /* = true */) {
 	if (!mWritable) {
 		return 0;
 	}

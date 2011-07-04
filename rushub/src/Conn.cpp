@@ -309,7 +309,7 @@ tSocket Conn::socketBind(tSocket sock) {
 	}
 
 	// Bind
-	if (SOCK_ERROR(bind(sock, mAddrInfo->ai_addr, mAddrInfo->ai_addrlen))) {
+	if (SOCK_ERROR(bind(sock, mAddrInfo->ai_addr, static_cast<int> (mAddrInfo->ai_addrlen)))) {
 		if (ErrLog(0)) {
 			LogStream() << "Error bind: " << SockErrMsg << endl;
 		}
@@ -343,7 +343,7 @@ tSocket Conn::socketConnect(tSocket sock) {
 	if (sock == INVALID_SOCKET) {
 		return INVALID_SOCKET;
 	}
-	if (SOCK_ERROR(connect(sock, mAddrInfo->ai_addr, mAddrInfo->ai_addrlen))) {
+	if (SOCK_ERROR(connect(sock, mAddrInfo->ai_addr, static_cast<int> (mAddrInfo->ai_addrlen)))) {
 		SOCK_CLOSE(sock);
 		if (ErrLog(1)) {
 			LogStream() << "Error connecting: " << SockErrMsg << endl;
@@ -818,7 +818,7 @@ void Conn::setCommandPtr(string * pStr) {
 
 
 /// Reading data from buffer and record in line of the protocol
-int Conn::readFromRecvBuf() {
+size_t Conn::readFromRecvBuf() {
 	if (!mCommand) {
 		if (ErrLog(0)) {
 			LogStream() << "Fatal error: ReadFromBuf with null string pointer" << endl;
@@ -893,15 +893,15 @@ void Conn::deleteParser(Parser * parser) {
 
 
 /// Remaining (for web-server)
-int Conn::remaining() {
+size_t Conn::remaining() {
 
 	unsigned long maxCommandLength = (mProtocol != NULL ? mProtocol->getMaxCommandLength() : 10240);
 
 	char * buf = mRecvBuf + mRecvBufRead;
-	int len = mRecvBufEnd - mRecvBufRead;
+	size_t len = mRecvBufEnd - mRecvBufRead;
 	if (mCommand->size() + len > maxCommandLength) {
 		closeNow(CLOSE_REASON_MAXSIZE_REMAINING);
-		return -1;
+		return 0;
 	}
 	mCommand->append(buf, len);
 	mRecvBufRead = mRecvBufEnd = 0;
@@ -911,14 +911,14 @@ int Conn::remaining() {
 
 
 /// Write data in sending buffer and send to conn
-int Conn::writeData(const char * data, size_t len, bool flush) {
+size_t Conn::writeData(const char * data, size_t len, bool flush) {
 	size_t bufLen = mSendBuf.size();
 	if (bufLen + len >= mSendBufMax) {
 		if (Log(0)) {
 			LogStream() << "Sending buffer has big size, closing" << endl;
 		}
 		closeNow(CLOSE_REASON_MAXSIZE_SEND);
-		return -1;
+		return 0;
 	}
 
 	if (!flush && (bufLen < (mSendBufMax >> 1))) { 
@@ -949,7 +949,7 @@ int Conn::writeData(const char * data, size_t len, bool flush) {
 				LogStream() << "Error in sending: " << SockErr << "(not EAGAIN), closing" << endl;
 			}
 			closeNow(CLOSE_REASON_ERROR_SEND);
-			return -1;
+			return 0;
 		}
 
 		if (Log(3)) {
@@ -1049,12 +1049,16 @@ int Conn::send(const char * buf, size_t & len) {
 
 			//int count = 0;
 			//do {
-				n = ::send(mSocket, buf + total, bytesleft, 
-				#ifndef _WIN32
-					MSG_NOSIGNAL | MSG_DONTWAIT);
-				#else
-					0);
-				#endif
+				n = ::send(
+					mSocket,
+					buf + total,
+					static_cast<int> (bytesleft), // fix me: protection to very long msg
+					#ifndef _WIN32
+						MSG_NOSIGNAL | MSG_DONTWAIT
+					#else
+						0
+					#endif
+				);
 			/*	if (SockErr == SOCK_EAGAIN) {
 					#ifdef _WIN32
 						Sleep(5);
@@ -1068,7 +1072,14 @@ int Conn::send(const char * buf, size_t & len) {
 			*/
 
 		} else {
-			n = ::sendto(mSocket, buf + total, bytesleft, 0, (struct sockaddr *) &mSockAddrIn, mSockAddrInSize);
+			n = ::sendto(
+				mSocket,
+				buf + total,
+				static_cast<int> (bytesleft), // fix me: protection to very long msg
+				0,
+				(struct sockaddr *) &mSockAddrIn,
+				mSockAddrInSize
+			);
 		}
 
 /*		if (Log(5)) {
@@ -1152,7 +1163,7 @@ const char * Conn::inetNtop(int af, const void * src, char * dst, socklen_t cnt)
 			return NULL;
 		}
 
-		if (WSAAddressToString(addr, size, NULL, dst, &len) == 0) {
+		if (WSAAddressToString(addr, static_cast<DWORD> (size), NULL, dst, &len) == 0) {
 			return dst;
 		}
 		return NULL;

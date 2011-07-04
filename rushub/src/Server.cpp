@@ -593,7 +593,7 @@ void Server::onClose(Conn * conn) {
 
 
 /// inputData
-int Server::inputData(Conn * conn) {
+size_t Server::inputData(Conn * conn) {
 	try {
 		if (conn->recv() <= 0) {
 			return 0;
@@ -610,7 +610,7 @@ int Server::inputData(Conn * conn) {
 		return 0;
 	}
 
-	int bytes = 0;
+	size_t bytes = 0;
 	while (conn->isOk() && conn->isWritable()) {
 		if (conn->getStatus() == STRING_STATUS_NO_STR) {
 			conn->setCommandPtr(createCommandPtr(conn));
@@ -655,9 +655,8 @@ void Server::onNewData(Conn *, string * str) {
 
 
 /// outputData
-int Server::outputData(Conn * conn) {
+void Server::outputData(Conn * conn) {
 	conn->flush();
-	return 0;
 }
 
 

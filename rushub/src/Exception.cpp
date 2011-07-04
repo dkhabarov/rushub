@@ -288,8 +288,12 @@ void Exception::stackTrace(void * hThread, char * msg, std::ostream & f, unsigne
 
 	f << msg << endl << endl;
 
-	getFunctionInfo(callStack.AddrPC.Offset, callStack.AddrFrame.Offset, symInfo);
-	getSourceInfo(callStack.AddrPC.Offset, srcInfo);
+	getFunctionInfo(
+		static_cast<unsigned long> (callStack.AddrPC.Offset),
+		static_cast<unsigned long> (callStack.AddrFrame.Offset),
+		symInfo
+	);
+	getSourceInfo(static_cast<unsigned long> (callStack.AddrPC.Offset), srcInfo);
 
 	f << srcInfo << ": " << symInfo << endl;
 
@@ -312,8 +316,12 @@ void Exception::stackTrace(void * hThread, char * msg, std::ostream & f, unsigne
 			break;
 		}
 
-		getFunctionInfo(callStack.AddrPC.Offset, callStack.AddrFrame.Offset, symInfo);
-		getSourceInfo(callStack.AddrPC.Offset, srcInfo);
+		getFunctionInfo(
+			static_cast<unsigned long> (callStack.AddrPC.Offset),
+			static_cast<unsigned long> (callStack.AddrFrame.Offset),
+			symInfo
+		);
+		getSourceInfo(static_cast<unsigned long> (callStack.AddrPC.Offset), srcInfo);
 
 		f << srcInfo << ": " << symInfo << endl;
 	}
