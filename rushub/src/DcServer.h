@@ -27,7 +27,7 @@
 
 //#define WITHOUT_PLUGINS 1
 
-#include "Server.h"
+#include "Server.h" // first (def winsock2.h)
 #include "DcConn.h"
 #include "NmdcProtocol.h"
 #include "Plugin.h"

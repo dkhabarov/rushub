@@ -25,9 +25,9 @@
 #ifndef CONN_CHOOSE_H
 #define CONN_CHOOSE_H
 
-#include "ConnBase.h" // before Times (winsock2.h redefinition)!
-#include "Times.h" // after ConnBase (winsock2.h redefinition)!
-#include "HashTable.h" // Hash table (HashTable)
+#include "ConnBase.h" // first (def winsock2.h)
+#include "Times.h"
+#include "HashTable.h"
 
 using namespace ::utils; // HashTable, Time
 

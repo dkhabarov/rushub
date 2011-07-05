@@ -25,9 +25,9 @@
 #ifndef CONN_H
 #define CONN_H
 
+#include "ConnBase.h" // first (def winsock2.h)
 #include "Obj.h"
-#include "ConnBase.h" // before Times (winsock2.h redefinition)!
-#include "Times.h" // after ConnBase (winsock2.h redefinition)!
+#include "Times.h"
 #include "Protocol.h"
 #include "Plugin.h" // for NMDC_SEPARATOR
 

@@ -22,7 +22,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DcServer.h"
+#include "DcServer.h" // first (def winsock2.h)
 #include "Service.h"
 #include "Dir.h"
 

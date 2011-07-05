@@ -25,8 +25,8 @@
 #ifndef DC_CONN_H
 #define DC_CONN_H
 
+#include "Conn.h" // first (def winsock2.h)
 #include "Plugin.h"
-#include "Conn.h"
 #include "DcUser.h"
 #include "TimeOut.h"
 

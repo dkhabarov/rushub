@@ -28,9 +28,9 @@
 #define INTERNALNAME "RusHub"
 #define INTERNALVERSION "2.3.5[beta]" // without space!
 
+#include "ConnChoose.h" // first (def winsock2.h)
 #include "Obj.h"
-#include "ConnChoose.h"
-#include "Times.h" // Time
+#include "Times.h"
 #include "MeanFrequency.h"
 
 #if USE_SELECT
