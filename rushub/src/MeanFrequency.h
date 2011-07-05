@@ -32,23 +32,23 @@
 using namespace ::std;
 
 namespace utils {
+
 /**
 	Template of the determination of the average frequency
 */
-
 template<class T, int max_size = 20>
 class MeanFrequency {
 
 public:
 
-	Time mOverPeriod; /** Value of the period, in current which is considered frequency */
-	Time mPeriodPart; /** Value of each part of period */
-	Time mStart, mEnd; /** Initial and final time of the period, in current which is considered frequency */
-	Time mPart; /** Begin (End) of the current part of period */
-	int mResolution; /** Number of the parts of the period */
-	T mCounts[max_size]; /** Array with amount of the hits in that or other part of the period */
-	int mStartIdx; /** Current index to positions */
-	int mNumFill; /** Amount filled period */
+	Time mOverPeriod; ///< Value of the period, in current which is considered frequency
+	Time mPeriodPart; ///< Value of each part of period
+	Time mStart, mEnd; ///< Initial and final time of the period, in current which is considered frequency
+	Time mPart; ///< Begin (End) of the current part of period
+	int mResolution; ///< Number of the parts of the period
+	T mCounts[max_size]; ///< Array with amount of the hits in that or other part of the period
+	int mStartIdx; ///< Current index to positions
+	int mNumFill; ///< Amount filled period
 
 	MeanFrequency() {
 		Time now(true);

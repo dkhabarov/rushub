@@ -119,7 +119,7 @@ int DcConn::checkTimeOut(HubTimeOut to, Time &now) {
 int DcConn::onTimer(Time &now) {
 	DcServer * dcServer = server();
 
-	/** Check timeouts. For entering only */
+	// Check timeouts. For entering only
 	if (!mDcUser->getInUserList()) { // Optimisation
 		for (int i = 0; i < HUB_TIME_OUT_MAX; ++i) {
 			if (!checkTimeOut(HubTimeOut(i), now)) {
@@ -145,9 +145,9 @@ int DcConn::onTimer(Time &now) {
 		return 2;
 	}*/
 
-	/** Check user on freeze.
-		Sending void msg to all users, starting on mStartPing sec after entry,
-		every mPingInterval sec
+	/* Check user on freeze.
+		 Sending void msg to all users, starting on mStartPing sec after entry,
+		 every mPingInterval sec
 	*/
 	Time Ago(now);
 	Ago -= dcServer->mDcConfig.mStartPing;
@@ -243,8 +243,8 @@ Conn * DcConnFactory::createConn(tSocket sock) {
 	}
 
 	DcConn * dcConn = new DcConn(CLIENT_TYPE_NMDC, sock, mServer);
-	dcConn->mSelfConnFactory = this; /** Connection factory for current connection (DcConnFactory) */
-	dcConn->mProtocol = mProtocol; /** Protocol pointer */
+	dcConn->mSelfConnFactory = this; // Connection factory for current connection (DcConnFactory)
+	dcConn->mProtocol = mProtocol; // Protocol pointer
 
 	// Create DcUser
 	DcUser * dcUser = new DcUser();

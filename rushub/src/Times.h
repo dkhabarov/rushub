@@ -39,7 +39,7 @@
 
 namespace utils {
 
-/** Class of time with microsecond decision and arithmetical operation */
+/// Class of time with microsecond decision and arithmetical operation
 class Time : public timeval {
 
 public:
@@ -93,7 +93,7 @@ public:
 
 private:
 
-	/** print-type of the time */
+	/// print-type of the time
 	mutable int mPrintType;
 
 private:
