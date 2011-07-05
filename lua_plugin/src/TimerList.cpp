@@ -42,6 +42,16 @@ Timer::~Timer() {
 
 
 void Timer::check(unsigned long time) {
+
+	// testing
+	static int i = 0;
+	if (i == 10) {
+		i = 0;
+		cout << "time: " << time << ", mTime: " << mTime << ", Interval: " << mInterval << endl;
+		cout << "Id: " << mId << ", Func: " << mFunc << ", Script: " << mScript->mName << endl;
+	}
+	++i;
+
 	unsigned long msec = time - mTime;
 	if (msec >= mInterval) {
 		mScript->timer(mId, mFunc.c_str());
