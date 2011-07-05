@@ -114,7 +114,7 @@ int NmdcProtocol::onNewDcConn(DcConn * dcConn) {
 		bool useCache = true;
 		Time Uptime(mDcServer->mTime);
 		Uptime -= mDcServer->mStartTime;
-		long min = Uptime.Sec() / 60;
+		long min = Uptime.sec() / 60;
 		if (iTimeVal != min) {
 			iTimeVal = min;
 			useCache = false;

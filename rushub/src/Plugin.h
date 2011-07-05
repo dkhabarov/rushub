@@ -379,7 +379,7 @@ public:
 	virtual const string & getSystemVersion() const = 0;
 
 	/// Get time in milliseconds (now)
-	virtual unsigned long getMSec() const = 0;
+	virtual __int64 getMsec() const = 0;
 
 	/// Get hub work time in sec
 	virtual int getUpTime() const = 0;

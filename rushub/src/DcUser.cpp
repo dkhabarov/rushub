@@ -332,7 +332,7 @@ const string & DcUser::getVersion() const {
 }
 
 long DcUser::getConnectTime() const {
-	return mTimeEnter.Sec();
+	return mTimeEnter.sec();
 }
 
 const string & DcUser::getData() const {

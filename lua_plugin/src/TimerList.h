@@ -24,6 +24,12 @@
 
 #include <string>
 
+#ifndef _WIN32
+	#ifndef __int64
+		#define __int64 long long
+	#endif
+#endif
+
 using namespace ::std;
 
 class LuaPlugin;
@@ -36,12 +42,6 @@ class LuaInterpreter;
 
 class Timer {
 
-private:
-
-	unsigned long mTime;
-	int mInterval;
-	string mFunc;
-
 public:
 
 	int mId;
@@ -53,7 +53,13 @@ public:
 
 	~Timer();
 
-	void check(unsigned long time);
+	void check(__int64 time);
+
+private:
+
+	__int64 mTime;
+	int mInterval;
+	string mFunc;
 
 }; // Timer
 

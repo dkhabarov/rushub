@@ -25,8 +25,9 @@
 #include "Obj.h"
 #include "Times.h"
 
+#include <time.h> // time
+
 using namespace ::std;
-using namespace ::utils;
 
 #define LOG_FILE "system.%Y-%m-%d.log"
 #define ERR_LABEL "[ERROR]"
@@ -151,7 +152,7 @@ void Obj::SetClassName(const char * name) {
 
 /** Main function putting log in stream */
 bool Obj::strLog() {
-	Time now(true);
+	utils::Time now(true);
 	LogStream() << "[" << now.AsDateMS() << "] " << ((mbIsErrorLog) ? ERR_LABEL " " : "")
 		<< "(" << miLevel << ") " << mClassName << ": ";
 	return true;

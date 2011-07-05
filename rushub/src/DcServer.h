@@ -206,16 +206,16 @@ public:
 		return mSysVersion;
 	}
 
-	unsigned long getMSec() const {
+	__int64 getMsec() const {
 		Time tm(true);
-		return tm;
+		return tm.msec();
 	}
 
 	/// Work time (sec)
 	int getUpTime() const {
 		Time tm(true);
 		tm -= mStartTime;
-		return tm.Sec();
+		return tm.sec();
 	}
 
 	int getUsersCount() const {

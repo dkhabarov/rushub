@@ -234,7 +234,7 @@ int Server::run() {
 			step(); // Server's step
 
 			// Timers (100 msec)
-			unsigned long msec = mTime.MiliSec();
+			unsigned long msec = mTime.msec();
 			if (msec > mTimes.mServ ? msec - mTimes.mServ >= 100 : mTimes.mServ - msec >= 100) { // Transfer of time
 				mTimes.mServ = msec;
 				onTimerBase(mTime);

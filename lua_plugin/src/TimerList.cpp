@@ -26,12 +26,12 @@ int TmrCnt::mCount = 0;
 
 
 Timer::Timer(int id, int interval, const char * func, LuaInterpreter * script) :
-	mInterval(interval),
-	mFunc(func),
 	mId(id),
-	mScript(script)
+	mScript(script),
+	mInterval(interval),
+	mFunc(func)
 {
-	mTime = LuaPlugin::mCurServer->getMSec();
+	mTime = LuaPlugin::mCurServer->getMsec();
 }
 
 
@@ -41,18 +41,8 @@ Timer::~Timer() {
 
 
 
-void Timer::check(unsigned long time) {
-
-	// testing
-	static int i = 0;
-	if (i == 10) {
-		i = 0;
-		cout << "time: " << time << ", mTime: " << mTime << ", Interval: " << mInterval << endl;
-		cout << "Id: " << mId << ", Func: " << mFunc << ", Script: " << mScript->mName << endl;
-	}
-	++i;
-
-	unsigned long msec = time - mTime;
+void Timer::check(__int64 time) {
+	int msec = static_cast<int> (time - mTime);
 	if (msec >= mInterval) {
 		mScript->timer(mId, mFunc.c_str());
 		if (msec >= 2 * mInterval) {
@@ -79,7 +69,7 @@ TimerList::~TimerList() {
 
 
 static void Checker(void * value) {
-	((Timer *) value)->check(LuaPlugin::mCurServer->getMSec());
+	((Timer *) value)->check(LuaPlugin::mCurServer->getMsec());
 }
 
 

@@ -25,11 +25,9 @@
 #include "Times.h"
 
 #include <sstream>
-#if HAVE_STRING_H
-	#include <string.h>
-#endif
+#include <string.h> // strlen
+#include <time.h> // ctime_s
 
-using namespace ::std;
 
 #ifdef _WIN32
 	#ifndef __int64
@@ -45,18 +43,16 @@ using namespace ::std;
 		tv->tv_sec = (long) ((now.ns100 - 116444736000000000LL) / 10000000LL);
 		tv->tv_usec = (long) ((now.ns100 / 10LL) % 1000000LL);
 	}
-#else
-	#include <cstring> // for strlen
 #endif // _WIN32
 
 namespace utils {
 
 
-
-
 Time::Time() : mPrintType(0) {
 	tv_sec = tv_usec = 0l;
 }
+
+
 
 Time::Time(bool now) : mPrintType(0) {
 	if (now) {
@@ -66,47 +62,63 @@ Time::Time(bool now) : mPrintType(0) {
 	}
 }
 
+
+
 Time::Time(double sec) : mPrintType(0) {
 	tv_sec = (long)sec;
 	tv_usec = long((sec - tv_sec) * 1000000);
 }
+
+
 
 Time::Time(long sec, long usec) : mPrintType(0) {
 	tv_sec = sec;
 	tv_usec = usec;
 }
 
+
+
 Time::Time(const Time & t) : mPrintType(0) {
 	tv_sec = t.tv_sec;
 	tv_usec = t.tv_usec;
 }
 
+
+
 Time::~Time() {
 }
+
+
 
 int Time::operator > (const Time & t) const {
 	return tv_sec > t.tv_sec ? 1 : (tv_sec < t.tv_sec ? 0 : tv_usec > t.tv_usec);
 }
 
+
+
 int Time::operator >= (const Time & t) const {
 	return tv_sec > t.tv_sec ? 1 : (tv_sec < t.tv_sec ? 0 : tv_usec >= t.tv_usec);
 }
+
+
 
 int Time::operator < (const Time & t) const {
 	return tv_sec < t.tv_sec ? 1 : (tv_sec > t.tv_sec ? 0 : tv_usec < t.tv_usec);
 }
 
+
+
 int Time::operator <= (const Time & t) const {
 	return tv_sec < t.tv_sec ? 1 : (tv_sec > t.tv_sec ? 0 : tv_usec <= t.tv_usec);
 }
+
+
 
 int Time::operator == (const Time & t) const {
 	return ((tv_usec == t.tv_usec) && (tv_sec == t.tv_sec));
 }
 
-/*int & Time::operator / (const Time & t) {
-	return Time(long(tv_sec / i), long((tv_usec + 1000000 * (tv_sec % i)) / i)).Normalize();
-}*/
+
 
 Time & Time::operator = (const Time & t) {
 	tv_usec = t.tv_usec;
@@ -114,9 +126,13 @@ Time & Time::operator = (const Time & t) {
 	return *this;
 }
 
+
+
 Time Time::operator + (const Time & t) const {
 	return Time(long(tv_sec + t.tv_sec), long(tv_usec + t.tv_usec)).Normalize();
 }
+
+
 
 Time Time::operator - (const Time & t) const {
 	return Time(long(tv_sec - t.tv_sec), long(tv_usec - t.tv_usec)).Normalize();
@@ -126,9 +142,13 @@ Time Time::operator + (int msec) const {
 	return Time(tv_sec, long(tv_usec + msec * 1000)).Normalize();
 }
 
+
+
 Time Time::operator - (int sec) const {
 	return Time(long(tv_sec - sec), tv_usec).Normalize();
 }
+
+
 
 Time & Time::operator += (const Time & t) {
 	tv_sec += t.tv_sec;
@@ -137,6 +157,8 @@ Time & Time::operator += (const Time & t) {
 	return *this;
 }
 
+
+
 Time & Time::operator -= (const Time & t) {
 	tv_sec -= t.tv_sec;
 	tv_usec -= t.tv_usec;
@@ -144,11 +166,15 @@ Time & Time::operator -= (const Time & t) {
 	return *this;
 }
 
+
+
 Time & Time::operator -= (int sec) {
 	tv_sec -= sec;
 	Normalize();
 	return *this;
 }
+
+
 
 Time & Time::operator += (int msec) {
 	tv_usec += 1000 * msec;
@@ -156,69 +182,46 @@ Time & Time::operator += (int msec) {
 	return *this;
 }
 
+
+
 Time & Time::operator += (long usec) {
 	tv_usec += usec;
 	Normalize();
 	return *this;
 }
 
-Time & Time::operator /= (int i) {
-	tv_usec += 1000000 * (tv_sec % i);
-	tv_usec /= i;
-	tv_sec = long(tv_sec / i);
-	Normalize();
-	return *this;
-}
 
-Time & Time::operator *= (int i) {
-	tv_sec *= i;
-	tv_usec *= i;
-	Normalize();
-	return *this;
-}
 
-Time Time::operator / (int i) const {
-	return Time(long(tv_sec / i), (tv_usec + 1000000 * (tv_sec % i)) / i).Normalize();
-}
-
-Time Time::operator * (int i) const {
-	return Time(long(tv_sec * i), long(tv_usec * i)).Normalize();
-}
-
-Time::operator double() {
-	return double(tv_sec) + double(tv_usec) / 1000000.;
-}
-
-Time::operator long() {
-	return long(tv_sec) * 1000000 + long(tv_usec);
-}
-
-Time::operator unsigned long() {
-	return int(tv_sec * 1000 + double(tv_usec) / 1000.);
-}
-
-Time::operator bool() {
-	return !(!tv_sec && !tv_usec);
-}
-
-int Time::operator ! () {
+int Time::operator ! () const {
 	return !tv_sec && !tv_usec;
 }
 
 
 
-unsigned long Time::MiliSec() const {
+Time::operator bool() const {
+	return !(!tv_sec && !tv_usec);
+}
+
+
+
+Time::operator double() const {
+	return double(tv_sec) + double(tv_usec) / 1000000.;
+}
+
+
+
+Time::operator __int64() const {
 	if (tv_sec > 0) {
 		if (tv_usec > 0) {
-			return (unsigned long)(tv_sec) * 1000 + (unsigned long)(tv_usec) / 1000;
+			return (__int64)(tv_sec) * 1000 + (__int64)(tv_usec) / 1000;
 		} else {
-			return (unsigned long)(tv_sec) * 1000 + (unsigned long)(-tv_usec) / 1000;
+			return (__int64)(tv_sec) * 1000 + (__int64)(-tv_usec) / 1000;
 		}
 	} else {
 		if (tv_usec > 0) {
-			return (unsigned long)(-tv_sec) * 1000 + (unsigned long)(tv_usec) / 1000;
+			return (__int64)(-tv_sec) * 1000 + (__int64)(tv_usec) / 1000;
 		} else {
-			return (unsigned long)(-tv_sec) * 1000 + (unsigned long)(-tv_usec) / 1000;
+			return (__int64)(-tv_sec) * 1000 + (__int64)(-tv_usec) / 1000;
 		}
 	}
 }
@@ -228,32 +231,6 @@ unsigned long Time::MiliSec() const {
 Time & Time::Get() {
 	gettimeofday(this, NULL);
 	return *this;
-}
-
-
-
-Time & Time::Normalize() {
-	if (tv_usec >= 1000000 || tv_usec <= -1000000) {
-		tv_sec += tv_usec/1000000;
-		tv_usec %= 1000000;
-	}
-	if ( tv_sec < 0 && tv_usec > 0) {
-		++tv_sec;
-		tv_usec -= 1000000;
-	}
-	if ( tv_sec > 0 && tv_usec < 0) {
-		--tv_sec;
-		tv_usec += 1000000;
-	}
-	return *this;
-}
-
-
-
-string Time::AsString() const {
-	ostringstream os;
-	os << (*this);
-	return os.str();
 }
 
 
@@ -356,21 +333,46 @@ const Time & Time::AsDate() const {
 	return *this;
 }
 
+
+
 const Time & Time::AsPeriod() const {
 	mPrintType = 2;
 	return *this;
 }
 
+
+
 const Time & Time::AsFullPeriod() const {
 	mPrintType = 3;
 	return *this;
 }
-	
+
+
+
 const Time & Time::AsDateMS() const {
 	mPrintType = 4;
 	return *this;
 }
-	
+
+
+
+Time & Time::Normalize() {
+	if (tv_usec >= 1000000 || tv_usec <= -1000000) {
+		tv_sec += tv_usec/1000000;
+		tv_usec %= 1000000;
+	}
+	if ( tv_sec < 0 && tv_usec > 0) {
+		++tv_sec;
+		tv_usec -= 1000000;
+	}
+	if ( tv_sec > 0 && tv_usec < 0) {
+		--tv_sec;
+		tv_usec += 1000000;
+	}
+	return *this;
+}
+
+
 }; // namespace utils
 
 /**

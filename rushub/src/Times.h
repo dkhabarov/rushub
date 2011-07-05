@@ -26,14 +26,14 @@
 #define TIMES_H
 
 #include <ostream>
-#include <time.h>
-#include <string>
-using std::string;
 
 #ifdef _WIN32
 	#include <winsock2.h> // for class timeval
 	void gettimeofday(struct timeval *, struct timezone *);
 #else
+	#ifndef __int64
+		#define __int64 long long
+	#endif
 	#include <sys/time.h> // for gettimeofday
 #endif
 
@@ -41,6 +41,7 @@ namespace utils {
 
 /** Class of time with microsecond decision and arithmetical operation */
 class Time : public timeval {
+
 public:
 
 	Time();
@@ -55,7 +56,6 @@ public:
 	int operator < (const Time &) const;
 	int operator <= (const Time &) const;
 	int operator == (const Time &) const;
-	//int & operator / (const Time &);
 	Time & operator = (const Time &);
 	Time operator + (const Time &) const;
 	Time operator - (const Time &) const;
@@ -66,29 +66,23 @@ public:
 	Time & operator -= (int sec);
 	Time & operator += (int msec);
 	Time & operator += (long usec);
-	Time & operator /= (int i);
-	Time & operator *= (int i);
-	Time operator / (int i) const;
-	Time operator * (int i) const;
 
-	operator double();
-	operator long();
-	operator unsigned long();
-	operator bool();
-	int operator ! ();
+	int operator ! () const;
+	operator bool() const;
+	operator double() const;
+	operator __int64() const;
 
 	/// Get seconds
-	inline long Sec() const {
+	inline long sec() const {
 		return tv_sec;
 	}
 
 	/// Get milisec
-	unsigned long MiliSec() const;
+	inline __int64 msec() const {
+		return __int64(*this);
+	}
 
-	/*bool LocalTime(struct tm &result){ return localtime_r(this, &result) == &result;}*/
 	Time & Get();
-	Time & Normalize();
-	string AsString() const;
 	void AsTimeVals(int & w, int & d, int & h, int & m) const;
 	friend std::ostream & operator << (std::ostream & os, const Time & t);
 
@@ -101,6 +95,10 @@ private:
 
 	/** print-type of the time */
 	mutable int mPrintType;
+
+private:
+
+	Time & Normalize();
 
 }; // Time
 
