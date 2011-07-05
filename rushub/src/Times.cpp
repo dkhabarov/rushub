@@ -207,6 +207,24 @@ int Time::operator ! () {
 
 
 
+unsigned long Time::MiliSec() const {
+	if (tv_sec > 0) {
+		if (tv_usec > 0) {
+			return (unsigned long)(tv_sec) * 1000 + (unsigned long)(tv_usec) / 1000;
+		} else {
+			return (unsigned long)(tv_sec) * 1000 + (unsigned long)(-tv_usec) / 1000;
+		}
+	} else {
+		if (tv_usec > 0) {
+			return (unsigned long)(-tv_sec) * 1000 + (unsigned long)(tv_usec) / 1000;
+		} else {
+			return (unsigned long)(-tv_sec) * 1000 + (unsigned long)(-tv_usec) / 1000;
+		}
+	}
+}
+
+
+
 Time & Time::Get() {
 	gettimeofday(this, NULL);
 	return *this;

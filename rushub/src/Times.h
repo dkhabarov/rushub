@@ -25,20 +25,13 @@
 #ifndef TIMES_H
 #define TIMES_H
 
-#if defined _WIN32 || HAVE_OSTREAM
-	#include <ostream>
-#else
-	//namespace std{
-		#include <ostream>
-	//};
-#endif
-
+#include <ostream>
 #include <time.h>
 #include <string>
 using std::string;
 
 #ifdef _WIN32
-	#include "conndefine.h" // for class timeval
+	#include <winsock2.h> // for class timeval
 	void gettimeofday(struct timeval *, struct timezone *);
 #else
 	#include <sys/time.h> // for gettimeofday
@@ -84,27 +77,13 @@ public:
 	operator bool();
 	int operator ! ();
 
-	/** Get seconds */
+	/// Get seconds
 	inline long Sec() const {
 		return tv_sec;
 	}
 
-	/** Get milisec */
-	inline unsigned long MiliSec() const {
-		if (tv_sec > 0) {
-			if (tv_usec > 0) {
-				return (unsigned long)(tv_sec) * 1000 + (unsigned long)(tv_usec) / 1000;
-			} else {
-				return (unsigned long)(tv_sec) * 1000 + (unsigned long)(-tv_usec) / 1000;
-			}
-		} else {
-			if (tv_usec > 0) {
-				return (unsigned long)(-tv_sec) * 1000 + (unsigned long)(tv_usec) / 1000;
-			} else {
-				return (unsigned long)(-tv_sec) * 1000 + (unsigned long)(-tv_usec) / 1000;
-			}
-		}
-	}
+	/// Get milisec
+	unsigned long MiliSec() const;
 
 	/*bool LocalTime(struct tm &result){ return localtime_r(this, &result) == &result;}*/
 	Time & Get();

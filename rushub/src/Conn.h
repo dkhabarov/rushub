@@ -26,8 +26,8 @@
 #define CONN_H
 
 #include "Obj.h"
-#include "Times.h" // Time
-#include "ConnBase.h"
+#include "ConnBase.h" // before Times (winsock2.h redefinition)!
+#include "Times.h" // after ConnBase (winsock2.h redefinition)!
 #include "Protocol.h"
 #include "Plugin.h" // for NMDC_SEPARATOR
 

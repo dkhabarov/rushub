@@ -17,14 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CONN_DEF_H
-#define CONN_DEF_H
+#ifndef CONN_DEFINE_H
+#define CONN_DEFINE_H
 
-//#if HAVE_ERRNO_H
-	#include <errno.h>
-//#endif
-
-
+#include <errno.h>
 
 #ifdef _WIN32
 
@@ -34,8 +30,8 @@
 
 	#include <winsock2.h>
 	#include <ws2tcpip.h>
-	#define socklen_t int /** unix type for socket (size_t) */
-	#define sockoptval_t char /** for setsockopt */
+	#define socklen_t int ///< unix type for socket (size_t)
+	#define sockoptval_t char ///< for setsockopt
 
 	#ifdef ECONNRESET
 		#undef ECONNRESET
@@ -65,10 +61,10 @@
 	typedef SOCKET tSocket;
 #else
 	#include <arpa/inet.h>
-	#include <netinet/in.h> /** for sockaddr_in */
-	#include <sys/socket.h> /** for AF_INET */
-	#include <netdb.h>      /** for gethostbyaddr */
-	#include <fcntl.h>      /** for nonblock flags F_GETFL & etc. */
+	#include <netinet/in.h> ///< for sockaddr_in
+	#include <sys/socket.h> ///< for AF_INET
+	#include <netdb.h>      ///< for gethostbyaddr
+	#include <fcntl.h>      ///< for nonblock flags F_GETFL & etc
 	#define sockoptval_t int
 	#define SockErr errno
 	#define SockErrMsg strerror(errno)
@@ -80,12 +76,12 @@
 	typedef int tSocket;
 #endif
 
-#define SOCK_BACKLOG 0x64 /** SOMAXCONN */
+#define SOCK_BACKLOG 0x64 ///< SOMAXCONN
 
-#define MAX_RECV_SIZE 0x02FFFF     /** Max buf size for recv */
-#define MAX_SEND_SIZE 0x2AFFFF     /** Max buf size for send */
-#define MAX_SEND_UNBLOCK_SIZE 0x25FFFF /** Max size (send) unblock input chanel */
-#define MAX_SEND_BLOCK_SIZE   0x28FFFF /** Max size (send) block input chanel */
+#define MAX_RECV_SIZE 0x02FFFF     ///< Max buf size for recv
+#define MAX_SEND_SIZE 0x2AFFFF     ///< Max buf size for send
+#define MAX_SEND_UNBLOCK_SIZE 0x25FFFF ///< Max size (send) unblock input chanel
+#define MAX_SEND_BLOCK_SIZE   0x28FFFF ///< Max size (send) block input chanel
 
 #ifdef _WIN32
 	#define SOCK_CLOSE(SOCK) \
@@ -130,7 +126,7 @@
 	#endif
 #endif
 
-#endif // CONN_DEF_H
+#endif // CONN_DEFINE_H
 
 /**
  * $Id$
