@@ -47,7 +47,7 @@ ConnEpoll::~ConnEpoll() {
 
 int ConnEpoll::choose(Time & timeout) {
 	static struct epoll_event * events;
-	return epoll_wait(mFd, events, 1024, timeout.msec() + 1);
+	return epoll_wait(mFd, events, 1024, static_cast<int> (timeout.msec()) + 1);
 }
 
 

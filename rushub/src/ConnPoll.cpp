@@ -54,7 +54,7 @@ bool ConnPoll::addConn(ConnBase * connBase) {
 
 
 int ConnPoll::choose(Time & timeout) {
-	int miliSec = timeout.msec() + 1;
+	int miliSec = static_cast<int> (timeout.msec()) + 1;
 	int tmp, n = 0, ret = 0, done = 0, size = mvFD.size();
 	while (size) {
 		// poll 1024 socks max
