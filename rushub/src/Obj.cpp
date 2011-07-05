@@ -153,7 +153,7 @@ void Obj::SetClassName(const char * name) {
 /** Main function putting log in stream */
 bool Obj::strLog() {
 	utils::Time now(true);
-	LogStream() << "[" << now.AsDateMS() << "] " << ((mbIsErrorLog) ? ERR_LABEL " " : "")
+	LogStream() << "[" << now.asDateMsec() << "] " << ((mbIsErrorLog) ? ERR_LABEL " " : "")
 		<< "(" << miLevel << ") " << mClassName << ": ";
 	return true;
 }

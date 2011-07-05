@@ -230,7 +230,7 @@ int Server::run() {
 
 	while (mRun) { // Main cycle
 		try {
-			mTime.Get(); // Current time
+			mTime.get(); // Current time
 			step(); // Server's step
 
 			// Timers (100 msec)

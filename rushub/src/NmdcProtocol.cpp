@@ -120,7 +120,7 @@ int NmdcProtocol::onNewDcConn(DcConn * dcConn) {
 			useCache = false;
 			stringstream oss;
 			int w, d, h, m;
-			Uptime.AsTimeVals(w, d, h, m);
+			Uptime.asTimeVals(w, d, h, m);
 			if (w) {
 				oss << w << " " << mDcServer->mDcLang.mTimes[0] << " ";
 			}
@@ -925,7 +925,7 @@ int NmdcProtocol::eventGetInfo(DcParser * dcparser, DcConn * dcConn) {
 		return -2;
 	}
 
-	if (dcConn->mDcUser->mTimeEnter < dcUser->mTimeEnter && Time().Get() < (dcUser->mTimeEnter + 60000)) {
+	if (dcConn->mDcUser->mTimeEnter < dcUser->mTimeEnter && Time().get() < (dcUser->mTimeEnter + 60000)) {
 		return 0;
 	}
 

@@ -583,7 +583,7 @@ void DcServer::doUserEnter(DcConn * dcConn) {
 	afterUserEnter(dcConn);
 
 	dcConn->clearTimeOut(HUB_TIME_OUT_LOGIN);
-	(static_cast<DcUser *> (dcConn->mDcUser))->mTimeEnter.Get();
+	(static_cast<DcUser *> (dcConn->mDcUser))->mTimeEnter.get();
 }
 
 

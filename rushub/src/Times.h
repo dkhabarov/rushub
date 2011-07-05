@@ -82,14 +82,14 @@ public:
 		return __int64(*this);
 	}
 
-	Time & Get();
-	void AsTimeVals(int & w, int & d, int & h, int & m) const;
+	Time & get();
+	void asTimeVals(int & w, int & d, int & h, int & m) const;
 	friend std::ostream & operator << (std::ostream & os, const Time & t);
 
-	const Time & AsDate() const;
-	const Time & AsPeriod() const;
-	const Time & AsFullPeriod() const;
-	const Time & AsDateMS() const;
+	const Time & asDate() const;
+	const Time & asPeriod() const;
+	const Time & asFullPeriod() const;
+	const Time & asDateMsec() const;
 
 private:
 
@@ -98,7 +98,7 @@ private:
 
 private:
 
-	Time & Normalize();
+	Time & normalize();
 
 }; // Time
 

@@ -189,7 +189,7 @@ public:
 
 	const string & getTime() {
 		stringstream oss;
-		oss << mTime.AsDate();
+		oss << mTime.asDate();
 		mTimeBuf = oss.str();
 		return mTimeBuf;
 	}

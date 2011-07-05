@@ -56,7 +56,7 @@ Time::Time() : mPrintType(0) {
 
 Time::Time(bool now) : mPrintType(0) {
 	if (now) {
-		Get();
+		get();
 	} else {
 		tv_sec = tv_usec = 0l;
 	}
@@ -129,23 +129,23 @@ Time & Time::operator = (const Time & t) {
 
 
 Time Time::operator + (const Time & t) const {
-	return Time(long(tv_sec + t.tv_sec), long(tv_usec + t.tv_usec)).Normalize();
+	return Time(long(tv_sec + t.tv_sec), long(tv_usec + t.tv_usec)).normalize();
 }
 
 
 
 Time Time::operator - (const Time & t) const {
-	return Time(long(tv_sec - t.tv_sec), long(tv_usec - t.tv_usec)).Normalize();
+	return Time(long(tv_sec - t.tv_sec), long(tv_usec - t.tv_usec)).normalize();
 }
 
 Time Time::operator + (int msec) const {
-	return Time(tv_sec, long(tv_usec + msec * 1000)).Normalize();
+	return Time(tv_sec, long(tv_usec + msec * 1000)).normalize();
 }
 
 
 
 Time Time::operator - (int sec) const {
-	return Time(long(tv_sec - sec), tv_usec).Normalize();
+	return Time(long(tv_sec - sec), tv_usec).normalize();
 }
 
 
@@ -153,7 +153,7 @@ Time Time::operator - (int sec) const {
 Time & Time::operator += (const Time & t) {
 	tv_sec += t.tv_sec;
 	tv_usec += t.tv_usec;
-	Normalize();
+	normalize();
 	return *this;
 }
 
@@ -162,7 +162,7 @@ Time & Time::operator += (const Time & t) {
 Time & Time::operator -= (const Time & t) {
 	tv_sec -= t.tv_sec;
 	tv_usec -= t.tv_usec;
-	Normalize();
+	normalize();
 	return *this;
 }
 
@@ -170,7 +170,7 @@ Time & Time::operator -= (const Time & t) {
 
 Time & Time::operator -= (int sec) {
 	tv_sec -= sec;
-	Normalize();
+	normalize();
 	return *this;
 }
 
@@ -178,7 +178,7 @@ Time & Time::operator -= (int sec) {
 
 Time & Time::operator += (int msec) {
 	tv_usec += 1000 * msec;
-	Normalize();
+	normalize();
 	return *this;
 }
 
@@ -186,7 +186,7 @@ Time & Time::operator += (int msec) {
 
 Time & Time::operator += (long usec) {
 	tv_usec += usec;
-	Normalize();
+	normalize();
 	return *this;
 }
 
@@ -228,14 +228,14 @@ Time::operator __int64() const {
 
 
 
-Time & Time::Get() {
+Time & Time::get() {
 	gettimeofday(this, NULL);
 	return *this;
 }
 
 
 
-void Time::AsTimeVals(int & w, int & d, int & h, int & m) const {
+void Time::asTimeVals(int & w, int & d, int & h, int & m) const {
 	long rest = tv_sec;
 	w = rest / (24 * 3600 * 7);
 	rest %= (24 * 3600 * 7);
@@ -261,8 +261,8 @@ std::ostream & operator << (std::ostream & os, const Time & t) {
 
 	switch (t.mPrintType) {
 
-		case 4 : /** AsDateMS */
-		case 1 : /** AsDate */
+		case 4 : // asDateMsec
+		case 1 : // asDate
 			#ifdef _WIN32
 				time_t ta;
 				ta = (time_t)t.tv_sec;
@@ -283,14 +283,14 @@ std::ostream & operator << (std::ostream & os, const Time & t) {
 			}
 			break;
 
-		case 2 : /** AsPeriod */
+		case 2 : // asPeriod
 			rest = t.tv_sec;
 			os << rest << " sec ";
 			os << t.tv_usec / 1000 << " ms ";
 			os << t.tv_usec % 1000 << " µs ";
 			break;
 
-		case 3 : /** AsFullPeriod */
+		case 3 : // asFullPeriod
 			rest = t.tv_sec;
 
 			n = rest / (24 * 3600 * 7);
@@ -319,7 +319,7 @@ std::ostream & operator << (std::ostream & os, const Time & t) {
 			os << rest << " sec";
 			break;
 
-		default : /** AsString */
+		default : // asString
 			os << t.tv_sec << " s " << t.tv_usec << " µs";
 			break;
 
@@ -328,35 +328,35 @@ std::ostream & operator << (std::ostream & os, const Time & t) {
 }
 
 
-const Time & Time::AsDate() const {
+const Time & Time::asDate() const {
 	mPrintType = 1;
 	return *this;
 }
 
 
 
-const Time & Time::AsPeriod() const {
+const Time & Time::asPeriod() const {
 	mPrintType = 2;
 	return *this;
 }
 
 
 
-const Time & Time::AsFullPeriod() const {
+const Time & Time::asFullPeriod() const {
 	mPrintType = 3;
 	return *this;
 }
 
 
 
-const Time & Time::AsDateMS() const {
+const Time & Time::asDateMsec() const {
 	mPrintType = 4;
 	return *this;
 }
 
 
 
-Time & Time::Normalize() {
+Time & Time::normalize() {
 	if (tv_usec >= 1000000 || tv_usec <= -1000000) {
 		tv_sec += tv_usec/1000000;
 		tv_usec %= 1000000;

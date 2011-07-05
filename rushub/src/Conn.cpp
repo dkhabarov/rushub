@@ -413,7 +413,7 @@ void Conn::closeNice(int msec /* = 0 */, int reason /* = 0 */) {
 		closeNow(reason);
 		return;
 	}
-	mCloseTime.Get();
+	mCloseTime.get();
 	mCloseTime += msec;
 }
 
@@ -690,7 +690,7 @@ int Conn::recv() {
 		mRecvBufEnd = iBufLen; // End buf pos
 		mRecvBufRead = 0; // Pos for reading from buf
 		mRecvBuf[mRecvBufEnd] = '\0'; // Adding 0 symbol to end of str
-		mLastRecv.Get(); // Write time last recv action
+		mLastRecv.get(); // Write time last recv action
 	}
 	return iBufLen;
 }
