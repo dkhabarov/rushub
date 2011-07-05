@@ -66,6 +66,10 @@ public:
 	Time & operator -= (int sec);
 	Time & operator += (int msec);
 	Time & operator += (long usec);
+	Time & operator /= (int i);
+	Time & operator *= (int i);
+	Time operator / (int i) const;
+	Time operator * (int i) const;
 
 	int operator ! () const;
 	operator bool() const;
@@ -79,7 +83,7 @@ public:
 
 	/// Get milisec
 	inline __int64 msec() const {
-		return __int64(*this);
+		return static_cast<__int64> (*this);
 	}
 
 	Time & get();

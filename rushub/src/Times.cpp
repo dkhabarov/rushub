@@ -192,6 +192,37 @@ Time & Time::operator += (long usec) {
 
 
 
+Time & Time::operator /= (int i) {
+	tv_usec += 1000000 * (tv_sec % i);
+	tv_usec /= i;
+	tv_sec = long(tv_sec / i);
+	normalize();
+	return *this;
+}
+
+
+
+Time & Time::operator *= (int i) {
+	tv_sec *= i;
+	tv_usec *= i;
+	normalize();
+	return *this;
+}
+
+
+
+Time Time::operator / (int i) const {
+	return Time(long(tv_sec / i), (tv_usec + 1000000 * (tv_sec % i)) / i).normalize();
+}
+
+
+
+Time Time::operator * (int i) const {
+	return Time(long(tv_sec * i), long(tv_usec * i)).normalize();
+}
+
+
+
 int Time::operator ! () const {
 	return !tv_sec && !tv_usec;
 }
@@ -358,14 +389,14 @@ const Time & Time::asDateMsec() const {
 
 Time & Time::normalize() {
 	if (tv_usec >= 1000000 || tv_usec <= -1000000) {
-		tv_sec += tv_usec/1000000;
+		tv_sec += tv_usec / 1000000;
 		tv_usec %= 1000000;
 	}
-	if ( tv_sec < 0 && tv_usec > 0) {
+	if (tv_sec < 0 && tv_usec > 0) {
 		++tv_sec;
 		tv_usec -= 1000000;
 	}
-	if ( tv_sec > 0 && tv_usec < 0) {
+	if (tv_sec > 0 && tv_usec < 0) {
 		--tv_sec;
 		tv_usec += 1000000;
 	}
