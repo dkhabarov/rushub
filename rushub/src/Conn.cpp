@@ -383,10 +383,10 @@ void Conn::close() {
 	}
 
 #ifndef _WIN32
-	TEMP_FAILURE_RETRY(SOCK_CLOSE(mSocket));
+	SOCK_CLOSE(mSocket);
 	if (SockErr != SOCK_EINTR || (mServer && !mServer->mRun)) { // Interrupted system call on exit
 #else
-	int err = TEMP_FAILURE_RETRY(SOCK_CLOSE(mSocket));
+	int err = SOCK_CLOSE(mSocket);
 	if (!(SOCK_ERROR(err))) {
 #endif
 		--mConnCounter;
@@ -394,7 +394,7 @@ void Conn::close() {
 			LogStream() << "Closing socket: " << mSocket << endl;
 		}
 	} else if (ErrLog(1)) {
-		LogStream() << "Socket not closed: " << SockErr << endl;
+		LogStream() << "Socket not closed: " << SockErrMsg << endl;
 	}
 
 	freeaddrinfo(mAddrInfo);
@@ -504,7 +504,7 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 	int i = 0;
 	socklen_t namelen = sizeof(storage);
 	memset(&storage, 0, namelen);
-	tSocket sock = accept(mSocket, (struct sockaddr *) &storage, (socklen_t*) &namelen);
+	tSocket sock = ::accept(mSocket, (struct sockaddr *) &storage, (socklen_t*) &namelen);
 	while (SOCK_INVALID(sock) && ((SockErr == SOCK_EAGAIN) || (SockErr == SOCK_EINTR)) && (++i <= 10)) {
 		// Try to accept connection not more than 10 once
 		sock = ::accept(mSocket, (struct sockaddr *) &storage, (socklen_t*) &namelen);
@@ -516,7 +516,7 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 	}
 	if (SOCK_INVALID(sock)) {
 		if (ErrLog(1)) {
-			LogStream() << "Socket not accept: " << SockErr << endl;
+			LogStream() << "Socket not accept: " << SockErrMsg << endl;
 		}
 		return INVALID_SOCKET;
 	}
@@ -524,13 +524,13 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 	sockoptval_t yes = 1;
 	if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(int)))) {
 		if (ErrLog(1)) {
-			LogStream() << "Socket not SO_KEEPALIVE: " << SockErr << endl;
+			LogStream() << "Socket not SO_KEEPALIVE: " << SockErrMsg << endl;
 		}
 #ifdef _WIN32
-		int err = TEMP_FAILURE_RETRY(SOCK_CLOSE(sock));
+		int err = SOCK_CLOSE(sock);
 		if (SOCK_ERROR(err))
 #else
-		TEMP_FAILURE_RETRY(SOCK_CLOSE(sock));
+		SOCK_CLOSE(sock);
 		if (SockErr != SOCK_EINTR)
 #endif
 		{
@@ -644,7 +644,7 @@ int Conn::recv() {
 				closeNow(CLOSE_REASON_CLIENT_DISCONNECT);
 			} else {
 				if (Log(2)) {
-					LogStream() << "Error in receive: " << SockErr << endl;
+					LogStream() << "Error in receive: " << SockErrMsg << endl;
 				}
 
 				switch (SockErr) {
@@ -946,7 +946,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 
 		if (SockErr != SOCK_EAGAIN) {
 			if (Log(2)) {
-				LogStream() << "Error in sending: " << SockErr << "(not EAGAIN), closing" << endl;
+				LogStream() << "Error in sending: " << SockErrMsg << "(not EAGAIN), closing" << endl;
 			}
 			closeNow(CLOSE_REASON_ERROR_SEND);
 			return 0;
