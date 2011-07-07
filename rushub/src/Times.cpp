@@ -67,6 +67,7 @@ Time::Time(bool now) : mPrintType(0) {
 Time::Time(double sec) : mPrintType(0) {
 	tv_sec = (long)sec;
 	tv_usec = long((sec - tv_sec) * 1000000);
+	normalize();
 }
 
 

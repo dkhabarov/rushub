@@ -159,7 +159,7 @@ public:
 
 template <class V> Array<V>::Array(size_t iCapacity) : miCapacity(iCapacity), miSize(0) {
 	mData = new V[miCapacity];
-	memset(mData, NULL, sizeof(V) * miCapacity);
+	memset(mData, 0, sizeof(V) * miCapacity);
 }
 
 template <class V> Array<V>::~Array() {
