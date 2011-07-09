@@ -30,7 +30,9 @@
 #include <sstream> // operation << for string
 #include <vector>
 #ifndef _WIN32
-	#define __int64 long long
+	#ifndef __int64
+		#define __int64 long long
+	#endif
 	#include <memory.h>
 	#include <syslog.h> 
 #endif

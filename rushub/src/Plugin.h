@@ -24,10 +24,8 @@
 #include <iostream>
 #include <vector>
 
-#ifndef _WIN32
-	#ifndef __int64
-		#define __int64 long long
-	#endif
+#if (!defined _WIN32) && (!defined __int64)
+	#define __int64 long long
 #endif
 
 namespace plugin {

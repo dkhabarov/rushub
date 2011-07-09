@@ -28,6 +28,10 @@
 #include <ostream>
 
 #ifdef _WIN32
+	#ifndef FD_SETSIZE // For select
+		#define FD_SETSIZE      10240//32768
+	#endif /* FD_SETSIZE */
+
 	#include <winsock2.h> // for class timeval
 	void gettimeofday(struct timeval *, struct timezone *);
 #else

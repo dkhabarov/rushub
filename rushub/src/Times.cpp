@@ -30,9 +30,6 @@
 
 
 #ifdef _WIN32
-	#ifndef __int64
-		#define __int64 long long
-	#endif
 	void gettimeofday(struct timeval * tv, struct timezone *) {
 		union {
 			FILETIME ft;
