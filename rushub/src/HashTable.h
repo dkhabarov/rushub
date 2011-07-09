@@ -542,7 +542,8 @@ public:
 	}
 
 	iterator end() {
-		return iterator();
+		static iterator end_it;
+		return end_it;
 	}
 
 	/** autoResize */

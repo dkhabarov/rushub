@@ -170,7 +170,8 @@ int ConnSelect::choose(Time & timeout) {
 
 
 void ConnSelect::clearRevents(void) {
-	for (tResList::iterator it = mResList.begin(); it != mResList.end(); ++it) {
+	static tResList::iterator it_e = mResList.end();
+	for (tResList::iterator it = mResList.begin(); it != it_e; ++it) {
 		(*it)->mRevents = 0;
 	}
 }
@@ -183,17 +184,19 @@ void ConnSelect::setRevents(SelectFd & fdset, unsigned mask) {
 	#ifdef _WIN32
 	for (unsigned i = 0; i < fdset.fd_count; ++i) {
 		sock = fdset.fd_array[i];
-		chooseRes = mResList.find(sock);
-		if (!chooseRes) {
-			mResList.add(sock, new ChooseRes(sock, 0, mask));
-		} else {
-			chooseRes->mRevents |= mask;
+		if (fdset.isSet(sock)) {
+			chooseRes = mResList.find(sock);
+			if (!chooseRes) {
+				mResList.add(sock, new ChooseRes(sock, 0, mask));
+			} else {
+				chooseRes->mRevents |= mask;
+			}
 		}
 	}
 	#else
 	for (unsigned i = 0; i < FD_SETSIZE; ++i) {
 		sock = i;
-		if (FD_ISSET(sock, &fdset)) {
+		if (fdset.isSet(sock)) {
 			chooseRes = mResList.find(sock);
 			if (!chooseRes) {
 				mResList.add(sock, new ChooseRes(sock, 0, mask));
