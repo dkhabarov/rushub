@@ -97,6 +97,7 @@ Server::~Server() {
 		deleteConn(*it);
 	}
 	for (tLLIt it = mListenList.begin(); it != mListenList.end(); ++it) {
+		(*it)->mProtocol = NULL; // upd hack: fix me!
 		deleteConn(*it);
 	}
 
