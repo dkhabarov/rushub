@@ -155,6 +155,7 @@ void DcConfig::addVars(Server * server) {
 	add("iLenCmdSearchPas",       mMaxCmdLen[NMDC_TYPE_SEARCH_PAS],     256   );
 	add("iLenCmdSearch",          mMaxCmdLen[NMDC_TYPE_SEARCH],         256   );
 	add("iLenCmdSR",              mMaxCmdLen[NMDC_TYPE_SR],             1024  );
+	add("iLenCmdSRUDP",           mMaxCmdLen[NMDC_TYPE_SR_UDP],         1024  );
 	add("iLenCmdMyINFO",          mMaxCmdLen[NMDC_TYPE_MYNIFO],         256   );
 	add("iLenCmdSupports",        mMaxCmdLen[NMDC_TYPE_SUPPORTS],       1024  );
 	add("iLenCmdKey",             mMaxCmdLen[NMDC_TYPE_KEY],            128   );
