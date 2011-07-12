@@ -87,6 +87,9 @@ Conn::Conn(tSocket socket, Server * server, ConnType connType) :
 
 Conn::~Conn() {
 	if (mParser) {
+		if (Log(0)) {
+			LogStream() << "Delete Conn with parser: " << mParser->getClassName() << endl;
+		}
 		deleteParser(mParser);
 		mParser = NULL;
 	}
@@ -860,6 +863,9 @@ size_t Conn::readFromRecvBuf() {
 /// Get pointer for string
 string * Conn::getParserCommandPtr() {
 	if (mParser == NULL) {
+		if (Log(0)) {
+			LogStream() << "---> Create parser" << endl;
+		}
 		mParser = createParser();
 	}
 	if (mParser == NULL) {

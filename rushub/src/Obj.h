@@ -69,6 +69,10 @@ public:
 		return *mToLog;
 	}
 
+	const char * getClassName() {
+		return mClassName;
+	}
+
 protected:
 
 	/** Class name */
