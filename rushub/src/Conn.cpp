@@ -515,9 +515,6 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 		#endif
 	}
 	if (SOCK_INVALID(sock)) {
-		if (ErrLog(1)) {
-			LogStream() << "Socket not accept: " << SockErrMsg << endl;
-		}
 		return INVALID_SOCKET;
 	}
 
