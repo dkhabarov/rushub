@@ -279,7 +279,7 @@ void Server::stop(int code) {
 /// Step
 void Server::step() {
 	int ret;
-	static Time tmout(0, 1000l); // timeout 1 msec
+	static Time tmout(0, 3000l); // timeout 3 msec
 
 	try {
 		// Checking the arrival data in listen sockets
@@ -331,36 +331,48 @@ void Server::step() {
 			(connType == CONN_TYPE_LISTEN)
 		) {
 
+
 			if (mNowConn->Log(5)) {
 				mNowConn->LogStream() << "::(s)NewConn" << endl;
 			}
 
-			// Create new connection:
-			// 1. Accept new socket
-			// 2. Create new connection object (using ConnFactory from ListenFactory else create simple Conn)
-			Conn * new_conn = mNowConn->createNewConn(); /** CONN_TYPE_INCOMING_TCP (Conn) */
+			int numAccept = 0;
+			Conn * new_conn = NULL;
 
-			if (new_conn) {
-				if (addConnection(new_conn) > 0) {
+			// accept before 64 connections for once
+			while (++numAccept <= 64) {
+			
+				// Create new connection:
+				// 1. Accept new socket
+				// 2. Create new connection object (using ConnFactory from ListenFactory else create simple Conn)
+				new_conn = mNowConn->createNewConn(); /** CONN_TYPE_INCOMING_TCP (Conn) */
 
-					//if (inputData(new_conn) >= 0) { // fix close conn if not recv data
+				if (new_conn) {
+					if (addConnection(new_conn) > 0) {
 
-						if (mNowConn->mCreatorConnFactory) {
-							// On new connection using ListenFactory
-							mNowConn->mCreatorConnFactory->onNewConn(new_conn);
-						} else {
-							if (Log(4)) {
-								LogStream() << "ListenFactory is empty" << endl;
+						//if (inputData(new_conn) >= 0) { // fix close conn if not recv data
+
+							if (mNowConn->mCreatorConnFactory) {
+								// On new connection using ListenFactory
+								mNowConn->mCreatorConnFactory->onNewConn(new_conn);
+							} else {
+								if (Log(4)) {
+									LogStream() << "ListenFactory is empty" << endl;
+								}
+
+								// On new connection by server
+								onNewConn(new_conn);
 							}
 
-							// On new connection by server
-							onNewConn(new_conn);
-						}
+						//}
 
-					//}
-
+					}
+				} else {
+					break;
 				}
+
 			}
+
 			if (mNowConn->Log(5)) {
 				mNowConn->LogStream() << "::(e)NewConn. Number connections: " << mConnChooser.mConnBaseList.size() << endl;
 			}
@@ -511,16 +523,13 @@ int Server::addConnection(Conn * conn) {
 	}
 
 	mConnChooser.addConn(conn);
-
-	tCLIt it = mConnList.insert(mConnList.begin(), conn);
-	conn->mIterator = it;
+	conn->mIterator = mConnList.insert(mConnList.begin(), conn);
+	conn->mPortConn = mNowConn->mPort;
+	conn->mIpConn = mNowConn->mIp;
 
 	/*if (Log(4)) {
 		LogStream() << "Num clients after add: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.size() << endl;
 	}*/
-
-	conn->mPortConn = mNowConn->mPort;
-	conn->mIpConn = mNowConn->mIp;
 	return 1;
 }
 
@@ -528,7 +537,7 @@ int Server::addConnection(Conn * conn) {
 
 /// delConnection
 int Server::delConnection(Conn * conn) {
-	if (!conn) {
+	if (conn == NULL) {
 		if (mNowConn && mNowConn->ErrLog(0)) {
 			mNowConn->LogStream() << "Fatal error: delConnection null pointer" << endl;
 		}
