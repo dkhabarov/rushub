@@ -46,15 +46,15 @@ Service::~Service() {
 int Service::installService(char * name, const char * configFile) {
 
 	// Open SC Manager
-	SC_HANDLE Manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
-	if (!Manager) {
+	SC_HANDLE manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
+	if (!manager) {
 		cout << "Open SCManager failed (" << GetLastError() << ")" << endl;
 		return -1;
 	}
 
 	// Service path
 	char buf[MAX_PATH+1] = { '\0' };
-	if (!GetModuleFileName(NULL, buf, MAX_PATH)) {
+	if (!::GetModuleFileName(NULL, buf, MAX_PATH)) {
 		cout << "Error in GetModuleFileName (" << GetLastError() << ")" << endl;
 	}
 
@@ -73,10 +73,10 @@ int Service::installService(char * name, const char * configFile) {
 
 	// Create service
 	SC_HANDLE service = ::CreateService(
-		Manager,
+		manager,
 		name,
 		name,
-		0,
+		SERVICE_CHANGE_CONFIG,
 		SERVICE_WIN32_OWN_PROCESS,
 		SERVICE_AUTO_START,
 		SERVICE_ERROR_NORMAL,
@@ -90,14 +90,18 @@ int Service::installService(char * name, const char * configFile) {
 
 	if (!service) {
 		cout << "Create service failed (" << GetLastError() << ")" << endl;
-		CloseServiceHandle(Manager);
+		::CloseServiceHandle(manager);
 		return -2;
 	}
 
+	SERVICE_DESCRIPTION serviceDescription;
+	serviceDescription.lpDescription = "NMDC Server";
+	::ChangeServiceConfig2(service, SERVICE_CONFIG_DESCRIPTION, &serviceDescription);
+
 	cout << "Service '" << name << "' installed successfully" << endl;
 
-	CloseServiceHandle(service);
-	CloseServiceHandle(Manager);
+	::CloseServiceHandle(service);
+	::CloseServiceHandle(manager);
 	return 0;
 }
 
@@ -105,9 +109,9 @@ int Service::installService(char * name, const char * configFile) {
 int Service::uninstallService(char * name) {
 
 	// Open SC Manager
-	SC_HANDLE Manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
+	SC_HANDLE manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
 
-	if (!Manager) {
+	if (!manager) {
 		cout << "Open SCManager failed (" << GetLastError() << ")" << endl;
 		return -1;
 	}
@@ -118,11 +122,11 @@ int Service::uninstallService(char * name) {
 	}
 
 	// Open service
-	SC_HANDLE service = ::OpenService(Manager, name, SERVICE_QUERY_STATUS | SERVICE_STOP | DELETE);
+	SC_HANDLE service = ::OpenService(manager, name, SERVICE_QUERY_STATUS | SERVICE_STOP | DELETE);
 
 	if (!service) {
 		cout << "Open service failed (" << GetLastError() << ")" << endl;
-		::CloseServiceHandle(Manager);
+		::CloseServiceHandle(manager);
 		return -2;
 	}
 
@@ -140,21 +144,21 @@ int Service::uninstallService(char * name) {
 	if (::DeleteService(service) == 0) {
 		cout << "Delete service failed (" << GetLastError() << ")" << endl;
 		::CloseServiceHandle(service);
-		::CloseServiceHandle(Manager);
+		::CloseServiceHandle(manager);
 		return -3;
 	}
 
 	cout << "Service '" << name << "' was deleted successfully" << endl;
 
 	::CloseServiceHandle(service);
-	::CloseServiceHandle(Manager);
+	::CloseServiceHandle(manager);
 	return 0;
 }
 
 int Service::serviceStart(char * name) {
 
-	SC_HANDLE Manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
-	if (!Manager) {
+	SC_HANDLE manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
+	if (!manager) {
 		cout << "Open SCManager failed (" << GetLastError() << ")" << endl;
 		return -1;
 	}
@@ -164,28 +168,28 @@ int Service::serviceStart(char * name) {
 		strcpy(name, "rushub");
 	}
 
-	SC_HANDLE service = OpenService(Manager, name, SERVICE_START);
+	SC_HANDLE service = ::OpenService(manager, name, SERVICE_START);
 	if (!service) {
 		cout << "Open service failed (" << GetLastError() << ")" << endl;
-		::CloseServiceHandle(Manager);
+		::CloseServiceHandle(manager);
 		return -2;
 	}
 
-	if (!StartService(service, 0, NULL)) {
+	if (!::StartService(service, 0, NULL)) {
 		cout << "Cannot start service (" << GetLastError() << ")" << endl;
 	} else {
 		cout << "Service '" << name << "' was started successfully" << endl;
 	}
 
 	::CloseServiceHandle(service);
-	::CloseServiceHandle(Manager);
+	::CloseServiceHandle(manager);
 	return 0;
 }
 
 int Service::serviceStop(char * name) {
 
-	SC_HANDLE Manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
-	if (!Manager) {
+	SC_HANDLE manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
+	if (!manager) {
 		cout << "Open SCManager failed (" << GetLastError() << ")" << endl;
 		return -1;
 	}
@@ -195,22 +199,22 @@ int Service::serviceStop(char * name) {
 		strcpy(name, "rushub");
 	}
 
-	SC_HANDLE service = OpenService(Manager, name, SERVICE_STOP);
+	SC_HANDLE service = ::OpenService(manager, name, SERVICE_STOP);
 	if (!service) {
 		cout << "Open service failed (" << GetLastError() << ")" << endl;
-		::CloseServiceHandle(Manager);
+		::CloseServiceHandle(manager);
 		return -2;
 	}
 
 	SERVICE_STATUS ss;
-	if (!ControlService(service, SERVICE_CONTROL_STOP, &ss)) {
+	if (!::ControlService(service, SERVICE_CONTROL_STOP, &ss)) {
 		cout << "Cannot stop service (" << GetLastError() << ")" << endl;
 	} else {
 		cout << "Service '" << name << "' was stoped successfully" << endl;
 	}
 
 	::CloseServiceHandle(service);
-	::CloseServiceHandle(Manager);
+	::CloseServiceHandle(manager);
 	return 0;
 }
 
@@ -227,7 +231,7 @@ int Service::start() {
 
 int Service::stop() {
 	ss.dwCurrentState = SERVICE_STOPPED;
-	SetServiceStatus(ssh, &ss);
+	::SetServiceStatus(ssh, &ss);
 	return 0;
 }
 
@@ -350,11 +354,11 @@ int Service::cli(int argc, char * argv[], string & configFile) {
 	}
 
 	if (startName) {
-		SERVICE_TABLE_ENTRY DispatchTable[] = {
+		SERVICE_TABLE_ENTRY dispatchTable[] = {
 			{ startName, (LPSERVICE_MAIN_FUNCTION)Service::serviceMain },
 			{ NULL, NULL }
 		};
-		if (::StartServiceCtrlDispatcher(DispatchTable) == 0) {
+		if (::StartServiceCtrlDispatcher(dispatchTable) == 0) {
 			if (GetLastError() == ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) {
 				// attempt to start service from console
 				mCurService->serviceStart(startName);
@@ -431,20 +435,20 @@ void WINAPI Service::ctrlHandler(DWORD dwCtrl) {
 
 void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 
-	SC_HANDLE Manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
-	if (!Manager) {
+	SC_HANDLE manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+	if (!manager) {
 		if (mCurService->ErrLog(0)) {
 			mCurService->LogStream() << "Open SCManager failed (" << GetLastError() << ")" << endl;
 		}
 		return;
 	}
 
-	SC_HANDLE service = OpenService(Manager, lpszArgv[0], SERVICE_ALL_ACCESS);
+	SC_HANDLE service = OpenService(manager, lpszArgv[0], SERVICE_ALL_ACCESS);
 	if (!service) {
 		if (mCurService->ErrLog(0)) {
 			mCurService->LogStream() << "Open service failed (" << GetLastError() << ")" << endl;
 		}
-		::CloseServiceHandle(Manager);
+		::CloseServiceHandle(manager);
 		return;
 	}
 
@@ -457,7 +461,7 @@ void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 				mCurService->LogStream() << "QueryServiceConfig failed (" << GetLastError() << ")" << endl;
 			}
 			::CloseServiceHandle(service);
-			::CloseServiceHandle(Manager);
+			::CloseServiceHandle(manager);
 			return;
 		}
 		sBinaryPathName = lpBuf->lpBinaryPathName;
@@ -465,7 +469,7 @@ void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 	}
 
 	::CloseServiceHandle(service);
-	::CloseServiceHandle(Manager);
+	::CloseServiceHandle(manager);
 	
 
 	ssh = ::RegisterServiceCtrlHandler(lpszArgv[0], ctrlHandler);
