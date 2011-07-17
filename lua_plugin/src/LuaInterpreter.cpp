@@ -194,6 +194,12 @@ int LuaInterpreter::stop() {
 }
 
 
+bool LuaInterpreter::testFunc(const char * funcName) {
+	lua_getglobal(mL, funcName);
+	bool ret = lua_isnil(mL, -1);
+	lua_pop(mL, -1);
+	return !ret;
+}
 
 /** 1 - lock! */
 int LuaInterpreter::callFunc(const char * funcName) {
@@ -302,6 +308,32 @@ bool LuaInterpreter::onError(const char * funcName, const char * errMsg, bool st
 	return false;
 }
 
+
+
+int LuaInterpreter::addTmr(Timer * timer) {
+	if (LuaPlugin::mCurLua->getListFlag(LIST_TIMER)) {
+		LuaPlugin::mCurLua->setListFlag(LuaPlugin::mCurLua->getListFlags() - LIST_TIMER);
+	}
+	return mTimerList.addTimer(timer);
+}
+
+
+
+int LuaInterpreter::delTmr(int tm) {
+	if (LuaPlugin::mCurLua->getListFlag(LIST_TIMER)) {
+		LuaPlugin::mCurLua->setListFlag(LuaPlugin::mCurLua->getListFlags() - LIST_TIMER);
+	}
+	return mTimerList.delTimer(tm);
+}
+
+
+
+void LuaInterpreter::delTmr() {
+	if (LuaPlugin::mCurLua->getListFlag(LIST_TIMER)) {
+		LuaPlugin::mCurLua->setListFlag(LuaPlugin::mCurLua->getListFlags() - LIST_TIMER);
+	}
+	mTimerList.delTimer();
+}
 
 
 void LuaInterpreter::timer(int id, const char * funcName) {

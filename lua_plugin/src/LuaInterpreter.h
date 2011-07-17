@@ -56,6 +56,7 @@ public:
 	int start(); // (-1 - is running already)
 	int stop();
 
+	bool testFunc(const char * funcName);
 	int callFunc(const char * funcName);
 
 	bool onError(const char * funcName, const char * errMsg, bool stop = false);
@@ -69,18 +70,13 @@ public:
 	inline void onTimer() {
 		mTimerList.onTimer();
 	}
-	inline int addTmr(Timer * timer) {
-		return mTimerList.addTimer(timer);
-	}
 	inline int size() {
 		return mTimerList.size();
 	}
-	inline int delTmr(int tm) {
-		return mTimerList.delTimer(tm);
-	}
-	inline void delTmr() {
-		mTimerList.delTimer();
-	}
+
+	int addTmr(Timer *);
+	int delTmr(int tm);
+	void delTmr();
 
 private:
 

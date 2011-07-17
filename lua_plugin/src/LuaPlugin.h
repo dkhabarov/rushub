@@ -50,6 +50,38 @@ using namespace ::plugin;
 using namespace ::dcserver;
 using namespace ::luaplugin;
 
+// ATTENTION! 31 max !!!!!!!!
+enum {
+	LIST_USER_CONNECTED    = 1 << 0,
+	LIST_USER_DISCONNECTED = 1 << 1,
+	LIST_USER_ENTER        = 1 << 2,
+	LIST_USER_EXIT         = 1 << 3,
+	LIST_SUPPORTS          = 1 << 4,
+	LIST_KEY               = 1 << 5,
+	LIST_VALIDATE_NICK     = 1 << 6,
+	LIST_MY_PASS           = 1 << 7,
+	LIST_VERSION           = 1 << 8,
+	LIST_GET_NICK_LIST     = 1 << 9,
+	LIST_MY_INFO           = 1 << 10,
+	LIST_CHAT              = 1 << 11,
+	LIST_TO                = 1 << 12,
+	LIST_CONNECT_TO_ME     = 1 << 13,
+	LIST_REV_CONNECT_TO_ME = 1 << 14,
+	LIST_SEARCH            = 1 << 15,
+	LIST_SR                = 1 << 16,
+	LIST_KICK              = 1 << 17,
+	LIST_OP_FORCE_MOVE     = 1 << 18,
+	LIST_GET_INFO          = 1 << 19,
+	LIST_MC_TO             = 1 << 20,
+	LIST_TIMER             = 1 << 21,
+	LIST_FLOOD             = 1 << 22,
+	LIST_WEB_DATA          = 1 << 23,
+	LIST_SCRIPT_ERROR      = 1 << 24,
+	LIST_CONFIG_CHANGE     = 1 << 25,
+	LIST_ANY               = 1 << 26,
+	LIST_UNKNOWN           = 1 << 27
+}; // ATTENTION! 31 max !!!!!!!!
+
 
 class LuaPlugin : public Plugin {
 
@@ -64,8 +96,9 @@ public:
 	static string mLuaCPath; /** lua package.cpath */
 	static bool mSetLuaPath; /** is set package.path and package.cpath */
 
-	typedef list<LuaInterpreter *> LuaInterpreterList;
-	LuaInterpreterList mLua; /** Script-list */
+	typedef list<LuaInterpreter *> listLuaInterpreter;
+	typedef vector<LuaInterpreter *> vectorLuaInterpreter;
+	listLuaInterpreter mLua; /** Script-list */
 
 	LuaInterpreter * mCurScript; /** Current script. When script is working only! */
 	string mLastError; /** Last error in scripts */
@@ -121,7 +154,7 @@ public:
 
 	int onConfigChange(const char * name, const char * value);
 
-	int callAll(const char * fancName, DcUserBase * dcUserBase, bool param = true); /** Calling event for all scripts */
+	int callAll(const char * funcName, unsigned int listFlag, vectorLuaInterpreter & vli, DcUserBase * dcUserBase, bool param = true); /** Calling event for all scripts */
 
 	LuaInterpreter * findScript(const string & scriptName);
 	LuaInterpreter * addScript(const string & scriptName, bool onlyNew = false);
@@ -147,6 +180,54 @@ public:
 
 	int moveUp(LuaInterpreter *);
 	int moveDown(LuaInterpreter *);
+
+	unsigned int getListFlags() {
+		return mListFlags;
+	}
+
+	void clearListFlags() {
+		mListFlags = 0;
+	}
+
+	unsigned int getListFlag(unsigned int flag) {
+		return mListFlags & flag;
+	}
+
+	void setListFlag(unsigned int flag) {
+		mListFlags |= flag;
+	}
+private:
+
+	unsigned int mListFlags;
+
+	vectorLuaInterpreter mUserConnected;
+	vectorLuaInterpreter mUserDisconnected;
+	vectorLuaInterpreter mUserEnter;
+	vectorLuaInterpreter mUserExit;
+	vectorLuaInterpreter mSupports;
+	vectorLuaInterpreter mKey;
+	vectorLuaInterpreter mValidateNick;
+	vectorLuaInterpreter mMyPass;
+	vectorLuaInterpreter mVersionList;
+	vectorLuaInterpreter mGetNickList;
+	vectorLuaInterpreter mMyINFO;
+	vectorLuaInterpreter mChat;
+	vectorLuaInterpreter mTo;
+	vectorLuaInterpreter mConnectToMe;
+	vectorLuaInterpreter mRevConnectToMe;
+	vectorLuaInterpreter mSearch;
+	vectorLuaInterpreter mSR;
+	vectorLuaInterpreter mKick;
+	vectorLuaInterpreter mOpForceMove;
+	vectorLuaInterpreter mGetINFO;
+	vectorLuaInterpreter mMCTo;
+	vectorLuaInterpreter mAny;
+	vectorLuaInterpreter mUnknown;
+	vectorLuaInterpreter mTimer;
+	vectorLuaInterpreter mFlood;
+	vectorLuaInterpreter mWebData;
+	vectorLuaInterpreter mScriptError;
+	vectorLuaInterpreter mConfigChange;
 
 }; // class LuaPlugin
 

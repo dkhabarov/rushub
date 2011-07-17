@@ -140,7 +140,7 @@ bool LuaUtils::checkScriptName(lua_State * L, string & name) {
 
 LuaInterpreter * LuaUtils::findInterpreter(lua_State * L, const string & name) {
 	LuaInterpreter * luaInterpreter = NULL;
-	for (LuaPlugin::LuaInterpreterList::iterator it = LuaPlugin::mCurLua->mLua.begin();
+	for (LuaPlugin::listLuaInterpreter::iterator it = LuaPlugin::mCurLua->mLua.begin();
 		it != LuaPlugin::mCurLua->mLua.end();
 		++it
 	) {

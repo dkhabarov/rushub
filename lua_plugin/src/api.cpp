@@ -989,7 +989,7 @@ int startScript(lua_State * L) {
 int getScripts(lua_State * L) {
 	lua_newtable(L);
 	int i = 1, top = lua_gettop(L);
-	LuaPlugin::LuaInterpreterList::iterator it;
+	LuaPlugin::listLuaInterpreter::iterator it;
 	for (it = LuaPlugin::mCurLua->mLua.begin(); it != LuaPlugin::mCurLua->mLua.end(); ++it) {
 		if (*it) {
 			lua_pushnumber(L, i);
