@@ -419,6 +419,7 @@ int LuaPlugin::callAll(const char * funcName, unsigned int listFlag, vectorLuaIn
 	LuaInterpreter * script = NULL;
 
 	if (!getListFlag(listFlag)) {
+		vli.clear();
 		listLuaInterpreter::iterator it, it_e = mLua.end();
 		for (it = mLua.begin(); it != it_e; ++it) {
 			script = *it;
@@ -465,6 +466,7 @@ int LuaPlugin::onTimer() {
 
 	LuaInterpreter * script = NULL;
 	if (!getListFlag(LIST_TIMER)) {
+		mTimer.clear();
 		listLuaInterpreter::iterator it, it_e = mLua.end();
 		for (it = mLua.begin(); it != it_e; ++it) {
 			script = *it;
@@ -511,6 +513,7 @@ int LuaPlugin::onScriptAction(const char * scriptName, const char * action) {
 int LuaPlugin::onConfigChange(const char * name, const char * value) {
 	LuaInterpreter * script = NULL;
 	if (!getListFlag(LIST_CONFIG_CHANGE)) {
+		mConfigChange.clear();
 		listLuaInterpreter::iterator it, it_e = mLua.end();
 		for (it = mLua.begin(); it != it_e; ++it) {
 			script = *it;
@@ -542,6 +545,7 @@ int LuaPlugin::onFlood(DcUserBase * dcUserBase, int type1, int type2) {
 	LuaInterpreter * script = NULL;
 
 	if (!getListFlag(LIST_FLOOD)) {
+		mFlood.clear();
 		listLuaInterpreter::iterator it, it_e = mLua.end();
 		for (it = mLua.begin(); it != it_e; ++it) {
 			script = *it;
@@ -579,6 +583,7 @@ int LuaPlugin::onWebData(WebUserBase * webUserBase) {
 	LuaInterpreter * script = NULL;
 
 	if (!getListFlag(LIST_WEB_DATA)) {
+		mWebData.clear();
 		listLuaInterpreter::iterator it, it_e = mLua.end();
 		for (it = mLua.begin(); it != it_e; ++it) {
 			script = *it;
@@ -614,6 +619,7 @@ int LuaPlugin::onScriptError(LuaInterpreter * current, const char * scriptName, 
 	LuaInterpreter * script = NULL;
 
 	if (!getListFlag(LIST_SCRIPT_ERROR)) {
+		mScriptError.clear();
 		listLuaInterpreter::iterator it, it_e = mLua.end();
 		for (it = mLua.begin(); it != it_e; ++it) {
 			script = *it;
@@ -648,6 +654,7 @@ int LuaPlugin::onAny(DcUserBase * dcUserBase, int type) {
 	int ret = 0, block = 0; // On defaults don't block
 	LuaInterpreter * script = NULL;
 	if (!getListFlag(LIST_ANY)) {
+		mAny.clear();
 		listLuaInterpreter::iterator it, it_e = mLua.end();
 		for (it = mLua.begin(); it != it_e; ++it) {
 			script = *it;
