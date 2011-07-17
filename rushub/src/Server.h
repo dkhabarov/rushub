@@ -161,6 +161,8 @@ protected:
 	/// onClose conn
 	virtual void onClose(Conn *);
 
+	void deleteAll();
+
 private:
 
 	/// Current connection

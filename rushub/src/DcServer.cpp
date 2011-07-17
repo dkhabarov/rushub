@@ -144,6 +144,8 @@ DcServer::~DcServer() {
 		}
 	}
 
+	deleteAll(); // Delete all other conn
+
 	if (mIpListConn != NULL) {
 		delete mIpListConn;
 		mIpListConn = NULL;

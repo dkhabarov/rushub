@@ -93,13 +93,7 @@ Server::~Server() {
 	mRun = false;
 	mNowConn = NULL;
 
-	for (tCLIt it = mConnList.begin(); it != mConnList.end(); ++it) {
-		deleteConn(*it);
-	}
-	for (tLLIt it = mListenList.begin(); it != mListenList.end(); ++it) {
-		(*it)->mProtocol = NULL; // upd hack: fix me!
-		deleteConn(*it);
-	}
+	deleteAll(); // fix me: go up on virtual funcs, that can be destroyed!
 
 #ifdef _WIN32
 	// Close WSA DLL lib
@@ -116,6 +110,19 @@ Server::~Server() {
 	}
 }
 
+
+
+void Server::deleteAll() {
+	for (tCLIt it = mConnList.begin(); it != mConnList.end(); ++it) {
+		deleteConn(*it);
+	}
+	mConnList.clear();
+	for (tLLIt it = mListenList.begin(); it != mListenList.end(); ++it) {
+		(*it)->mProtocol = NULL; // upd hack: fix me!
+		deleteConn(*it);
+	}
+	mListenList.clear();
+}
 
 
 void Server::deleteConn(Conn * conn) {
