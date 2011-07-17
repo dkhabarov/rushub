@@ -431,7 +431,7 @@ int LuaPlugin::callAll(const char * funcName, unsigned int listFlag, vectorLuaIn
 	}
 
 	// loop cache
-	for (int i = 0; i < vli.size(); ++i) {
+	for (size_t i = 0; i < vli.size(); ++i) {
 		script = vli[i];
 		if (script && script->mL) {
 			script->newCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA); // TODO refactoring
@@ -478,7 +478,7 @@ int LuaPlugin::onTimer() {
 	}
 
 	// loop cache
-	for (int i = 0; i < mTimer.size(); ++i) {
+	for (size_t i = 0; i < mTimer.size(); ++i) {
 		script = mTimer[i];
 		if (script && script->mL) {
 			script->onTimer();
@@ -525,7 +525,7 @@ int LuaPlugin::onConfigChange(const char * name, const char * value) {
 	}
 
 	// loop cache
-	for (int i = 0; i < mConfigChange.size(); ++i) {
+	for (size_t i = 0; i < mConfigChange.size(); ++i) {
 		script = mConfigChange[i];
 		if (script && script->mL) {
 			script->newCallParam((void *) name, LUA_TSTRING);
@@ -557,7 +557,7 @@ int LuaPlugin::onFlood(DcUserBase * dcUserBase, int type1, int type2) {
 	}
 
 	// loop cache
-	for (int i = 0; i < mFlood.size(); ++i) {
+	for (size_t i = 0; i < mFlood.size(); ++i) {
 		script = mFlood[i];
 		if (script && script->mL) {
 			script->newCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA); // TODO refactoring
@@ -595,7 +595,7 @@ int LuaPlugin::onWebData(WebUserBase * webUserBase) {
 	}
 
 	// loop cache
-	for (int i = 0; i < mWebData.size(); ++i) {
+	for (size_t i = 0; i < mWebData.size(); ++i) {
 		script = mWebData[i];
 		if (script && script->mL) {
 			script->newCallParam((void *) webUserBase, LUA_TLIGHTUSERDATA);
@@ -631,7 +631,7 @@ int LuaPlugin::onScriptError(LuaInterpreter * current, const char * scriptName, 
 	}
 
 	// loop cache
-	for (int i = 0; i < mScriptError.size(); ++i) {
+	for (size_t i = 0; i < mScriptError.size(); ++i) {
 		script = mScriptError[i];
 		if (script && script->mL && script == current) {
 			script->newCallParam((void *)scriptName, LUA_TSTRING);
@@ -666,7 +666,7 @@ int LuaPlugin::onAny(DcUserBase * dcUserBase, int type) {
 	}
 
 	// loop cache
-	for (int i = 0; i < mAny.size(); ++i) {
+	for (size_t i = 0; i < mAny.size(); ++i) {
 		script = mAny[i];
 		if (script && script->mL) {
 			script->newCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA); // TODO refactoring
