@@ -212,7 +212,7 @@ bool DcServer::listeningServer(const char * name, const char * addresses, const 
 
 	bool ret = false;
 	for (vector<pair<string, string> >::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
-		if (Server::listening(connFactory, ((*it).first).c_str(), ((*it).second).c_str(), udp) == 0) {
+		if (Server::listening(connFactory, ((*it).first).c_str(), ((*it).second).c_str(), udp) != NULL) {
 			ret = true;
 			if (Log(0)) {
 				LogStream() << name << " is running on [" 

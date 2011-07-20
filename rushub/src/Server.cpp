@@ -142,10 +142,10 @@ void Server::deleteConn(Conn * conn) {
 
 
 /// Set and Listen port
-int Server::listening(ConnFactory * connFactory, const char * ip, const char * port, bool udp /*= false*/) {
+Conn * Server::listening(ConnFactory * connFactory, const char * ip, const char * port, bool udp /*= false*/) {
 	Conn * conn = listen(ip, port, udp);
 	if (conn == NULL) {
-		return -1;
+		return NULL;
 	}
 
 	// Set server listen factory
@@ -154,16 +154,16 @@ int Server::listening(ConnFactory * connFactory, const char * ip, const char * p
 	// Set protocol for Conn without factory
 	conn->mProtocol = connFactory->mProtocol;
 
-	return 0;
+	return conn;
 }
 
 
 
 /// Set and Connect to port
-int Server::connecting(ConnFactory * connFactory, const char * ip, const char * port, bool udp /*= false*/) {
+Conn * Server::connecting(ConnFactory * connFactory, const char * ip, const char * port, bool udp /*= false*/) {
 	Conn * conn = connect(ip, port, udp);
 	if (conn == NULL) {
-		return -1;
+		return NULL;
 	}
 
 	// Set server listen factory
@@ -172,7 +172,7 @@ int Server::connecting(ConnFactory * connFactory, const char * ip, const char * 
 	// Set protocol for Conn without factory
 	conn->mProtocol = connFactory->mProtocol;
 
-	return 0;
+	return conn;
 }
 
 
