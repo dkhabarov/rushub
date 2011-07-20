@@ -30,7 +30,7 @@
 #ifdef _WIN32
 
 	#ifndef FD_SETSIZE // For select
-		#define FD_SETSIZE      32768 // also see Times.h
+		#define FD_SETSIZE      16384 // also see Times.h
 	#endif /* FD_SETSIZE */
 
 	#include <winsock2.h>
