@@ -159,10 +159,43 @@ int Server::listening(ConnFactory * connFactory, const char * ip, const char * p
 
 
 
+/// Set and Connect to port
+int Server::connecting(ConnFactory * connFactory, const char * ip, const char * port, bool udp /*= false*/) {
+	Conn * conn = connect(ip, port, udp);
+	if (conn == NULL) {
+		return -1;
+	}
+
+	// Set server listen factory
+	conn->mCreatorConnFactory = connFactory;
+
+	// Set protocol for Conn without factory
+	conn->mProtocol = connFactory->mProtocol;
+
+	return 0;
+}
+
+
+
 /// Listen port (TCP/UDP)
 Conn * Server::listen(const char * ip, const char * port, bool udp) {
 
 	ConnType connType = udp ? CONN_TYPE_INCOMING_UDP : CONN_TYPE_LISTEN;
+	Conn * conn = new Conn(0, this, connType);
+
+	if (!addSimpleConn(conn, ip, port, connType)) { // Listen conn
+		delete conn;
+		conn = NULL;
+	}
+	return conn;
+}
+
+
+
+/// Connect to port (TCP/UDP)
+Conn * Server::connect(const char * ip, const char * port, bool udp) {
+
+	ConnType connType = udp ? CONN_TYPE_OUTGOING_UDP : CONN_TYPE_OUTGOING_TCP;
 	Conn * conn = new Conn(0, this, connType);
 
 	if (!addSimpleConn(conn, ip, port, connType)) { // Listen conn

@@ -77,8 +77,14 @@ public:
 	/// Set and Listen port
 	virtual int listening(ConnFactory *, const char * ip, const char * port = 0, bool udp = false);
 
+	/// Set and Connect to port
+	virtual int connecting(ConnFactory *, const char * ip, const char * port = 0, bool udp = false);
+
 	/// Listen port (TCP/UDP)
 	virtual Conn * listen(const char * ip, const char * port, bool udp = false);
+
+	/// Connect to port (TCP/UDP)
+	virtual Conn * connect(const char * ip, const char * port, bool udp = false);
 
 	/// Add simple connection
 	virtual Conn * addSimpleConn(Conn *, const char * ip, const char * port, int connType);
