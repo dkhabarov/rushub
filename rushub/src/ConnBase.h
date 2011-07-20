@@ -33,7 +33,7 @@
 		#ifdef WIN64
 			#define FD_SETSIZE      16384 // also see Times.h
 		#else
-			#define FD_SETSIZE      16384 // also see Times.h
+			#define FD_SETSIZE      32768 // also see Times.h
 		#endif
 	#endif /* FD_SETSIZE */
 

@@ -32,7 +32,7 @@
 		#ifdef _WIN64
 			#define FD_SETSIZE      16384 // also see ConnBase.h
 		#else
-			#define FD_SETSIZE      16384 // also see ConnBase.h
+			#define FD_SETSIZE      32768 // also see ConnBase.h
 		#endif
 	#endif /* FD_SETSIZE */
 
