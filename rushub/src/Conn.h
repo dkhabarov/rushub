@@ -247,6 +247,9 @@ public:
 	/// Main timer
 	virtual int onTimer(Time &now);
 
+	/// Write data in sending buffer
+	size_t writeData(const char * data, size_t len, bool flush);
+
 protected:
 
 	/// Socket type
@@ -274,9 +277,6 @@ protected:
 	Time mConnect;
 
 protected:
-
-	/// Write data in sending buffer
-	size_t writeData(const char * data, size_t len, bool flush);
 
 	/// onFlush
 	virtual void onFlush();
