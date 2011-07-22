@@ -198,7 +198,7 @@ int main(int argc, char ** argv) {
 	}
 
 	int i = 0;
-	while (i < argc - 1) {
+	while (i < argc) {
 		if(!strcmp(last, "-help")) {
 			printHelp();
 			return 1;
