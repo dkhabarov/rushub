@@ -214,6 +214,13 @@ int main(int argc, char ** argv) {
 		last = argv[i];
 		++i;
 	}
+	
+	if (batch > maxConn) {
+		batch = maxConn;
+	}
+	if (batch > 100) {
+		batch = 100;
+	}
 
 	NmdcClient client(ip, port, maxConn, batch);
 	curServer = &client;
@@ -225,3 +232,8 @@ int main(int argc, char ** argv) {
 
 	return 0;
 }
+
+/**
+ * $Id$
+ * $HeadURL$
+ */

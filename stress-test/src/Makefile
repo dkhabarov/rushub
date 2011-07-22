@@ -1,3 +1,10 @@
+#  files for make:
+#
+#  Conn.cpp Conn.h ConnBase.h ConnChoose.cpp ConnChoose.h ConnEpoll.cpp 
+#  ConnEpoll.h ConnPoll.cpp ConnPoll.h ConnSelect.cpp ConnSelect.h HashTable.h
+#  MeanFrequency.h Obj.cpp Obj.h Plugin.h Protocol.cpp Protocol.h Server.cpp 
+#  Server.h Times.cpp Times.h
+
 CXX = g++
 
 CXXFLAGS = -O2 -Wall -Wextra -pipe
