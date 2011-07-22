@@ -943,7 +943,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 
 		if (SockErr != SOCK_EAGAIN) {
 			if (Log(2)) {
-				LogStream() << "Error in sending: " << SockErrMsg << "(not EAGAIN), closing" << endl;
+				LogStream() << "Error in sending: " << SockErrMsg << " [" << SockErr << "] (not EAGAIN), closing" << endl;
 			}
 			closeNow(CLOSE_REASON_ERROR_SEND);
 			return 0;
