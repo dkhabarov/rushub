@@ -70,27 +70,6 @@ typedef enum {
 } SystemLoad;
 
 
-
-/// Flood types
-enum FloodType {
-
-	FLOOD_TYPE_NO = -1,
-	FLOOD_TYPE_CHAT,
-	FLOOD_TYPE_TO,
-	FLOOD_TYPE_MYNIFO,
-	FLOOD_TYPE_NICKLIST,
-	FLOOD_TYPE_SEARCH,
-	FLOOD_TYPE_SR,
-	FLOOD_TYPE_CTM,
-	FLOOD_TYPE_RCTM,
-	FLOOD_TYPE_MCTO,
-	FLOOD_TYPE_PING,
-	FLOOD_TYPE_UNKNOWN
-
-}; // enum FloodType
-
-
-
 class DcServer;
 class DcConfigLoader;
 
