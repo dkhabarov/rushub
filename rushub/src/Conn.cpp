@@ -511,7 +511,7 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 		#ifdef _WIN32
 			Sleep(1);
 		#else
-			usleep(50);
+			usleep(1000);
 		#endif
 	}
 	if (SOCK_INVALID(sock)) {
@@ -601,7 +601,7 @@ int Conn::recv() {
 			&& (++i <= 100)
 		) {
 			#ifndef _WIN32
-				usleep(5);
+				usleep(100);
 			#endif
 		}
 
@@ -620,7 +620,7 @@ int Conn::recv() {
 			))) && (++i <= 100)
 		) {
 			#ifndef _WIN32
-				usleep(5);
+				usleep(100);
 			#endif
 		}
 		if (Log(4)) {

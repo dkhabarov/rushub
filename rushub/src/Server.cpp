@@ -328,7 +328,7 @@ void Server::step() {
 			#ifdef _WIN32
 				Sleep(1);
 			#else
-				usleep(50); // 50 usec
+				usleep(1000);
 			#endif
 			return;
 		}
