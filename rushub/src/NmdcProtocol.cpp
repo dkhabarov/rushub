@@ -1229,7 +1229,7 @@ bool NmdcProtocol::antiflood(DcConn * dcConn, unsigned int type) {
 		mDcServer->mDcConfig.mFloodCount[type], mDcServer->mDcConfig.mFloodTime[type])
 	) {
 		#ifndef WITHOUT_PLUGINS
-		if (!mDcServer->mCalls.mOnFlood.callAll(dcConn->mDcUser, FLOOD_TYPE_MYNIFO, 1))
+		if (!mDcServer->mCalls.mOnFlood.callAll(dcConn->mDcUser, (int) type, 1))
 		#endif
 		{
 			mDcServer->sendToUser(dcConn->mDcUser, (mDcServer->mDcLang.mFlood[type]).c_str(), mDcServer->mDcConfig.mHubBot.c_str());
@@ -1241,7 +1241,7 @@ bool NmdcProtocol::antiflood(DcConn * dcConn, unsigned int type) {
 		mDcServer->mDcConfig.mFloodCount2[type], mDcServer->mDcConfig.mFloodTime2[type])
 	) {
 		#ifndef WITHOUT_PLUGINS
-		if (!mDcServer->mCalls.mOnFlood.callAll(dcConn->mDcUser, FLOOD_TYPE_MYNIFO, 2))
+		if (!mDcServer->mCalls.mOnFlood.callAll(dcConn->mDcUser, (int) type, 2))
 		#endif
 		{
 			mDcServer->sendToUser(dcConn->mDcUser, (mDcServer->mDcLang.mFlood[type]).c_str(), mDcServer->mDcConfig.mHubBot.c_str());
