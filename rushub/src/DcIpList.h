@@ -48,8 +48,8 @@ public:
 	void sendToIpWithNick(const char * ip, string & start, string & end, unsigned long profile = 0, bool addSep = false, bool flush = true);
 
 	virtual void onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
-		if (Log(3)) {
-			LogStream() << "Autoresizing: size = " << currentSize << 
+		if (log(3)) {
+			logStream() << "Autoresizing: size = " << currentSize << 
 				", capacity = " << oldCapacity << " -> " + newCapacity << endl;
 		}
 	}

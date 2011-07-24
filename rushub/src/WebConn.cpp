@@ -74,8 +74,8 @@ void WebConnFactory::deleteConn(Conn * &conn) {
 
 void WebConnFactory::onNewData(Conn * conn, string * str) {
 
-	if (conn->Log(1)) {
-		conn->LogStream() << "WEB IN: " << (*str) << endl;
+	if (conn->log(1)) {
+		conn->logStream() << "WEB IN: " << (*str) << endl;
 	}
 
 	(*str).append(WEB_SEPARATOR);
@@ -125,7 +125,7 @@ void WebUser::disconnect() {
 WebConn::WebConn(tSocket sock, Server * server) : 
 	Conn(sock, server)
 {
-	SetClassName("WebConn");
+	setClassName("WebConn");
 }
 
 
@@ -146,8 +146,8 @@ int WebConn::onTimer(Time &) {
 	DcServer * dcServer = server();
 	Time lastRecv(mLastRecv);
 	if (dcServer->minDelay(lastRecv, dcServer->mDcConfig.mWebTimeout)) {
-		if (Log(2)) {
-			LogStream() << "Any action timeout..." << endl;
+		if (log(2)) {
+			logStream() << "Any action timeout..." << endl;
 		}
 		closeNice(9000, CLOSE_REASON_WEB);
 		return 1;

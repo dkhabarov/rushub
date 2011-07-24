@@ -54,13 +54,13 @@ DcConfig::DcConfig(ConfigLoader * configLoader, Server * server, const string & 
 	Dir::checkPath(mLangPath);
 	Dir::checkPath(mPluginPath);
 
-	msPath = &mLogPath; // Set log point path
+	mLogsPath = &mLogPath; // Set log point path
 
 	#ifndef _WIN32
 		// Go to the work directory
 		if ((chdir(mMainPath.c_str())) < 0) {
-			if (ErrLog(1)) {
-				LogStream() << "Can not go to the work directory '" << mMainPath << "'. Error: " << strerror(errno) << endl;
+			if (errLog(1)) {
+				logStream() << "Can not go to the work directory '" << mMainPath << "'. Error: " << strerror(errno) << endl;
 			}
 		}
 	#endif
@@ -232,8 +232,8 @@ void DcConfig::addVars(Server * server) {
 	add("iMaxNickLen",            mMaxNickLen,                          32);
 	add("iMinNickLen",            mMinNickLen,                          2);
 	add("iUsersLimit",            mUsersLimit,                          -1);
-	add("iMaxLevel",              miMaxLevel,                           miMaxLevel); // set this default value for log
-	add("iMaxErrLevel",           miMaxErrLevel,                        miMaxErrLevel); // set this default value for log
+	add("iMaxLevel",              mMaxLevel,                            mMaxLevel); // set this default value for log
+	add("iMaxErrLevel",           mMaxErrLevel,                         mMaxErrLevel); // set this default value for log
 
 	add("sUDPAddresses",          mUdpAddresses,                        "0.0.0.0:1209");
 	add("bUDPServer",             mUdpServer,                           false);
@@ -301,8 +301,8 @@ int DcConfig::reload() {
 
 		if (ret != -4) {
 			// Set default log levels
-			miMaxErrLevel = 2;
-			miMaxLevel = 0;
+			mMaxErrLevel = 2;
+			mMaxLevel = 0;
 		}
 
 		save();

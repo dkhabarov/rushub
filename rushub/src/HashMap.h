@@ -105,8 +105,8 @@ bool HashMap<V, K>::add(const K & hash, V Data) {
 
 	/** Check */
 	if (contain(hash)) {
-		if (Log(1)) {
-			LogStream() << "Hash " << hash << " is contains already" << endl;
+		if (log(1)) {
+			logStream() << "Hash " << hash << " is contains already" << endl;
 		}
 		return false;
 	}
@@ -114,8 +114,8 @@ bool HashMap<V, K>::add(const K & hash, V Data) {
 	/** Insert data */
 	iterator ulit = mList.insert(mList.begin(), Data); /** Insert in begin list */
 	if (ulit == mList.end()) {
-		if (Log(1)) {
-			LogStream() << "Don't add " << hash << " into the list" << endl;
+		if (log(1)) {
+			logStream() << "Don't add " << hash << " into the list" << endl;
 		}
 		return false;
 	}
@@ -124,12 +124,12 @@ bool HashMap<V, K>::add(const K & hash, V Data) {
 	pair<tUHIt, bool> P = mHashMap.insert(tHashPair(hash, ulit));
 	if (P.second) {
 		onAdd(Data);
-		if (Log(4)) {
-			LogStream() << "Added: " << hash << " (size: " << mHashMap.size() << ")" << endl;
+		if (log(4)) {
+			logStream() << "Added: " << hash << " (size: " << mHashMap.size() << ")" << endl;
 		}
 	} else {
-		if (Log(1)) {
-			LogStream() << "Don't add " << hash << endl;
+		if (log(1)) {
+			logStream() << "Don't add " << hash << endl;
 		}
 		mList.erase(ulit); /** Removing data fron list */
 		return false;
@@ -145,13 +145,13 @@ bool HashMap<V, K>::remove(const K & hash) {
 		onRemove(*(uhit->second));
 		mList.erase(uhit->second); /** Remove data */
 		mHashMap.erase(uhit); /** Remove key */
-		if (Log(4)) {
-			LogStream() << "Removed: " << hash << " (size: " << mHashMap.size() << ")" << endl;
+		if (log(4)) {
+			logStream() << "Removed: " << hash << " (size: " << mHashMap.size() << ")" << endl;
 		}
 		return true;
 	}
-	if (Log(3)) {
-		LogStream() << "Don't exist: " << hash << endl;
+	if (log(3)) {
+		logStream() << "Don't exist: " << hash << endl;
 	}
 	return false;
 }

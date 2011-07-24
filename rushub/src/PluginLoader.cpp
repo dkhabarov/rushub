@@ -78,8 +78,8 @@ bool PluginLoader::open() {
 		if (!mHandle) {
 			isError(); // ???
 		}
-		if (ErrLog(1)) {
-			LogStream() << "Can't open file '" << mFile << "' because:" << getError() << " handle(" << mHandle << ")" << endl;
+		if (errLog(1)) {
+			logStream() << "Can't open file '" << mFile << "' because:" << getError() << " handle(" << mHandle << ")" << endl;
 		}
 		return false;
 	}
@@ -96,8 +96,8 @@ bool PluginLoader::close() {
 				__try {
 					mDelPluginFunc(mPlugin);
 				} __except( EXCEPTION_EXECUTE_HANDLER) {
-					if (ErrLog(0)) {
-						LogStream() << "error in DelPluginFunc (" << mPlugin->getName() << ")" << endl;
+					if (errLog(0)) {
+						logStream() << "error in DelPluginFunc (" << mPlugin->getName() << ")" << endl;
 					}
 				}
 			#else
@@ -107,8 +107,8 @@ bool PluginLoader::close() {
 		mPlugin = NULL;
 		dlclose(mHandle);
 		if (isError()) {
-			if (ErrLog(1)) {
-				LogStream() << "Can't close :" << getError() << endl;
+			if (errLog(1)) {
+				logStream() << "Can't close :" << getError() << endl;
 			}
 			return false;
 		}
@@ -150,8 +150,8 @@ bool PluginLoader::loadSym() {
 void * PluginLoader::loadSym(const char * name) {
 	void * func = dlsym(mHandle, name);
 	if (isError()) {
-		if (ErrLog(1)) {
-			LogStream() << "Can't load " << name <<" exported interface :" << getError() << endl;
+		if (errLog(1)) {
+			logStream() << "Can't load " << name <<" exported interface :" << getError() << endl;
 		}
 		return NULL;
 	}
@@ -160,10 +160,10 @@ void * PluginLoader::loadSym(const char * name) {
 
 
 
-/** Log */
+/** log */
 bool PluginLoader::strLog() {
 	Obj::strLog();
-	LogStream() << "(" << mFile << ") ";
+	logStream() << "(" << mFile << ") ";
 	return true;
 }
 

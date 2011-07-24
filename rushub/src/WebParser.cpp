@@ -28,7 +28,7 @@ namespace protocol {
 WebParser::WebParser() : 
 	Parser(5)
 {
-	SetClassName("WebParser");
+	setClassName("WebParser");
 }
 
 

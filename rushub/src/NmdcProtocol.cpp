@@ -32,7 +32,7 @@ namespace protocol {
 
 
 NmdcProtocol::NmdcProtocol() {
-	SetClassName("NmdcProtocol");
+	setClassName("NmdcProtocol");
 
 	events[NMDC_TYPE_MSEARCH] = &NmdcProtocol::eventSearch;
 	events[NMDC_TYPE_MSEARCH_PAS] = &NmdcProtocol::eventSearch;
@@ -172,18 +172,18 @@ Conn * NmdcProtocol::getConnForUdpData(Conn * conn, Parser * parser) {
 			if (dcUser && dcUser->mDcConn && conn->getIpUdp() == dcUser->getIp()) {
 				return dcUser->mDcConn;
 			} else {
-				if (conn->Log(3)) {
-					conn->LogStream() << "Not found user for UDP data" << endl;
+				if (conn->log(3)) {
+					conn->logStream() << "Not found user for UDP data" << endl;
 				}
 			}
 		} else {
-			if (conn->Log(3)) {
-				conn->LogStream() << "Bad UDP cmd syntax" << endl;
+			if (conn->log(3)) {
+				conn->logStream() << "Bad UDP cmd syntax" << endl;
 			}
 		}
 	} else {
-		if (conn->Log(4)) {
-			conn->LogStream() << "Unknown UDP data" << endl;
+		if (conn->log(4)) {
+			conn->logStream() << "Unknown UDP data" << endl;
 		}
 	}
 	return NULL;
@@ -212,14 +212,14 @@ int NmdcProtocol::doCommand(Parser * parser, Conn * conn) {
 		}
 	#endif
 
-	if (dcConn->Log(5)) {
-		dcConn->LogStream() << "[S]Stage " << dcParser->mType << endl;
+	if (dcConn->log(5)) {
+		dcConn->logStream() << "[S]Stage " << dcParser->mType << endl;
 	}
 
 	(this->*(this->events[dcParser->mType])) (dcParser, dcConn);
 
-	if (dcConn->Log(5)) {
-		dcConn->LogStream() << "[E]Stage " << dcParser->mType << endl;
+	if (dcConn->log(5)) {
+		dcConn->logStream() << "[E]Stage " << dcParser->mType << endl;
 	}
 	return 0;
 }
@@ -298,15 +298,15 @@ int NmdcProtocol::eventValidateNick(DcParser * dcparser, DcConn * dcConn) {
 
 	/** Additional checking the nick length */
 	if (iNickLen > 0xFF) {
-		if (dcConn->Log(1)) {
-			dcConn->LogStream() << "Attempt to attack by long nick" << endl;
+		if (dcConn->log(1)) {
+			dcConn->logStream() << "Attempt to attack by long nick" << endl;
 		}
 		dcConn->closeNow(CLOSE_REASON_NICK_LONG);
 		return -1;
 	}
 
-	if (dcConn->Log(3)) {
-		dcConn->LogStream() << "User " << nick << " to validate nick" << endl;
+	if (dcConn->log(3)) {
+		dcConn->logStream() << "User " << nick << " to validate nick" << endl;
 	}
 
 	// Set nick
@@ -321,8 +321,8 @@ int NmdcProtocol::eventValidateNick(DcParser * dcparser, DcConn * dcConn) {
 
 	/** Global user's limit */
 	if (mDcServer->mDcConfig.mUsersLimit >= 0 && mDcServer->miTotalUserCount >= mDcServer->mDcConfig.mUsersLimit) {
-		if (dcConn->Log(3)) {
-			dcConn->LogStream() << "User " << nick << " was disconnected (user's limit: " << mDcServer->mDcConfig.mUsersLimit << ")" << endl;
+		if (dcConn->log(3)) {
+			dcConn->logStream() << "User " << nick << " was disconnected (user's limit: " << mDcServer->mDcConfig.mUsersLimit << ")" << endl;
 		}
 		mDcServer->sendToUser(dcConn->mDcUser, mDcServer->mDcLang.mUsersLimit.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
 		dcConn->closeNice(9000, CLOSE_REASON_USERS_LIMIT);
@@ -360,8 +360,8 @@ int NmdcProtocol::eventValidateNick(DcParser * dcparser, DcConn * dcConn) {
 int NmdcProtocol::eventMyPass(DcParser *, DcConn * dcConn) {
 
 	if (dcConn->mDcUser->getUid().empty()) { /* Check of existence of the user for current connection */
-		if (dcConn->Log(2)) {
-			dcConn->LogStream() << "Mypass before validatenick" << endl;
+		if (dcConn->log(2)) {
+			dcConn->logStream() << "Mypass before validatenick" << endl;
 		}
 		mDcServer->sendToUser(dcConn->mDcUser, mDcServer->mDcLang.mBadLoginSequence.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
 		dcConn->closeNice(9000, CLOSE_REASON_CMD_PASSWORD_ERR);
@@ -401,8 +401,8 @@ int NmdcProtocol::eventVersion(DcParser * dcparser, DcConn * dcConn) {
 	}
 
 	string & sVersion = dcparser->chunkString(CHUNK_1_PARAM);
-	if (dcConn->Log(3)) {
-		dcConn->LogStream() << "Version:" << sVersion << endl;
+	if (dcConn->log(3)) {
+		dcConn->logStream() << "Version:" << sVersion << endl;
 	}
 
 	#ifndef WITHOUT_PLUGINS
@@ -452,16 +452,16 @@ int NmdcProtocol::eventMyInfo(DcParser * dcparser, DcConn * dcConn) {
 		//	dcConn->mDcUser->setUid(nick);
 		//} else
 		{
-			if (dcConn->Log(2)) {
-				dcConn->LogStream() << "Myinfo without user: " << dcparser->mCommand << endl;
+			if (dcConn->log(2)) {
+				dcConn->logStream() << "Myinfo without user: " << dcparser->mCommand << endl;
 			}
 			mDcServer->sendToUser(dcConn->mDcUser, mDcServer->mDcLang.mBadLoginSequence.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
 			dcConn->closeNice(9000, CLOSE_REASON_CMD_MYINFO_WITHOUT_USER);
 			return -2;
 		}
 	} else if (nick != dcConn->mDcUser->getUid()) { /** Проверка ника */
-		if (dcConn->Log(2)) {
-			dcConn->LogStream() << "Bad nick in MyINFO, closing" << endl;
+		if (dcConn->log(2)) {
+			dcConn->logStream() << "Bad nick in MyINFO, closing" << endl;
 		}
 		mDcServer->sendToUser(dcConn->mDcUser, mDcServer->mDcLang.mBadMyinfoNick.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_MYINFO);
@@ -505,8 +505,8 @@ int NmdcProtocol::eventChat(DcParser * dcparser, DcConn * dcConn) {
 
 	/** Check chat nick */
 	if ((dcparser->chunkString(CHUNK_CH_NICK) != dcConn->mDcUser->getUid()) ) {
-		if (dcConn->Log(2)) {
-			dcConn->LogStream() << "Bad nick in chat, closing" << endl;
+		if (dcConn->log(2)) {
+			dcConn->logStream() << "Bad nick in chat, closing" << endl;
 		}
 		string msg;
 		stringReplace(mDcServer->mDcLang.mBadChatNick, "nick", msg, dcparser->chunkString(CHUNK_CH_NICK));
@@ -541,8 +541,8 @@ int NmdcProtocol::eventTo(DcParser * dcparser, DcConn * dcConn) {
 
 	/** Checking the coincidence nicks in command */
 	if (dcparser->chunkString(CHUNK_PM_FROM) != dcConn->mDcUser->getUid() || dcparser->chunkString(CHUNK_PM_NICK) != dcConn->mDcUser->getUid()) {
-		if (dcConn->Log(2)) {
-			dcConn->LogStream() << "Bad nick in PM, closing" <<endl;
+		if (dcConn->log(2)) {
+			dcConn->logStream() << "Bad nick in PM, closing" <<endl;
 		}
 		dcConn->closeNow(CLOSE_REASON_NICK_PM);
 		return -1;
@@ -576,8 +576,8 @@ int NmdcProtocol::eventMcTo(DcParser * dcparser, DcConn * dcConn) {
 
 	/** Checking the coincidence nicks in command */
 	if (dcparser->chunkString(CHUNK_MC_FROM) != dcConn->mDcUser->getUid()) {
-		if (dcConn->Log(2)) {
-			dcConn->LogStream() << "Bad nick in MCTo, closing" <<endl;
+		if (dcConn->log(2)) {
+			dcConn->logStream() << "Bad nick in MCTo, closing" <<endl;
 		}
 		dcConn->closeNow(CLOSE_REASON_NICK_MCTO);
 		return -1;
@@ -676,8 +676,8 @@ int NmdcProtocol::eventSearch(DcParser * dcparser, DcConn * dcConn) {
 
 		case NMDC_TYPE_SEARCH :
 			if (mDcServer->mDcConfig.mCheckSearchIp && dcConn->getIp() != dcparser->chunkString(CHUNK_AS_IP)) {
-				if (dcConn->Log(2)) {
-					dcConn->LogStream() << "Bad ip in active search, closing" << endl;
+				if (dcConn->log(2)) {
+					dcConn->logStream() << "Bad ip in active search, closing" << endl;
 				}
 				stringReplace(mDcServer->mDcLang.mBadSearchIp, "ip", msg, dcparser->chunkString(CHUNK_AS_IP));
 				stringReplace(msg, "real_ip", msg, dcConn->getIp());
@@ -695,8 +695,8 @@ int NmdcProtocol::eventSearch(DcParser * dcparser, DcConn * dcConn) {
 
 		case NMDC_TYPE_MSEARCH :
 			if (mDcServer->mDcConfig.mCheckSearchIp && (dcConn->getIp() != dcparser->chunkString(CHUNK_AS_IP))) {
-				if (dcConn->Log(2)) {
-					dcConn->LogStream() << "Bad ip in active search, closing" << endl;
+				if (dcConn->log(2)) {
+					dcConn->logStream() << "Bad ip in active search, closing" << endl;
 				}
 				stringReplace(mDcServer->mDcLang.mBadSearchIp, "ip", msg, dcparser->chunkString(CHUNK_AS_IP));
 				stringReplace(msg, "real_ip", msg, dcConn->getIp());
@@ -733,8 +733,8 @@ int NmdcProtocol::eventSr(DcParser * dcparser, DcConn * dcConn) {
 
 	// Check same nick in cmd (PROTOCOL NMDC)
 	if (mDcServer->mDcConfig.mCheckSrNick && (dcConn->mDcUser->getUid() != dcparser->chunkString(CHUNK_SR_FROM))) {
-		if (dcConn->Log(2)) {
-			dcConn->LogStream() << "Bad nick in search response, closing" << endl;
+		if (dcConn->log(2)) {
+			dcConn->logStream() << "Bad nick in search response, closing" << endl;
 		}
 		string msg;
 		stringReplace(mDcServer->mDcLang.mBadSrNick, "nick", msg, dcparser->chunkString(CHUNK_SR_FROM));
@@ -1118,37 +1118,37 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 		}
 
 		if (dcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
-			if (dcConn->Log(3)) {
-				dcConn->LogStream() << "Sending MyINFO list" << endl;
+			if (dcConn->log(3)) {
+				dcConn->logStream() << "Sending MyINFO list" << endl;
 			}
 			// seperator "|" was added in getInfoList function
 			dcConn->send(mDcServer->mDcUserList.getInfoList(true), false, false);
 		} else if (dcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
-			if (dcConn->Log(3)) {
-				dcConn->LogStream() << "Sending MyINFO list and Nicklist" << endl;
+			if (dcConn->log(3)) {
+				dcConn->logStream() << "Sending MyINFO list and Nicklist" << endl;
 			}
 			// seperator "|" was not added in getNickList function, because seperator was "$$"
 			dcConn->send(mDcServer->mDcUserList.getNickList(), true, false);
 			// seperator "|" was added in getInfoList function
 			dcConn->send(mDcServer->mDcUserList.getInfoList(true), false, false);
 		} else {
-			if (dcConn->Log(3)) {
-				dcConn->LogStream() << "Sending Nicklist" << endl;
+			if (dcConn->log(3)) {
+				dcConn->logStream() << "Sending Nicklist" << endl;
 			}
 			// seperator "|" was not added in getNickList function, because seperator was "$$"
 			dcConn->send(mDcServer->mDcUserList.getNickList(), true, false);
 		}
 		if (mDcServer->mOpList.size()) {
-			if (dcConn->Log(3)) {
-				dcConn->LogStream() << "Sending Oplist" << endl;
+			if (dcConn->log(3)) {
+				dcConn->logStream() << "Sending Oplist" << endl;
 			}
 			// seperator "|" was not added in getNickList function, because seperator was "$$"
 			dcConn->send(mDcServer->mOpList.getNickList(), true, false);
 		}
 
 		if (dcConn->mDcUser->getInUserList() && dcConn->mDcUser->getInIpList()) {
-			if (dcConn->Log(3)) {
-				dcConn->LogStream() << "Sending Iplist" << endl;
+			if (dcConn->log(3)) {
+				dcConn->logStream() << "Sending Iplist" << endl;
 			}
 			// seperator "|" was not added in getIpList function, because seperator was "$$"
 			dcConn->send(mDcServer->mDcUserList.getIpList(), true);
@@ -1160,8 +1160,8 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 			}
 		}
 	} catch(...) {
-		if (dcConn->ErrLog(0)) {
-			dcConn->LogStream() << "exception in sendNickList" << endl;
+		if (dcConn->errLog(0)) {
+			dcConn->logStream() << "exception in sendNickList" << endl;
 		}
 		return -1;
 	}
@@ -1186,8 +1186,8 @@ int NmdcProtocol::checkCommand(DcParser * dcParser, DcConn * dcConn) {
 
 	// Checking length of command
 	if (dcParser->getCommandLen() > mDcServer->mDcConfig.mMaxCmdLen[dcParser->mType]) {
-		if (dcConn->Log(1)) {
-			dcConn->LogStream() << "Bad CMD(" << dcParser->mType << ") length: " << dcParser->getCommandLen() << endl;
+		if (dcConn->log(1)) {
+			dcConn->logStream() << "Bad CMD(" << dcParser->mType << ") length: " << dcParser->getCommandLen() << endl;
 		}
 		dcConn->closeNow(CLOSE_REASON_CMD_LENGTH);
 		return -1;
@@ -1195,8 +1195,8 @@ int NmdcProtocol::checkCommand(DcParser * dcParser, DcConn * dcConn) {
 
 	// Checking null chars
 	if (strlen(dcParser->mCommand.data()) < dcParser->mCommand.size()) {
-		if (dcConn->Log(1)) {
-			dcConn->LogStream() << "Sending null chars, probably attempt an attack" << endl;
+		if (dcConn->log(1)) {
+			dcConn->logStream() << "Sending null chars, probably attempt an attack" << endl;
 		}
 		dcConn->closeNow(CLOSE_REASON_CMD_NULL);
 		return -2;
@@ -1206,8 +1206,8 @@ int NmdcProtocol::checkCommand(DcParser * dcParser, DcConn * dcConn) {
 	if (dcParser->splitChunks()) {
 		// Protection from commands, not belonging to DC protocol
 		if (dcParser->mType != NMDC_TYPE_UNKNOWN || mDcServer->mDcConfig.mDisableNoDCCmd) {
-			if (dcConn->Log(1)) {
-				dcConn->LogStream() << "Wrong syntax in cmd: " << dcParser->mType << endl;
+			if (dcConn->log(1)) {
+				dcConn->logStream() << "Wrong syntax in cmd: " << dcParser->mType << endl;
 			}
 			dcConn->closeNice(9000, CLOSE_REASON_CMD_SYNTAX);
 			return -3;
@@ -1257,8 +1257,8 @@ bool NmdcProtocol::validateUser(DcConn * dcConn, const string & nick) {
 
 	/** Checking for bad symbols in nick */
 	if (nick.npos != nick.find_first_of("$| ")) {
-		if (dcConn->Log(2)) {
-			dcConn->LogStream() << "Bad nick chars: '" << nick << "'" << endl;
+		if (dcConn->log(2)) {
+			dcConn->logStream() << "Bad nick chars: '" << nick << "'" << endl;
 		}
 		mDcServer->sendToUser(
 			dcConn->mDcUser,
@@ -1284,8 +1284,8 @@ bool NmdcProtocol::checkNickLength(DcConn * dcConn, size_t len) {
 
 		string msg;
 
-		if (dcConn->Log(2)) {
-			dcConn->LogStream() << "Bad nick len: " 
+		if (dcConn->log(2)) {
+			dcConn->logStream() << "Bad nick len: " 
 				<< len << " (" << dcConn->mDcUser->getUid() 
 				<< ") [" << mDcServer->mDcConfig.mMinNickLen << ", " 
 				<< mDcServer->mDcConfig.mMaxNickLen << "]" << endl;
@@ -1414,8 +1414,8 @@ void NmdcProtocol::delFromHide(DcUser * dcUser) {
 
 bool NmdcProtocol::badFlag(DcConn * dcConn, const char * cmd, unsigned int flag) {
 	if (dcConn->getLoginStatusFlag(flag)) {
-		if (dcConn->Log(1)) {
-			dcConn->LogStream() << "Attempt to attack in " << cmd << " (repeated sending)" << endl;
+		if (dcConn->log(1)) {
+			dcConn->logStream() << "Attempt to attack in " << cmd << " (repeated sending)" << endl;
 		}
 		dcConn->closeNow(CLOSE_REASON_CMD_REPEAT);
 		return true;

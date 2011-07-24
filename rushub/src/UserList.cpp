@@ -110,8 +110,8 @@ const string & UserList::getNickList() {
  */
 void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 	if (!useCache) {
-		if (Log(4)) {
-			LogStream() << "sendToAll begin" << endl;
+		if (log(4)) {
+			logStream() << "sendToAll begin" << endl;
 		}
 
 		if (mCache.size()) {
@@ -125,8 +125,8 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 			for_each(begin(), end(), ufSend(data, addSep));
 		}
 
-		if (Log(4)) {
-			LogStream() << "sendToAll end" << endl;
+		if (log(4)) {
+			logStream() << "sendToAll end" << endl;
 		}
 	} else {
 		mCache.append(data);
@@ -138,14 +138,14 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 
 /** Sending data to profiles */
 void UserList::sendToProfiles(unsigned long profile, const string & data, bool addSep) {
-	if (Log(4)) {
-		LogStream() << "sendToProfiles begin" << endl;
+	if (log(4)) {
+		logStream() << "sendToProfiles begin" << endl;
 	}
 
 	for_each(begin(), end(), ufSendProfile(data, profile, addSep));
 
-	if (Log(4)) {
-		LogStream() << "sendToProfiles end" << endl;
+	if (log(4)) {
+		logStream() << "sendToProfiles end" << endl;
 	}
 }
 
@@ -178,7 +178,7 @@ void UserList::flushCache() {
 /** Redefining log level function */
 bool UserList::strLog() {
 	Obj::strLog();
-	LogStream() << "(" << size() << ")" << "[" << mName << "] ";
+	logStream() << "(" << size() << ")" << "[" << mName << "] ";
 	return true;
 }
 
@@ -208,7 +208,7 @@ FullUserList::FullUserList(const string & name, bool keepNickList, bool keepInfo
 	mInfoListMaker(mInfoList, mInfoListComplete),
 	mIpListMaker(mIpList)
 {
-	SetClassName("FullUserList");
+	setClassName("FullUserList");
 }
 
 const string & FullUserList::getNickList() {

@@ -56,16 +56,16 @@ public:
 	virtual ~Obj();
 
 	/** Get counts of objects */
-	static int GetCount();
+	static int getCount();
 
 	/** Return log straem */
-	int Log(int level);
+	int log(int level);
 
-	/** Return errlog stream */
-	int ErrLog(int level);
+	/** Return errLog stream */
+	int errLog(int level);
 
 	/** Return current log stream */
-	inline ostream & LogStream() {
+	inline ostream & logStream() {
 		return *mToLog;
 	}
 
@@ -79,18 +79,18 @@ protected:
 	const char * mClassName;
 
 	/** Max log level of events */
-	static int miMaxLevel;
+	static int mMaxLevel;
 
 	/** Max log level of errors */
-	static int miMaxErrLevel;
+	static int mMaxErrLevel;
 
 	static ofstream mOfs;
-	static string * msPath;
+	static string * mLogsPath;
 
 protected:
 
 	/** Set class name */
-	void SetClassName(const char * name);
+	void setClassName(const char * name);
 
 	/** Main function putting log in stream */
 	virtual bool strLog();
@@ -99,8 +99,8 @@ private:
 
 	/** Objects counter */
 	static int mCounterObj;
-	static int miLevel;
-	static bool mbIsErrorLog;
+	static int mLevel;
+	static bool mIsErrorLog;
 	static bool mCout;
 
 	/** output log stream */
@@ -115,10 +115,10 @@ private:
 
 private:
 
-	/** Log function */
+	/** log function */
 	ostream & log();
 
-	/** Errlog function */
+	/** errLog function */
 	ostream & errLog();
 
 	ostream & openLog();
@@ -126,7 +126,7 @@ private:
 	void loadFromBuf(ostream &);
 
 	/** Return level for syslog */
-	int sysLogLevel(int iLevel, bool bIsError = false);
+	int sysLogLevel(int level, bool isError = false);
 
 }; // class Obj
 

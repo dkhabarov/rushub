@@ -63,8 +63,8 @@ static void sigHandler(int sig) {
 			// Fallthrough
 
 		case SIGHUP :
-			if (DcServer::currentDcServer->Log(0)) {
-				DcServer::currentDcServer->LogStream() << "Received a " << sig << " signal, quiting" << endl;
+			if (DcServer::currentDcServer->log(0)) {
+				DcServer::currentDcServer->logStream() << "Received a " << sig << " signal, quiting" << endl;
 			}
 			cout << "Received a " << sig << " signal, quiting" << endl;
 			DcServer::currentDcServer->stop(0);
@@ -72,8 +72,8 @@ static void sigHandler(int sig) {
 			break;
 
 		default :
-			if (DcServer::currentDcServer->Log(0)) {
-				DcServer::currentDcServer->LogStream() << "Received a " << sig << " signal, ignoring it" << endl;
+			if (DcServer::currentDcServer->log(0)) {
+				DcServer::currentDcServer->logStream() << "Received a " << sig << " signal, ignoring it" << endl;
 			}
 			signal(sig, sigHandler);
 			break;
@@ -118,8 +118,8 @@ int runHub(int argc, char ** argv, bool isService /*= false*/) {
 
 		/** Listening all ports */
 		if (server.listening() != 0) {
-			if (server.ErrLog(0)) {
-				server.LogStream() << "Listening failed" << endl;
+			if (server.errLog(0)) {
+				server.logStream() << "Listening failed" << endl;
 			}
 			return -2;
 		}

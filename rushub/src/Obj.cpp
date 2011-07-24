@@ -47,23 +47,23 @@ bool Obj::mbSysLogOn = false;
   * 4 - Enough frequent events
   * 5 - io actions
   */
-int Obj::miMaxLevel = MAX_LEVEL; // set max level for log before load config
+int Obj::mMaxLevel = MAX_LEVEL; // set max level for log before load config
 
 /** 
   * The error level. All errors above limit are not considered
-  * 0 - Log with critical errors and exceptions. The errors bring about fall of the server
+  * 0 - log with critical errors and exceptions. The errors bring about fall of the server
   * 1 - The suspicious errors. End usually disconnection. If such errors appear then with server not okay
   * 2 - Errors, which can be connected with incorrect call function from outside (from plugins)
   */
-int Obj::miMaxErrLevel = MAX_ERR_LEVEL;
+int Obj::mMaxErrLevel = MAX_ERR_LEVEL;
 
 ofstream Obj::mOfs;
-string * Obj::msPath = NULL; /** Logs path */
+string * Obj::mLogsPath = NULL; /** Logs path */
 
 
 int Obj::mCounterObj = 0; /** Objects counter */
-int Obj::miLevel = 0;
-bool Obj::mbIsErrorLog = false;
+int Obj::mLevel = 0;
+bool Obj::mIsErrorLog = false;
 bool Obj::mCout = false;
 
 ostringstream Obj::mSysLogOss;
@@ -78,7 +78,7 @@ Obj::Obj(const char * name) :
 	mToLog(&cout)
 {
 	++mCounterObj;
-	//if (Log(0)) LogStream() << "+ " << mClassName << endl;
+	//if (log(0)) logStream() << "+ " << mClassName << endl;
 }
 
 
@@ -97,31 +97,31 @@ Obj::Obj() :
 	mToLog(&cout)
 {
 	++mCounterObj;
-	//if (Log(0)) LogStream() << "+ " << mClassName << endl;
+	//if (log(0)) logStream() << "+ " << mClassName << endl;
 }
 
 
 
 Obj::~Obj() {
 	--mCounterObj;
-	//if (string(mClassName) != "DcServer" && Log(0)) LogStream() << "- " << mClassName << endl;
+	//if (string(mClassName) != "DcServer" && log(0)) logStream() << "- " << mClassName << endl;
 }
 
 
 
 /** Get counts of objects */
-int Obj::GetCount() {
+int Obj::getCount() {
 	return mCounterObj;
 }
 
 
 
 /** Return log straem */
-int Obj::Log(int level) {
-	if (level <= miMaxLevel) {
+int Obj::log(int level) {
+	if (level <= mMaxLevel) {
 		mToLog = &log();
-		miLevel = level;
-		mbIsErrorLog = false;
+		mLevel = level;
+		mIsErrorLog = false;
 		return strLog();
 	}
 	return 0;
@@ -129,12 +129,12 @@ int Obj::Log(int level) {
 
 
 
-/** Return errlog stream */
-int Obj::ErrLog(int level) {
-	if (level <= miMaxErrLevel) {
+/** Return errLog stream */
+int Obj::errLog(int level) {
+	if (level <= mMaxErrLevel) {
 		mToLog = &errLog();
-		miLevel = level;
-		mbIsErrorLog = true;
+		mLevel = level;
+		mIsErrorLog = true;
 		return strLog();
 	}
 	return 0;
@@ -143,8 +143,8 @@ int Obj::ErrLog(int level) {
 
 
 /** Set class name */
-void Obj::SetClassName(const char * name) {
-	//if (Log(0)) LogStream() << "r " << mClassName << " -> " << name << endl;
+void Obj::setClassName(const char * name) {
+	//if (log(0)) logStream() << "r " << mClassName << " -> " << name << endl;
 	mClassName = name;
 }
 
@@ -153,14 +153,14 @@ void Obj::SetClassName(const char * name) {
 /** Main function putting log in stream */
 bool Obj::strLog() {
 	utils::Time now(true);
-	LogStream() << "[" << now.asDateMsec() << "] " << ((mbIsErrorLog) ? ERR_LABEL " " : "")
-		<< "(" << miLevel << ") " << mClassName << ": ";
+	logStream() << "[" << now.asDateMsec() << "] " << ((mIsErrorLog) ? ERR_LABEL " " : "")
+		<< "(" << mLevel << ") " << mClassName << ": ";
 	return true;
 }
 
 
 
-/** Log function. Return log straem */
+/** log function. Return log straem */
 ostream & Obj::log() {
 
 #ifndef _WIN32
@@ -170,7 +170,7 @@ ostream & Obj::log() {
 		}
 		const string & buf = mSysLogOss.str();
 		if (!buf.empty()) {
-			syslog(sysLogLevel(miLevel, mbIsErrorLog), "%s", buf.c_str());
+			syslog(sysLogLevel(mLevel, mIsErrorLog), "%s", buf.c_str());
 			mSysLogOss.str("");
 		}
 		return mSysLogOss;
@@ -186,7 +186,7 @@ ostream & Obj::log() {
 	// save in buff when the config is not loaded
 	saveInBuf();
 
-	if (msPath == NULL) {
+	if (mLogsPath == NULL) {
 		return mBufOss;
 	}
 	return openLog();
@@ -194,7 +194,7 @@ ostream & Obj::log() {
 
 
 
-/** Errlog function. Return errlog straem */
+/** errLog function. Return errLog straem */
 ostream & Obj::errLog() {
 	return log();
 }
@@ -214,7 +214,7 @@ ostream & Obj::openLog() {
 	char buf[64] = { '\0' };
 	strftime(buf, 64, LOG_FILE, &tmr);
 
-	string path(*msPath);
+	string path(*mLogsPath);
 	mOfs.open(path.append(buf).c_str(), ios_base::app);
 
 	ostream * ret = &mOfs;
@@ -233,7 +233,7 @@ ostream & Obj::openLog() {
 bool Obj::saveInBuf() {
 	const string & buff = mBufOss.str();
 	if (!buff.empty()) {
-		pair<int, bool> first(miLevel, mbIsErrorLog);
+		pair<int, bool> first(mLevel, mIsErrorLog);
 		mLoadBuf.push_back(pair<pair<int, bool>, string>(first, buff));
 		mBufOss.str("");
 		return true;
@@ -246,7 +246,7 @@ bool Obj::saveInBuf() {
 void Obj::loadFromBuf(ostream & os) {
 	for (vector<Pair>::iterator it = mLoadBuf.begin(); it != mLoadBuf.end(); ++it) {
 		Pair & p = (*it);
-		if ((!p.first.second && p.first.first <= miMaxLevel) || (p.first.second && p.first.first <= miMaxErrLevel)) {
+		if ((!p.first.second && p.first.first <= mMaxLevel) || (p.first.second && p.first.first <= mMaxErrLevel)) {
 			os << p.second;
 		}
 	}

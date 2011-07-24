@@ -54,7 +54,7 @@ string DcServer::mSysVersion;
 
 
 
-DcServer::DcServer(const string & configFile, const string &):
+DcServer::DcServer(const string & configFile, const string &) :
 	Server(),
 	mDcConfig(&mDcConfigLoader, mServer, configFile.c_str()),
 	mDcLang(&mDcConfigLoader, &mDcConfig),
@@ -78,7 +78,7 @@ DcServer::DcServer(const string & configFile, const string &):
 	mIpEnterFlood(mDcConfig.mFloodCountReconnIp, mDcConfig.mFloodTimeReconnIp),
 	mCalls(&mPluginList)
 {
-	SetClassName("DcServer");
+	setClassName("DcServer");
 
 	// Current server
 	currentDcServer = this;
@@ -105,8 +105,8 @@ DcServer::DcServer(const string & configFile, const string &):
 
 
 	if (mDcConfig.mRegMainBot) { // Main bot registration
-		if (Log(3)) {
-			LogStream() << "Reg main bot '" << mDcConfig.mHubBot << "'" << endl;
+		if (log(3)) {
+			logStream() << "Reg main bot '" << mDcConfig.mHubBot << "'" << endl;
 		}
 		regBot(mDcConfig.mHubBot, mDcConfig.mMainBotMyinfo,
 			mDcConfig.mMainBotIp, mDcConfig.mMainBotKey);
@@ -116,15 +116,15 @@ DcServer::DcServer(const string & configFile, const string &):
 
 
 DcServer::~DcServer() {
-	if (Log(1)) {
-		LogStream() << "Destruct DcServer" << endl;
+	if (log(1)) {
+		logStream() << "Destruct DcServer" << endl;
 	}
 
 	mPluginList.unloadAll(); // Unload all plugins
 
 	if (mDcConfig.mRegMainBot) { // Main bot unreg
-		if (Log(3)) {
-			LogStream() << "Unreg main bot '" << mDcConfig.mHubBot << "'" << endl;
+		if (log(3)) {
+			logStream() << "Unreg main bot '" << mDcConfig.mHubBot << "'" << endl;
 		}
 		unregBot(mDcConfig.mHubBot);
 	}
@@ -205,8 +205,8 @@ bool DcServer::listeningServer(const char * name, const char * addresses, const 
 	getAddresses(addresses, vAddresses, defaultPort);
 
 	if (vAddresses.size() == 0) {
-		if (ErrLog(0)) {
-			LogStream() << "Incorrect address of the " << name << endl;
+		if (errLog(0)) {
+			logStream() << "Incorrect address of the " << name << endl;
 		}
 	}
 
@@ -214,8 +214,8 @@ bool DcServer::listeningServer(const char * name, const char * addresses, const 
 	for (vector<pair<string, string> >::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
 		if (Server::listening(connFactory, ((*it).first).c_str(), ((*it).second).c_str(), udp) != NULL) {
 			ret = true;
-			if (Log(0)) {
-				LogStream() << name << " is running on [" 
+			if (log(0)) {
+				logStream() << name << " is running on [" 
 					<< ((*it).first) << "]:" << ((*it).second) 
 					<< (udp ? " UDP" : " TCP") << endl;
 			}
@@ -303,8 +303,8 @@ int DcServer::onTimer(Time & now) {
 		}
 
 		if (mSystemLoad != SysLoading) {
-			if (Log(0)) {
-				LogStream() << "System loading: " 
+			if (log(0)) {
+				logStream() << "System loading: " 
 					<< mSystemLoad << " level (was " 
 					<< SysLoading << " level)" << endl;
 			}
@@ -338,8 +338,8 @@ int DcServer::onNewConn(Conn *conn) {
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 
 	if (mSystemLoad == SYSTEM_LOAD_SYSTEM_DOWN) {
-		if (dcConn->Log(1)) {
-			dcConn->LogStream() << "System down, close" << endl;
+		if (dcConn->log(1)) {
+			dcConn->logStream() << "System down, close" << endl;
 		}
 		dcConn->closeNow(CLOSE_REASON_HUB_LOAD);
 		return -1;
@@ -355,14 +355,14 @@ int DcServer::onNewConn(Conn *conn) {
 	mIpListConn->add(dcConn); // Adding connection in IP-list
 	dcConn->mDcUser->setIp(dcConn->getIp());
 
-	if (dcConn->Log(5)) {
-		dcConn->LogStream() << "[S]Stage onNewConn" << endl;
+	if (dcConn->log(5)) {
+		dcConn->logStream() << "[S]Stage onNewConn" << endl;
 	}
 
 	mNmdcProtocol.onNewDcConn(dcConn); // refactoring to DcProtocol pointer
 
-	if (dcConn->Log(5)) {
-		dcConn->LogStream() << "[E]Stage onNewConn" << endl;
+	if (dcConn->log(5)) {
+		dcConn->logStream() << "[E]Stage onNewConn" << endl;
 	}
 	return 0;
 }
@@ -379,8 +379,8 @@ string * DcServer::createCommandPtr(Conn * conn) {
 /// Function of the processing enterring data
 void DcServer::onNewData(Conn * conn, string * data) {
 
-	if (conn->Log(4)) {
-		conn->LogStream() << "IN: " << (*data) << endl;
+	if (conn->log(4)) {
+		conn->logStream() << "IN: " << (*data) << endl;
 	}
 
 	// Protocol parser
@@ -474,8 +474,8 @@ bool DcServer::checkNick(DcConn *dcConn) {
 		DcUser * us = static_cast<DcUser *> (mDcUserList.find(uidHash));
 
 		if (!us->mDcConn || (us->getProfile() == -1 && us->getIp() != dcConn->getIp())) {
-			if (dcConn->Log(2)) {
-				dcConn->LogStream() << "Bad nick (used): '" 
+			if (dcConn->log(2)) {
+				dcConn->logStream() << "Bad nick (used): '" 
 					<< dcConn->mDcUser->getUid() << "'["
 					<< dcConn->getIp() << "] vs '" << us->getUid() 
 					<< "'[" << us->getIp() << "]" << endl;
@@ -486,8 +486,8 @@ bool DcServer::checkNick(DcConn *dcConn) {
 			dcConn->send(mNmdcProtocol.appendValidateDenied(msg.erase(), dcConn->mDcUser->getUid())); // refactoring to DcProtocol pointer
 			return false;
 		}
-		if (us->mDcConn->Log(3)) {
-			us->mDcConn->LogStream() << "removed old user" << endl;
+		if (us->mDcConn->log(3)) {
+			us->mDcConn->logStream() << "removed old user" << endl;
 		}
 		removeFromDcUserList(us);
 		us->mDcConn->closeNow(CLOSE_REASON_USER_OLD);
@@ -506,8 +506,8 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 	}
 
 	if (iWantedMask == dcConn->getLoginStatusFlag(iWantedMask)) {
-		if (dcConn->Log(3)) {
-			dcConn->LogStream() << "Begin login" << endl;
+		if (dcConn->log(3)) {
+			dcConn->logStream() << "Begin login" << endl;
 		}
 
 		// check empty nick!
@@ -534,8 +534,8 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 		}
 		return true;
 	} else { // Invalid sequence of the sent commands
-		if (dcConn->Log(2)) {
-			dcConn->LogStream() << "Invalid sequence of the sent commands (" 
+		if (dcConn->log(2)) {
+			dcConn->logStream() << "Invalid sequence of the sent commands (" 
 				<< dcConn->getLoginStatusFlag(iWantedMask) << "), wanted: " 
 				<< iWantedMask << endl;
 		}
@@ -550,8 +550,8 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 void DcServer::doUserEnter(DcConn * dcConn) {
 	// Check entry stages
 	if (LOGIN_STATUS_LOGIN_DONE != dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE)) {
-		if (dcConn->Log(2)) {
-			dcConn->LogStream() << "User Login when not all done (" 
+		if (dcConn->log(2)) {
+			dcConn->logStream() << "User Login when not all done (" 
 				<< dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE) << ")" <<endl;
 		}
 		dcConn->closeNow(CLOSE_REASON_LOGIN_NOT_DONE);
@@ -593,34 +593,34 @@ void DcServer::doUserEnter(DcConn * dcConn) {
 /// Adding user in the user list
 bool DcServer::addToUserList(DcUser * dcUser) {
 	if (!dcUser) {
-		if (ErrLog(1)) {
-			LogStream() << "Adding a NULL user to userlist" << endl;
+		if (errLog(1)) {
+			logStream() << "Adding a NULL user to userlist" << endl;
 		}
 		return false;
 	}
 	if (dcUser->getInUserList()) {
-		if (ErrLog(2)) {
-			LogStream() << "User is already in the user list" << endl;
+		if (errLog(2)) {
+			logStream() << "User is already in the user list" << endl;
 		}
 		return false;
 	}
 
 	unsigned long uidHash = dcUser->getUidHash();
 
-	if (mDcUserList.Log(4)) {
-		mDcUserList.LogStream() << "Before add: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
+	if (mDcUserList.log(4)) {
+		mDcUserList.logStream() << "Before add: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
 	}
 
 	if (!mDcUserList.add(uidHash, dcUser)) {
-		if (Log(1)) {
-			LogStream() << "Adding twice user with same nick " << dcUser->getUid() << " (" << mDcUserList.find(uidHash)->uid() << ")" << endl;
+		if (log(1)) {
+			logStream() << "Adding twice user with same nick " << dcUser->getUid() << " (" << mDcUserList.find(uidHash)->uid() << ")" << endl;
 		}
 		dcUser->setInUserList(false);
 		return false;
 	}
 
-	if (mDcUserList.Log(4)) {
-		mDcUserList.LogStream() << "After add: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
+	if (mDcUserList.log(4)) {
+		mDcUserList.logStream() << "After add: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
 	}
 
 	dcUser->setInUserList(true);
@@ -642,11 +642,11 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 		if (!(dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO)) {
 			mHelloList.add(uidHash, dcUser);
 		}
-		if (dcUser->mDcConn->Log(3)) {
-			dcUser->mDcConn->LogStream() << "Adding at the end of Nicklist" << endl;
+		if (dcUser->mDcConn->log(3)) {
+			dcUser->mDcConn->logStream() << "Adding at the end of Nicklist" << endl;
 		}
-		if (dcUser->mDcConn->Log(3)) {
-			dcUser->mDcConn->LogStream() << "Becomes in list" << endl;
+		if (dcUser->mDcConn->log(3)) {
+			dcUser->mDcConn->logStream() << "Becomes in list" << endl;
 		}
 	}
 	return true;
@@ -657,8 +657,8 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 /// Removing user from the user list
 bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 	unsigned long uidHash = dcUser->getUidHash();
-	if (mDcUserList.Log(4)) {
-		mDcUserList.LogStream() << "Before leave: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
+	if (mDcUserList.log(4)) {
+		mDcUserList.logStream() << "Before leave: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
 	}
 	if (mDcUserList.contain(uidHash)) {
 		#ifndef WITHOUT_PLUGINS
@@ -673,13 +673,13 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 			mDcUserList.remove(uidHash);
 		} else if (other && other->mDcConn && dcUser->mDcConn && other->mDcConn == dcUser->mDcConn) {
 			mDcUserList.remove(uidHash);
-			if (mDcUserList.Log(4)) {
-				mDcUserList.LogStream() << "After leave: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
+			if (mDcUserList.log(4)) {
+				mDcUserList.logStream() << "After leave: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
 			}
 		} else {
 			// Such can happen only for users without connection or with different connection
-			if (dcUser->ErrLog(1)) {
-				dcUser->LogStream() << "Not found the correct user for nick: " << dcUser->getUid() << endl;
+			if (dcUser->errLog(1)) {
+				dcUser->logStream() << "Not found the correct user for nick: " << dcUser->getUid() << endl;
 			}
 			return false;
 		}
@@ -777,8 +777,8 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 
 
 void DcServer::afterUserEnter(DcConn *dcConn) {
-	if (dcConn->Log(3)) {
-		dcConn->LogStream() << "Entered the hub." << endl;
+	if (dcConn->log(3)) {
+		dcConn->logStream() << "Entered the hub." << endl;
 	}
 	#ifndef WITHOUT_PLUGINS
 		mCalls.mOnUserEnter.callAll(dcConn->mDcUser);
@@ -1203,8 +1203,8 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 	}
 	////
 
-	if (Log(3)) {
-		LogStream() << "Reg bot: " << uid << endl;
+	if (log(3)) {
+		logStream() << "Reg bot: " << uid << endl;
 	}
 
 	if (!addToUserList(dcUser)) {
@@ -1220,8 +1220,8 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 
 int DcServer::unregBot(const string & uid) {
 
-	if (Log(3)) {
-		LogStream() << "Unreg bot: " << uid << endl;
+	if (log(3)) {
+		logStream() << "Unreg bot: " << uid << endl;
 	}
 
 	// NMDC
@@ -1230,8 +1230,8 @@ int DcServer::unregBot(const string & uid) {
 		return -1;
 	}
 	if (dcUser->mDcConn) {
-		if (Log(3)) {
-			LogStream() << "Attempt delete user" << endl;
+		if (log(3)) {
+			logStream() << "Attempt delete user" << endl;
 		}
 		return -2;
 	}

@@ -221,8 +221,8 @@ int Service::serviceStop(char * name) {
 int Service::start() {
 	ss.dwCurrentState = SERVICE_RUNNING;
 	if (::SetServiceStatus(ssh, &ss) == false) {
-		if (mCurService->ErrLog(0)) {
-			mCurService->LogStream() << "Set Service Status failed (" << (unsigned long)GetLastError() << ")" << endl;
+		if (mCurService->errLog(0)) {
+			mCurService->logStream() << "Set Service Status failed (" << (unsigned long)GetLastError() << ")" << endl;
 		}
 		return -1;
 	}
@@ -261,8 +261,8 @@ int Service::cli(int argc, char * argv[], string & configFile) {
 
 			case eService :
 				if (++i >= argc) {
-					if (mCurService->ErrLog(0)) {
-						mCurService->LogStream() << "Please, set service name." << endl;
+					if (mCurService->errLog(0)) {
+						mCurService->logStream() << "Please, set service name." << endl;
 					}
 					return -1;
 				}
@@ -395,8 +395,8 @@ void WINAPI Service::ctrlHandler(DWORD dwCtrl) {
 			// Fallthrough
 
 		case SERVICE_CONTROL_STOP :
-			if (mCurService->Log(0)) {
-				mCurService->LogStream() << "Received a " << dwCtrl << " signal, service stop" << endl;
+			if (mCurService->log(0)) {
+				mCurService->logStream() << "Received a " << dwCtrl << " signal, service stop" << endl;
 			}
 
 			ss.dwCurrentState = SERVICE_STOP_PENDING;
@@ -404,8 +404,8 @@ void WINAPI Service::ctrlHandler(DWORD dwCtrl) {
 			ss.dwCheckPoint = 0;
 			ss.dwWaitHint = 10 * 1000;
 			if (SetServiceStatus(ssh, &ss) == false) {
-				if (mCurService->ErrLog(0)) {
-					mCurService->LogStream() << "Set Service status failed (" << (unsigned long)GetLastError() << ")" << endl;
+				if (mCurService->errLog(0)) {
+					mCurService->logStream() << "Set Service status failed (" << (unsigned long)GetLastError() << ")" << endl;
 					return;
 				}
 			}
@@ -419,14 +419,14 @@ void WINAPI Service::ctrlHandler(DWORD dwCtrl) {
 			break;
 
 		case SERVICE_CONTROL_INTERROGATE :
-			if (mCurService->Log(0)) {
-				mCurService->LogStream() << "Received a " << dwCtrl << " signal, interrogate" << endl;
+			if (mCurService->log(0)) {
+				mCurService->logStream() << "Received a " << dwCtrl << " signal, interrogate" << endl;
 			}
 			break;
 
 		default :
-			if (mCurService->Log(0)) {
-				mCurService->LogStream() << "Received a " << dwCtrl << " signal, default" << endl;
+			if (mCurService->log(0)) {
+				mCurService->logStream() << "Received a " << dwCtrl << " signal, default" << endl;
 			}
 			break;
 
@@ -437,16 +437,16 @@ void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 
 	SC_HANDLE manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 	if (!manager) {
-		if (mCurService->ErrLog(0)) {
-			mCurService->LogStream() << "Open SCManager failed (" << GetLastError() << ")" << endl;
+		if (mCurService->errLog(0)) {
+			mCurService->logStream() << "Open SCManager failed (" << GetLastError() << ")" << endl;
 		}
 		return;
 	}
 
 	SC_HANDLE service = OpenService(manager, lpszArgv[0], SERVICE_ALL_ACCESS);
 	if (!service) {
-		if (mCurService->ErrLog(0)) {
-			mCurService->LogStream() << "Open service failed (" << GetLastError() << ")" << endl;
+		if (mCurService->errLog(0)) {
+			mCurService->logStream() << "Open service failed (" << GetLastError() << ")" << endl;
 		}
 		::CloseServiceHandle(manager);
 		return;
@@ -457,8 +457,8 @@ void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 	if (lpBuf != NULL) {
 		DWORD dwBytesNeeded;
 		if (!::QueryServiceConfig(service, lpBuf, 4096, &dwBytesNeeded)) {
-			if (mCurService->ErrLog(0)) {
-				mCurService->LogStream() << "QueryServiceConfig failed (" << GetLastError() << ")" << endl;
+			if (mCurService->errLog(0)) {
+				mCurService->logStream() << "QueryServiceConfig failed (" << GetLastError() << ")" << endl;
 			}
 			::CloseServiceHandle(service);
 			::CloseServiceHandle(manager);
@@ -474,8 +474,8 @@ void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 
 	ssh = ::RegisterServiceCtrlHandler(lpszArgv[0], ctrlHandler);
 	if (!ssh) {
-		if (mCurService->ErrLog(0)) {
-			mCurService->LogStream() << "Register service ctrl handler failed (" << (unsigned long)GetLastError() << ")" << endl;
+		if (mCurService->errLog(0)) {
+			mCurService->logStream() << "Register service ctrl handler failed (" << (unsigned long)GetLastError() << ")" << endl;
 		}
 		return;
 	}
@@ -486,8 +486,8 @@ void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 	ss.dwCheckPoint = 0;
 	ss.dwWaitHint = 10 * 1000;
 	if (::SetServiceStatus(ssh, &ss) == false) {
-		if (mCurService->ErrLog(0)) {
-			mCurService->LogStream() << "Set service status failed (" << (unsigned long)GetLastError() << ")" << endl;
+		if (mCurService->errLog(0)) {
+			mCurService->logStream() << "Set service status failed (" << (unsigned long)GetLastError() << ")" << endl;
 		}
 		return;
 	}

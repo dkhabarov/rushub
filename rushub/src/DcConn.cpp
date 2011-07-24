@@ -42,7 +42,7 @@ DcConn::DcConn(int type, tSocket sock, Server * server) :
 	mLoginStatus(0)
 {
 	mDcUserBase = NULL;
-	SetClassName("DcConn");
+	setClassName("DcConn");
 }
 
 
@@ -64,8 +64,8 @@ size_t DcConn::send(const char * data, size_t len, bool addSep, bool flush) {
 	if (mWritable) {
 		if (len >= mSendBufMax) {
 			len = mSendBufMax;
-			if (Log(0)) {
-				LogStream() << "Too long message. Size: " << len << ". Max size: " << mSendBufMax << endl;
+			if (log(0)) {
+				logStream() << "Too long message. Size: " << len << ". Max size: " << mSendBufMax << endl;
 			}
 		}
 
@@ -87,12 +87,12 @@ void DcConn::onFlush() {
 		setLoginStatusFlag(LOGIN_STATUS_NICKLST);
 		mNickListInProgress = false;
 		if (!mOk || !mWritable) {
-			if (Log(2)) {
-				LogStream() << "Connection closed during nicklist" << endl;
+			if (log(2)) {
+				logStream() << "Connection closed during nicklist" << endl;
 			}
 		} else {
-			if (Log(3)) {
-				LogStream() << "Enter after nicklist" << endl;
+			if (log(3)) {
+				logStream() << "Enter after nicklist" << endl;
 			}
 			server()->doUserEnter(this);
 		}
@@ -123,8 +123,8 @@ int DcConn::onTimer(Time &now) {
 	if (!mDcUser->getInUserList()) { // Optimisation
 		for (int i = 0; i < HUB_TIME_OUT_MAX; ++i) {
 			if (!checkTimeOut(HubTimeOut(i), now)) {
-				if (Log(2)) {
-					LogStream() << "Operation timeout (" << HubTimeOut(i) << ")" << endl;
+				if (log(2)) {
+					logStream() << "Operation timeout (" << HubTimeOut(i) << ")" << endl;
 				}
 				string msg;
 				stringReplace(dcServer->mDcLang.mTimeout, "reason", msg, dcServer->mDcLang.mTimeoutCmd[i]);
@@ -137,8 +137,8 @@ int DcConn::onTimer(Time &now) {
 
 	/*Time lastRecv(mLastRecv);
 	if (dcServer->minDelay(lastRecv, dcServer->mDcConfig.mTimeoutAny)) {
-		if (Log(2)) {
-			LogStream() << "Any action timeout..." << endl;
+		if (log(2)) {
+			logStream() << "Any action timeout..." << endl;
 		}
 		dcServer->sendToUser(mDcUser, dcServer->mDcLang.mTimeoutAny.c_str(), dcServer->mDcConfig.mHubBot.c_str());
 		closeNice(9000, CLOSE_REASON_TIMEOUT_ANYACTION);
@@ -262,11 +262,11 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 			dcServer->miTotalUserCount --;
 			if (dcConn->mDcUser) {
 				dcServer->miTotalShare -= dcConn->mDcUser->getShare();
-			} else if (conn->Log(3)) {
-				conn->LogStream() << "Del conn without user" << endl;
+			} else if (conn->log(3)) {
+				conn->logStream() << "Del conn without user" << endl;
 			}
-		} else if (conn->Log(3)) {
-			conn->LogStream() << "Del conn without ALOWED flag: " << dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE) << endl;
+		} else if (conn->log(3)) {
+			conn->logStream() << "Del conn without ALOWED flag: " << dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE) << endl;
 		}
 
 		#ifndef WITHOUT_PLUGINS
@@ -285,8 +285,8 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 			dcConn->mDcUser = NULL;
 			dcConn->mDcUserBase = NULL;
 		}
-	} else if (conn->ErrLog(0)) {
-		conn->LogStream() << "Fail error in deleteConn: dcConn = " <<
+	} else if (conn->errLog(0)) {
+		conn->logStream() << "Fail error in deleteConn: dcConn = " <<
 		(dcConn == NULL ? "NULL" : "not NULL") << ", dcServer = " << 
 		(dcServer == NULL ? "NULL" : "not NULL") << endl;
 	}

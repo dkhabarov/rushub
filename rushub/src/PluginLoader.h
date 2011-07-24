@@ -77,7 +77,7 @@ public:
 	/** loadSym from dll(so) */
 	void * loadSym(const char *);
 
-	/** Log */
+	/** log */
 	bool strLog();
 
 protected:

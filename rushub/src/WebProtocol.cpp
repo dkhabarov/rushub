@@ -31,7 +31,7 @@ WebProtocol::WebProtocol(unsigned long & maxCommandLength) :
 	mServer(NULL),
 	mMaxCommandLength(maxCommandLength)
 {
-	SetClassName("WebProtocol");
+	setClassName("WebProtocol");
 }
 
 

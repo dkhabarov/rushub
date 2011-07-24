@@ -99,7 +99,7 @@ DcParser::DcParser() :
 	mError(false),
 	mKeyLength(0)
 { 
-	SetClassName("DcParser");
+	setClassName("DcParser");
 }
 
 
