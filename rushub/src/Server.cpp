@@ -690,14 +690,13 @@ size_t Server::inputData(Conn * conn) {
 
 /// createCommandPtr
 string * Server::createCommandPtr(Conn *) {
-	return new string;
+	return &mCommand;
 }
 
 
 
 /// onNewData
-void Server::onNewData(Conn *, string * str) {
-	delete str;
+void Server::onNewData(Conn *, string *) {
 }
 
 

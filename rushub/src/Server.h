@@ -173,6 +173,7 @@ private:
 
 	/// Current connection
 	Conn * mNowConn;
+	string mCommand;
 
 	#ifdef _WIN32
 		static bool initWSA; ///< Windows init flag for WSA (Windows Sockets API)
