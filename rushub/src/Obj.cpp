@@ -214,13 +214,18 @@ ostream & Obj::openLog() {
 	char buf[64] = { '\0' };
 	strftime(buf, 64, LOG_FILE, &tmr);
 
-	string path(*mLogsPath);
-	mOfs.open(path.append(buf).c_str(), ios_base::app);
-
 	ostream * ret = &mOfs;
-	if (mLogsPath->empty() || !mOfs.is_open()) {
+	// If mLogsPath is empty, then using cout
+	if (mLogsPath->empty()) {
 		ret = &cout;
 		mCout = true;
+	} else {
+		string path(*mLogsPath);
+		mOfs.open(path.append(buf).c_str(), ios_base::app);
+		if (!mOfs.is_open()) {
+			ret = &cout;
+			mCout = true;
+		}
 	}
 
 	loadFromBuf(*ret);
