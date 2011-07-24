@@ -218,7 +218,7 @@ ostream & Obj::openLog() {
 	mOfs.open(path.append(buf).c_str(), ios_base::app);
 
 	ostream * ret = &mOfs;
-	if (!mOfs.is_open()) {
+	if (mLogsPath->empty() || !mOfs.is_open()) {
 		ret = &cout;
 		mCout = true;
 	}

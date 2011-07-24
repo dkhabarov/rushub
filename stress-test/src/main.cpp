@@ -122,10 +122,13 @@ public:
 		mMaxConn(maxConn),
 		mBatch(batch)
 	{
+		mLogsPath = new string();
 	}
+
 	~NmdcClient() {
 		deleteAll();
 	}
+
 	void onNewData(Conn * conn, string * str) {
 		const string & cmd(*str);
 
