@@ -46,7 +46,7 @@ class Obj {
 
 public:
 
-	static bool mbSysLogOn;
+	static bool mSysLogOn;
 
 public:
 

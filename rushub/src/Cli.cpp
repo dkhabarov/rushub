@@ -71,7 +71,7 @@ void Cli::detectArgs(int argc, char ** argv) {
 				break;
 
 			case 's' :
-				Obj::mbSysLogOn = true;
+				Obj::mSysLogOn = true;
 				break;
 
 			case '?' :

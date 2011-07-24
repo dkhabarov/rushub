@@ -35,7 +35,7 @@ using namespace ::std;
 #define MAX_ERR_LEVEL 2 // Max error level for log
 
 
-bool Obj::mbSysLogOn = false;
+bool Obj::mSysLogOn = false;
 
 
 /** 
@@ -164,7 +164,7 @@ bool Obj::strLog() {
 ostream & Obj::log() {
 
 #ifndef _WIN32
-	if (mbSysLogOn) {
+	if (mSysLogOn) {
 		if (saveInBuf()) {
 			loadFromBuf(mSysLogOss);
 		}
