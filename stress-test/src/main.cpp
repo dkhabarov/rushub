@@ -113,7 +113,7 @@ public:
 	int mBatch;
 
 public:
-	NmdcClient(const char * ip, const char * port, int maxConn, int batch) : 
+	NmdcClient(const char * ip, const char * port, int maxConn, int batch, const char * logPath, int logLevel, int errLevel) : 
 		Server(),
 		mConnFactory(NULL),
 		mConnCount(0),
@@ -122,7 +122,9 @@ public:
 		mMaxConn(maxConn),
 		mBatch(batch)
 	{
-		mLogsPath = new string();
+		mLogsPath = new string(logPath);
+		mMaxLevel = logLevel;
+		mMaxErrLevel = errLevel;
 	}
 
 	~NmdcClient() {
@@ -181,6 +183,9 @@ void printHelp() {
 		"  -port <port>\t\tset port to connect" << endl <<
 		"  -max <max>\t\tset max connections" << endl <<
 		"  -batch <batch>\tset entering batch" << endl <<
+		"  -logPath <path>\tset log path" << endl <<
+		"  -logLevel <level>\tset log level" << endl <<
+		"  -errLevel <level>\tset error level" << endl <<
 		"  -help\t\t\tshow this help" << endl;
 }
 
@@ -192,8 +197,11 @@ int main(int argc, char ** argv) {
 	const char * last = "";
 	const char * ip = "127.0.0.1";
 	const char * port = "411";
+	const char * logPath = "";
 	int maxConn = 50;
 	int batch = 25;
+	int logLevel = 0;
+	int errLevel = 2;
 
 	if (argc == 1) {
 		printHelp();
@@ -202,7 +210,7 @@ int main(int argc, char ** argv) {
 
 	int i = 0;
 	while (i < argc) {
-		if(!strcmp(last, "-help")) {
+		if(!strcmp(argv[i], "-help")) {
 			printHelp();
 			return 1;
 		} else if(!strcmp(last, "-ip")) {
@@ -213,6 +221,12 @@ int main(int argc, char ** argv) {
 			maxConn = atoi(argv[i]);
 		} else if(!strcmp(last, "-batch")) {
 			batch = atoi(argv[i]);
+		} else if(!strcmp(last, "-logPath")) {
+			logPath = argv[i];
+		} else if(!strcmp(last, "-logLevel")) {
+			logLevel = atoi(argv[i]);
+		} else if(!strcmp(last, "-errLevel")) {
+			errLevel = atoi(argv[i]);
 		}
 		last = argv[i];
 		++i;
@@ -225,7 +239,7 @@ int main(int argc, char ** argv) {
 		batch = 100;
 	}
 
-	NmdcClient client(ip, port, maxConn, batch);
+	NmdcClient client(ip, port, maxConn, batch, logPath, logLevel, errLevel);
 	curServer = &client;
 
 	NmdcProtocol nmdcProtocol;

@@ -240,14 +240,20 @@ Conn * Server::addSimpleConn(Conn * conn, const char * ip, const char * port, in
 			return NULL;
 		}
 
-		if (log(0)) {
-			if (connType == CONN_TYPE_LISTEN) {
+		if (connType == CONN_TYPE_LISTEN) {
+			if (log(0)) {
 				logStream() << "Listening on " << ip << ":" << port << " TCP" << endl;
-			} else if (connType == CONN_TYPE_INCOMING_UDP) {
+			}
+		} else if (connType == CONN_TYPE_INCOMING_UDP) {
+			if (log(0)) {
 				logStream() << "Listening on " << ip << ":" << port << " UDP" << endl;
-			} else if (connType == CONN_TYPE_OUTGOING_TCP) {
+			}
+		} else if (connType == CONN_TYPE_OUTGOING_TCP) {
+			if (log(4)) {
 				logStream() << "Connected to " << ip << ":" << port << " TCP" << endl;
-			} else if (connType == CONN_TYPE_OUTGOING_UDP) {
+			}
+		} else if (connType == CONN_TYPE_OUTGOING_UDP) {
+			if (log(4)) {
 				logStream() << "Connected to " << ip << ":" << port << " UDP" << endl;
 			}
 		}
