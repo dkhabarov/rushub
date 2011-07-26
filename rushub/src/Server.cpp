@@ -183,7 +183,7 @@ Conn * Server::listen(const char * ip, const char * port, bool udp) {
 	ConnType connType = udp ? CONN_TYPE_INCOMING_UDP : CONN_TYPE_LISTEN;
 	Conn * conn = new Conn(0, this, connType);
 
-	if (!addSimpleConn(conn, ip, port, connType)) { // Listen conn
+	if (!addSimpleConn(conn, ip, port, connType)) {
 		delete conn;
 		conn = NULL;
 	}
@@ -198,7 +198,7 @@ Conn * Server::connect(const char * ip, const char * port, bool udp) {
 	ConnType connType = udp ? CONN_TYPE_OUTGOING_UDP : CONN_TYPE_OUTGOING_TCP;
 	Conn * conn = new Conn(0, this, connType);
 
-	if (!addSimpleConn(conn, ip, port, connType)) { // Listen conn
+	if (!addSimpleConn(conn, ip, port, connType)) {
 		delete conn;
 		conn = NULL;
 	}
@@ -227,18 +227,26 @@ Conn * Server::addSimpleConn(Conn * conn, const char * ip, const char * port, in
 			return NULL;
 		}
 
-		mListenList.insert(mListenList.begin(), conn);
-		mConnChooser.addConn(conn);
-
-		if (!mConnChooser.ConnChoose::optIn(
-			static_cast<ConnBase *> (conn),
-			ConnChoose::tEventFlag(ConnChoose::eEF_INPUT | ConnChoose::eEF_ERROR))) {
-			if (errLog(0)) {
-				logStream() << "Error: Can't add socket" << endl;
+		if (
+			#if USE_SELECT
+				(mConnChooser.size() == (FD_SETSIZE - 1)) || 
+			#endif
+			!mConnChooser.ConnChoose::optIn(static_cast<ConnBase *> (conn),
+			ConnChoose::tEventFlag(ConnChoose::eEF_INPUT | ConnChoose::eEF_ERROR)))
+		{
+			if (conn->errLog(0)) {
+				conn->logStream() << "Error: Can't add socket!" << endl;
 			}
-			delete conn;
+			if (conn->mSelfConnFactory != NULL) {
+				conn->mSelfConnFactory->deleteConn(conn);
+			} else {
+				delete conn;
+			}
 			return NULL;
 		}
+
+		mConnChooser.addConn(conn);
+		/*conn->mIterator =*/ mConnList.insert(mListenList.begin(), conn);
 
 		if (connType == CONN_TYPE_LISTEN) {
 			if (log(0)) {
@@ -395,6 +403,10 @@ void Server::step() {
 
 				if (new_conn) {
 					if (addConnection(new_conn) > 0) {
+
+						// Set conn port and IP
+						new_conn->mPortConn = mNowConn->mPort;
+						new_conn->mIpConn = mNowConn->mIp;
 
 						//if (inputData(new_conn) >= 0) { // fix close conn if not recv data
 
@@ -570,8 +582,6 @@ int Server::addConnection(Conn * conn) {
 
 	mConnChooser.addConn(conn);
 	conn->mIterator = mConnList.insert(mConnList.begin(), conn);
-	conn->mPortConn = mNowConn->mPort;
-	conn->mIpConn = mNowConn->mIp;
 
 	/*if (log(4)) {
 		logStream() << "Num clients after add: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.size() << endl;

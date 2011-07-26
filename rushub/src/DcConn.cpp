@@ -30,7 +30,7 @@ namespace dcserver {
 
 
 DcConn::DcConn(int type, tSocket sock, Server * server) : 
-	Conn(sock, server),
+	Conn(sock, server, CONN_TYPE_INCOMING_TCP),
 	DcConnBase(type),
 	mFeatures(0),
 	mSendNickList(false),

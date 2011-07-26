@@ -123,7 +123,7 @@ void WebUser::disconnect() {
 
 
 WebConn::WebConn(tSocket sock, Server * server) : 
-	Conn(sock, server)
+	Conn(sock, server, CONN_TYPE_INCOMING_TCP)
 {
 	setClassName("WebConn");
 }

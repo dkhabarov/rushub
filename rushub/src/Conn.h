@@ -130,7 +130,7 @@ public:
 
 public:
 
-	Conn(tSocket socket = 0, Server * server = NULL, ConnType connType = CONN_TYPE_INCOMING_TCP);
+	Conn(tSocket socket, Server * server, ConnType connType);
 	virtual ~Conn();
 
 	// === static functions ===

@@ -471,12 +471,12 @@ Conn * Conn::createNewConn() {
 	Conn * new_conn = NULL;
 
 	if (mCreatorConnFactory != NULL) {
-		new_conn = mCreatorConnFactory->createConn(sock); // Create connection object by factory (CONN_TYPE_INCOMING_TCP)
+		new_conn = mCreatorConnFactory->createConn(sock); // Create connection object by factory
 	} else {
 		if (log(3)) {
 			logStream() << "Create simple connection object for socket: " << sock << endl;
 		}
-		new_conn = new Conn(sock, mServer); // Create simple connection object (CONN_TYPE_INCOMING_TCP)
+		new_conn = new Conn(sock, mServer, CONN_TYPE_INCOMING_TCP); // Create simple connection object
 		new_conn->mProtocol = mProtocol; // Set protocol by this Conn
 	}
 	if (!new_conn) {
@@ -1218,7 +1218,7 @@ ConnFactory::~ConnFactory() {
 
 
 Conn * ConnFactory::createConn(tSocket sock) {
-	Conn * conn = new Conn(sock, mServer); // CONN_TYPE_INCOMING_TCP
+	Conn * conn = new Conn(sock, mServer, CONN_TYPE_INCOMING_TCP);
 	conn->mSelfConnFactory = this;
 	conn->mProtocol = mProtocol; // protocol
 	return conn;
