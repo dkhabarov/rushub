@@ -103,7 +103,7 @@ protected:
 	typedef list<Conn *> tConnList; ///< tConnList
 	typedef tConnList::iterator tCLIt;
 
-	tConnList mClientList; ///< ConnList
+	tConnList mClientList; ///< ClientList
 	tConnList mListenList; ///< ListenList
 
 	// select/poll/epoll/kqueue objects

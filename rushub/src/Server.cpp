@@ -509,6 +509,9 @@ int Server::addConnection(Conn * conn) {
 		return -1;
 	}
 
+	// Adding in common list
+	mConnChooser.addConn(conn);
+
 	if (
 		#if USE_SELECT
 			(mConnChooser.size() == (FD_SETSIZE - 1)) || 
@@ -519,6 +522,7 @@ int Server::addConnection(Conn * conn) {
 		if (conn->errLog(0)) {
 			conn->logStream() << "Error: Can't add socket!" << endl;
 		}
+		mConnChooser.deleteConn(conn);
 		if (conn->mSelfConnFactory != NULL) {
 			conn->mSelfConnFactory->deleteConn(conn);
 		} else {
@@ -526,16 +530,14 @@ int Server::addConnection(Conn * conn) {
 		}
 		return -2;
 	}
-
-	// Adding in common list
-	mConnChooser.addConn(conn);
-
+	
 	// Adding in client or listen list
 	if (conn->getConnType() == CONN_TYPE_INCOMING_TCP) {
 		conn->mIterator = mClientList.insert(mClientList.begin(), conn);
 	} else {
 		conn->mIterator = mListenList.insert(mListenList.begin(), conn);
 	}
+
 	return 1;
 }
 
@@ -687,10 +689,21 @@ void Server::onTimerBase(Time & now) {
 		(mTimes.mConn - mTimes.mServ >= mTimerConnPeriod)
 	) {
 		mTimes.mConn = mTimes.mServ;
-		tCLIt it_e = mClientList.end();
 		Conn * conn = NULL;
-		for (tCLIt it = mClientList.begin(); it != it_e; ++it) {
-			conn = (*it);
+		
+		tCLIt it = mClientList.begin();
+		tCLIt it_e = mClientList.end();
+		while (it != it_e) {
+			conn = (*it++);
+			if (conn->isOk()) {
+				conn->onTimerBase(now);
+			}
+		}
+		
+		it = mListenList.begin();
+		it_e = mListenList.end();
+		while (it != it_e) {
+			conn = (*it++);
 			if (conn->isOk()) {
 				conn->onTimerBase(now);
 			}
