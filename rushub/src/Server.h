@@ -80,14 +80,8 @@ public:
 	/// Set and Connect to port
 	virtual Conn * connecting(ConnFactory *, const char * ip, const char * port = 0, bool udp = false);
 
-	/// Listen port (TCP/UDP)
-	virtual Conn * listen(const char * ip, const char * port, bool udp = false);
-
-	/// Connect to port (TCP/UDP)
-	virtual Conn * connect(const char * ip, const char * port, bool udp = false);
-
 	/// Add simple connection
-	virtual Conn * addSimpleConn(Conn *, const char * ip, const char * port, int connType);
+	virtual Conn * addSimpleConn(int connType, const char * ip, const char * port);
 
 	/// Main cycle
 	int run();
@@ -108,11 +102,9 @@ protected:
 
 	typedef list<Conn *> tConnList; ///< tConnList
 	typedef tConnList::iterator tCLIt;
-	tConnList mConnList; ///< ConnList
 
-	typedef list<Conn *> tListenList; ///< tListenList
-	typedef tListenList::iterator tLLIt;
-	tListenList mListenList; ///< ListenList
+	tConnList mClientList; ///< ConnList
+	tConnList mListenList; ///< ListenList
 
 	// select/poll/epoll/kqueue objects
 	#if USE_SELECT
@@ -187,7 +179,6 @@ private:
 	/// Main base timer
 	void onTimerBase(Time & now);
 
-	void deleteConn(Conn *);
 
 }; // Server
 

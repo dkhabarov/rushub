@@ -54,7 +54,7 @@ socklen_t Conn::mSockAddrInSize = sizeof(struct sockaddr_in);
 
 char Conn::mRecvBuf[MAX_RECV_SIZE + 1];
 
-Conn::Conn(tSocket socket, Server * server, ConnType connType) :
+Conn::Conn(tSocket socket, Server * server, int connType) :
 	Obj("Conn"),
 	mLastRecv(true),
 	mSelfConnFactory(NULL),
@@ -107,7 +107,7 @@ Conn::operator tSocket() const {
 
 
 /// Get connection type
-ConnType Conn::getConnType() const {
+int Conn::getConnType() const {
 	return mConnType;
 }
 

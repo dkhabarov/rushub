@@ -42,8 +42,8 @@ namespace dcserver {
 
 
 DcListIterator::DcListIterator(DcServer * dcServer) : 
-	mIt(dcServer->mConnList.begin()),
-	mEnd(dcServer->mConnList.end())
+	mIt(dcServer->mClientList.begin()),
+	mEnd(dcServer->mClientList.end())
 {
 }
 
@@ -800,7 +800,7 @@ DcUser * DcServer::getDcUser(const char * nick) {
 			return static_cast<DcUser *> (userBase);
 		}
 		DcConn * dcConn = NULL;
-		for (tCLIt it = mConnList.begin(); it != mConnList.end(); ++it) {
+		for (tCLIt it = mClientList.begin(); it != mClientList.end(); ++it) {
 			dcConn = static_cast<DcConn *> (*it);
 			if (dcConn && dcConn->mType == CLIENT_TYPE_NMDC && 
 				dcConn->mDcUser && dcConn->mDcUser->getUid() == nickStr

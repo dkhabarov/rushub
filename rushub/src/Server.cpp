@@ -113,38 +113,36 @@ Server::~Server() {
 
 
 void Server::deleteAll() {
-	for (tCLIt it = mConnList.begin(); it != mConnList.end(); ++it) {
-		deleteConn(*it);
+	Conn * conn = NULL;
+
+	tCLIt it = mClientList.begin();
+	tCLIt it_e = mClientList.end();
+	while (it != mClientList.end()) {
+		conn = (*it++);
+		delConnection(conn);
 	}
-	mConnList.clear();
-	for (tLLIt it = mListenList.begin(); it != mListenList.end(); ++it) {
-		(*it)->mProtocol = NULL; // upd hack: fix me!
-		deleteConn(*it);
+	mClientList.clear();
+
+	it = mListenList.begin();
+	it_e = mListenList.end();
+	while (it != mListenList.end()) {
+		conn = (*it++);
+		conn->mProtocol = NULL; // upd hack: fix me!
+		delConnection(conn);
 	}
 	mListenList.clear();
-}
-
-
-void Server::deleteConn(Conn * conn) {
-	if (conn != NULL) {
-		mConnChooser.deleteConn(conn);
-
-		ConnFactory * selfConnFactory = conn->mSelfConnFactory;
-		if (selfConnFactory != NULL) {
-			selfConnFactory->deleteConn(conn);
-		} else {
-			delete conn;
-		}
-		conn = NULL;
-	}
 }
 
 
 
 /// Set and Listen port
 Conn * Server::listening(ConnFactory * connFactory, const char * ip, const char * port, bool udp /*= false*/) {
-	Conn * conn = listen(ip, port, udp);
+
+	ConnType connType = udp ? CONN_TYPE_INCOMING_UDP : CONN_TYPE_LISTEN;
+	Conn * conn = addSimpleConn(connType, ip, port);
+
 	if (conn == NULL) {
+		delete conn;
 		return NULL;
 	}
 
@@ -161,8 +159,12 @@ Conn * Server::listening(ConnFactory * connFactory, const char * ip, const char 
 
 /// Set and Connect to port
 Conn * Server::connecting(ConnFactory * connFactory, const char * ip, const char * port, bool udp /*= false*/) {
-	Conn * conn = connect(ip, port, udp);
+
+	ConnType connType = udp ? CONN_TYPE_OUTGOING_UDP : CONN_TYPE_OUTGOING_TCP;
+	Conn * conn = addSimpleConn(connType, ip, port);
+
 	if (conn == NULL) {
+		delete conn;
 		return NULL;
 	}
 
@@ -177,101 +179,50 @@ Conn * Server::connecting(ConnFactory * connFactory, const char * ip, const char
 
 
 
-/// Listen port (TCP/UDP)
-Conn * Server::listen(const char * ip, const char * port, bool udp) {
-
-	ConnType connType = udp ? CONN_TYPE_INCOMING_UDP : CONN_TYPE_LISTEN;
-	Conn * conn = new Conn(0, this, connType);
-
-	if (!addSimpleConn(conn, ip, port, connType)) {
-		delete conn;
-		conn = NULL;
-	}
-	return conn;
-}
-
-
-
-/// Connect to port (TCP/UDP)
-Conn * Server::connect(const char * ip, const char * port, bool udp) {
-
-	ConnType connType = udp ? CONN_TYPE_OUTGOING_UDP : CONN_TYPE_OUTGOING_TCP;
-	Conn * conn = new Conn(0, this, connType);
-
-	if (!addSimpleConn(conn, ip, port, connType)) {
-		delete conn;
-		conn = NULL;
-	}
-	return conn;
-}
-
-
-
 /// Add simple connection
-Conn * Server::addSimpleConn(Conn * conn, const char * ip, const char * port, int connType) {
-	if (conn) {
-		if (conn->makeSocket(port, ip, connType) == INVALID_SOCKET) {
-			if (errLog(0)) {
-				if (connType == CONN_TYPE_LISTEN) {
-					logStream() << "Fatal error: Can't listen on " << ip << ":" << port << " TCP" << endl;
-				} else if (connType == CONN_TYPE_INCOMING_UDP) {
-					logStream() << "Fatal error: Can't listen on " << ip << ":" << port << " UDP" << endl;
-				} else if (connType == CONN_TYPE_OUTGOING_TCP) {
-					logStream() << "Fatal error: Can't connect to " << ip << ":" << port << " TCP" << endl;
-				} else if (connType == CONN_TYPE_OUTGOING_UDP) {
-					logStream() << "Fatal error: Can't connect to " << ip << ":" << port << " UDP" << endl;
-				} else {
-					logStream() << "Fatal error: Unknown connection" << endl;
-				}
-			}
-			return NULL;
-		}
+Conn * Server::addSimpleConn(int connType, const char * ip, const char * port) {
 
-		if (
-			#if USE_SELECT
-				(mConnChooser.size() == (FD_SETSIZE - 1)) || 
-			#endif
-			!mConnChooser.ConnChoose::optIn(static_cast<ConnBase *> (conn),
-			ConnChoose::tEventFlag(ConnChoose::eEF_INPUT | ConnChoose::eEF_ERROR)))
-		{
-			if (conn->errLog(0)) {
-				conn->logStream() << "Error: Can't add socket!" << endl;
-			}
-			if (conn->mSelfConnFactory != NULL) {
-				conn->mSelfConnFactory->deleteConn(conn);
-			} else {
-				delete conn;
-			}
-			return NULL;
-		}
+	Conn * conn = new Conn(0, this, connType);
 
-		mConnChooser.addConn(conn);
-		/*conn->mIterator =*/ mConnList.insert(mListenList.begin(), conn);
-
-		if (connType == CONN_TYPE_LISTEN) {
-			if (log(0)) {
-				logStream() << "Listening on " << ip << ":" << port << " TCP" << endl;
-			}
-		} else if (connType == CONN_TYPE_INCOMING_UDP) {
-			if (log(0)) {
-				logStream() << "Listening on " << ip << ":" << port << " UDP" << endl;
-			}
-		} else if (connType == CONN_TYPE_OUTGOING_TCP) {
-			if (log(4)) {
-				logStream() << "Connected to " << ip << ":" << port << " TCP" << endl;
-			}
-		} else if (connType == CONN_TYPE_OUTGOING_UDP) {
-			if (log(4)) {
-				logStream() << "Connected to " << ip << ":" << port << " UDP" << endl;
-			}
-		}
-		return conn;
-	} else {
+	if (conn->makeSocket(port, ip, connType) == INVALID_SOCKET) {
 		if (errLog(0)) {
-			logStream() << "Fatal error: Connection object is empty" << endl;
+			if (connType == CONN_TYPE_LISTEN) {
+				logStream() << "Fatal error: Can't listen on " << ip << ":" << port << " TCP" << endl;
+			} else if (connType == CONN_TYPE_INCOMING_UDP) {
+				logStream() << "Fatal error: Can't listen on " << ip << ":" << port << " UDP" << endl;
+			} else if (connType == CONN_TYPE_OUTGOING_TCP) {
+				logStream() << "Fatal error: Can't connect to " << ip << ":" << port << " TCP" << endl;
+			} else if (connType == CONN_TYPE_OUTGOING_UDP) {
+				logStream() << "Fatal error: Can't connect to " << ip << ":" << port << " UDP" << endl;
+			} else {
+				logStream() << "Fatal error: Unknown connection" << endl;
+			}
+		}
+		return NULL;
+	}
+
+	if (addConnection(conn) <= 0) {
+		return NULL;
+	}
+
+	if (connType == CONN_TYPE_LISTEN) {
+		if (log(0)) {
+			logStream() << "Listening on " << ip << ":" << port << " TCP" << endl;
+		}
+	} else if (connType == CONN_TYPE_INCOMING_UDP) {
+		if (log(0)) {
+			logStream() << "Listening on " << ip << ":" << port << " UDP" << endl;
+		}
+	} else if (connType == CONN_TYPE_OUTGOING_TCP) {
+		if (log(4)) {
+			logStream() << "Connected to " << ip << ":" << port << " TCP" << endl;
+		}
+	} else if (connType == CONN_TYPE_OUTGOING_UDP) {
+		if (log(4)) {
+			logStream() << "Connected to " << ip << ":" << port << " UDP" << endl;
 		}
 	}
-	return NULL;
+	return conn;
 }
 
 
@@ -363,7 +314,7 @@ void Server::step() {
 	}
 
 	ConnChoose::ChooseRes res;
-	ConnType connType;
+	int connType;
 	bool ok = false;
 	int activity = 0;
 	int forDel = miNumCloseConn;
@@ -558,10 +509,6 @@ int Server::addConnection(Conn * conn) {
 		return -1;
 	}
 
-	/*if (log(4)) {
-		logStream() << "Num clients before add: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.size() << endl;
-	}*/
-
 	if (
 		#if USE_SELECT
 			(mConnChooser.size() == (FD_SETSIZE - 1)) || 
@@ -580,12 +527,15 @@ int Server::addConnection(Conn * conn) {
 		return -2;
 	}
 
+	// Adding in common list
 	mConnChooser.addConn(conn);
-	conn->mIterator = mConnList.insert(mConnList.begin(), conn);
 
-	/*if (log(4)) {
-		logStream() << "Num clients after add: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.size() << endl;
-	}*/
+	// Adding in client or listen list
+	if (conn->getConnType() == CONN_TYPE_INCOMING_TCP) {
+		conn->mIterator = mClientList.insert(mClientList.begin(), conn);
+	} else {
+		conn->mIterator = mListenList.insert(mListenList.begin(), conn);
+	}
 	return 1;
 }
 
@@ -600,40 +550,44 @@ int Server::delConnection(Conn * conn) {
 		throw "Fatal error: delConnection null pointer";
 	}
 
-	/*if (log(4)) {
-		logStream() << "Num clients before del: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.size() << endl;
-	}
-	if (log(4)) {
-		logStream() << "Delete connection on socket: " << (tSocket)(*conn) << endl;
-	}*/
-
 	tCLIt it = conn->mIterator;
-	Conn *found = (*it);
-	if ((it == mConnList.end()) || (found != conn)) {
-		if (conn->errLog(0)) {
-			conn->logStream() << "Fatal error: Delete unknown connection: " << conn << endl;
+	Conn * found = (*it);
+
+	// Removing from client or listen list
+	if (conn->getConnType() == CONN_TYPE_INCOMING_TCP) {
+		if (it == mClientList.end() || found != conn) {
+			if (conn->errLog(0)) {
+				conn->logStream() << "Fatal error: Delete unknown connection: " << conn << endl;
+			}
+			throw "Fatal error: Delete unknown connection";
 		}
-		throw "Fatal error: Delete unknown connection";
+		mClientList.erase(it);
+		conn->mIterator = mClientList.end();
+	} else {
+		if (it == mListenList.end() || found != conn) {
+			if (conn->errLog(0)) {
+				conn->logStream() << "Fatal error: Delete unknown connection: " << conn << endl;
+			}
+			throw "Fatal error: Delete unknown connection";
+		}
+		mListenList.erase(it);
+		conn->mIterator = mListenList.end();
 	}
 
-	mConnList.erase(it);
-	tCLIt empty_it;
-	conn->mIterator = empty_it;
-
+	// Removing from common list
 	mConnChooser.deleteConn(conn);
 
+
+	// Removing self connection
 	if (conn->mSelfConnFactory != NULL) {
 		conn->mSelfConnFactory->deleteConn(conn); 
 	} else {
-		if (conn->log(0)) {
+		if (conn->log(3)) {
 			conn->logStream() << "Deleting conn without factory!" << endl;
 		}
 		delete conn;
 	}
 
-	/*if (log(4)) {
-		logStream() << "Num clients after del: " << mConnList.size() << ". Num socks: " << mConnChooser.mConnBaseList.size() << endl;
-	}*/
 	return 1;
 }
 
@@ -733,9 +687,9 @@ void Server::onTimerBase(Time & now) {
 		(mTimes.mConn - mTimes.mServ >= mTimerConnPeriod)
 	) {
 		mTimes.mConn = mTimes.mServ;
-		tCLIt it_e = mConnList.end();
+		tCLIt it_e = mClientList.end();
 		Conn * conn = NULL;
-		for (tCLIt it = mConnList.begin(); it != it_e; ++it) {
+		for (tCLIt it = mClientList.begin(); it != it_e; ++it) {
 			conn = (*it);
 			if (conn->isOk()) {
 				conn->onTimerBase(now);

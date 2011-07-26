@@ -130,7 +130,7 @@ public:
 
 public:
 
-	Conn(tSocket socket, Server * server, ConnType connType);
+	Conn(tSocket socket, Server * server, int connType);
 	virtual ~Conn();
 
 	// === static functions ===
@@ -146,7 +146,7 @@ public:
 	// === getter / setter ===
 
 	/// Get connection type
-	ConnType getConnType() const;
+	int getConnType() const;
 
 	/// Get status
 	int getStatus() const;
@@ -253,7 +253,7 @@ public:
 protected:
 
 	/// Socket type
-	ConnType mConnType;
+	int mConnType;
 
 	bool mOk; ///< Points that given connection is registered (socket of connection is created and bound)
 	bool mWritable; ///< Points that data can be read and be written

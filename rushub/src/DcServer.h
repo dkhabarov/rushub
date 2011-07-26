@@ -105,7 +105,7 @@ private:
 
 class DcServer : public Server, public DcServerBase {
 
-	friend class ::dcserver::DcListIterator; // for mConnList
+	friend class ::dcserver::DcListIterator; // for mClientList
 	friend class ::dcserver::DcConn; // for doUserEnter in DcConn::onFlush and minDelay in DcConn::onTimer
 	friend class ::dcserver::DcConnFactory; // for removeFromDcUserList in DcConnFactory::deleteConn
 	friend class ::dcserver::protocol::NmdcProtocol; // for beforeUserEnter in NmdcProtocol::eventMyInfo
