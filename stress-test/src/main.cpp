@@ -143,7 +143,7 @@ public:
 			conn->writeData(data.c_str(), len, true);
 		} else if (cmd.find("$Hello ", 0, 7) != cmd.npos) {
 			string data("$Version 1,0091|$GetNickList|$MyINFO $ALL ");
-			data.append(static_cast<NmdcParser*> (conn->mParser)->mNick).append(" $ $ $$0$|");
+			data.append(static_cast<NmdcParser*> (conn->mParser)->mNick).append(" any description<TestDC++ 1.00,M:A,H:1/0/0,S:32>$ $1000$some@email.ru$1234554321$|");
 			size_t len = data.size();
 			conn->writeData(data.c_str(), len, true);
 		}
