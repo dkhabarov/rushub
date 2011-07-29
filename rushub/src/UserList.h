@@ -165,7 +165,7 @@ public:
 	}
 
 	UserBase * getUserBaseByNick(const string & nick) {
-		return List_t::find(nick2Key(nick));
+		return List_t::find(static_cast<unsigned long> (nick2Key(nick))); // for x64 compatibility
 	}
 
 	virtual const string & getNickList();

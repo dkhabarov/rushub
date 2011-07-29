@@ -114,7 +114,6 @@ class DcServer : public Server, public DcServerBase {
 public:
 
 	typedef vector<string> List_t;
-	typedef UserList::Key UserKey;
 
 	/// Current server
 	static DcServer * currentDcServer;

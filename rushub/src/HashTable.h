@@ -337,7 +337,7 @@ public:
 
 	typedef UINT_PTR Key;
 	class iterator;
-	static Hash<Key> mHash; /** Hesh function */
+	static Hash<Key> mHash; /** Hash function */
 
 private:
 
