@@ -260,7 +260,7 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 		if (errLog(0)) {
 			logStream() << "Error in getaddrinfo: " << 
 			#ifdef _WIN32
-				SockErrMsg
+				SockErr
 			#else
 				gai_strerror(ret) << " (" << ret << ")"
 			#endif
@@ -276,7 +276,7 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 	// socket
 	if (SOCK_INVALID(sock = socket(mAddrInfo->ai_family, mAddrInfo->ai_socktype, 0))) {
 		if (errLog(0)) {
-			logStream() << "Error in socket: " << SockErrMsg << endl;
+			logStream() << "Error in socket: " << SockErrMsg << " [" << SockErr << "]" << endl;
 		}
 		return INVALID_SOCKET;
 	}
@@ -287,7 +287,7 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 		// TIME_WAIT after close conn. Reuse address after disconn
 		if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(sockoptval_t)))) {
 			if (errLog(0)) {
-				logStream() << "Error in setsockopt: " << SockErrMsg << endl;
+				logStream() << "Error in setsockopt: " << SockErrMsg << " [" << SockErr << "]" << endl;
 			}
 			return INVALID_SOCKET;
 		}
@@ -311,7 +311,7 @@ tSocket Conn::socketBind(tSocket sock) {
 	// Bind
 	if (SOCK_ERROR(bind(sock, mAddrInfo->ai_addr, static_cast<int> (mAddrInfo->ai_addrlen)))) {
 		if (errLog(0)) {
-			logStream() << "Error bind: " << SockErrMsg << endl;
+			logStream() << "Error bind: " << SockErrMsg << " [" << SockErr << "]" << endl;
 		}
 		return INVALID_SOCKET;
 	}
@@ -329,7 +329,7 @@ tSocket Conn::socketListen(tSocket sock) {
 	if (SOCK_ERROR(listen(sock, SOCK_BACKLOG))) {
 		SOCK_CLOSE(sock);
 		if (errLog(1)) {
-			logStream() << "Error listening: " << SockErrMsg << endl;
+			logStream() << "Error listening: " << SockErrMsg << " [" << SockErr << "]" << endl;
 		}
 		return INVALID_SOCKET;
 	}
@@ -346,7 +346,7 @@ tSocket Conn::socketConnect(tSocket sock) {
 	if (SOCK_ERROR(connect(sock, mAddrInfo->ai_addr, static_cast<int> (mAddrInfo->ai_addrlen)))) {
 		SOCK_CLOSE(sock);
 		if (errLog(1)) {
-			logStream() << "Error connecting: " << SockErrMsg << endl;
+			logStream() << "Error connecting: " << SockErrMsg << " [" << SockErr << "]" << endl;
 		}
 		return INVALID_SOCKET;
 	}
@@ -394,7 +394,7 @@ void Conn::close() {
 			logStream() << "Closing socket: " << mSocket << endl;
 		}
 	} else if (errLog(1)) {
-		logStream() << "Socket not closed: " << SockErrMsg << endl;
+		logStream() << "Socket not closed: " << SockErrMsg << " [" << SockErr << "]" << endl;
 	}
 
 	freeaddrinfo(mAddrInfo);
@@ -521,7 +521,7 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 	sockoptval_t yes = 1;
 	if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(int)))) {
 		if (errLog(1)) {
-			logStream() << "Socket not SO_KEEPALIVE: " << SockErrMsg << endl;
+			logStream() << "Socket not SO_KEEPALIVE: " << SockErrMsg << " [" << SockErr << "]" << endl;
 		}
 #ifdef _WIN32
 		int err = SOCK_CLOSE(sock);
@@ -565,7 +565,7 @@ int Conn::defineConnInfo(sockaddr_storage & storage) {
 		char port[NI_MAXSERV] = { 0 };
 		if (getnameinfo((struct sockaddr *) &storage, sizeof(storage), host, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV) != 0) {
 			if (log(2)) {
-				logStream() << "Error in getnameinfo: " << SockErrMsg << endl;
+				logStream() << "Error in getnameinfo: " << SockErrMsg << " [" << SockErr << "]" << endl;
 			}
 			closeNow(CLOSE_REASON_GETPEERNAME);
 			return -1;
@@ -641,7 +641,7 @@ int Conn::recv() {
 				closeNow(CLOSE_REASON_CLIENT_DISCONNECT);
 			} else {
 				if (log(2)) {
-					logStream() << "Error in receive: " << SockErrMsg << endl;
+					logStream() << "Error in receive: " << SockErrMsg << " [" << SockErr << "]" << endl;
 				}
 
 				switch (SockErr) {
@@ -943,11 +943,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 
 		if (SockErr != SOCK_EAGAIN) {
 			if (log(2)) {
-				logStream() << "Error in sending: " << SockErrMsg << 
-				#ifndef _WIN32
-					" [" << SockErr << "] " <<
-				#endif
-				"(not EAGAIN), closing" << endl;
+				logStream() << "Error in sending: " << SockErrMsg << " [" << SockErr << "]" << "(not EAGAIN), closing" << endl;
 			}
 			closeNow(CLOSE_REASON_ERROR_SEND);
 			return 0;

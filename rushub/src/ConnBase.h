@@ -62,7 +62,7 @@
 	#define EHOSTUNREACH WSAEHOSTUNREACH
 	#define EWOULDBLOCK WSAEWOULDBLOCK
 	#define SockErr WSAGetLastError()
-	#define SockErrMsg WSAGetLastError()
+	#define SockErrMsg "err"
 	#define SOCK_EAGAIN WSAEWOULDBLOCK
 	#define SOCK_EINTR WSAEINTR
 	#define SOCK_INVALID(SOCK) (SOCK) == INVALID_SOCKET
