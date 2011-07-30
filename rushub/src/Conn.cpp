@@ -468,33 +468,33 @@ Conn * Conn::createNewConn() {
 		return NULL;
 	}
 
-	Conn * new_conn = NULL;
+	Conn * newConn = NULL;
 
 	if (mCreatorConnFactory != NULL) {
-		new_conn = mCreatorConnFactory->createConn(sock); // Create connection object by factory
+		newConn = mCreatorConnFactory->createConn(sock); // Create connection object by factory
 	} else {
 		if (log(3)) {
 			logStream() << "Create simple connection object for socket: " << sock << endl;
 		}
-		new_conn = new Conn(sock, mServer, CONN_TYPE_INCOMING_TCP); // Create simple connection object
-		new_conn->mProtocol = mProtocol; // Set protocol by this Conn
+		newConn = new Conn(sock, mServer, CONN_TYPE_INCOMING_TCP); // Create simple connection object
+		newConn->mProtocol = mProtocol; // Set protocol by this Conn
 	}
-	if (!new_conn) {
+	if (!newConn) {
 		if (errLog(0)) {
 			logStream() << "Fatal error: Can't create new connection object" << endl;
 		}
 		throw "Fatal error: Can't create new connection object";
 	}
 
-	if (new_conn->defineConnInfo(storage) == -1) {
+	if (newConn->defineConnInfo(storage) == -1) {
 		if (mCreatorConnFactory != NULL) {
-			mCreatorConnFactory->deleteConn(new_conn);
+			mCreatorConnFactory->deleteConn(newConn);
 		} else {
-			delete new_conn;
+			delete newConn;
 		}
 		return NULL;
 	}
-	return new_conn;
+	return newConn;
 }
 
 

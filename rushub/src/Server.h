@@ -179,6 +179,7 @@ private:
 	/// Main base timer
 	void onTimerBase(Time & now);
 
+	size_t onRecv(Conn *);
 
 }; // Server
 

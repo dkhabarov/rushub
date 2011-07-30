@@ -342,44 +342,41 @@ void Server::step() {
 			}
 
 			int numAccept = 0;
-			Conn * new_conn = NULL;
+			Conn * newConn = NULL;
 
 			// accept before 64 connections for once
 			while (++numAccept <= 64) {
-			
+
 				// Create new connection:
 				// 1. Accept new socket
 				// 2. Create new connection object (using ConnFactory from ListenFactory else create simple Conn)
-				new_conn = mNowConn->createNewConn(); /** CONN_TYPE_INCOMING_TCP (Conn) */
-
-				if (new_conn) {
-					if (addConnection(new_conn) > 0) {
-
-						// Set conn port and IP
-						new_conn->mPortConn = mNowConn->mPort;
-						new_conn->mIpConn = mNowConn->mIp;
-
-						//if (inputEvent(new_conn) >= 0) { // fix close conn if not recv data
-
-							if (mNowConn->mCreatorConnFactory) {
-								// On new connection using ListenFactory
-								mNowConn->mCreatorConnFactory->onNewConn(new_conn);
-							} else {
-								if (log(4)) {
-									logStream() << "ListenFactory is empty" << endl;
-								}
-
-								// On new connection by server
-								onNewConn(new_conn);
-							}
-
-						//}
-
-					}
-				} else {
+				if ((newConn = mNowConn->createNewConn()) == NULL) {
 					break;
 				}
 
+				if (addConnection(newConn) > 0) {
+
+					// Set conn port and IP
+					newConn->mPortConn = mNowConn->mPort;
+					newConn->mIpConn = mNowConn->mIp;
+
+					//if (inputEvent(newConn) >= 0) { // fix close conn if not recv data
+
+						if (mNowConn->mCreatorConnFactory) {
+							// On new connection using ListenFactory
+							mNowConn->mCreatorConnFactory->onNewConn(newConn);
+						} else {
+							if (log(4)) {
+								logStream() << "CreatorConnFactory is empty" << endl;
+							}
+
+							// On new connection by server
+							onNewConn(newConn);
+						}
+
+					//}
+
+				}
 			}
 
 			if (mNowConn->log(5)) {
@@ -399,7 +396,7 @@ void Server::step() {
 						mNowConn->logStream() << "::(s)inputEvent" << endl;
 					}
 
-					if (inputEvent(mNowConn) <= 0) {
+					if (inputEvent(mNowConn) == 0) {
 						mNowConn->setOk(false);
 					}
 
@@ -614,22 +611,17 @@ void Server::onClose(Conn * conn) {
 
 /// inputEvent
 size_t Server::inputEvent(Conn * conn) {
-	try {
-		if (conn->recv() <= 0) {
-			return 0;
-		}
-	} catch(const char * exception) {
-		if (errLog(0)) {
-			logStream() << "Exception in recv: " << exception << endl;
-		}
-		return 0;
-	} catch(...) {
-		if (errLog(0)) {
-			logStream() << "Exception in recv" << endl;
-		}
+	int ret = conn->recv();
+	if (ret <= 0) {
 		return 0;
 	}
+	return onRecv(conn);
+}
 
+
+
+// onRecv
+size_t Server::onRecv(Conn * conn) {
 	size_t bytes = 0;
 	while (conn->isOk() && conn->isWritable()) {
 		if (conn->getStatus() == STRING_STATUS_NO_STR) {
