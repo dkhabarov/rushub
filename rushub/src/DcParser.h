@@ -238,7 +238,7 @@ public:
 	
 	bool splitChunks();
 	static bool isPassive(const string & description);
-	static int checkCmd(DcParser & dcParser, const string & sData, DcUserBase * dcUserBase = NULL);
+	static int checkCmd(DcParser & dcParser, const string & data, DcUserBase * dcUserBase = NULL);
 
 private:
 

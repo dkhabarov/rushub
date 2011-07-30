@@ -362,9 +362,9 @@ bool DcParser::splitChunks() {
 	return mError;
 }
 
-int DcParser::checkCmd(DcParser & dcParser, const string & sData, DcUserBase * dcUserBase /*= NULL*/) {
+int DcParser::checkCmd(DcParser & dcParser, const string & data, DcUserBase * dcUserBase /*= NULL*/) {
 	dcParser.reInit();
-	dcParser.mCommand = sData;
+	dcParser.mCommand = data;
 	dcParser.parse();
 	if (dcParser.splitChunks()) {
 		return -1;

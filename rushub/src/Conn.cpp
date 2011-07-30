@@ -1042,11 +1042,11 @@ int Conn::send(const char * buf, size_t & len) {
 	int n = -1;
 	size_t total = 0, bytesleft = len;
 
-	bool bUDP = (this->mConnType == CONN_TYPE_INCOMING_UDP);
+	bool udp = (this->mConnType == CONN_TYPE_INCOMING_UDP);
 
 	while (total < len) { // EMSGSIZE (WSAEMSGSIZE)
 
-		if (!bUDP) {
+		if (!udp) {
 
 			//int count = 0;
 			//do {
