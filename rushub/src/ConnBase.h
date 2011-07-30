@@ -61,8 +61,8 @@
 	#define ETIMEDOUT WSAETIMEDOUT
 	#define EHOSTUNREACH WSAEHOSTUNREACH
 	#define EWOULDBLOCK WSAEWOULDBLOCK
-	#define SockErr WSAGetLastError()
-	#define SockErrMsg "err"
+	#define SOCK_ERR WSAGetLastError()
+	#define SOCK_ERR_MSG "err"
 	#define SOCK_EAGAIN WSAEWOULDBLOCK
 	#define SOCK_EINTR WSAEINTR
 	#define SOCK_INVALID(SOCK) (SOCK) == INVALID_SOCKET
@@ -75,8 +75,8 @@
 	#include <netdb.h>      ///< for gethostbyaddr
 	#include <fcntl.h>      ///< for nonblock flags F_GETFL & etc
 	#define sockoptval_t int
-	#define SockErr errno
-	#define SockErrMsg strerror(errno)
+	#define SOCK_ERR errno
+	#define SOCK_ERR_MSG strerror(errno)
 	#define SOCK_EAGAIN EAGAIN
 	#define SOCK_EINTR EINTR
 	#define SOCK_INVALID(SOCK) (SOCK) < 0
@@ -102,13 +102,13 @@
 		#define TEMP_FAILURE_RETRY(expression) \
 		(__extension__ ({ \
 			long int __result; \
-			while ((__result = (long int) (expression)) == -1L && SockErr == SOCK_EINTR) { \
+			while ((__result = (long int) (expression)) == -1L && SOCK_ERR == SOCK_EINTR) { \
 			}; \
 			__result; \
 		}))
 	#else
 		#define TEMP_FAILURE_RETRY(expression) \
-			while ((long int) (expression) == -1L && SockErr == SOCK_EINTR){ \
+			while ((long int) (expression) == -1L && SOCK_ERR == SOCK_EINTR){ \
 			}
 	#endif
 #endif
