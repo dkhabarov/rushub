@@ -89,11 +89,11 @@ public:
 	/// Stop cycle
 	void stop(int);
 
-	/// inputData
-	size_t inputData(Conn *);
+	/// inputEvent
+	size_t inputEvent(Conn *);
 
-	/// outputData
-	void outputData(Conn *);
+	/// outputEvent
+	void outputEvent(Conn *);
 
 	/// onNewConn
 	virtual int onNewConn(Conn *);

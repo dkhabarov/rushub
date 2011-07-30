@@ -639,56 +639,56 @@ int Conn::recv() {
 					logStream() << "User itself was disconnected" << endl;
 				}
 				closeNow(CLOSE_REASON_CLIENT_DISCONNECT);
-			} else {
-				if (log(2)) {
-					logStream() << "Error in receive: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
-				}
-
-				switch (SOCK_ERR) {
-
-					case ECONNRESET : // Connection reset by peer
-						if (log(2)) {
-							logStream() << "(connection reset by peer)" << endl;
-						}
-						break;
-
-					case ETIMEDOUT : // Connection timed out
-						if (log(2)) {
-							logStream() << "(connection timed out)" << endl;
-						}
-						break;
-
-					case EHOSTUNREACH : // No route to host
-						if (log(2)) {
-							logStream() << "(no route to host)" << endl;
-						}
-						break;
-
-					case EWOULDBLOCK : // Non-blocking socket operation
-						return -1;
-
-					default :
-						if (log(2)) {
-							logStream() << "(other reason)" << endl;
-						}
-						break;
-
-				}
-				closeNow(CLOSE_REASON_ERROR_RECV);
+				return -2;
 			}
-			return -1;
 
-		}
+			if (log(2)) {
+				logStream() << "Error in receive: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
+			}
 
-	} else {
-		if (bUdp) {
-			mIpUdp = inet_ntoa(mSockAddrIn.sin_addr);
+			switch (SOCK_ERR) {
+
+				case EWOULDBLOCK : // Non-blocking socket operation
+					return -3;
+
+				case ECONNRESET : // Connection reset by peer
+					if (log(2)) {
+						logStream() << "(connection reset by peer)" << endl;
+					}
+					break;
+
+				case ETIMEDOUT : // Connection timed out
+					if (log(2)) {
+						logStream() << "(connection timed out)" << endl;
+					}
+					break;
+
+				case EHOSTUNREACH : // No route to host
+					if (log(2)) {
+						logStream() << "(no route to host)" << endl;
+					}
+					break;
+
+				default :
+					if (log(2)) {
+						logStream() << "(other reason)" << endl;
+					}
+					break;
+
+			}
+			closeNow(CLOSE_REASON_ERROR_RECV);
+			return -4;
 		}
-		mRecvBufEnd = iBufLen; // End buf pos
-		mRecvBufRead = 0; // Pos for reading from buf
-		mRecvBuf[mRecvBufEnd] = '\0'; // Adding 0 symbol to end of str
-		mLastRecv.get(); // Write time last recv action
+		return -5;
 	}
+
+	if (bUdp) {
+		mIpUdp = inet_ntoa(mSockAddrIn.sin_addr);
+	}
+	mRecvBufEnd = iBufLen; // End buf pos
+	mRecvBufRead = 0; // Pos for reading from buf
+	mRecvBuf[mRecvBufEnd] = '\0'; // Adding 0 symbol to end of str
+	mLastRecv.get(); // Write time last recv action
 	return iBufLen;
 }
 

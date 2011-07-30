@@ -359,7 +359,7 @@ void Server::step() {
 						new_conn->mPortConn = mNowConn->mPort;
 						new_conn->mIpConn = mNowConn->mIp;
 
-						//if (inputData(new_conn) >= 0) { // fix close conn if not recv data
+						//if (inputEvent(new_conn) >= 0) { // fix close conn if not recv data
 
 							if (mNowConn->mCreatorConnFactory) {
 								// On new connection using ListenFactory
@@ -396,50 +396,50 @@ void Server::step() {
 			)) {
 				try {
 					if (mNowConn->log(5)) {
-						mNowConn->logStream() << "::(s)inputData" << endl;
+						mNowConn->logStream() << "::(s)inputEvent" << endl;
 					}
 
-					if (inputData(mNowConn) <= 0) {
+					if (inputEvent(mNowConn) <= 0) {
 						mNowConn->setOk(false);
 					}
 
 					if (mNowConn->log(5)) {
-						mNowConn->logStream() << "::(e)inputData" << endl;
+						mNowConn->logStream() << "::(e)inputEvent" << endl;
 					}
 				} catch (const char * exception) {
 					if (errLog(0)) {
-						logStream() << "Exception in inputData: " << exception << endl;
+						logStream() << "Exception in inputEvent: " << exception << endl;
 					}
-					throw "Exception in inputData";
+					throw "Exception in inputEvent";
 				} catch (...) {
 					if (errLog(0)) {
-						logStream() << "Exception in inputData" << endl;
+						logStream() << "Exception in inputEvent" << endl;
 					}
-					throw "Exception in inputData";
+					throw "Exception in inputEvent";
 				}
 			}
 
 			if (ok && (activity & ConnChoose::eEF_OUTPUT)) {
 				try {
 					if (mNowConn->log(5)) {
-						mNowConn->logStream() << "::(s)outputData" << endl;
+						mNowConn->logStream() << "::(s)outputEvent" << endl;
 					}
 
-					outputData(mNowConn);
+					outputEvent(mNowConn);
 
 					if (mNowConn->log(5)) {
-						mNowConn->logStream() << "::(e)outputData" << endl;
+						mNowConn->logStream() << "::(e)outputEvent" << endl;
 					}
 				} catch (const char * exception) {
 					if (errLog(0)) {
-						logStream() << "Exception in outputData: " << exception << endl;
+						logStream() << "Exception in outputEvent: " << exception << endl;
 					}
-					throw "Exception in outputData";
+					throw "Exception in outputEvent";
 				} catch (...) {
 					if (errLog(0)) {
-						logStream() << "Exception in outputData" << endl;
+						logStream() << "Exception in outputEvent" << endl;
 					}
-					throw "Exception in outputData";
+					throw "Exception in outputEvent";
 				}
 			}
 
@@ -612,8 +612,8 @@ void Server::onClose(Conn * conn) {
 
 
 
-/// inputData
-size_t Server::inputData(Conn * conn) {
+/// inputEvent
+size_t Server::inputEvent(Conn * conn) {
 	try {
 		if (conn->recv() <= 0) {
 			return 0;
@@ -673,8 +673,8 @@ void Server::onNewData(Conn *, string *) {
 
 
 
-/// outputData
-void Server::outputData(Conn * conn) {
+/// outputEvent
+void Server::outputEvent(Conn * conn) {
 	conn->flush();
 }
 

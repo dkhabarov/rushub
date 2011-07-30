@@ -101,7 +101,7 @@ void WebConnFactory::onNewData(Conn * conn, string * str) {
 
 
 int WebConnFactory::onNewConn(Conn * conn) {
-	mServer->inputData(conn);
+	mServer->inputEvent(conn);
 	return 0;
 }
 
