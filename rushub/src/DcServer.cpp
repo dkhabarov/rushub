@@ -359,7 +359,7 @@ int DcServer::onNewConn(Conn *conn) {
 		dcConn->logStream() << "[S]Stage onNewConn" << endl;
 	}
 
-	mNmdcProtocol.onNewDcConn(dcConn); // refactoring to DcProtocol pointer
+	dcConn->mProtocol->onNewConn(dcConn);
 
 	if (dcConn->log(5)) {
 		dcConn->logStream() << "[E]Stage onNewConn" << endl;
@@ -498,11 +498,9 @@ bool DcServer::checkNick(DcConn *dcConn) {
 
 
 bool DcServer::beforeUserEnter(DcConn * dcConn) {
-	unsigned iWantedMask;
+	unsigned iWantedMask = LOGIN_STATUS_LOGIN_DONE;
 	if (mDcConfig.mDelayedLogin && dcConn->mSendNickList) {
 		iWantedMask = LOGIN_STATUS_LOGIN_DONE - LOGIN_STATUS_NICKLST;
-	} else {
-		iWantedMask = LOGIN_STATUS_LOGIN_DONE;
 	}
 
 	if (iWantedMask == dcConn->getLoginStatusFlag(iWantedMask)) {
@@ -547,7 +545,7 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 
 
 /// User entry
-void DcServer::doUserEnter(DcConn * dcConn) {
+void DcServer::doUserEnter(DcConn * dcConn) { // refactoring in DcConn::flush !
 	// Check entry stages
 	if (LOGIN_STATUS_LOGIN_DONE != dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE)) {
 		if (dcConn->log(2)) {

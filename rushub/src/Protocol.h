@@ -59,6 +59,8 @@ public:
 
 	virtual Conn * getConnForUdpData(Conn *, Parser *) = 0;
 
+	virtual int onNewConn(Conn *) = 0;
+
 }; // Protocol
 
 

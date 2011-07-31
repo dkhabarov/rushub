@@ -60,7 +60,8 @@ public:
 	virtual Conn * createConn(tSocket sock = 0);
 	virtual void deleteConn(Conn * &);
 	virtual void onNewData(Conn *, string *);
-	virtual int onNewConn(Conn *);
+	virtual int onNewConnClient(Conn *);
+	virtual int onNewConnServer(Conn *);
 
 protected:
 

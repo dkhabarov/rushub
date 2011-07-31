@@ -54,6 +54,12 @@ int WebProtocol::doCommand(Parser *, Conn *) {
 
 
 
+int WebProtocol::onNewConn(Conn *) {
+	return 0;
+}
+
+
+
 /** Creating parser of the protocol */
 Parser * WebProtocol::createParser() {
 	return new WebParser;

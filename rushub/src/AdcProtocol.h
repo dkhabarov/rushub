@@ -53,6 +53,8 @@ public:
 	virtual int doCommand(Parser *, Conn *);
 	virtual Conn * getConnForUdpData(Conn *, Parser *);
 
+	virtual int onNewConn(Conn * conn);
+
 }; // AdcProtocol
 
 }; // namespace protocol

@@ -61,6 +61,8 @@ public:
 		return NULL;
 	}
 
+	virtual int onNewConn(Conn *);
+
 	/** Creating parser of the protocol */
 	virtual Parser * createParser();
 

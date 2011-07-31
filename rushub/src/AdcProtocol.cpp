@@ -63,6 +63,12 @@ Conn * AdcProtocol::getConnForUdpData(Conn *, Parser *) {
 }
 
 
+
+int AdcProtocol::onNewConn(Conn * conn) {
+	return 0;
+}
+
+
 }; // namespace protocol
 
 }; // namespace dcserver

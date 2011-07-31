@@ -244,7 +244,6 @@ Conn * DcConnFactory::createConn(tSocket sock) {
 
 	DcConn * dcConn = new DcConn(CLIENT_TYPE_NMDC, sock, mServer);
 	dcConn->mSelfConnFactory = this; // Connection factory for current connection (DcConnFactory)
-	dcConn->mProtocol = mProtocol; // Protocol pointer
 
 	// Create DcUser
 	DcUser * dcUser = new DcUser();
@@ -292,6 +291,21 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 	}
 	ConnFactory::deleteConn(conn);
 }
+
+
+
+int DcConnFactory::onNewConnClient(Conn * conn) {
+	conn->mProtocol = mProtocol; // Protocol pointer
+	return mServer->onNewConn(conn);
+}
+
+
+
+int DcConnFactory::onNewConnServer(Conn * conn) {
+	conn->mProtocol = mProtocol; // Protocol pointer
+	return mServer->onNewConn(conn);
+}
+
 
 }; // namespace dcserver
 

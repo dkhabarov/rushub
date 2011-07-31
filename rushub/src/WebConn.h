@@ -43,7 +43,8 @@ public:
 	Conn * createConn(tSocket sock = 0);
 	void deleteConn(Conn * &);
 	void onNewData(Conn *, string *);
-	int onNewConn(Conn *);
+	int onNewConnClient(Conn *);
+	int onNewConnServer(Conn *);
 
 }; // class WebConnFactory
 

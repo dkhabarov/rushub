@@ -70,7 +70,7 @@ public:
 	virtual int doCommand(Parser *, Conn *); ///< Do command
 	virtual Conn * getConnForUdpData(Conn *, Parser *);
 
-	int onNewDcConn(DcConn *);
+	virtual int onNewConn(Conn *);
 
 	void setServer(DcServer * dcServer) {
 		mDcServer = dcServer;

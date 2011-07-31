@@ -1184,7 +1184,6 @@ ConnFactory::~ConnFactory() {
 Conn * ConnFactory::createConn(tSocket sock) {
 	Conn * conn = new Conn(sock, mServer, CONN_TYPE_INCOMING_TCP);
 	conn->mSelfConnFactory = this;
-	conn->mProtocol = mProtocol; // protocol
 	return conn;
 }
 
@@ -1204,7 +1203,15 @@ void ConnFactory::onNewData(Conn * conn, string * str) {
 
 
 
-int ConnFactory::onNewConn(Conn * conn) {
+int ConnFactory::onNewConnClient(Conn * conn) {
+	conn->mProtocol = mProtocol; // protocol
+	return mServer->onNewConn(conn);
+}
+
+
+
+int ConnFactory::onNewConnServer(Conn * conn) {
+	conn->mProtocol = mProtocol; // protocol
 	return mServer->onNewConn(conn);
 }
 

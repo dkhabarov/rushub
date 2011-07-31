@@ -88,8 +88,9 @@ unsigned long NmdcProtocol::getMaxCommandLength() {
 
 
 
-int NmdcProtocol::onNewDcConn(DcConn * dcConn) {
+int NmdcProtocol::onNewConn(Conn * conn) {
 
+	DcConn * dcConn = static_cast<DcConn *> (conn);
 	string msg;
 	dcConn->send(
 		appendHubName(

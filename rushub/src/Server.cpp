@@ -360,18 +360,25 @@ void Server::step() {
 					newConn->mPortConn = mNowConn->mPort;
 					newConn->mIpConn = mNowConn->mIp;
 
-					//inputEvent(newConn); // fix close conn if not recv data
+					if (newConn->recv() > 0) { // client initialization (ADC behaviour)
 
-					if (mNowConn->mCreatorConnFactory) {
-						// On new connection using CreatorConnFactory
-						mNowConn->mCreatorConnFactory->onNewConn(newConn);
-					} else {
-						if (log(4)) {
-							logStream() << "CreatorConnFactory is empty" << endl;
+						if (mNowConn->mCreatorConnFactory) {
+							mNowConn->mCreatorConnFactory->onNewConnClient(newConn); // set protocol point
+						} else {
+							onNewConn(newConn);
+						}
+						if (newConn->isOk()) {
+							onRecv(newConn); // parse recv data
 						}
 
-						// On new connection by server
-						onNewConn(newConn);
+					} else if (newConn->isOk()) { // server initialization (NMDC behaviour)
+
+						if (mNowConn->mCreatorConnFactory) {
+							mNowConn->mCreatorConnFactory->onNewConnServer(newConn); // set protocol point
+						} else {
+							onNewConn(newConn);
+						}
+
 					}
 
 				}
@@ -590,23 +597,6 @@ int Server::delConnection(Conn * conn) {
 
 
 
-/// onNewConn
-int Server::onNewConn(Conn * conn) {
-	return conn == NULL ? -1 : 0;
-}
-
-
-
-/// onClose
-void Server::onClose(Conn * conn) {
-	if (!conn) {
-		return;
-	}
-	mConnChooser.deleteConn(conn);
-}
-
-
-
 /// inputEvent
 size_t Server::inputEvent(Conn * conn) {
 	int ret = conn->recv();
@@ -653,6 +643,13 @@ size_t Server::onRecv(Conn * conn) {
 
 
 
+/// outputEvent
+void Server::outputEvent(Conn * conn) {
+	conn->flush();
+}
+
+
+
 /// createCommandPtr
 string * Server::createCommandPtr(Conn *) {
 	return &mCommand;
@@ -660,15 +657,25 @@ string * Server::createCommandPtr(Conn *) {
 
 
 
-/// onNewData
-void Server::onNewData(Conn *, string *) {
+/// onNewConn
+int Server::onNewConn(Conn * conn) {
+	return conn == NULL ? -1 : 0;
 }
 
 
 
-/// outputEvent
-void Server::outputEvent(Conn * conn) {
-	conn->flush();
+/// onClose
+void Server::onClose(Conn * conn) {
+	if (!conn) {
+		return;
+	}
+	mConnChooser.deleteConn(conn);
+}
+
+
+
+/// onNewData
+void Server::onNewData(Conn *, string *) {
 }
 
 

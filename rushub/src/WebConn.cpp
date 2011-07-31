@@ -49,7 +49,6 @@ Conn * WebConnFactory::createConn(tSocket sock) {
 
 	WebConn * webConn = new WebConn(sock, mServer);
 	webConn->mSelfConnFactory = this; /** Fuctory current connection (WebConnFactory) */
-	webConn->mProtocol = mProtocol; /** Protocol (WebProtocol) */
 
 	WebUser * webUser = new WebUser(CLIENT_TYPE_WEB);
 	webConn->mWebUser = webUser;
@@ -100,11 +99,19 @@ void WebConnFactory::onNewData(Conn * conn, string * str) {
 
 
 
-int WebConnFactory::onNewConn(Conn * conn) {
+int WebConnFactory::onNewConnClient(Conn * conn) {
+	conn->mProtocol = mProtocol; /** Protocol (WebProtocol) */
 	mServer->inputEvent(conn);
 	return 0;
 }
 
+
+
+int WebConnFactory::onNewConnServer(Conn * conn) {
+	conn->mProtocol = mProtocol; /** Protocol (WebProtocol) */
+	mServer->inputEvent(conn);
+	return 0;
+}
 
 
 
