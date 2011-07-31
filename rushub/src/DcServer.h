@@ -297,11 +297,7 @@ private:
 	vector<DcConnBase *> mIpConnList; ///< Conn with same ip for plugins
 	vector<string> mConfigNameList; ///< Config names for plugins
 
-	/// DC Server Conn Factory
-	DcConnFactory * mDcConnFactory;
-
-	/// Web Server Conn Factory
-	WebConnFactory * mWebConnFactory;
+	vector<ConnFactory *> mConnFactories; ///< Server Conn Factories
 
 	/// Web Protocol
 	WebProtocol * mWebProtocol;

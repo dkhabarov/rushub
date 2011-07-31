@@ -117,7 +117,7 @@ void Server::deleteAll() {
 
 	tCLIt it = mClientList.begin();
 	tCLIt it_e = mClientList.end();
-	while (it != mClientList.end()) {
+	while (it != it_e) {
 		conn = (*it++);
 		delConnection(conn);
 	}
@@ -125,7 +125,7 @@ void Server::deleteAll() {
 
 	it = mListenList.begin();
 	it_e = mListenList.end();
-	while (it != mListenList.end()) {
+	while (it != it_e) {
 		conn = (*it++);
 		conn->mProtocol = NULL; // upd hack: fix me!
 		delConnection(conn);
@@ -363,7 +363,7 @@ void Server::step() {
 					//inputEvent(newConn); // fix close conn if not recv data
 
 					if (mNowConn->mCreatorConnFactory) {
-						// On new connection using ListenFactory
+						// On new connection using CreatorConnFactory
 						mNowConn->mCreatorConnFactory->onNewConn(newConn);
 					} else {
 						if (log(4)) {

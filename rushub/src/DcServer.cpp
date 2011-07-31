@@ -72,8 +72,6 @@ DcServer::DcServer(const string & configFile, const string &) :
 	miTotalShare(0),
 	mPluginList(mDcConfig.mPluginPath),
 	mHubName(INTERNALNAME " " INTERNALVERSION " " __DATE__ " " __TIME__),
-	mDcConnFactory(NULL),
-	mWebConnFactory(NULL),
 	mWebProtocol(NULL),
 	mIpEnterFlood(mDcConfig.mFloodCountReconnIp, mDcConfig.mFloodTimeReconnIp),
 	mCalls(&mPluginList)
@@ -130,8 +128,9 @@ DcServer::~DcServer() {
 	}
 
 	DcUser * Us = NULL;
-	UserList::iterator it, it_e = mDcUserList.end();
-	for (it = mDcUserList.begin(); it != it_e;) {
+	UserList::iterator it = mDcUserList.begin();
+	UserList::iterator it_e = mDcUserList.end();
+	while (it != it_e) {
 		Us = static_cast<DcUser *> (*it);
 		++it;
 		if (Us->mDcConn) {
@@ -146,19 +145,21 @@ DcServer::~DcServer() {
 
 	deleteAll(); // Delete all other conn
 
+
+	// Delete all ConnFactory of server
+	ConnFactory * connFactory = NULL;
+	vector<ConnFactory *>::iterator cf_it = mConnFactories.begin();
+	vector<ConnFactory *>::iterator cf_it_e = mConnFactories.end();
+	while (cf_it != cf_it_e) {
+		connFactory = (*cf_it++);
+		delete connFactory;
+	}
+	mConnFactories.clear();
+
+
 	if (mIpListConn != NULL) {
 		delete mIpListConn;
 		mIpListConn = NULL;
-	}
-
-	if (mDcConnFactory != NULL) {
-		delete mDcConnFactory;
-		mDcConnFactory = NULL;
-	}
-
-	if (mWebConnFactory != NULL) {
-		delete mWebConnFactory;
-		mWebConnFactory = NULL;
 	}
 
 	if (mWebProtocol != NULL) {
@@ -232,31 +233,30 @@ bool DcServer::listeningServer(const char * name, const char * addresses, const 
 /// Listening all servers
 int DcServer::listening() {
 
-	if (!mDcConnFactory) {
-		mDcConnFactory = new DcConnFactory(&mNmdcProtocol, this); // NMDC PROTOCOL
-	}
+	ConnFactory * dcConnFactory = new DcConnFactory(&mNmdcProtocol, this); // NMDC PROTOCOL
+	mConnFactories.push_back(dcConnFactory);
 
 	if (!mWebProtocol) {
 		mWebProtocol = new WebProtocol(mDcConfig.mMaxWebCommandLength);
 	}
 
-	if (!mWebConnFactory) {
-		mWebConnFactory = new WebConnFactory(mWebProtocol, this);
-	}
+	ConnFactory * webConnFactory = new WebConnFactory(mWebProtocol, this);
+	mConnFactories.push_back(webConnFactory);
+
 
 	// NMDC Server
-	if (!listeningServer("DC Server " INTERNALNAME " " INTERNALVERSION, mDcConfig.mAddresses.c_str(), "411", mDcConnFactory)) {
+	if (!listeningServer("DC Server " INTERNALNAME " " INTERNALVERSION, mDcConfig.mAddresses.c_str(), "411", dcConnFactory)) {
 		return -1;
 	}
 
 	// Web Server
 	if (mDcConfig.mWebServer) {
-		listeningServer("Web Server", mDcConfig.mWebAddresses.c_str(), "80", mWebConnFactory);
+		listeningServer("Web Server", mDcConfig.mWebAddresses.c_str(), "80", webConnFactory);
 	}
 
 	// UDP NMDC Server
 	if (mDcConfig.mUdpServer) {
-		listeningServer("DC Server (UDP)", mDcConfig.mUdpAddresses.c_str(), "1209", mDcConnFactory, true);
+		listeningServer("DC Server (UDP)", mDcConfig.mUdpAddresses.c_str(), "1209", dcConnFactory, true);
 	}
 	return 0;
 }
