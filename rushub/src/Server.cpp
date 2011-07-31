@@ -360,21 +360,19 @@ void Server::step() {
 					newConn->mPortConn = mNowConn->mPort;
 					newConn->mIpConn = mNowConn->mIp;
 
-					//if (inputEvent(newConn) >= 0) { // fix close conn if not recv data
+					//inputEvent(newConn); // fix close conn if not recv data
 
-						if (mNowConn->mCreatorConnFactory) {
-							// On new connection using ListenFactory
-							mNowConn->mCreatorConnFactory->onNewConn(newConn);
-						} else {
-							if (log(4)) {
-								logStream() << "CreatorConnFactory is empty" << endl;
-							}
-
-							// On new connection by server
-							onNewConn(newConn);
+					if (mNowConn->mCreatorConnFactory) {
+						// On new connection using ListenFactory
+						mNowConn->mCreatorConnFactory->onNewConn(newConn);
+					} else {
+						if (log(4)) {
+							logStream() << "CreatorConnFactory is empty" << endl;
 						}
 
-					//}
+						// On new connection by server
+						onNewConn(newConn);
+					}
 
 				}
 			}
@@ -613,6 +611,9 @@ void Server::onClose(Conn * conn) {
 size_t Server::inputEvent(Conn * conn) {
 	int ret = conn->recv();
 	if (ret <= 0) {
+		if (ret == -1) {
+			conn->closeSelf();
+		}
 		return 0;
 	}
 	return onRecv(conn);

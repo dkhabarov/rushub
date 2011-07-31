@@ -137,7 +137,7 @@ public:
 
 	static const char * inetNtop(int af, const void * src, char * dst, socklen_t cnt);
 	static int inetPton(int af, const char * src, void * dst);
-	static bool checkIp(const string &ip);
+	static bool checkIp(const string & ip);
 
 
 	virtual operator tSocket() const;
@@ -193,6 +193,9 @@ public:
 
 	/// Now close conn
 	void closeNow(int reason = 0);
+
+	/// Client close conn
+	void closeSelf();
 
 	/// Creating the new object for enterring connection
 	virtual Conn * createNewConn();
@@ -264,7 +267,7 @@ protected:
 	int mPort; ///< port
 	int mPortConn; ///< listen-conn port
 
-	string mMac; ///< mac address
+	string mMacAddress; ///< mac address
 	string mHost; ///< DNS
 
 	static char mRecvBuf[MAX_RECV_SIZE + 1]; ///< Recv buffer
@@ -329,7 +332,7 @@ private:
 	int defineConnInfo(struct sockaddr_storage &);
 
 	/// Calculate mac-address
-	void calcMacAddress();
+	static void calcMacAddress(const string & ip, string & mac);
 
 	/// Send len byte from buf
 	int send(const char * buf, size_t & len);

@@ -186,7 +186,7 @@ int Conn::getPortConn() const {
 
 /// Get mac-address
 const string & Conn::getMacAddress() const {
-	return mMac;
+	return mMacAddress;
 }
 
 
@@ -458,6 +458,15 @@ void Conn::closeNow(int reason /* = 0 */) {
 
 
 
+void Conn::closeSelf() {
+	if (log(3)) {
+		logStream() << "User itself was disconnected" << endl;
+	}
+	closeNow(CLOSE_REASON_CLIENT_DISCONNECT);
+}
+
+
+
 /// createNewConn
 Conn * Conn::createNewConn() {
 
@@ -574,7 +583,7 @@ int Conn::defineConnInfo(sockaddr_storage & storage) {
 		mPort = atoi(port);
 
 		if (mServer->mMac) {
-			calcMacAddress();
+			calcMacAddress(mIp, mMacAddress);
 		}
 		return 0;
 	}
@@ -586,14 +595,14 @@ int Conn::defineConnInfo(sockaddr_storage & storage) {
 /// Reading all data from socket to buffer of the conn
 int Conn::recv() {
 	if (!mOk || !mWritable) {
-		return -1;
+		return 0;
 	}
 
 	int iBufLen = 0, i = 0;
 
 
-	bool bUdp = (this->mConnType == CONN_TYPE_INCOMING_UDP);
-	if (!bUdp) { // TCP
+	bool udp = (this->mConnType == CONN_TYPE_INCOMING_UDP);
+	if (!udp) { // TCP
 
 		while (
 			(SOCK_ERROR(iBufLen = ::recv(mSocket, mRecvBuf, MAX_RECV_SIZE, 0))) &&
@@ -631,58 +640,26 @@ int Conn::recv() {
 
 	mRecvBufRead = mRecvBufEnd = 0;
 	if (iBufLen <= 0) {
-
-		if (!bUdp) {
-
+		if (!udp) {
 			if (iBufLen == 0) {
-				if (log(3)) {
-					logStream() << "User itself was disconnected" << endl;
+				return -1;
+			} else if (SOCK_ERR == EWOULDBLOCK) {
+				if (log(2)) {
+					logStream() << "Operation would block" << endl;
 				}
-				closeNow(CLOSE_REASON_CLIENT_DISCONNECT);
 				return -2;
+			} else {
+				if (log(2)) {
+					logStream() << "Error in receive: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
+				}
+				closeNow(CLOSE_REASON_ERROR_RECV);
+				return -3;
 			}
-
-			if (log(2)) {
-				logStream() << "Error in receive: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
-			}
-
-			switch (SOCK_ERR) {
-
-				case EWOULDBLOCK : // Non-blocking socket operation
-					return -3;
-
-				case ECONNRESET : // Connection reset by peer
-					if (log(2)) {
-						logStream() << "(connection reset by peer)" << endl;
-					}
-					break;
-
-				case ETIMEDOUT : // Connection timed out
-					if (log(2)) {
-						logStream() << "(connection timed out)" << endl;
-					}
-					break;
-
-				case EHOSTUNREACH : // No route to host
-					if (log(2)) {
-						logStream() << "(no route to host)" << endl;
-					}
-					break;
-
-				default :
-					if (log(2)) {
-						logStream() << "(other reason)" << endl;
-					}
-					break;
-
-			}
-			closeNow(CLOSE_REASON_ERROR_RECV);
-			return -4;
 		}
-		return -5;
+		return -4;
 	}
 
-	if (bUdp) {
+	if (udp) {
 		mIpUdp = inet_ntoa(mSockAddrIn.sin_addr);
 	}
 	mRecvBufEnd = iBufLen; // End buf pos
@@ -723,10 +700,9 @@ bool Conn::checkIp(const string & ip) {
 }
 
 
-
 /// Calculate mac-address
-void Conn::calcMacAddress() {
 #ifdef _WIN32
+void Conn::calcMacAddress(const string & ip, string & mac) {
 	DWORD size;
 	DWORD ret = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, NULL, NULL, &size);
 	if (ret != ERROR_BUFFER_OVERFLOW) {
@@ -756,13 +732,13 @@ void Conn::calcMacAddress() {
 					) {
 						continue;
 					}
-					if (strcmp(mIp.c_str(), address) == 0) {
+					if (strcmp(ip.c_str(), address) == 0) {
 						char buf[18] = { '\0' };
 						sprintf(buf, "%02x-%02x-%02x-%02x-%02x-%02x",
 							curr->PhysicalAddress[0], curr->PhysicalAddress[1],
 							curr->PhysicalAddress[2], curr->PhysicalAddress[3],
 							curr->PhysicalAddress[4], curr->PhysicalAddress[5]);
-						mMac = buf;
+						mac = buf;
 						free(addr);
 						return;
 					}
@@ -772,8 +748,11 @@ void Conn::calcMacAddress() {
 		}
 	}
 	free(addr);
-#endif
 }
+#else
+void Conn::calcMacAddress(const string &, string &) {
+}
+#endif
 
 
 
@@ -1038,37 +1017,25 @@ int Conn::send(const char * buf, size_t & len) {
 	int n = -1;
 	size_t total = 0, bytesleft = len;
 
-	bool udp = (this->mConnType == CONN_TYPE_INCOMING_UDP);
+	bool tcp = (mConnType != CONN_TYPE_INCOMING_UDP);
 
 	while (total < len) { // EMSGSIZE (WSAEMSGSIZE)
 
-		if (!udp) {
+		if (tcp) {
 
-			//int count = 0;
-			//do {
-				n = ::send(
-					mSocket,
-					buf + total,
-					static_cast<int> (bytesleft), // fix me: protection to very long msg
-					#ifndef _WIN32
-						MSG_NOSIGNAL | MSG_DONTWAIT
-					#else
-						0
-					#endif
-				);
-			/*	if (SOCK_ERR == SOCK_EAGAIN) {
-					#ifdef _WIN32
-						Sleep(5);
-					#else
-						usleep(5000);
-					#endif
-				} else {
-					break;
-				}
-			} while (++count < 5);
-			*/
+			n = ::send(
+				mSocket,
+				buf + total,
+				static_cast<int> (bytesleft), // fix me: protection to very long msg
+				#ifndef _WIN32
+					MSG_NOSIGNAL | MSG_DONTWAIT
+				#else
+					0
+				#endif
+			);
 
 		} else {
+
 			n = ::sendto(
 				mSocket,
 				buf + total,
@@ -1077,6 +1044,7 @@ int Conn::send(const char * buf, size_t & len) {
 				(struct sockaddr *) &mSockAddrIn,
 				mSockAddrInSize
 			);
+
 		}
 
 /*		if (log(5)) {
@@ -1092,7 +1060,7 @@ int Conn::send(const char * buf, size_t & len) {
 		total += n;
 		bytesleft -= n;
 	}
-	len = total; // Number sending bytes
+	len = total; // Number sent bytes
 	return SOCK_ERROR(n) ? -1 : 0; // return -1 - fail, 0 - ok
 #endif
 }
