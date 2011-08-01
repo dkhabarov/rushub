@@ -95,6 +95,9 @@ public:
 	virtual Conn * getConnForUdpData(Conn *, Parser *) {
 		return NULL;
 	}
+	virtual int onNewConn(Conn *) {
+		return 0;
+	}
 
 }; // class Protocol
 
