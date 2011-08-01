@@ -99,18 +99,10 @@ void WebConnFactory::onNewData(Conn * conn, string * str) {
 
 
 
-int WebConnFactory::onNewConnClient(Conn * newConn, Conn * builderConn) {
-	setConnParams(newConn, builderConn);
-
-	newConn->mProtocol = mProtocol; // Set protocol
-	mServer->inputEvent(newConn);
+int WebConnFactory::onNewConn(Conn * conn) {
+	conn->mProtocol = mProtocol; // Set protocol
+	mServer->inputEvent(conn);
 	return 0;
-}
-
-
-
-int WebConnFactory::onNewConnServer(Conn * newConn, Conn * builderConn) {
-	return onNewConnClient(newConn, builderConn);
 }
 
 

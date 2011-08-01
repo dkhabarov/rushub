@@ -77,7 +77,8 @@ Conn::Conn(tSocket socket, Server * server, int connType) :
 	mBlockOutput(true),
 	mCommand(NULL),
 	mClosed(false),
-	mCloseReason(0)
+	mCloseReason(0),
+	mServerInit(false)
 {
 	clearCommandPtr();
 	memset(&mCloseTime, 0, sizeof(mCloseTime));
@@ -193,6 +194,18 @@ const string & Conn::getMacAddress() const {
 
 
 void Conn::onOk(bool) {
+}
+
+
+
+bool Conn::isServerInit() const {
+	return mServerInit;
+}
+
+
+
+void Conn::setServerInit() {
+	mServerInit = true;
 }
 
 	
@@ -1202,26 +1215,11 @@ void ConnFactory::onNewData(Conn * conn, string * str) {
 
 
 
-void ConnFactory::setConnParams(Conn * newConn, Conn * builderConn) {
-	newConn->mPortConn = builderConn->mPort;
-	newConn->mIpConn = builderConn->mIp;
-}
-
-
-
-int ConnFactory::onNewConnClient(Conn * newConn, Conn * builderConn) {
-	setConnParams(newConn, builderConn);
-
-	if (newConn->mProtocol == NULL) {
-		newConn->mProtocol = mProtocol; // Set protocol
+int ConnFactory::onNewConn(Conn * conn) {
+	if (conn->mProtocol == NULL) {
+		conn->mProtocol = mProtocol; // Set protocol
 	}
-	return mServer->onNewConn(newConn);
-}
-
-
-
-int ConnFactory::onNewConnServer(Conn * newConn, Conn * builderConn) {
-	return onNewConnClient(newConn, builderConn);
+	return mServer->onNewConn(conn);
 }
 
 

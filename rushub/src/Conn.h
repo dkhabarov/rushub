@@ -60,16 +60,11 @@ public:
 	virtual Conn * createConn(tSocket sock = 0);
 	virtual void deleteConn(Conn * &);
 	virtual void onNewData(Conn *, string *);
-	virtual int onNewConnClient(Conn * newConn, Conn * builderConn);
-	virtual int onNewConnServer(Conn * newConn, Conn * builderConn);
+	virtual int onNewConn(Conn *);
 
 protected:
 
 	Server * mServer; ///< Pointer on server
-
-protected:
-
-	void setConnParams(Conn * newConn, Conn * builderConn);
 
 }; // class ConnFactory
 
@@ -119,8 +114,7 @@ enum {
 /// Main connection class for server
 class Conn : public Obj, public ConnBase {
 
-	friend class Server; // for mIterator
-	friend class ConnFactory; // for ports
+	friend class Server; // for mIterator and ports
 
 public:
 
@@ -186,6 +180,9 @@ public:
 
 	/// Get mac-address
 	const string & getMacAddress() const;
+
+	/// Server first init conn
+	bool isServerInit() const;
 
 
 	/// Create, bind and listen socket
@@ -292,6 +289,9 @@ protected:
 
 	virtual void onOk(bool);
 
+	/// Server first initiated the connection
+	void setServerInit();
+
 private:
 
 	tSocket mSocket; ///< Socket descriptor
@@ -314,6 +314,8 @@ private:
 
 	bool mClosed; ///< closed flag, for close counter
 	int mCloseReason; ///< Reason of close connection
+
+	bool mServerInit;
 
 private:
 

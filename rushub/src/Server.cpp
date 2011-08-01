@@ -471,25 +471,24 @@ int Server::newAccept() {
 		return -1;
 	}
 
-	if (newConn->recv() > 0) { // Client initialization (ADC behaviour)
+	newConn->mPortConn = mNowConn->mPort;
+	newConn->mIpConn = mNowConn->mIp;
+
+	if (newConn->recv() <= 0) { // Server initialization (NMDC behaviour)
+		newConn->setServerInit();
+	}
+
+	if (newConn->isOk()) {
 
 		if (mNowConn->mCreatorConnFactory) {
-			mNowConn->mCreatorConnFactory->onNewConnClient(newConn, mNowConn); // Set protocol point
+			mNowConn->mCreatorConnFactory->onNewConn(newConn); // Set protocol point
 		} else {
 			newConn->mProtocol = mNowConn->mProtocol; // Set protocol by this Conn
 			onNewConn(newConn);
 		}
-		if (newConn->isOk()) {
-			onRecv(newConn); // Parse recv data
-		}
 
-	} else if (newConn->isOk()) { // Server initialization (NMDC behaviour)
-			
-		if (mNowConn->mCreatorConnFactory) {
-			mNowConn->mCreatorConnFactory->onNewConnServer(newConn, mNowConn); // Set protocol point
-		} else {
-			newConn->mProtocol = mNowConn->mProtocol; // Set protocol by this Conn
-			onNewConn(newConn);
+		if (!newConn->isServerInit()) { // Client initialization (ADC behaviour)
+			onRecv(newConn);
 		}
 
 	}
