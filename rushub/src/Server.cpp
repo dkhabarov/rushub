@@ -149,9 +149,6 @@ Conn * Server::listening(ConnFactory * connFactory, const char * ip, const char 
 	// Set server listen factory
 	conn->mCreatorConnFactory = connFactory;
 
-	// Set protocol for Conn without factory
-	conn->mProtocol = connFactory->mProtocol;
-
 	return conn;
 }
 
@@ -170,9 +167,6 @@ Conn * Server::connecting(ConnFactory * connFactory, const char * ip, const char
 
 	// Set server listen factory
 	conn->mCreatorConnFactory = connFactory;
-
-	// Set protocol for Conn without factory
-	conn->mProtocol = connFactory->mProtocol;
 
 	return conn;
 }
@@ -480,11 +474,17 @@ int Server::newAccept() {
 
 	if (newConn->isOk()) {
 
+		// Set protocol point and may send hello msg to the client
 		if (mNowConn->mCreatorConnFactory) {
-			mNowConn->mCreatorConnFactory->onNewConn(newConn); // Set protocol point
+			mNowConn->mCreatorConnFactory->onNewConn(newConn);
 		} else {
-			newConn->mProtocol = mNowConn->mProtocol; // Set protocol by this Conn
-			onNewConn(newConn);
+			onNewConn(newConn); // Now it was not setting protocol!
+		}
+
+		if (newConn->mProtocol == NULL) {
+			if (errLog(0)) {
+				logStream() << "Protocol was not set" << endl;
+			}
 		}
 
 		if (!newConn->isServerInit()) { // Client initialization (ADC behaviour)
@@ -665,12 +665,7 @@ string * Server::createCommandPtr(Conn *) {
 
 /// onNewConn
 int Server::onNewConn(Conn * conn) {
-	if (conn == NULL) {
-		return -1;
-	}
-	conn->mPortConn = mNowConn->mPort;
-	conn->mIpConn = mNowConn->mIp;
-	return 0;
+	return conn == NULL ? -1 : 0;
 }
 
 

@@ -50,10 +50,6 @@ class ConnFactory {
 
 public:
 
-	Protocol * mProtocol; ///< Protocal
-
-public:
-
 	ConnFactory(Protocol *, Server *);
 	virtual ~ConnFactory();
 
@@ -65,6 +61,7 @@ public:
 protected:
 
 	Server * mServer; ///< Pointer on server
+	Protocol * mProtocol; ///< Protocal
 
 }; // class ConnFactory
 

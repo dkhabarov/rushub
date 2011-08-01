@@ -359,7 +359,9 @@ int DcServer::onNewConn(Conn *conn) {
 		dcConn->logStream() << "[S]Stage onNewConn" << endl;
 	}
 
-	dcConn->mProtocol->onNewConn(dcConn);
+	if (dcConn->mProtocol != NULL) {
+		dcConn->mProtocol->onNewConn(dcConn);
+	}
 
 	if (dcConn->log(5)) {
 		dcConn->logStream() << "[E]Stage onNewConn" << endl;
@@ -383,13 +385,10 @@ void DcServer::onNewData(Conn * conn, string * data) {
 		conn->logStream() << "IN: " << (*data) << endl;
 	}
 
-	// Protocol parser
 	Parser * parser = conn->mParser;
+	Protocol * protocol = conn->mProtocol;
 
-	// ToDo Parser == NULL ?
-	// ToDo Protocol == NULL ?
-
-	if (parser != NULL) {
+	if (parser != NULL && protocol != NULL) {
 
 		// Parser
 		parser->parse();
@@ -401,7 +400,7 @@ void DcServer::onNewData(Conn * conn, string * data) {
 		}
 
 		// Do protocol command
-		conn->mProtocol->doCommand(parser, conn);
+		protocol->doCommand(parser, conn);
 	}
 }
 
