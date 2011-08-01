@@ -77,8 +77,7 @@ Conn::Conn(tSocket socket, Server * server, int connType) :
 	mBlockOutput(true),
 	mCommand(NULL),
 	mClosed(false),
-	mCloseReason(0),
-	mServerInit(false)
+	mCloseReason(0)
 {
 	clearCommandPtr();
 	memset(&mCloseTime, 0, sizeof(mCloseTime));
@@ -197,18 +196,6 @@ void Conn::onOk(bool) {
 }
 
 
-
-bool Conn::isServerInit() const {
-	return mServerInit;
-}
-
-
-
-void Conn::setServerInit() {
-	mServerInit = true;
-}
-
-	
 
 /// makeSocket
 tSocket Conn::makeSocket(const char * port, const char * address, int connType /*= CONN_TYPE_LISTEN*/) {

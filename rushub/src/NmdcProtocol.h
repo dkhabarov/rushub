@@ -26,7 +26,7 @@
 #define NMDC_PROTOCOL_H
 
 #include "Protocol.h"
-#include "DcParser.h"
+#include "NmdcParser.h"
 
 #include <string>
 #include <cmath> // for ::std::floor
@@ -57,7 +57,7 @@ public:
 
 	/// Creating protocol parser
 	virtual Parser * createParser() {
-		return new DcParser;
+		return new NmdcParser;
 	}
 	
 	/// Removing protocol parser
@@ -107,36 +107,36 @@ protected:
 
 	DcServer * mDcServer;
 
-	typedef int (NmdcProtocol::*Event) (DcParser *, DcConn *);
+	typedef int (NmdcProtocol::*Event) (NmdcParser *, DcConn *);
 	Event events[NMDC_TYPE_UNKNOWN + 1];
 
 
 private:
 
-	int eventSearch(DcParser *, DcConn *); ///< Search request
-	int eventSr(DcParser *, DcConn *); ///< Answer to search request
-	int eventMyInfo(DcParser *, DcConn *); ///< MyINFO event
-	int eventSupports(DcParser *, DcConn *); ///< Support of the additional expansions
-	int eventKey(DcParser *, DcConn *); ///< Checking the key
-	int eventValidateNick(DcParser *, DcConn *); ///< Checking and reg nick
-	int eventVersion(DcParser *, DcConn *); ///< Checking a version
-	int eventGetNickList(DcParser *, DcConn *); ///< Sending user-list
-	int eventChat(DcParser *, DcConn *); ///< Chat message
-	int eventTo(DcParser *, DcConn *); ///< Private message
-	int eventMyPass(DcParser *, DcConn *); ///< Checking password
-	int eventConnectToMe(DcParser *, DcConn *); ///< Active connection
-	int eventRevConnectToMe(DcParser *, DcConn *); ///< Passive connection
-	int eventMultiConnectToMe(DcParser *, DcConn *); ///< Multi connection (for linked hubs)
-	int eventKick(DcParser *, DcConn *); ///< Kick
-	int eventOpForceMove(DcParser *, DcConn *); ///< Force move
-	int eventGetInfo(DcParser *, DcConn *); ///< Get user's MyINFO
-	int eventMcTo(DcParser *, DcConn *); ///< Private message in chat
-	int eventUserIp(DcParser *, DcConn *); ///< UserIP cmd
-	int eventPing(DcParser *, DcConn *); ///< Ping cmd
-	int eventUnknown(DcParser *, DcConn *); ///< Unknown cmd
-	int eventQuit(DcParser *, DcConn *); ///< Quit cmd
+	int eventSearch(NmdcParser *, DcConn *); ///< Search request
+	int eventSr(NmdcParser *, DcConn *); ///< Answer to search request
+	int eventMyInfo(NmdcParser *, DcConn *); ///< MyINFO event
+	int eventSupports(NmdcParser *, DcConn *); ///< Support of the additional expansions
+	int eventKey(NmdcParser *, DcConn *); ///< Checking the key
+	int eventValidateNick(NmdcParser *, DcConn *); ///< Checking and reg nick
+	int eventVersion(NmdcParser *, DcConn *); ///< Checking a version
+	int eventGetNickList(NmdcParser *, DcConn *); ///< Sending user-list
+	int eventChat(NmdcParser *, DcConn *); ///< Chat message
+	int eventTo(NmdcParser *, DcConn *); ///< Private message
+	int eventMyPass(NmdcParser *, DcConn *); ///< Checking password
+	int eventConnectToMe(NmdcParser *, DcConn *); ///< Active connection
+	int eventRevConnectToMe(NmdcParser *, DcConn *); ///< Passive connection
+	int eventMultiConnectToMe(NmdcParser *, DcConn *); ///< Multi connection (for linked hubs)
+	int eventKick(NmdcParser *, DcConn *); ///< Kick
+	int eventOpForceMove(NmdcParser *, DcConn *); ///< Force move
+	int eventGetInfo(NmdcParser *, DcConn *); ///< Get user's MyINFO
+	int eventMcTo(NmdcParser *, DcConn *); ///< Private message in chat
+	int eventUserIp(NmdcParser *, DcConn *); ///< UserIP cmd
+	int eventPing(NmdcParser *, DcConn *); ///< Ping cmd
+	int eventUnknown(NmdcParser *, DcConn *); ///< Unknown cmd
+	int eventQuit(NmdcParser *, DcConn *); ///< Quit cmd
 
-	int checkCommand(DcParser *, DcConn *);
+	int checkCommand(NmdcParser *, DcConn *);
 	bool antiflood(DcConn *, unsigned int type);
 	void sendMode(DcConn *, const string & str, int mode, UserList &, bool useCache = false);
 

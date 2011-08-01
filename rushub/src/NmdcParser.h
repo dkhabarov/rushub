@@ -22,8 +22,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DC_PARSER_H
-#define DC_PARSER_H
+#ifndef NMDC_PARSER_H
+#define NMDC_PARSER_H
 
 #include "Protocol.h"
 #include "Plugin.h"
@@ -68,7 +68,7 @@ typedef enum { /** Types of the commands */
 /** The Following constants were developed for accomodation 
 	corresponding to parameter for each enterring commands of 
 	the protocol DC in variable mChunks, are used in function 
-	DcServer::DC_* as well as in DcParser::splitChunks... 
+	DcServer::DC_* as well as in NmdcParser::splitChunks... 
 	they must correspond
 	Now max number of chunks = 9 !
 */
@@ -220,12 +220,12 @@ namespace protocol {
 
 using namespace ::dcserver::protoenums;
 
-class DcParser : public Parser {
+class NmdcParser : public Parser {
 
 public:
 
-	DcParser();
-	virtual ~DcParser();
+	NmdcParser();
+	virtual ~NmdcParser();
 
 	int getCommandType() const {
 		return mType;
@@ -238,20 +238,20 @@ public:
 	
 	bool splitChunks();
 	static bool isPassive(const string & description);
-	static int checkCmd(DcParser & dcParser, const string & data, DcUserBase * dcUserBase = NULL);
+	static int checkCmd(NmdcParser & dcParser, const string & data, DcUserBase * dcUserBase = NULL);
 
 private:
 
 	bool mError;
 	size_t mKeyLength; ///< Key-word len
 
-}; // class DcParser
+}; // class NmdcParser
 
 }; // namespace protocol
 
 }; // namespace dcserver
 
-#endif // DC_PARSER_H
+#endif // NMDC_PARSER_H
 
 /**
  * $Id$

@@ -81,7 +81,7 @@ public:
 	virtual bool getInUserList() const;
 	virtual const string & getMyInfo(/*bool real = false*/) const;
 	virtual bool setMyInfo(const string & myInfo);
-	bool setMyInfo(DcParser * parser);
+	bool setMyInfo(NmdcParser * parser);
 	virtual __int64 getShare(/*bool real = false*/) const;
 
 	virtual bool getInOpList() const;

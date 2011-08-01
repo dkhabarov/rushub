@@ -35,7 +35,7 @@ MyInfo & MyInfo::operator = (const MyInfo &) {
 
 
 
-void MyInfo::setMyInfo(const string & myInfo, DcParser * parser, __int64 & totalHubShare) {
+void MyInfo::setMyInfo(const string & myInfo, NmdcParser * parser, __int64 & totalHubShare) {
 
 	if (this->myInfo != myInfo) {
 		this->myInfo = myInfo;

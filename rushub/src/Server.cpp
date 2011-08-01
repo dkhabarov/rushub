@@ -468,29 +468,18 @@ int Server::newAccept() {
 	newConn->mPortConn = mNowConn->mPort;
 	newConn->mIpConn = mNowConn->mIp;
 
-	if (newConn->recv() <= 0) { // Server initialization (NMDC behaviour)
-		newConn->setServerInit();
+
+	// Set protocol point and may send hello msg to the client
+	if (mNowConn->mCreatorConnFactory) {
+		mNowConn->mCreatorConnFactory->onNewConn(newConn);
+	} else {
+		onNewConn(newConn); // Now it was not setting protocol!
 	}
 
-	if (newConn->isOk()) {
-
-		// Set protocol point and may send hello msg to the client
-		if (mNowConn->mCreatorConnFactory) {
-			mNowConn->mCreatorConnFactory->onNewConn(newConn);
-		} else {
-			onNewConn(newConn); // Now it was not setting protocol!
+	if (newConn->mProtocol == NULL) {
+		if (errLog(0)) {
+			logStream() << "Protocol was not set" << endl;
 		}
-
-		if (newConn->mProtocol == NULL) {
-			if (errLog(0)) {
-				logStream() << "Protocol was not set" << endl;
-			}
-		}
-
-		if (!newConn->isServerInit()) { // Client initialization (ADC behaviour)
-			onRecv(newConn);
-		}
-
 	}
 
 	return 1;

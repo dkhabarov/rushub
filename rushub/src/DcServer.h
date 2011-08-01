@@ -30,6 +30,7 @@
 #include "Server.h" // first (def winsock2.h)
 #include "DcConn.h"
 #include "NmdcProtocol.h"
+#include "AdcProtocol.h"
 #include "Plugin.h"
 
 #include "DcConfig.h"
@@ -132,6 +133,7 @@ public:
 
 	Time mStartTime; ///< Start time of the hub
 	NmdcProtocol mNmdcProtocol; ///< NMDC Protocol
+	AdcProtocol mAdcProtocol; ///< ADC Protocol
 
 	FullUserList mDcUserList; ///< User list
 	UserList mBotList; ///< Bot list

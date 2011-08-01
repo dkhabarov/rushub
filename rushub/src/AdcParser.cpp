@@ -1,6 +1,11 @@
 /*
  * RusHub - hub server for Direct Connect peer to peer network.
  *
+ * begin: Wed Jun 11 2003
+ * Copyright (C) 2003 by dan at verliba dot cziel Muller
+ * E-Mail: dan at verliba dot cz@verliba.cz
+ *
+ * modified: 27 Aug 2009
  * Copyright (C) 2009-2011 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
@@ -16,70 +21,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
-#include "AdcProtocol.h"
+
+#include "AdcParser.h"
 
 namespace dcserver {
 
 namespace protocol {
 
 
-AdcProtocol::AdcProtocol() {
+
+AdcParser::AdcParser() :
+	Parser(9) // Max number of chunks - 9 !!!
+{ 
+	setClassName("AdcParser");
 }
 
 
 
-AdcProtocol::~AdcProtocol() {
+AdcParser::~AdcParser() {
 }
 
 
 
-const char * AdcProtocol::getSeparator() {
-	return ADC_SEPARATOR;
+/// Do parse for command and return type of this command
+int AdcParser::parse() {
+	return mType;
 }
 
 
 
-size_t AdcProtocol::getSeparatorLen() {
-	return ADC_SEPARATOR_LEN;
-}
-
-
-
-unsigned long AdcProtocol::getMaxCommandLength() {
-	return 10240;
-}
-
-
-
-Parser * AdcProtocol::createParser() {
-	return new AdcParser;
-}
-
-
-
-void AdcProtocol::deleteParser(Parser * parser) {
-	if (parser != NULL) {
-		delete parser;
-	}
-}
-
-
-
-int AdcProtocol::doCommand(Parser *, Conn *) {
-	return 0;
-}
-
-
-
-Conn * AdcProtocol::getConnForUdpData(Conn *, Parser *) {
-	return NULL;
-}
-
-
-
-int AdcProtocol::onNewConn(Conn *) {
-	return 0;
+void AdcParser::reInit() {
+	Parser::reInit();
 }
 
 

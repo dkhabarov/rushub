@@ -233,8 +233,8 @@ bool DcServer::listeningServer(const char * name, const char * addresses, const 
 /// Listening all servers
 int DcServer::listening() {
 
-	ConnFactory * dcConnFactory = new DcConnFactory(&mNmdcProtocol, this); // NMDC PROTOCOL
-	mConnFactories.push_back(dcConnFactory);
+	ConnFactory * nmdcConnFactory = new DcConnFactory(&mNmdcProtocol, this); // NMDC PROTOCOL
+	mConnFactories.push_back(nmdcConnFactory);
 
 	if (!mWebProtocol) {
 		mWebProtocol = new WebProtocol(mDcConfig.mMaxWebCommandLength);
@@ -245,7 +245,7 @@ int DcServer::listening() {
 
 
 	// NMDC Server
-	if (!listeningServer("DC Server " INTERNALNAME " " INTERNALVERSION, mDcConfig.mAddresses.c_str(), "411", dcConnFactory)) {
+	if (!listeningServer("DC Server " INTERNALNAME " " INTERNALVERSION, mDcConfig.mAddresses.c_str(), "411", nmdcConnFactory)) {
 		return -1;
 	}
 
@@ -256,7 +256,7 @@ int DcServer::listening() {
 
 	// UDP NMDC Server
 	if (mDcConfig.mUdpServer) {
-		listeningServer("DC Server (UDP)", mDcConfig.mUdpAddresses.c_str(), "1209", dcConnFactory, true);
+		listeningServer("DC Server (UDP)", mDcConfig.mUdpAddresses.c_str(), "1209", nmdcConnFactory, true);
 	}
 	return 0;
 }

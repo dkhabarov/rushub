@@ -21,7 +21,7 @@
 #define ADC_PROTOCOL_H
 
 #include "Protocol.h"
-#include "Plugin.h"
+#include "AdcParser.h"
 
 #include <string>
 
@@ -43,12 +43,8 @@ public:
 	virtual size_t getSeparatorLen();
 	virtual unsigned long getMaxCommandLength();
 
-	virtual Parser * createParser() {
-		return NULL;
-	}
-	
-	virtual void deleteParser(Parser *) {
-	}
+	virtual Parser * createParser();
+	virtual void deleteParser(Parser *);
 
 	virtual int doCommand(Parser *, Conn *);
 	virtual Conn * getConnForUdpData(Conn *, Parser *);

@@ -295,7 +295,6 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 
 
 int DcConnFactory::onNewConn(Conn * conn) {
-	conn->mProtocol = mProtocol; // Set protocol
 	return ConnFactory::onNewConn(conn);
 }
 

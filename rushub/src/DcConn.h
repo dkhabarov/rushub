@@ -134,11 +134,16 @@ class DcConnFactory : public ConnFactory {
 
 public:
 
-	DcConnFactory(Protocol * protocol, Server * server);
+	DcConnFactory(Protocol *, Server *);
 	virtual ~DcConnFactory();
 	virtual Conn * createConn(tSocket sock = 0);
 	virtual void deleteConn(Conn * &);
 	virtual int onNewConn(Conn *);
+
+private:
+
+	Protocol * mNmdcProtocol;
+	Protocol * mAdcProtocol;
 
 }; // DcConnFactory
 

@@ -312,8 +312,6 @@ private:
 	bool mClosed; ///< closed flag, for close counter
 	int mCloseReason; ///< Reason of close connection
 
-	bool mServerInit;
-
 private:
 
 	/// Create socket (default TCP)

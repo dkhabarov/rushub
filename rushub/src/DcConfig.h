@@ -27,7 +27,7 @@
 
 #include "ConfigList.h"
 #include "ConfigLoader.h"
-#include "DcParser.h" // for NMDC_TYPE_UNKNOWN (PROTOCOL NMDC)
+#include "NmdcParser.h" // for NMDC_TYPE_UNKNOWN (PROTOCOL NMDC)
 
 using ::std::string;
 using namespace ::configuration;

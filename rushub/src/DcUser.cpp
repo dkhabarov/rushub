@@ -258,17 +258,17 @@ const string & DcUser::getMyInfo(/*bool real = false */) const {
 /** Set MyINFO string (for plugins). With cmd & nick check */
 bool DcUser::setMyInfo(const string & newMyInfo) {
 
-	// TODO remove DcParser class from this function
+	// TODO remove NmdcParser class from this function
 
-	DcParser dcParser;
-	if (DcParser::checkCmd(dcParser, newMyInfo, this) != NMDC_TYPE_MYNIFO) {
+	NmdcParser dcParser;
+	if (NmdcParser::checkCmd(dcParser, newMyInfo, this) != NMDC_TYPE_MYNIFO) {
 		return false;
 	}
 	myInfo.setMyInfo(newMyInfo, &dcParser, mDcServer->miTotalShare);
 	return true;
 }
 
-bool DcUser::setMyInfo(DcParser * parser) {
+bool DcUser::setMyInfo(NmdcParser * parser) {
 	myInfo.setMyInfo(parser->mCommand, parser, mDcServer->miTotalShare);
 	return true;
 }

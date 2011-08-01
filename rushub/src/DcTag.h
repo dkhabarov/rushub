@@ -20,7 +20,7 @@
 #ifndef DC_TAG_H
 #define DC_TAG_H
 
-#include "DcParser.h" // TagNil
+#include "NmdcParser.h" // TagNil
 #include "stringutils.h"
 
 #include <string>

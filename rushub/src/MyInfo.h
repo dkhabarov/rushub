@@ -50,7 +50,7 @@ public:
 	inline const string & getMyInfo() const {
 		return myInfo;
 	}
-	void setMyInfo(const string & myInfo, DcParser * parser, __int64 & totalHubShare);
+	void setMyInfo(const string & myInfo, NmdcParser * parser, __int64 & totalHubShare);
 
 	inline const string & getDescription() const {
 		return description;

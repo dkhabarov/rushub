@@ -22,7 +22,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DcParser.h"
+#include "NmdcParser.h"
 
 namespace dcserver {
 
@@ -94,23 +94,23 @@ ProtocolCommand aDC_Commands[] = {
 
 
 
-DcParser::DcParser() :
+NmdcParser::NmdcParser() :
 	Parser(9), // Max number of chunks - 9 !!!
 	mError(false),
 	mKeyLength(0)
 { 
-	setClassName("DcParser");
+	setClassName("NmdcParser");
 }
 
 
 
-DcParser::~DcParser() {
+NmdcParser::~NmdcParser() {
 }
 
 
 
 /// Do parse for command and return type of this command
-int DcParser::parse() {
+int NmdcParser::parse() {
 	mLength = mCommand.size(); // Set cmd len
 	if (mLength) {
 		for (int i = 0; i < NMDC_TYPE_UNKNOWN; ++i) {
@@ -129,7 +129,7 @@ int DcParser::parse() {
 
 
 
-void DcParser::reInit() {
+void NmdcParser::reInit() {
 	Parser::reInit();
 
 	mError = false;
@@ -138,7 +138,7 @@ void DcParser::reInit() {
 
 
 
-bool DcParser::isPassive(const string & description) {
+bool NmdcParser::isPassive(const string & description) {
 	if (!description.size()) {
 		return false;
 	}
@@ -161,7 +161,7 @@ bool DcParser::isPassive(const string & description) {
 }
 
 /// Split command to chunks
-bool DcParser::splitChunks() {
+bool NmdcParser::splitChunks() {
 
 	if (mIsParsed) {
 		return mError;
@@ -362,7 +362,7 @@ bool DcParser::splitChunks() {
 	return mError;
 }
 
-int DcParser::checkCmd(DcParser & dcParser, const string & data, DcUserBase * dcUserBase /*= NULL*/) {
+int NmdcParser::checkCmd(NmdcParser & dcParser, const string & data, DcUserBase * dcUserBase /*= NULL*/) {
 	dcParser.reInit();
 	dcParser.mCommand = data;
 	dcParser.parse();
