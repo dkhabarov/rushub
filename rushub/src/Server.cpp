@@ -666,7 +666,12 @@ string * Server::createCommandPtr(Conn *) {
 
 /// onNewConn
 int Server::onNewConn(Conn * conn) {
-	return conn == NULL ? -1 : 0;
+	if (conn == NULL) {
+		return -1;
+	}
+	conn->mPortConn = mNowConn->mPort;
+	conn->mIpConn = mNowConn->mIp;
+	return 0;
 }
 
 
