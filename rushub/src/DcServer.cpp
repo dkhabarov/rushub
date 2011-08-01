@@ -249,6 +249,16 @@ int DcServer::listening() {
 		return -1;
 	}
 
+#ifdef ADC
+	ConnFactory * adcConnFactory = new DcConnFactory(&mAdcProtocol, this); // ADC PROTOCOL
+	mConnFactories.push_back(adcConnFactory);
+
+	// ADC Server
+	if (!listeningServer("ADC Server " INTERNALNAME " " INTERNALVERSION, "0.0.0.0:410", "410", adcConnFactory)) {
+		return -1;
+	}
+#endif // ADC
+
 	// Web Server
 	if (mDcConfig.mWebServer) {
 		listeningServer("Web Server", mDcConfig.mWebAddresses.c_str(), "80", webConnFactory);
