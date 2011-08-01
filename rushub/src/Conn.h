@@ -60,12 +60,16 @@ public:
 	virtual Conn * createConn(tSocket sock = 0);
 	virtual void deleteConn(Conn * &);
 	virtual void onNewData(Conn *, string *);
-	virtual int onNewConnClient(Conn *);
-	virtual int onNewConnServer(Conn *);
+	virtual int onNewConnClient(Conn * newConn, Conn * builderConn);
+	virtual int onNewConnServer(Conn * newConn, Conn * builderConn);
 
 protected:
 
 	Server * mServer; ///< Pointer on server
+
+protected:
+
+	void setConnParams(Conn * newConn, Conn * builderConn);
 
 }; // class ConnFactory
 
@@ -115,7 +119,8 @@ enum {
 /// Main connection class for server
 class Conn : public Obj, public ConnBase {
 
-	friend class Server; // for ports and mIterator
+	friend class Server; // for mIterator
+	friend class ConnFactory; // for ports
 
 public:
 

@@ -138,8 +138,8 @@ public:
 	virtual ~DcConnFactory();
 	virtual Conn * createConn(tSocket sock = 0);
 	virtual void deleteConn(Conn * &);
-	virtual int onNewConnClient(Conn *);
-	virtual int onNewConnServer(Conn *);
+	virtual int onNewConnClient(Conn * newConn, Conn * builderConn);
+	virtual int onNewConnServer(Conn * newConn, Conn * builderConn);
 
 }; // DcConnFactory
 

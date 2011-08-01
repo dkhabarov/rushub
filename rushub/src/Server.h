@@ -181,6 +181,8 @@ private:
 
 	size_t onRecv(Conn *);
 
+	int newAccept();
+
 }; // Server
 
 }; // server

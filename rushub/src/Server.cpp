@@ -201,7 +201,7 @@ Conn * Server::addSimpleConn(int connType, const char * ip, const char * port) {
 		return NULL;
 	}
 
-	if (addConnection(conn) <= 0) {
+	if (addConnection(conn) < 0) {
 		return NULL;
 	}
 
@@ -336,51 +336,16 @@ void Server::step() {
 			(connType == CONN_TYPE_LISTEN)
 		) {
 
-
 			if (mNowConn->log(5)) {
 				mNowConn->logStream() << "::(s)NewConn" << endl;
 			}
 
 			int numAccept = 0;
-			Conn * newConn = NULL;
 
 			// accept before 64 connections for once
 			while (++numAccept <= 64) {
-
-				// Create new connection:
-				// 1. Accept new socket
-				// 2. Create new connection object (using ConnFactory from ListenFactory else create simple Conn)
-				if ((newConn = mNowConn->createNewConn()) == NULL) {
+				if (newAccept() == 0) {
 					break;
-				}
-
-				if (addConnection(newConn) > 0) {
-
-					// Set conn port and IP
-					newConn->mPortConn = mNowConn->mPort;
-					newConn->mIpConn = mNowConn->mIp;
-
-					if (newConn->recv() > 0) { // client initialization (ADC behaviour)
-
-						if (mNowConn->mCreatorConnFactory) {
-							mNowConn->mCreatorConnFactory->onNewConnClient(newConn); // set protocol point
-						} else {
-							onNewConn(newConn);
-						}
-						if (newConn->isOk()) {
-							onRecv(newConn); // parse recv data
-						}
-
-					} else if (newConn->isOk()) { // server initialization (NMDC behaviour)
-
-						if (mNowConn->mCreatorConnFactory) {
-							mNowConn->mCreatorConnFactory->onNewConnServer(newConn); // set protocol point
-						} else {
-							onNewConn(newConn);
-						}
-
-					}
-
 				}
 			}
 
@@ -492,6 +457,48 @@ void Server::step() {
 
 
 
+int Server::newAccept() {
+
+	// Create new connection:
+	// 1. Accept new socket
+	// 2. Create new connection object (using mCreatorConnFactory else create simple Conn)
+	Conn * newConn = NULL;
+	if ((newConn = mNowConn->createNewConn()) == NULL) {
+		return 0;
+	}
+
+	if (addConnection(newConn) < 0) {
+		return -1;
+	}
+
+	if (newConn->recv() > 0) { // Client initialization (ADC behaviour)
+
+		if (mNowConn->mCreatorConnFactory) {
+			mNowConn->mCreatorConnFactory->onNewConnClient(newConn, mNowConn); // Set protocol point
+		} else {
+			newConn->mProtocol = mNowConn->mProtocol; // Set protocol by this Conn
+			onNewConn(newConn);
+		}
+		if (newConn->isOk()) {
+			onRecv(newConn); // Parse recv data
+		}
+
+	} else if (newConn->isOk()) { // Server initialization (NMDC behaviour)
+			
+		if (mNowConn->mCreatorConnFactory) {
+			mNowConn->mCreatorConnFactory->onNewConnServer(newConn, mNowConn); // Set protocol point
+		} else {
+			newConn->mProtocol = mNowConn->mProtocol; // Set protocol by this Conn
+			onNewConn(newConn);
+		}
+
+	}
+
+	return 1;
+}
+
+
+
 ///////////////////////////////////add_connection/del_connection///////////////////////////////////
 
 int Server::addConnection(Conn * conn) {
@@ -540,7 +547,7 @@ int Server::addConnection(Conn * conn) {
 		conn->mIterator = mListenList.insert(mListenList.begin(), conn);
 	}
 
-	return 1;
+	return 0;
 }
 
 

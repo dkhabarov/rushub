@@ -294,16 +294,16 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 
 
 
-int DcConnFactory::onNewConnClient(Conn * conn) {
-	conn->mProtocol = mProtocol; // Protocol pointer
-	return mServer->onNewConn(conn);
+int DcConnFactory::onNewConnClient(Conn * newConn, Conn * builderConn) {
+	newConn->mProtocol = mProtocol; // Set protocol
+	return ConnFactory::onNewConnClient(newConn, builderConn);
 }
 
 
 
-int DcConnFactory::onNewConnServer(Conn * conn) {
-	conn->mProtocol = mProtocol; // Protocol pointer
-	return mServer->onNewConn(conn);
+int DcConnFactory::onNewConnServer(Conn * newConn, Conn * builderConn) {
+	newConn->mProtocol = mProtocol; // Set protocol
+	return ConnFactory::onNewConnServer(newConn, builderConn);
 }
 
 

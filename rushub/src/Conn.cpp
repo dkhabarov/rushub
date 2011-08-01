@@ -486,7 +486,6 @@ Conn * Conn::createNewConn() {
 			logStream() << "Create simple connection object for socket: " << sock << endl;
 		}
 		newConn = new Conn(sock, mServer, CONN_TYPE_INCOMING_TCP); // Create simple connection object
-		newConn->mProtocol = mProtocol; // Set protocol by this Conn
 	}
 	if (!newConn) {
 		if (errLog(0)) {
@@ -1203,16 +1202,26 @@ void ConnFactory::onNewData(Conn * conn, string * str) {
 
 
 
-int ConnFactory::onNewConnClient(Conn * conn) {
-	conn->mProtocol = mProtocol; // protocol
-	return mServer->onNewConn(conn);
+void ConnFactory::setConnParams(Conn * newConn, Conn * builderConn) {
+	newConn->mPortConn = builderConn->mPort;
+	newConn->mIpConn = builderConn->mIp;
 }
 
 
 
-int ConnFactory::onNewConnServer(Conn * conn) {
-	conn->mProtocol = mProtocol; // protocol
-	return mServer->onNewConn(conn);
+int ConnFactory::onNewConnClient(Conn * newConn, Conn * builderConn) {
+	setConnParams(newConn, builderConn);
+
+	if (newConn->mProtocol == NULL) {
+		newConn->mProtocol = mProtocol; // Set protocol
+	}
+	return mServer->onNewConn(newConn);
+}
+
+
+
+int ConnFactory::onNewConnServer(Conn * newConn, Conn * builderConn) {
+	return onNewConnClient(newConn, builderConn);
 }
 
 

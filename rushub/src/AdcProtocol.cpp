@@ -64,7 +64,7 @@ Conn * AdcProtocol::getConnForUdpData(Conn *, Parser *) {
 
 
 
-int AdcProtocol::onNewConn(Conn * conn) {
+int AdcProtocol::onNewConn(Conn *) {
 	return 0;
 }
 
