@@ -37,7 +37,7 @@ class Parser;
 class Conn;
 
 enum {
-	NMDC_TYPE_UNPARSED = -1
+	TYPE_UNPARSED = -1
 };
 
 

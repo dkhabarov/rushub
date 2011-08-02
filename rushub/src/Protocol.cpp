@@ -41,7 +41,7 @@ Protocol::~Protocol(){
 
 Parser::Parser(int max) : 
 	Obj("Parser"),
-	mType(NMDC_TYPE_UNPARSED),
+	mType(TYPE_UNPARSED),
 	mChunks(max),
 	mLength(0),
 	mStrings(NULL),
@@ -73,7 +73,7 @@ Parser::~Parser() {
 
 /// reInit()
 void Parser::reInit() {
-	mType = NMDC_TYPE_UNPARSED;
+	mType = TYPE_UNPARSED;
 	mLength = 0;
 	mStrMap = 0l;
 	mIsParsed = false;

@@ -23,7 +23,7 @@
 #include "Protocol.h"
 #include "Plugin.h"
 
-using namespace ::server; // NMDC_TYPE_UNPARSED
+using namespace ::server;
 
 namespace webserver {
 

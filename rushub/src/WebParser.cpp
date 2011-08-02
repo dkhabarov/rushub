@@ -40,7 +40,7 @@ WebParser::~WebParser() {
 
 /** Parse cmd and return type */
 int WebParser::parse() {
-	return NMDC_TYPE_UNPARSED;
+	return mType;
 }
 
 

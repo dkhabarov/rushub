@@ -208,7 +208,7 @@ int NmdcProtocol::doCommand(Parser * parser, Conn * conn) {
 	#endif
 
 	#ifdef _DEBUG
-		if (dcParser->mType == NMDC_TYPE_UNPARSED) {
+		if (dcParser->mType == TYPE_UNPARSED) {
 			throw "Unparsed command";
 		}
 	#endif

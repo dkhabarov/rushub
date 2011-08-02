@@ -63,6 +63,10 @@ class AdcParser : public Parser {
 
 public:
 
+	char mHeader;
+
+public:
+
 	AdcParser();
 	virtual ~AdcParser();
 

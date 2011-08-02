@@ -45,6 +45,10 @@ AdcParser::~AdcParser() {
 
 /// Do parse for command and return type of this command
 int AdcParser::parse() {
+	mLength = mCommand.size(); // Set cmd len
+	if (mLength >= 4) { // ADC cmd key contain 4 symbols
+		mHeader = mCommand[0];
+	}
 	return mType;
 }
 
