@@ -63,7 +63,7 @@ class AdcParser : public Parser {
 
 public:
 
-	char mHeader;
+	int mHeader;
 
 public:
 
@@ -78,7 +78,10 @@ public:
 	virtual int parse();
 	
 	virtual void reInit();
-	
+
+private:
+
+	int getHeader(char c);
 
 }; // class AdcParser
 
