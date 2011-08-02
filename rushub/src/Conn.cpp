@@ -835,12 +835,12 @@ size_t Conn::readFromRecvBuf() {
 /// Get pointer for string
 string * Conn::getParserCommandPtr() {
 	if (mParser == NULL) {
-		mParser = createParser();
+		if ((mParser = createParser()) == NULL) {
+			return NULL;
+		}
+	} else {
+		mParser->reInit();
 	}
-	if (mParser == NULL) {
-		return NULL;
-	}
-	mParser->reInit();
 	return &(mParser->mCommand);
 }
 

@@ -50,6 +50,13 @@ Parser::Parser(int max) :
 	mMaxChunks(max)
 {
 	mStrings = new std::string[mMaxChunks];
+	mCommand.resize(0);
+	mCommand.reserve(512);
+	for(int i = 0; i < mMaxChunks; ++i) {
+		tChunk & p = mChunks[i];
+		p.first = 0;
+		p.second = 0;
+	}
 }
 
 
@@ -66,12 +73,12 @@ Parser::~Parser() {
 
 /// reInit()
 void Parser::reInit() {
-	mCommand.resize(0);
-	mCommand.reserve(512);
 	mType = NMDC_TYPE_UNPARSED;
 	mLength = 0;
 	mStrMap = 0l;
 	mIsParsed = false;
+	mCommand.resize(0);
+	mCommand.reserve(512);
 	for(int i = 0; i < mMaxChunks; ++i) {
 		tChunk & p = mChunks[i];
 		p.first = 0;
