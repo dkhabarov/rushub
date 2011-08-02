@@ -264,7 +264,7 @@ protected:
 	/// Function of the processing enterring data
 	void onNewData(Conn *, string *);
 
-	void onNewUdpData(Conn *, string *);
+	void onNewUdpData(Conn *, Parser *);
 
 	/// Antiflood function
 	bool antiFlood(unsigned & iCount, Time &, const unsigned & countLimit, const double & timeLimit);

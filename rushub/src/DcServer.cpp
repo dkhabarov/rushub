@@ -400,25 +400,19 @@ void DcServer::onNewData(Conn * conn, string * data) {
 
 	if (parser != NULL && protocol != NULL) {
 
-		// Parser
 		parser->parse();
 
-		// UDP data
 		if (conn->getConnType() == CONN_TYPE_INCOMING_UDP) {
-			onNewUdpData(conn, data);
-			return;
+			onNewUdpData(conn, parser);
+		} else {
+			protocol->doCommand(parser, conn); // Do protocol command
 		}
-
-		// Do protocol command
-		protocol->doCommand(parser, conn);
 	}
 }
 
 
 
-void DcServer::onNewUdpData(Conn * conn, string *) {
-
-	Parser * parser = conn->mParser;
+void DcServer::onNewUdpData(Conn * conn, Parser * parser) {
 
 	// UDP redirect
 	Conn * userConn = conn->mProtocol->getConnForUdpData(conn, parser);
