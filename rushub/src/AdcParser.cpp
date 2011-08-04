@@ -24,9 +24,16 @@
 
 #include "AdcParser.h"
 
+#ifndef _WIN32
+	#include <sys/types.h>
+#else
+	#define uint32_t __int32
+#endif
+
 namespace dcserver {
 
 namespace protocol {
+
 
 
 enum {
@@ -40,6 +47,31 @@ enum {
 	HEADER_INFO = 7,
 	HEADER_UNKNOWN = 8
 } Header;
+
+
+/// ADC command
+class AdcCommand {
+
+public:
+
+	uint32_t mHash;
+
+public:
+
+	AdcCommand() : mHash(0) {
+	}
+
+	AdcCommand(const char * cmd) {
+		mHash = *reinterpret_cast<const uint32_t*>(cmd);
+	}
+
+	virtual ~AdcCommand() {
+	}
+
+
+}; // AdcCommand
+
+
 
 
 AdcParser::AdcParser() :
