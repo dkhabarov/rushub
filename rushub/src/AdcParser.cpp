@@ -43,28 +43,58 @@ enum Header {
 };
 
 
+
 /// ADC command
 class AdcCommand {
 
 public:
 
-	unsigned int mHash;
-
-public:
-
-	AdcCommand() : mHash(0) {
+	AdcCommand() {
 	}
 
 	AdcCommand(const char * cmd) {
-		mHash = *reinterpret_cast<const unsigned int*>(cmd);
+		mCmd = cmd;
 	}
 
 	virtual ~AdcCommand() {
 	}
 
+	bool check(const string & cmd) const {
+		return 0 == cmd.compare(1, 3, mCmd);
+	}
+
+private:
+
+	//hash = *reinterpret_cast<const unsigned int*>(cmd);
+	const char * mCmd;
 
 }; // AdcCommand
 
+
+
+/// Main ADC commands
+AdcCommand AdcCommands[] = {
+	AdcCommand("SUP"), // SUP
+	AdcCommand("STA"), // STA
+	AdcCommand("INF"), // INF
+	AdcCommand("MSG"), // MSG
+	AdcCommand("SCH"), // SCH
+	AdcCommand("RES"), // RES
+	AdcCommand("CTM"), // CTM
+	AdcCommand("RCM"), // RCM
+	AdcCommand("GPA"), // GPA
+	AdcCommand("PAS"), // PAS
+	AdcCommand("QUI"), // QUI
+	AdcCommand("GET"), // GET
+	AdcCommand("GFI"), // GFI
+	AdcCommand("SND"), // SND
+	AdcCommand("SID"), // SID
+	AdcCommand("CMD"), // CMD
+	AdcCommand("NAT"), // NAT
+	AdcCommand("RNT"), // RNT
+	AdcCommand("PSR"), // PSR
+	AdcCommand("PUB")  // PUB
+};
 
 
 
@@ -85,11 +115,16 @@ AdcParser::~AdcParser() {
 int AdcParser::parse() {
 	mLength = mCommand.size(); // Set cmd len
 	if (mLength >= 4) { // ADC cmd key contain 4 symbols
-
 		mHeader = getHeader(mCommand[0]);
-
+		if (mHeader != HEADER_UNKNOWN) {
+			for (unsigned int i = 0; i < ADC_TYPE_UNKNOWN; ++i) {
+				if (AdcCommands[i].check(mCommand)) { // Check cmd from mCommand
+					return mType = AdcType(i); // Set cmd type
+				}
+			}
+		}
 	}
-	return mType;
+	return mType = ADC_TYPE_UNKNOWN; // Unknown cmd
 }
 
 

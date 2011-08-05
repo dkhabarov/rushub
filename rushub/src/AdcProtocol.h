@@ -30,6 +30,8 @@ using namespace ::std;
 
 namespace dcserver {
 
+class DcConn;
+
 namespace protocol {
 
 class AdcProtocol : public Protocol {
@@ -50,6 +52,35 @@ public:
 	virtual Conn * getConnForUdpData(Conn *, Parser *);
 
 	virtual int onNewConn(Conn * conn);
+
+protected:
+
+	typedef int (AdcProtocol::*Event) (AdcParser *, DcConn *);
+	Event events[ADC_TYPE_UNKNOWN + 1];
+
+private:
+
+	int eventSup(AdcParser *, DcConn *); ///< SUP
+	int eventSta(AdcParser *, DcConn *); ///< STA
+	int eventInf(AdcParser *, DcConn *); ///< INF
+	int eventMsg(AdcParser *, DcConn *); ///< MSG
+	int eventSch(AdcParser *, DcConn *); ///< SCH
+	int eventRes(AdcParser *, DcConn *); ///< RES
+	int eventCtm(AdcParser *, DcConn *); ///< CTM
+	int eventRcm(AdcParser *, DcConn *); ///< RCM
+	int eventGpa(AdcParser *, DcConn *); ///< GPA
+	int eventPas(AdcParser *, DcConn *); ///< PAS
+	int eventQui(AdcParser *, DcConn *); ///< QUI
+	int eventGet(AdcParser *, DcConn *); ///< GET
+	int eventGfi(AdcParser *, DcConn *); ///< GFI
+	int eventSnd(AdcParser *, DcConn *); ///< SND
+	int eventSid(AdcParser *, DcConn *); ///< SID
+	int eventCmd(AdcParser *, DcConn *); ///< CMD
+	int eventNat(AdcParser *, DcConn *); ///< NAT
+	int eventRnt(AdcParser *, DcConn *); ///< RNT
+	int eventPsr(AdcParser *, DcConn *); ///< PSR
+	int eventPub(AdcParser *, DcConn *); ///< PUB
+	int eventUnknown(AdcParser *, DcConn *); ///< Unknown cmd
 
 }; // AdcProtocol
 
