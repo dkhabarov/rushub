@@ -140,11 +140,6 @@ public:
 	virtual void deleteConn(Conn * &);
 	virtual int onNewConn(Conn *);
 
-private:
-
-	Protocol * mNmdcProtocol;
-	Protocol * mAdcProtocol;
-
 }; // DcConnFactory
 
 

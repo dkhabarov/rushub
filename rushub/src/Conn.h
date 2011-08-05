@@ -60,8 +60,8 @@ public:
 
 protected:
 
-	Server * mServer; ///< Pointer on server
 	Protocol * mProtocol; ///< Protocal
+	Server * mServer; ///< Pointer on server
 
 }; // class ConnFactory
 
