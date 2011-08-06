@@ -503,48 +503,31 @@ bool DcServer::checkNick(DcConn *dcConn) {
 
 
 bool DcServer::beforeUserEnter(DcConn * dcConn) {
-	unsigned iWantedMask = LOGIN_STATUS_LOGIN_DONE;
-	if (mDcConfig.mDelayedLogin && dcConn->mSendNickList) {
-		iWantedMask = LOGIN_STATUS_LOGIN_DONE - LOGIN_STATUS_NICKLST;
+	if (dcConn->log(3)) {
+		dcConn->logStream() << "Begin login" << endl;
 	}
 
-	if (iWantedMask == dcConn->getLoginStatusFlag(iWantedMask)) {
-		if (dcConn->log(3)) {
-			dcConn->logStream() << "Begin login" << endl;
-		}
-
-		// check empty nick!
-		if (!checkNick(dcConn)) {
-			dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
-			return false;
-		}
-
-		if (dcConn->mSendNickList) {
-			if (!mDcConfig.mDelayedLogin) {
-				doUserEnter(dcConn);
-			} else {
-				mEnterList.add(dcConn->mDcUser->getUidHash(), dcConn->mDcUser);
-			}
-
-			// Can happen so that list not to send at a time
-			mNmdcProtocol.sendNickList(dcConn); // refactoring to DcProtocol pointer
-
-			dcConn->mSendNickList = false;
-			return true;
-		}
-		if (!dcConn->mDcUser->getInUserList()) {
-			doUserEnter(dcConn);
-		}
-		return true;
-	} else { // Invalid sequence of the sent commands
-		if (dcConn->log(2)) {
-			dcConn->logStream() << "Invalid sequence of the sent commands (" 
-				<< dcConn->getLoginStatusFlag(iWantedMask) << "), wanted: " 
-				<< iWantedMask << endl;
-		}
-		dcConn->closeNow(CLOSE_REASON_CMD_SEQUENCE);
+	// check empty nick!
+	if (!checkNick(dcConn)) {
+		dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
 		return false;
 	}
+
+	if (dcConn->mSendNickList) {
+		if (!mDcConfig.mDelayedLogin) {
+			doUserEnter(dcConn);
+		} else {
+			mEnterList.add(dcConn->mDcUser->getUidHash(), dcConn->mDcUser);
+		}
+
+		// Can happen so that list not to send at a time
+		mNmdcProtocol.sendNickList(dcConn); // refactoring to DcProtocol pointer
+
+		dcConn->mSendNickList = false;
+	} else if (!dcConn->mDcUser->getInUserList()) {
+		doUserEnter(dcConn);
+	}
+	return true;
 }
 
 
@@ -785,7 +768,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 
 void DcServer::afterUserEnter(DcConn *dcConn) {
 	if (dcConn->log(3)) {
-		dcConn->logStream() << "Entered the hub." << endl;
+		dcConn->logStream() << "Entered on the hub" << endl;
 	}
 	#ifndef WITHOUT_PLUGINS
 		mCalls.mOnUserEnter.callAll(dcConn->mDcUser);

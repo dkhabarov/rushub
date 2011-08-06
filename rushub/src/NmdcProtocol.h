@@ -71,6 +71,7 @@ public:
 	virtual Conn * getConnForUdpData(Conn *, Parser *);
 
 	virtual int onNewConn(Conn *);
+	virtual void onFlush(Conn *);
 
 	void setServer(DcServer * dcServer) {
 		mDcServer = dcServer;
@@ -109,7 +110,6 @@ protected:
 
 	typedef int (NmdcProtocol::*Event) (NmdcParser *, DcConn *);
 	Event events[NMDC_TYPE_UNKNOWN + 1];
-
 
 private:
 

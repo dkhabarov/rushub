@@ -245,9 +245,6 @@ protected:
 
 protected:
 
-	/// Flush sending buffer
-	virtual void onFlush();
-
 	virtual void onOk(bool);
 
 private:

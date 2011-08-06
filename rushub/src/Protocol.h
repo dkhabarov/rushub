@@ -61,6 +61,9 @@ public:
 
 	virtual int onNewConn(Conn *) = 0;
 
+	virtual void onFlush(Conn *) {
+	}
+
 }; // Protocol
 
 

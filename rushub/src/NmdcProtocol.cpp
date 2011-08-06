@@ -194,6 +194,26 @@ Conn * NmdcProtocol::getConnForUdpData(Conn * conn, Parser * parser) {
 
 
 
+void NmdcProtocol::onFlush(Conn * conn) {
+	DcConn * dcConn = static_cast<DcConn *> (conn);
+	if (dcConn->mNickListInProgress) {
+		dcConn->setLoginStatusFlag(LOGIN_STATUS_NICKLST);
+		dcConn->mNickListInProgress = false;
+		if (!dcConn->isOk() || !dcConn->isWritable()) {
+			if (dcConn->log(2)) {
+				dcConn->logStream() << "Connection closed during nicklist" << endl;
+			}
+		} else {
+			if (dcConn->log(3)) {
+				dcConn->logStream() << "Enter after nicklist" << endl;
+			}
+			mDcServer->doUserEnter(dcConn);
+		}
+	}
+}
+
+
+
 int NmdcProtocol::doCommand(Parser * parser, Conn * conn) {
 
 	NmdcParser * dcParser = static_cast<NmdcParser *> (parser);
@@ -488,6 +508,21 @@ int NmdcProtocol::eventMyInfo(NmdcParser * dcparser, DcConn * dcConn) {
 		}
 	} else if (!dcConn->mDcUser->getInUserList()) {
 		dcConn->setLoginStatusFlag(LOGIN_STATUS_MYINFO);
+
+		unsigned iWantedMask = LOGIN_STATUS_LOGIN_DONE;
+		if (mDcServer->mDcConfig.mDelayedLogin && dcConn->mSendNickList) {
+			iWantedMask = LOGIN_STATUS_LOGIN_DONE - LOGIN_STATUS_NICKLST;
+		}
+		if (iWantedMask != dcConn->getLoginStatusFlag(iWantedMask)) {
+			if (dcConn->log(2)) {
+				dcConn->logStream() << "Invalid sequence of the sent commands (" 
+					<< dcConn->getLoginStatusFlag(iWantedMask) << "), wanted: " 
+					<< iWantedMask << endl;
+			}
+			dcConn->closeNow(CLOSE_REASON_CMD_SEQUENCE);
+			return -1;
+		}
+
 		if (!mDcServer->beforeUserEnter(dcConn)) {
 			return -1;
 		}

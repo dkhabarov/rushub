@@ -85,24 +85,6 @@ size_t DcConn::send(const char * data, size_t len, bool addSep, bool flush) {
 
 
 
-/// onFlush sending buffer
-void DcConn::onFlush() {
-	if (mNickListInProgress) {
-		setLoginStatusFlag(LOGIN_STATUS_NICKLST);
-		mNickListInProgress = false;
-		if (!mOk || !mWritable) {
-			if (log(2)) {
-				logStream() << "Connection closed during nicklist" << endl;
-			}
-		} else {
-			if (log(3)) {
-				logStream() << "Enter after nicklist" << endl;
-			}
-			server()->doUserEnter(this);
-		}
-	}
-}
-
 /// Set timeout for this connection
 void DcConn::setTimeOut(HubTimeOut to, double Sec, Time &now) {
 	mTimeOut[to].setMaxDelay(Sec);
