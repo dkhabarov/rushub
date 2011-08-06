@@ -26,6 +26,8 @@
 #include "DcServer.h" // for mDcServer
 #include "DcConn.h" // for DcConn
 
+#include <string.h>
+
 namespace dcserver {
 
 namespace protocol {
@@ -259,7 +261,8 @@ int NmdcProtocol::eventSupports(NmdcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	dcConn->send("$Supports UserCommand NoGetINFO NoHello UserIP UserIP2 MCTo"NMDC_SEPARATOR, 59 + NMDC_SEPARATOR_LEN, false, false);
+	const char * support = "$Supports UserCommand NoGetINFO NoHello UserIP UserIP2 MCTo";
+	dcConn->send(support, strlen(support), true, false);
 
 	return 0;
 }
@@ -385,7 +388,7 @@ int NmdcProtocol::eventMyPass(NmdcParser *, DcConn * dcConn) {
 	if (bOp) { /** If entered operator, that sends command LoggedIn ($LogedIn !) */
 		msg.append("$LogedIn ", 9);
 		msg.append(dcConn->mDcUser->getUid());
-		msg.append(NMDC_SEPARATOR);
+		msg.append(getSeparator());
 	}
 	dcConn->send(msg);
 	dcConn->clearTimeOut(HUB_TIME_OUT_PASS);
@@ -984,94 +987,95 @@ int NmdcProtocol::eventUnknown(NmdcParser *, DcConn * dcConn) {
 
 // $Lock ...|
 string & NmdcProtocol::appendLock(string & str) {
-	return str.append("$Lock EXTENDEDPROTOCOL_" INTERNALNAME "_by_setuper_" INTERNALVERSION " Pk=" INTERNALNAME NMDC_SEPARATOR);
+	str.append("$Lock EXTENDEDPROTOCOL_" INTERNALNAME "_by_setuper_" INTERNALVERSION " Pk=" INTERNALNAME);
+	return str.append(getSeparator());
 }
 
 // $Hello nick|
 string & NmdcProtocol::appendHello(string & str, const string & nick) {
-	str.reserve(str.size() + nick.size() + 7 + NMDC_SEPARATOR_LEN);
-	return str.append("$Hello ", 7).append(nick).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	str.reserve(str.size() + nick.size() + 7 + getSeparatorLen());
+	return str.append("$Hello ").append(nick).append(getSeparator());
 }
 
 // $HubIsFull|
 string & NmdcProtocol::appendHubIsFull(string & str) {
-	return str.append("$HubIsFull" NMDC_SEPARATOR, 10 + NMDC_SEPARATOR_LEN);
+	return str.append("$HubIsFull").append(getSeparator());
 }
 
 // $GetPass|
 string & NmdcProtocol::appendGetPass(string & str) {
-	return str.append("$GetPass" NMDC_SEPARATOR, 8 + NMDC_SEPARATOR_LEN);
+	return str.append("$GetPass").append(getSeparator());
 }
 
 // $ValidateDenide nick|
 string & NmdcProtocol::appendValidateDenied(string & str, const string & nick) {
-	str.reserve(str.size() + nick.size() + 16 + NMDC_SEPARATOR_LEN);
-	return str.append("$ValidateDenide ", 16).append(nick).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	str.reserve(str.size() + nick.size() + 16 + getSeparatorLen());
+	return str.append("$ValidateDenide ").append(nick).append(getSeparator());
 }
 
 // $HubName hubName - topic|
 string & NmdcProtocol::appendHubName(string & str, const string & hubName, const string & topic) {
 	if (topic.size()) {
-		str.reserve(str.size() + hubName.size() + topic.size() + 12 + NMDC_SEPARATOR_LEN);
-		return str.append("$HubName ", 9).append(hubName).append(" - ", 3).append(topic).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+		str.reserve(str.size() + hubName.size() + topic.size() + 12 + getSeparatorLen());
+		return str.append("$HubName ").append(hubName).append(" - ", 3).append(topic).append(getSeparator());
 	} else {
-		str.reserve(str.size() + hubName.size() + 9 + NMDC_SEPARATOR_LEN);
-		return str.append("$HubName ", 9).append(hubName).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+		str.reserve(str.size() + hubName.size() + 9 + getSeparatorLen());
+		return str.append("$HubName ").append(hubName).append(getSeparator());
 	}
 }
 
 // $HubTopic hubTopic|
 string & NmdcProtocol::appendHubTopic(string & str, const string & hubTopic) {
-	str.reserve(str.size() + hubTopic.size() + 10 + NMDC_SEPARATOR_LEN);
-	return str.append("$HubTopic ", 10).append(hubTopic).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	str.reserve(str.size() + hubTopic.size() + 10 + getSeparatorLen());
+	return str.append("$HubTopic ").append(hubTopic).append(getSeparator());
 }
 
 // <nick> msg|
 string & NmdcProtocol::appendChat(string & str, const string & nick, const string & msg) {
-	str.reserve(str.size() + nick.size() + msg.size() + 3 + NMDC_SEPARATOR_LEN);
-	return str.append("<", 1).append(nick).append("> ", 2).append(msg).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	str.reserve(str.size() + nick.size() + msg.size() + 3 + getSeparatorLen());
+	return str.append("<").append(nick).append("> ").append(msg).append(getSeparator());
 }
 
 // $To: to From: from $<nick> msg|
 string & NmdcProtocol::appendPm(string & str, const string & to, const string & from, const string & nick, const string & msg) {
-	str.reserve(str.size() + to.size() + from.size() + nick.size() + msg.size() + 17 + NMDC_SEPARATOR_LEN);
-	str.append("$To: ", 5).append(to).append(" From: ", 7).append(from).append(" $<", 3).append(nick);
-	return str.append("> ", 2).append(msg).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	str.reserve(str.size() + to.size() + from.size() + nick.size() + msg.size() + 17 + getSeparatorLen());
+	str.append("$To: ").append(to).append(" From: ").append(from).append(" $<").append(nick);
+	return str.append("> ").append(msg).append(getSeparator());
 }
 
 // $To: to From: from $<nick> msg|
 void NmdcProtocol::appendPmToAll(string & start, string & end, const string & from, const string & nick, const string & msg) {
-	start.append("$To: ", 5);
-	end.reserve(end.size() + from.size() + nick.size() + msg.size() + 12 + NMDC_SEPARATOR_LEN);
-	end.append(" From: ", 7).append(from).append(" $<", 3).append(nick);
-	end.append("> ", 2).append(msg).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	start.append("$To: ");
+	end.reserve(end.size() + from.size() + nick.size() + msg.size() + 12 + getSeparatorLen());
+	end.append(" From: ").append(from).append(" $<").append(nick);
+	end.append("> ").append(msg).append(getSeparator());
 }
 
 // $Quit nick|
 string & NmdcProtocol::appendQuit(string & str, const string & nick) {
-	str.reserve(str.size() + nick.size() + 6 + NMDC_SEPARATOR_LEN);
-	return str.append("$Quit ", 6).append(nick).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	str.reserve(str.size() + nick.size() + 6 + getSeparatorLen());
+	return str.append("$Quit ").append(nick).append(getSeparator());
 }
 
 // $OpList nick$$|
 string & NmdcProtocol::appendOpList(string & str, const string & nick) {
-	str.reserve(str.size() + nick.size() + 10 + NMDC_SEPARATOR_LEN);
-	return str.append("$OpList ", 8).append(nick).append("$$"NMDC_SEPARATOR, 2 + NMDC_SEPARATOR_LEN);
+	str.reserve(str.size() + nick.size() + 10 + getSeparatorLen());
+	return str.append("$OpList ").append(nick).append("$$").append(getSeparator());
 }
 
 // $UserIP nick ip$$|
 string & NmdcProtocol::appendUserIp(string & str, const string & nick, const string & ip) {
 	if (ip.size()) {
-		str.reserve(str.size() + nick.size() + ip.size() + 11 + NMDC_SEPARATOR_LEN);
-		str.append("$UserIP ", 8).append(nick).append(" ", 1).append(ip).append("$$"NMDC_SEPARATOR, 2 + NMDC_SEPARATOR_LEN);
+		str.reserve(str.size() + nick.size() + ip.size() + 11 + getSeparatorLen());
+		str.append("$UserIP ").append(nick).append(" ").append(ip).append("$$").append(getSeparator());
 	}
 	return str;
 }
 
 // $ForceMove address|
 string & NmdcProtocol::appendForceMove(string & str, const string & address) {
-	str.reserve(address.size() + 11 + NMDC_SEPARATOR_LEN);
-	return str.append("$ForceMove ", 11).append(address).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	str.reserve(address.size() + 11 + getSeparatorLen());
+	return str.append("$ForceMove ").append(address).append(getSeparator());
 }
 
 
@@ -1079,17 +1083,12 @@ string & NmdcProtocol::appendForceMove(string & str, const string & address) {
 
 
 void NmdcProtocol::sendMode(DcConn * dcConn, const string & str, int mode, UserList & userList, bool useCache) {
-	bool addSep = false;
-	if (str.find(NMDC_SEPARATOR, str.size() - NMDC_SEPARATOR_LEN) == str.npos) {
-		addSep = true;
-	}
-
 	if (mode == 0) { // Send to all
-		userList.sendToAll(str, useCache, addSep);
+		userList.sendToAll(str, useCache, true);
 	} else if (mode == 3) { // Send to all except current user
 		if (dcConn->mDcUser->isCanSend()) {
 			dcConn->mDcUser->setCanSend(false);
-			userList.sendToAll(str, useCache, addSep);
+			userList.sendToAll(str, useCache, true);
 			dcConn->mDcUser->setCanSend(true);
 		}
 	} else if (mode == 4) { // Send to all except users with ip of the current user
@@ -1102,7 +1101,7 @@ void NmdcProtocol::sendMode(DcConn * dcConn, const string & str, int mode, UserL
 				ul.push_back(conn);
 			}
 		}
-		userList.sendToAll(str, useCache, addSep);
+		userList.sendToAll(str, useCache, true);
 		for (vector<DcConn *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
 			(*ul_it)->mDcUser->setCanSend(true);
 		}
