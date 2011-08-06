@@ -29,7 +29,6 @@
 #include "Obj.h"
 #include "Times.h"
 #include "Protocol.h"
-#include "Plugin.h" // for NMDC_SEPARATOR
 
 #include <string>
 #include <list>
@@ -252,6 +251,9 @@ public:
 
 	/// Write data in sending buffer
 	size_t writeData(const char * data, size_t len, bool flush);
+
+	const char * getSeparator();
+	size_t getSeparatorLen();
 
 protected:
 

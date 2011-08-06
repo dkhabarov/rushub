@@ -44,8 +44,8 @@ public:
 	bool add(DcConn *);
 	bool remove(DcConn *);
 
-	void sendToIp(const char * ip, string & data, unsigned long profile = 0, bool addSep = false, bool flush = true);
-	void sendToIpWithNick(const char * ip, string & start, string & end, unsigned long profile = 0, bool addSep = false, bool flush = true);
+	void sendToIp(const char * ip, const char * data, unsigned long profile = 0, bool addSep = false, bool flush = true);
+	void sendToIpWithNick(const char * ip, const char * start, const char * end, unsigned long profile = 0, bool addSep = false, bool flush = true);
 
 	virtual void onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
 		if (log(3)) {
@@ -100,7 +100,8 @@ private:
 	typedef HashTable<IpList *> IpTable;
 	bool mFlush, mAddSep;
 	unsigned long mProfile;
-	string msData1, msData2;
+	const char * msData1;
+	const char * msData2;
 
 private:
 

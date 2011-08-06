@@ -117,7 +117,9 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 		if (mCache.size()) {
 			mCache.append(data);
 			if (addSep) {
-				mCache.append(NMDC_SEPARATOR);
+				if (mCache.find(NMDC_SEPARATOR, mCache.size() - NMDC_SEPARATOR_LEN, NMDC_SEPARATOR_LEN)) {
+					mCache.append(NMDC_SEPARATOR);
+				}
 			}
 			for_each(begin(), end(), ufSend(mCache, false));
 			mCache.erase(0, mCache.size());
@@ -131,7 +133,9 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 	} else {
 		mCache.append(data);
 		if (addSep) {
-			mCache.append(NMDC_SEPARATOR);
+			if (mCache.find(NMDC_SEPARATOR, mCache.size() - NMDC_SEPARATOR_LEN, NMDC_SEPARATOR_LEN)) {
+				mCache.append(NMDC_SEPARATOR);
+			}
 		}
 	}
 }

@@ -885,6 +885,18 @@ size_t Conn::remaining() {
 
 
 
+const char * Conn::getSeparator() {
+	return mProtocol != NULL ? mProtocol->getSeparator() : "\0";
+}
+
+
+
+size_t Conn::getSeparatorLen() {
+	return mProtocol != NULL ? mProtocol->getSeparatorLen() : 1;
+}
+
+
+
 /// Write data in sending buffer and send to conn
 size_t Conn::writeData(const char * data, size_t len, bool flush) {
 	size_t bufLen = mSendBuf.size();

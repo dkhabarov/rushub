@@ -69,9 +69,13 @@ size_t DcConn::send(const char * data, size_t len, bool addSep, bool flush) {
 			}
 		}
 
-		if (addSep) {
+		const char * sep = getSeparator();
+		size_t sep_len = getSeparatorLen();
+
+		// if addSep then check for separator at end of data
+		if (addSep && len >= sep_len && strstr(data + len - sep_len, sep) == NULL) {
 			writeData(data, len, false);
-			ret = writeData(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN, flush);
+			ret = writeData(sep, sep_len, flush);
 		} else {
 			ret = writeData(data, len, flush);
 		}

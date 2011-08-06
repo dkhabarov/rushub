@@ -29,7 +29,10 @@ DcIpList::DcIpList() :
 	Obj("DcIpList"),
 	HashTable<IpList *> (1024),
 	mFlush(false),
-	mAddSep(false)
+	mAddSep(false),
+	mProfile(0),
+	msData1(NULL),
+	msData2(NULL)
 {
 }
 
@@ -83,7 +86,7 @@ bool DcIpList::remove(DcConn * dcConn) {
 
 
 
-void DcIpList::sendToIp(const char * ip, string & data, unsigned long profile, bool addSep, bool flush) {
+void DcIpList::sendToIp(const char * ip, const char * data, unsigned long profile, bool addSep, bool flush) {
 	unsigned long ipHash = mHash(ip);
 	mProfile = profile;
 	msData1 = data;
@@ -100,7 +103,7 @@ void DcIpList::sendToIp(const char * ip, string & data, unsigned long profile, b
 
 
 
-void DcIpList::sendToIpWithNick(const char * ip, string & start, string & end, unsigned long profile, bool addSep, bool flush) {
+void DcIpList::sendToIpWithNick(const char * ip, const char * start, const char * end, unsigned long profile, bool addSep, bool flush) {
 	unsigned long ipHash = mHash(ip);
 	mProfile = profile;
 	msData1 = start;
@@ -131,10 +134,10 @@ size_t DcIpList::send(DcConn * dcConn) {
 			profile = (profile % 32) - 1;
 		}
 		if (mProfile & (1 << profile)) {
-			return dcConn->send(msData1, mAddSep, mFlush);
+			return dcConn->send(msData1, strlen(msData1), mAddSep, mFlush); // TODO: refactoring
 		}
 	} else {
-		return dcConn->send(msData1, mAddSep, mFlush);
+		return dcConn->send(msData1, strlen(msData1), mAddSep, mFlush); // TODO: refactoring
 	}
 	return 0;
 }
@@ -155,14 +158,14 @@ size_t DcIpList::sendWithNick(DcConn * dcConn) {
 			profile = (profile % 32) - 1;
 		}
 		if (mProfile & (1 << profile)) {
-			dcConn->send(msData1, false, false);
+			dcConn->send(msData1, strlen(msData1), false, false);
 			dcConn->send(dcConn->mDcUser->getUid(), false, false);
-			return dcConn->send(msData2, mAddSep, mFlush);
+			return dcConn->send(msData2, strlen(msData2), mAddSep, mFlush);
 		}
 	} else {
-		dcConn->send(msData1, false, false);
+		dcConn->send(msData1, strlen(msData1), false, false);
 		dcConn->send(dcConn->mDcUser->getUid(), false, false);
-		return dcConn->send(msData2, mAddSep, mFlush);
+		return dcConn->send(msData2, strlen(msData2), mAddSep, mFlush);
 	}
 	return 0;
 }

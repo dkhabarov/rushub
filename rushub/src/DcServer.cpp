@@ -25,6 +25,8 @@
 #include "DcServer.h"
 #include "WebConn.h"
 
+#include <string.h>
+
 #ifdef _WIN32
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
 		#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
@@ -861,14 +863,7 @@ bool DcServer::sendToUser(DcUserBase * dcUserBase, const char * data, const char
 	}
 
 	// Simple Msg
-	string msg(data);
-	if (dcConn->mType == CLIENT_TYPE_NMDC && 
-		msg.find(NMDC_SEPARATOR, msg.size() - NMDC_SEPARATOR_LEN) == msg.npos
-	) {
-		dcConn->send(msg, true);
-	} else {
-		dcConn->send(msg);
-	}
+	dcConn->send(data, strlen(data), dcConn->mType == CLIENT_TYPE_NMDC); // TODO refactoring len
 	return true;
 }
 
@@ -906,12 +901,7 @@ bool DcServer::sendToAll(const char * data, const char * nick, const char * from
 		return true;
 	}
 
-	// Simple Msg
-	string msg(data);
-	if (msg.find(NMDC_SEPARATOR, msg.size() - NMDC_SEPARATOR_LEN) == msg.npos) {
-		msg.append(NMDC_SEPARATOR);
-	}
-	mDcUserList.sendToAll(msg, false, false);
+	mDcUserList.sendToAll(data, false, true);
 	return true;
 }
 
@@ -939,11 +929,7 @@ bool DcServer::sendToProfiles(unsigned long profile, const char * data, const ch
 	}
 
 	// Simple Msg
-	string msg(data);
-	if (msg.find(NMDC_SEPARATOR, msg.size() - NMDC_SEPARATOR_LEN) == msg.npos) {
-		msg.append(NMDC_SEPARATOR);
-	}
-	mDcUserList.sendToProfiles(profile, msg, false);
+	mDcUserList.sendToProfiles(profile, data, true);
 	return true;
 }
 
@@ -958,23 +944,19 @@ bool DcServer::sendToIp(const char * ip, const char * data, unsigned long profil
 	if (from && nick) {
 		string start, end;
 		mNmdcProtocol.appendPmToAll(start, end, from, nick, data); // refactoring to DcProtocol pointer
-		mIpListConn->sendToIpWithNick(ip, start, end, profile);
+		mIpListConn->sendToIpWithNick(ip, start.c_str(), end.c_str(), profile);
 		return true;
 	}
 
 	// Chat
 	if (nick) {
 		string str;
-		mIpListConn->sendToIp(ip, mNmdcProtocol.appendChat(str, nick, data), profile); // refactoring to DcProtocol pointer
+		mIpListConn->sendToIp(ip, mNmdcProtocol.appendChat(str, nick, data).c_str(), profile); // refactoring to DcProtocol pointer
 		return true;
 	}
 
 	// Simple Msg
-	string msg(data);
-	if (msg.find(NMDC_SEPARATOR, msg.size() - NMDC_SEPARATOR_LEN) == msg.npos) {
-		msg.append(NMDC_SEPARATOR);
-	}
-	mIpListConn->sendToIp(ip, msg, profile); // newPolitic
+	mIpListConn->sendToIp(ip, data, profile);
 	return true;
 }
 
@@ -1005,11 +987,7 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & nickList, const char 
 		string str;
 		mDcUserList.sendToAll(mNmdcProtocol.appendChat(str, nick, data), false, false); // refactoring to DcProtocol pointer
 	} else { // Simple Msg
-		string msg(data);
-		if (msg.find(NMDC_SEPARATOR, msg.size() - NMDC_SEPARATOR_LEN) == msg.npos) {
-			msg.append(NMDC_SEPARATOR);
-		}
-		mDcUserList.sendToAll(msg, false, false);
+		mDcUserList.sendToAll(data, false, true);
 	}
 
 	for (vector<DcUser *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
@@ -1051,11 +1029,7 @@ bool DcServer::sendToAllExceptIps(const vector<string> & ipList, const char * da
 			string str;
 			mDcUserList.sendToAll(mNmdcProtocol.appendChat(str, nick, data), false, false); // refactoring to DcProtocol pointer
 		} else { // Simple Msg
-			string msg(data);
-			if (msg.find(NMDC_SEPARATOR, msg.size() - NMDC_SEPARATOR_LEN) == msg.npos) {
-				msg.append(NMDC_SEPARATOR);
-			}
-			mDcUserList.sendToAll(msg, false, false);
+			mDcUserList.sendToAll(data, false, true);
 		}
 	}
 
