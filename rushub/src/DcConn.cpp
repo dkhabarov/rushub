@@ -261,6 +261,8 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 	DcServer * dcServer = static_cast<DcServer *> (mServer);
 	if (dcConn && dcServer) {
 		dcServer->mIpListConn->remove(dcConn);
+
+
 		if (dcConn->getLoginStatusFlag(LOGIN_STATUS_ALOWED)) {
 			dcServer->miTotalUserCount --;
 			if (dcConn->mDcUser) {
@@ -275,6 +277,7 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 		#ifndef WITHOUT_PLUGINS
 			dcServer->mCalls.mOnUserDisconnected.callAll(dcConn->mDcUser);
 		#endif
+		
 
 		if (dcConn->mDcUser) {
 			if (dcConn->mDcUser->getInUserList()) {

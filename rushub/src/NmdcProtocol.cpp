@@ -72,19 +72,19 @@ NmdcProtocol::~NmdcProtocol() {
 
 
 
-const char * NmdcProtocol::getSeparator() {
+const char * NmdcProtocol::getSeparator() const {
 	return NMDC_SEPARATOR;
 }
 
 
 
-size_t NmdcProtocol::getSeparatorLen() {
+size_t NmdcProtocol::getSeparatorLen() const {
 	return NMDC_SEPARATOR_LEN;
 }
 
 
 
-unsigned long NmdcProtocol::getMaxCommandLength() {
+unsigned long NmdcProtocol::getMaxCommandLength() const {
 	return mDcServer->mDcConfig.mMaxNmdcCommandLength;
 }
 

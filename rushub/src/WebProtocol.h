@@ -69,16 +69,16 @@ public:
 	/** Removing parser of the protocol */
 	virtual void deleteParser(Parser *);
 
-	virtual const char * getSeparator() {
+	virtual const char * getSeparator() const {
 		return "\r\n\r\n";
 	}
 
 	/** protocol separator length */
-	virtual size_t getSeparatorLen() {
+	virtual size_t getSeparatorLen() const {
 		return 4;
 	}
 
-	virtual unsigned long getMaxCommandLength() {
+	virtual unsigned long getMaxCommandLength() const {
 		return mMaxCommandLength;
 	}
 

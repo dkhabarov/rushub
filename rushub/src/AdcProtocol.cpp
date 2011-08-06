@@ -58,19 +58,19 @@ AdcProtocol::~AdcProtocol() {
 
 
 
-const char * AdcProtocol::getSeparator() {
+const char * AdcProtocol::getSeparator() const {
 	return ADC_SEPARATOR;
 }
 
 
 
-size_t AdcProtocol::getSeparatorLen() {
+size_t AdcProtocol::getSeparatorLen() const {
 	return ADC_SEPARATOR_LEN;
 }
 
 
 
-unsigned long AdcProtocol::getMaxCommandLength() {
+unsigned long AdcProtocol::getMaxCommandLength() const {
 	return 10240;
 }
 
@@ -139,7 +139,9 @@ int AdcProtocol::onNewConn(Conn *) {
 
 
 
-int AdcProtocol::eventSup(AdcParser *, DcConn *) {
+int AdcProtocol::eventSup(AdcParser *, DcConn * dcConn) {
+	string s("ISUP ADBAS0 ADBASE ADTIGR\nISID AAAI");
+	dcConn->send(s, true);
 	return 0;
 }
 
@@ -151,13 +153,15 @@ int AdcProtocol::eventSta(AdcParser *, DcConn *) {
 
 
 
-int AdcProtocol::eventInf(AdcParser *, DcConn *) {
+int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
+	dcConn->send(adcParser->mCommand, true);
 	return 0;
 }
 
 
 
-int AdcProtocol::eventMsg(AdcParser *, DcConn *) {
+int AdcProtocol::eventMsg(AdcParser * adcParser, DcConn * dcConn) {
+	dcConn->send(adcParser->mCommand, true);
 	return 0;
 }
 

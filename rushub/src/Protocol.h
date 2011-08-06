@@ -49,9 +49,9 @@ public:
 	Protocol();
 	virtual ~Protocol();
 
-	virtual const char * getSeparator() = 0; ///< protocol separator
-	virtual size_t getSeparatorLen() = 0; ///< protocol separator length
-	virtual unsigned long getMaxCommandLength() = 0; ///< protocol max command length
+	virtual const char * getSeparator() const = 0; ///< protocol separator
+	virtual size_t getSeparatorLen() const = 0; ///< protocol separator length
+	virtual unsigned long getMaxCommandLength() const = 0; ///< protocol max command length
 
 	virtual int doCommand(Parser *, Conn *) = 0; ///< doCommand
 	virtual Parser * createParser() = 0; ///< createParser

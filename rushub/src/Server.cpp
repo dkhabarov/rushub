@@ -581,9 +581,6 @@ int Server::delConnection(Conn * conn) {
 	if (conn->mSelfConnFactory != NULL) {
 		conn->mSelfConnFactory->deleteConn(conn); 
 	} else {
-		if (conn->log(3)) {
-			conn->logStream() << "Deleting conn without factory!" << endl;
-		}
 		delete conn;
 	}
 

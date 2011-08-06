@@ -41,9 +41,9 @@ public:
 	AdcProtocol();
 	virtual ~AdcProtocol();
 	
-	virtual const char * getSeparator();
-	virtual size_t getSeparatorLen();
-	virtual unsigned long getMaxCommandLength();
+	virtual const char * getSeparator() const;
+	virtual size_t getSeparatorLen() const;
+	virtual unsigned long getMaxCommandLength() const;
 
 	virtual Parser * createParser();
 	virtual void deleteParser(Parser *);
@@ -51,7 +51,7 @@ public:
 	virtual int doCommand(Parser *, Conn *);
 	virtual Conn * getConnForUdpData(Conn *, Parser *);
 
-	virtual int onNewConn(Conn * conn);
+	virtual int onNewConn(Conn *);
 
 protected:
 
