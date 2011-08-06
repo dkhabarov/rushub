@@ -260,27 +260,19 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 	DcServer * dcServer = static_cast<DcServer *> (mServer);
 	if (dcConn && dcServer) {
-		dcServer->mIpListConn->remove(dcConn);
-
-
-		if (dcConn->getLoginStatusFlag(LOGIN_STATUS_ALOWED)) {
-			dcServer->miTotalUserCount --;
-			if (dcConn->mDcUser) {
-				dcServer->miTotalShare -= dcConn->mDcUser->getShare();
-			} else if (conn->log(3)) {
-				conn->logStream() << "Del conn without user" << endl;
-			}
-		} else if (conn->log(3)) {
-			conn->logStream() << "Del conn without ALOWED flag: " << dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE) << endl;
-		}
 
 		#ifndef WITHOUT_PLUGINS
 			dcServer->mCalls.mOnUserDisconnected.callAll(dcConn->mDcUser);
 		#endif
 		
+		dcServer->mIpListConn->remove(dcConn);
 
-		if (dcConn->mDcUser) {
+		if (dcConn->mDcUser != NULL) {
+
+			dcServer->miTotalShare -= dcConn->mDcUser->getShare();
+
 			if (dcConn->mDcUser->getInUserList()) {
+				-- dcServer->miTotalUserCount;
 				dcServer->removeFromDcUserList(static_cast<DcUser *> (dcConn->mDcUser));
 			} else { // remove from enter list, if user was already added in it, but user was not added in user list
 				dcServer->mEnterList.remove(dcConn->mDcUser->getUidHash());
@@ -290,6 +282,10 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 			delete dcConn->mDcUser;
 			dcConn->mDcUser = NULL;
 			dcConn->mDcUserBase = NULL;
+		} else {
+			if (conn->log(3)) {
+				conn->logStream() << "Del conn without user" << endl;
+			}
 		}
 	} else if (conn->errLog(0)) {
 		conn->logStream() << "Fail error in deleteConn: dcConn = " <<

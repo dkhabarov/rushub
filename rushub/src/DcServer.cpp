@@ -346,7 +346,7 @@ int DcServer::onTimer(Time & now) {
 
 
 /// Function action after joining the client
-int DcServer::onNewConn(Conn *conn) {
+int DcServer::onNewConn(Conn * conn) {
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 
 	if (mSystemLoad == SYSTEM_LOAD_SYSTEM_DOWN) {
@@ -628,6 +628,10 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 
 	dcUser->setInUserList(true);
 	dcUser->setCanSend(true);
+	if (dcUser->mDcConn != NULL) {
+		++ miTotalUserCount;
+	}
+
 	if (!dcUser->isPassive()) {
 		mActiveList.add(uidHash, dcUser);
 	}

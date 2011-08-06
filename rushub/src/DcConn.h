@@ -55,13 +55,12 @@ typedef enum {
 enum LoginStatus {
 
 	LOGIN_STATUS_KEY        = 1 << 0, ///< Key was checked (once)
-	LOGIN_STATUS_ALOWED     = 1 << 1, ///< It allow for entry
-	LOGIN_STATUS_VALNICK    = 1 << 2, ///< Nick was checked (once)
-	LOGIN_STATUS_PASSWD     = 1 << 3, ///< Password was right or password was not need
-	LOGIN_STATUS_VERSION    = 1 << 4, ///< Version was checked
-	LOGIN_STATUS_MYINFO     = 1 << 5, ///< MyINFO string was received
-	LOGIN_STATUS_NICKLST    = 1 << 6, ///< GetNickList flag
-	LOGIN_STATUS_LOGIN_DONE = LOGIN_STATUS_KEY|LOGIN_STATUS_ALOWED|LOGIN_STATUS_VALNICK|LOGIN_STATUS_PASSWD|LOGIN_STATUS_VERSION|LOGIN_STATUS_MYINFO|LOGIN_STATUS_NICKLST
+	LOGIN_STATUS_VALNICK    = 1 << 1, ///< Nick was checked (once)
+	LOGIN_STATUS_PASSWD     = 1 << 2, ///< Password was right or password was not need
+	LOGIN_STATUS_VERSION    = 1 << 3, ///< Version was checked
+	LOGIN_STATUS_MYINFO     = 1 << 4, ///< MyINFO string was received
+	LOGIN_STATUS_NICKLST    = 1 << 5, ///< GetNickList flag
+	LOGIN_STATUS_LOGIN_DONE = LOGIN_STATUS_KEY|LOGIN_STATUS_VALNICK|LOGIN_STATUS_PASSWD|LOGIN_STATUS_VERSION|LOGIN_STATUS_MYINFO|LOGIN_STATUS_NICKLST
 
 }; // enum LoginStatus
 

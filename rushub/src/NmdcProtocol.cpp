@@ -333,9 +333,6 @@ int NmdcProtocol::eventValidateNick(NmdcParser * dcparser, DcConn * dcConn) {
 		return -3;
 	}
 
-	dcConn->setLoginStatusFlag(LOGIN_STATUS_ALOWED);
-	++ mDcServer->miTotalUserCount;
-
 	dcConn->setLoginStatusFlag(LOGIN_STATUS_VALNICK | LOGIN_STATUS_NICKLST); /** We Install NICKLST because user can not call user list */
 	dcConn->clearTimeOut(HUB_TIME_OUT_VALNICK);
 
