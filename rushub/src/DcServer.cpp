@@ -285,7 +285,7 @@ int DcServer::onTimer(Time & now) {
 		mHelloList.flushCache(); // NMDC
 		mDcUserList.flushCache();
 		mBotList.flushCache();
-		mEnterList.flushCache(); // NMDC
+		mEnterList.flushCache();
 		mOpList.flushCache();
 		mIpList.flushCache();
 		mChatList.flushCache();
@@ -327,7 +327,7 @@ int DcServer::onTimer(Time & now) {
 		mDcUserList.autoResize();
 		mBotList.autoResize();
 		mHelloList.autoResize(); // NMDC
-		mEnterList.autoResize(); // NMDC
+		mEnterList.autoResize();
 		mActiveList.autoResize();
 		mChatList.autoResize();
 		mOpList.autoResize();
@@ -533,7 +533,7 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 
 
 /// User entry
-void DcServer::doUserEnter(DcConn * dcConn) { // refactoring in DcConn::flush !
+void DcServer::doUserEnter(DcConn * dcConn) {
 	// Check entry stages
 	if (LOGIN_STATUS_LOGIN_DONE != dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE)) {
 		if (dcConn->log(2)) {
