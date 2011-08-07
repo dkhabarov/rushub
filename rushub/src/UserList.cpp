@@ -29,51 +29,126 @@
 
 namespace dcserver {
 
-void UserList::ufSend::operator() (UserBase * userBase) {
-	if (userBase && userBase->isCanSend()) {
-		userBase->send(mData, mAddSep);
-	}
-}
 
-void UserList::ufSendProfile::operator() (UserBase * userBase) {
-	if (userBase && userBase->isCanSend()) {
-		int profile = userBase->getProfile() + 1;
-		if (profile < 0) {
-			profile = -profile;
-		}
-		if (profile > 31) {
-			profile = (profile % 32) - 1;
-		}
-		if (mProfile & (1 << profile)) {
+
+/** Unary function for sending data to users */
+struct ufSend : public unary_function<void, UserList::iterator> {
+	const string & mData; /** Data for sending */
+	bool mAddSep;
+
+	ufSend(const string & data, bool addSep) : mData(data), mAddSep(addSep) {
+	}
+
+	ufSend & operator = (const ufSend &) {
+		return *this;
+	}
+
+	void operator() (UserBase * userBase) {
+		if (userBase && userBase->isCanSend()) {
 			userBase->send(mData, mAddSep);
 		}
 	}
-}
 
-void UserList::ufSendWithNick::operator() (UserBase * userBase) {
-	if (userBase && userBase->isCanSend() && !userBase->uid().empty()) {
-		userBase->send(mDataStart, false, false);
-		userBase->send(userBase->uid(), false, false);
-		userBase->send(mDataEnd, true);
+}; // struct ufSend
+
+
+
+/** Unary function for sending data to users with profile */
+struct ufSendProfile : public unary_function<void, UserList::iterator> {
+	const string & mData; /** Data for sending */
+	unsigned long mProfile;
+	bool mAddSep;
+
+	ufSendProfile(const string & data, unsigned long profile, bool addSep) : 
+		mData(data), mProfile(profile), mAddSep(addSep)
+	{
 	}
-}
 
-void UserList::ufSendWithNickProfile::operator() (UserBase * userBase) {
-	if (userBase && userBase->isCanSend()) { 
-		int profile = userBase->getProfile() + 1;
-		if (profile < 0) {
-			profile = -profile;
+	ufSendProfile & operator = (const ufSendProfile &) {
+		return *this;
+	}
+
+	void operator() (UserBase * userBase) {
+		if (userBase && userBase->isCanSend()) {
+			int profile = userBase->getProfile() + 1;
+			if (profile < 0) {
+				profile = -profile;
+			}
+			if (profile > 31) {
+				profile = (profile % 32) - 1;
+			}
+			if (mProfile & (1 << profile)) {
+				userBase->send(mData, mAddSep);
+			}
 		}
-		if (profile > 31) {
-			profile = (profile % 32) - 1;
-		}
-		if (mProfile & (1 << profile) && !userBase->uid().empty()) {
+	}
+
+}; // struct ufSendProfile
+
+
+
+/** Unary function for sending data dataS + nick + dataE to each user */
+struct ufSendWithNick : public unary_function<void, UserList::iterator> {
+	const string &mDataStart, &mDataEnd; /** Data for sending */
+
+	ufSendWithNick(const string & dataStart, const string & dataEnd) : 
+		mDataStart(dataStart),
+		mDataEnd(dataEnd)
+	{
+	}
+
+	ufSendWithNick & operator = (const ufSendWithNick &) {
+		return *this;
+	}
+
+	void operator() (UserBase * userBase) {
+		if (userBase && userBase->isCanSend() && !userBase->uid().empty()) {
 			userBase->send(mDataStart, false, false);
 			userBase->send(userBase->uid(), false, false);
 			userBase->send(mDataEnd, true);
 		}
 	}
-}
+
+}; // struct ufSendWithNick
+
+
+
+/** Unary function for sending data dataS + nick + dataE to each user with profile */
+struct ufSendWithNickProfile : public unary_function<void, UserList::iterator> {
+	const string &mDataStart, &mDataEnd; /** Data for sending */
+	unsigned long mProfile;
+
+	ufSendWithNickProfile(const string & dataStart, const string & dataEnd, unsigned long profile) : 
+		mDataStart(dataStart),
+		mDataEnd(dataEnd),
+		mProfile(profile)
+	{
+	}
+
+	ufSendWithNickProfile & operator = (const ufSendWithNickProfile &) {
+		return *this;
+	}
+
+	void operator() (UserBase * userBase) {
+		if (userBase && userBase->isCanSend()) { 
+			int profile = userBase->getProfile() + 1;
+			if (profile < 0) {
+				profile = -profile;
+			}
+			if (profile > 31) {
+				profile = (profile % 32) - 1;
+			}
+			if (mProfile & (1 << profile) && !userBase->uid().empty()) {
+				userBase->send(mDataStart, false, false);
+				userBase->send(userBase->uid(), false, false);
+				userBase->send(mDataEnd, true);
+			}
+		}
+	}
+
+}; // struct ufSendWithNickProfile
+
+
 
 void UserList::ufDoNickList::operator() (UserBase * userBase) {
 	if (!userBase->hide() && !userBase->uid().empty()) {
@@ -81,6 +156,8 @@ void UserList::ufDoNickList::operator() (UserBase * userBase) {
 		mList.append(mSep);
 	}
 }
+
+
 
 UserList::UserList(const string & name, bool keepNickList) :
 	Obj("UserList"),
@@ -91,6 +168,8 @@ UserList::UserList(const string & name, bool keepNickList) :
 	mNickListMaker(mNickList)
 {
 }
+
+
 
 const string & UserList::getNickList() {
 	if (mRemakeNextNickList && mKeepNickList) {
@@ -141,6 +220,8 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 	}
 }
 
+
+
 /** Sending data to profiles */
 void UserList::sendToProfiles(unsigned long profile, const string & data, bool addSep) {
 	if (log(4)) {
@@ -154,6 +235,8 @@ void UserList::sendToProfiles(unsigned long profile, const string & data, bool a
 	}
 }
 
+
+
 /** Sending data start+Nick+end to all
     Nick - user's nick
     Use for private send to all */
@@ -161,9 +244,13 @@ void UserList::sendWithNick(const string & dataStart, const string & dataEnd) {
 	for_each(begin(), end(), ufSendWithNick(dataStart, dataEnd));
 }
 
+
+
 void UserList::sendWithNick(const string & dataStart, const string & dataEnd, unsigned long profile) {
 	for_each(begin(), end(), ufSendWithNickProfile(dataStart, dataEnd, profile));
 }
+
+
 
 /** Flush user cache */
 void UserList::flushForUser(UserBase * userBase) {
@@ -171,6 +258,8 @@ void UserList::flushForUser(UserBase * userBase) {
 		ufSend(mCache, false).operator() (userBase);
 	}
 }
+
+
 
 /** Flush common cache */
 void UserList::flushCache() {
@@ -180,6 +269,8 @@ void UserList::flushCache() {
 	}
 }
 
+
+
 /** Redefining log level function */
 bool UserList::strLog() {
 	Obj::strLog();
@@ -188,12 +279,15 @@ bool UserList::strLog() {
 }
 
 
-void FullUserList::ufDoINFOList::operator() (UserBase * userBase) {
+
+void FullUserList::ufDoInfoList::operator() (UserBase * userBase) {
 	if (!userBase->hide()) {
 		msListComplete.append(userBase->myInfoString());
 		msListComplete.append(mSep);
 	}
 }
+
+
 
 void FullUserList::ufDoIpList::operator() (UserBase * userBase) {
 	if (!userBase->hide() && userBase->ip().size() && !userBase->uid().empty()) {
@@ -203,6 +297,8 @@ void FullUserList::ufDoIpList::operator() (UserBase * userBase) {
 		mList.append(mSep);
 	}
 }
+
+
 
 FullUserList::FullUserList(const string & name, bool keepNickList, bool keepInfoList, bool keepIpList) :
 	UserList(name, keepNickList),

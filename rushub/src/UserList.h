@@ -45,82 +45,10 @@ namespace dcserver {
 class UserBase;
 
 
-
 /** The structure, allowing add and delete users. Quick iterations cycle for sending */
 class UserList : public Obj, public HashTable<UserBase *> {
 
 public:
-
-	/** Unary function for sending data to users */
-	struct ufSend : public unary_function<void, iterator> {
-		const string & mData; /** Data for sending */
-		bool mAddSep;
-
-		ufSend(const string & data, bool addSep) : mData(data), mAddSep(addSep) {
-		}
-
-		ufSend & operator = (const ufSend &) {
-			return *this;
-		}
-
-		void operator() (UserBase *); /** Sending operator */
-	};
-
-	/** Unary function for sending data to users with profile */
-	struct ufSendProfile : public unary_function<void, iterator> {
-		const string & mData; /** Data for sending */
-		unsigned long mProfile;
-		bool mAddSep;
-
-		ufSendProfile(const string & data, unsigned long profile, bool addSep) : 
-			mData(data), mProfile(profile), mAddSep(addSep)
-		{
-		}
-
-		ufSendProfile & operator = (const ufSendProfile &) {
-			return *this;
-		}
-
-		void operator() (UserBase *); /** Sending operator */
-	};
-
-	/** Unary function for sending data dataS + nick + dataE to each user */
-	struct ufSendWithNick : public unary_function<void, iterator> {
-		const string &mDataStart, &mDataEnd; /** Data for sending */
-
-		ufSendWithNick(const string & dataStart, const string & dataEnd) : 
-			mDataStart(dataStart),
-			mDataEnd(dataEnd)
-		{
-		}
-
-		ufSendWithNick & operator = (const ufSendWithNick &) {
-			return *this;
-		}
-
-		void operator() (UserBase *); /** Sending operator */
-	};
-
-	/** Unary function for sending data dataS + nick + dataE to each user with profile */
-	struct ufSendWithNickProfile : public unary_function<void, iterator> {
-		const string &mDataStart, &mDataEnd; /** Data for sending */
-		unsigned long mProfile;
-
-		ufSendWithNickProfile(const string & dataStart, const string & dataEnd, unsigned long profile) : 
-			mDataStart(dataStart),
-			mDataEnd(dataEnd),
-			mProfile(profile)
-		{
-		}
-
-		ufSendWithNickProfile & operator = (const ufSendWithNickProfile &) {
-			return *this;
-		}
-
-		void operator() (UserBase *); /** Sending operator */
-	};
-
-
 
 	/** Unary function for constructing nick-list */
 	struct ufDoNickList : public unary_function<void, iterator> {
@@ -165,7 +93,7 @@ public:
 	}
 
 	UserBase * getUserBaseByUid(const string & uid) {
-		return List_t::find(static_cast<unsigned long> (uidToLowerHash(uid))); // for x64 compatibility
+		return HashTable<UserBase *>::find(static_cast<unsigned long> (uidToLowerHash(uid))); // for x64 compatibility
 	}
 
 	virtual const string & getNickList();
@@ -230,8 +158,6 @@ protected:
 
 private:
 
-	typedef HashTable<UserBase *> List_t;
-
 	string mName; ///< Name of list
 	string mCache;
 
@@ -247,9 +173,9 @@ class FullUserList : public UserList {
 public:
 
 	/** Unary function for constructing MyINFO list */
-	struct ufDoINFOList : public UserList::ufDoNickList {
+	struct ufDoInfoList : public UserList::ufDoNickList {
 		string & msListComplete;
-		ufDoINFOList(string & listComplete) :
+		ufDoInfoList(string & listComplete) :
 			ufDoNickList(listComplete),
 			msListComplete(listComplete)
 		{
@@ -257,10 +183,10 @@ public:
 			mStart = "";
 		}
 
-		virtual ~ufDoINFOList() {
+		virtual ~ufDoInfoList() {
 		}
 
-		virtual ufDoINFOList & operator = (const ufDoINFOList &) {
+		virtual ufDoInfoList & operator = (const ufDoInfoList &) {
 			return *this;
 		}
 
@@ -334,7 +260,7 @@ private:
 
 	string mInfoListComplete;
 	string mIpList;
-	ufDoINFOList mInfoListMaker;
+	ufDoInfoList mInfoListMaker;
 	ufDoIpList mIpListMaker;
 
 }; // FullUserList
