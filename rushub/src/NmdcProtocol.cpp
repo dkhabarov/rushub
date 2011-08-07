@@ -500,10 +500,9 @@ int NmdcProtocol::eventMyInfo(NmdcParser * dcparser, DcConn * dcConn) {
 	if (iMode != 1 && dcConn->mDcUser->getInUserList()) {
 		if (sOldMyINFO != dcConn->mDcUser->getMyInfo()) {
 			if (dcConn->mDcUser->getHide()) {
-				dcConn->send(dcparser->mCommand, true); // Send to self only
+				dcConn->send(dcConn->mDcUser->getMyInfo(), true); // Send to self only
 			} else {
-				sendMode(dcConn, dcparser->mCommand, iMode, mDcServer->mDcUserList, true); // Use cache for send to all
-				//mDcServer->mDcUserList.sendToAll(dcparser->mCommand, true/*mDcServer->mDcConfig.mDelayedMyinfo*/); // Send to all
+				sendMode(dcConn, dcConn->mDcUser->getMyInfo(), iMode, mDcServer->mDcUserList, true); // Use cache for send to all
 			}
 		}
 	} else if (!dcConn->mDcUser->getInUserList()) {
