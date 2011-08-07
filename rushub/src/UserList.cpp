@@ -87,7 +87,6 @@ UserList::UserList(const string & name, bool keepNickList) :
 	HashTable<UserBase *> (1024), // 1024 for big hubs and big check interval of resize
 	mKeepNickList(keepNickList),
 	mRemakeNextNickList(true),
-	mOptRemake(false),
 	mName(name),
 	mNickListMaker(mNickList)
 {
@@ -97,10 +96,12 @@ const string & UserList::getNickList() {
 	if (mRemakeNextNickList && mKeepNickList) {
 		mNickListMaker.clear();
 		for_each(begin(), end(), mNickListMaker);
-		mRemakeNextNickList = mOptRemake = false;
+		mRemakeNextNickList = false;
 	}
 	return mNickList;
 }
+
+
 
 /**
  Sendind data to all users from the list
@@ -209,30 +210,24 @@ FullUserList::FullUserList(const string & name, bool keepNickList, bool keepInfo
 	mRemakeNextInfoList(true),
 	mKeepIpList(keepIpList),
 	mRemakeNextIpList(true),
-	mInfoListMaker(mInfoList, mInfoListComplete),
+	mInfoListMaker(mInfoListComplete),
 	mIpListMaker(mIpList)
 {
 	setClassName("FullUserList");
 }
 
-const string & FullUserList::getNickList() {
-	if (mKeepNickList) {
-		UserList::getNickList();
-		mOptRemake = false;
+
+
+const string & FullUserList::getInfoList() {
+	if (mRemakeNextInfoList && mKeepInfoList) {
+		mInfoListMaker.clear();
+		for_each(begin(), end(), mInfoListMaker);
+		mRemakeNextInfoList = false;
 	}
-	return mNickList;
+	return mInfoListComplete;
 }
 
-const string & FullUserList::getInfoList(bool complete) {
-	if (mKeepInfoList) {
-		if (mRemakeNextInfoList && mKeepInfoList) {
-			mInfoListMaker.clear();
-			for_each(begin(), end(), mInfoListMaker);
-			mRemakeNextInfoList = mOptRemake = false;
-		}
-	}
-	return complete ? mInfoListComplete : mInfoList;
-}
+
 
 const string & FullUserList::getIpList() {
 	if (mRemakeNextIpList && mKeepIpList) {
@@ -242,6 +237,7 @@ const string & FullUserList::getIpList() {
 	}
 	return mIpList;
 }
+
 
 }; // namespace dcserver
 

@@ -31,6 +31,7 @@ using namespace ::std;
 namespace dcserver {
 
 class DcConn;
+class DcServer;
 
 namespace protocol {
 

@@ -18,6 +18,7 @@
  */
  
 #include "AdcProtocol.h"
+#include "DcServer.h" // for mDcServer
 #include "DcConn.h" // for DcConn
 
 namespace dcserver {

@@ -1155,7 +1155,7 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 				dcConn->logStream() << "Sending MyINFO list" << endl;
 			}
 			// seperator "|" was added in getInfoList function
-			dcConn->send(mDcServer->mDcUserList.getInfoList(true), false, false);
+			dcConn->send(mDcServer->mDcUserList.getInfoList(), false, false);
 		} else if (dcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
 			if (dcConn->log(3)) {
 				dcConn->logStream() << "Sending MyINFO list and Nicklist" << endl;
@@ -1163,7 +1163,7 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 			// seperator "|" was not added in getNickList function, because seperator was "$$"
 			dcConn->send(mDcServer->mDcUserList.getNickList(), true, false);
 			// seperator "|" was added in getInfoList function
-			dcConn->send(mDcServer->mDcUserList.getInfoList(true), false, false);
+			dcConn->send(mDcServer->mDcUserList.getInfoList(), false, false);
 		} else {
 			if (dcConn->log(3)) {
 				dcConn->logStream() << "Sending Nicklist" << endl;

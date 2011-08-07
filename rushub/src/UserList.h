@@ -179,7 +179,7 @@ public:
 	}
 	
 	void remake() {
-		mRemakeNextNickList = (!mOptRemake);
+		mRemakeNextNickList = true;
 	}
 
 	/** Sending data to all from the list */
@@ -208,7 +208,6 @@ protected:
 	string mNickList;
 	bool mKeepNickList;
 	bool mRemakeNextNickList;
-	bool mOptRemake; /** Flag of the absence of the change between remake */
 
 protected:
 
@@ -220,7 +219,6 @@ protected:
 
 	virtual void onRemove(UserBase *) {
 		mRemakeNextNickList = mKeepNickList;
-		mOptRemake = false;
 	}
 
 	virtual void onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
@@ -251,8 +249,8 @@ public:
 	/** Unary function for constructing MyINFO list */
 	struct ufDoINFOList : public UserList::ufDoNickList {
 		string & msListComplete;
-		ufDoINFOList(string & list, string & listComplete) :
-			ufDoNickList(list),
+		ufDoINFOList(string & listComplete) :
+			ufDoNickList(listComplete),
 			msListComplete(listComplete)
 		{
 			mSep = NMDC_SEPARATOR;
@@ -267,7 +265,6 @@ public:
 		}
 
 		virtual void clear() { /** Clear var and record prefix */
-			ufDoNickList::clear();
 			msListComplete.erase(0, msListComplete.size());
 			msListComplete.append(mStart);
 		}
@@ -303,16 +300,11 @@ public:
 		return *this;
 	}
 
-	virtual const string & getNickList();
-	virtual const string & getInfoList(bool complete = false);
+	virtual const string & getInfoList();
 	virtual const string & getIpList();
 
 	inline void remake() {
-		if (!mOptRemake) {
-			mRemakeNextNickList = mRemakeNextInfoList = mRemakeNextIpList = true;
-		} else {
-			mRemakeNextNickList = mRemakeNextInfoList = mRemakeNextIpList = false;
-		}
+		mRemakeNextNickList = mRemakeNextInfoList = mRemakeNextIpList = true;
 	}
 
 
@@ -340,12 +332,10 @@ protected:
 
 private:
 
-	string mInfoList;
 	string mInfoListComplete;
 	string mIpList;
 	ufDoINFOList mInfoListMaker;
 	ufDoIpList mIpListMaker;
-
 
 }; // FullUserList
 
