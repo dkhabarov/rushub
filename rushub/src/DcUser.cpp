@@ -107,7 +107,7 @@ void DcUser::setUid(const string & uid) {
 	mUid = uid;
 
 	// Calc uid hash
-	mUidHash = static_cast<unsigned long> (UserList::nick2Key(uid));
+	mUidHash = static_cast<unsigned long> (UserList::uidToLowerHash(uid));
 }
 
 

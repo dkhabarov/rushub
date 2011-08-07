@@ -157,15 +157,15 @@ public:
 		return *this;
 	}
 
-	static Key nick2Key(const string & nick) {
-		string key;
-		key.resize(nick.size());
-		::transform(nick.begin(), nick.end(), key.begin(), ::tolower);
-		return mHash(key);
+	static Key uidToLowerHash(const string & uid) {
+		string tmp;
+		tmp.resize(uid.size());
+		::transform(uid.begin(), uid.end(), tmp.begin(), ::tolower);
+		return mHash(tmp);
 	}
 
-	UserBase * getUserBaseByNick(const string & nick) {
-		return List_t::find(static_cast<unsigned long> (nick2Key(nick))); // for x64 compatibility
+	UserBase * getUserBaseByUid(const string & uid) {
+		return List_t::find(static_cast<unsigned long> (uidToLowerHash(uid))); // for x64 compatibility
 	}
 
 	virtual const string & getNickList();

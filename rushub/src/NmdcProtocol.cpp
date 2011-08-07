@@ -33,7 +33,9 @@ namespace dcserver {
 namespace protocol {
 
 
-NmdcProtocol::NmdcProtocol() {
+NmdcProtocol::NmdcProtocol() :
+	mDcServer(NULL)
+{
 	setClassName("NmdcProtocol");
 
 	events[NMDC_TYPE_MSEARCH] = &NmdcProtocol::eventSearch;
@@ -171,7 +173,7 @@ Conn * NmdcProtocol::getConnForUdpData(Conn * conn, Parser * parser) {
 		if (!dcParser->splitChunks()) {
 
 			// NMDC
-			DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcParser->chunkString(CHUNK_SR_FROM)));
+			DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcParser->chunkString(CHUNK_SR_FROM)));
 			if (dcUser && dcUser->mDcConn && conn->getIpUdp() == dcUser->getIp()) {
 				return dcUser->mDcConn;
 			} else {
@@ -590,7 +592,7 @@ int NmdcProtocol::eventTo(NmdcParser * dcparser, DcConn * dcConn) {
 	#endif
 
 	// Search user (PROTOCOL NMDC)
-	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(nick));
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(nick));
 	if (!dcUser) {
 		return -2;
 	}
@@ -625,7 +627,7 @@ int NmdcProtocol::eventMcTo(NmdcParser * dcparser, DcConn * dcConn) {
 	#endif
 
 	// Search user (PROTOCOL NMDC)
-	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(nick));
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(nick));
 	if (!dcUser) {
 		return -2;
 	}
@@ -659,7 +661,7 @@ int NmdcProtocol::eventUserIp(NmdcParser * dcParser, DcConn * dcConn) {
 		nick.assign(param, cur, pos - cur);
 		if (nick.size()) {
 			// PROTOCOL NMDC
-			UserBase * userBase = mDcServer->mDcUserList.getUserBaseByNick(nick);
+			UserBase * userBase = mDcServer->mDcUserList.getUserBaseByUid(nick);
 			if (userBase != NULL) {
 				result.append(nick).append(" ", 1).append(userBase->ip()).append("$$", 2);
 			}
@@ -672,7 +674,7 @@ int NmdcProtocol::eventUserIp(NmdcParser * dcParser, DcConn * dcConn) {
 	nick.assign(param, cur, param.size() - cur);
 	if (nick.size()) {
 		// PROTOCOL NMDC
-		UserBase * userBase = mDcServer->mDcUserList.getUserBaseByNick(nick);
+		UserBase * userBase = mDcServer->mDcUserList.getUserBaseByUid(nick);
 		if (userBase != NULL) {
 			result.append(nick).append(" ", 1).append(userBase->ip());
 		}
@@ -782,7 +784,7 @@ int NmdcProtocol::eventSr(NmdcParser * dcparser, DcConn * dcConn) {
 	DcUser * dcUser = NULL;
 	const string & nick = dcparser->chunkString(CHUNK_SR_TO);
 	if (nick != "") {
-		dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(nick));
+		dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(nick));
 
 		/** Is user exist? */
 		if (!dcUser || !dcUser->mDcConn) {
@@ -826,7 +828,7 @@ int NmdcProtocol::eventConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 	}
 
 	// PROTOCOL NMDC
-	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcparser->chunkString(CHUNK_CM_NICK)));
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcparser->chunkString(CHUNK_CM_NICK)));
 	if (!dcUser) {
 		return -1;
 	}
@@ -860,7 +862,7 @@ int NmdcProtocol::eventRevConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 	}
 
 	// Searching the user (PROTOCOL NMDC)
-	DcUser * other = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcparser->chunkString(CHUNK_RC_OTHER)));
+	DcUser * other = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcparser->chunkString(CHUNK_RC_OTHER)));
 	if (!other) {
 		return -2;
 	}
@@ -905,7 +907,7 @@ int NmdcProtocol::eventKick(NmdcParser * dcparser, DcConn * dcConn) {
 	}
 
 	// PROTOCOL NMDC
-	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcparser->chunkString(CHUNK_1_PARAM)));
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcparser->chunkString(CHUNK_1_PARAM)));
 
 	// Is user exist?
 	if (!dcUser || !dcUser->mDcConn) {
@@ -935,7 +937,7 @@ int NmdcProtocol::eventOpForceMove(NmdcParser * dcparser, DcConn * dcConn) {
 	}
 
 	// PROTOCOL NMDC
-	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcparser->chunkString(CHUNK_FM_NICK)));
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcparser->chunkString(CHUNK_FM_NICK)));
 
 	// Is user exist?
 	if (!dcUser || !dcUser->mDcConn || !dcparser->chunkString(CHUNK_FM_DEST).size()) {
@@ -955,7 +957,7 @@ int NmdcProtocol::eventGetInfo(NmdcParser * dcparser, DcConn * dcConn) {
 	}
 
 	// PROTOCOL NMDC
-	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcparser->chunkString(CHUNK_GI_OTHER)));
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcparser->chunkString(CHUNK_GI_OTHER)));
 	if (!dcUser) {
 		return -2;
 	}

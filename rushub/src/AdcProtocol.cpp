@@ -25,7 +25,9 @@ namespace dcserver {
 namespace protocol {
 
 
-AdcProtocol::AdcProtocol() {
+AdcProtocol::AdcProtocol() :
+	mDcServer(NULL)
+{
 	setClassName("AdcProtocol");
 
 	events[ADC_TYPE_SUP] = &AdcProtocol::eventSup;

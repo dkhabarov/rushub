@@ -53,7 +53,13 @@ public:
 
 	virtual int onNewConn(Conn *);
 
+	void setServer(DcServer * dcServer) {
+		mDcServer = dcServer;
+	}
+
 protected:
+
+	DcServer * mDcServer;
 
 	typedef int (AdcProtocol::*Event) (AdcParser *, DcConn *);
 	Event events[ADC_TYPE_UNKNOWN + 1];

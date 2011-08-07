@@ -91,6 +91,7 @@ DcServer::DcServer(const string & configFile, const string &) :
 	// DcIpList
 	mIpListConn = new DcIpList();
 
+	mAdcProtocol.setServer(this);
 	mNmdcProtocol.setServer(this);
 	mPluginList.setServer(this);
 
@@ -609,12 +610,6 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 		mDcUserList.logStream() << "After add: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
 	}
 
-	dcUser->setInUserList(true);
-	dcUser->setCanSend(true);
-	if (dcUser->mDcConn != NULL) {
-		++ miTotalUserCount;
-	}
-
 	if (!dcUser->isPassive()) {
 		mActiveList.add(uidHash, dcUser);
 	}
@@ -625,18 +620,23 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 		mIpList.add(uidHash, dcUser);
 	}
 
+	dcUser->setInUserList(true);
+	dcUser->setCanSend(true);
+
 	if (dcUser->mDcConn) {
+
+		++ miTotalUserCount;
+
 		dcUser->mDcConn->mIpRecv = true; // Installing the permit on reception of the messages on ip
 		mChatList.add(uidHash, dcUser);
 
+		// NMDC
 		if (!(dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO)) {
 			mHelloList.add(uidHash, dcUser);
 		}
+
 		if (dcUser->mDcConn->log(3)) {
 			dcUser->mDcConn->logStream() << "Adding at the end of Nicklist" << endl;
-		}
-		if (dcUser->mDcConn->log(3)) {
-			dcUser->mDcConn->logStream() << "Becomes in list" << endl;
 		}
 	}
 	return true;
@@ -785,7 +785,7 @@ DcUser * DcServer::getDcUser(const char * nick) {
 	string nickStr(nick);
 	if (nickStr.size()) {
 		// NMDC
-		UserBase * userBase = mDcUserList.getUserBaseByNick(nickStr);
+		UserBase * userBase = mDcUserList.getUserBaseByUid(nickStr);
 		if (userBase) {
 			return static_cast<DcUser *> (userBase);
 		}
@@ -959,7 +959,7 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & nickList, const char 
 	vector<DcUser *> ul;
 	for (List_t::const_iterator it = nickList.begin(); it != nickList.end(); ++it) {
 		// NMDC
-		dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByNick(*it));
+		dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByUid(*it));
 		if (dcUser && dcUser->isCanSend()) {
 			dcUser->setCanSend(false);
 			ul.push_back(dcUser);
@@ -1061,20 +1061,9 @@ const vector<string> & DcServer::getConfig() {
 
 
 
-const char * DcServer::getConfig(const string & sName) {
-	Config * config = mDcConfig[sName];
-	if (!config) {
-		return NULL;
-	}
-	config->convertTo(sBuf);
-	return sBuf.c_str();
-}
-
-
-
-const char * DcServer::getLang(const string & sName) {
-	Config * config = mDcLang[sName];
-	if (!config) {
+const char * DcServer::getConfig(const string & name) {
+	Config * config = mDcConfig[name];
+	if (config == NULL) {
 		return NULL;
 	}
 	config->convertTo(sBuf);
@@ -1093,7 +1082,7 @@ bool DcServer::setConfig(const string & name, const string & value) {
 	}
 
 	Config * config = mDcConfig[name];
-	if (!config) {
+	if (config == NULL) {
 		return false;
 	}
 
@@ -1127,9 +1116,20 @@ bool DcServer::setConfig(const string & name, const string & value) {
 
 
 
+const char * DcServer::getLang(const string & name) {
+	Config * config = mDcLang[name];
+	if (config == NULL) {
+		return NULL;
+	}
+	config->convertTo(sBuf);
+	return sBuf.c_str();
+}
+
+
+
 bool DcServer::setLang(const string & name, const string & value) {
 	Config * config = mDcLang[name];
-	if (!config) {
+	if (config == NULL) {
 		return false;
 	}
 	config->convertFrom(value);
@@ -1187,7 +1187,7 @@ int DcServer::unregBot(const string & uid) {
 	}
 
 	// NMDC
-	DcUser * dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByNick(uid));
+	DcUser * dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByUid(uid));
 	if (!dcUser) {
 		return -1;
 	}
