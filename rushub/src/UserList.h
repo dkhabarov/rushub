@@ -45,6 +45,72 @@ namespace dcserver {
 class UserBase;
 
 
+
+template <class I, class T>
+class ListItem {
+
+public:
+
+	typedef void (*Func)(string &, T);
+
+public:
+
+	ListItem(Func func, const char * start = "", bool keep = false) : 
+		mStart(start),
+		mKeep(keep),
+		mRemake(true),
+		mMaker(func, mList)
+	{
+	}
+
+	void add(T t) {
+		if(!mRemake && mKeep) {
+			mMaker(t);
+		}
+	}
+
+	void remove(T) {
+		mRemake = mKeep;
+	}
+
+	const string & getList(I begin, I end) {
+		if (mRemake && mKeep) {
+			mList.erase(0, mList.size());
+			mList.append(mStart);
+			for_each(begin, end, mMaker);
+			mRemake = false;
+		}
+		return mList;
+	}
+
+private:
+
+	struct Maker : public unary_function<void, I> {
+		Func mFunc;
+		string & mList;
+
+		Maker(Func func, string & list) : mFunc(func), mList(list) {
+		}
+
+		void operator() (T t) {
+			mFunc(mList, t);
+		}
+
+	}; // struct ListMaker
+
+	string mList;
+	string mStart;
+
+	bool mKeep;
+	bool mRemake;
+
+	Maker mMaker;
+
+}; // class ListItem
+
+
+
+
 /** The structure, allowing add and delete users. Quick iterations cycle for sending */
 class UserList : public Obj, public HashTable<UserBase *> {
 
@@ -131,6 +197,10 @@ public:
 	/** Redefining log level function */
 	virtual bool strLog();
 
+	void nmdcNickList(string & list, UserBase * userBase);
+	void nmdcInfoList(string & list, UserBase * userBase);
+	void nmdcIpList(string & list, UserBase * userBase);
+
 protected:
 
 	string mNickList;
@@ -162,7 +232,6 @@ private:
 	string mCache;
 
 	ufDoNickList mNickListMaker;
-
 
 }; // UserList
 

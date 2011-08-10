@@ -150,15 +150,6 @@ struct ufSendWithNickProfile : public unary_function<void, UserList::iterator> {
 
 
 
-void UserList::ufDoNickList::operator() (UserBase * userBase) {
-	if (!userBase->hide() && !userBase->uid().empty()) {
-		mList.append(userBase->uid());
-		mList.append(mSep);
-	}
-}
-
-
-
 UserList::UserList(const string & name, bool keepNickList) :
 	Obj("UserList"),
 	HashTable<UserBase *> (1024), // 1024 for big hubs and big check interval of resize
@@ -280,6 +271,15 @@ bool UserList::strLog() {
 
 
 
+void UserList::ufDoNickList::operator() (UserBase * userBase) {
+	if (!userBase->hide() && !userBase->uid().empty()) {
+		mList.append(userBase->uid());
+		mList.append(mSep);
+	}
+}
+
+
+
 void FullUserList::ufDoInfoList::operator() (UserBase * userBase) {
 	if (!userBase->hide()) {
 		msListComplete.append(userBase->myInfoString());
@@ -332,6 +332,38 @@ const string & FullUserList::getIpList() {
 		mRemakeNextIpList = false;
 	}
 	return mIpList;
+}
+
+
+
+void UserList::nmdcNickList(string & list, UserBase * userBase) {
+	// $NickList nick1$$nick2$$
+	if (!userBase->hide() && !userBase->uid().empty()) {
+		list.append(userBase->uid());
+		list.append("$$");
+	}
+}
+
+
+
+void UserList::nmdcInfoList(string & list, UserBase * userBase) {
+	// $MyINFO nick1 ...|$MyINFO nick2 ...|
+	if (!userBase->hide()) {
+		list.append(userBase->myInfoString());
+		list.append(NMDC_SEPARATOR);
+	}
+}
+
+
+
+void UserList::nmdcIpList(string & list, UserBase * userBase) {
+	// $UserIP nick1 ip1$$nick2 ip2$$
+	if (!userBase->hide() && userBase->ip().size() && !userBase->uid().empty()) {
+		list.append(userBase->uid());
+		list.append(" ", 1);
+		list.append(userBase->ip());
+		list.append("$$");
+	}
 }
 
 
