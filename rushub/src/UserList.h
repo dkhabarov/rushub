@@ -69,7 +69,7 @@ public:
 		}
 	}
 
-	void remove(T) {
+	void remake() {
 		mRemake = mKeep;
 	}
 
