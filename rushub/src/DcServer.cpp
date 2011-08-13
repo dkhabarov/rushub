@@ -70,6 +70,7 @@ DcServer::DcServer(const string & configFile, const string &) :
 	mHelloList("HelloList"),
 	mEnterList("EnterList"),
 	mChatList("ChatList"),
+	mAdcUserList("AdcUserList"),
 	miTotalUserCount(0),
 	miTotalShare(0),
 	mPluginList(mDcConfig.mPluginPath),
@@ -102,7 +103,8 @@ DcServer::DcServer(const string & configFile, const string &) :
 	mDcUserList.addUserListItem(NmdcProtocol::myInfoList, "");
 	mDcUserList.addUserListItem(NmdcProtocol::ipList, "$UserIP ");
 	mOpList.addUserListItem(NmdcProtocol::nickList, "$OpList ");
-	//mDcUserList.addUserListItem(AdcProtocol::infList, ""); // TODO
+
+	mAdcUserList.addUserListItem(AdcProtocol::infList, "");
 
 
 	if (mDcConfig.mRegMainBot) { // Main bot registration
@@ -291,6 +293,7 @@ int DcServer::onTimer(Time & now) {
 		mIpList.flushCache();
 		mChatList.flushCache();
 		mActiveList.flushCache();
+		mAdcUserList.flushCacheAdc(); // ADC
 
 
 		int SysLoading = mSystemLoad;
@@ -333,6 +336,7 @@ int DcServer::onTimer(Time & now) {
 		mChatList.autoResize();
 		mOpList.autoResize();
 		mIpList.autoResize();
+		mAdcUserList.autoResize(); // ADC
 	}
 
 	#ifndef WITHOUT_PLUGINS

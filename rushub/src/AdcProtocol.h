@@ -60,6 +60,7 @@ public:
 	}
 
 	static void infList(string & list, UserBase * userBase);
+	static const char * getSid(unsigned int num);
 
 protected:
 
@@ -67,6 +68,10 @@ protected:
 
 	typedef int (AdcProtocol::*Event) (AdcParser *, DcConn *);
 	Event events[ADC_TYPE_UNKNOWN + 1];
+
+private:
+
+	unsigned int mSidNum;
 
 private:
 

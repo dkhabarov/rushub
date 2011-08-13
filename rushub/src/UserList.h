@@ -145,6 +145,9 @@ public:
 	/** Sending data to all from the list */
 	void sendToAll(const string & data, bool useCache = false, bool addSep = true);
 
+	/** Sending data to all from the list */
+	void sendToAllAdc(const string & data, bool useCache = false, bool addSep = true);
+
 	/** Sending data to profiles */
 	void sendToProfiles(unsigned long profile, const string & data, bool addSep = true);
 
@@ -159,6 +162,8 @@ public:
 
 	/** Sending data from cache to all and clear cache */
 	void flushCache();
+
+	void flushCacheAdc();
 
 	/** Redefining log level function */
 	virtual bool strLog();

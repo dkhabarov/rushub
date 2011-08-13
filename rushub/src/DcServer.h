@@ -74,8 +74,7 @@ typedef enum {
 enum {
 	USER_LIST_NICK,
 	USER_LIST_MYINFO,
-	USER_LIST_IP,
-	USER_LIST_INF
+	USER_LIST_IP
 };
 
 
@@ -152,6 +151,8 @@ public:
 	UserList mHelloList; ///< Hello user list (NMDC)
 	UserList mEnterList; ///< Enter list (NMDC)
 	UserList mChatList; ///< Chat list
+
+	UserList mAdcUserList; ///< ADC User list
 
 	int miTotalUserCount; ///< Total number of the users
 	__int64 miTotalShare; ///< Total hub share size

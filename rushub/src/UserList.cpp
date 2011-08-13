@@ -234,6 +234,40 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 
 
 
+void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
+	if (!useCache) {
+		if (log(4)) {
+			logStream() << "sendToAll begin" << endl;
+		}
+
+		if (mCache.size()) {
+			mCache.append(data);
+			if (addSep) {
+				if (mCache.find(ADC_SEPARATOR, mCache.size() - ADC_SEPARATOR_LEN, ADC_SEPARATOR_LEN)) {
+					mCache.append(ADC_SEPARATOR);
+				}
+			}
+			for_each(begin(), end(), ufSend(mCache, false));
+			mCache.erase(0, mCache.size());
+		} else {
+			for_each(begin(), end(), ufSend(data, addSep));
+		}
+
+		if (log(4)) {
+			logStream() << "sendToAll end" << endl;
+		}
+	} else {
+		mCache.append(data);
+		if (addSep) {
+			if (mCache.find(NMDC_SEPARATOR, mCache.size() - NMDC_SEPARATOR_LEN, NMDC_SEPARATOR_LEN)) {
+				mCache.append(NMDC_SEPARATOR);
+			}
+		}
+	}
+}
+
+
+
 /** Sending data to profiles */
 void UserList::sendToProfiles(unsigned long profile, const string & data, bool addSep) {
 	if (log(4)) {
@@ -278,6 +312,15 @@ void UserList::flushCache() {
 	if (mCache.size()) {
 		string str;
 		sendToAll(str, false, false);
+	}
+}
+
+
+
+void UserList::flushCacheAdc() {
+	if (mCache.size()) {
+		string str;
+		sendToAllAdc(str, false, false);
 	}
 }
 

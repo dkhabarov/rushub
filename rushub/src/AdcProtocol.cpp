@@ -27,7 +27,8 @@ namespace protocol {
 
 
 AdcProtocol::AdcProtocol() :
-	mDcServer(NULL)
+	mDcServer(NULL),
+	mSidNum(0)
 {
 	setClassName("AdcProtocol");
 
@@ -143,8 +144,20 @@ int AdcProtocol::onNewConn(Conn *) {
 
 
 int AdcProtocol::eventSup(AdcParser *, DcConn * dcConn) {
-	string s("ISUP ADBAS0 ADBASE ADTIGR\nISID AAAI");
-	dcConn->send(s, true);
+
+	const char * sid = NULL;
+	UserBase * userBase = NULL;
+	do {
+		sid = getSid(++mSidNum);
+		userBase = mDcServer->mAdcUserList.getUserBaseByUid(sid);
+	} while (userBase != NULL || strcmp(sid, "AAAA") == 0); // "AAAA" is a hub
+
+	dcConn->mDcUser->setUid(string(sid));
+
+	string cmds("ISUP ADBAS0 ADBASE ADTIGR");
+	cmds.append(ADC_SEPARATOR);
+	cmds.append("ISID ").append(sid);
+	dcConn->send(cmds, true);
 	return 0;
 }
 
@@ -157,6 +170,7 @@ int AdcProtocol::eventSta(AdcParser *, DcConn *) {
 
 
 int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
+
 	dcConn->send(adcParser->mCommand, true);
 	return 0;
 }
@@ -278,6 +292,19 @@ void AdcProtocol::infList(string & list, UserBase * userBase) {
 		list.append(userBase->myInfoString()); // TODO get INF
 		list.append(ADC_SEPARATOR);
 	}
+}
+
+
+
+const char * AdcProtocol::getSid(unsigned int num) {
+	static const char* base32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+	static char ret[5];
+	ret[0] = base32[num >> 0xF & 0x1F];
+	ret[1] = base32[num >> 0xA & 0x1F];
+	ret[2] = base32[num >> 0x5 & 0x1F];
+	ret[3] = base32[num & 0x1F];
+	ret[4] = 0;
+	return ret;
 }
 
 
