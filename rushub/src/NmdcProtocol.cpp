@@ -1155,28 +1155,28 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 				dcConn->logStream() << "Sending MyINFO list" << endl;
 			}
 			// seperator "|" was added in getInfoList function
-			dcConn->send(mDcServer->mDcUserList.getInfoList(), false, false);
+			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false, false);
 		} else if (dcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
 			if (dcConn->log(3)) {
 				dcConn->logStream() << "Sending MyINFO list and Nicklist" << endl;
 			}
 			// seperator "|" was not added in getNickList function, because seperator was "$$"
-			dcConn->send(mDcServer->mDcUserList.getNickList(), true, false);
+			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_NICK), true, false);
 			// seperator "|" was added in getInfoList function
-			dcConn->send(mDcServer->mDcUserList.getInfoList(), false, false);
+			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false, false);
 		} else {
 			if (dcConn->log(3)) {
 				dcConn->logStream() << "Sending Nicklist" << endl;
 			}
 			// seperator "|" was not added in getNickList function, because seperator was "$$"
-			dcConn->send(mDcServer->mDcUserList.getNickList(), true, false);
+			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_NICK), true, false);
 		}
 		if (mDcServer->mOpList.size()) {
 			if (dcConn->log(3)) {
 				dcConn->logStream() << "Sending Oplist" << endl;
 			}
 			// seperator "|" was not added in getNickList function, because seperator was "$$"
-			dcConn->send(mDcServer->mOpList.getNickList(), true, false);
+			dcConn->send(mDcServer->mOpList.getList(), true, false);
 		}
 
 		if (dcConn->mDcUser->getInUserList() && dcConn->mDcUser->getInIpList()) {
@@ -1184,7 +1184,7 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 				dcConn->logStream() << "Sending Iplist" << endl;
 			}
 			// seperator "|" was not added in getIpList function, because seperator was "$$"
-			dcConn->send(mDcServer->mDcUserList.getIpList(), true);
+			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_IP), true);
 		} else {
 			if (!dcConn->sendBufIsEmpty()) { // buf would not flush, if it was empty
 				dcConn->flush(); // newPolitic
@@ -1336,6 +1336,39 @@ bool NmdcProtocol::checkNickLength(DcConn * dcConn, size_t len) {
 
 
 
+void NmdcProtocol::nickList(string & list, UserBase * userBase) {
+	// $NickList nick1$$nick2$$
+	// $OpList nick1$$nick2$$
+	if (!userBase->hide() && !userBase->uid().empty()) {
+		list.append(userBase->uid());
+		list.append("$$");
+	}
+}
+
+
+
+void NmdcProtocol::myInfoList(string & list, UserBase * userBase) {
+	// $MyINFO nick1 ...|$MyINFO nick2 ...|
+	if (!userBase->hide()) {
+		list.append(userBase->myInfoString());
+		list.append(NMDC_SEPARATOR);
+	}
+}
+
+
+
+void NmdcProtocol::ipList(string & list, UserBase * userBase) {
+	// $UserIP nick1 ip1$$nick2 ip2$$
+	if (!userBase->hide() && userBase->ip().size() && !userBase->uid().empty()) {
+		list.append(userBase->uid());
+		list.append(" ", 1);
+		list.append(userBase->ip());
+		list.append("$$");
+	}
+}
+
+
+
 void NmdcProtocol::addToOps(DcUser * dcUser) {
 	if (dcUser->getInUserList()) {
 		string msg;
@@ -1390,7 +1423,7 @@ void NmdcProtocol::delFromOps(DcUser * dcUser) {
 void NmdcProtocol::addToIpList(DcUser * dcUser) {
 	if (dcUser->getInUserList()) {
 		mDcServer->mIpList.add(dcUser->getUidHash(), dcUser);
-		dcUser->send(mDcServer->mDcUserList.getIpList(), true);
+		dcUser->send(mDcServer->mDcUserList.getList(USER_LIST_IP), true);
 	}
 }
 

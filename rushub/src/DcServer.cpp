@@ -62,9 +62,9 @@ DcServer::DcServer(const string & configFile, const string &) :
 	mDcLang(&mDcConfigLoader, &mDcConfig),
 	mSystemLoad(SYSTEM_LOAD_OK),
 	mStartTime(true),
-	mDcUserList("UserList", true, true, true),
-	mBotList("BotList", true),
-	mOpList("OpList", true),
+	mDcUserList("UserList"),
+	mBotList("BotList"),
+	mOpList("OpList"),
 	mIpList("IpList"),
 	mActiveList("ActiveList"),
 	mHelloList("HelloList"),
@@ -98,11 +98,11 @@ DcServer::DcServer(const string & configFile, const string &) :
 	mPluginList.loadAll(); // Load plugins
 
 
-	mDcUserList.setNickListStart("$NickList ");
-	mDcUserList.setNickListSeparator("$$");
-
-	mOpList.setNickListStart("$OpList ");
-	mOpList.setNickListSeparator("$$");
+	mDcUserList.addUserListItem(NmdcProtocol::nickList, "$NickList ");
+	mDcUserList.addUserListItem(NmdcProtocol::myInfoList, "");
+	mDcUserList.addUserListItem(NmdcProtocol::ipList, "$UserIP ");
+	mOpList.addUserListItem(NmdcProtocol::nickList, "$OpList ");
+	//mDcUserList.addUserListItem(AdcProtocol::infList, ""); // TODO
 
 
 	if (mDcConfig.mRegMainBot) { // Main bot registration
@@ -754,7 +754,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 		}
 
 		if (dcUser->getInIpList()) {
-			dcUser->send(mDcUserList.getIpList(), true, false);
+			dcUser->send(mDcUserList.getList(USER_LIST_IP), true, false);
 		} else if (ipList.size() && dcUser->mDcConn && (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_USERIP2)) { // UserIP2
 			dcUser->send(ipList, false, false);
 		}

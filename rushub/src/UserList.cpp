@@ -150,25 +150,46 @@ struct ufSendWithNickProfile : public unary_function<void, UserList::iterator> {
 
 
 
-UserList::UserList(const string & name, bool keepNickList) :
+UserList::UserList(const string & name) :
 	Obj("UserList"),
 	HashTable<UserBase *> (1024), // 1024 for big hubs and big check interval of resize
-	mKeepNickList(keepNickList),
-	mRemakeNextNickList(true),
-	mName(name),
-	mNickListMaker(mNickList)
+	mName(name)
 {
 }
 
 
 
-const string & UserList::getNickList() {
-	if (mRemakeNextNickList && mKeepNickList) {
-		mNickListMaker.clear();
-		for_each(begin(), end(), mNickListMaker);
-		mRemakeNextNickList = false;
+UserList::~UserList() {
+	for (unsigned int i = 0; i < mListItems.size(); ++i) {
+		delete mListItems[i];
 	}
-	return mNickList;
+}
+
+
+
+UserList::Key UserList::uidToLowerHash(const string & uid) {
+	string tmp;
+	tmp.resize(uid.size());
+	::transform(uid.begin(), uid.end(), tmp.begin(), ::tolower);
+	return mHash(tmp);
+}
+
+
+
+UserBase * UserList::getUserBaseByUid(const string & uid) {
+	return find(static_cast<unsigned long> (uidToLowerHash(uid))); // for x64 compatibility
+}
+
+
+
+void UserList::addUserListItem(UserListItem::Func func, const char * start) {
+	mListItems.push_back(new UserListItem(func, start));
+}
+
+
+
+const string & UserList::getList(int number) {
+	return mListItems[number]->getList(begin(), end());
 }
 
 
@@ -271,99 +292,33 @@ bool UserList::strLog() {
 
 
 
-void UserList::ufDoNickList::operator() (UserBase * userBase) {
-	if (!userBase->hide() && !userBase->uid().empty()) {
-		mList.append(userBase->uid());
-		mList.append(mSep);
+void UserList::onAdd(UserBase * userBase) {
+	for (unsigned int i = 0; i < mListItems.size(); ++i) {
+		mListItems[i]->add(userBase);
 	}
 }
 
 
 
-void FullUserList::ufDoInfoList::operator() (UserBase * userBase) {
-	if (!userBase->hide()) {
-		msListComplete.append(userBase->myInfoString());
-		msListComplete.append(mSep);
+void UserList::onRemove(UserBase *) {
+	for (unsigned int i = 0; i < mListItems.size(); ++i) {
+		mListItems[i]->remake();
 	}
 }
 
 
 
-void FullUserList::ufDoIpList::operator() (UserBase * userBase) {
-	if (!userBase->hide() && userBase->ip().size() && !userBase->uid().empty()) {
-		mList.append(userBase->uid());
-		mList.append(" ", 1);
-		mList.append(userBase->ip());
-		mList.append(mSep);
+void UserList::onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
+	if (log(3)) {
+		logStream() << "Autoresizing: size = " << currentSize << 
+		", capacity = " << oldCapacity << " -> " << newCapacity << endl;
 	}
 }
 
 
 
-FullUserList::FullUserList(const string & name, bool keepNickList, bool keepInfoList, bool keepIpList) :
-	UserList(name, keepNickList),
-	mKeepInfoList(keepInfoList),
-	mRemakeNextInfoList(true),
-	mKeepIpList(keepIpList),
-	mRemakeNextIpList(true),
-	mInfoListMaker(mInfoListComplete),
-	mIpListMaker(mIpList)
-{
-	setClassName("FullUserList");
-}
-
-
-
-const string & FullUserList::getInfoList() {
-	if (mRemakeNextInfoList && mKeepInfoList) {
-		mInfoListMaker.clear();
-		for_each(begin(), end(), mInfoListMaker);
-		mRemakeNextInfoList = false;
-	}
-	return mInfoListComplete;
-}
-
-
-
-const string & FullUserList::getIpList() {
-	if (mRemakeNextIpList && mKeepIpList) {
-		mIpListMaker.clear();
-		for_each(begin(), end(), mIpListMaker);
-		mRemakeNextIpList = false;
-	}
-	return mIpList;
-}
-
-
-
-void UserList::nmdcNickList(string & list, UserBase * userBase) {
-	// $NickList nick1$$nick2$$
-	if (!userBase->hide() && !userBase->uid().empty()) {
-		list.append(userBase->uid());
-		list.append("$$");
-	}
-}
-
-
-
-void UserList::nmdcInfoList(string & list, UserBase * userBase) {
-	// $MyINFO nick1 ...|$MyINFO nick2 ...|
-	if (!userBase->hide()) {
-		list.append(userBase->myInfoString());
-		list.append(NMDC_SEPARATOR);
-	}
-}
-
-
-
-void UserList::nmdcIpList(string & list, UserBase * userBase) {
-	// $UserIP nick1 ip1$$nick2 ip2$$
-	if (!userBase->hide() && userBase->ip().size() && !userBase->uid().empty()) {
-		list.append(userBase->uid());
-		list.append(" ", 1);
-		list.append(userBase->ip());
-		list.append("$$");
-	}
+UserList & UserList::operator = (const UserList &) {
+	return *this;
 }
 
 

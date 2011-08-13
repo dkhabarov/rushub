@@ -55,26 +55,25 @@ public:
 
 public:
 
-	ListItem(Func func, const char * start = "", bool keep = false) : 
+	ListItem(Func func, const char * start = "") : 
 		mStart(start),
-		mKeep(keep),
 		mRemake(true),
 		mMaker(func, mList)
 	{
 	}
 
 	void add(T t) {
-		if(!mRemake && mKeep) {
+		if(!mRemake) {
 			mMaker(t);
 		}
 	}
 
 	void remake() {
-		mRemake = mKeep;
+		mRemake = true;
 	}
 
 	const string & getList(I begin, I end) {
-		if (mRemake && mKeep) {
+		if (mRemake) {
 			mList.erase(0, mList.size());
 			mList.append(mStart);
 			for_each(begin, end, mMaker);
@@ -96,18 +95,31 @@ private:
 			mFunc(mList, t);
 		}
 
+	private:
+		Maker & operator = (const Maker &) {
+			return *this;
+		}
 	}; // struct ListMaker
 
 	string mList;
 	string mStart;
 
-	bool mKeep;
 	bool mRemake;
 
 	Maker mMaker;
 
+private:
+
+	ListItem & operator = (const ListItem &) {
+		return *this;
+	}
+
 }; // class ListItem
 
+
+
+/// User List Item for quickly get list
+typedef ListItem<HashTable<UserBase *>::iterator, UserBase *> UserListItem;
 
 
 
@@ -116,64 +128,18 @@ class UserList : public Obj, public HashTable<UserBase *> {
 
 public:
 
-	/** Unary function for constructing nick-list */
-	struct ufDoNickList : public unary_function<void, iterator> {
-		string & mList; /** List */
-		string mStart; /** Prefix */
-		string mSep; /** Separator */
+	explicit UserList(const string & name);
+	virtual ~UserList();
 
-		ufDoNickList(string & list) : mList(list){
-		}
+	static Key uidToLowerHash(const string & uid);
 
-		virtual ~ufDoNickList() {
-		}
+	UserBase * getUserBaseByUid(const string & uid);
 
-		virtual ufDoNickList & operator = (const ufDoNickList &) {
-			return *this;
-		}
+	void addUserListItem(UserListItem::Func func, const char * start = "");
+	const string & getList(int number = 0);
 
-		virtual void clear() { /** Clear var and record prefix */
-			mList.erase(0, mList.size());
-			mList.append(mStart);
-		}
-
-		virtual void operator() (UserBase *);
-	};
-
-public:
-
-	explicit UserList(const string & name, bool keepNickList = false);
-
-	virtual ~UserList() {
-	}
-
-	virtual UserList & operator = (const UserList &) {
-		return *this;
-	}
-
-	static Key uidToLowerHash(const string & uid) {
-		string tmp;
-		tmp.resize(uid.size());
-		::transform(uid.begin(), uid.end(), tmp.begin(), ::tolower);
-		return mHash(tmp);
-	}
-
-	UserBase * getUserBaseByUid(const string & uid) {
-		return HashTable<UserBase *>::find(static_cast<unsigned long> (uidToLowerHash(uid))); // for x64 compatibility
-	}
-
-	virtual const string & getNickList();
-
-	void setNickListStart(const char * start) {
-		mNickListMaker.mStart = start;
-	}
-
-	void setNickListSeparator(const char * sep) {
-		mNickListMaker.mSep = sep;
-	}
-	
-	void remake() {
-		mRemakeNextNickList = true;
+	inline void remake() {
+		onRemove(NULL);
 	}
 
 	/** Sending data to all from the list */
@@ -197,142 +163,25 @@ public:
 	/** Redefining log level function */
 	virtual bool strLog();
 
-	void nmdcNickList(string & list, UserBase * userBase);
-	void nmdcInfoList(string & list, UserBase * userBase);
-	void nmdcIpList(string & list, UserBase * userBase);
-
 protected:
 
-	string mNickList;
-	bool mKeepNickList;
-	bool mRemakeNextNickList;
-
-protected:
-
-	virtual void onAdd(UserBase * userBase) {
-		if (!mRemakeNextNickList && mKeepNickList) {
-			mNickListMaker(userBase);
-		}
-	}
-
-	virtual void onRemove(UserBase *) {
-		mRemakeNextNickList = mKeepNickList;
-	}
-
-	virtual void onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
-		if (log(3)) {
-			logStream() << "Autoresizing: size = " << currentSize << 
-			", capacity = " << oldCapacity << " -> " << newCapacity << endl;
-		}
-	}
+	virtual void onAdd(UserBase * userBase);
+	virtual void onRemove(UserBase *);
+	virtual void onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity);
 
 private:
 
 	string mName; ///< Name of list
 	string mCache;
 
-	ufDoNickList mNickListMaker;
-
-}; // UserList
-
-
-/** Full user list */
-class FullUserList : public UserList {
-
-public:
-
-	/** Unary function for constructing MyINFO list */
-	struct ufDoInfoList : public UserList::ufDoNickList {
-		string & msListComplete;
-		ufDoInfoList(string & listComplete) :
-			ufDoNickList(listComplete),
-			msListComplete(listComplete)
-		{
-			mSep = NMDC_SEPARATOR;
-			mStart = "";
-		}
-
-		virtual ~ufDoInfoList() {
-		}
-
-		virtual ufDoInfoList & operator = (const ufDoInfoList &) {
-			return *this;
-		}
-
-		virtual void clear() { /** Clear var and record prefix */
-			msListComplete.erase(0, msListComplete.size());
-			msListComplete.append(mStart);
-		}
-
-		virtual void operator() (UserBase *);
-	};
-
-	/** Unary function for constructing ip-list */
-	struct ufDoIpList : public UserList::ufDoNickList {
-		ufDoIpList(string & list) : ufDoNickList(list) {
-			mSep = "$$";
-			mStart = "$UserIP ";
-		}
-
-		virtual ~ufDoIpList() {
-		}
-
-		virtual ufDoIpList & operator = (const ufDoIpList &) {
-			return *this;
-		}
-
-		virtual void operator() (UserBase *);
-	};
-
-public:
-
-	explicit FullUserList(const string & name, bool keepNickList = false, bool keepInfoList = false, bool keepIpList = false);
-
-	virtual ~FullUserList() {
-	}
-
-	virtual FullUserList & operator = (const FullUserList &) {
-		return *this;
-	}
-
-	virtual const string & getInfoList();
-	virtual const string & getIpList();
-
-	inline void remake() {
-		mRemakeNextNickList = mRemakeNextInfoList = mRemakeNextIpList = true;
-	}
-
-
-protected:
-
-	bool mKeepInfoList;
-	bool mRemakeNextInfoList;
-
-	bool mKeepIpList;
-	bool mRemakeNextIpList;
-
-protected:
-
-	virtual void onAdd(UserBase * userBase) {
-		UserList::onAdd(userBase);
-		if(!mRemakeNextInfoList && mKeepInfoList) mInfoListMaker(userBase);
-		if(!mRemakeNextIpList && mKeepIpList) mIpListMaker(userBase);
-	}
-
-	virtual void onRemove(UserBase * userBase) {
-		UserList::onRemove(userBase);
-		mRemakeNextInfoList = mKeepInfoList;
-		mRemakeNextIpList = mKeepIpList;
-	}
+	vector<UserListItem*> mListItems;
 
 private:
 
-	string mInfoListComplete;
-	string mIpList;
-	ufDoInfoList mInfoListMaker;
-	ufDoIpList mIpListMaker;
+	UserList & operator = (const UserList &);
 
-}; // FullUserList
+}; // UserList
+
 
 }; // namespace dcserver
 

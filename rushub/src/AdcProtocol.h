@@ -32,6 +32,7 @@ namespace dcserver {
 
 class DcConn;
 class DcServer;
+class UserBase;
 
 namespace protocol {
 
@@ -57,6 +58,8 @@ public:
 	void setServer(DcServer * dcServer) {
 		mDcServer = dcServer;
 	}
+
+	static void infList(string & list, UserBase * userBase);
 
 protected:
 

@@ -271,6 +271,16 @@ int AdcProtocol::eventUnknown(AdcParser *, DcConn *) {
 }
 
 
+
+void AdcProtocol::infList(string & list, UserBase * userBase) {
+	// INF ...\nINF ...\n
+	if (!userBase->hide()) {
+		list.append(userBase->myInfoString()); // TODO get INF
+		list.append(ADC_SEPARATOR);
+	}
+}
+
+
 }; // namespace protocol
 
 }; // namespace dcserver

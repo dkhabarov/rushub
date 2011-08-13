@@ -71,6 +71,15 @@ typedef enum {
 } SystemLoad;
 
 
+enum {
+	USER_LIST_NICK,
+	USER_LIST_MYINFO,
+	USER_LIST_IP,
+	USER_LIST_INF
+};
+
+
+
 class DcServer;
 class DcConfigLoader;
 
@@ -135,7 +144,7 @@ public:
 	NmdcProtocol mNmdcProtocol; ///< NMDC Protocol
 	AdcProtocol mAdcProtocol; ///< ADC Protocol
 
-	FullUserList mDcUserList; ///< User list
+	UserList mDcUserList; ///< User list
 	UserList mBotList; ///< Bot list
 	UserList mOpList; ///< Op list
 	UserList mIpList; ///< ip list
