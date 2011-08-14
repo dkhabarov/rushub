@@ -100,6 +100,8 @@ private:
 	int eventPub(AdcParser *, DcConn *); ///< PUB
 	int eventUnknown(AdcParser *, DcConn *); ///< Unknown cmd
 
+	int checkCommand(AdcParser *, DcConn *);
+
 }; // AdcProtocol
 
 }; // namespace protocol

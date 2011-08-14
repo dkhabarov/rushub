@@ -99,9 +99,9 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 	AdcParser * adcParser = static_cast<AdcParser *> (parser);
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 
-//	if (checkCommand(adcParser, dcConn) < 0) {
-//		return -1;
-//	}
+	if (checkCommand(adcParser, dcConn) < 0) {
+		return -1;
+	}
 
 	#ifndef WITHOUT_PLUGINS
 //		if (mDcServer->mCalls.mOnAny.callAll(dcConn->mDcUser, adcParser->mType)) {
@@ -134,6 +134,17 @@ Conn * AdcProtocol::getConnForUdpData(Conn *, Parser *) {
 }
 
 
+static void getNormalShare(__int64 share, string & normalShare) {
+	ostringstream os;
+	float s(static_cast<float>(share));
+	int i(0);
+	for (; ((s >= 1024) && (i < 7)); ++i) {
+		s /= 1024;
+	}
+	os << ::std::floor(s * 1000 + 0.5) / 1000 << " " << DcServer::currentDcServer->mDcLang.mUnits[i];
+	normalShare = os.str();
+}
+
 
 int AdcProtocol::onNewConn(Conn * conn) {
 
@@ -151,8 +162,74 @@ int AdcProtocol::onNewConn(Conn * conn) {
 	string cmds("ISUP ADBASE ADTIGR");
 	cmds.append(ADC_SEPARATOR);
 	cmds.append("ISID ").append(sid);
-	dcConn->send(cmds, true);
+	cmds.append(ADC_SEPARATOR);
 
+	cmds.append("IINF CT32 VE" INTERNALVERSION " NIADC" INTERNALNAME);
+	cmds.append(" DE").append(mDcServer->mDcConfig.mTopic);
+
+	dcConn->send(cmds, true, false);
+
+
+
+	static __int64 iShareVal = -1;
+	static int iUsersVal = -1;
+	static long iTimeVal = -1;
+	static string sTimeCache, sShareCache, sCache;
+	char cacheBuff[1024];
+	bool useCache = true;
+	Time Uptime(mDcServer->mTime);
+	Uptime -= mDcServer->mStartTime;
+	long min = Uptime.sec() / 60;
+	if (iTimeVal != min) {
+		iTimeVal = min;
+		useCache = false;
+		stringstream oss;
+		int w, d, h, m;
+		Uptime.asTimeVals(w, d, h, m);
+		if (w) {
+			oss << w << " " << mDcServer->mDcLang.mTimes[0] << " ";
+		}
+		if (d) {
+			oss << d << " " << mDcServer->mDcLang.mTimes[1] << " ";
+		}
+		if (h) {
+			oss << h << " " << mDcServer->mDcLang.mTimes[2] << " ";
+		}
+		oss << m << " " << mDcServer->mDcLang.mTimes[3];
+		sTimeCache = oss.str();
+	}
+	if (iShareVal != mDcServer->miTotalShare) {
+		iShareVal = mDcServer->miTotalShare;
+		useCache = false;
+		getNormalShare(iShareVal, sShareCache);
+	}
+	if (iUsersVal != mDcServer->getUsersCount()) {
+		iUsersVal = mDcServer->getUsersCount();
+		useCache = false;
+	}
+	if (!useCache) {
+		stringReplace(mDcServer->mDcLang.mFirstMsg, "HUB", sCache, INTERNALNAME " " INTERNALVERSION);
+		stringReplace(sCache, "uptime", sCache, sTimeCache);
+		stringReplace(sCache, "users", sCache, iUsersVal);
+		stringReplace(sCache, "share", sCache, sShareCache);
+	}
+
+	string botSid = getSid(1);
+
+	size_t pos = sCache.find(' ');
+	while (pos != sCache.npos) {
+		sCache.replace(pos, 1, "\\s");
+		pos = sCache.find(' ', pos + 2);
+	}
+
+	if (sCache.size() > 1024) {
+		sCache.assign(sCache, 0, 1024);
+	}
+	cp1251ToUtf8(cacheBuff, sCache.c_str());
+	
+	dcConn->send(string("IMSG ").append(cacheBuff), true);
+
+	dcConn->setTimeOut(HUB_TIME_OUT_LOGIN, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_LOGIN], mDcServer->mTime); /** Timeout for enter */
 	return 0;
 }
 
@@ -197,12 +274,8 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 			}
 		}
 	} else if (!dcConn->mDcUser->getInUserList()) {
-
-		string hubInf("IINF CT32 VE" INTERNALVERSION " NIADC" INTERNALNAME);
-		hubInf.append(" DE").append(mDcServer->mDcConfig.mTopic);
-		dcConn->send(hubInf, true);
-		
 		dcConn->mSendNickList = true;
+		dcConn->clearTimeOut(HUB_TIME_OUT_LOGIN);
 		mDcServer->beforeUserEnter(dcConn);
 	}
 
@@ -501,6 +574,39 @@ void AdcProtocol::onFlush(Conn * conn) {
 			mDcServer->doUserEnter(dcConn);
 		}
 	}
+}
+
+
+
+int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
+
+	// TODO Checking length of command
+
+	// Checking null chars
+	if (strlen(adcParser->mCommand.data()) < adcParser->mCommand.size()) {
+		if (dcConn->log(1)) {
+			dcConn->logStream() << "Sending null chars, probably attempt an attack" << endl;
+		}
+		dcConn->closeNow(CLOSE_REASON_CMD_NULL);
+		return -2;
+	}
+
+	// Check Syntax
+/*
+	if (adcParser->splitChunks()) {
+		// Protection from commands, not belonging to DC protocol
+		if (adcParser->mType != ADC_TYPE_UNKNOWN || mDcServer->mDcConfig.mDisableNoDCCmd) {
+			if (dcConn->log(1)) {
+				dcConn->logStream() << "Wrong syntax in cmd: " << adcParser->mType << endl;
+			}
+			dcConn->closeNice(9000, CLOSE_REASON_CMD_SYNTAX);
+			return -3;
+		}
+	}
+*/
+
+	// TODO: Check flood
+	return 0;
 }
 
 

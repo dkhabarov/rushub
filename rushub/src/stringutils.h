@@ -62,6 +62,8 @@ void stringSplit(const string &, const char * sDelim, vector<string> &);
 
 string & trim(string &);
 
+void cp1251ToUtf8(char * out, const char * in);
+
 }; // namespace utils
 
 #endif // STRING_UTILS_H
