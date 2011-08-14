@@ -72,6 +72,14 @@ public:
 	virtual void send(const string & data, bool addSep = false, bool flush = true);
 
 
+	virtual const string & getInf() const {
+		return mInf;
+	}
+
+	void setInf(const string & inf) {
+		mInf = inf;
+	}
+
 
 	virtual void send(const char * data, size_t len, bool addSep = false, bool flush = true);
 
@@ -163,6 +171,8 @@ private:
 	bool mKick; ///< User can kick other users
 	bool mInUserList; ///< User in user-list
 	bool mCanSend; ///< Can send to user
+
+	string mInf; // ADC
 
 	MyInfo myInfo; ///< User params
 	string mIp; ///< IP address of user/bot

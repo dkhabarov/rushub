@@ -259,8 +259,8 @@ void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 	} else {
 		mCache.append(data);
 		if (addSep) {
-			if (mCache.find(NMDC_SEPARATOR, mCache.size() - NMDC_SEPARATOR_LEN, NMDC_SEPARATOR_LEN)) {
-				mCache.append(NMDC_SEPARATOR);
+			if (mCache.find(ADC_SEPARATOR, mCache.size() - ADC_SEPARATOR_LEN, ADC_SEPARATOR_LEN)) {
+				mCache.append(ADC_SEPARATOR);
 			}
 		}
 	}

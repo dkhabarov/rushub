@@ -33,6 +33,7 @@ public:
 
 	virtual const string & uid() const = 0;
 	virtual const string & myInfoString() const = 0;
+	virtual const string & getInf() const = 0;
 	virtual const string & ip() const = 0;
 	virtual bool hide() const = 0;
 	virtual int getProfile() const = 0;

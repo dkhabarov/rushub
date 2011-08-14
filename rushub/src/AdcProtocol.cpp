@@ -135,15 +135,9 @@ Conn * AdcProtocol::getConnForUdpData(Conn *, Parser *) {
 
 
 
-int AdcProtocol::onNewConn(Conn *) {
-	return 0;
-}
+int AdcProtocol::onNewConn(Conn * conn) {
 
-
-
-
-
-int AdcProtocol::eventSup(AdcParser *, DcConn * dcConn) {
+	DcConn * dcConn = static_cast<DcConn *> (conn);
 
 	const char * sid = NULL;
 	UserBase * userBase = NULL;
@@ -154,10 +148,19 @@ int AdcProtocol::eventSup(AdcParser *, DcConn * dcConn) {
 
 	dcConn->mDcUser->setUid(string(sid));
 
-	string cmds("ISUP ADBAS0 ADBASE ADTIGR");
+	string cmds("ISUP ADBASE ADTIGR");
 	cmds.append(ADC_SEPARATOR);
 	cmds.append("ISID ").append(sid);
 	dcConn->send(cmds, true);
+
+	return 0;
+}
+
+
+
+
+
+int AdcProtocol::eventSup(AdcParser *, DcConn *) {
 	return 0;
 }
 
@@ -171,20 +174,107 @@ int AdcProtocol::eventSta(AdcParser *, DcConn *) {
 
 int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 
-	dcConn->send(adcParser->mCommand, true);
+	string inf = adcParser->mCommand;
+	string oldInf = dcConn->mDcUser->getInf();
+
+	size_t pos = inf.find(" PD");
+	if (pos != inf.npos) {
+		size_t pos_s = inf.find(" ", pos + 3);
+		if (pos_s != inf.npos) {
+			inf.erase(pos, pos_s - pos);
+		}
+	}
+
+	dcConn->mDcUser->setInf(inf);
+
+	if (/*mode != 1 &&*/ dcConn->mDcUser->getInUserList()) {
+		if (oldInf != dcConn->mDcUser->getInf()) {
+			if (dcConn->mDcUser->getHide()) {
+				dcConn->send(dcConn->mDcUser->getInf(), true); // Send to self only
+			} else {
+				//sendMode(dcConn, dcConn->mDcUser->getInf(), mode, mDcServer->mDcUserList, true); // Use cache for send to all
+				mDcServer->mAdcUserList.sendToAllAdc(dcConn->mDcUser->getInf(), true);
+			}
+		}
+	} else if (!dcConn->mDcUser->getInUserList()) {
+
+		string hubInf("IINF CT32 VE" INTERNALVERSION " NIADC" INTERNALNAME);
+		hubInf.append(" DE").append(mDcServer->mDcConfig.mTopic);
+		dcConn->send(hubInf, true);
+		
+		dcConn->mSendNickList = true;
+		mDcServer->beforeUserEnter(dcConn);
+	}
+
 	return 0;
 }
 
 
 
 int AdcProtocol::eventMsg(AdcParser * adcParser, DcConn * dcConn) {
-	dcConn->send(adcParser->mCommand, true);
+
+	if (!dcConn->mDcUser->getInUserList()) {
+		return -1;
+	}
+
+	if (adcParser->mHeader == HEADER_ECHO) {
+		size_t pos = adcParser->mCommand.find(" PM");
+		if (pos != adcParser->mCommand.npos) {
+			size_t pos1 = adcParser->mCommand.find(" ", 5);
+			if (pos1 != adcParser->mCommand.npos) {
+				size_t pos2 = adcParser->mCommand.find(" ", pos1 + 1);
+				if (pos2 != adcParser->mCommand.npos) {
+					string sid;
+					sid.assign(adcParser->mCommand, pos1 + 1, pos2 - pos1 - 1);
+
+					// Search user
+					DcUser * dcUser = static_cast<DcUser *> (mDcServer->mAdcUserList.getUserBaseByUid(sid));
+					if (!dcUser) {
+						return -2;
+					}
+					dcUser->send(adcParser->mCommand, true);
+					dcConn->mDcUser->send(adcParser->mCommand, true);
+				}
+			}
+		}
+		return 0;
+	}
+
+	/*
+	if ((dcparser->chunkString(CHUNK_CH_NICK) != dcConn->mDcUser->getUid()) ) {
+		if (dcConn->log(2)) {
+			dcConn->logStream() << "Bad nick in chat, closing" << endl;
+		}
+		string msg;
+		stringReplace(mDcServer->mDcLang.mBadChatNick, "nick", msg, dcparser->chunkString(CHUNK_CH_NICK));
+		stringReplace(msg, "real_nick", msg, dcConn->mDcUser->getUid());
+		mDcServer->sendToUser(dcConn->mDcUser, msg.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+		dcConn->closeNice(9000, CLOSE_REASON_NICK_CHAT);
+		return -2;
+	}
+	int mode = 0;
+	#ifndef WITHOUT_PLUGINS
+		mode = mDcServer->mCalls.mOnChat.callAll(dcConn->mDcUser);
+	#endif
+	*/
+
+	/** Sending message */
+	if (adcParser->mHeader == HEADER_BROADCAST) {
+		mDcServer->mChatList.sendToAllAdc(adcParser->mCommand, false);
+	}
+	//sendMode(dcConn, adcparser->mCommand, mode, mDcServer->mChatList, false); // Don't use cache for send to all
 	return 0;
 }
 
 
 
-int AdcProtocol::eventSch(AdcParser *, DcConn *) {
+int AdcProtocol::eventSch(AdcParser * adcParser, DcConn *) {
+
+	//todo HEADER_FEATURE
+
+	if (adcParser->mHeader == HEADER_BROADCAST) {
+		mDcServer->mAdcUserList.sendToAllAdc(adcParser->mCommand, true);
+	}
 	return 0;
 }
 
@@ -196,7 +286,26 @@ int AdcProtocol::eventRes(AdcParser *, DcConn *) {
 
 
 
-int AdcProtocol::eventCtm(AdcParser *, DcConn *) {
+int AdcProtocol::eventCtm(AdcParser * adcParser, DcConn *) {
+
+	if (adcParser->mHeader == HEADER_DIRECT) {
+		size_t pos1 = adcParser->mCommand.find(" ", 5);
+		if (pos1 != adcParser->mCommand.npos) {
+			size_t pos2 = adcParser->mCommand.find(" ", pos1 + 1);
+			if (pos2 != adcParser->mCommand.npos) {
+				string sid;
+				sid.assign(adcParser->mCommand, pos1 + 1, pos2 - pos1 - 1);
+
+				// Search user
+				DcUser * dcUser = static_cast<DcUser *> (mDcServer->mAdcUserList.getUserBaseByUid(sid));
+				if (!dcUser) {
+					return -2;
+				}
+				dcUser->send(adcParser->mCommand, true);
+			}
+		}
+	}
+
 	return 0;
 }
 
@@ -289,7 +398,7 @@ int AdcProtocol::eventUnknown(AdcParser *, DcConn *) {
 void AdcProtocol::infList(string & list, UserBase * userBase) {
 	// INF ...\nINF ...\n
 	if (!userBase->hide()) {
-		list.append(userBase->myInfoString()); // TODO get INF
+		list.append(userBase->getInf());
 		list.append(ADC_SEPARATOR);
 	}
 }
@@ -305,6 +414,93 @@ const char * AdcProtocol::getSid(unsigned int num) {
 	ret[3] = base32[num & 0x1F];
 	ret[4] = 0;
 	return ret;
+}
+
+
+
+/// Sending the user-list
+int AdcProtocol::sendNickList(DcConn * dcConn) {
+	try {
+
+		if (mDcServer->mEnterList.find(dcConn->mDcUser->getUidHash())) {
+			dcConn->mNickListInProgress = true;
+		}
+/*
+		if ((dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE) != LOGIN_STATUS_LOGIN_DONE) && mDcServer->mDcConfig.mNicklistOnLogin) {
+			dcConn->mNickListInProgress = true;
+		}
+
+		if (dcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
+			if (dcConn->log(3)) {
+				dcConn->logStream() << "Sending MyINFO list" << endl;
+			}
+			// seperator "|" was added in getInfoList function
+			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false, false);
+		} else if (dcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
+			if (dcConn->log(3)) {
+				dcConn->logStream() << "Sending MyINFO list and Nicklist" << endl;
+			}
+			// seperator "|" was not added in getNickList function, because seperator was "$$"
+			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_NICK), true, false);
+			// seperator "|" was added in getInfoList function
+			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false, false);
+		} else {
+			if (dcConn->log(3)) {
+				dcConn->logStream() << "Sending Nicklist" << endl;
+			}
+			// seperator "|" was not added in getNickList function, because seperator was "$$"
+			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_NICK), true, false);
+		}
+		if (mDcServer->mOpList.size()) {
+			if (dcConn->log(3)) {
+				dcConn->logStream() << "Sending Oplist" << endl;
+			}
+			// seperator "|" was not added in getNickList function, because seperator was "$$"
+			dcConn->send(mDcServer->mOpList.getList(), true, false);
+		}
+
+		if (dcConn->mDcUser->getInUserList() && dcConn->mDcUser->getInIpList()) {
+			if (dcConn->log(3)) {
+				dcConn->logStream() << "Sending Iplist" << endl;
+			}
+			// seperator "|" was not added in getIpList function, because seperator was "$$"
+			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_IP), true);
+		} else {
+			if (!dcConn->sendBufIsEmpty()) { // buf would not flush, if it was empty
+				dcConn->flush(); // newPolitic
+			} else {
+				dcConn->send("", 0 , true, true);
+			}
+		}
+*/
+
+		dcConn->send(mDcServer->mAdcUserList.getList(), true);
+	} catch(...) {
+		if (dcConn->errLog(0)) {
+			dcConn->logStream() << "exception in sendNickList" << endl;
+		}
+		return -1;
+	}
+	return 0;
+}
+
+
+
+void AdcProtocol::onFlush(Conn * conn) {
+	DcConn * dcConn = static_cast<DcConn *> (conn);
+	if (dcConn->mNickListInProgress) {
+		dcConn->mNickListInProgress = false;
+		if (!dcConn->isOk() || !dcConn->isWritable()) {
+			if (dcConn->log(2)) {
+				dcConn->logStream() << "Connection closed during nicklist" << endl;
+			}
+		} else {
+			if (dcConn->log(3)) {
+				dcConn->logStream() << "Enter after nicklist" << endl;
+			}
+			mDcServer->doUserEnter(dcConn);
+		}
+	}
 }
 
 

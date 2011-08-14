@@ -238,6 +238,8 @@ void DcConfig::addVars(Server * server) {
 	add("sUDPAddresses",          mUdpAddresses,                        "0.0.0.0:1209");
 	add("bUDPServer",             mUdpServer,                           false);
 	
+	add("bAdcOn",                 mAdcOn,                               false);
+
 	add("sLocale",                mLocale,                              setlocale(LC_ALL, ""));
 	add("sMainBotIP",             mMainBotIp,                           "127.0.0.1");
 	add("sMainBotMyINFO",         mMainBotMyinfo,                       "RusHub bot<Bot V:1.0,M:A,H:0/0/1,S:0>$ $$$0$");

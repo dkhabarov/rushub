@@ -117,7 +117,8 @@ class DcServer : public Server, public DcServerBase {
 	friend class ::dcserver::DcListIterator; // for mClientList
 	friend class ::dcserver::DcConn; // for doUserEnter in DcConn::onFlush and minDelay in DcConn::onTimer
 	friend class ::dcserver::DcConnFactory; // for removeFromDcUserList in DcConnFactory::deleteConn
-	friend class ::dcserver::protocol::NmdcProtocol; // for beforeUserEnter in NmdcProtocol::eventMyInfo
+	friend class ::dcserver::protocol::NmdcProtocol; // for beforeUserEnter
+	friend class ::dcserver::protocol::AdcProtocol; // for beforeUserEnter
 	friend class ::webserver::WebConnFactory; // for call plugins
 
 public:

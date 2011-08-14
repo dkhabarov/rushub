@@ -254,7 +254,6 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 			dcServer->miTotalShare -= dcConn->mDcUser->getShare();
 
 			if (dcConn->mDcUser->getInUserList()) {
-				-- dcServer->miTotalUserCount;
 				dcServer->removeFromDcUserList(static_cast<DcUser *> (dcConn->mDcUser));
 			} else { // remove from enter list, if user was already added in it, but user was not added in user list
 				dcServer->mEnterList.remove(dcConn->mDcUser->getUidHash());

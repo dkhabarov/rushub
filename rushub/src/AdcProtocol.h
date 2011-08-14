@@ -54,13 +54,16 @@ public:
 	virtual Conn * getConnForUdpData(Conn *, Parser *);
 
 	virtual int onNewConn(Conn *);
+	virtual void onFlush(Conn *);
 
 	void setServer(DcServer * dcServer) {
 		mDcServer = dcServer;
 	}
 
-	static void infList(string & list, UserBase * userBase);
+	static void infList(string & list, UserBase *);
 	static const char * getSid(unsigned int num);
+
+	int sendNickList(DcConn *);
 
 protected:
 

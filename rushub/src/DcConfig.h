@@ -77,6 +77,7 @@ public:
 	double mSysLoading;         ///< Factor of the system loading
 
 	bool mUdpServer;            ///< UDP server on/off
+	bool mAdcOn;                ///< Use ADC protocol
 
 	bool mWebServer;            ///< Web-server on/off
 	bool mDisableNoDCCmd;       ///< Allow DC commands only

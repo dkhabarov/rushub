@@ -34,6 +34,18 @@ namespace dcserver {
 
 namespace protocol {
 
+enum Header {
+	HEADER_HUB = 0,
+	HEADER_DIRECT = 1,
+	HEADER_ECHO = 2,
+	HEADER_FEATURE = 3,
+	HEADER_BROADCAST = 4,
+	HEADER_CLIENT = 5,
+	HEADER_UDP = 6,
+	HEADER_INFO = 7,
+	HEADER_UNKNOWN = 8
+};
+
 typedef enum { // Types of the commands
 	ADC_TYPE_NO = -1,
 	ADC_TYPE_SUP,

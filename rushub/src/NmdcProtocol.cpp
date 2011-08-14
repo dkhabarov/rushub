@@ -143,8 +143,8 @@ int NmdcProtocol::onNewConn(Conn * conn) {
 			useCache = false;
 			getNormalShare(iShareVal, sShareCache);
 		}
-		if (iUsersVal != mDcServer->miTotalUserCount) {
-			iUsersVal = mDcServer->miTotalUserCount;
+		if (iUsersVal != mDcServer->getUsersCount()) {
+			iUsersVal = mDcServer->getUsersCount();
 			useCache = false;
 		}
 		if (!useCache) {
@@ -346,7 +346,7 @@ int NmdcProtocol::eventValidateNick(NmdcParser * dcparser, DcConn * dcConn) {
 	}
 
 	/** Global user's limit */
-	if (mDcServer->mDcConfig.mUsersLimit >= 0 && mDcServer->miTotalUserCount >= mDcServer->mDcConfig.mUsersLimit) {
+	if (mDcServer->mDcConfig.mUsersLimit >= 0 && mDcServer->getUsersCount() >= mDcServer->mDcConfig.mUsersLimit) {
 		if (dcConn->log(3)) {
 			dcConn->logStream() << "User " << nick << " was disconnected (user's limit: " << mDcServer->mDcConfig.mUsersLimit << ")" << endl;
 		}
