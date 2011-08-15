@@ -262,6 +262,7 @@ public:
 		stop(1);
 	}
 
+	static void getNormalShare(__int64, string &); ///< Get normal share size
 	static void getAddresses(const char * addresses, vector<pair<string, string> > &, const char * defaultPort);
 
 	/// Function action when joining the client

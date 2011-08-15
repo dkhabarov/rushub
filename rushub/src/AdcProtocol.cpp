@@ -134,17 +134,6 @@ Conn * AdcProtocol::getConnForUdpData(Conn *, Parser *) {
 }
 
 
-static void getNormalShare(__int64 share, string & normalShare) {
-	ostringstream os;
-	float s(static_cast<float>(share));
-	int i(0);
-	for (; ((s >= 1024) && (i < 7)); ++i) {
-		s /= 1024;
-	}
-	os << ::std::floor(s * 1000 + 0.5) / 1000 << " " << DcServer::currentDcServer->mDcLang.mUnits[i];
-	normalShare = os.str();
-}
-
 
 int AdcProtocol::onNewConn(Conn * conn) {
 
@@ -175,7 +164,6 @@ int AdcProtocol::onNewConn(Conn * conn) {
 	static int iUsersVal = -1;
 	static long iTimeVal = -1;
 	static string sTimeCache, sShareCache, sCache;
-	char cacheBuff[1024];
 	bool useCache = true;
 	Time Uptime(mDcServer->mTime);
 	Uptime -= mDcServer->mStartTime;
@@ -201,33 +189,23 @@ int AdcProtocol::onNewConn(Conn * conn) {
 	if (iShareVal != mDcServer->miTotalShare) {
 		iShareVal = mDcServer->miTotalShare;
 		useCache = false;
-		getNormalShare(iShareVal, sShareCache);
+		DcServer::getNormalShare(iShareVal, sShareCache);
 	}
 	if (iUsersVal != mDcServer->getUsersCount()) {
 		iUsersVal = mDcServer->getUsersCount();
 		useCache = false;
 	}
 	if (!useCache) {
-		stringReplace(mDcServer->mDcLang.mFirstMsg, "HUB", sCache, INTERNALNAME " " INTERNALVERSION);
-		stringReplace(sCache, "uptime", sCache, sTimeCache);
-		stringReplace(sCache, "users", sCache, iUsersVal);
-		stringReplace(sCache, "share", sCache, sShareCache);
+		string buff;
+		stringReplace(mDcServer->mDcLang.mFirstMsg, "HUB", buff, INTERNALNAME " " INTERNALVERSION);
+		stringReplace(buff, "uptime", buff, sTimeCache);
+		stringReplace(buff, "users", buff, iUsersVal);
+		stringReplace(buff, "share", buff, sShareCache);
+		stringReplace(buff, " ", buff, "\\s", true);
+		cp1251ToUtf8(buff, sCache);
 	}
 
-	string botSid = getSid(1);
-
-	size_t pos = sCache.find(' ');
-	while (pos != sCache.npos) {
-		sCache.replace(pos, 1, "\\s");
-		pos = sCache.find(' ', pos + 2);
-	}
-
-	if (sCache.size() > 1024) {
-		sCache.assign(sCache, 0, 1024);
-	}
-	cp1251ToUtf8(cacheBuff, sCache.c_str());
-	
-	dcConn->send(string("IMSG ").append(cacheBuff), true);
+	dcConn->send(string("IMSG ").append(sCache), true);
 
 	dcConn->setTimeOut(HUB_TIME_OUT_LOGIN, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_LOGIN], mDcServer->mTime); /** Timeout for enter */
 	return 0;
@@ -547,6 +525,7 @@ int AdcProtocol::sendNickList(DcConn * dcConn) {
 		}
 */
 
+		dcConn->send(dcConn->mDcUser->getInf(), true, false);
 		dcConn->send(mDcServer->mAdcUserList.getList(), true);
 	} catch(...) {
 		if (dcConn->errLog(0)) {

@@ -141,7 +141,7 @@ int NmdcProtocol::onNewConn(Conn * conn) {
 		if (iShareVal != mDcServer->miTotalShare) {
 			iShareVal = mDcServer->miTotalShare;
 			useCache = false;
-			getNormalShare(iShareVal, sShareCache);
+			DcServer::getNormalShare(iShareVal, sShareCache);
 		}
 		if (iUsersVal != mDcServer->getUsersCount()) {
 			iUsersVal = mDcServer->getUsersCount();
@@ -1199,18 +1199,6 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 		return -1;
 	}
 	return 0;
-}
-
-/** Get normal share size */
-void NmdcProtocol::getNormalShare(__int64 share, string & normalShare) {
-	ostringstream os;
-	float s(static_cast<float>(share));
-	int i(0);
-	for (; ((s >= 1024) && (i < 7)); ++i) {
-		s /= 1024;
-	}
-	os << ::std::floor(s * 1000 + 0.5) / 1000 << " " << DcServer::currentDcServer->mDcLang.mUnits[i];
-	normalShare = os.str();
 }
 
 

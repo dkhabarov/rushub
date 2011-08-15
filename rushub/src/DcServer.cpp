@@ -873,9 +873,10 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 
 		dcUser->send("", 0, false, true);
 	} else {
-		if (dcUser->getHide() && dcUser->mDcConn) {
-			dcUser->mDcConn->send(dcUser->getInf(), true, false);
-		} else {
+
+		bool canSend = dcUser->isCanSend();
+
+		if (!dcUser->getHide()) {
 
 			// Show MyINFO string to all users
 			mAdcUserList.sendToAllAdc(dcUser->getInf(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
@@ -884,8 +885,6 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 			mEnterList.sendToAllAdc(dcUser->getInf(), true/*mDcConfig.mDelayedMyinfo*/);
 
 		}
-
-		bool canSend = dcUser->isCanSend();
 
 		// Prevention of the double sending
 		if (!mDcConfig.mDelayedLogin) {
@@ -1358,6 +1357,20 @@ int DcServer::unregBot(const string & uid) {
 	removeFromDcUserList(dcUser);
 	delete dcUser;
 	return 0;
+}
+
+
+
+/** Get normal share size */
+void DcServer::getNormalShare(__int64 share, string & normalShare) {
+	ostringstream os;
+	float s(static_cast<float>(share));
+	int i(0);
+	for (; ((s >= 1024) && (i < 7)); ++i) {
+		s /= 1024;
+	}
+	os << ::std::floor(s * 1000 + 0.5) / 1000 << " " << DcServer::currentDcServer->mDcLang.mUnits[i];
+	normalShare = os.str();
 }
 
 

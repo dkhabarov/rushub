@@ -192,7 +192,7 @@ string & trim(string & str) {
 
 
 
-void cp1251ToUtf8(char * out, const char * in) {
+string & cp1251ToUtf8(const string & in, string & out) {
 	static const int table[128] = {                    
 		0x82D0,0x83D0,0x9A80E2,0x93D1,0x9E80E2,0xA680E2,0xA080E2,0xA180E2,
 		0xAC82E2,0xB080E2,0x89D0,0xB980E2,0x8AD0,0x8CD0,0x8BD0,0x8FD0,    
@@ -211,21 +211,23 @@ void cp1251ToUtf8(char * out, const char * in) {
 		0x80D1,0x81D1,0x82D1,0x83D1,0x84D1,0x85D1,0x86D1,0x87D1,
 		0x88D1,0x89D1,0x8AD1,0x8BD1,0x8CD1,0x8DD1,0x8ED1,0x8FD1
 	};
-	while (*in) {
-		if (*in & 0x80) {
-			int v = table[static_cast<int> (0x7f & *in++)];
+	out.reserve(3 * in.size());
+	const char * ch = in.c_str();
+	while (*ch) {
+		if (*ch & 0x80) {
+			int v = table[static_cast<int> (0x7f & *ch++)];
 			if (v) {
-				*out++ = static_cast<char> (v);
-				*out++ = static_cast<char> (v >> 8);
+				out.append(1, static_cast<char> (v));
+				out.append(1, static_cast<char> (v >> 8));
 				if (v >>= 16) {
-					*out++ = static_cast<char> (v);
+					out.append(1, static_cast<char> (v));
 				}
 			}
 		} else {
-			*out++ = *in++;
+			out.append(1, *ch++);
 		}
 	}
-	*out = 0;
+	return out;
 }
 
 

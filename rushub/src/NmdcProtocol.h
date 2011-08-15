@@ -96,7 +96,6 @@ public:
 
 
 	int sendNickList(DcConn *); ///< Sending user-list and op-list
-	static void getNormalShare(__int64, string &); ///< Get normal share size
 
 	static void nickList(string & list, UserBase * userBase);
 	static void myInfoList(string & list, UserBase * userBase);

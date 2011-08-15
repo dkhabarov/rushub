@@ -62,7 +62,7 @@ void stringSplit(const string &, const char * sDelim, vector<string> &);
 
 string & trim(string &);
 
-void cp1251ToUtf8(char * out, const char * in);
+string & cp1251ToUtf8(const string & in, string & out);
 
 }; // namespace utils
 
