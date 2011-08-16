@@ -70,7 +70,7 @@ protected:
 	DcServer * mDcServer;
 
 	typedef int (AdcProtocol::*Event) (AdcParser *, DcConn *);
-	Event events[ADC_TYPE_UNKNOWN + 1];
+	Event events[ADC_TYPE_INVALID + 1];
 
 private:
 
@@ -98,6 +98,7 @@ private:
 	int eventRnt(AdcParser *, DcConn *); ///< RNT
 	int eventPsr(AdcParser *, DcConn *); ///< PSR
 	int eventPub(AdcParser *, DcConn *); ///< PUB
+	int eventVoid(AdcParser *, DcConn *); ///< Void cmd (ping)
 	int eventUnknown(AdcParser *, DcConn *); ///< Unknown cmd
 
 	int checkCommand(AdcParser *, DcConn *);

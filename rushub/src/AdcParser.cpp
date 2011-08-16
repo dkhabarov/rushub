@@ -23,6 +23,9 @@
  */
 
 #include "AdcParser.h"
+#include "stringutils.h"
+
+using namespace utils;
 
 namespace dcserver {
 
@@ -85,6 +88,7 @@ AdcCommand AdcCommands[] = {
 
 AdcParser::AdcParser() :
 	Parser(9), // Max number of chunks - 9 !!!
+	mHeader(HEADER_UNKNOWN),
 	mError(false)
 { 
 	setClassName("AdcParser");
@@ -99,18 +103,124 @@ AdcParser::~AdcParser() {
 
 /// Do parse for command and return type of this command
 int AdcParser::parse() {
+
 	mLength = mCommand.size(); // Set cmd len
-	if (mLength >= 4) { // ADC cmd key contain 4 symbols
-		mHeader = getHeader(mCommand[0]);
-		if (mHeader != HEADER_UNKNOWN) {
-			for (unsigned int i = 0; i < ADC_TYPE_UNKNOWN; ++i) {
+
+	if (mLength >= 4) { // ADC cmd key must contain 4 symbols
+
+		if (checkHeaderSyntax()) {
+
+			for (unsigned int i = 0; i < ADC_TYPE_INVALID; ++i) {
 				if (AdcCommands[i].check(mCommand)) { // Check cmd from mCommand
 					return mType = AdcType(i); // Set cmd type
 				}
 			}
+			return mType = ADC_TYPE_UNKNOWN; // Unknown cmd
 		}
+
+	} else if (mLength == 0) {
+		return mType = ADC_TYPE_VOID; // Void cmd
 	}
-	return mType = ADC_TYPE_UNKNOWN; // Unknown cmd
+
+	return mType = ADC_TYPE_INVALID; // Invalid cmd
+}
+
+
+
+bool AdcParser::checkHeaderSyntax() {
+
+	// Check cmd name ([A-Z] [A-Z0-9] [A-Z0-9])
+	if (!isUpperAlpha(mCommand[1]) || !isUpperAlphaNum(mCommand[2]) || !isUpperAlphaNum(mCommand[3])) {
+		return false;
+	}
+
+	unsigned int counter = 0;
+
+	switch (mCommand[0]) {
+
+		case 'B': // Broadcast
+			// 'B' command_name ' ' base32_character{4}
+			mHeader = HEADER_BROADCAST;
+			if (mLength < 9 ||
+				mCommand[4] != ' ' || 
+				!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8])
+			) {
+				return false;
+			}
+			break;
+
+		case 'H': // Hub message
+			// 'H' command_name
+			mHeader = HEADER_HUB;
+			break;
+
+		case 'I': // Info message
+			// 'I' command_name
+			mHeader = HEADER_INFO;
+			break;
+
+		case 'C': // Client message
+			// 'C' command_name
+			mHeader =  HEADER_CLIENT;
+			break;
+
+		case 'D': // Direct message
+			// 'D' command_name ' ' base32_character{4} ' ' base32_character{4}
+			mHeader = HEADER_DIRECT;
+			// Fallthrough
+
+		case 'E': // Echo message
+			// 'E' command_name ' ' base32_character{4} ' ' base32_character{4}
+			if (mHeader == HEADER_UNKNOWN) {
+				mHeader = HEADER_ECHO;
+			}
+			if (mLength < 14 ||
+				mCommand[4] != ' ' || 
+				!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8]) ||
+				mCommand[9] != ' ' || 
+				!isBase32(mCommand[10]) || !isBase32(mCommand[11]) || !isBase32(mCommand[12]) || !isBase32(mCommand[13])
+			) {
+				return false;
+			}
+			break;
+
+		case 'F': // Feature broadcast
+			// 'F' command_name ' ' base32_character{4} ' ' (('+'|'-') [A-Z] [A-Z0-9]{3})+
+			mHeader = HEADER_FEATURE;
+			if (mLength < 15 ||
+				mCommand[4] != ' ' || 
+				!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8]) ||
+				mCommand[9] != ' ' || 
+				mCommand[10] != '+' && mCommand[10] != '-' || 
+				!isUpperAlpha(mCommand[11]) || !isUpperAlphaNum(mCommand[12]) || !isUpperAlphaNum(mCommand[13]) || !isUpperAlphaNum(mCommand[14])
+			) {
+				return false;
+			}
+			break;
+
+		case 'U': // UDP message
+			// 'U' command_name ' ' base32_character+
+			mHeader = HEADER_UDP;
+			if (mLength < 6 || 
+				mCommand[4] != ' ' || 
+				!isBase32(mCommand[5])
+			) {
+				return false;
+			}
+			counter = 6;
+			while (counter < mLength && isBase32(mCommand[counter++])) {
+			}
+			if (counter != mLength && mCommand[counter] != ' ') {
+				return false;
+			}
+			break;
+
+		default: // Unknown
+			return false;
+
+	}
+
+	return true;
 }
 
 
@@ -118,44 +228,8 @@ int AdcParser::parse() {
 void AdcParser::reInit() {
 	Parser::reInit();
 
+	mHeader = HEADER_UNKNOWN;
 	mError = false;
-}
-
-
-
-int AdcParser::getHeader(char c) {
-
-	switch (c) {
-
-		case 'H': // Hub message
-			return HEADER_HUB;
-
-		case 'D': // Direct message
-			return HEADER_DIRECT;
-
-		case 'E': // Echo message
-			return HEADER_ECHO;
-
-		case 'F': // Feature broadcast
-			return HEADER_FEATURE;
-
-		case 'B': // Broadcast
-			return HEADER_BROADCAST;
-
-		case 'C': // Client message
-			return HEADER_CLIENT;
-
-		case 'U': // UDP message
-			return HEADER_UDP;
-
-		case 'I': // Info message
-			return HEADER_INFO;
-
-		default: // Unknown
-			return HEADER_UNKNOWN;
-
-	}
-
 }
 
 

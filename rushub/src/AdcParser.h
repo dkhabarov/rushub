@@ -68,7 +68,9 @@ typedef enum { // Types of the commands
 	ADC_TYPE_RNT,
 	ADC_TYPE_PSR,
 	ADC_TYPE_PUB,
+	ADC_TYPE_VOID,
 	ADC_TYPE_UNKNOWN,
+	ADC_TYPE_INVALID
 } AdcType;
 
 
@@ -150,7 +152,7 @@ private:
 
 private:
 
-	int getHeader(char c);
+	bool checkHeaderSyntax();
 
 }; // class AdcParser
 

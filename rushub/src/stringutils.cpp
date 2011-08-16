@@ -211,6 +211,7 @@ string & cp1251ToUtf8(const string & in, string & out) {
 		0x80D1,0x81D1,0x82D1,0x83D1,0x84D1,0x85D1,0x86D1,0x87D1,
 		0x88D1,0x89D1,0x8AD1,0x8BD1,0x8CD1,0x8DD1,0x8ED1,0x8FD1
 	};
+	out.clear();
 	out.reserve(3 * in.size());
 	const char * ch = in.c_str();
 	while (*ch) {
@@ -228,6 +229,24 @@ string & cp1251ToUtf8(const string & in, string & out) {
 		}
 	}
 	return out;
+}
+
+
+
+bool isBase32(char c) {
+	return (c >= 0x41 && c <= 0x5a) || (c >= 0x32 && c <= 0x37);
+}
+
+
+
+bool isUpperAlpha(char c) {
+	return c >= 0x41 && c <= 0x5a;
+}
+
+
+
+bool isUpperAlphaNum(char c) {
+	return (c >= 0x41 && c <= 0x5a) || (c >= 0x30 && c <= 0x39);
 }
 
 

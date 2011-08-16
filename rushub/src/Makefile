@@ -10,7 +10,7 @@ OBJS = $(CURDIR)/AdcParser.o $(CURDIR)/AdcProtocol.o $(CURDIR)/AntiFlood.o $(CUR
 RusHub: $(OBJS)
 	$(CXX) -lrt -ldl -o RusHub $(OBJS) $(CURDIR)/tinyxml/tinyxml.a
 
-$(CURDIR)/AdcParser.o: $(CURDIR)/AdcParser.cpp $(CURDIR)/Obj.h $(CURDIR)/Protocol.h $(CURDIR)/Plugin.h $(CURDIR)/AdcParser.h
+$(CURDIR)/AdcParser.o: $(CURDIR)/AdcParser.cpp $(CURDIR)/Obj.h $(CURDIR)/Protocol.h $(CURDIR)/Plugin.h $(CURDIR)/AdcParser.h $(CURDIR)/stringutils.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(CURDIR)/AdcProtocol.o: $(CURDIR)/AdcProtocol.cpp $(CURDIR)/Obj.h $(CURDIR)/Protocol.h $(CURDIR)/Plugin.h $(CURDIR)/AdcParser.h $(CURDIR)/AdcProtocol.h

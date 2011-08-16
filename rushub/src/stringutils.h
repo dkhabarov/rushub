@@ -64,6 +64,10 @@ string & trim(string &);
 
 string & cp1251ToUtf8(const string & in, string & out);
 
+bool isBase32(char);
+bool isUpperAlpha(char);
+bool isUpperAlphaNum(char);
+
 }; // namespace utils
 
 #endif // STRING_UTILS_H

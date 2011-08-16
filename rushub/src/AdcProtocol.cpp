@@ -52,6 +52,7 @@ AdcProtocol::AdcProtocol() :
 	events[ADC_TYPE_RNT] = &AdcProtocol::eventRnt;
 	events[ADC_TYPE_PSR] = &AdcProtocol::eventPsr;
 	events[ADC_TYPE_PUB] = &AdcProtocol::eventPub;
+	events[ADC_TYPE_VOID] = &AdcProtocol::eventVoid;
 	events[ADC_TYPE_UNKNOWN] = &AdcProtocol::eventUnknown;
 }
 
@@ -440,6 +441,12 @@ int AdcProtocol::eventPub(AdcParser *, DcConn *) {
 
 
 
+int AdcProtocol::eventVoid(AdcParser *, DcConn *) {
+	return 0;
+}
+
+
+
 int AdcProtocol::eventUnknown(AdcParser *, DcConn *) {
 	return 0;
 }
@@ -525,7 +532,6 @@ int AdcProtocol::sendNickList(DcConn * dcConn) {
 		}
 */
 
-		dcConn->send(dcConn->mDcUser->getInf(), true, false);
 		dcConn->send(mDcServer->mAdcUserList.getList(), true);
 	} catch(...) {
 		if (dcConn->errLog(0)) {
@@ -561,6 +567,14 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 
 	// TODO Checking length of command
 
+	if (adcParser->mType == ADC_TYPE_INVALID) {
+		if (dcConn->log(1)) {
+			dcConn->logStream() << "Wrong syntax cmd" << endl;
+		}
+		dcConn->closeNice(9000, CLOSE_REASON_CMD_SYNTAX);
+		return -1;
+	}
+
 	// Checking null chars
 	if (strlen(adcParser->mCommand.data()) < adcParser->mCommand.size()) {
 		if (dcConn->log(1)) {
@@ -576,7 +590,7 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 		// Protection from commands, not belonging to DC protocol
 		if (adcParser->mType != ADC_TYPE_UNKNOWN || mDcServer->mDcConfig.mDisableNoDCCmd) {
 			if (dcConn->log(1)) {
-				dcConn->logStream() << "Wrong syntax in cmd: " << adcParser->mType << endl;
+				dcConn->logStream() << "Unknown cmd: " << adcParser->mType << endl;
 			}
 			dcConn->closeNice(9000, CLOSE_REASON_CMD_SYNTAX);
 			return -3;
