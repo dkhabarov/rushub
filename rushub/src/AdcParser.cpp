@@ -101,6 +101,48 @@ AdcParser::~AdcParser() {
 
 
 
+int AdcParser::getCommandType() const {
+	return mType;
+}
+
+
+
+int AdcParser::getHeader() const {
+	return mHeader;
+}
+
+
+
+const string & AdcParser::getSidSource() const {
+	return mSidSource;
+}
+
+
+
+const string & AdcParser::getSidTarget() const {
+	return mSidTarget;
+}
+
+
+
+const string & AdcParser::getCidSource() const {
+	return mCidSource;
+}
+
+
+
+const string & AdcParser::getErrorCode() const {
+	return mErrorCode;
+}
+
+
+
+const string & AdcParser::getErrorText() const {
+	return mErrorText;
+}
+
+
+
 /// Do parse for command and return type of this command
 int AdcParser::parse() {
 
@@ -141,12 +183,16 @@ bool AdcParser::checkHeaderSyntax() {
 		case 'B': // Broadcast
 			// 'B' command_name ' ' base32_character{4}
 			mHeader = HEADER_BROADCAST;
-			if (mLength < 9 ||
-				mCommand[4] != ' ' || 
-				!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8])
-			) {
+			if (mLength < 9 || mCommand[4] != ' ') {
+				mErrorCode = "40"; // Protocol error
+				mErrorText = "Protocol syntax error";
+				return false;
+			} else if (!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8])) {
+				mErrorCode = "40"; // Protocol error
+				mErrorText = "Invalid source SID";
 				return false;
 			}
+			mSidSource.assign(mCommand, 5, 4);
 			break;
 
 		case 'H': // Hub message
@@ -174,45 +220,59 @@ bool AdcParser::checkHeaderSyntax() {
 			if (mHeader == HEADER_UNKNOWN) {
 				mHeader = HEADER_ECHO;
 			}
-			if (mLength < 14 ||
-				mCommand[4] != ' ' || 
-				!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8]) ||
-				mCommand[9] != ' ' || 
-				!isBase32(mCommand[10]) || !isBase32(mCommand[11]) || !isBase32(mCommand[12]) || !isBase32(mCommand[13])
-			) {
+			if (mLength < 14 || mCommand[4] != ' ' || mCommand[9] != ' ') {
+				mErrorCode = "40"; // Protocol error
+				mErrorText = "Protocol syntax error";
+				return false;
+			} else if (!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8])) {
+				mErrorCode = "40"; // Protocol error
+				mErrorText = "Invalid source SID";
+				return false;
+			} else if (!isBase32(mCommand[10]) || !isBase32(mCommand[11]) || !isBase32(mCommand[12]) || !isBase32(mCommand[13])) {
+				mErrorCode = "40"; // Protocol error
+				mErrorText = "Invalid target SID";
 				return false;
 			}
+			mSidSource.assign(mCommand, 5, 4);
+			mSidTarget.assign(mCommand, 10, 4);
 			break;
 
 		case 'F': // Feature broadcast
 			// 'F' command_name ' ' base32_character{4} ' ' (('+'|'-') [A-Z] [A-Z0-9]{3})+
 			mHeader = HEADER_FEATURE;
-			if (mLength < 15 ||
-				mCommand[4] != ' ' || 
-				!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8]) ||
-				mCommand[9] != ' ' || 
-				mCommand[10] != '+' && mCommand[10] != '-' || 
-				!isUpperAlpha(mCommand[11]) || !isUpperAlphaNum(mCommand[12]) || !isUpperAlphaNum(mCommand[13]) || !isUpperAlphaNum(mCommand[14])
-			) {
+			if (mLength < 15 || mCommand[4] != ' ' || mCommand[9] != ' ' || mCommand[10] != '+' && mCommand[10] != '-') {
+				mErrorCode = "40"; // Protocol error
+				mErrorText = "Protocol syntax error";
+				return false;
+			} else if (!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8])) {
+				mErrorCode = "40"; // Protocol error
+				mErrorText = "Invalid source SID";
+				return false;
+			} else if (!isUpperAlpha(mCommand[11]) || !isUpperAlphaNum(mCommand[12]) || !isUpperAlphaNum(mCommand[13]) || !isUpperAlphaNum(mCommand[14])) {
+				mErrorCode = "40"; // Protocol error
+				mErrorText = "Invalid feature";
 				return false;
 			}
+			mSidSource.assign(mCommand, 5, 4);
 			break;
 
 		case 'U': // UDP message
 			// 'U' command_name ' ' base32_character+
 			mHeader = HEADER_UDP;
-			if (mLength < 6 || 
-				mCommand[4] != ' ' || 
-				!isBase32(mCommand[5])
-			) {
+			if (mLength < 6 || mCommand[4] != ' ' || !isBase32(mCommand[5])) {
+				mErrorCode = "40"; // Protocol error
+				mErrorText = "Protocol syntax error";
 				return false;
 			}
 			counter = 6;
 			while (counter < mLength && isBase32(mCommand[counter++])) {
 			}
 			if (counter != mLength && mCommand[counter] != ' ') {
+				mErrorCode = "40"; // Protocol error
+				mErrorText = "Invalid source CID";
 				return false;
 			}
+			mCidSource.assign(mCommand, 5, counter - 5);
 			break;
 
 		default: // Unknown
@@ -229,6 +289,8 @@ void AdcParser::reInit() {
 	Parser::reInit();
 
 	mHeader = HEADER_UNKNOWN;
+	mSidSource.clear();
+	mSidTarget.clear();
 	mError = false;
 }
 

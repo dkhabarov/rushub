@@ -128,16 +128,16 @@ class AdcParser : public Parser {
 
 public:
 
-	int mHeader;
-
-public:
-
 	AdcParser();
 	virtual ~AdcParser();
 
-	int getCommandType() const {
-		return mType;
-	}
+	int getCommandType() const;
+	int getHeader() const;
+	const string & getSidSource() const;
+	const string & getSidTarget() const;
+	const string & getCidSource() const;
+	const string & getErrorCode() const;
+	const string & getErrorText() const;
 	
 	/// Do parse for command and return type of this command
 	virtual int parse();
@@ -148,6 +148,12 @@ public:
 
 private:
 
+	int mHeader;
+	string mSidSource;
+	string mSidTarget;
+	string mCidSource;
+	string mErrorCode;
+	string mErrorText;
 	bool mError;
 
 private:

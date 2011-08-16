@@ -62,7 +62,7 @@ void stringSplit(const string &, const char * sDelim, vector<string> &);
 
 string & trim(string &);
 
-string & cp1251ToUtf8(const string & in, string & out);
+string & cp1251ToUtf8(const string & in, string & out, void (*escape)(char, string &) = NULL);
 
 bool isBase32(char);
 bool isUpperAlpha(char);

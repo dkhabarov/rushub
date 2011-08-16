@@ -95,6 +95,28 @@ void AdcProtocol::deleteParser(Parser * parser) {
 
 
 
+static void escaper(char c, string & dst) {
+
+	switch (c) {
+
+		case ' ':
+			dst += '\\';
+			dst += 's';
+			break;
+
+		case '\\': // Fallthrough
+		case '\n':
+			dst += '\\';
+
+		default:
+			dst += c;
+			break;
+
+	}
+}
+
+
+
 int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 
 	AdcParser * adcParser = static_cast<AdcParser *> (parser);
@@ -120,7 +142,22 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 		dcConn->logStream() << "[S]Stage " << adcParser->mType << endl;
 	}
 
-	(this->*(this->events[adcParser->mType])) (adcParser, dcConn);
+	if (0 == (this->*(this->events[adcParser->mType])) (adcParser, dcConn)) {
+		if (adcParser->getHeader() == HEADER_BROADCAST) {
+			mDcServer->mAdcUserList.sendToAllAdc(adcParser->mCommand, true);
+		} else if (adcParser->getHeader() == HEADER_ECHO || adcParser->getHeader() == HEADER_DIRECT) {
+			// Search user
+			DcUser * dcUser = static_cast<DcUser *> (mDcServer->mAdcUserList.getUserBaseByUid(adcParser->getSidTarget()));
+			if (!dcUser) { // User is not found
+				return 0;
+			}
+			dcUser->send(adcParser->mCommand, true);
+			dcConn->mDcUser->send(adcParser->mCommand, true);
+			return 0;
+		}
+
+		// TODO HEADER_FEATURE
+	}
 
 	if (dcConn->log(5)) {
 		dcConn->logStream() << "[E]Stage " << adcParser->mType << endl;
@@ -202,8 +239,7 @@ int AdcProtocol::onNewConn(Conn * conn) {
 		stringReplace(buff, "uptime", buff, sTimeCache);
 		stringReplace(buff, "users", buff, iUsersVal);
 		stringReplace(buff, "share", buff, sShareCache);
-		stringReplace(buff, " ", buff, "\\s", true);
-		cp1251ToUtf8(buff, sCache);
+		cp1251ToUtf8(buff, sCache, escaper);
 	}
 
 	dcConn->send(string("IMSG ").append(sCache), true);
@@ -230,9 +266,9 @@ int AdcProtocol::eventSta(AdcParser *, DcConn *) {
 
 int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 
-	string inf = adcParser->mCommand;
-	string oldInf = dcConn->mDcUser->getInf();
+	string & inf = adcParser->mCommand;
 
+	// Remove PID
 	size_t pos = inf.find(" PD");
 	if (pos != inf.npos) {
 		size_t pos_s = inf.find(" ", pos + 3);
@@ -243,14 +279,12 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 
 	dcConn->mDcUser->setInf(inf);
 
-	if (/*mode != 1 &&*/ dcConn->mDcUser->getInUserList()) {
-		if (oldInf != dcConn->mDcUser->getInf()) {
-			if (dcConn->mDcUser->getHide()) {
-				dcConn->send(dcConn->mDcUser->getInf(), true); // Send to self only
-			} else {
-				//sendMode(dcConn, dcConn->mDcUser->getInf(), mode, mDcServer->mDcUserList, true); // Use cache for send to all
-				mDcServer->mAdcUserList.sendToAllAdc(dcConn->mDcUser->getInf(), true);
-			}
+	if (dcConn->mDcUser->getInUserList()) {
+		if (dcConn->mDcUser->getHide()) {
+			dcConn->send(dcConn->mDcUser->getInf(), true); // Send to self only
+		} else {
+			// TODO sendMode
+			mDcServer->mAdcUserList.sendToAllAdc(dcConn->mDcUser->getInf(), true);
 		}
 	} else if (!dcConn->mDcUser->getInUserList()) {
 		dcConn->mSendNickList = true;
@@ -258,105 +292,65 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 		mDcServer->beforeUserEnter(dcConn);
 	}
 
-	return 0;
+	return 1;
 }
 
 
 
 int AdcProtocol::eventMsg(AdcParser * adcParser, DcConn * dcConn) {
 
+	// TODO check SID
+
 	if (!dcConn->mDcUser->getInUserList()) {
 		return -1;
 	}
 
-	if (adcParser->mHeader == HEADER_ECHO) {
-		size_t pos = adcParser->mCommand.find(" PM");
-		if (pos != adcParser->mCommand.npos) {
-			size_t pos1 = adcParser->mCommand.find(" ", 5);
-			if (pos1 != adcParser->mCommand.npos) {
-				size_t pos2 = adcParser->mCommand.find(" ", pos1 + 1);
-				if (pos2 != adcParser->mCommand.npos) {
-					string sid;
-					sid.assign(adcParser->mCommand, pos1 + 1, pos2 - pos1 - 1);
-
-					// Search user
-					DcUser * dcUser = static_cast<DcUser *> (mDcServer->mAdcUserList.getUserBaseByUid(sid));
-					if (!dcUser) {
-						return -2;
-					}
-					dcUser->send(adcParser->mCommand, true);
-					dcConn->mDcUser->send(adcParser->mCommand, true);
-				}
-			}
-		}
+	if (adcParser->getHeader() == HEADER_ECHO) {
 		return 0;
 	}
 
-	/*
-	if ((dcparser->chunkString(CHUNK_CH_NICK) != dcConn->mDcUser->getUid()) ) {
-		if (dcConn->log(2)) {
-			dcConn->logStream() << "Bad nick in chat, closing" << endl;
-		}
-		string msg;
-		stringReplace(mDcServer->mDcLang.mBadChatNick, "nick", msg, dcparser->chunkString(CHUNK_CH_NICK));
-		stringReplace(msg, "real_nick", msg, dcConn->mDcUser->getUid());
-		mDcServer->sendToUser(dcConn->mDcUser, msg.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
-		dcConn->closeNice(9000, CLOSE_REASON_NICK_CHAT);
-		return -2;
-	}
-	int mode = 0;
 	#ifndef WITHOUT_PLUGINS
-		mode = mDcServer->mCalls.mOnChat.callAll(dcConn->mDcUser);
+		// TODO call plugins
 	#endif
-	*/
 
 	/** Sending message */
-	if (adcParser->mHeader == HEADER_BROADCAST) {
+	if (adcParser->getHeader() == HEADER_BROADCAST) {
+		// TODO sendMode
 		mDcServer->mChatList.sendToAllAdc(adcParser->mCommand, false);
+		return 1;
 	}
-	//sendMode(dcConn, adcparser->mCommand, mode, mDcServer->mChatList, false); // Don't use cache for send to all
 	return 0;
 }
 
 
 
-int AdcProtocol::eventSch(AdcParser * adcParser, DcConn *) {
+int AdcProtocol::eventSch(AdcParser *, DcConn *) {
 
-	//todo HEADER_FEATURE
+	#ifndef WITHOUT_PLUGINS
+		// TODO call plugins
+	#endif
 
-	if (adcParser->mHeader == HEADER_BROADCAST) {
-		mDcServer->mAdcUserList.sendToAllAdc(adcParser->mCommand, true);
-	}
 	return 0;
 }
 
 
 
 int AdcProtocol::eventRes(AdcParser *, DcConn *) {
+
+	#ifndef WITHOUT_PLUGINS
+		// TODO call plugins
+	#endif
+
 	return 0;
 }
 
 
 
-int AdcProtocol::eventCtm(AdcParser * adcParser, DcConn *) {
+int AdcProtocol::eventCtm(AdcParser *, DcConn *) {
 
-	if (adcParser->mHeader == HEADER_DIRECT) {
-		size_t pos1 = adcParser->mCommand.find(" ", 5);
-		if (pos1 != adcParser->mCommand.npos) {
-			size_t pos2 = adcParser->mCommand.find(" ", pos1 + 1);
-			if (pos2 != adcParser->mCommand.npos) {
-				string sid;
-				sid.assign(adcParser->mCommand, pos1 + 1, pos2 - pos1 - 1);
-
-				// Search user
-				DcUser * dcUser = static_cast<DcUser *> (mDcServer->mAdcUserList.getUserBaseByUid(sid));
-				if (!dcUser) {
-					return -2;
-				}
-				dcUser->send(adcParser->mCommand, true);
-			}
-		}
-	}
+	#ifndef WITHOUT_PLUGINS
+		// TODO call plugins
+	#endif
 
 	return 0;
 }
@@ -364,90 +358,165 @@ int AdcProtocol::eventCtm(AdcParser * adcParser, DcConn *) {
 
 
 int AdcProtocol::eventRcm(AdcParser *, DcConn *) {
+
+	#ifndef WITHOUT_PLUGINS
+		// TODO call plugins
+	#endif
+
 	return 0;
 }
 
 
 
 int AdcProtocol::eventGpa(AdcParser *, DcConn *) {
+
+	#ifndef WITHOUT_PLUGINS
+		// TODO call plugins
+	#endif
+
 	return 0;
 }
 
 
 
 int AdcProtocol::eventPas(AdcParser *, DcConn *) {
+
+	#ifndef WITHOUT_PLUGINS
+		// TODO call plugins
+	#endif
+
 	return 0;
 }
 
 
 
 int AdcProtocol::eventQui(AdcParser *, DcConn *) {
+
+	#ifndef WITHOUT_PLUGINS
+		// TODO call plugins
+	#endif
+
 	return 0;
 }
 
 
 
 int AdcProtocol::eventGet(AdcParser *, DcConn *) {
+
+	#ifndef WITHOUT_PLUGINS
+		// TODO call plugins
+	#endif
+
 	return 0;
 }
 
 
 
 int AdcProtocol::eventGfi(AdcParser *, DcConn *) {
+
+	#ifndef WITHOUT_PLUGINS
+		// TODO call plugins
+	#endif
+
 	return 0;
 }
 
 
 
 int AdcProtocol::eventSnd(AdcParser *, DcConn *) {
+
+	#ifndef WITHOUT_PLUGINS
+		// TODO call plugins
+	#endif
+
 	return 0;
 }
 
 
 
 int AdcProtocol::eventSid(AdcParser *, DcConn *) {
+
+	#ifndef WITHOUT_PLUGINS
+		// TODO call plugins
+	#endif
+
 	return 0;
 }
 
 
 
 int AdcProtocol::eventCmd(AdcParser *, DcConn *) {
+
+	#ifndef WITHOUT_PLUGINS
+		// TODO call plugins
+	#endif
+
 	return 0;
 }
 
 
 
 int AdcProtocol::eventNat(AdcParser *, DcConn *) {
+
+	#ifndef WITHOUT_PLUGINS
+		// TODO call plugins
+	#endif
+
 	return 0;
 }
 
 
 
 int AdcProtocol::eventRnt(AdcParser *, DcConn *) {
+
+	#ifndef WITHOUT_PLUGINS
+		// TODO call plugins
+	#endif
+
 	return 0;
 }
 
 
 
 int AdcProtocol::eventPsr(AdcParser *, DcConn *) {
+
+	#ifndef WITHOUT_PLUGINS
+		// TODO call plugins
+	#endif
+
 	return 0;
 }
 
 
 
 int AdcProtocol::eventPub(AdcParser *, DcConn *) {
+
+	#ifndef WITHOUT_PLUGINS
+		// TODO call plugins
+	#endif
+
 	return 0;
 }
 
 
 
 int AdcProtocol::eventVoid(AdcParser *, DcConn *) {
+
+	#ifndef WITHOUT_PLUGINS
+		// TODO call plugins
+	#endif
+
 	return 0;
 }
 
 
 
 int AdcProtocol::eventUnknown(AdcParser *, DcConn *) {
+
+	#ifndef WITHOUT_PLUGINS
+		// TODO call plugins
+	#endif
+
 	return 0;
 }
 
@@ -483,56 +552,9 @@ int AdcProtocol::sendNickList(DcConn * dcConn) {
 		if (mDcServer->mEnterList.find(dcConn->mDcUser->getUidHash())) {
 			dcConn->mNickListInProgress = true;
 		}
-/*
-		if ((dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE) != LOGIN_STATUS_LOGIN_DONE) && mDcServer->mDcConfig.mNicklistOnLogin) {
-			dcConn->mNickListInProgress = true;
-		}
-
-		if (dcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
-			if (dcConn->log(3)) {
-				dcConn->logStream() << "Sending MyINFO list" << endl;
-			}
-			// seperator "|" was added in getInfoList function
-			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false, false);
-		} else if (dcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
-			if (dcConn->log(3)) {
-				dcConn->logStream() << "Sending MyINFO list and Nicklist" << endl;
-			}
-			// seperator "|" was not added in getNickList function, because seperator was "$$"
-			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_NICK), true, false);
-			// seperator "|" was added in getInfoList function
-			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false, false);
-		} else {
-			if (dcConn->log(3)) {
-				dcConn->logStream() << "Sending Nicklist" << endl;
-			}
-			// seperator "|" was not added in getNickList function, because seperator was "$$"
-			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_NICK), true, false);
-		}
-		if (mDcServer->mOpList.size()) {
-			if (dcConn->log(3)) {
-				dcConn->logStream() << "Sending Oplist" << endl;
-			}
-			// seperator "|" was not added in getNickList function, because seperator was "$$"
-			dcConn->send(mDcServer->mOpList.getList(), true, false);
-		}
-
-		if (dcConn->mDcUser->getInUserList() && dcConn->mDcUser->getInIpList()) {
-			if (dcConn->log(3)) {
-				dcConn->logStream() << "Sending Iplist" << endl;
-			}
-			// seperator "|" was not added in getIpList function, because seperator was "$$"
-			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_IP), true);
-		} else {
-			if (!dcConn->sendBufIsEmpty()) { // buf would not flush, if it was empty
-				dcConn->flush(); // newPolitic
-			} else {
-				dcConn->send("", 0 , true, true);
-			}
-		}
-*/
 
 		dcConn->send(mDcServer->mAdcUserList.getList(), true);
+
 	} catch(...) {
 		if (dcConn->errLog(0)) {
 			dcConn->logStream() << "exception in sendNickList" << endl;
@@ -571,6 +593,12 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 		if (dcConn->log(1)) {
 			dcConn->logStream() << "Wrong syntax cmd" << endl;
 		}
+		string msg("ISTA "), buff;
+		msg.append("2"); // Disconnect
+		msg.append(adcParser->getErrorCode()); // Error code
+		msg.append(" ");
+		msg.append(cp1251ToUtf8(adcParser->getErrorText(), buff, escaper)); // Error text
+		dcConn->send(msg, true);
 		dcConn->closeNice(9000, CLOSE_REASON_CMD_SYNTAX);
 		return -1;
 	}
