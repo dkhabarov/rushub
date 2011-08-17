@@ -192,6 +192,7 @@ Conn * Server::addSimpleConn(int connType, const char * ip, const char * port) {
 				logStream() << "Fatal error: Unknown connection" << endl;
 			}
 		}
+		delete conn;
 		return NULL;
 	}
 

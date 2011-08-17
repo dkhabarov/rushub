@@ -397,7 +397,9 @@ void Conn::close() {
 		logStream() << "Socket not closed: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 	}
 
-	freeaddrinfo(mAddrInfo);
+	if (mAddrInfo != NULL) {
+		freeaddrinfo(mAddrInfo);
+	}
 	mSocket = 0;
 }
 
