@@ -205,18 +205,18 @@ bool LuaInterpreter::testFunc(const char * funcName) {
 int LuaInterpreter::callFunc(const char * funcName) {
 	CallParams::iterator it;
 	lua_settop(mL, 0);
-	int base = lua_gettop(mL);
+	int traceback = lua_gettop(mL);
 
 	lua_pushliteral(mL, "_TRACEBACK");
 	lua_rawget(mL, LUA_GLOBALSINDEX); // lua 5.1
 
 	if (lua_isfunction(mL, -1)) {
-		base = lua_gettop(mL);
+		traceback = lua_gettop(mL);
 	} else {
 		lua_pop(mL, 1);
 	}
 	//lua_rawget(mL, LUA_ENVIRONINDEX); // lua 5.2
-	//lua_insert(mL, base);
+	//lua_insert(mL, traceback);
 
 	lua_getglobal(mL, funcName);
 	if (lua_isnil(mL, -1)) { // function not exists
@@ -225,7 +225,9 @@ int LuaInterpreter::callFunc(const char * funcName) {
 		}
 		mCallParams.clear();
 		lua_pop(mL, -1); // remove nil value
-		lua_remove(mL, base); // remove _TRACEBACK
+		if (traceback != 0) {
+			lua_remove(mL, traceback); // remove _TRACEBACK
+		}
 		return 0;
 	}
 
@@ -264,10 +266,12 @@ int LuaInterpreter::callFunc(const char * funcName) {
 	LuaInterpreter * oldScript = LuaPlugin::mCurLua->mCurScript;
 	LuaPlugin::mCurLua->mCurScript = this;
 
-	if (lua_pcall(mL, len, 1, base)) {
+	if (lua_pcall(mL, len, 1, traceback)) {
 		const char * error = lua_tostring(mL, -1);
 		lua_pop(mL, 1);
-		lua_remove(mL, base); // remove _TRACEBACK
+		if (traceback != 0) {
+			lua_remove(mL, traceback); // remove _TRACEBACK
+		}
 		onError(funcName, error);
 		LuaPlugin::mCurLua->mCurScript = oldScript;
 		return 0;
@@ -281,7 +285,9 @@ int LuaInterpreter::callFunc(const char * funcName) {
 	}
 
 	lua_pop(mL, 1);
-	lua_remove(mL, base); // remove _TRACEBACK
+	if (traceback != 0) {
+		lua_remove(mL, traceback); // remove _TRACEBACK
+	}
 
 	LuaPlugin::mCurLua->mCurScript = oldScript;
 	return ret;
@@ -302,7 +308,7 @@ bool LuaInterpreter::onError(const char * funcName, const char * errMsg, bool st
 	}
 	stoped = stoped || stop;
 	LuaPlugin::mCurLua->onScriptError(this, mName.c_str(), errMsg, stoped);
-	if (stoped) {
+	if (stoped && strcmp(funcName, "OnExit")) {
 		return !LuaPlugin::mCurLua->stopScript(this, true);
 	}
 	return false;

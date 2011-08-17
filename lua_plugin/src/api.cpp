@@ -1266,20 +1266,22 @@ int call(lua_State * L) {
 	lua_State * LL = lua_newthread(LIP->mL);
 	lua_settop(LL, 0);
 
-	int base = lua_gettop(LL);
+	int traceback = lua_gettop(LL);
 	lua_pushliteral(LL, "_TRACEBACK");
 	lua_rawget(LL, LUA_GLOBALSINDEX); // lua 5.1
 	if (lua_isfunction(LL, -1)) {
-		base = lua_gettop(LL);
+		traceback = lua_gettop(LL);
 	} else {
 		lua_pop(LL, 1);
 	}
 	//lua_rawget(LL, LUA_ENVIRONINDEX); // lua 5.2
-	//lua_insert(LL, base);
+	//lua_insert(LL, traceback);
 
 	lua_getglobal(LL, luaL_checkstring(L, 2));
 	if (lua_type(LL, -1) != LUA_TFUNCTION) {
-		lua_remove(LL, base); // remove _TRACEBACK
+		if (traceback != 0) {
+			lua_remove(LL, traceback); // remove _TRACEBACK
+		}
 		return LuaUtils::pushError(L, "function was not found");
 	}
 
@@ -1288,9 +1290,11 @@ int call(lua_State * L) {
 		copyValue(L, LL, pos);
 	}
 
-	if (lua_pcall(LL, top - 2, LUA_MULTRET, base)) {
+	if (lua_pcall(LL, top - 2, LUA_MULTRET, traceback)) {
 		const char * errMsg = lua_tostring(LL, -1);
-		lua_remove(LL, base); // remove _TRACEBACK
+		if (traceback != 0) {
+			lua_remove(LL, traceback); // remove _TRACEBACK
+		}
 		return luaL_error(L, errMsg);
 	}
 
@@ -1301,7 +1305,9 @@ int call(lua_State * L) {
 		copyValue(LL, L, pos);
 	}
 
-	lua_remove(LL, base); // remove _TRACEBACK
+	if (traceback != 0) {
+		lua_remove(LL, traceback); // remove _TRACEBACK
+	}
 	return top;
 }
 
