@@ -64,6 +64,7 @@ TimerList::TimerList() {
 
 
 TimerList::~TimerList() {
+	clear(); // clear before destruct
 }
 
 

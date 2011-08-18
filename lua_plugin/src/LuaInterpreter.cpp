@@ -203,36 +203,33 @@ bool LuaInterpreter::testFunc(const char * funcName) {
 
 /** 1 - lock! */
 int LuaInterpreter::callFunc(const char * funcName) {
-	CallParams::iterator it;
-	lua_settop(mL, 0);
-	int traceback = lua_gettop(mL);
+	lua_settop(mL, 0); // clear stack
+	int base = lua_gettop(mL);
+	int traceback = base;
 
 	lua_pushliteral(mL, "_TRACEBACK");
 	lua_rawget(mL, LUA_GLOBALSINDEX); // lua 5.1
+	//lua_rawget(mL, LUA_ENVIRONINDEX); // lua 5.2
 
 	if (lua_isfunction(mL, -1)) {
 		traceback = lua_gettop(mL);
 	} else {
-		lua_pop(mL, 1);
+		lua_pop(mL, 1); // remove _TRACEBACK
 	}
-	//lua_rawget(mL, LUA_ENVIRONINDEX); // lua 5.2
-	//lua_insert(mL, traceback);
+	
 
 	lua_getglobal(mL, funcName);
 	if (lua_isnil(mL, -1)) { // function not exists
-		for (it = mCallParams.begin(); it != mCallParams.end(); ++it) {
+		for (CallParams::iterator it = mCallParams.begin(); it != mCallParams.end(); ++it) {
 			delete (*it);
 		}
 		mCallParams.clear();
-		lua_pop(mL, -1); // remove nil value
-		if (traceback != 0) {
-			lua_remove(mL, traceback); // remove _TRACEBACK
-		}
+		lua_settop(mL, base); // clear stack
 		return 0;
 	}
 
 	void ** userdata = NULL;
-	for (it = mCallParams.begin(); it != mCallParams.end(); ++it) {
+	for (CallParams::iterator it = mCallParams.begin(); it != mCallParams.end(); ++it) {
 		switch ((*it)->type) {
 			case LUA_TLIGHTUSERDATA :
 				userdata = (void **) lua_newuserdata(mL, sizeof(void *));
@@ -268,10 +265,7 @@ int LuaInterpreter::callFunc(const char * funcName) {
 
 	if (lua_pcall(mL, len, 1, traceback)) {
 		const char * error = lua_tostring(mL, -1);
-		lua_pop(mL, 1);
-		if (traceback != 0) {
-			lua_remove(mL, traceback); // remove _TRACEBACK
-		}
+		lua_settop(mL, base); // clear stack
 		onError(funcName, error);
 		LuaPlugin::mCurLua->mCurScript = oldScript;
 		return 0;
@@ -284,11 +278,7 @@ int LuaInterpreter::callFunc(const char * funcName) {
 		ret = (int)lua_tonumber(mL, -1);
 	}
 
-	lua_pop(mL, 1);
-	if (traceback != 0) {
-		lua_remove(mL, traceback); // remove _TRACEBACK
-	}
-
+	lua_settop(mL, base); // clear stack
 	LuaPlugin::mCurLua->mCurScript = oldScript;
 	return ret;
 }
@@ -308,7 +298,7 @@ bool LuaInterpreter::onError(const char * funcName, const char * errMsg, bool st
 	}
 	stoped = stoped || stop;
 	LuaPlugin::mCurLua->onScriptError(this, mName.c_str(), errMsg, stoped);
-	if (stoped && strcmp(funcName, "OnExit")) {
+	if (stoped) {
 		return !LuaPlugin::mCurLua->stopScript(this, true);
 	}
 	return false;

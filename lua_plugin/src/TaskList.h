@@ -66,6 +66,7 @@ public:
 	}
 
 	virtual ~TasksList() {
+		clear(); // clear before destruct
 	}
 
 	void addTask(void * param, TaskType type = TASKTYPE_No); /** Adding tasks */

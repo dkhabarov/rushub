@@ -1264,24 +1264,23 @@ int call(lua_State * L) {
 	}
 
 	lua_State * LL = lua_newthread(LIP->mL);
-	lua_settop(LL, 0);
+	lua_settop(LL, 0); // clear stack
 
-	int traceback = lua_gettop(LL);
+
+	int base = lua_gettop(LL);
+	int traceback = base;
 	lua_pushliteral(LL, "_TRACEBACK");
 	lua_rawget(LL, LUA_GLOBALSINDEX); // lua 5.1
+	//lua_rawget(LL, LUA_ENVIRONINDEX); // lua 5.2
 	if (lua_isfunction(LL, -1)) {
 		traceback = lua_gettop(LL);
 	} else {
-		lua_pop(LL, 1);
+		lua_pop(LL, 1); // remove _TRACEBACK
 	}
-	//lua_rawget(LL, LUA_ENVIRONINDEX); // lua 5.2
-	//lua_insert(LL, traceback);
 
 	lua_getglobal(LL, luaL_checkstring(L, 2));
 	if (lua_type(LL, -1) != LUA_TFUNCTION) {
-		if (traceback != 0) {
-			lua_remove(LL, traceback); // remove _TRACEBACK
-		}
+		lua_settop(LL, base); // clear stack
 		return LuaUtils::pushError(L, "function was not found");
 	}
 
@@ -1292,9 +1291,7 @@ int call(lua_State * L) {
 
 	if (lua_pcall(LL, top - 2, LUA_MULTRET, traceback)) {
 		const char * errMsg = lua_tostring(LL, -1);
-		if (traceback != 0) {
-			lua_remove(LL, traceback); // remove _TRACEBACK
-		}
+		lua_settop(LL, base); // clear stack
 		return luaL_error(L, errMsg);
 	}
 
@@ -1303,10 +1300,6 @@ int call(lua_State * L) {
 	lua_settop(L, 0);
 	while (++pos <= top) {
 		copyValue(LL, L, pos);
-	}
-
-	if (traceback != 0) {
-		lua_remove(LL, traceback); // remove _TRACEBACK
 	}
 	return top;
 }
