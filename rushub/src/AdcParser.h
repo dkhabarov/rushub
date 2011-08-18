@@ -159,6 +159,7 @@ private:
 private:
 
 	bool checkHeaderSyntax();
+	void setError(const char * code, const char * text);
 
 }; // class AdcParser
 
