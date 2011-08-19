@@ -306,7 +306,7 @@ int DcServer::onTimer(Time & now) {
 
 		if (!mDcConfig.mAdcOn) {
 			mHelloList.flushCache(); // NMDC
-			mDcUserList.flushCache();
+			mDcUserList.flushCache(); // NMDC
 			mBotList.flushCache();
 			mEnterList.flushCache();
 			mOpList.flushCache();
@@ -356,15 +356,16 @@ int DcServer::onTimer(Time & now) {
 
 		mIpEnterFlood.del(now); // Removing ip addresses, which already long ago entered
 
-		mDcUserList.autoResize();
-		mBotList.autoResize();
+		mDcUserList.autoResize(); // NMDC
+		mAdcUserList.autoResize(); // ADC
 		mHelloList.autoResize(); // NMDC
+		mBotList.autoResize();
 		mEnterList.autoResize();
 		mActiveList.autoResize();
 		mChatList.autoResize();
 		mOpList.autoResize();
 		mIpList.autoResize();
-		mAdcUserList.autoResize(); // ADC
+		
 	}
 
 	#ifndef WITHOUT_PLUGINS
@@ -637,38 +638,27 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 
 	unsigned long uidHash = dcUser->getUidHash();
 
+	UserList * mainUserList = NULL;
 	if (!mDcConfig.mAdcOn) {
-		if (mDcUserList.log(4)) {
-			mDcUserList.logStream() << "Before add: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
-		}
-
-		if (!mDcUserList.add(uidHash, dcUser)) {
-			if (log(1)) {
-				logStream() << "Adding twice user with same nick " << dcUser->getUid() << " (" << mDcUserList.find(uidHash)->uid() << ")" << endl;
-			}
-			dcUser->setInUserList(false);
-			return false;
-		}
-
-		if (mDcUserList.log(4)) {
-			mDcUserList.logStream() << "After add: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
-		}
+		mainUserList = &mDcUserList;
 	} else {
-		if (mAdcUserList.log(4)) {
-			mAdcUserList.logStream() << "Before add: " << dcUser->getUid() << " Size: " << mAdcUserList.size() << endl;
-		}
+		mainUserList = &mAdcUserList;
+	}
 
-		if (!mAdcUserList.add(uidHash, dcUser)) {
-			if (log(1)) {
-				logStream() << "Adding twice user with same nick " << dcUser->getUid() << " (" << mAdcUserList.find(uidHash)->uid() << ")" << endl;
-			}
-			dcUser->setInUserList(false);
-			return false;
-		}
+	if (mainUserList->log(4)) {
+		mainUserList->logStream() << "Before add: " << dcUser->getUid() << " Size: " << mainUserList->size() << endl;
+	}
 
-		if (mAdcUserList.log(4)) {
-			mAdcUserList.logStream() << "After add: " << dcUser->getUid() << " Size: " << mAdcUserList.size() << endl;
+	if (!mainUserList->add(uidHash, dcUser)) {
+		if (log(1)) {
+			logStream() << "Adding twice user with same nick " << dcUser->getUid() << " (" << mainUserList->find(uidHash)->uid() << ")" << endl;
 		}
+		dcUser->setInUserList(false);
+		return false;
+	}
+
+	if (mainUserList->log(4)) {
+		mainUserList->logStream() << "After add: " << dcUser->getUid() << " Size: " << mainUserList->size() << endl;
 	}
 
 
@@ -713,65 +703,45 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 	unsigned long uidHash = dcUser->getUidHash();
 
+	UserList * mainUserList = NULL;
 	if (!mDcConfig.mAdcOn) {
-		if (mDcUserList.log(4)) {
-			mDcUserList.logStream() << "Before leave: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
-		}
-		if (mDcUserList.contain(uidHash)) {
+		mainUserList = &mDcUserList;
+	} else {
+		mainUserList = &mAdcUserList;
+	}
 
+	if (mainUserList->log(4)) {
+		mainUserList->logStream() << "Before leave: " << dcUser->getUid() << " Size: " << mainUserList->size() << endl;
+	}
+	if (mainUserList->contain(uidHash)) {
+
+		if (!mDcConfig.mAdcOn) {
 			#ifndef WITHOUT_PLUGINS
 				if (dcUser->mDcConn) {
 					mCalls.mOnUserExit.callAll(dcUser);
 				}
 			#endif
-
-			if (dcUser->mDcConn != NULL) {
-				-- miTotalUserCount;
-			}
-
-			// We make sure that user with such nick one!
-			DcUser * other = static_cast<DcUser *> (mDcUserList.find(dcUser->getUidHash()));
-			if (!dcUser->mDcConn) { // Removing the bot
-				mDcUserList.remove(uidHash);
-			} else if (other && other->mDcConn && dcUser->mDcConn && other->mDcConn == dcUser->mDcConn) {
-				mDcUserList.remove(uidHash);
-				if (mDcUserList.log(4)) {
-					mDcUserList.logStream() << "After leave: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
-				}
-			} else {
-				// Such can happen only for users without connection or with different connection
-				if (dcUser->errLog(1)) {
-					dcUser->logStream() << "Not found the correct user for nick: " << dcUser->getUid() << endl;
-				}
-				return false;
-			}
 		}
-	} else {
-		if (mAdcUserList.log(4)) {
-			mAdcUserList.logStream() << "Before leave: " << dcUser->getUid() << " Size: " << mAdcUserList.size() << endl;
+
+		if (dcUser->mDcConn != NULL) {
+			-- miTotalUserCount;
 		}
-		if (mAdcUserList.contain(uidHash)) {
 
-			if (dcUser->mDcConn != NULL) {
-				-- miTotalUserCount;
+		// We make sure that user with such nick one!
+		DcUser * other = static_cast<DcUser *> (mainUserList->find(dcUser->getUidHash()));
+		if (!dcUser->mDcConn) { // Removing the bot
+			mainUserList->remove(uidHash);
+		} else if (other && other->mDcConn && dcUser->mDcConn && other->mDcConn == dcUser->mDcConn) {
+			mainUserList->remove(uidHash);
+			if (mainUserList->log(4)) {
+				mainUserList->logStream() << "After leave: " << dcUser->getUid() << " Size: " << mainUserList->size() << endl;
 			}
-
-			// We make sure that user with such nick one!
-			DcUser * other = static_cast<DcUser *> (mAdcUserList.find(dcUser->getUidHash()));
-			if (!dcUser->mDcConn) { // Removing the bot
-				mAdcUserList.remove(uidHash);
-			} else if (other && other->mDcConn && dcUser->mDcConn && other->mDcConn == dcUser->mDcConn) {
-				mAdcUserList.remove(uidHash);
-				if (mAdcUserList.log(4)) {
-					mAdcUserList.logStream() << "After leave: " << dcUser->getUid() << " Size: " << mAdcUserList.size() << endl;
-				}
-			} else {
-				// Such can happen only for users without connection or with different connection
-				if (dcUser->errLog(1)) {
-					dcUser->logStream() << "Not found the correct user for nick: " << dcUser->getUid() << endl;
-				}
-				return false;
+		} else {
+			// Such can happen only for users without connection or with different connection
+			if (dcUser->errLog(1)) {
+				dcUser->logStream() << "Not found the correct user for nick: " << dcUser->getUid() << endl;
 			}
+			return false;
 		}
 	}
 
@@ -783,7 +753,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 	mChatList.remove(uidHash);
 	mBotList.remove(uidHash);
 	if (!mDcConfig.mAdcOn) {
-		mHelloList.remove(uidHash);
+		mHelloList.remove(uidHash); // NMDC
 	}
 
 	if (dcUser->getInUserList()) {
@@ -793,13 +763,10 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 			string msg;
 
 			if (!mDcConfig.mAdcOn) {
-				mNmdcProtocol.appendQuit(msg, dcUser->getUid()); // refactoring to DcProtocol pointer
-
-				// Delay in sending MyINFO (and Quit)
-				mDcUserList.sendToAll(msg, true/*mDcConfig.mDelayedMyinfo*/, false);
+				mNmdcProtocol.appendQuit(msg, dcUser->getUid());
+				mDcUserList.sendToAll(msg, true/*mDcConfig.mDelayedMyinfo*/, false); // Delay in sending MyINFO (and Quit)
 			} else {
 				msg.append("IQUI ").append(dcUser->getUid()).append(ADC_SEPARATOR);
-
 				mAdcUserList.sendToAllAdc(msg, true/*mDcConfig.mDelayedMyinfo*/, false);
 			}
 		}
