@@ -75,54 +75,25 @@ typedef enum { // Types of the commands
 
 
 enum {
-	CHUNK_ADC_ALL
-};
-
-enum {
-	CHUNK_ADC_STA_ALL,
 	CHUNK_ADC_STA_CMD,
-	CHUNK_ADC_STA_TO_SID,
 	CHUNK_ADC_STA_CODE,
 	CHUNK_ADC_STA_DESC,
 	CHUNK_ADC_STA_OTHER
 };
 
 enum {
-	CHUNK_ADC_INF_ALL,
 	CHUNK_ADC_INF_CMD,
-	CHUNK_ADC_INF_SID,
 	CHUNK_ADC_INF_OTHER
 };
 
 enum {
-	CHUNK_ADC_MSG_ALL,
 	CHUNK_ADC_MSG_CMD,
-	CHUNK_ADC_MSG_SID,
-	CHUNK_ADC_MSG_TO_SID,
 	CHUNK_ADC_MSG_TEXT,
 	CHUNK_ADC_MSG_ME,
 	CHUNK_ADC_MSG_PM,
 	CHUNK_ADC_MSG_OTHER
 };
 
-enum {
-	CHUNK_ADC_PARAMS_ALL,
-	CHUNK_ADC_PARAMS_CMD,
-	CHUNK_ADC_PARAMS_SID,
-	CHUNK_ADC_PARAMS_OTHER
-};
-
-enum {
-	CHUNK_ADC_SINGLE_ALL,
-	CHUNK_ADC_SINGLE_CMD,
-	CHUNK_ADC_SINGLE_DATA
-};
-
-enum {
-	CHUNK_ADC_QUI_ALL,
-	CHUNK_ADC_QUI_CMD,
-	CHUNK_ADC_QUI_SID
-};
 
 class AdcParser : public Parser {
 
@@ -154,6 +125,7 @@ private:
 	string mCidSource;
 	string mErrorCode;
 	string mErrorText;
+	size_t mBodyPos;
 	bool mError;
 
 private:

@@ -89,6 +89,7 @@ AdcCommand AdcCommands[] = {
 AdcParser::AdcParser() :
 	Parser(9), // Max number of chunks - 9 !!!
 	mHeader(HEADER_UNKNOWN),
+	mBodyPos(0),
 	mError(false)
 { 
 	setClassName("AdcParser");
@@ -191,21 +192,25 @@ bool AdcParser::checkHeaderSyntax() {
 				return false;
 			}
 			mSidSource.assign(mCommand, 5, 4);
+			mBodyPos = 9;
 			break;
 
 		case 'H': // Hub message
 			// 'H' command_name
 			mHeader = HEADER_HUB;
+			mBodyPos = 4;
 			break;
 
 		case 'I': // Info message
 			// 'I' command_name
 			mHeader = HEADER_INFO;
+			mBodyPos = 4;
 			break;
 
 		case 'C': // Client message
 			// 'C' command_name
 			mHeader =  HEADER_CLIENT;
+			mBodyPos = 4;
 			break;
 
 		case 'D': // Direct message
@@ -230,6 +235,7 @@ bool AdcParser::checkHeaderSyntax() {
 			}
 			mSidSource.assign(mCommand, 5, 4);
 			mSidTarget.assign(mCommand, 10, 4);
+			mBodyPos = 14;
 			break;
 
 		case 'F': // Feature broadcast
@@ -246,6 +252,7 @@ bool AdcParser::checkHeaderSyntax() {
 				return false;
 			}
 			mSidSource.assign(mCommand, 5, 4);
+			mBodyPos = 14;
 			break;
 
 		case 'U': // UDP message
@@ -263,6 +270,7 @@ bool AdcParser::checkHeaderSyntax() {
 				return false;
 			}
 			mCidSource.assign(mCommand, 5, counter - 5);
+			mBodyPos = counter;
 			break;
 
 		default: // Unknown
@@ -301,26 +309,16 @@ bool AdcParser::splitChunks() {
 	}
 	mIsParsed = true;
 
-	setChunk(0, 0, mCommand.size()); // Zero part - always whole command
+	//setChunk(0, 0, mCommand.size()); // Zero part - always whole command
 
 	switch (mType) {
 
 		case ADC_TYPE_SUP : // This command has a different number parameters
 			break;
 
-// todo chech sid length!
 		case ADC_TYPE_STA : // STA code [desc]
-			if (mHeader == HEADER_ECHO || mHeader == HEADER_DIRECT) {
-				if (!splitOnTwo(' ', CHUNK_ADC_STA_CMD, CHUNK_ADC_STA_CMD, CHUNK_ADC_STA_TO_SID)) {
-					mError = true;
-				}
-				if (!splitOnTwo(' ', CHUNK_ADC_STA_TO_SID, CHUNK_ADC_STA_TO_SID, CHUNK_ADC_STA_CODE)) {
-					mError = true;
-				}
-			} else {
-				if (!splitOnTwo(0, ' ', CHUNK_ADC_STA_CMD, CHUNK_ADC_STA_CODE)) {
-					mError = true;
-				}
+			if (!splitOnTwo(mBodyPos, ' ', CHUNK_ADC_STA_CMD, CHUNK_ADC_STA_CODE)) {
+				mError = true;
 			}
 			if (splitOnTwo(' ', CHUNK_ADC_STA_CODE, CHUNK_ADC_STA_CODE, CHUNK_ADC_STA_DESC)) {
 				splitOnTwo(' ', CHUNK_ADC_STA_DESC, CHUNK_ADC_STA_DESC, CHUNK_ADC_STA_OTHER);
@@ -328,26 +326,15 @@ bool AdcParser::splitChunks() {
 			break;
 
 		case ADC_TYPE_INF : // INF sid params
-			if (!splitOnTwo(0, ' ', CHUNK_ADC_INF_CMD, CHUNK_ADC_INF_SID)) {
-				mError = true;
-			} else if (!splitOnTwo(' ', CHUNK_ADC_INF_SID, CHUNK_ADC_INF_SID, CHUNK_ADC_INF_OTHER)) {
+			if (!splitOnTwo(mBodyPos, ' ', CHUNK_ADC_INF_CMD, CHUNK_ADC_INF_OTHER)) {
 				mError = true;
 			}
 			break;
 			
 		case ADC_TYPE_MSG : // MSG sid [to_sid] text [me] [pm]
-			if (!splitOnTwo(0, ' ', CHUNK_ADC_MSG_CMD, CHUNK_ADC_MSG_SID)) {
-				mError = true;
-			} else if (mHeader == HEADER_ECHO || mHeader == HEADER_DIRECT) {
-				if (!splitOnTwo(' ', CHUNK_ADC_MSG_SID, CHUNK_ADC_MSG_SID, CHUNK_ADC_MSG_TO_SID)) {
-					mError = true;
-				} else if (!splitOnTwo(' ', CHUNK_ADC_MSG_TO_SID, CHUNK_ADC_MSG_TO_SID, CHUNK_ADC_MSG_TEXT)) {
-					mError = true;
-				}
-			} else if (!splitOnTwo(' ', CHUNK_ADC_MSG_SID, CHUNK_ADC_MSG_SID, CHUNK_ADC_MSG_TEXT)) {
+			if (!splitOnTwo(mBodyPos, ' ', CHUNK_ADC_MSG_CMD, CHUNK_ADC_MSG_TEXT)) {
 				mError = true;
 			}
-
 			if (!splitOnTwo(" ME", CHUNK_ADC_MSG_TEXT, CHUNK_ADC_MSG_TEXT, CHUNK_ADC_MSG_ME)) {
 				if (!splitOnTwo(" PM", CHUNK_ADC_MSG_TEXT, CHUNK_ADC_MSG_TEXT, CHUNK_ADC_MSG_PM)) {
 					splitOnTwo(' ', CHUNK_ADC_MSG_TEXT, CHUNK_ADC_MSG_TEXT, CHUNK_ADC_MSG_OTHER);
@@ -364,53 +351,24 @@ bool AdcParser::splitChunks() {
 			break;
 
 		case ADC_TYPE_SCH : // SCH sid params
-			if (!splitOnTwo(0, ' ', CHUNK_ADC_PARAMS_CMD, CHUNK_ADC_PARAMS_SID)) {
-				mError = true;
-			} else if (!splitOnTwo(' ', CHUNK_ADC_PARAMS_SID, CHUNK_ADC_PARAMS_SID, CHUNK_ADC_PARAMS_OTHER)) {
-				mError = true;
-			}
 			break;
 
 		case ADC_TYPE_RES : // RES sid params
-			if (!splitOnTwo(0, ' ', CHUNK_ADC_PARAMS_CMD, CHUNK_ADC_PARAMS_SID)) {
-				mError = true;
-			} else if (!splitOnTwo(' ', CHUNK_ADC_PARAMS_SID, CHUNK_ADC_PARAMS_SID, CHUNK_ADC_PARAMS_OTHER)) {
-				mError = true;
-			}
 			break;
 
 		case ADC_TYPE_CTM : // CTM sid params
-			if (!splitOnTwo(0, ' ', CHUNK_ADC_PARAMS_CMD, CHUNK_ADC_PARAMS_SID)) {
-				mError = true;
-			} else if (!splitOnTwo(' ', CHUNK_ADC_PARAMS_SID, CHUNK_ADC_PARAMS_SID, CHUNK_ADC_PARAMS_OTHER)) {
-				mError = true;
-			}
 			break;
 
 		case ADC_TYPE_RCM : // RCM sid params
-			if (!splitOnTwo(0, ' ', CHUNK_ADC_PARAMS_CMD, CHUNK_ADC_PARAMS_SID)) {
-				mError = true;
-			} else if (!splitOnTwo(' ', CHUNK_ADC_PARAMS_SID, CHUNK_ADC_PARAMS_SID, CHUNK_ADC_PARAMS_OTHER)) {
-				mError = true;
-			}
 			break;
 
 		case ADC_TYPE_GPA : // GPA data
-			if (!splitOnTwo(0, ' ', CHUNK_ADC_SINGLE_CMD, CHUNK_ADC_SINGLE_DATA)) {
-				mError = true;
-			}
 			break;
 
 		case ADC_TYPE_PAS : // PAS password
-			if (!splitOnTwo(0, ' ', CHUNK_ADC_SINGLE_CMD, CHUNK_ADC_SINGLE_DATA)) {
-				mError = true;
-			}
 			break;
 
 		case ADC_TYPE_QUI : // QUI sid
-			if (!splitOnTwo(0, ' ', CHUNK_ADC_QUI_CMD, CHUNK_ADC_QUI_SID)) {
-				mError = true;
-			}
 			break;
 
 		case ADC_TYPE_GET : //
