@@ -95,7 +95,7 @@ int Service::installService(char * name, const char * configFile) {
 	}
 
 	SERVICE_DESCRIPTION serviceDescription;
-	serviceDescription.lpDescription = "NMDC Server";
+	serviceDescription.lpDescription = "DC Server";
 	::ChangeServiceConfig2(service, SERVICE_CONFIG_DESCRIPTION, &serviceDescription);
 
 	cout << "Service '" << name << "' installed successfully" << endl;
