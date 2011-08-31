@@ -30,7 +30,7 @@
 #ifdef _WIN32
 
 	#ifndef FD_SETSIZE // For select
-		#ifdef WIN64
+		#ifdef _WIN64
 			#define FD_SETSIZE      16384 // also see Times.h
 		#else
 			#define FD_SETSIZE      32768 // also see Times.h
