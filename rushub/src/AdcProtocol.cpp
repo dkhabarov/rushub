@@ -127,9 +127,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 	}
 
 	#ifndef WITHOUT_PLUGINS
-//		if (mDcServer->mCalls.mOnAny.callAll(dcConn->mDcUser, adcParser->mType)) {
-//			return 1;
-//		}
+		// TODO call plugins (OnAny)
 	#endif
 
 	#ifdef _DEBUG
@@ -148,15 +146,14 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 		} else if (adcParser->getHeader() == HEADER_ECHO || adcParser->getHeader() == HEADER_DIRECT) {
 			// Search user
 			DcUser * dcUser = static_cast<DcUser *> (mDcServer->mAdcUserList.getUserBaseByUid(adcParser->getSidTarget()));
-			if (!dcUser) { // User is not found
-				return 0;
+			if (dcUser) { // User is found
+				dcUser->send(adcParser->mCommand, true);
+				dcConn->mDcUser->send(adcParser->mCommand, true);
 			}
-			dcUser->send(adcParser->mCommand, true);
-			dcConn->mDcUser->send(adcParser->mCommand, true);
-			return 0;
+		} else if (adcParser->getHeader() == HEADER_FEATURE) {
+			// TODO HEADER_FEATURE
 		}
-
-		// TODO HEADER_FEATURE
+		
 	}
 
 	if (dcConn->log(5)) {
