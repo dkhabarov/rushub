@@ -408,7 +408,7 @@ int LuaPlugin::moveDown(LuaInterpreter * script) {
 
 
 
-// ToDo: add cmd param
+// TODO: add cmd param
 /** 1 - blocked */
 int LuaPlugin::callAll(const char * funcName, unsigned int listFlag, vectorLuaInterpreter & vli, DcUserBase * dcUserBase, bool param /*= true*/) {
 
@@ -436,7 +436,7 @@ int LuaPlugin::callAll(const char * funcName, unsigned int listFlag, vectorLuaIn
 		if (script && script->mL) {
 			script->newCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA); // TODO refactoring
 
-			// ToDo
+			// TODO
 			if (param) {
 				script->newCallParam((void *) dcConnBase->getCommand(), LUA_TSTRING); // TODO refactoring
 			}

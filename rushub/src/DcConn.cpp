@@ -186,7 +186,7 @@ void DcConn::onOk(bool ok) {
 
 bool DcConn::parseCommand(const char * cmd) {
 
-	// ToDo: set command pointer
+	// TODO: set command pointer
 	if (getCommandPtr() == NULL || mParser == NULL) {
 		return false;
 	}
