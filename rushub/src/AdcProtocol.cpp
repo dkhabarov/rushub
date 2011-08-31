@@ -151,9 +151,9 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 				dcConn->mDcUser->send(adcParser->mCommand, true);
 			}
 		} else if (adcParser->getHeader() == HEADER_FEATURE) {
-			// TODO HEADER_FEATURE
+			// TODO: send to all with this feature
 		}
-		
+
 	}
 
 	if (dcConn->log(5)) {
