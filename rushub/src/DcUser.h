@@ -24,12 +24,14 @@
 #include "Times.h"
 #include "UserBase.h"
 #include "Plugin.h"
-#include "MyInfo.h"
+#include "NmdcParser.h" // TagNil
 
 #include <string>
 
 using namespace ::std;
 using namespace ::utils;
+using namespace ::dcserver::protoenums;
+using namespace ::dcserver::protocol;
 
 #if (!defined _WIN32) && (!defined __int64)
 	#define __int64 long long
@@ -39,7 +41,6 @@ namespace dcserver {
 
 class DcConn;
 class DcServer; /** for mDcServer */
-
 
 
 /** Extended class of the user */
@@ -137,26 +138,33 @@ public:
 	virtual void setData(const string & data);
 
 	// myinfo
-	virtual const string & getDesc(/*bool real = false*/) const;
-	virtual const string & getEmail(/*bool real = false*/) const;
-	virtual const string & getConnection(/*bool real = false*/) const;
-	virtual unsigned getByte(/*bool real = false*/) const;
+	virtual const string & getDesc() const;
+	virtual const string & getEmail() const;
+	virtual const string & getConnection() const;
+	virtual unsigned getByte() const;
 
-	virtual unsigned int getTagNil(/*bool real = false*/) const;
-	virtual const string & getTag(/*bool real = false*/) const;
-	virtual const string & getClient(/*bool real = false*/) const;
-	virtual const string & getClientVersion(/*bool real = false*/) const;
-	virtual unsigned getUnregHubs(/*bool real = false*/) const;
-	virtual unsigned getRegHubs(/*bool real = false*/) const;
-	virtual unsigned getOpHubs(/*bool real = false*/) const;
-	virtual unsigned getSlots(/*bool real = false*/) const;
-	virtual unsigned getLimit(/*bool real = false*/) const;
-	virtual unsigned getOpen(/*bool real = false*/) const;
-	virtual unsigned getBandwidth(/*bool real = false*/) const;
-	virtual unsigned getDownload(/*bool real = false*/) const;
-	virtual const string & getFraction(/*bool real = false*/) const;
-	virtual const string & getMode(/*bool real = false*/) const;
+	virtual unsigned int getTagNil() const;
+	virtual const string & getTag() const;
+	virtual const string & getClient() const;
+	virtual const string & getClientVersion() const;
+	virtual unsigned getUnregHubs() const;
+	virtual unsigned getRegHubs() const;
+	virtual unsigned getOpHubs() const;
+	virtual unsigned getSlots() const;
+	virtual unsigned getLimit() const;
+	virtual unsigned getOpen() const;
+	virtual unsigned getBandwidth() const;
+	virtual unsigned getDownload() const;
+	virtual const string & getFraction() const;
+	virtual const string & getMode() const;
 	// =====================================================================
+
+private:
+
+	DcUser & operator = (const DcUser &) { return *this; }
+	void parse(string & description);
+	void parseTag();
+	void findIntParam(const char * find, unsigned int & param, TagNil tagNil);
 
 private:
 
@@ -172,11 +180,38 @@ private:
 	bool mInUserList; ///< User in user-list
 	bool mCanSend; ///< Can send to user
 
-	string mInf; // ADC
-
-	MyInfo myInfo; ///< User params
 	string mIp; ///< IP address of user/bot
 	string mData; ///< Some user's data
+
+
+
+	string mInf; // ADC
+
+
+	string myInfo;
+
+	string description; ///< User's description
+	string email; ///< User's e-mail
+	string connection; ///< User's connection
+	unsigned magicByte; ///< User's magic byte
+	__int64 share; ///< Share size
+
+	unsigned int nil;
+	string tag; ///< Tag string
+	string clientName; ///< Client name
+	string clientVersion; ///< Client version
+	string mode; ///< Mode
+	bool passive; ///< Passive mode
+	unsigned int unregHubs; ///< Count of hubs where client unregistered
+	unsigned int regHubs; ///< Count of hubs where client registered
+	unsigned int opHubs; ///< Count of hubs where client is operator
+	unsigned int slots; ///< Count of slots
+	unsigned int limit; ///< Limit L:x
+	unsigned int open; ///< Limit O:x
+	unsigned int bandwidth; ///< Limit B:x
+	unsigned int download; ///< Limit D:x
+	string fraction; ///< Limit F:x/y
+	const char tagSep; ///< Tag separator
 
 
 }; // DcUser

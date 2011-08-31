@@ -241,7 +241,7 @@ bool AdcParser::checkHeaderSyntax() {
 		case 'F': // Feature broadcast
 			// 'F' command_name ' ' base32_character{4} ' ' (('+'|'-') [A-Z] [A-Z0-9]{3})+
 			mHeader = HEADER_FEATURE;
-			if (mLength < 15 || mCommand[4] != ' ' || mCommand[9] != ' ' || mCommand[10] != '+' && mCommand[10] != '-') {
+			if (mLength < 15 || mCommand[4] != ' ' || mCommand[9] != ' ' || (mCommand[10] != '+' && mCommand[10] != '-')) {
 				setError("40", "Protocol syntax error");
 				return false;
 			} else if (!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8])) {

@@ -38,7 +38,20 @@ DcUser::DcUser() :
 	mForceMove(false),
 	mKick(false),
 	mInUserList(false),
-	mCanSend(false)
+	mCanSend(false),
+	magicByte(0),
+	share(0),
+	nil(TAGNIL_NO),
+	passive(false),
+	unregHubs(0),
+	regHubs(0),
+	opHubs(0),
+	slots(0),
+	limit(0),
+	open(0),
+	bandwidth(0),
+	download(0),
+	tagSep(',')
 {
 	mDcConnBase = NULL;
 }
@@ -60,7 +73,7 @@ const string & DcUser::uid() const {
 
 
 const string & DcUser::myInfoString() const {
-	return myInfo.getMyInfo();
+	return myInfo;
 }
 
 
@@ -250,9 +263,12 @@ void DcUser::setKick(bool kick) {
 }
 
 
+//////////////////////////////////////////////////////////////////////////////////////
+
+
 /** Get MyINFO */
 const string & DcUser::getMyInfo(/*bool real = false */) const {
-	return myInfo.getMyInfo();
+	return myInfo;
 }
 
 /** Set MyINFO string (for plugins). With cmd & nick check */
@@ -264,24 +280,40 @@ bool DcUser::setMyInfo(const string & newMyInfo) {
 	if (NmdcParser::checkCmd(dcParser, newMyInfo, this) != NMDC_TYPE_MYNIFO) {
 		return false;
 	}
-	myInfo.setMyInfo(newMyInfo, &dcParser, mDcServer->miTotalShare);
+	setMyInfo(&dcParser);
 	return true;
 }
 
 bool DcUser::setMyInfo(NmdcParser * parser) {
-	myInfo.setMyInfo(parser->mCommand, parser, mDcServer->miTotalShare);
+	if (myInfo != parser->mCommand) {
+		myInfo = parser->mCommand;
+
+		mDcServer->miTotalShare -= share;
+		share = stringToInt64(parser->chunkString(CHUNK_MI_SIZE));
+		mDcServer->miTotalShare += share;
+
+		email = parser->chunkString(CHUNK_MI_MAIL);
+		connection = parser->chunkString(CHUNK_MI_SPEED);
+
+		size_t connSize = connection.size();
+		if (connSize != 0) {
+			magicByte = unsigned(connection[--connSize]);
+			connection.assign(connection, 0, connSize);
+		}
+
+		description = parser->chunkString(CHUNK_MI_DESC);
+		parse(description);
+	}
 	return true;
 }
 
 /** Get share (for plugins) */
-__int64 DcUser::getShare(/*bool real = false */) const {
-	// !!!
-	return myInfo.getShare();
+__int64 DcUser::getShare() const {
+	return share;
 }
 
 bool DcUser::isPassive() const {
-	// !!!
-	return myInfo.dcTag.isPassive();
+	return passive;
 }
 
 
@@ -343,76 +375,238 @@ void DcUser::setData(const string & data) {
 	mData = data;
 }
 
-const string & DcUser::getDesc(/*bool real = false */) const {
-	return myInfo.getDescription();
+
+
+const string & DcUser::getDesc() const {
+	return description;
 }
 
-const string & DcUser::getEmail(/*bool real = false */) const {
-	return myInfo.getEmail();
+const string & DcUser::getEmail() const {
+	return email;
 }
 
-const string & DcUser::getConnection(/*bool real = false */) const {
-	return myInfo.getConnection();
+const string & DcUser::getConnection() const {
+	return connection;
 }
 
-unsigned DcUser::getByte(/*bool real = false */) const {
-	return myInfo.getMagicByte();
+unsigned int DcUser::getByte() const {
+	return magicByte;
 }
 
-unsigned int DcUser::getTagNil(/*bool real = false */) const {
-	return myInfo.dcTag.getNil();
+unsigned int DcUser::getTagNil() const {
+	return nil;
 }
 
-const string & DcUser::getTag(/*bool real = false */) const {
-	return myInfo.dcTag.getTag();
+const string & DcUser::getTag() const {
+	return tag;
 }
 
-const string & DcUser::getClient(/*bool real = false */) const {
-	return myInfo.dcTag.getClientName();
+const string & DcUser::getClient() const {
+	return clientName;
 }
 
-const string & DcUser::getClientVersion(/*bool real = false */) const {
-	return myInfo.dcTag.getClientVersion();
+const string & DcUser::getClientVersion() const {
+	return clientVersion;
 }
 
-unsigned DcUser::getUnregHubs(/*bool real = false */) const {
-	return myInfo.dcTag.getUnregHubs();
+unsigned DcUser::getUnregHubs() const {
+	return unregHubs;
 }
 
-unsigned DcUser::getRegHubs(/*bool real = false */) const {
-	return myInfo.dcTag.getRegHubs();
+unsigned DcUser::getRegHubs() const {
+	return regHubs;
 }
 
-unsigned DcUser::getOpHubs(/*bool real = false */) const {
-	return myInfo.dcTag.getOpHubs();
+unsigned DcUser::getOpHubs() const {
+	return opHubs;
 }
 
-unsigned DcUser::getSlots(/*bool real = false */) const {
-	return myInfo.dcTag.getSlots();
+unsigned DcUser::getSlots() const {
+	return slots;
 }
 
-unsigned DcUser::getLimit(/*bool real = false */) const {
-	return myInfo.dcTag.getLimit();
+unsigned DcUser::getLimit() const {
+	return limit;
 }
 
-unsigned DcUser::getOpen(/*bool real = false */) const {
-	return myInfo.dcTag.getOpen();
+unsigned DcUser::getOpen() const {
+	return open;
 }
 
-unsigned DcUser::getBandwidth(/*bool real = false */) const {
-	return myInfo.dcTag.getBandwidth();
+unsigned DcUser::getBandwidth() const {
+	return bandwidth;
 }
 
-unsigned DcUser::getDownload(/*bool real = false */) const {
-	return myInfo.dcTag.getDownload();
+unsigned DcUser::getDownload() const {
+	return download;
 }
 
-const string & DcUser::getFraction(/*bool real = false */) const {
-	return myInfo.dcTag.getFraction();
+const string & DcUser::getFraction() const {
+	return fraction;
 }
 
-const string & DcUser::getMode(/*bool real = false */) const {
-	return myInfo.dcTag.getMode();
+const string & DcUser::getMode() const {
+	return mode;
+}
+
+
+
+void DcUser::parse(string & description) {
+
+	unsigned int OldNil = nil;
+	nil = TAGNIL_NO; // Set null value for all params
+
+	size_t l = description.size();
+	if (l) { // optimization
+		size_t i = description.find_last_of('<');
+		if (i != description.npos && description[--l] == '>') {
+			nil |= TAGNIL_TAG;
+			string sOldTag = tag;
+			++i;
+			tag.assign(description, i, l - i);
+			description.assign(description, 0, --i);
+			if (tag.compare(sOldTag) != 0) { // optimization
+				parseTag();
+			} else {
+				nil |= OldNil;
+			}
+		}
+	}
+}
+
+
+
+void DcUser::parseTag() {
+
+	/* Get clientName and clientVersion */
+
+	nil |= TAGNIL_CLIENT;
+
+	size_t clientPos = tag.find(tagSep);
+	size_t tagSize = tag.size();
+	if (clientPos == tag.npos) {
+		clientPos = tagSize;
+	}
+
+	size_t v = tag.find("V:");
+	if (v != tag.npos) {
+		nil |= TAGNIL_VERSION;
+		clientVersion.assign(tag, v + 2, clientPos - v - 2);
+		clientName.assign(tag, 0, v);
+	} else {
+		size_t s = tag.find(' ');
+		if (s != tag.npos && s < clientPos) {
+			++s;
+			if (atof(tag.substr(s, clientPos - s).c_str())) {
+				nil |= TAGNIL_VERSION;
+				clientVersion.assign(tag, s, clientPos - s);
+				clientName.assign(tag, 0, --s);
+			} else {
+				clientName.assign(tag, 0, clientPos);
+			}
+		} else {
+			clientName.assign(tag, 0, clientPos);
+		}
+	}
+	trim(clientName);
+	trim(clientVersion);
+
+	/* Get mode */
+	size_t m = tag.find("M:");
+	if (m != tag.npos) {
+		nil |= TAGNIL_MODE;
+		m += 2;
+		size_t mPos = tag.find(tagSep, m);
+		if (mPos == tag.npos) {
+			mPos = tagSize;
+		}
+		mode.assign(tag, m, mPos - m);
+		if (mPos > m) {
+			unsigned int p = mode[0];
+			if(p == 80 || p == 53 || p == 83) {
+				passive = true;
+			}
+		}
+	}
+	string tmp;
+
+	/* hubs */
+	size_t h = tag.find("H:");
+	if (h != tag.npos) {
+		h += 2;
+		size_t unregPos = tag.find('/', h);
+		if (unregPos == tag.npos) {
+			unregPos = tag.find(tagSep, h);
+			if (unregPos == tag.npos) {
+				unregPos = tagSize;
+			}
+		} else {
+			size_t regPos = tag.find('/', ++unregPos);
+			if (regPos == tag.npos) {
+				regPos = tag.find(tagSep, unregPos);
+				if (regPos == tag.npos) {
+					regPos = tagSize;
+				}
+			} else {
+				size_t opPos = tag.find('/', ++regPos);
+				if (opPos == tag.npos) {
+					opPos = tag.find(tagSep, regPos);
+					if (opPos == tag.npos) {
+						opPos = tagSize;
+					}
+				}
+				opHubs = atoi(tmp.assign(tag, regPos, opPos - regPos).c_str());
+				if (tmp.size()) {
+					nil |= TAGNIL_UNREG;
+				}
+			}
+			regHubs = atoi(tmp.assign(tag, unregPos, regPos - unregPos - 1).c_str());
+			if (tmp.size()) {
+				nil |= TAGNIL_REG;
+			}
+		}
+		unregHubs = atoi(tmp.assign(tag, h, unregPos - h - 1).c_str());
+		if (tmp.size()) {
+			nil |= TAGNIL_OP;
+		}
+	}
+
+	/* slots and limits */
+	findIntParam("S:", slots, TAGNIL_SLOT);
+	findIntParam("L:", limit, TAGNIL_LIMIT);
+	findIntParam("O:", open, TAGNIL_OPEN);
+	findIntParam("B:", bandwidth, TAGNIL_BANDWIDTH);
+	findIntParam("D:", download, TAGNIL_DOWNLOAD);
+
+	size_t f = tag.find("F:");
+	if (f != tag.npos) {
+		nil |= TAGNIL_FRACTION;
+		f += 2;
+		size_t fPos = tag.find(tagSep, f);
+		if(fPos == tag.npos) {
+			fPos = tagSize;
+		}
+		fraction.assign(tag, f, fPos - f);
+	}
+}
+
+void DcUser::findIntParam(const char * find, unsigned int & param, TagNil tagNil) {
+
+	size_t pos = tag.find(find);
+	if (pos != tag.npos) {
+
+		pos += 2;
+		size_t sepPos = tag.find(tagSep, pos);
+
+		if (sepPos == tag.npos) {
+			sepPos = tag.size();
+		}
+
+		nil |= tagNil;
+
+		string tmp;
+		param = atoi(tmp.assign(tag, pos, sepPos - pos).c_str());
+	}
 }
 
 // =====================================================================
