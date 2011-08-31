@@ -253,12 +253,12 @@ int NmdcProtocol::doCommand(Parser * parser, Conn * conn) {
 
 int NmdcProtocol::eventSupports(NmdcParser * dcparser, DcConn * dcConn) {
 
-	string feature, cmd(dcparser->mCommand);
+	string feature;
 	size_t posNext, posPrev = 10;
 	dcConn->mFeatures = 0;
-	cmd += ' ';
-	while((posNext = cmd.find(' ', posPrev)) != feature.npos) {
-		feature.assign(cmd, posPrev, posNext - posPrev);
+	dcparser->mCommand += ' ';
+	while((posNext = dcparser->mCommand.find(' ', posPrev)) != feature.npos) {
+		feature.assign(dcparser->mCommand, posPrev, posNext - posPrev);
 		posPrev = posNext + 1;
 		if (feature == "UserCommand") {
 			dcConn->mFeatures |= SUPPORT_FEATUER_USERCOMMAND;
