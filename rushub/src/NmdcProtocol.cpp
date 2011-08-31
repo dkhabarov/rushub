@@ -284,8 +284,12 @@ int NmdcProtocol::eventSupports(NmdcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	const char * support = "$Supports UserCommand NoGetINFO NoHello UserIP UserIP2 MCTo";
-	dcConn->send(support, strlen(support), true, false);
+	dcConn->send(
+		"$Supports UserCommand NoGetINFO NoHello UserIP UserIP2 MCTo",
+		59,
+		true,
+		false
+	);
 
 	return 0;
 }
