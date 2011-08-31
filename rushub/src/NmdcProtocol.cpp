@@ -704,7 +704,12 @@ int NmdcProtocol::eventSearch(NmdcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	// TODO: Check overloading of the system
+	if (mDcServer->mSystemLoad == SYSTEM_LOAD_SYSTEM_DOWN) {
+		if (dcConn->log(1)) {
+			dcConn->logStream() << "System down, search is impossible" << endl;
+		}
+		return -2;
+	}
 
 	int iMode = 0;
 	#ifndef WITHOUT_PLUGINS

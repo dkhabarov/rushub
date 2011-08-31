@@ -1249,7 +1249,7 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 	if (!mDcConfig.mAdcOn) {
 		dcUser->setUid(uid);
 	} else {
-		sid = mAdcProtocol.getSid(1); // TODO
+		sid = mAdcProtocol.getSid(1); // TODO: set bot SID!
 		dcUser->setUid(sid);
 	}
 	dcUser->setProfile(30);

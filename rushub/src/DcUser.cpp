@@ -275,7 +275,6 @@ const string & DcUser::getMyInfo(/*bool real = false */) const {
 bool DcUser::setMyInfo(const string & newMyInfo) {
 
 	// TODO remove NmdcParser class from this function
-
 	NmdcParser dcParser;
 	if (NmdcParser::checkCmd(dcParser, newMyInfo, this) != NMDC_TYPE_MYNIFO) {
 		return false;
