@@ -25,6 +25,7 @@
 #include "UserBase.h"
 #include "Plugin.h"
 #include "NmdcParser.h" // TagNil
+#include "HashMap.h"
 
 #include <string>
 
@@ -41,6 +42,7 @@ namespace dcserver {
 
 class DcConn;
 class DcServer; /** for mDcServer */
+
 
 
 /** Extended class of the user */
@@ -88,10 +90,10 @@ public:
 	virtual const string & getUid() const;
 	unsigned long getUidHash() const;
 	virtual bool getInUserList() const;
-	virtual const string & getMyInfo(/*bool real = false*/) const;
+	virtual const string & getMyInfo() const;
 	virtual bool setMyInfo(const string & myInfo);
 	bool setMyInfo(NmdcParser * parser);
-	virtual __int64 getShare(/*bool real = false*/) const;
+	virtual __int64 getShare() const;
 
 	virtual bool getInOpList() const;
 	virtual bool getInIpList() const;
@@ -124,6 +126,10 @@ public:
 	virtual int getPort() const;
 	virtual int getPortConn() const;
 	virtual const string & getMacAddress() const;
+
+
+
+	virtual const string * getParam(unsigned int key) const;
 
 
 	// Used in plugins only
@@ -185,6 +191,10 @@ private:
 
 
 
+	HashMap<string *> mParams;
+
+
+
 	string mInf; // ADC
 
 
@@ -193,7 +203,7 @@ private:
 	string description; ///< User's description
 	string email; ///< User's e-mail
 	string connection; ///< User's connection
-	unsigned magicByte; ///< User's magic byte
+	unsigned int magicByte; ///< User's magic byte
 	__int64 share; ///< Share size
 
 	unsigned int nil;
@@ -211,7 +221,6 @@ private:
 	unsigned int bandwidth; ///< Limit B:x
 	unsigned int download; ///< Limit D:x
 	string fraction; ///< Limit F:x/y
-	const char tagSep; ///< Tag separator
 
 
 }; // DcUser

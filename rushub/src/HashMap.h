@@ -38,14 +38,13 @@ namespace utils {
 
 /** Hash map with list */
 template <class V, class K = unsigned long>
-class HashMap : public Obj {
+class HashMap {
 
 public:
 
 	typedef list<V, allocator<V> > List_t; /** Iteration list with data */
 	typedef typename List_t::iterator iterator; /** Iterator for the data-list */
 	typedef map<K, iterator> tHashMap; /** Map [K]=iterator */
-	typedef typename tHashMap::iterator tUHIt; /** Iterator for tHashMap */
 	typedef pair<K, iterator> tHashPair; /** pair (for insert) */
 
 	Hash<K> mHash; /** Hash function */
@@ -57,7 +56,7 @@ private:
 
 public:
 
-	HashMap() : Obj("HashMap") {
+	HashMap() {
 	}
 
 	~HashMap() {
@@ -85,10 +84,10 @@ public:
 	bool remove(const K & hash);
 
 	/** Check existed this hash-key (true - yes, false - no) */
-	bool contain(const K & hash);
+	bool contain(const K & hash) const;
 
 	/** Return data by hash-key. Return val else NULL */
-	V find(const K & hash);
+	V find(const K & hash) const;
 
 	virtual void onAdd(V) {
 	}
@@ -103,35 +102,23 @@ public:
 template <class V, class K>
 bool HashMap<V, K>::add(const K & hash, V Data) {
 
-	/** Check */
+	// Check
 	if (contain(hash)) {
-		if (log(1)) {
-			logStream() << "Hash " << hash << " is contains already" << endl;
-		}
 		return false;
 	}
 
-	/** Insert data */
-	iterator ulit = mList.insert(mList.begin(), Data); /** Insert in begin list */
+	// Insert data
+	iterator ulit = mList.insert(mList.begin(), Data); // Insert in begin list
 	if (ulit == mList.end()) {
-		if (log(1)) {
-			logStream() << "Don't add " << hash << " into the list" << endl;
-		}
 		return false;
 	}
 
-	/** Insert hash-key */
-	pair<tUHIt, bool> P = mHashMap.insert(tHashPair(hash, ulit));
+	// Insert hash-key
+	pair<tHashMap::iterator, bool> P = mHashMap.insert(tHashPair(hash, ulit));
 	if (P.second) {
 		onAdd(Data);
-		if (log(4)) {
-			logStream() << "Added: " << hash << " (size: " << mHashMap.size() << ")" << endl;
-		}
 	} else {
-		if (log(1)) {
-			logStream() << "Don't add " << hash << endl;
-		}
-		mList.erase(ulit); /** Removing data fron list */
+		mList.erase(ulit); // Removing data fron list
 		return false;
 	}
 	return true;
@@ -140,34 +127,28 @@ bool HashMap<V, K>::add(const K & hash, V Data) {
 /** Removing data by hash-key (true - ok, false - fail) */
 template <class V, class K>
 bool HashMap<V, K>::remove(const K & hash) {
-	tUHIt uhit = mHashMap.find(hash);
+	tHashMap::iterator uhit = mHashMap.find(hash);
 	if (uhit != mHashMap.end()) {
 		onRemove(*(uhit->second));
-		mList.erase(uhit->second); /** Remove data */
-		mHashMap.erase(uhit); /** Remove key */
-		if (log(4)) {
-			logStream() << "Removed: " << hash << " (size: " << mHashMap.size() << ")" << endl;
-		}
+		mList.erase(uhit->second); // Remove data 
+		mHashMap.erase(uhit); // Remove key
 		return true;
-	}
-	if (log(3)) {
-		logStream() << "Don't exist: " << hash << endl;
 	}
 	return false;
 }
 
 /** Check existed this hash-key (true - yes, false - no) */
 template <class V, class K>
-bool HashMap<V, K>::contain(const K & hash) {
+bool HashMap<V, K>::contain(const K & hash) const {
 	return mHashMap.find(hash) != mHashMap.end();
 }
 
 /** Return data by hash-key. Return val else NULL */
 template <class V, class K>
-V HashMap<V, K>::find(const K & hash) {
-	tUHIt uhit = mHashMap.find(hash);
+V HashMap<V, K>::find(const K & hash) const {
+	tHashMap::const_iterator uhit = mHashMap.find(hash);
 	if (uhit != mHashMap.end()) {
-		return *(uhit->second); /** Pointer to iterator = val */
+		return *(uhit->second); // Pointer to iterator = val
 	}
 	return NULL;
 }

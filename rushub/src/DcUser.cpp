@@ -50,8 +50,7 @@ DcUser::DcUser() :
 	limit(0),
 	open(0),
 	bandwidth(0),
-	download(0),
-	tagSep(',')
+	download(0)
 {
 	mDcConnBase = NULL;
 }
@@ -59,6 +58,12 @@ DcUser::DcUser() :
 
 
 DcUser::~DcUser() {
+	HashMap<string *>::iterator it = mParams.begin(), it_e = mParams.end();
+	while (it != mParams.end()) {
+		string * param = (*it);
+		++it;
+		delete param;
+	}
 	mDcConn = NULL;
 	mDcConnBase = NULL;
 	mDcServer = NULL;
@@ -267,7 +272,7 @@ void DcUser::setKick(bool kick) {
 
 
 /** Get MyINFO */
-const string & DcUser::getMyInfo(/*bool real = false */) const {
+const string & DcUser::getMyInfo() const {
 	return myInfo;
 }
 
@@ -300,6 +305,7 @@ bool DcUser::setMyInfo(NmdcParser * parser) {
 			connection.assign(connection, 0, connSize);
 		}
 
+		//string * description = new string(parser->chunkString(CHUNK_MI_DESC));
 		description = parser->chunkString(CHUNK_MI_DESC);
 		parse(description);
 	}
@@ -450,6 +456,11 @@ const string & DcUser::getMode() const {
 
 
 
+const string * DcUser::getParam(unsigned int key) const {
+	return mParams.find(key);
+}
+
+
 void DcUser::parse(string & description) {
 
 	unsigned int OldNil = nil;
@@ -481,7 +492,7 @@ void DcUser::parseTag() {
 
 	nil |= TAGNIL_CLIENT;
 
-	size_t clientPos = tag.find(tagSep);
+	size_t clientPos = tag.find(',');
 	size_t tagSize = tag.size();
 	if (clientPos == tag.npos) {
 		clientPos = tagSize;
@@ -515,7 +526,7 @@ void DcUser::parseTag() {
 	if (m != tag.npos) {
 		nil |= TAGNIL_MODE;
 		m += 2;
-		size_t mPos = tag.find(tagSep, m);
+		size_t mPos = tag.find(',', m);
 		if (mPos == tag.npos) {
 			mPos = tagSize;
 		}
@@ -535,21 +546,21 @@ void DcUser::parseTag() {
 		h += 2;
 		size_t unregPos = tag.find('/', h);
 		if (unregPos == tag.npos) {
-			unregPos = tag.find(tagSep, h);
+			unregPos = tag.find(',', h);
 			if (unregPos == tag.npos) {
 				unregPos = tagSize;
 			}
 		} else {
 			size_t regPos = tag.find('/', ++unregPos);
 			if (regPos == tag.npos) {
-				regPos = tag.find(tagSep, unregPos);
+				regPos = tag.find(',', unregPos);
 				if (regPos == tag.npos) {
 					regPos = tagSize;
 				}
 			} else {
 				size_t opPos = tag.find('/', ++regPos);
 				if (opPos == tag.npos) {
-					opPos = tag.find(tagSep, regPos);
+					opPos = tag.find(',', regPos);
 					if (opPos == tag.npos) {
 						opPos = tagSize;
 					}
@@ -581,7 +592,7 @@ void DcUser::parseTag() {
 	if (f != tag.npos) {
 		nil |= TAGNIL_FRACTION;
 		f += 2;
-		size_t fPos = tag.find(tagSep, f);
+		size_t fPos = tag.find(',', f);
 		if(fPos == tag.npos) {
 			fPos = tagSize;
 		}
@@ -595,7 +606,7 @@ void DcUser::findIntParam(const char * find, unsigned int & param, TagNil tagNil
 	if (pos != tag.npos) {
 
 		pos += 2;
-		size_t sepPos = tag.find(tagSep, pos);
+		size_t sepPos = tag.find(',', pos);
 
 		if (sepPos == tag.npos) {
 			sepPos = tag.size();

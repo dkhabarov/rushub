@@ -73,7 +73,7 @@ using namespace ::std;
 
 /// Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10025
+	#define INTERNAL_PLUGIN_VERSION 10026
 #endif
 
 /// NMDC protocol separator
@@ -123,6 +123,28 @@ enum TagNil {
 
 
 
+enum UserParam {
+	USER_PARAM_DESC = 1,
+	USER_PARAM_EMAIL,
+	USER_PARAM_CONNECTION,
+	USER_PARAM_BYTE,
+	USER_PARAM_TAG,
+	USER_PARAM_CLIENT_NAME,
+	USER_PARAM_CLIENT_VERSION,
+	USER_PARAM_UNREG_HUBS,
+	USER_PARAM_REG_HUBS,
+	USER_PARAM_OP_HUBS,
+	USER_PARAM_SLOTS,
+	USER_PARAM_LIMIT,
+	USER_PARAM_OPEN,
+	USER_PARAM_BANDWIDTH,
+	USER_PARAM_DOWNLOAD,
+	USER_PARAM_FRACTION,
+	USER_PARAM_MODE
+}; // enum UserParam
+
+
+
 class DcConnBase;
 
 
@@ -141,6 +163,8 @@ public:
 
 	virtual ~DcUserBase() {
 	}
+
+	virtual const string * getParam(unsigned int key) const = 0;
 
 	/// Get user's nick
 	virtual const string & getUid() const = 0;
@@ -192,70 +216,70 @@ public:
 
 
 	/// Get user's MyINFO cmd
-	virtual const string & getMyInfo(/*bool real = false*/) const = 0;
+	virtual const string & getMyInfo() const = 0;
 
 	/// Set user's MyINFO cmd
 	virtual bool setMyInfo(const string & myInfo) = 0;
 
 
 	/// Get user's description
-	virtual const string & getDesc(/*bool real = false*/) const = 0;
+	virtual const string & getDesc() const = 0;
 
 	/// Get user's email address
-	virtual const string & getEmail(/*bool real = false*/) const = 0;
+	virtual const string & getEmail() const = 0;
 
 	/// Get user's connection flag
-	virtual const string & getConnection(/*bool real = false*/) const = 0;
+	virtual const string & getConnection() const = 0;
 
 	/// Get user's magic byte
-	virtual unsigned getByte(/*bool real = false*/) const = 0;
+	virtual unsigned getByte() const = 0;
 
 	/// Get user's share size
-	virtual __int64 getShare(/*bool real = false*/) const = 0;
+	virtual __int64 getShare() const = 0;
 
 
 	/// Get user's tag
-	virtual const string & getTag(/*bool real = false*/) const = 0;
+	virtual const string & getTag() const = 0;
 
 	/// Get user's client
-	virtual const string & getClient(/*bool real = false*/) const = 0;
+	virtual const string & getClient() const = 0;
 
 	/// Get user's client version
-	virtual const string & getClientVersion(/*bool real = false*/) const = 0;
+	virtual const string & getClientVersion() const = 0;
 
 	/// Get user's mode
-	virtual const string & getMode(/*bool real = false*/) const = 0;
+	virtual const string & getMode() const = 0;
 
 	/// Get user's unreg-hubs
-	virtual unsigned getUnregHubs(/*bool real = false*/) const = 0;
+	virtual unsigned getUnregHubs() const = 0;
 
 	/// Get user's reg-hubs
-	virtual unsigned getRegHubs(/*bool real = false*/) const = 0;
+	virtual unsigned getRegHubs() const = 0;
 
 	/// Get user's op-hubs
-	virtual unsigned getOpHubs(/*bool real = false*/) const = 0;
+	virtual unsigned getOpHubs() const = 0;
 
 	/// Get user's slots
-	virtual unsigned getSlots(/*bool real = false*/) const = 0;
+	virtual unsigned getSlots() const = 0;
 
 	/// Get user's L-limit
-	virtual unsigned getLimit(/*bool real = false*/) const = 0;
+	virtual unsigned getLimit() const = 0;
 
 	/// Get user's O-limit
-	virtual unsigned getOpen(/*bool real = false*/) const = 0;
+	virtual unsigned getOpen() const = 0;
 
 	/// Get user's B-limit
-	virtual unsigned getBandwidth(/*bool real = false*/) const = 0;
+	virtual unsigned getBandwidth() const = 0;
 
 	/// Get user's D-limit
-	virtual unsigned getDownload(/*bool real = false*/) const = 0;
+	virtual unsigned getDownload() const = 0;
 
 	/// Get user's F-limit
-	virtual const string & getFraction(/*bool real = false*/) const = 0;
+	virtual const string & getFraction() const = 0;
 
 
 	/// Get user's tagNil param
-	virtual unsigned int getTagNil(/*bool real = false*/) const = 0;
+	virtual unsigned int getTagNil() const = 0;
 
 
 	/// Get some user data
