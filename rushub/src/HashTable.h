@@ -520,7 +520,7 @@ public:
 			return mItem != it.mItem;
 		}
 
-		iterator & operator ++() {
+		iterator & operator ++ () {
 			if ((mItem != NULL) && (mItem->mNext != NULL)) {
 				mItem = mItem->mNext;
 			} else {
@@ -532,6 +532,12 @@ public:
 				}
 			}
 			return *this;
+		}
+
+		iterator operator ++ (int) {
+			iterator it = *this;
+			this->operator ++();
+			return it;
 		}
 
 		inline bool isEnd() const {

@@ -136,8 +136,7 @@ DcServer::~DcServer() {
 	UserList::iterator it = mDcUserList.begin();
 	UserList::iterator it_e = mDcUserList.end();
 	while (it != it_e) {
-		Us = static_cast<DcUser *> (*it);
-		++it;
+		Us = static_cast<DcUser *> (*it++);
 		if (Us->mDcConn) {
 			delConnection(Us->mDcConn);
 		} else {
@@ -151,8 +150,7 @@ DcServer::~DcServer() {
 	it = mAdcUserList.begin();
 	it_e = mAdcUserList.end();
 	while (it != it_e) {
-		Us = static_cast<DcUser *> (*it);
-		++it;
+		Us = static_cast<DcUser *> (*it++);
 		if (Us->mDcConn) {
 			delConnection(Us->mDcConn);
 		} else {
