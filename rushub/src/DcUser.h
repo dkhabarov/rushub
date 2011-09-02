@@ -24,7 +24,7 @@
 #include "Times.h"
 #include "UserBase.h"
 #include "Plugin.h"
-#include "NmdcParser.h" // TagNil
+#include "NmdcParser.h"
 #include "HashMap.h"
 
 #include <string>
@@ -41,7 +41,7 @@ using namespace ::dcserver::protocol;
 namespace dcserver {
 
 class DcConn;
-class DcServer; /** for mDcServer */
+class DcServer;
 
 
 
