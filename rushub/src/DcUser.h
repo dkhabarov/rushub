@@ -143,7 +143,7 @@ private:
 	bool mInUserList; ///< User in user-list
 	bool mCanSend; ///< Can send to user
 
-	__int64 share; ///< Share size
+	__int64 mShare; ///< Share size
 
 }; // DcUser
 

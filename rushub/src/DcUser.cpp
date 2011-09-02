@@ -37,7 +37,7 @@ DcUser::DcUser() :
 	mHide(false),
 	mInUserList(false),
 	mCanSend(false),
-	share(0)
+	mShare(0)
 {
 	mDcConnBase = NULL;
 }
@@ -143,9 +143,9 @@ bool DcUser::setInfo(NmdcParser * parser) {
 	if (myInfo != parser->mCommand) {
 		myInfo = parser->mCommand;
 
-		mDcServer->miTotalShare -= share;
-		share = stringToInt64(parser->chunkString(CHUNK_MI_SIZE));
-		mDcServer->miTotalShare += share;
+		mDcServer->miTotalShare -= mShare;
+		mShare = stringToInt64(parser->chunkString(CHUNK_MI_SIZE));
+		mDcServer->miTotalShare += mShare;
 
 		updateParam(USER_PARAM_EMAIL, parser->chunkString(CHUNK_MI_MAIL).c_str());
 
@@ -225,7 +225,7 @@ const string & DcUser::getMacAddress() const {
 
 /** Get share (for plugins) */
 __int64 DcUser::getShare() const {
-	return share;
+	return mShare;
 }
 
 
