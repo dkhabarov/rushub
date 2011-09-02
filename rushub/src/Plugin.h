@@ -73,7 +73,7 @@ using namespace ::std;
 
 /// Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10026
+	#define INTERNAL_PLUGIN_VERSION 10027
 #endif
 
 /// NMDC protocol separator
@@ -103,25 +103,6 @@ enum ClientType {
 	CLIENT_TYPE_WEB = 1001,
 }; // enum ClientType
 
-/** Params with null values flags */
-enum TagNil {
-	TAGNIL_NO        = 0,        ///< No
-	TAGNIL_TAG       = 1 << 0,   ///< Tag
-	TAGNIL_CLIENT    = 1 << 1,   ///< Client name
-	TAGNIL_VERSION   = 1 << 2,   ///< Client version
-	TAGNIL_MODE      = 1 << 3,   ///< Mode
-	TAGNIL_UNREG     = 1 << 4,   ///< Usual hubs
-	TAGNIL_REG       = 1 << 5,   ///< Reg hubs
-	TAGNIL_OP        = 1 << 6,   ///< Op hubs
-	TAGNIL_SLOT      = 1 << 7,   ///< Slots
-	TAGNIL_LIMIT     = 1 << 8,   ///< Limit
-	TAGNIL_OPEN      = 1 << 9,   ///< Open
-	TAGNIL_BANDWIDTH = 1 << 10,  ///< Bandwidth
-	TAGNIL_DOWNLOAD  = 1 << 11,  ///< Download
-	TAGNIL_FRACTION  = 1 << 12,  ///< Fraction
-}; // enum TagNil
-
-
 
 enum UserParam {
 	USER_PARAM_DESC = 1,
@@ -140,7 +121,13 @@ enum UserParam {
 	USER_PARAM_BANDWIDTH,
 	USER_PARAM_DOWNLOAD,
 	USER_PARAM_FRACTION,
-	USER_PARAM_MODE
+	USER_PARAM_MODE,
+	USER_PARAM_DATA,
+	USER_PARAM_SUPPORTS,
+	USER_PARAM_NMDC_VERSION,
+	USER_PARAM_CAN_KICK,
+	USER_PARAM_CAN_FORCE_MOVE,
+	USER_PARAM_PROFILE
 }; // enum UserParam
 
 
@@ -165,47 +152,50 @@ public:
 	}
 
 	virtual const string * getParam(unsigned int key) const = 0;
+	virtual void setParam(unsigned int key, const char * value) = 0;
+	virtual void removeParam(unsigned int key) = 0;
 
-	/// Get user's nick
+	/// Disconnect this client
+	virtual void disconnect() = 0;
+
+
+	/// Get user's uid (UserID/nick)
 	virtual const string & getUid() const = 0;
 
+	/// Get user's share size
+	virtual __int64 getShare() const = 0;
+
+
+	/// Get user's Info string
+	virtual const string & getInfo() const = 0;
+
+	/// Set user's MyINFO cmd
+	virtual bool setInfo(const string & myInfo) = 0;
+
+
 	/// User in user-list
-	virtual bool getInUserList() const = 0;
+	virtual bool isInUserList() const = 0;
 
 
 	/// User in op-list (has op-key)
-	virtual bool getInOpList() const = 0;
+	virtual bool isInOpList() const = 0;
 
 	/// Add user in op-list
 	virtual void setInOpList(bool) = 0;
 
 
 	/// User in ip-list (can receive ip addresses of users)
-	virtual bool getInIpList() const = 0;
+	virtual bool isInIpList() const = 0;
 
 	/// Add user in ip-list
 	virtual void setInIpList(bool) = 0;
 
 
 	/// User is hidden
-	virtual bool getHide() const = 0;
+	virtual bool isHide() const = 0;
 
 	/// Hide the user
 	virtual void setHide(bool) = 0;
-
-
-	/// User can redirect
-	virtual bool getForceMove() const = 0;
-
-	/// Redirect flag (user can redirect)
-	virtual void setForceMove(bool) = 0;
-
-
-	/// User can kick
-	virtual bool getKick() const = 0;
-
-	/// Kick flag (user can kick)
-	virtual void setKick(bool) = 0;
 
 
 	/// Get user's profile
@@ -215,90 +205,7 @@ public:
 	virtual void setProfile(int) = 0;
 
 
-	/// Get user's MyINFO cmd
-	virtual const string & getMyInfo() const = 0;
-
-	/// Set user's MyINFO cmd
-	virtual bool setMyInfo(const string & myInfo) = 0;
-
-
-	/// Get user's description
-	virtual const string & getDesc() const = 0;
-
-	/// Get user's email address
-	virtual const string & getEmail() const = 0;
-
-	/// Get user's connection flag
-	virtual const string & getConnection() const = 0;
-
-	/// Get user's magic byte
-	virtual unsigned getByte() const = 0;
-
-	/// Get user's share size
-	virtual __int64 getShare() const = 0;
-
-
-	/// Get user's tag
-	virtual const string & getTag() const = 0;
-
-	/// Get user's client
-	virtual const string & getClient() const = 0;
-
-	/// Get user's client version
-	virtual const string & getClientVersion() const = 0;
-
-	/// Get user's mode
-	virtual const string & getMode() const = 0;
-
-	/// Get user's unreg-hubs
-	virtual unsigned getUnregHubs() const = 0;
-
-	/// Get user's reg-hubs
-	virtual unsigned getRegHubs() const = 0;
-
-	/// Get user's op-hubs
-	virtual unsigned getOpHubs() const = 0;
-
-	/// Get user's slots
-	virtual unsigned getSlots() const = 0;
-
-	/// Get user's L-limit
-	virtual unsigned getLimit() const = 0;
-
-	/// Get user's O-limit
-	virtual unsigned getOpen() const = 0;
-
-	/// Get user's B-limit
-	virtual unsigned getBandwidth() const = 0;
-
-	/// Get user's D-limit
-	virtual unsigned getDownload() const = 0;
-
-	/// Get user's F-limit
-	virtual const string & getFraction() const = 0;
-
-
-	/// Get user's tagNil param
-	virtual unsigned int getTagNil() const = 0;
-
-
-	/// Get some user data
-	virtual const string & getData() const = 0;
-
-	/// Set some user data
-	virtual void setData(const string &) = 0;
-
-	/// Get all support cmd parameters, except of cmd name (PROTOCOL NMDC)
-	virtual const string & getSupports() const = 0;
-
-	/// User's protocol version
-	virtual const string & getVersion() const = 0;
-
-	/// Disconnect this client
-	virtual void disconnect() = 0;
-
-
-	/// Get string of IP
+	/// Get string with IP
 	virtual const string & getIp() const = 0;
 
 	/// Get string of server ip (host)

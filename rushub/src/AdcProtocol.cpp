@@ -276,14 +276,14 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 
 	dcConn->mDcUser->setInf(inf);
 
-	if (dcConn->mDcUser->getInUserList()) {
-		if (dcConn->mDcUser->getHide()) {
+	if (dcConn->mDcUser->isInUserList()) {
+		if (dcConn->mDcUser->isHide()) {
 			dcConn->send(dcConn->mDcUser->getInf(), true); // Send to self only
 		} else {
 			// TODO sendMode
 			mDcServer->mAdcUserList.sendToAllAdc(dcConn->mDcUser->getInf(), true);
 		}
-	} else if (!dcConn->mDcUser->getInUserList()) {
+	} else if (!dcConn->mDcUser->isInUserList()) {
 		dcConn->mSendNickList = true;
 		dcConn->clearTimeOut(HUB_TIME_OUT_LOGIN);
 		mDcServer->beforeUserEnter(dcConn);
@@ -298,7 +298,7 @@ int AdcProtocol::eventMsg(AdcParser * adcParser, DcConn * dcConn) {
 
 	// TODO check SID
 
-	if (!dcConn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser->isInUserList()) {
 		return -1;
 	}
 
@@ -521,7 +521,7 @@ int AdcProtocol::eventUnknown(AdcParser *, DcConn *) {
 
 void AdcProtocol::infList(string & list, UserBase * userBase) {
 	// INF ...\nINF ...\n
-	if (!userBase->hide()) {
+	if (!userBase->isHide()) {
 		list.append(userBase->getInf());
 		list.append(ADC_SEPARATOR);
 	}

@@ -140,7 +140,7 @@ DcServer::~DcServer() {
 		if (Us->mDcConn) {
 			delConnection(Us->mDcConn);
 		} else {
-			if (Us->getInUserList()) {
+			if (Us->isInUserList()) {
 				removeFromDcUserList(Us);
 			}
 			delete Us;
@@ -154,7 +154,7 @@ DcServer::~DcServer() {
 		if (Us->mDcConn) {
 			delConnection(Us->mDcConn);
 		} else {
-			if (Us->getInUserList()) {
+			if (Us->isInUserList()) {
 				removeFromDcUserList(Us);
 			}
 			delete Us;
@@ -562,7 +562,7 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 		}
 
 		dcConn->mSendNickList = false;
-	} else if (!dcConn->mDcUser->getInUserList()) {
+	} else if (!dcConn->mDcUser->isInUserList()) {
 		doUserEnter(dcConn);
 	}
 	return true;
@@ -627,7 +627,7 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 		}
 		return false;
 	}
-	if (dcUser->getInUserList()) {
+	if (dcUser->isInUserList()) {
 		if (errLog(2)) {
 			logStream() << "User is already in the user list" << endl;
 		}
@@ -649,7 +649,7 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 
 	if (!mainUserList->add(uidHash, dcUser)) {
 		if (log(1)) {
-			logStream() << "Adding twice user with same nick " << dcUser->getUid() << " (" << mainUserList->find(uidHash)->uid() << ")" << endl;
+			logStream() << "Adding twice user with same nick " << dcUser->getUid() << " (" << mainUserList->find(uidHash)->getUid() << ")" << endl;
 		}
 		dcUser->setInUserList(false);
 		return false;
@@ -664,10 +664,10 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 		if (!dcUser->isPassive()) {
 			mActiveList.add(uidHash, dcUser);
 		}
-		if (dcUser->getInOpList()) {
+		if (dcUser->isInOpList()) {
 			mOpList.add(uidHash, dcUser);
 		}
-		if (dcUser->getInIpList()) {
+		if (dcUser->isInIpList()) {
 			mIpList.add(uidHash, dcUser);
 		}
 	}
@@ -754,10 +754,10 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 		mHelloList.remove(uidHash); // NMDC
 	}
 
-	if (dcUser->getInUserList()) {
+	if (dcUser->isInUserList()) {
 		dcUser->setInUserList(false);
 
-		if (!dcUser->getHide()) {
+		if (!dcUser->isHide()) {
 			string msg;
 
 			if (!mDcConfig.mAdcOn) {
@@ -779,17 +779,17 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 
 	if (!mDcConfig.mAdcOn) {
 		string hello;
-		if (dcUser->getHide() && dcUser->mDcConn) {
+		if (dcUser->isHide() && dcUser->mDcConn) {
 			if (dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
-				dcUser->mDcConn->send(dcUser->getMyInfo(), true, false);
+				dcUser->mDcConn->send(dcUser->getInfo(), true, false);
 			} else if (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
 				dcUser->mDcConn->send(mNmdcProtocol.appendHello(hello, dcUser->getUid()), false, false); // refactoring to DcProtocol pointer
-				dcUser->mDcConn->send(dcUser->getMyInfo(), true, false);
+				dcUser->mDcConn->send(dcUser->getInfo(), true, false);
 			} else {
 				dcUser->mDcConn->send(mNmdcProtocol.appendHello(hello, dcUser->getUid()), false, false); // refactoring to DcProtocol pointer
 			}
 
-			if (dcUser->getInOpList()) {
+			if (dcUser->isInOpList()) {
 				string opList;
 				dcUser->mDcConn->send(mNmdcProtocol.appendOpList(opList, dcUser->getUid()), false, false); // refactoring to DcProtocol pointer
 			}
@@ -799,13 +799,13 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 			mHelloList.sendToAll(mNmdcProtocol.appendHello(hello, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false); // refactoring to DcProtocol pointer
 
 			// Show MyINFO string to all users
-			mDcUserList.sendToAll(dcUser->getMyInfo(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
+			mDcUserList.sendToAll(dcUser->getInfo(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
 
 			// Show MyINFO string of the current user to all enterring users
-			mEnterList.sendToAll(dcUser->getMyInfo(), true/*mDcConfig.mDelayedMyinfo*/);
+			mEnterList.sendToAll(dcUser->getInfo(), true/*mDcConfig.mDelayedMyinfo*/);
 
 			// Op entry
-			if (dcUser->getInOpList()) {
+			if (dcUser->isInOpList()) {
 				string opList;
 				mDcUserList.sendToAll(mNmdcProtocol.appendOpList(opList, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false); // refactoring to DcProtocol pointer
 				mEnterList.sendToAll(opList, true/*mDcConfig.mDelayedMyinfo*/, false);
@@ -829,7 +829,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 				mIpList.sendToAll(ipList, true, false);
 			}
 
-			if (dcUser->getInIpList()) {
+			if (dcUser->isInIpList()) {
 				dcUser->send(mDcUserList.getList(USER_LIST_IP), true, false);
 			} else if (ipList.size() && dcUser->mDcConn && (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_USERIP2)) { // UserIP2
 				dcUser->send(ipList, false, false);
@@ -841,7 +841,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 
 		bool canSend = dcUser->isCanSend();
 
-		if (!dcUser->getHide()) {
+		if (!dcUser->isHide()) {
 
 			// Show MyINFO string to all users
 			mAdcUserList.sendToAllAdc(dcUser->getInf(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
@@ -1265,9 +1265,9 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 			return -1;
 		}
 		string myInfo("$MyINFO $ALL ");
-		if (!dcUser->setMyInfo(myInfo.append(uid).append(" ", 1).append(info))) {
+		if (!dcUser->setInfo(myInfo.append(uid).append(" ", 1).append(info))) {
 			myInfo = "$MyINFO $ALL ";
-			if (!dcUser->setMyInfo(myInfo.append(uid).append(" $ $$$0$", 9))) {
+			if (!dcUser->setInfo(myInfo.append(uid).append(" $ $$$0$", 9))) {
 				delete dcUser;
 				return -2;
 			}

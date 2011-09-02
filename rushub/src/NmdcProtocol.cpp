@@ -276,7 +276,7 @@ int NmdcProtocol::eventSupports(NmdcParser * dcparser, DcConn * dcConn) {
 			dcConn->mFeatures |= SUPPORT_FEATUER_QUICKLIST;
 		}
 	}
-	dcConn->mDcUser->mSupports.assign(dcparser->mCommand, 10, dcparser->mCommand.size() - 10);
+	dcConn->mDcUser->setSupports(dcparser->mCommand);
 
 	#ifndef WITHOUT_PLUGINS
 		if (mDcServer->mCalls.mOnSupports.callAll(dcConn->mDcUser)) {
@@ -428,19 +428,19 @@ int NmdcProtocol::eventVersion(NmdcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	string & sVersion = dcparser->chunkString(CHUNK_1_PARAM);
+	string & version = dcparser->chunkString(CHUNK_1_PARAM);
 	if (dcConn->log(3)) {
-		dcConn->logStream() << "Version:" << sVersion << endl;
+		dcConn->logStream() << "Version:" << version << endl;
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnVersion.callAll(dcConn->mDcUser) && sVersion != "1,0091") {
+		if (mDcServer->mCalls.mOnVersion.callAll(dcConn->mDcUser) && version != "1,0091") {
 			dcConn->closeNice(9000, CLOSE_REASON_CMD_VERSION); /** Checking of the version */
 		}
 	#endif
 
 	dcConn->setLoginStatusFlag(LOGIN_STATUS_VERSION); /** Version was checked */
-	dcConn->mDcUser->mVersion = sVersion;
+	dcConn->mDcUser->setParam(USER_PARAM_NMDC_VERSION, version.c_str());
 	return 0;
 }
 
@@ -496,23 +496,23 @@ int NmdcProtocol::eventMyInfo(NmdcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	string sOldMyINFO = dcConn->mDcUser->getMyInfo();
-	dcConn->mDcUser->setMyInfo(dcparser);
+	string sOldMyINFO = dcConn->mDcUser->getInfo();
+	dcConn->mDcUser->setInfo(dcparser);
 
 	int iMode = 0;
 	#ifndef WITHOUT_PLUGINS
 		iMode = mDcServer->mCalls.mOnMyINFO.callAll(dcConn->mDcUser);
 	#endif
 
-	if (iMode != 1 && dcConn->mDcUser->getInUserList()) {
-		if (sOldMyINFO != dcConn->mDcUser->getMyInfo()) {
-			if (dcConn->mDcUser->getHide()) {
-				dcConn->send(dcConn->mDcUser->getMyInfo(), true); // Send to self only
+	if (iMode != 1 && dcConn->mDcUser->isInUserList()) {
+		if (sOldMyINFO != dcConn->mDcUser->getInfo()) {
+			if (dcConn->mDcUser->isHide()) {
+				dcConn->send(dcConn->mDcUser->getInfo(), true); // Send to self only
 			} else {
-				sendMode(dcConn, dcConn->mDcUser->getMyInfo(), iMode, mDcServer->mDcUserList, true); // Use cache for send to all
+				sendMode(dcConn, dcConn->mDcUser->getInfo(), iMode, mDcServer->mDcUserList, true); // Use cache for send to all
 			}
 		}
-	} else if (!dcConn->mDcUser->getInUserList()) {
+	} else if (!dcConn->mDcUser->isInUserList()) {
 		dcConn->setLoginStatusFlag(LOGIN_STATUS_MYINFO);
 
 		unsigned iWantedMask = LOGIN_STATUS_LOGIN_DONE;
@@ -541,7 +541,7 @@ int NmdcProtocol::eventMyInfo(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventChat(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser->isInUserList()) {
 		return -1;
 	}
 
@@ -575,7 +575,7 @@ int NmdcProtocol::eventChat(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventTo(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser->isInUserList()) {
 		return -1;
 	}
 
@@ -610,7 +610,7 @@ int NmdcProtocol::eventTo(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventMcTo(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser->isInUserList()) {
 		return -1;
 	}
 
@@ -649,7 +649,7 @@ int NmdcProtocol::eventMcTo(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventUserIp(NmdcParser * dcParser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser->isInUserList()) {
 		return -1;
 	}
 
@@ -668,7 +668,7 @@ int NmdcProtocol::eventUserIp(NmdcParser * dcParser, DcConn * dcConn) {
 			// PROTOCOL NMDC
 			UserBase * userBase = mDcServer->mDcUserList.getUserBaseByUid(nick);
 			if (userBase != NULL) {
-				result.append(nick).append(" ", 1).append(userBase->ip()).append("$$", 2);
+				result.append(nick).append(" ", 1).append(userBase->getIp()).append("$$", 2);
 			}
 		}
 		cur = pos + 2;
@@ -681,7 +681,7 @@ int NmdcProtocol::eventUserIp(NmdcParser * dcParser, DcConn * dcConn) {
 		// PROTOCOL NMDC
 		UserBase * userBase = mDcServer->mDcUserList.getUserBaseByUid(nick);
 		if (userBase != NULL) {
-			result.append(nick).append(" ", 1).append(userBase->ip());
+			result.append(nick).append(" ", 1).append(userBase->getIp());
 		}
 	}
 
@@ -700,7 +700,7 @@ int NmdcProtocol::eventUserIp(NmdcParser * dcParser, DcConn * dcConn) {
 */
 int NmdcProtocol::eventSearch(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser->isInUserList()) {
 		return -1;
 	}
 
@@ -774,7 +774,7 @@ int NmdcProtocol::eventSearch(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventSr(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser->isInUserList()) {
 		return -1;
 	}
 
@@ -824,7 +824,7 @@ int NmdcProtocol::eventSr(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser->isInUserList()) {
 		return -1;
 	}
 
@@ -857,7 +857,7 @@ int NmdcProtocol::eventConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventRevConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser->isInUserList()) {
 		return -1;
 	}
 
@@ -891,7 +891,7 @@ int NmdcProtocol::eventRevConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventMultiConnectToMe(NmdcParser *, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser->isInUserList()) {
 		return -1;
 	}
 
@@ -902,7 +902,7 @@ int NmdcProtocol::eventMultiConnectToMe(NmdcParser *, DcConn * dcConn) {
 
 int NmdcProtocol::eventKick(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser->isInUserList()) {
 		return -1;
 	}
 
@@ -912,7 +912,7 @@ int NmdcProtocol::eventKick(NmdcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	if (!dcConn->mDcUser->getKick()) {
+	if (!dcConn->mDcUser->getParam(USER_PARAM_CAN_KICK)) {
 		return -2;
 	}
 
@@ -932,7 +932,7 @@ int NmdcProtocol::eventKick(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventOpForceMove(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser->isInUserList()) {
 		return -1;
 	}
 
@@ -942,7 +942,7 @@ int NmdcProtocol::eventOpForceMove(NmdcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	if (!dcConn->mDcUser->getForceMove()) {
+	if (!dcConn->mDcUser->getParam(USER_PARAM_CAN_FORCE_MOVE)) {
 		return -2;
 	}
 
@@ -962,7 +962,7 @@ int NmdcProtocol::eventOpForceMove(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventGetInfo(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getInUserList()) {
+	if (!dcConn->mDcUser->isInUserList()) {
 		return -1;
 	}
 
@@ -983,8 +983,8 @@ int NmdcProtocol::eventGetInfo(NmdcParser * dcparser, DcConn * dcConn) {
 	#endif
 
 	//if(!(dcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO)){
-	if (!dcUser->getHide()) {
-		dcConn->send(dcUser->getMyInfo(), true, false);
+	if (!dcUser->isHide()) {
+		dcConn->send(dcUser->getInfo(), true, false);
 	}
 	return 0;
 }
@@ -1189,7 +1189,7 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 			dcConn->send(mDcServer->mOpList.getList(), true, false);
 		}
 
-		if (dcConn->mDcUser->getInUserList() && dcConn->mDcUser->getInIpList()) {
+		if (dcConn->mDcUser->isInUserList() && dcConn->mDcUser->isInIpList()) {
 			if (dcConn->log(3)) {
 				dcConn->logStream() << "Sending Iplist" << endl;
 			}
@@ -1337,8 +1337,8 @@ bool NmdcProtocol::checkNickLength(DcConn * dcConn, size_t len) {
 void NmdcProtocol::nickList(string & list, UserBase * userBase) {
 	// $NickList nick1$$nick2$$
 	// $OpList nick1$$nick2$$
-	if (!userBase->hide() && !userBase->uid().empty()) {
-		list.append(userBase->uid());
+	if (!userBase->isHide() && !userBase->getUid().empty()) {
+		list.append(userBase->getUid());
 		list.append("$$");
 	}
 }
@@ -1347,8 +1347,8 @@ void NmdcProtocol::nickList(string & list, UserBase * userBase) {
 
 void NmdcProtocol::myInfoList(string & list, UserBase * userBase) {
 	// $MyINFO nick1 ...|$MyINFO nick2 ...|
-	if (!userBase->hide()) {
-		list.append(userBase->myInfoString());
+	if (!userBase->isHide()) {
+		list.append(userBase->getInfo());
 		list.append(NMDC_SEPARATOR);
 	}
 }
@@ -1357,10 +1357,10 @@ void NmdcProtocol::myInfoList(string & list, UserBase * userBase) {
 
 void NmdcProtocol::ipList(string & list, UserBase * userBase) {
 	// $UserIP nick1 ip1$$nick2 ip2$$
-	if (!userBase->hide() && userBase->ip().size() && !userBase->uid().empty()) {
-		list.append(userBase->uid());
+	if (!userBase->isHide() && userBase->getIp().size() && !userBase->getUid().empty()) {
+		list.append(userBase->getUid());
 		list.append(" ", 1);
-		list.append(userBase->ip());
+		list.append(userBase->getIp());
 		list.append("$$");
 	}
 }
@@ -1368,10 +1368,10 @@ void NmdcProtocol::ipList(string & list, UserBase * userBase) {
 
 
 void NmdcProtocol::addToOps(DcUser * dcUser) {
-	if (dcUser->getInUserList()) {
+	if (dcUser->isInUserList()) {
 		string msg;
 		mDcServer->mOpList.add(dcUser->getUidHash(), dcUser);
-		if (dcUser->getHide()) {
+		if (dcUser->isHide()) {
 			dcUser->send(appendOpList(msg, dcUser->getUid()), false, true);
 		} else {
 			mDcServer->mDcUserList.sendToAll(appendOpList(msg, dcUser->getUid()), true/*mDcServer->mDcConfig.mDelayedMyinfo*/, false);
@@ -1383,24 +1383,24 @@ void NmdcProtocol::addToOps(DcUser * dcUser) {
 
 
 void NmdcProtocol::delFromOps(DcUser * dcUser) {
-	if (dcUser->getInUserList()) {
+	if (dcUser->isInUserList()) {
 		string sMsg1, sMsg2, sMsg3;
 		mDcServer->mOpList.remove(dcUser->getUidHash());
-		if (dcUser->getHide()) {
+		if (dcUser->isHide()) {
 			if (dcUser->mDcConn == NULL) {
 				return;
 			}
 			dcUser->send(appendQuit(sMsg1, dcUser->getUid()), false, false);
 			if (dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
-				dcUser->send(dcUser->getMyInfo(), true, false);
+				dcUser->send(dcUser->getInfo(), true, false);
 			} else if (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
 				dcUser->send(appendHello(sMsg2, dcUser->getUid()), false, false);
-				dcUser->send(dcUser->getMyInfo(), true, false);
+				dcUser->send(dcUser->getInfo(), true, false);
 			} else {
 				dcUser->send(appendHello(sMsg2, dcUser->getUid()), false, false);
 			}
 
-			if ((dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_USERIP2) || dcUser->getInIpList()) {
+			if ((dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_USERIP2) || dcUser->isInIpList()) {
 				dcUser->send(appendUserIp(sMsg3, dcUser->getUid(), dcUser->getIp()));
 			} else {
 				dcUser->send("", 0, false, true);
@@ -1409,8 +1409,8 @@ void NmdcProtocol::delFromOps(DcUser * dcUser) {
 			mDcServer->mDcUserList.sendToAll(appendQuit(sMsg1, dcUser->getUid()), true/*mDcServer->mDcConfig.mDelayedMyinfo*/, false);
 			mDcServer->mEnterList.sendToAll(sMsg1, true/*mDcServer->mDcConfig.mDelayedMyinfo*/, false);
 			mDcServer->mHelloList.sendToAll(appendHello(sMsg2, dcUser->getUid()), true/*mDcServer->mDcConfig.mDelayedMyinfo*/, false);
-			mDcServer->mDcUserList.sendToAll(dcUser->getMyInfo(), true/*mDcServer->mDcConfig.mDelayedMyinfo*/);
-			mDcServer->mEnterList.sendToAll(dcUser->getMyInfo(), true/*mDcServer->mDcConfig.mDelayedMyinfo*/);
+			mDcServer->mDcUserList.sendToAll(dcUser->getInfo(), true/*mDcServer->mDcConfig.mDelayedMyinfo*/);
+			mDcServer->mEnterList.sendToAll(dcUser->getInfo(), true/*mDcServer->mDcConfig.mDelayedMyinfo*/);
 			mDcServer->mIpList.sendToAll(appendUserIp(sMsg3, dcUser->getUid(), dcUser->getIp()), true, false);
 		}
 	}
@@ -1419,7 +1419,7 @@ void NmdcProtocol::delFromOps(DcUser * dcUser) {
 
 
 void NmdcProtocol::addToIpList(DcUser * dcUser) {
-	if (dcUser->getInUserList()) {
+	if (dcUser->isInUserList()) {
 		mDcServer->mIpList.add(dcUser->getUidHash(), dcUser);
 		dcUser->send(mDcServer->mDcUserList.getList(USER_LIST_IP), true);
 	}
@@ -1428,7 +1428,7 @@ void NmdcProtocol::addToIpList(DcUser * dcUser) {
 
 
 void NmdcProtocol::delFromIpList(DcUser * dcUser) {
-	if (dcUser->getInUserList()) {
+	if (dcUser->isInUserList()) {
 		mDcServer->mIpList.remove(dcUser->getUidHash());
 	}
 }
@@ -1452,20 +1452,20 @@ void NmdcProtocol::addToHide(DcUser * dcUser) {
 void NmdcProtocol::delFromHide(DcUser * dcUser) {
 	if (dcUser->isCanSend()) {
 		string sMsg1, sMsg2, sMsg3;
-		if (dcUser->getInOpList()) {
+		if (dcUser->isInOpList()) {
 			dcUser->setCanSend(false);
 			mDcServer->mHelloList.sendToAll(appendHello(sMsg1, dcUser->getUid()), false/*mDcServer->mDcConfig.mDelayedMyinfo*/, false);
-			mDcServer->mDcUserList.sendToAll(dcUser->getMyInfo(), true, true);
+			mDcServer->mDcUserList.sendToAll(dcUser->getInfo(), true, true);
 			mDcServer->mDcUserList.sendToAll(appendOpList(sMsg2, dcUser->getUid()), false/*mDcServer->mDcConfig.mDelayedMyinfo*/, false);
-			mDcServer->mEnterList.sendToAll(dcUser->getMyInfo(), true, true);
+			mDcServer->mEnterList.sendToAll(dcUser->getInfo(), true, true);
 			mDcServer->mEnterList.sendToAll(sMsg2, false/*mDcServer->mDcConfig.mDelayedMyinfo*/, false);
 			mDcServer->mIpList.sendToAll(appendUserIp(sMsg3, dcUser->getUid(), dcUser->getIp()), false, false);
 			dcUser->setCanSend(true);
 		} else {
 			dcUser->setCanSend(false);
 			mDcServer->mHelloList.sendToAll(appendHello(sMsg1, dcUser->getUid()), false/*mDcServer->mDcConfig.mDelayedMyinfo*/, false);
-			mDcServer->mDcUserList.sendToAll(dcUser->getMyInfo(), false/*mDcServer->mDcConfig.mDelayedMyinfo*/);
-			mDcServer->mEnterList.sendToAll(dcUser->getMyInfo(), false/*mDcServer->mDcConfig.mDelayedMyinfo*/);
+			mDcServer->mDcUserList.sendToAll(dcUser->getInfo(), false/*mDcServer->mDcConfig.mDelayedMyinfo*/);
+			mDcServer->mEnterList.sendToAll(dcUser->getInfo(), false/*mDcServer->mDcConfig.mDelayedMyinfo*/);
 			mDcServer->mIpList.sendToAll(appendUserIp(sMsg3, dcUser->getUid(), dcUser->getIp()), false, false);
 			dcUser->setCanSend(true);
 		}

@@ -55,122 +55,75 @@ public:
 
 	Time mTimeEnter; ///< Enter time on the hub
 
-	string mSupports; ///< Support cmd param (PROTOCOL NMDC)
-	string mVersion; ///< DC version (PROTOCOL NMDC)
-
 public:
 
 	DcUser();
 	virtual ~DcUser();
 
-	// UserBase params
-	virtual const string & uid() const;
-	virtual const string & myInfoString() const;
-	virtual const string & ip() const;
-	virtual bool hide() const;
-	virtual int getProfile() const;
-	inline bool isCanSend() {
-		return mCanSend;
-	}
 	virtual void send(const string & data, bool addSep = false, bool flush = true);
-
-
-	virtual const string & getInf() const {
-		return mInf;
-	}
-
-	void setInf(const string & inf) {
-		mInf = inf;
-	}
-
-
 	virtual void send(const char * data, size_t len, bool addSep = false, bool flush = true);
+	virtual void disconnect();
+
+	virtual const string * getParam(unsigned int key) const;
+	virtual void setParam(unsigned int key, const char * value);
+	virtual void removeParam(unsigned int key);
 
 
 	virtual const string & getUid() const;
-	unsigned long getUidHash() const;
-	virtual bool getInUserList() const;
-	virtual const string & getMyInfo() const;
-	virtual bool setMyInfo(const string & myInfo);
-	bool setMyInfo(NmdcParser * parser);
-	virtual __int64 getShare() const;
-
-	virtual bool getInOpList() const;
-	virtual bool getInIpList() const;
-	virtual bool getHide() const;
-	virtual bool getForceMove() const;
-	virtual bool getKick() const;
-
-	virtual void setInOpList(bool inOpList);
-	virtual void setInIpList(bool inIpList);
-	virtual void setHide(bool hide);
-	virtual void setForceMove(bool forceMove);
-	virtual void setKick(bool kick);
-
-
 	void setUid(const string & uid);
-	void setIp(const string & ip);
-	void setInUserList(bool);
-	void setCanSend(bool canSend);
-	bool isPassive() const;
+	unsigned long getUidHash() const;
 
 
-	virtual void setProfile(int profile);
+	virtual const string & getInfo() const;
+	virtual bool setInfo(const string & myInfo);
+	bool setInfo(NmdcParser * parser);
 
-	virtual void disconnect();
+	virtual const string & getInf() const;
+	void setInf(const string & inf);
 
-
-	// From Conn
 	virtual const string & getIp() const;
+	void setIp(const string & ip);
 	virtual const string & getIpConn() const;
 	virtual int getPort() const;
 	virtual int getPortConn() const;
 	virtual const string & getMacAddress() const;
 
 
+	virtual __int64 getShare() const;
 
-	virtual const string * getParam(unsigned int key) const;
 
+	virtual int getProfile() const;
+	virtual void setProfile(int profile);
 
-	// Used in plugins only
-	// =====================================================================
+	virtual bool isCanSend() const;
+	void setCanSend(bool canSend);
 
-	virtual const string & getSupports() const; // NMDC
-	virtual const string & getVersion() const; // NMDC
+	virtual bool isInUserList() const;
+	void setInUserList(bool);
 
+	virtual bool isInOpList() const;
+	virtual void setInOpList(bool inOpList);
+
+	virtual bool isInIpList() const;
+	virtual void setInIpList(bool inIpList);
+
+	virtual bool isHide() const;
+	virtual void setHide(bool hide);
+	
+	bool isPassive() const;
+
+	void setSupports(const string & cmd); // NMDC
 
 	virtual long getConnectTime() const;
-	virtual const string & getData() const;
-	virtual void setData(const string & data);
-
-	// myinfo
-	virtual const string & getDesc() const;
-	virtual const string & getEmail() const;
-	virtual const string & getConnection() const;
-	virtual unsigned getByte() const;
-
-	virtual unsigned int getTagNil() const;
-	virtual const string & getTag() const;
-	virtual const string & getClient() const;
-	virtual const string & getClientVersion() const;
-	virtual unsigned getUnregHubs() const;
-	virtual unsigned getRegHubs() const;
-	virtual unsigned getOpHubs() const;
-	virtual unsigned getSlots() const;
-	virtual unsigned getLimit() const;
-	virtual unsigned getOpen() const;
-	virtual unsigned getBandwidth() const;
-	virtual unsigned getDownload() const;
-	virtual const string & getFraction() const;
-	virtual const string & getMode() const;
-	// =====================================================================
 
 private:
 
 	DcUser & operator = (const DcUser &) { return *this; }
-	void parse(string & description);
+
+	string & updateParam(unsigned long key, const char * value);
+	void parseDesc(string & description);
 	void parseTag();
-	void findIntParam(const char * find, unsigned int & param, TagNil tagNil);
+	void findParam(const string & tag, const char * find, unsigned long key);
 
 private:
 
@@ -178,50 +131,19 @@ private:
 	unsigned long mUidHash; ///< UserID Hash
 	int mProfile; ///< Profile
 
+	HashMap<string *> mParams;
+
+	string myInfo;
+	string mInf; // ADC
+	string mIp; ///< IP address of user/bot
+
 	bool mInOpList; ///< User in op-list
 	bool mInIpList; ///< User in ip-list
 	bool mHide; ///< User was hide
-	bool mForceMove; ///< User can redirect other users
-	bool mKick; ///< User can kick other users
 	bool mInUserList; ///< User in user-list
 	bool mCanSend; ///< Can send to user
 
-	string mIp; ///< IP address of user/bot
-	string mData; ///< Some user's data
-
-
-
-	HashMap<string *> mParams;
-
-
-
-	string mInf; // ADC
-
-
-	string myInfo;
-
-	string description; ///< User's description
-	string email; ///< User's e-mail
-	string connection; ///< User's connection
-	unsigned int magicByte; ///< User's magic byte
 	__int64 share; ///< Share size
-
-	unsigned int nil;
-	string tag; ///< Tag string
-	string clientName; ///< Client name
-	string clientVersion; ///< Client version
-	string mode; ///< Mode
-	bool passive; ///< Passive mode
-	unsigned int unregHubs; ///< Count of hubs where client unregistered
-	unsigned int regHubs; ///< Count of hubs where client registered
-	unsigned int opHubs; ///< Count of hubs where client is operator
-	unsigned int slots; ///< Count of slots
-	unsigned int limit; ///< Limit L:x
-	unsigned int open; ///< Limit O:x
-	unsigned int bandwidth; ///< Limit B:x
-	unsigned int download; ///< Limit D:x
-	string fraction; ///< Limit F:x/y
-
 
 }; // DcUser
 

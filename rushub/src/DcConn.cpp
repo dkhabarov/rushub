@@ -106,7 +106,7 @@ int DcConn::onTimer(Time &now) {
 	DcServer * dcServer = server();
 
 	// Check timeouts. For entering only
-	if (!mDcUser->getInUserList()) { // Optimisation
+	if (!mDcUser->isInUserList()) { // Optimisation
 		for (int i = 0; i < HUB_TIME_OUT_MAX; ++i) {
 			if (!checkTimeOut(HubTimeOut(i), now)) {
 				if (log(2)) {
@@ -139,7 +139,7 @@ int DcConn::onTimer(Time &now) {
 	Ago -= dcServer->mDcConfig.mStartPing;
 	if (
 		dcServer->minDelay(mPingServer, dcServer->mDcConfig.mPingInterval) &&
-		mDcUser->getInUserList() && mDcUser->mTimeEnter < Ago
+		mDcUser->isInUserList() && mDcUser->mTimeEnter < Ago
 	) {
 		send("", 0, true, true);
 	}
@@ -253,7 +253,7 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 
 			dcServer->miTotalShare -= dcConn->mDcUser->getShare();
 
-			if (dcConn->mDcUser->getInUserList()) {
+			if (dcConn->mDcUser->isInUserList()) {
 				dcServer->removeFromDcUserList(static_cast<DcUser *> (dcConn->mDcUser));
 			} else { // remove from enter list, if user was already added in it, but user was not added in user list
 				dcServer->mEnterList.remove(dcConn->mDcUser->getUidHash());

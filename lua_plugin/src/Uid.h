@@ -84,6 +84,9 @@ private:
 	static int userIndex(lua_State *);
 	static int userNewIndex(lua_State *);
 
+	static void pushStringOrNil(lua_State *, DcUserBase *, unsigned long key);
+	static void pushNumberOrNil(lua_State *, DcUserBase *, unsigned long key);
+
 	static unsigned int getHash(const char *);
 
 }; // class Uid

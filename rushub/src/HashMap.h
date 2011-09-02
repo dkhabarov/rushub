@@ -42,17 +42,10 @@ class HashMap {
 
 public:
 
-	typedef list<V, allocator<V> > List_t; /** Iteration list with data */
-	typedef typename List_t::iterator iterator; /** Iterator for the data-list */
-	typedef map<K, iterator> tHashMap; /** Map [K]=iterator */
-	typedef pair<K, iterator> tHashPair; /** pair (for insert) */
+	/// Iterator for the data-list
+	typedef typename list<V, allocator<V> >::iterator iterator;
 
-	Hash<K> mHash; /** Hash function */
-
-private:
-
-	List_t mList; /** List with data */
-	tHashMap mHashMap; /** HashMap */
+	Hash<K> mHash; ///< Hash function
 
 public:
 
@@ -95,12 +88,19 @@ public:
 	virtual void onRemove(V) {
 	}
 
+private:
+
+	typedef map<K, iterator> tHashMap; ///< Map [K]=iterator
+
+	list<V, allocator<V> > mList; ///< List with data
+	tHashMap mHashMap; ///< HashMap
+
 }; // HashMap
 
 
 /** Adding data and hash-key (true - ok, false - fail) */
 template <class V, class K>
-bool HashMap<V, K>::add(const K & hash, V Data) {
+bool HashMap<V, K>::add(const K & hash, V data) {
 
 	// Check
 	if (contain(hash)) {
@@ -108,17 +108,17 @@ bool HashMap<V, K>::add(const K & hash, V Data) {
 	}
 
 	// Insert data
-	iterator ulit = mList.insert(mList.begin(), Data); // Insert in begin list
-	if (ulit == mList.end()) {
+	iterator it = mList.insert(mList.begin(), data);
+	if (it == mList.end()) {
 		return false;
 	}
 
 	// Insert hash-key
-	pair<tHashMap::iterator, bool> P = mHashMap.insert(tHashPair(hash, ulit));
-	if (P.second) {
-		onAdd(Data);
+	pair<tHashMap::iterator, bool> p = mHashMap.insert(pair<K, iterator>(hash, it));
+	if (p.second) {
+		onAdd(data);
 	} else {
-		mList.erase(ulit); // Removing data fron list
+		mList.erase(it); // Removing data fron list
 		return false;
 	}
 	return true;
@@ -127,11 +127,11 @@ bool HashMap<V, K>::add(const K & hash, V Data) {
 /** Removing data by hash-key (true - ok, false - fail) */
 template <class V, class K>
 bool HashMap<V, K>::remove(const K & hash) {
-	tHashMap::iterator uhit = mHashMap.find(hash);
-	if (uhit != mHashMap.end()) {
-		onRemove(*(uhit->second));
-		mList.erase(uhit->second); // Remove data 
-		mHashMap.erase(uhit); // Remove key
+	tHashMap::iterator it = mHashMap.find(hash);
+	if (it != mHashMap.end()) {
+		onRemove(*(it->second));
+		mList.erase(it->second); // Remove data 
+		mHashMap.erase(it); // Remove key
 		return true;
 	}
 	return false;
@@ -146,9 +146,9 @@ bool HashMap<V, K>::contain(const K & hash) const {
 /** Return data by hash-key. Return val else NULL */
 template <class V, class K>
 V HashMap<V, K>::find(const K & hash) const {
-	tHashMap::const_iterator uhit = mHashMap.find(hash);
-	if (uhit != mHashMap.end()) {
-		return *(uhit->second); // Pointer to iterator = val
+	tHashMap::const_iterator it = mHashMap.find(hash);
+	if (it != mHashMap.end()) {
+		return *(it->second); // Pointer to iterator = val
 	}
 	return NULL;
 }

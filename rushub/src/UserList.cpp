@@ -102,9 +102,9 @@ struct ufSendWithNick : public unary_function<void, UserList::iterator> {
 	}
 
 	void operator() (UserBase * userBase) {
-		if (userBase && userBase->isCanSend() && !userBase->uid().empty()) {
+		if (userBase && userBase->isCanSend() && !userBase->getUid().empty()) {
 			userBase->send(mDataStart, false, false);
-			userBase->send(userBase->uid(), false, false);
+			userBase->send(userBase->getUid(), false, false);
 			userBase->send(mDataEnd, true);
 		}
 	}
@@ -138,9 +138,9 @@ struct ufSendWithNickProfile : public unary_function<void, UserList::iterator> {
 			if (profile > 31) {
 				profile = (profile % 32) - 1;
 			}
-			if (mProfile & (1 << profile) && !userBase->uid().empty()) {
+			if (mProfile & (1 << profile) && !userBase->getUid().empty()) {
 				userBase->send(mDataStart, false, false);
-				userBase->send(userBase->uid(), false, false);
+				userBase->send(userBase->getUid(), false, false);
 				userBase->send(mDataEnd, true);
 			}
 		}

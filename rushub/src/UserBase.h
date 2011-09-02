@@ -31,13 +31,13 @@ class UserBase {
 
 public:
 
-	virtual const string & uid() const = 0;
-	virtual const string & myInfoString() const = 0;
+	virtual const string & getUid() const = 0;
+	virtual const string & getInfo() const = 0;
 	virtual const string & getInf() const = 0;
-	virtual const string & ip() const = 0;
-	virtual bool hide() const = 0;
+	virtual const string & getIp() const = 0;
 	virtual int getProfile() const = 0;
-	virtual bool isCanSend() = 0;
+	virtual bool isHide() const = 0;
+	virtual bool isCanSend() const = 0;
 	virtual void send(const string & msg, bool sep = false, bool flush = true) = 0;
 
 }; // UserBase

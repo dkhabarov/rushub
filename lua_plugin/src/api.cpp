@@ -663,11 +663,11 @@ int setUser(lua_State * L) {
 		dcUserBase->setProfile(luaL_checkint(L, 3));
 	} else if (num == USERVALUE_MYINFO) {
 		string myInfo(luaL_checkstring(L, 3));
-		if (!dcUserBase->setMyInfo(myInfo)) {
+		if (!dcUserBase->setInfo(myInfo)) {
 			return LuaUtils::pushError(L, "wrong syntax");
 		}
 	} else if (num == USERVALUE_DATA) {
-		dcUserBase->setData(luaL_checkstring(L, 3));
+		dcUserBase->setParam(USER_PARAM_DATA, luaL_checkstring(L, 3));
 	} else if (num == USERVALUE_OPLIST) {
 		luaL_checktype(L, 3, LUA_TBOOLEAN);
 		dcUserBase->setInOpList(lua_toboolean(L, 3) != 0);
@@ -696,7 +696,7 @@ int getUsers(lua_State * L) {
 		}
 		const vector<DcConnBase *> & v = LuaPlugin::mCurServer->getDcConnBase(lua_tostring(L, 1));
 		for (vector<DcConnBase *>::const_iterator it = v.begin(); it != v.end(); ++it) {
-			if (all || ((*it)->mDcUserBase && (*it)->mDcUserBase->getInUserList())) {
+			if (all || ((*it)->mDcUserBase && (*it)->mDcUserBase->isInUserList())) {
 				lua_pushnumber(L, i);
 				void ** userdata = (void **) lua_newuserdata(L, sizeof(void *));
 				*userdata = (void *) (*it);
@@ -717,7 +717,7 @@ int getUsers(lua_State * L) {
 			if (dcConnBase->mType != CLIENT_TYPE_NMDC) {
 				continue;
 			}
-			if (all || (dcConnBase->mDcUserBase && dcConnBase->mDcUserBase->getInUserList())) {
+			if (all || (dcConnBase->mDcUserBase && dcConnBase->mDcUserBase->isInUserList())) {
 				lua_pushnumber(L, i);
 				void ** userdata = (void **) lua_newuserdata(L, sizeof(void *));
 				*userdata = (void *) dcConnBase; // TODO refactoring
