@@ -26,7 +26,6 @@
 #define HASH_LIST_MAP_H
 
 #include "HashTable.h"
-#include "Obj.h"
 
 #include <list>
 #include <map>
