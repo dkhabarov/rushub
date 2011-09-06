@@ -20,6 +20,7 @@
 #include "Uid.h"
 
 #include <string.h> // strlen
+#include <cstdlib> // atof
 
 namespace luaplugin {
 
