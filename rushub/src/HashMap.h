@@ -90,6 +90,8 @@ public:
 private:
 
 	typedef map<K, iterator> tHashMap; ///< Map [K]=iterator
+	typedef typename tHashMap::iterator HashMapIterator; // for posix
+	typedef typename tHashMap::const_iterator HashMapConstIterator; // for posix
 
 	list<V, allocator<V> > mList; ///< List with data
 	tHashMap mHashMap; ///< HashMap
@@ -113,7 +115,7 @@ bool HashMap<V, K>::add(const K & hash, V data) {
 	}
 
 	// Insert hash-key
-	pair<tHashMap::iterator, bool> p = mHashMap.insert(pair<K, iterator>(hash, it));
+	pair<HashMapIterator, bool> p = mHashMap.insert(pair<K, iterator>(hash, it));
 	if (p.second) {
 		onAdd(data);
 	} else {
@@ -126,7 +128,7 @@ bool HashMap<V, K>::add(const K & hash, V data) {
 /** Removing data by hash-key (true - ok, false - fail) */
 template <class V, class K>
 bool HashMap<V, K>::remove(const K & hash) {
-	tHashMap::iterator it = mHashMap.find(hash);
+	HashMapIterator it = mHashMap.find(hash);
 	if (it != mHashMap.end()) {
 		onRemove(*(it->second));
 		mList.erase(it->second); // Remove data 
@@ -145,7 +147,7 @@ bool HashMap<V, K>::contain(const K & hash) const {
 /** Return data by hash-key. Return val else NULL */
 template <class V, class K>
 V HashMap<V, K>::find(const K & hash) const {
-	tHashMap::const_iterator it = mHashMap.find(hash);
+	HashMapConstIterator it = mHashMap.find(hash);
 	if (it != mHashMap.end()) {
 		return *(it->second); // Pointer to iterator = val
 	}
