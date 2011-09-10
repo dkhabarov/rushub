@@ -46,6 +46,7 @@ namespace server {
 //////////////////////////////////////////////constructor////////////////////////////////////////
 Server::Server() :
 	Obj("Server", true),
+	mTime(true),
 	mStepDelay(0),
 	mTimerServPeriod(1000),
 	mTimerConnPeriod(4000),
