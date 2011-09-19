@@ -510,7 +510,7 @@ bool DcServer::checkNick(DcConn *dcConn) {
 	if (mDcUserList.contain(uidHash)) {
 		DcUser * us = static_cast<DcUser *> (mDcUserList.find(uidHash));
 
-		if (!us->mDcConn || (us->getProfile() == -1 && us->getIp() != dcConn->getIp())) {
+		if (!us->mDcConn || (us->getProfile() != -1 && us->getIp() != dcConn->getIp())) {
 			if (dcConn->log(2)) {
 				dcConn->logStream() << "Bad nick (used): '" 
 					<< dcConn->mDcUser->getUid() << "'["
