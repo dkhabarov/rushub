@@ -79,20 +79,169 @@ void DcUser::disconnect() {
 
 
 
-const string * DcUser::getParam(unsigned int key) const {
+const void * DcUser::getParam(unsigned int key) const {
 	return mParams.find(key);
 }
 
 
 
 void DcUser::setParam(unsigned int key, const char * value) {
-	updateParam(key, value);
+	if (value != NULL) {
+		updateParam(key, value);
+	} else {
+		mParams.remove(key);
+	}
 }
 
 
 
-void DcUser::removeParam(unsigned int key) {
-	mParams.remove(key);
+const string & DcUser::getStringParam(unsigned int key) const {
+	switch (key) {
+		case USER_STRING_PARAM_DATA :
+			return mData;
+
+		case USER_STRING_PARAM_SUPPORTS :
+			return mSupports;
+
+		case USER_STRING_PARAM_NMDC_VERSION :
+			return mNmdcVersion;
+
+		case USER_STRING_PARAM_MAC_ADDRESS :
+			return mDcConn->getMacAddress();
+
+		case USER_STRING_PARAM_IP :
+			return getIp();
+
+		case USER_STRING_PARAM_IP_CONN :
+			return mDcConn->getIpConn();
+
+		case USER_STRING_PARAM_UID :
+			return getUid();
+
+		default :
+			throw "Invalid key";
+
+	}
+}
+
+
+
+void DcUser::setStringParam(unsigned int key, const string & value) {
+	setStringParam(key, value.c_str());
+}
+
+
+
+void DcUser::setStringParam(unsigned int key, const char * value) {
+	switch (key) {
+		case USER_STRING_PARAM_DATA :
+			mData = value;
+			break;
+
+		case USER_STRING_PARAM_SUPPORTS :
+			value += 10;
+			mSupports = value;
+			break;
+
+		case USER_STRING_PARAM_NMDC_VERSION :
+			mNmdcVersion = value;
+			break;
+
+		default :
+			throw "Invalid key";
+
+	}
+}
+
+
+
+bool DcUser::getBoolParam(unsigned int key) const {
+	switch (key) {
+		case USER_BOOL_PARAM_CAN_KICK :
+			return mCanKick;
+
+		case USER_BOOL_PARAM_CAN_FORCE_MOVE :
+			return mCanForceMove;
+
+		case USER_BOOL_PARAM_IN_USER_LIST :
+			return isInUserList();
+
+		case USER_BOOL_PARAM_IN_OP_LIST :
+			return isInOpList();
+
+		case USER_BOOL_PARAM_IN_IP_LIST :
+			return isInIpList();
+
+		case USER_BOOL_PARAM_HIDE :
+			return isHide();
+
+		default :
+			throw "Invalid key";
+
+	}
+}
+
+
+
+void DcUser::setBoolParam(unsigned int key, bool value) {
+	switch (key) {
+		case USER_BOOL_PARAM_CAN_KICK :
+			mCanKick = value;
+			break;
+
+		case USER_BOOL_PARAM_CAN_FORCE_MOVE :
+			mCanForceMove = value;
+			break;
+
+		case USER_BOOL_PARAM_IN_OP_LIST :
+			setInOpList(value);
+			break;
+
+		case USER_BOOL_PARAM_IN_IP_LIST :
+			setInIpList(value);
+			break;
+
+		case USER_BOOL_PARAM_HIDE :
+			setHide(value);
+			break;
+
+		default :
+			throw "Invalid key";
+
+	}
+}
+
+
+
+int DcUser::getIntParam(unsigned int key) const {
+	switch (key) {
+		case USER_INT_PARAM_PROFILE :
+			return getProfile();
+
+		case USER_INT_PARAM_PORT :
+			return getPort();
+
+		case USER_INT_PARAM_PORT_CONN :
+			return getPortConn();
+
+		default :
+			throw "Invalid key";
+
+	}
+}
+
+
+
+void DcUser::setIntParam(unsigned int key, int value) {
+	switch (key) {
+		case USER_BOOL_PARAM_CAN_KICK :
+			setProfile(value);
+			break;
+
+		default :
+			throw "Invalid key";
+
+	}
 }
 
 
@@ -195,13 +344,6 @@ void DcUser::setIp(const string & ip) {
 
 
 
-/// Get string of server ip (host)
-const string & DcUser::getIpConn() const{
-	return mDcConn->getIpConn();
-}
-
-
-
 /// Get real clients port
 int DcUser::getPort() const {
 	return mDcConn->getPort();
@@ -212,13 +354,6 @@ int DcUser::getPort() const {
 /// Get connection port
 int DcUser::getPortConn() const {
 	return mDcConn->getPortConn();
-}
-
-
-
-/// Get mac address
-const string & DcUser::getMacAddress() const {
-	return mDcConn->getMacAddress();
 }
 
 
@@ -335,18 +470,9 @@ void DcUser::setHide(bool hide) {
 
 
 bool DcUser::isPassive() const {
-	const string * mode = getParam(USER_PARAM_MODE);
+	const string * mode = static_cast<const string *> (getParam(USER_PARAM_MODE));
 	unsigned int passive = (mode != NULL && mode->size()) ? mode->operator [](0) : 0;
 	return passive == 80 || passive == 53 || passive == 83;
-}
-
-
-
-void DcUser::setSupports(const string & cmd) {
-	if (cmd.size() > 10) {
-		string & param = updateParam(USER_PARAM_SUPPORTS, "");
-		param.assign(cmd, 10, cmd.size() - 10);
-	}
 }
 
 
@@ -376,7 +502,7 @@ void DcUser::parseDesc(string & description) {
 	if (size) { // optimization
 		size_t i = description.find_last_of('<');
 		if (i != description.npos && description[--size] == '>') {
-			const string * oldTag = getParam(USER_PARAM_TAG);
+			const string * oldTag = static_cast<const string *> (getParam(USER_PARAM_TAG));
 			string & tag = updateParam(USER_PARAM_TAG, "");
 			++i;
 			tag.assign(description, i, size - i);
@@ -398,7 +524,7 @@ void DcUser::parseTag() {
 		}
 	#endif
 
-	const string & tag = *getParam(USER_PARAM_TAG);
+	const string & tag = *static_cast<const string *> (getParam(USER_PARAM_TAG));
 	size_t clientPos = tag.find(',');
 	size_t tagSize = tag.size();
 	if (clientPos == tag.npos) {

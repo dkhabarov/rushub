@@ -64,9 +64,20 @@ public:
 	virtual void send(const char * data, size_t len, bool addSep = false, bool flush = true);
 	virtual void disconnect();
 
-	virtual const string * getParam(unsigned int key) const;
+
+	virtual const void * getParam(unsigned int key) const;
 	virtual void setParam(unsigned int key, const char * value);
-	virtual void removeParam(unsigned int key);
+
+
+	virtual const string & getStringParam(unsigned int key) const;
+	virtual void setStringParam(unsigned int key, const string & value);
+	virtual void setStringParam(unsigned int key, const char * value);
+
+	virtual bool getBoolParam(unsigned int key) const;
+	virtual void setBoolParam(unsigned int key, bool value);
+
+	virtual int getIntParam(unsigned int key) const;
+	virtual void setIntParam(unsigned int key, int value);
 
 
 	virtual const string & getUid() const;
@@ -83,10 +94,8 @@ public:
 
 	virtual const string & getIp() const;
 	void setIp(const string & ip);
-	virtual const string & getIpConn() const;
 	virtual int getPort() const;
 	virtual int getPortConn() const;
-	virtual const string & getMacAddress() const;
 
 
 	virtual __int64 getShare() const;
@@ -112,8 +121,6 @@ public:
 	
 	bool isPassive() const;
 
-	void setSupports(const string & cmd); // NMDC
-
 	virtual long getConnectTime() const;
 
 private:
@@ -136,12 +143,18 @@ private:
 	string myInfo;
 	string mInf; // ADC
 	string mIp; ///< IP address of user/bot
+	string mData;
+	string mSupports; // NMDC
+	string mNmdcVersion; // NMDC
 
 	bool mInOpList; ///< User in op-list
 	bool mInIpList; ///< User in ip-list
 	bool mHide; ///< User was hide
 	bool mInUserList; ///< User in user-list
 	bool mCanSend; ///< Can send to user
+
+	bool mCanKick;
+	bool mCanForceMove;
 
 	__int64 mShare; ///< Share size
 

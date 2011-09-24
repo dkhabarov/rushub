@@ -370,9 +370,10 @@ int NmdcParser::checkCmd(NmdcParser & dcParser, const string & data, DcUserBase 
 		return -1;
 	}
 
+	const string & uid = dcUserBase->getStringParam(USER_STRING_PARAM_UID);
 	if (dcParser.mType == NMDC_TYPE_MYNIFO && (dcUserBase == NULL ||
-			dcUserBase->getUid().empty() ||
-			dcUserBase->getUid() != dcParser.chunkString(CHUNK_MI_NICK))
+			uid.empty() ||
+			uid != dcParser.chunkString(CHUNK_MI_NICK))
 	) {
 		return -2;
 	}

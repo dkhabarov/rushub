@@ -276,7 +276,10 @@ int NmdcProtocol::eventSupports(NmdcParser * dcparser, DcConn * dcConn) {
 			dcConn->mFeatures |= SUPPORT_FEATUER_QUICKLIST;
 		}
 	}
-	dcConn->mDcUser->setSupports(dcparser->mCommand);
+
+	if (dcparser->mCommand.size() > 10) {
+		dcConn->mDcUser->setStringParam(USER_STRING_PARAM_SUPPORTS, dcparser->mCommand);
+	}
 
 	#ifndef WITHOUT_PLUGINS
 		if (mDcServer->mCalls.mOnSupports.callAll(dcConn->mDcUser)) {
@@ -440,7 +443,7 @@ int NmdcProtocol::eventVersion(NmdcParser * dcparser, DcConn * dcConn) {
 	#endif
 
 	dcConn->setLoginStatusFlag(LOGIN_STATUS_VERSION); /** Version was checked */
-	dcConn->mDcUser->setParam(USER_PARAM_NMDC_VERSION, version.c_str());
+	dcConn->mDcUser->setStringParam(USER_STRING_PARAM_NMDC_VERSION, version);
 	return 0;
 }
 
@@ -912,7 +915,7 @@ int NmdcProtocol::eventKick(NmdcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	if (!dcConn->mDcUser->getParam(USER_PARAM_CAN_KICK)) {
+	if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_CAN_KICK)) {
 		return -2;
 	}
 
@@ -942,7 +945,7 @@ int NmdcProtocol::eventOpForceMove(NmdcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	if (!dcConn->mDcUser->getParam(USER_PARAM_CAN_FORCE_MOVE)) {
+	if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_CAN_FORCE_MOVE)) {
 		return -2;
 	}
 

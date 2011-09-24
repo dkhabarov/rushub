@@ -63,23 +63,44 @@ int Uid::uidToString(lua_State * L) {
 
 
 
-void Uid::pushStringOrNil(lua_State * L, DcUserBase * dcUserBase, unsigned long key) {
-	const string * param = dcUserBase->getParam(key);
-	if (param != NULL) {
-		lua_pushstring(L, (*param).c_str());
+void Uid::pushString(lua_State * L, DcUserBase * dcUserBase, unsigned long key, const char * def) {
+	const string & param = dcUserBase->getStringParam(key);
+	if (param.size() != 0) {
+		lua_pushstring(L, param.c_str());
 	} else {
-		lua_pushnil(L);
+		lua_pushstring(L, def);
 	}
 }
 
 
 
-void Uid::pushNumberOrNil(lua_State * L, DcUserBase * dcUserBase, unsigned long key) {
-	const string * param = dcUserBase->getParam(key);
-	if (param != NULL) {
-		lua_pushnumber(L, atof((*param).c_str()));
+void Uid::pushStringOrNil(lua_State * L, DcUserBase * dcUserBase, unsigned long key, bool userPapam /*= true*/) {
+	if (!userPapam) {
+		const string & param = dcUserBase->getStringParam(key);
+		lua_pushstring(L, param.c_str());
 	} else {
-		lua_pushnil(L);
+		const string * param = static_cast<const string *> (dcUserBase->getParam(key));
+		if (param != NULL) {
+			lua_pushstring(L, (*param).c_str());
+		} else {
+			lua_pushnil(L);
+		}
+	}
+}
+
+
+
+void Uid::pushNumberOrNil(lua_State * L, DcUserBase * dcUserBase, unsigned long key, bool userPapam /*= true*/) {
+	if (!userPapam) {
+		const string & param = dcUserBase->getStringParam(key);
+		lua_pushnumber(L, atof(param.c_str()));
+	} else {
+		const string * param = static_cast<const string *> (dcUserBase->getParam(key));
+		if (param != NULL) {
+			lua_pushnumber(L, atof((*param).c_str()));
+		} else {
+			lua_pushnil(L);
+		}
 	}
 }
 
@@ -103,15 +124,15 @@ int Uid::userIndex(lua_State * L) {
 	switch(getHash(str)) {
 
 		case PARAM_HASH_NICK :
-			lua_pushstring(L, dcUserBase->getUid().c_str());
+			lua_pushstring(L, dcUserBase->getStringParam(USER_STRING_PARAM_UID).c_str());
 			break;
 
 		case PARAM_HASH_IP :
-			lua_pushstring(L, dcUserBase->getIp().c_str()); // TODO refactoring
+			lua_pushstring(L, dcUserBase->getStringParam(USER_STRING_PARAM_IP).c_str());
 			break;
 
 		case PARAM_HASH_PROFILE :
-			lua_pushnumber(L, dcUserBase->getProfile());
+			lua_pushnumber(L, dcUserBase->getIntParam(USER_INT_PARAM_PROFILE));
 			break;
 
 		case PARAM_HASH_MYINFO :
@@ -191,55 +212,55 @@ int Uid::userIndex(lua_State * L) {
 			break;
 
 		case PARAM_HASH_INOPLIST :
-			lua_pushboolean(L, dcUserBase->isInOpList() ? 1 : 0);
+			lua_pushboolean(L, dcUserBase->getBoolParam(USER_BOOL_PARAM_IN_OP_LIST) ? 1 : 0);
 			break;
 
 		case PARAM_HASH_INIPLIST :
-			lua_pushboolean(L, dcUserBase->isInIpList() ? 1 : 0);
+			lua_pushboolean(L, dcUserBase->getBoolParam(USER_BOOL_PARAM_IN_IP_LIST) ? 1 : 0);
 			break;
 
 		case PARAM_HASH_INUSERLIST :
-			lua_pushboolean(L, dcUserBase->isInUserList() ? 1 : 0);
+			lua_pushboolean(L, dcUserBase->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST) ? 1 : 0);
 			break;
 
 		case PARAM_HASH_KICK :
-			lua_pushboolean(L, dcUserBase->getParam(USER_PARAM_CAN_KICK) ? 1 : 0);
+			lua_pushboolean(L, dcUserBase->getBoolParam(USER_BOOL_PARAM_CAN_KICK) ? 1 : 0);
 			break;
 
 		case PARAM_HASH_REDIRECT :
-			lua_pushboolean(L, dcUserBase->getParam(USER_PARAM_CAN_FORCE_MOVE) ? 1 : 0);
+			lua_pushboolean(L, dcUserBase->getBoolParam(USER_BOOL_PARAM_CAN_FORCE_MOVE) ? 1 : 0);
 			break;
 
 		case PARAM_HASH_HIDE :
-			lua_pushboolean(L, dcUserBase->isHide() ? 1 : 0);
+			lua_pushboolean(L, dcUserBase->getBoolParam(USER_BOOL_PARAM_HIDE) ? 1 : 0);
 			break;
 
 		case PARAM_HASH_PORT :
-			lua_pushnumber(L, dcUserBase->getPort()); // TODO refactoring
+			lua_pushnumber(L, dcUserBase->getIntParam(USER_INT_PARAM_PORT)); // TODO refactoring
 			break;
 
 		case PARAM_HASH_PORTCONN :
-			lua_pushnumber(L, dcUserBase->getPortConn()); // TODO refactoring
+			lua_pushnumber(L, dcUserBase->getIntParam(USER_INT_PARAM_PORT_CONN)); // TODO refactoring
 			break;
 
 		case PARAM_HASH_IPCONN :
-			lua_pushstring(L, dcUserBase->getIpConn().c_str()); // TODO refactoring
+			lua_pushstring(L, dcUserBase->getStringParam(USER_STRING_PARAM_IP_CONN).c_str());
 			break;
 
 		case PARAM_HASH_MACADDRESS :
-			lua_pushstring(L, dcUserBase->getMacAddress().size() ? dcUserBase->getMacAddress().c_str() : "n/a"); // TODO refactoring
+			pushString(L, dcUserBase, USER_STRING_PARAM_MAC_ADDRESS, "n/a");
 			break;
 
 		case PARAM_HASH_SUPPORTS :
-			pushStringOrNil(L, dcUserBase, USER_PARAM_SUPPORTS);
+			pushStringOrNil(L, dcUserBase, USER_STRING_PARAM_SUPPORTS, false);
 			break;
 
 		case PARAM_HASH_VERSION :
-			pushStringOrNil(L, dcUserBase, USER_PARAM_NMDC_VERSION);
+			pushStringOrNil(L, dcUserBase, USER_STRING_PARAM_NMDC_VERSION, false);
 			break;
 
 		case PARAM_HASH_DATA :
-			pushStringOrNil(L, dcUserBase, USER_PARAM_DATA);
+			pushStringOrNil(L, dcUserBase, USER_STRING_PARAM_DATA, false);
 			break;
 
 		case PARAM_HASH_ENTERTIME :
@@ -280,7 +301,7 @@ int Uid::userNewIndex(lua_State * L) {
 	switch(getHash(s)) {
 
 		case PARAM_HASH_PROFILE :
-			dcUserBase->setProfile(luaL_checkint(L, 3));
+			dcUserBase->setIntParam(USER_INT_PARAM_PROFILE, luaL_checkint(L, 3));
 			break;
 
 		case PARAM_HASH_MYINFO :
@@ -295,43 +316,35 @@ int Uid::userNewIndex(lua_State * L) {
 			if (lua_type(L, 3) != LUA_TBOOLEAN) {
 				ERR_TYPEMETA(3, "UID", "boolean");
 			}
-			dcUserBase->setInOpList(lua_toboolean(L, 3) != 0);
+			dcUserBase->setBoolParam(USER_BOOL_PARAM_IN_OP_LIST, lua_toboolean(L, 3) != 0);
 			break;
 
 		case PARAM_HASH_INIPLIST :
 			if (lua_type(L, 3) != LUA_TBOOLEAN) {
 				ERR_TYPEMETA(3, "UID", "boolean");
 			}
-			dcUserBase->setInIpList(lua_toboolean(L, 3) != 0);
+			dcUserBase->setBoolParam(USER_BOOL_PARAM_IN_IP_LIST, lua_toboolean(L, 3) != 0);
 			break;
 
 		case PARAM_HASH_HIDE :
 			if (lua_type(L, 3) != LUA_TBOOLEAN) {
 				ERR_TYPEMETA(3, "UID", "boolean");
 			}
-			dcUserBase->setHide(lua_toboolean(L, 3) != 0);
+			dcUserBase->setBoolParam(USER_BOOL_PARAM_HIDE, lua_toboolean(L, 3) != 0);
 			break;
 
 		case PARAM_HASH_KICK :
 			if (lua_type(L, 3) != LUA_TBOOLEAN) {
 				ERR_TYPEMETA(3, "UID", "boolean");
 			}
-			if (lua_toboolean(L, 3) != 0) {
-				dcUserBase->setParam(USER_PARAM_CAN_KICK, "1");
-			} else {
-				dcUserBase->removeParam(USER_PARAM_CAN_KICK);
-			}
+			dcUserBase->setBoolParam(USER_BOOL_PARAM_CAN_KICK, lua_toboolean(L, 3) != 0 ? "1" : NULL);
 			break;
 
 		case PARAM_HASH_REDIRECT :
 			if (lua_type(L, 3) != LUA_TBOOLEAN) {
 				ERR_TYPEMETA(3, "UID", "boolean");
 			}
-			if (lua_toboolean(L, 3) != 0) {
-				dcUserBase->setParam(USER_PARAM_CAN_FORCE_MOVE, "1");
-			} else {
-				dcUserBase->removeParam(USER_PARAM_CAN_FORCE_MOVE);
-			}
+			dcUserBase->setBoolParam(USER_BOOL_PARAM_CAN_FORCE_MOVE, lua_toboolean(L, 3) != 0 ? "1" : NULL);
 			break;
 
 		case PARAM_HASH_DATA :
@@ -339,7 +352,7 @@ int Uid::userNewIndex(lua_State * L) {
 			if (!s) {
 				ERR_TYPEMETA(3, "UID", "string");
 			}
-			dcUserBase->setParam(USER_PARAM_DATA, s);
+			dcUserBase->setStringParam(USER_STRING_PARAM_DATA, s);
 			break;
 
 		default :

@@ -73,7 +73,7 @@ using namespace ::std;
 
 /// Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10027
+	#define INTERNAL_PLUGIN_VERSION 10028
 #endif
 
 /// NMDC protocol separator
@@ -105,7 +105,7 @@ enum ClientType {
 
 
 enum UserParam {
-	USER_PARAM_DESC = 1,
+	USER_PARAM_DESC = 0,
 	USER_PARAM_EMAIL,
 	USER_PARAM_CONNECTION,
 	USER_PARAM_BYTE,
@@ -121,14 +121,36 @@ enum UserParam {
 	USER_PARAM_BANDWIDTH,
 	USER_PARAM_DOWNLOAD,
 	USER_PARAM_FRACTION,
-	USER_PARAM_MODE,
-	USER_PARAM_DATA,
-	USER_PARAM_SUPPORTS,
-	USER_PARAM_NMDC_VERSION,
-	USER_PARAM_CAN_KICK,
-	USER_PARAM_CAN_FORCE_MOVE,
-	USER_PARAM_PROFILE
+	USER_PARAM_MODE
 }; // enum UserParam
+
+
+enum UserStringParam {
+	USER_STRING_PARAM_DATA = 0,
+	USER_STRING_PARAM_SUPPORTS,
+	USER_STRING_PARAM_NMDC_VERSION,
+	USER_STRING_PARAM_MAC_ADDRESS,
+	USER_STRING_PARAM_IP,
+	USER_STRING_PARAM_IP_CONN,
+	USER_STRING_PARAM_UID
+}; // enum UserStringParam
+
+
+enum UserBoolParam {
+	USER_BOOL_PARAM_CAN_KICK = 0,
+	USER_BOOL_PARAM_CAN_FORCE_MOVE,
+	USER_BOOL_PARAM_IN_USER_LIST,
+	USER_BOOL_PARAM_IN_OP_LIST,
+	USER_BOOL_PARAM_IN_IP_LIST,
+	USER_BOOL_PARAM_HIDE
+}; // enum UserBoolParam
+
+
+enum UserIntParam {
+	USER_INT_PARAM_PROFILE = 0,
+	USER_INT_PARAM_PORT,
+	USER_INT_PARAM_PORT_CONN
+}; // enum UserBoolParam
 
 
 
@@ -143,28 +165,31 @@ class DcUserBase {
 
 public:
 
-	/// Connection
-	DcConnBase * mDcConnBase;
+	DcConnBase * mDcConnBase; /// Connection
 
 public:
 
 	virtual ~DcUserBase() {
 	}
 
-	virtual const string * getParam(unsigned int key) const = 0;
+	virtual const void * getParam(unsigned int key) const = 0;
 	virtual void setParam(unsigned int key, const char * value) = 0;
-	virtual void removeParam(unsigned int key) = 0;
+
+	virtual const string & getStringParam(unsigned int key) const = 0;
+	virtual void setStringParam(unsigned int key, const string & value) = 0;
+	virtual void setStringParam(unsigned int key, const char * value) = 0;
+
+	virtual bool getBoolParam(unsigned int key) const = 0;
+	virtual void setBoolParam(unsigned int key, bool value) = 0;
+
+	virtual int getIntParam(unsigned int key) const = 0;
+	virtual void setIntParam(unsigned int key, int value) = 0;
 
 	/// Disconnect this client
 	virtual void disconnect() = 0;
 
-
-	/// Get user's uid (UserID/nick)
-	virtual const string & getUid() const = 0;
-
 	/// Get user's share size
 	virtual __int64 getShare() const = 0;
-
 
 	/// Get user's Info string
 	virtual const string & getInfo() const = 0;
@@ -172,56 +197,8 @@ public:
 	/// Set user's MyINFO cmd
 	virtual bool setInfo(const string & myInfo) = 0;
 
-
-	/// User in user-list
-	virtual bool isInUserList() const = 0;
-
-
-	/// User in op-list (has op-key)
-	virtual bool isInOpList() const = 0;
-
-	/// Add user in op-list
-	virtual void setInOpList(bool) = 0;
-
-
-	/// User in ip-list (can receive ip addresses of users)
-	virtual bool isInIpList() const = 0;
-
-	/// Add user in ip-list
-	virtual void setInIpList(bool) = 0;
-
-
-	/// User is hidden
-	virtual bool isHide() const = 0;
-
-	/// Hide the user
-	virtual void setHide(bool) = 0;
-
-
-	/// Get user's profile
-	virtual int getProfile() const = 0;
-
-	/// Set client profile
-	virtual void setProfile(int) = 0;
-
-
-	/// Get string with IP
-	virtual const string & getIp() const = 0;
-
-	/// Get string of server ip (host)
-	virtual const string & getIpConn() const = 0;
-
 	/// Get enter time (in unix time sec)
 	virtual long getConnectTime() const = 0;
-
-	/// Get real clients port
-	virtual int getPort() const = 0;
-
-	/// Get connection port
-	virtual int getPortConn() const = 0;
-
-	/// Get mac address
-	virtual const string & getMacAddress() const = 0;
 
 }; // class DcUserBase
 

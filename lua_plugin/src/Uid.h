@@ -84,8 +84,9 @@ private:
 	static int userIndex(lua_State *);
 	static int userNewIndex(lua_State *);
 
-	static void pushStringOrNil(lua_State *, DcUserBase *, unsigned long key);
-	static void pushNumberOrNil(lua_State *, DcUserBase *, unsigned long key);
+	static void pushString(lua_State *, DcUserBase *, unsigned long key, const char * def = "");
+	static void pushStringOrNil(lua_State *, DcUserBase *, unsigned long key, bool userPapam = true);
+	static void pushNumberOrNil(lua_State *, DcUserBase *, unsigned long key, bool userPapam = true);
 
 	static unsigned int getHash(const char *);
 
