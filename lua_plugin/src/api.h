@@ -156,6 +156,9 @@ int setHubState(lua_State * L);
 // Redirect(UID/sNick, sAddress, [sReason])
 int redirect(lua_State * L);
 
+// preg_match(sSubject, sPattern, [iFlags, [iOffset]])
+int pregMatch(lua_State * L);
+
 
 }; // namespace luaplugin
 

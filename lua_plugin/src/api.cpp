@@ -27,6 +27,9 @@
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
 		#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
 	#endif
+	#include "pcre/pcre.h"
+#else
+	#include <pcre.h>
 #endif
 
 using namespace ::std;
@@ -42,6 +45,8 @@ enum {
 static const int maxTimers = 100; // max count timers per script
 static const size_t redirectReasonMaxLen = 1024;
 static const size_t redirectAddressMaxLen = 128;
+static const size_t regExpPatternMaxLen = 1024;
+static const size_t regExpSubjectMaxLen = 1024000;
 
 
 namespace luaplugin {
@@ -1463,6 +1468,59 @@ int setHubState(lua_State * L) {
 		}
 	}
 	return 0;
+}
+
+
+
+/// preg_match(sSubject, sPattern, [iFlags, [iOffset]])
+int pregMatch(lua_State * L) {
+	int top = lua_gettop(L);
+	if (top < 2 || top > 4) {
+		return LuaUtils::errCount(L, "2, 3 or 4");
+	}
+
+	size_t len;
+	const char * pattern = luaL_checklstring(L, 2, &len);
+	if (len > regExpPatternMaxLen) {
+		lua_settop(L, 0);
+		lua_pushnil(L);
+		lua_pushliteral(L, "very long regexp pattern");
+		return 2;
+	}
+
+	int erroffset;
+	const char * error = NULL;
+
+	pcre * re = pcre_compile(pattern, (top > 2) ? luaL_checkint(L, 3) : 0, &error, &erroffset, NULL);
+	if (re == NULL) {
+		return LuaUtils::pushError(L, error);
+	} else {
+
+		const char * subject = luaL_checklstring(L, 1, &len);
+		if (len > regExpSubjectMaxLen) {
+			lua_settop(L, 0);
+			lua_pushnil(L);
+			lua_pushliteral(L, "very long regexp subject");
+			return 2;
+		}
+		int ovector[90];
+		int count = pcre_exec(re, NULL, subject, len, ((top == 4) ? luaL_checkint(L, 4) : 0), 0, ovector, 90);
+		free(re);
+
+		lua_settop(L, 0);
+
+		if (count > 0) {
+			for (int c = 0; c < 2 * count; c += 2) {
+				if (ovector[c] < 0) {
+					lua_pushnil(L);
+				} else {
+					lua_pushlstring(L, subject + ovector[c], ovector[c + 1] - ovector[c]);
+				}
+			}
+			return count;
+		}
+		return 0;
+	}
 }
 
 

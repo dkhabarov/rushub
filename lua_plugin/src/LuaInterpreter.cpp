@@ -146,6 +146,14 @@ int LuaInterpreter::start() {
 
 	lua_setglobal(mL, "Core");
 
+	// Reg preg_match
+	lua_getglobal(mL, "string");
+	if (lua_istable(mL, -1)) {
+		regFunc("preg_match", &pregMatch);
+	}
+	lua_settop(mL, 0);
+
+
 	// Creating Config metatable
 	LuaPlugin::mCurLua->mHubConfig.createMetaTable(mL);
 
