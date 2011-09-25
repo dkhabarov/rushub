@@ -36,8 +36,7 @@ DcUser::DcUser() :
 	mInIpList(false),
 	mHide(false),
 	mInUserList(false),
-	mCanSend(false),
-	mShare(0)
+	mCanSend(false)
 {
 	mDcConnBase = NULL;
 }
@@ -292,9 +291,9 @@ bool DcUser::setInfo(NmdcParser * parser) {
 	if (myInfo != parser->mCommand) {
 		myInfo = parser->mCommand;
 
-		mDcServer->miTotalShare -= mShare;
-		mShare = stringToInt64(parser->chunkString(CHUNK_MI_SIZE));
-		mDcServer->miTotalShare += mShare;
+		mDcServer->miTotalShare -= stringToInt64(getParam(USER_PARAM_SHARE));
+		string & newShare = updateParam(USER_PARAM_SHARE, parser->chunkString(CHUNK_MI_SIZE));
+		mDcServer->miTotalShare += stringToInt64(newShare);
 
 		updateParam(USER_PARAM_EMAIL, parser->chunkString(CHUNK_MI_MAIL).c_str());
 
@@ -354,13 +353,6 @@ int DcUser::getPort() const {
 /// Get connection port
 int DcUser::getPortConn() const {
 	return mDcConn->getPortConn();
-}
-
-
-
-/** Get share (for plugins) */
-__int64 DcUser::getShare() const {
-	return mShare;
 }
 
 

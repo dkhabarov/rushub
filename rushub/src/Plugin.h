@@ -121,7 +121,8 @@ enum UserParam {
 	USER_PARAM_BANDWIDTH,
 	USER_PARAM_DOWNLOAD,
 	USER_PARAM_FRACTION,
-	USER_PARAM_MODE
+	USER_PARAM_MODE,
+	USER_PARAM_SHARE
 }; // enum UserParam
 
 
@@ -187,9 +188,6 @@ public:
 
 	/// Disconnect this client
 	virtual void disconnect() = 0;
-
-	/// Get user's share size
-	virtual __int64 getShare() const = 0;
 
 	/// Get user's Info string
 	virtual const string & getInfo() const = 0;

@@ -140,7 +140,7 @@ int Uid::userIndex(lua_State * L) {
 			break;
 
 		case PARAM_HASH_SHARE :
-			lua_pushnumber(L, (double) dcUserBase->getShare());
+			lua_pushnumber(L, (double) stringToInt64(dcUserBase->getParam(USER_PARAM_SHARE)));
 			break;
 
 		case PARAM_HASH_MODE :

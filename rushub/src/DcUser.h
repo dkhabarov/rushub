@@ -98,9 +98,6 @@ public:
 	virtual int getPortConn() const;
 
 
-	virtual __int64 getShare() const;
-
-
 	virtual int getProfile() const;
 	virtual void setProfile(int profile);
 
@@ -155,8 +152,6 @@ private:
 
 	bool mCanKick;
 	bool mCanForceMove;
-
-	__int64 mShare; ///< Share size
 
 }; // DcUser
 
