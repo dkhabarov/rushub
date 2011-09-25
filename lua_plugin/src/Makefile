@@ -19,13 +19,13 @@ all: debian
 linux-static: freebsd
 
 freebsd: $(OBJS)
-	$(CXX) -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/tinyxml.a /usr/local/lib/liblua.a /usr/lib/libpcre.a
+	$(CXX) -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/tinyxml.a /usr/local/lib/liblua.a
 
 debian: $(OBJS)
-	$(CXX) -llua5.1 -lpcre -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/tinyxml.a
+	$(CXX) -llua5.1 -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/tinyxml.a
 
 linux: $(OBJS)
-	$(CXX) -llua -lpcre -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/tinyxml.a
+	$(CXX) -llua -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/tinyxml.a
 
 $(CURDIR)/api.o: $(CURDIR)/api.cpp $(CURDIR)/api.h $(CURDIR)/List.h $(CURDIR)/TimerList.h $(CURDIR)/LuaInterpreter.h $(CURDIR)/TaskList.h $(CURDIR)/HubConfig.h $(CURDIR)/LuaPlugin.h $(CURDIR)/Uid.h $(CURDIR)/LuaUtils.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
