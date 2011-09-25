@@ -78,7 +78,7 @@ void DcUser::disconnect() {
 
 
 
-const void * DcUser::getParam(unsigned int key) const {
+const string * DcUser::getParam(unsigned int key) const {
 	return mParams.find(key);
 }
 
@@ -291,8 +291,11 @@ bool DcUser::setInfo(NmdcParser * parser) {
 	if (myInfo != parser->mCommand) {
 		myInfo = parser->mCommand;
 
-		mDcServer->miTotalShare -= stringToInt64(getParam(USER_PARAM_SHARE));
-		string & newShare = updateParam(USER_PARAM_SHARE, parser->chunkString(CHUNK_MI_SIZE));
+		const string * oldShare = getParam(USER_PARAM_SHARE);
+		if (oldShare != NULL) {
+			mDcServer->miTotalShare -= stringToInt64(*oldShare);
+		}
+		string & newShare = updateParam(USER_PARAM_SHARE, parser->chunkString(CHUNK_MI_SIZE).c_str());
 		mDcServer->miTotalShare += stringToInt64(newShare);
 
 		updateParam(USER_PARAM_EMAIL, parser->chunkString(CHUNK_MI_MAIL).c_str());
@@ -462,7 +465,7 @@ void DcUser::setHide(bool hide) {
 
 
 bool DcUser::isPassive() const {
-	const string * mode = static_cast<const string *> (getParam(USER_PARAM_MODE));
+	const string * mode = getParam(USER_PARAM_MODE);
 	unsigned int passive = (mode != NULL && mode->size()) ? mode->operator [](0) : 0;
 	return passive == 80 || passive == 53 || passive == 83;
 }
@@ -494,7 +497,7 @@ void DcUser::parseDesc(string & description) {
 	if (size) { // optimization
 		size_t i = description.find_last_of('<');
 		if (i != description.npos && description[--size] == '>') {
-			const string * oldTag = static_cast<const string *> (getParam(USER_PARAM_TAG));
+			const string * oldTag = getParam(USER_PARAM_TAG);
 			string & tag = updateParam(USER_PARAM_TAG, "");
 			++i;
 			tag.assign(description, i, size - i);
@@ -516,7 +519,7 @@ void DcUser::parseTag() {
 		}
 	#endif
 
-	const string & tag = *static_cast<const string *> (getParam(USER_PARAM_TAG));
+	const string & tag = *getParam(USER_PARAM_TAG);
 	size_t clientPos = tag.find(',');
 	size_t tagSize = tag.size();
 	if (clientPos == tag.npos) {

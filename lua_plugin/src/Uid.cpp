@@ -79,7 +79,7 @@ void Uid::pushStringOrNil(lua_State * L, DcUserBase * dcUserBase, unsigned long 
 		const string & param = dcUserBase->getStringParam(key);
 		lua_pushstring(L, param.c_str());
 	} else {
-		const string * param = static_cast<const string *> (dcUserBase->getParam(key));
+		const string * param = dcUserBase->getParam(key);
 		if (param != NULL) {
 			lua_pushstring(L, (*param).c_str());
 		} else {
@@ -95,7 +95,7 @@ void Uid::pushNumberOrNil(lua_State * L, DcUserBase * dcUserBase, unsigned long 
 		const string & param = dcUserBase->getStringParam(key);
 		lua_pushnumber(L, atof(param.c_str()));
 	} else {
-		const string * param = static_cast<const string *> (dcUserBase->getParam(key));
+		const string * param = dcUserBase->getParam(key);
 		if (param != NULL) {
 			lua_pushnumber(L, atof((*param).c_str()));
 		} else {
@@ -140,7 +140,7 @@ int Uid::userIndex(lua_State * L) {
 			break;
 
 		case PARAM_HASH_SHARE :
-			lua_pushnumber(L, (double) stringToInt64(dcUserBase->getParam(USER_PARAM_SHARE)));
+			pushNumberOrNil(L, dcUserBase, USER_PARAM_SHARE);
 			break;
 
 		case PARAM_HASH_MODE :

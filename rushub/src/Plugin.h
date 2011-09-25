@@ -173,7 +173,7 @@ public:
 	virtual ~DcUserBase() {
 	}
 
-	virtual const void * getParam(unsigned int key) const = 0;
+	virtual const string * getParam(unsigned int key) const = 0;
 	virtual void setParam(unsigned int key, const char * value) = 0;
 
 	virtual const string & getStringParam(unsigned int key) const = 0;

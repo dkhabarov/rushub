@@ -65,7 +65,7 @@ public:
 	virtual void disconnect();
 
 
-	virtual const void * getParam(unsigned int key) const;
+	virtual const string * getParam(unsigned int key) const;
 	virtual void setParam(unsigned int key, const char * value);
 
 
