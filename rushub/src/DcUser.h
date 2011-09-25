@@ -85,7 +85,7 @@ public:
 	unsigned long getUidHash() const;
 
 
-	virtual const string & getInfo() const;
+	virtual const string & getInfo();
 	virtual bool setInfo(const string & myInfo);
 	bool setInfo(NmdcParser * parser);
 
@@ -129,6 +129,9 @@ private:
 	void parseTag();
 	void findParam(const string & tag, const char * find, unsigned long key);
 
+	void collectInfo();
+	void appendParam(string & dst, const char * prefix, unsigned long key);
+
 private:
 
 	string mUid; ///< UserID
@@ -152,6 +155,7 @@ private:
 
 	bool mCanKick;
 	bool mCanForceMove;
+	bool mCollectInfo;
 
 }; // DcUser
 

@@ -190,7 +190,7 @@ public:
 	virtual void disconnect() = 0;
 
 	/// Get user's Info string
-	virtual const string & getInfo() const = 0;
+	virtual const string & getInfo() = 0;
 
 	/// Set user's MyINFO cmd
 	virtual bool setInfo(const string & myInfo) = 0;

@@ -32,7 +32,7 @@ class UserBase {
 public:
 
 	virtual const string & getUid() const = 0;
-	virtual const string & getInfo() const = 0;
+	virtual const string & getInfo() = 0;
 	virtual const string & getInf() const = 0;
 	virtual const string & getIp() const = 0;
 	virtual int getProfile() const = 0;
