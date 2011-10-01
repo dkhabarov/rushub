@@ -104,17 +104,7 @@ public:
 	virtual bool isCanSend() const;
 	void setCanSend(bool canSend);
 
-	bool isInUserList() const;
-	void setInUserList(bool);
-
-	bool isInOpList() const;
-	void setInOpList(bool inOpList);
-
-	bool isInIpList() const;
-	void setInIpList(bool inIpList);
-
 	virtual bool isHide() const;
-	void setHide(bool hide);
 	
 	bool isPassive() const;
 
@@ -131,6 +121,18 @@ private:
 
 	void collectInfo();
 	void appendParam(string & dst, const char * prefix, unsigned long key);
+
+
+	bool isInUserList() const;
+	void setInUserList(bool);
+
+	bool isInOpList() const;
+	void setInOpList(bool inOpList);
+
+	bool isInIpList() const;
+	void setInIpList(bool inIpList);
+
+	void setHide(bool hide);
 
 private:
 
