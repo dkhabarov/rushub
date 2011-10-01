@@ -93,11 +93,11 @@ DcServer::DcServer(const string & configFile, const string &) :
 {
 	setClassName("DcServer");
 
-	// Put some capabilities
-	setCapabilities();
-
 	// Current server
 	currentDcServer = this;
+
+	// Put some capabilities
+	setCapabilities();
 
 	// Define OS
 	if (mSysVersion.empty()) {
