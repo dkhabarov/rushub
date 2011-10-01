@@ -110,7 +110,13 @@ public:
 	string mPluginPath;         ///< Plugin path
 	string mLangPath;           ///< Langage path
 	string mLang;               ///< Langage
-	
+
+	// Put some net functions
+	#ifndef _WIN32
+		string mUser;
+		string mGroup;
+	#endif
+	// End of injection
 
 public:
 

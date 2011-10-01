@@ -79,6 +79,19 @@ DcServer::DcServer(const string & configFile, const string &) :
 	mIpEnterFlood(mDcConfig.mFloodCountReconnIp, mDcConfig.mFloodTimeReconnIp),
 	mCalls(&mPluginList)
 {
+	// Put some capabilities code here
+	#ifndef _WIN32
+		if (setcapabilities(mDcConfig.mUser, mDcConfig.mGroup)) {
+			if (log(0)) {
+				logStream() << "Capabilities set complete!" << endl;
+			}
+		} else {
+			if (log(0)) {
+				logStream() << "Capabilities failed!" << endl;
+			}
+		}
+	#endif
+	// End of injection
 	setClassName("DcServer");
 
 	// Current server

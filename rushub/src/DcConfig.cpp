@@ -81,7 +81,7 @@ void DcConfig::addVars(Server * server) {
 		mFloodTime[i] = 0;
 		mFloodTime2[i] = 0;
 	}
-	
+
 	add("iFloodCountReconnIp",    mFloodCountReconnIp,                  1     );
 	add("iFloodCountMyINFO",      mFloodCount [NMDC_TYPE_MYNIFO],       6     );
 	add("iFloodCountMyINFO2",     mFloodCount2[NMDC_TYPE_MYNIFO],       30    );
@@ -237,8 +237,15 @@ void DcConfig::addVars(Server * server) {
 
 	add("sUDPAddresses",          mUdpAddresses,                        "0.0.0.0:1209");
 	add("bUDPServer",             mUdpServer,                           false);
-	
+
 	add("bAdcOn",                 mAdcOn,                               false);
+
+	// Put some new options
+	#ifndef _WIN32
+		add("sUser",		      mUser,				    "root");
+		add("sGroup",		      mGroup,				    "root");
+	#endif
+	// End of injection!
 
 	add("sLocale",                mLocale,                              setlocale(LC_ALL, ""));
 	add("sMainBotIP",             mMainBotIp,                           "127.0.0.1");
