@@ -240,12 +240,8 @@ void DcConfig::addVars(Server * server) {
 
 	add("bAdcOn",                 mAdcOn,                               false);
 
-	// Put some new options
-	#ifndef _WIN32
-		add("sUser",		      mUser,				    "root");
-		add("sGroup",		      mGroup,				    "root");
-	#endif
-	// End of injection!
+	add("sGroupName",             mUserName,                            "root");
+	add("sUserName",              mUserName,                            "root");
 
 	add("sLocale",                mLocale,                              setlocale(LC_ALL, ""));
 	add("sMainBotIP",             mMainBotIp,                           "127.0.0.1");

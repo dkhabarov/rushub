@@ -111,12 +111,8 @@ public:
 	string mLangPath;           ///< Langage path
 	string mLang;               ///< Langage
 
-	// Put some net functions
-	#ifndef _WIN32
-		string mUser;
-		string mGroup;
-	#endif
-	// End of injection
+	string mUserName;           ///< OS user name
+	string mGroupName;          ///< OS group name
 
 public:
 

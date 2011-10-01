@@ -27,12 +27,24 @@
 
 #include <string.h>
 
+
 #ifdef _WIN32
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
 		#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
 	#endif
 #else
 	#include <sys/utsname.h> // for utsname
+
+	// capability
+	#define HAVE_CAPABILITY 1
+
+	#if HAVE_CAPABILITY
+		#include <grp.h>
+		#include <pwd.h>
+		#include <stdarg.h>
+		#include <sys/capability.h>
+		#include <sys/prctl.h>
+	#endif // HAVE_CAPABILITY
 #endif
 
 
@@ -79,19 +91,9 @@ DcServer::DcServer(const string & configFile, const string &) :
 	mIpEnterFlood(mDcConfig.mFloodCountReconnIp, mDcConfig.mFloodTimeReconnIp),
 	mCalls(&mPluginList)
 {
-	// Put some capabilities code here
-	#ifndef _WIN32
-		if (setcapabilities(mDcConfig.mUser, mDcConfig.mGroup)) {
-			if (log(0)) {
-				logStream() << "Capabilities set complete!" << endl;
-			}
-		} else {
-			if (log(0)) {
-				logStream() << "Capabilities failed!" << endl;
-			}
-		}
-	#endif
-	// End of injection
+	// Put some capabilities
+	setCapabilities();
+
 	setClassName("DcServer");
 
 	// Current server
@@ -1353,9 +1355,10 @@ void DcServer::getNormalShare(__int64 share, string & normalShare) {
 
 
 
+string DcServer::getSysVersion() {
+
 #ifdef _WIN32
 
-string DcServer::getSysVersion() {
 	OSVERSIONINFOEX osvi;
 	int osVersionInfoEx;
 
@@ -1503,12 +1506,10 @@ string DcServer::getSysVersion() {
 		default :
 			break;
 	}
-	return version; 
-}
+	return version;
 
 #else
 
-string DcServer::getSysVersion() {
 	utsname osname;
 	if (uname(&osname) == 0) {
 		string version(osname.sysname);
@@ -1520,9 +1521,95 @@ string DcServer::getSysVersion() {
 		return version;
 	}
 	return "unknown";
-}
 
 #endif
+
+}
+
+
+
+bool DcServer::setCapabilities() {
+
+#if (!defined _WIN32) && HAVE_CAPABILITY
+
+	struct passwd * user = getpwnam(mDcConfig.mUserName.c_str());
+
+	if(user) {
+		// Keep capabilities across UID change
+		if(prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0) != 0) {
+			if (log(0)) {
+				logStream() << "prctl(PR_SET_KEEPCAPS) failed" << endl;
+			}
+			return false;
+		}
+
+		// Change supplementary groups
+		if(initgroups(user->pw_name, user->pw_gid) != 0) {
+			if (log(0)) {
+				logStream() << "initgroups() for user " << user->pw_name << " failed"<< endl;
+			}
+			return false;
+		}
+
+		// Change GID
+		if(setgid(user->pw_gid) != 0) {
+			if (log(0)) {
+				logStream() << "Cannot set GID to " << user->pw_gid << endl;
+			}
+			return false;
+		}
+
+		// Change UID
+		if(setuid(user->pw_uid) != 0) {
+			if (log(0)) {
+				logStream() << "Cannot set UID to " << user->pw_uid << endl;
+			}
+			return false;
+		}
+	}
+
+	// Check capability to bind privileged ports
+	cap_t caps = cap_get_proc();
+	if(!caps) {
+		if (log(0)) {
+			logStream() << "cap_get_proc() failed to get capabilities" << endl;
+		}
+		return false;
+	}
+
+	cap_flag_value_t nbs_flag;
+	if(cap_get_flag(caps, CAP_NET_BIND_SERVICE, CAP_PERMITTED, &nbs_flag) != 0) {
+		if (log(0)) {
+			logStream() << "cap_get_flag() failed to get CAP_NET_BIND_SERVICE state" << endl;
+		}
+		cap_free(caps);
+		return false;
+	}
+
+	// Drop all capabilities except privileged ports binding
+	caps = cap_from_text(nbs_flag == CAP_SET ? "cap_net_bind_service=ep" : "=");
+	if(!caps) {
+		if (log(0)) {
+			logStream() << "cap_from_text() failed to parse capabilities string" << endl;
+		}
+		return false;
+	}
+
+	if(cap_set_proc(caps) != 0) {
+		if (log(0)) {
+			logStream() << "cap_set_proc() failed to set capabilities" << endl;
+		}
+		cap_free(caps);
+		return false;
+	}
+	cap_free(caps);
+
+#endif
+
+	return true;
+
+}
+
 
 }; // namespace dcserver
 

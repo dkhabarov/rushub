@@ -343,6 +343,8 @@ private:
 
 	static string getSysVersion();
 
+	bool setCapabilities();
+
 	struct PluginCallList {
 
 		PluginCallList(PluginList * pluginList) :
