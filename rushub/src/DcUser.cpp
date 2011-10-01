@@ -194,6 +194,10 @@ void DcUser::setBoolParam(unsigned int key, bool value) {
 			mCanForceMove = value;
 			break;
 
+		case USER_BOOL_PARAM_IN_USER_LIST :
+			setInUserList(value);
+			break;
+
 		case USER_BOOL_PARAM_IN_OP_LIST :
 			setInOpList(value);
 			break;
