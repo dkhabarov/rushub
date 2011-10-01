@@ -91,10 +91,10 @@ DcServer::DcServer(const string & configFile, const string &) :
 	mIpEnterFlood(mDcConfig.mFloodCountReconnIp, mDcConfig.mFloodTimeReconnIp),
 	mCalls(&mPluginList)
 {
+	setClassName("DcServer");
+
 	// Put some capabilities
 	setCapabilities();
-
-	setClassName("DcServer");
 
 	// Current server
 	currentDcServer = this;
