@@ -47,12 +47,6 @@
 
 #include <istream> // for istringstream
 
-// Put some code here
-#ifndef _WIN32
-	#include "PosixCapabilities.h"
-#endif
-// End of injection
-
 using namespace ::plugin;
 using namespace ::webserver::protocol;
 
