@@ -12,8 +12,14 @@ all: RusHub
 freebsd: $(OBJS)
 	$(CXX) -lrt -o RusHub $(OBJS) $(CURDIR)/tinyxml/tinyxml.a
 
-RusHub: $(OBJS)
+RusHub_shared: $(OBJS)
+	$(CXX) -lrt -ldl -lcap -ltinyxml -o RusHub $(OBJS)
+
+RusHub_caps: $(OBJS)
 	$(CXX) -lrt -ldl -lcap -o RusHub $(OBJS) $(CURDIR)/tinyxml/tinyxml.a
+
+RusHub: $(OBJS)
+	$(CXX) -lrt -ldl -o RusHub $(OBJS) $(CURDIR)/tinyxml/tinyxml.a
 
 $(CURDIR)/AdcParser.o: $(CURDIR)/AdcParser.cpp $(CURDIR)/Obj.h $(CURDIR)/Protocol.h $(CURDIR)/Plugin.h $(CURDIR)/AdcParser.h $(CURDIR)/stringutils.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
