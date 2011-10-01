@@ -36,7 +36,7 @@
 	#include <sys/utsname.h> // for utsname
 
 	// capability
-	#define HAVE_CAPABILITY 1
+	#define HAVE_CAPABILITY 0
 
 	#if HAVE_CAPABILITY
 		#include <grp.h>
