@@ -94,27 +94,27 @@ public:
 
 	virtual const string & getIp() const;
 	void setIp(const string & ip);
-	virtual int getPort() const;
-	virtual int getPortConn() const;
+	int getPort() const;
+	int getPortConn() const;
 
 
 	virtual int getProfile() const;
-	virtual void setProfile(int profile);
+	void setProfile(int profile);
 
 	virtual bool isCanSend() const;
 	void setCanSend(bool canSend);
 
-	virtual bool isInUserList() const;
+	bool isInUserList() const;
 	void setInUserList(bool);
 
-	virtual bool isInOpList() const;
-	virtual void setInOpList(bool inOpList);
+	bool isInOpList() const;
+	void setInOpList(bool inOpList);
 
-	virtual bool isInIpList() const;
-	virtual void setInIpList(bool inIpList);
+	bool isInIpList() const;
+	void setInIpList(bool inIpList);
 
 	virtual bool isHide() const;
-	virtual void setHide(bool hide);
+	void setHide(bool hide);
 	
 	bool isPassive() const;
 
