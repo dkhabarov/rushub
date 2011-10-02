@@ -1563,7 +1563,7 @@ bool DcServer::setCapabilities() {
 		// Change GID
 		if(setgid(grp->gr_gid) != 0) {
 			if (log(0)) {
-				logStream() << "Cannot set GID to " << user->pw_gid << endl;
+				logStream() << "Cannot set GID to " << grp->gr_gid << endl;
 			}
 			return false;
 		}
