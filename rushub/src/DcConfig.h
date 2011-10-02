@@ -129,7 +129,7 @@ private:
 	ConfigLoader * mConfigLoader;
 	ConfigStore mConfigStore;
 	string mConfigPath;
-	
+
 }; // DcConfig
 
 

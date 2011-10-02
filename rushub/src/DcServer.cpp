@@ -41,7 +41,8 @@
 	#if HAVE_CAPABILITY
 		#include <grp.h>
 		#include <pwd.h>
-		#include <stdarg.h>
+		#include <sys/types.h>
+		#include <unistd.h>
 		#include <sys/capability.h>
 		#include <sys/prctl.h>
 	#endif // HAVE_CAPABILITY
@@ -55,7 +56,7 @@ namespace dcserver {
 
 
 
-DcListIterator::DcListIterator(DcServer * dcServer) : 
+DcListIterator::DcListIterator(DcServer * dcServer) :
 	mIt(dcServer->mClientList.begin()),
 	mEnd(dcServer->mClientList.end())
 {
@@ -378,7 +379,7 @@ int DcServer::onTimer(Time & now) {
 		mChatList.autoResize();
 		mOpList.autoResize();
 		mIpList.autoResize();
-		
+
 	}
 
 	#ifndef WITHOUT_PLUGINS
@@ -1485,18 +1486,18 @@ string DcServer::getSysVersion() {
 				if (osvi.szCSDVersion[1] == 'C' || osvi.szCSDVersion[1] == 'B') {
 					version.append("OSR2 ");
 				}
-			} 
+			}
 
 			if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 10) {
 				version.append("Microsoft Windows 98 ");
 				if (osvi.szCSDVersion[1] == 'A') {
 					version.append("SE ");
 				}
-			} 
+			}
 
 			if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 90) {
 				version.append("Microsoft Windows Millennium Edition ");
-			} 
+			}
 			break;
 
 		case VER_PLATFORM_WIN32s : // Windows
@@ -1532,9 +1533,17 @@ bool DcServer::setCapabilities() {
 
 #if (!defined _WIN32) && HAVE_CAPABILITY
 
-	struct passwd * user = getpwnam(mDcConfig.mUserName.c_str());
+	if (getuid()) {
+		if (log(0)) {
+			logStream() << "Cannot set capabilities. Hub started from common user, not root." << endl;
+		}
+		return false;
+	}
 
-	if(user) {
+	struct passwd * user = getpwnam(mDcConfig.mUserName.c_str());
+	struct group * grp = getgrnam(mDcConfig.mGroupName.c_str());
+
+	if(user && grp) {
 		// Keep capabilities across UID change
 		if(prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0) != 0) {
 			if (log(0)) {
@@ -1552,7 +1561,7 @@ bool DcServer::setCapabilities() {
 		}
 
 		// Change GID
-		if(setgid(user->pw_gid) != 0) {
+		if(setgid(grp->gr_gid) != 0) {
 			if (log(0)) {
 				logStream() << "Cannot set GID to " << user->pw_gid << endl;
 			}
@@ -1566,6 +1575,11 @@ bool DcServer::setCapabilities() {
 			}
 			return false;
 		}
+	} else {
+		if (log(0)) {
+			logStream() << "Bad user name. Cannot get pam structs. Check user and group name." << endl;
+		}
+		return false;
 	}
 
 	// Check capability to bind privileged ports

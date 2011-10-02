@@ -240,7 +240,7 @@ void DcConfig::addVars(Server * server) {
 
 	add("bAdcOn",                 mAdcOn,                               false);
 
-	add("sGroupName",             mUserName,                            "root");
+	add("sGroupName",             mGroupName,                            "root");
 	add("sUserName",              mUserName,                            "root");
 
 	add("sLocale",                mLocale,                              setlocale(LC_ALL, ""));
