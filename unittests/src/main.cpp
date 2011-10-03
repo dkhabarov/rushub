@@ -17,15 +17,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "UnitTest++.h"
+#ifndef UNITTESTS_OFF
+	#include "UnitTest++.h"
+#endif
 
 int main(int, char **) {
-	#ifdef _DEBUG
+	#if (defined _DEBUG) && (!defined UNITTESTS_OFF)
 		return UnitTest::RunAllTests();
 	#else
 		return 0;
 	#endif
 }
+
+
 
 /**
  * $Id$

@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef _DEBUG
+#if (defined _DEBUG) && (!defined UNITTESTS_OFF)
 
 
 #include "UnitTest++.h"
