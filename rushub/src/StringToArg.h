@@ -32,8 +32,8 @@ class StringToArg {
 
 private:
 
-	static int CopyRawString(char **, char **);
-	static int CopyCookedString(char **, char **);
+	static int copyRawString(char **, char **);
+	static int copyCookedString(char **, char **);
 
 public:
 

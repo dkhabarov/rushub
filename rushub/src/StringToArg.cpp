@@ -67,14 +67,14 @@ int StringToArg::String2Arg(char const * str, int * argc_p, char *** argv_p) {
 					break;
 
 				case '\'':
-					err = CopyRawString(&dest, &scan);
+					err = copyRawString(&dest, &scan);
 					if (err != 0) {
 						goto error_leave;
 					}
 					break;
 
 				case '"':
-					err = CopyCookedString(&dest, &scan);
+					err = copyCookedString(&dest, &scan);
 					if (err != 0) {
 						goto error_leave;
 					}
@@ -114,7 +114,7 @@ error_leave:
 	return err;
 }
 
-int StringToArg::CopyRawString(char ** dest, char ** src) {
+int StringToArg::copyRawString(char ** dest, char ** src) {
 
 	while (true) {
 		char ch = *((*src)++);
@@ -154,7 +154,7 @@ int StringToArg::CopyRawString(char ** dest, char ** src) {
 	}
 }
 
-int StringToArg::CopyCookedString(char ** dest, char ** src) {
+int StringToArg::copyCookedString(char ** dest, char ** src) {
 
 	while (true) {
 		char ch = *((*src)++);
