@@ -19,7 +19,7 @@
 
 #ifdef _WIN32
 
-#include "dlfcn_r.h"
+#include "dlfuncs.h"
 
 #include <windows.h>
 #include <stdio.h>

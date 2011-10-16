@@ -27,7 +27,7 @@
 
 #include "Obj.h"
 
-#include "dlfcn_r.h"
+#include "dlfuncs.h"
 
 #include <string>
 
