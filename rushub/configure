@@ -565,7 +565,7 @@ PACKAGE_STRING='RusHub 2.3.7beta'
 PACKAGE_BUGREPORT='setuper@gmail.com'
 PACKAGE_URL=''
 
-ac_unique_file="config.h.in"
+ac_unique_file="src/config.h.in"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>

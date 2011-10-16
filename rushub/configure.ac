@@ -4,7 +4,7 @@
 AC_PREREQ([2.68])
 AC_INIT(RusHub, 2.3.7[beta], [setuper@gmail.com])
 AM_INIT_AUTOMAKE(RusHub, 2.3.7[beta])
-AC_CONFIG_SRCDIR([config.h.in])
+AC_CONFIG_SRCDIR([src/config.h.in])
 AC_CONFIG_HEADERS([src/config.h])
 
 # Checks for programs.
