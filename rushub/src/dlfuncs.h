@@ -17,8 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DLFCN
-#define DLFCN
+#ifndef DLFUNCS
+#define DLFUNCS
 
 #if defined(_WIN32) || defined(__APPLE__)
 
@@ -43,7 +43,7 @@
 	#include <dlfcn.h>
 #endif // _WIN32
 
-#endif // DLFCN
+#endif // DLFUNCS
 
 /**
  * $Id$
