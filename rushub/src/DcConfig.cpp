@@ -326,8 +326,8 @@ DcLang::DcLang(ConfigLoader * configLoader, ConfigListBase * configListBase) :
 	mConfigLoader(configLoader)
 {
 
-	Config * langConfig = configListBase->operator[] ("sLang");
-	Config * langPathConfig = configListBase->operator[] ("sLangPath");
+	ConfigItem * langConfig = configListBase->operator[] ("sLang");
+	ConfigItem * langPathConfig = configListBase->operator[] ("sLangPath");
 	if (langConfig && langPathConfig) {
 		langPathConfig->convertTo(mConfigStore.mPath);
 		langConfig->convertTo(mConfigStore.mName);

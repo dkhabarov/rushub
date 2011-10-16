@@ -22,7 +22,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Config.h"
+#include "ConfigItem.h"
 #include "stringutils.h" // for stringToInt64
 
 #ifndef _WIN32
@@ -41,7 +41,7 @@ namespace configuration {
 
 
 
-Config::Config(void * address) : 
+ConfigItem::ConfigItem(void * address) : 
 	mAddress(address),
 	mEmpty(true)
 {
@@ -49,33 +49,33 @@ Config::Config(void * address) :
 
 
 
-Config::~Config() {
+ConfigItem::~ConfigItem() {
 }
 
 
 
-istream & operator >> (istream & is, Config & config) {
-	return config.readFromStream(is);
+istream & operator >> (istream & is, ConfigItem & configItem) {
+	return configItem.readFromStream(is);
 }
 
 
 
-ostream & operator << (ostream & os, Config & config) {
-	return config.writeToStream(os);
+ostream & operator << (ostream & os, ConfigItem & configItem) {
+	return configItem.writeToStream(os);
 }
 
 
 
 /** Convert from string */
 #define CCONVERTFROMCHAR() \
-void ConfigChar::convertFrom(const string & str) { \
+void ConfigItemChar::convertFrom(const string & str) { \
 	*this = *str.c_str(); \
 }
 
 
 
 #define CCONVERTFROMPCHAR() \
-void ConfigPChar::convertFrom(const string & str) { \
+void ConfigItemPChar::convertFrom(const string & str) { \
 	char * data = this->data(); \
 	if (data) { \
 		delete data; \
@@ -88,10 +88,10 @@ void ConfigPChar::convertFrom(const string & str) { \
 
 
 #define CCONVERTFROM(TYPE, SUFFIX, SUB) \
-void Config##SUFFIX::convertFrom(const string & str) { \
+void ConfigItem##SUFFIX::convertFrom(const string & str) { \
 	*this = SUB; \
 } \
-void ConfigP##SUFFIX::convertFrom(const string & str) { \
+void ConfigItemP##SUFFIX::convertFrom(const string & str) { \
 	TYPE * data = this->data(); \
 	if (data) { \
 		delete data; \
@@ -116,7 +116,7 @@ CCONVERTFROM(string, String, str);
 
 /** Convert to string */
 #define CCONVERTTO(SUFFIX, SUB) \
-void Config##SUFFIX::convertTo(string & str) { \
+void ConfigItem##SUFFIX::convertTo(string & str) { \
 	SUB; \
 }
 
@@ -145,7 +145,7 @@ CCONVERTTO(PInt64,  sprintf(mBuffer, "%lld",*(this->data())); str = mBuffer)
 
 /** Read from stream */
 #define READFROMSTREAM(SUFFIX) \
-istream & Config##SUFFIX::readFromStream(istream & is) { \
+istream & ConfigItem##SUFFIX::readFromStream(istream & is) { \
 	string str; \
 	is >> str; \
 	this->convertFrom(str); \
@@ -155,7 +155,7 @@ istream & Config##SUFFIX::readFromStream(istream & is) { \
 
 
 #define READFROMSTREAMTOSTR(SUFFIX) \
-istream & Config##SUFFIX::readFromStream(istream & is) { \
+istream & ConfigItem##SUFFIX::readFromStream(istream & is) { \
 	string str; \
 	stringstream ss; \
 	getline(is, str); \
@@ -194,7 +194,7 @@ READFROMSTREAM(PInt64);
 
 /** Write in stream */
 #define WRITETOSTREAM(SUFFIX) \
-ostream & Config##SUFFIX::writeToStream(ostream & os) { \
+ostream & ConfigItem##SUFFIX::writeToStream(ostream & os) { \
 	string str; \
 	this->convertTo(str); \
 	os << str; \
@@ -223,13 +223,13 @@ WRITETOSTREAM(PInt64);
 WRITETOSTREAM(PString);
 
 /** NULL values */
-#define ISNULL(SUFFIX)  bool Config##SUFFIX::isNull()  { return !this->data(); } // 0, false, \0
-#define ISNULLPCHAR()   bool ConfigPChar ::isNull()    { return !this->data() || !*(this->data()); } // 0 or \0
-#define ISNULLDOUBLE()  bool ConfigDouble::isNull()    { return this->data() == 0.; } // 0.
-#define ISNULLSTRING()  bool ConfigString::isNull()    { return !this->data().size(); } // ""
-#define ISNULLP(SUFFIX) bool ConfigP##SUFFIX::isNull() { return !this->data() || !*(this->data()); }
-#define ISNULLPDOUBLE() bool ConfigPDouble::isNull()   { return !this->data() || *(this->data()) == 0.; }
-#define ISNULLPSTRING() bool ConfigPString::isNull()   { return !this->data() || !((*(this->data())).size()); }
+#define ISNULL(SUFFIX)  bool ConfigItem##SUFFIX::isNull()  { return !this->data(); } // 0, false, \0
+#define ISNULLPCHAR()   bool ConfigItemPChar ::isNull()    { return !this->data() || !*(this->data()); } // 0 or \0
+#define ISNULLDOUBLE()  bool ConfigItemDouble::isNull()    { return this->data() == 0.; } // 0.
+#define ISNULLSTRING()  bool ConfigItemString::isNull()    { return !this->data().size(); } // ""
+#define ISNULLP(SUFFIX) bool ConfigItemP##SUFFIX::isNull() { return !this->data() || !*(this->data()); }
+#define ISNULLPDOUBLE() bool ConfigItemPDouble::isNull()   { return !this->data() || *(this->data()) == 0.; }
+#define ISNULLPSTRING() bool ConfigItemPString::isNull()   { return !this->data() || !((*(this->data())).size()); }
 
 ISNULL(Bool);
 ISNULL(Int);

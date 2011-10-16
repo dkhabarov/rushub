@@ -27,7 +27,7 @@
 
 #include "Obj.h"
 #include "HashMap.h"
-#include "Config.h"
+#include "ConfigItem.h"
 
 #include <vector>
 
@@ -37,8 +37,8 @@ using namespace ::utils;
 namespace configuration {
 
 #define NEWITEM(TYPE, SUFFIX) \
-virtual Config##SUFFIX * add(TYPE & v) { return new Config##SUFFIX(v); } \
-virtual ConfigP##SUFFIX * add(TYPE * & v) { return new ConfigP##SUFFIX(v); }
+virtual ConfigItem##SUFFIX * add(TYPE & v) { return new ConfigItem##SUFFIX(v); } \
+virtual ConfigItemP##SUFFIX * add(TYPE * & v) { return new ConfigItemP##SUFFIX(v); }
 
 /** The Class of the making the object for any type. 
 Contains the functions of the creation of all available types. */
@@ -48,21 +48,21 @@ public:
 
   ConfigFactory() {
 	}
-	NEWITEM(bool, Bool);            /** virtual ConfigBool    * add(bool & var) { return new ConfigBool(var) } */
-	NEWITEM(double, Double);        /** virtual ConfigDouble  * add(double & var) { return new ConfigDouble(var) } */
-	NEWITEM(int, Int);              /** virtual ConfigInt     * add(int & var) { return new ConfigInt(var) } */
-	NEWITEM(long, Long);            /** virtual ConfigLong    * add(long & var) { return new ConfigLong(var) } */
-	NEWITEM(unsigned int, UInt);    /** virtual ConfigUInt    * add(unsigned int & var) { return new ConfigUInt(var) } */
-	NEWITEM(unsigned long, ULong);  /** virtual ConfigULong   * add(unsigned long & var) { return new ConfigULong(var) } */
-	NEWITEM(__int64, Int64);        /** virtual ConfigInt64   * add(__int64 & var) { return new ConfigInt64(var) } */
-	NEWITEM(char, Char);            /** virtual ConfigChar    * add(char & var) { return new ConfigChar(var) } */
-	NEWITEM(string, String);        /** virtual ConfigString  * add(string & var) { return new ConfigString(var) } */
-	virtual void del(Config * config) { /** Removing config */
-		delete config;
+	NEWITEM(bool, Bool);            /** virtual ConfigItemBool    * add(bool & var) { return new ConfigItemBool(var) } */
+	NEWITEM(double, Double);        /** virtual ConfigItemDouble  * add(double & var) { return new ConfigItemDouble(var) } */
+	NEWITEM(int, Int);              /** virtual ConfigItemInt     * add(int & var) { return new ConfigItemInt(var) } */
+	NEWITEM(long, Long);            /** virtual ConfigItemLong    * add(long & var) { return new ConfigItemLong(var) } */
+	NEWITEM(unsigned int, UInt);    /** virtual ConfigItemUInt    * add(unsigned int & var) { return new ConfigItemUInt(var) } */
+	NEWITEM(unsigned long, ULong);  /** virtual ConfigItemULong   * add(unsigned long & var) { return new ConfigItemULong(var) } */
+	NEWITEM(__int64, Int64);        /** virtual ConfigItemInt64   * add(__int64 & var) { return new ConfigItemInt64(var) } */
+	NEWITEM(char, Char);            /** virtual ConfigItemChar    * add(char & var) { return new ConfigItemChar(var) } */
+	NEWITEM(string, String);        /** virtual ConfigItemString  * add(string & var) { return new ConfigItemString(var) } */
+	virtual void del(ConfigItem * configItem) { /** Removing config item */
+		delete configItem;
 	}
 }; // ConfigFactory
 
-/** Base config class (Config Base Base) */
+/** Base config class */
 class ConfigListBase : public Obj {
 
 public:
@@ -70,7 +70,7 @@ public:
 	typedef unsigned Hash_t;
 	typedef vector<Hash_t> tVector; /** Vector */
 	typedef tVector::iterator tVIt; /** Iterator of vector */
-	typedef HashMap<Config *, Hash_t> tHashMap;
+	typedef HashMap<ConfigItem *, Hash_t> tHashMap;
 	typedef tHashMap::iterator tHLMIt; /** Iterator of list */
 
 	tHashMap mList; /** Main list of data */
@@ -95,7 +95,7 @@ public:
 		{
 		}
 
-		Config * operator * () {
+		ConfigItem * operator * () {
 			return mConfigListBase->mList.find(*mIterator);
 		}
 
@@ -131,9 +131,9 @@ public:
 	ConfigListBase();
 	virtual ~ConfigListBase();
 
-	Config * operator[] (const char *); /** Get config by name */
-	Config * operator[] (const string &); /** Get config by name */
-	Config * add(const string &, Config *); /** Add config object in list */
+	ConfigItem * operator[] (const char *); /** Get config by name */
+	ConfigItem * operator[] (const string &); /** Get config by name */
+	ConfigItem * add(const string &, ConfigItem *); /** Add config object in list */
 	void setBaseTo(void * newBase); /** Set base pointer in address */
 
 	virtual int load() = 0; /** Loading from store */
@@ -153,12 +153,12 @@ public:
 
 /** Adding */
 #define ADDMTDS(TYPE) \
-Config * add(const string & name, TYPE & var); \
-Config * add(const string & name, TYPE & var, TYPE const & def);
+ConfigItem * add(const string & name, TYPE & var); \
+ConfigItem * add(const string & name, TYPE & var, TYPE const & def);
 
 #define ADDPMTDS(TYPE) \
-Config * add(const string & name, TYPE * & var); \
-Config * add(const string & name, TYPE * & var, TYPE const & def);
+ConfigItem * add(const string & name, TYPE * & var); \
+ConfigItem * add(const string & name, TYPE * & var, TYPE const & def);
 
 #define ADDMETHODS(TYPE) \
 ADDMTDS(TYPE); \

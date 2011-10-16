@@ -1182,11 +1182,11 @@ const vector<string> & DcServer::getConfig() {
 
 
 const char * DcServer::getConfig(const string & name) {
-	Config * config = mDcConfig[name];
-	if (config == NULL) {
+	ConfigItem * configItem = mDcConfig[name];
+	if (configItem == NULL) {
 		return NULL;
 	}
-	config->convertTo(sBuf);
+	configItem->convertTo(sBuf);
 	return sBuf.c_str();
 }
 
@@ -1201,8 +1201,8 @@ bool DcServer::setConfig(const string & name, const string & value) {
 		return false;
 	}
 
-	Config * config = mDcConfig[name];
-	if (config == NULL) {
+	ConfigItem * configItem = mDcConfig[name];
+	if (configItem == NULL) {
 		return false;
 	}
 
@@ -1217,7 +1217,7 @@ bool DcServer::setConfig(const string & name, const string & value) {
 		}
 	}
 
-	config->convertFrom(value);
+	configItem->convertFrom(value);
 
 	if (name == "sHubBot") {
 		if (mDcConfig.mRegMainBot) { // Registration bot
@@ -1237,22 +1237,22 @@ bool DcServer::setConfig(const string & name, const string & value) {
 
 
 const char * DcServer::getLang(const string & name) {
-	Config * config = mDcLang[name];
-	if (config == NULL) {
+	ConfigItem * configItem = mDcLang[name];
+	if (configItem == NULL) {
 		return NULL;
 	}
-	config->convertTo(sBuf);
+	configItem->convertTo(sBuf);
 	return sBuf.c_str();
 }
 
 
 
 bool DcServer::setLang(const string & name, const string & value) {
-	Config * config = mDcLang[name];
-	if (config == NULL) {
+	ConfigItem * configItem = mDcLang[name];
+	if (configItem == NULL) {
 		return false;
 	}
-	config->convertFrom(value);
+	configItem->convertFrom(value);
 	mDcLang.save();
 	return true;
 }

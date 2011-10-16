@@ -84,7 +84,7 @@ int DcConfigLoader::loadFromXml(ConfigListBase * configListBase, const string & 
 		return -3;
 	}
 
-	Config * config = NULL;
+	ConfigItem * configItem = NULL;
 	const char * name = NULL;
 	const char * data = NULL;
 	istringstream * iss = NULL;
@@ -94,10 +94,10 @@ int DcConfigLoader::loadFromXml(ConfigListBase * configListBase, const string & 
 			continue;
 		}
 		data = value->ToElement()->GetText();
-		if ((config = configListBase->operator[](name)) != NULL) {
+		if ((configItem = configListBase->operator[](name)) != NULL) {
 			iss = new istringstream(data != NULL ? data : "");
 			iss->seekg(0, istream::beg);
-			(*iss) >> *config;
+			(*iss) >> *configItem;
 			delete iss;
 			iss = NULL;
 		} else {
