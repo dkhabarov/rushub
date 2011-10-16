@@ -35,10 +35,12 @@
 #else
 	#include <sys/utsname.h> // for utsname
 
-	// capability
-	#define HAVE_CAPABILITY 0
+	// include from autoconf
+	#include "config.h"
 
-	#if HAVE_CAPABILITY
+	// capabilit
+
+	#if HAVE_LIBCAP
 		#include <grp.h>
 		#include <pwd.h>
 		#include <sys/types.h>
@@ -1531,7 +1533,7 @@ string DcServer::getSysVersion() {
 
 bool DcServer::setCapabilities() {
 
-#if (!defined _WIN32) && HAVE_CAPABILITY
+#if (!defined _WIN32) && HAVE_LIBCAP
 
 	if (getuid()) {
 		if (log(0)) {

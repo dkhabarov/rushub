@@ -240,8 +240,10 @@ void DcConfig::addVars(Server * server) {
 
 	add("bAdcOn",                 mAdcOn,                               false);
 
-	add("sGroupName",             mGroupName,                            "root");
-	add("sUserName",              mUserName,                            "root");
+	#ifdef HAVE_LIBCAP
+		add("sGroupName",             mGroupName,                            "root");
+		add("sUserName",              mUserName,                            "root");
+	#endif
 
 	add("sLocale",                mLocale,                              setlocale(LC_ALL, ""));
 	add("sMainBotIP",             mMainBotIp,                           "127.0.0.1");

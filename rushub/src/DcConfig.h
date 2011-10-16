@@ -29,6 +29,10 @@
 #include "ConfigLoader.h"
 #include "NmdcParser.h" // for NMDC_TYPE_UNKNOWN (PROTOCOL NMDC)
 
+#ifndef _WIN32
+	#include "config.h"
+#endif
+
 using ::std::string;
 using namespace ::configuration;
 
@@ -111,8 +115,10 @@ public:
 	string mLangPath;           ///< Langage path
 	string mLang;               ///< Langage
 
-	string mUserName;           ///< OS user name
-	string mGroupName;          ///< OS group name
+	#ifdef HAVE_LIBCAP
+		string mUserName;           ///< OS user name
+		string mGroupName;          ///< OS group name
+	#endif
 
 public:
 

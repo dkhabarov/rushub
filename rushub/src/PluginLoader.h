@@ -26,7 +26,8 @@
 #define PLUGIN_LOADER_H
 
 #include "Obj.h"
-#include "dlfcn.h"
+
+#include "dlfcn_r.h"
 
 #include <string>
 

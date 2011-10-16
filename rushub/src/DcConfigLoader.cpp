@@ -22,9 +22,15 @@
 #include "Server.h" // for version and hub name
 #include "stringutils.h"
 
-#include "tinyxml/tinyxml.h"
+#ifndef _WIN32
+	#include "config.h"
+#endif
 
-
+#ifdef HAVE_LIBTINYXML
+	#include <tinyxml.h>
+#else
+	#include "tinyxml/tinyxml.h"
+#endif
 namespace dcserver {
 
 
