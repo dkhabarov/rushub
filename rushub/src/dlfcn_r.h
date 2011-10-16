@@ -46,6 +46,6 @@
 #endif // DLFCN
 
 /**
- * $Id: dlfcn.h 394 2011-06-27 07:55:37Z setuper $
- * $HeadURL: https://rushub.svn.sourceforge.net/svnroot/rushub/trunk/rushub/src/dlfcn.h $
+ * $Id$
+ * $HeadURL$
  */

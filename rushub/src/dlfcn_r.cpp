@@ -164,6 +164,6 @@ int dlclose(void * handle) {
 #endif // _WIN32
 
 /**
- * $Id: dlfcn.cpp 253 2011-05-01 17:03:31Z setuper $
- * $HeadURL: https://rushub.svn.sourceforge.net/svnroot/rushub/trunk/rushub/src/dlfcn.cpp $
+ * $Id$
+ * $HeadURL$
  */
