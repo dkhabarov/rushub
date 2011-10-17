@@ -10,3 +10,4 @@ RusHub_SOURCES= AdcParser.cpp ConfigList.h DcConfig.cpp Dir.h NmdcParser.h Serve
 		Cli.h ConnPoll.cpp DcServer.h PluginLoader.h Times.h ConfigItem.cpp ConnPoll.h DcUser.cpp Protocol.cpp \
 		ConfigItem.h ConnSelect.cpp DcUser.h MeanFrequency.h Protocol.h UserBase.h ConfigList.cpp ConnSelect.h \
 		Dir.cpp NmdcParser.cpp Server.cpp UserList.cpp
+RusHub_LDFLAGS = $(RUSHUB_LIBS)
