@@ -213,6 +213,7 @@ void DcConfig::addVars(Server * server) {
 	add("iTimeoutAny",            mTimeoutAny,                          600.);
 	add("iTimerServPeriod",       server->mTimerServPeriod,             2000);
 	add("iTimerConnPeriod",       server->mTimerConnPeriod,             4000);
+	add("iMaxSendSize",           server->mMaxSendSize,                 MAX_SEND_SIZE);
 	add("iStepDelay",             server->mStepDelay,                   0);
 	add("iStrSizeMax",            mMaxNmdcCommandLength,                10240);
 	add("iSysLoading",            mSysLoading,                          1.);
