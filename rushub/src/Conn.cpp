@@ -26,7 +26,7 @@
 #include "Server.h" // mServer
 
 #include <iostream> // cout, endl
-#include <stdlib.h> // atoi
+#include <stdlib.h> // atoi unix
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>

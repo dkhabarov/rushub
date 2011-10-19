@@ -28,7 +28,7 @@
 #include "HashMap.h"
 #include "stringutils.h"
 
-#include <stdlib.h> // atoi
+#include <stdlib.h> // atoi unix
 #include <string>
 
 using namespace ::std;
