@@ -26,6 +26,7 @@
 #include "Plugin.h"
 #include "NmdcParser.h"
 #include "HashMap.h"
+#include "stringutils.h"
 
 #include <string>
 
@@ -33,6 +34,12 @@ using namespace ::std;
 using namespace ::utils;
 using namespace ::dcserver::protoenums;
 using namespace ::dcserver::protocol;
+
+#ifdef _WIN32
+	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+		#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
+	#endif
+#endif
 
 #if (!defined _WIN32) && (!defined __int64)
 	#define __int64 long long
@@ -160,6 +167,128 @@ private:
 	bool mCollectInfo;
 
 }; // DcUser
+
+
+
+class Param : public ParamBase {
+
+public:
+
+	Param(const char * name, int category = 0, bool readOnly = false) : 
+		name(name),
+		type(TYPE_NONE),
+		category(category),
+		readOnly(readOnly)
+	{
+	}
+
+	~Param() {
+	}
+
+
+	const string & getName() const {
+		return name;
+	}
+
+	int getType() const {
+		return type;
+	}
+
+	int getCategory() const {
+		return category;
+	}
+
+	bool isReadOnly() const {
+		return readOnly;
+	}
+
+	void setReadOnly(bool readOnly) {
+		this->readOnly = readOnly;
+	}
+
+
+	const string & getString() const {
+		return value;
+	}
+
+	int getInt() const {
+		return atoi(value.c_str());
+	}
+
+	bool getBool() const {
+		return value == "true" || 0 != getInt();
+	}
+
+	double getDouble() const {
+		return atof(value.c_str());
+	}
+
+	long getLong() const {
+		return atol(value.c_str());
+	}
+	
+	__int64 getInt64() const {
+		return stringToInt64(value);
+	}
+
+
+	void setString(const char * data) {
+		if (!readOnly) {
+			value = data;
+			type = TYPE_STRING;
+		}
+	}
+
+	void setInt(const int & data) {
+		if (!readOnly) {
+			sprintf(mBuffer, "%d", data);
+			value = mBuffer;
+			type = TYPE_INT;
+		}
+	}
+
+	void setBool(const bool & data) {
+		if (!readOnly) {
+			value = (data ? "1" : "0");
+			type = TYPE_BOOL;
+		}
+	}
+
+	void setDouble(const double & data) {
+		if (!readOnly) {
+			sprintf(mBuffer, "%f", data);
+			value = mBuffer;
+			type = TYPE_DOUBLE;
+		}
+	}
+
+	void setLong(const long & data) {
+		if (!readOnly) {
+			sprintf(mBuffer, "%ld", data);
+			value = mBuffer;
+			type = TYPE_LONG;
+		}
+	}
+
+	void setInt64(const __int64 & data) {
+		if (!readOnly) {
+			value = int64ToString(data);
+			type = TYPE_INT64;
+		}
+	}
+
+
+private:
+
+	string name;
+	string value;
+	int type;
+	int category;
+	bool readOnly;
+	static char mBuffer[32];
+
+}; // class Param
+
 
 }; // namespace dcserver
 

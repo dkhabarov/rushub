@@ -158,6 +158,44 @@ enum UserIntParam {
 
 
 
+
+class ParamBase {
+
+public:
+
+	enum {
+		TYPE_NONE = 0,
+		TYPE_STRING,
+		TYPE_INT,
+		TYPE_BOOL,
+		TYPE_DOUBLE,
+		TYPE_LONG,
+		TYPE_INT64
+	};
+
+	virtual const string & getName() const = 0;
+	virtual int getType() const = 0;
+	virtual int getCategory() const = 0;
+	virtual bool isReadOnly() const = 0;
+
+	virtual const string & getString() const = 0;
+	virtual int getInt() const = 0;
+	virtual bool getBool() const = 0;
+	virtual double getDouble() const = 0;
+	virtual long getLong() const = 0;
+	virtual __int64 getInt64() const = 0;
+
+	virtual void setString(const char *) = 0;
+	virtual void setInt(const int &) = 0;
+	virtual void setBool(const bool &) = 0;
+	virtual void setDouble(const double &) = 0;
+	virtual void setLong(const long &) = 0;
+	virtual void setInt64(const __int64 &) = 0;
+
+}; // class ParamBase
+
+
+
 class DcConnBase;
 
 
