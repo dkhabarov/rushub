@@ -437,7 +437,7 @@ int NmdcProtocol::eventVersion(NmdcParser * dcparser, DcConn * dcConn) {
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnVersion.callAll(dcConn->mDcUser) && version != "1,0091") {
+		if (mDcServer->mCalls.mOnVersion.callAll(dcConn->mDcUser) && version != "1,0091" && version != "1.0091") {
 			dcConn->closeNice(9000, CLOSE_REASON_CMD_VERSION); /** Checking of the version */
 		}
 	#endif
