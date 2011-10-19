@@ -274,7 +274,7 @@ protected:
 
 	static char mRecvBuf[MAX_RECV_SIZE + 1]; ///< Recv buffer
 	string mSendBuf; ///< Buffer for sending
-	unsigned long mSendBufMax; ///< Max size sending buf
+	unsigned long & mSendBufMax; ///< Max size sending buf
 
 	list<Conn *>::iterator mIterator; ///< Optimisation
 
@@ -342,7 +342,7 @@ private:
 	/// Send len byte from buf
 	int send(const char * buf, size_t & len);
 
-
+	Conn & operator = (const Conn &);
 }; // class Conn
 
 }; // namespace server

@@ -50,6 +50,7 @@ Server::Server() :
 	mStepDelay(0),
 	mTimerServPeriod(1000),
 	mTimerConnPeriod(4000),
+	mMaxSendSize(MAX_SEND_SIZE),
 	mMac(true),
 	mRun(true), // run by default
 	mMainLoopCode(0),

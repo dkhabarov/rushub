@@ -67,7 +67,7 @@ Conn::Conn(tSocket socket, Server * server, int connType) :
 	mWritable(true),
 	mPort(0),
 	mPortConn(0),
-	mSendBufMax(MAX_SEND_SIZE),
+	mSendBufMax(server->mMaxSendSize),
 	mConnect(true),
 	mSocket(socket),
 	mRecvBufEnd(0),

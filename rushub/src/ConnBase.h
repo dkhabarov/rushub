@@ -87,7 +87,7 @@
 
 #define SOCK_BACKLOG          0x40     ///< SOMAXCONN
 #define MAX_RECV_SIZE         0x02FFFF ///< Max buf size for recv
-#define MAX_SEND_SIZE         0x2AFFFF ///< Max buf size for send
+#define MAX_SEND_SIZE         0x2AFFFF ///< Max buf size for send (by default)
 #define MAX_SEND_UNBLOCK_SIZE 0x25FFFF ///< Max size (send) unblock input chanel
 #define MAX_SEND_BLOCK_SIZE   0x28FFFF ///< Max size (send) block input chanel
 

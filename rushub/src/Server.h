@@ -67,6 +67,7 @@ public:
 	int mStepDelay; ///< Step delay (for testing)
 	unsigned int mTimerServPeriod; ///< Serv period (msec)
 	unsigned int mTimerConnPeriod; ///< Conn period (msec)
+	unsigned long mMaxSendSize;
 	bool mMac; ///< allow to define MAC address
 
 public:
