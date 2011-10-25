@@ -553,7 +553,7 @@ int AdcProtocol::sendNickList(DcConn * dcConn) {
 		dcConn->send(mDcServer->mAdcUserList.getList(), true);
 
 	} catch(...) {
-		if (dcConn->errLog(FATAL)) {
+		if (dcConn->log(FATAL)) {
 			dcConn->logStream() << "exception in sendNickList" << endl;
 		}
 		return -1;

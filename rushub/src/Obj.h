@@ -43,10 +43,7 @@ namespace utils {
 
 enum {
 	FATAL, // falat error
-	ERR    // simple error
-};
-
-enum {
+	ERR,   // simple error
 	WARN,  // warning
 	INFO,  // information
 	DEBUG, // debug
@@ -72,9 +69,6 @@ public:
 
 	/** Return log straem */
 	int log(int level);
-
-	/** Return errLog stream */
-	int errLog(int level);
 
 	/** Return current log stream */
 	inline ostream & logStream() {
@@ -112,7 +106,6 @@ private:
 	/** Objects counter */
 	static int mCounterObj;
 	static int mLevel;
-	static bool mIsErrorLog;
 	static bool mCout;
 
 	/** output log stream */
@@ -122,7 +115,7 @@ private:
 	static ostringstream mBufOss;
 
 	// Loading buffer
-	typedef pair<pair<int, bool>, string> Pair;
+	typedef pair<int, string> Pair;
 	static vector<Pair> mLoadBuf;
 
 private:
@@ -130,15 +123,12 @@ private:
 	/** log function */
 	ostream & log();
 
-	/** errLog function */
-	ostream & errLog();
-
 	ostream & openLog();
 	bool saveInBuf();
 	void loadFromBuf(ostream &);
 
 	/** Return level for syslog */
-	int sysLogLevel(int level, bool isError = false);
+	int sysLogLevel(int level);
 
 }; // class Obj
 

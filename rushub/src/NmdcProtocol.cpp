@@ -1206,7 +1206,7 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 			}
 		}
 	} catch(...) {
-		if (dcConn->errLog(FATAL)) {
+		if (dcConn->log(FATAL)) {
 			dcConn->logStream() << "exception in sendNickList" << endl;
 		}
 		return -1;

@@ -118,7 +118,7 @@ int runHub(int argc, char ** argv, bool isService /*= false*/) {
 
 		/** Listening all ports */
 		if (server.listening() != 0) {
-			if (server.errLog(FATAL)) {
+			if (server.log(FATAL)) {
 				server.logStream() << "Listening failed" << endl;
 			}
 			return -2;

@@ -34,40 +34,16 @@ namespace utils {
 
 
 #define LOG_FILE "system.%Y-%m-%d.log"
-#define ERR_LABEL "[ERROR]"
-#define MAX_LEVEL 6 // Max level for log
-#define MAX_ERR_LEVEL 2 // Max error level for log
-
 
 bool Obj::mSysLogOn = false;
+int Obj::mMaxLevel = TRACE; // set max level for log before load config
 
-
-/** 
-  * The event level. All events above limit are not considered
-  * 0 - Information messages of the start and stops hub
-  * 1 - Failures lower level, and information records
-  * 2 - Events
-  * 3 - Good actions and process actions
-  * 4 - Enough frequent events
-  * 5 - io actions
-  */
-int Obj::mMaxLevel = MAX_LEVEL; // set max level for log before load config
-
-/** 
-  * The error level. All errors above limit are not considered
-  * 0 - log with critical errors and exceptions. The errors bring about fall of the server
-  * 1 - The suspicious errors. End usually disconnection. If such errors appear then with server not okay
-  * 2 - Errors, which can be connected with incorrect call function from outside (from plugins)
-  */
-int Obj::mMaxErrLevel = MAX_ERR_LEVEL;
 
 ofstream Obj::mOfs;
 string * Obj::mLogsPath = NULL; /** Logs path */
 
-
 int Obj::mCounterObj = 0; /** Objects counter */
 int Obj::mLevel = 0;
-bool Obj::mIsErrorLog = false;
 bool Obj::mCout = false;
 
 ostringstream Obj::mSysLogOss;
@@ -125,20 +101,6 @@ int Obj::log(int level) {
 	if (level <= mMaxLevel) {
 		mToLog = &log();
 		mLevel = level;
-		mIsErrorLog = false;
-		return strLog();
-	}
-	return 0;
-}
-
-
-
-/** Return errLog stream */
-int Obj::errLog(int level) {
-	if (level <= mMaxErrLevel) {
-		mToLog = &errLog();
-		mLevel = level;
-		mIsErrorLog = true;
 		return strLog();
 	}
 	return 0;
@@ -157,8 +119,7 @@ void Obj::setClassName(const char * name) {
 /** Main function putting log in stream */
 bool Obj::strLog() {
 	utils::Time now(true);
-	logStream() << "[" << now.asDateMsec() << "] " << ((mIsErrorLog) ? ERR_LABEL " " : "")
-		<< "(" << mLevel << ") " << mClassName << ": ";
+	logStream() << "[" << now.asDateMsec() << "] " << "(" << mLevel << ") " << mClassName << ": ";
 	return true;
 }
 
@@ -174,7 +135,7 @@ ostream & Obj::log() {
 		}
 		const string & buf = mSysLogOss.str();
 		if (!buf.empty()) {
-			syslog(sysLogLevel(mLevel, mIsErrorLog), "%s", buf.c_str());
+			syslog(sysLogLevel(mLevel), "%s", buf.c_str());
 			mSysLogOss.str("");
 		}
 		return mSysLogOss;
@@ -194,13 +155,6 @@ ostream & Obj::log() {
 		return mBufOss;
 	}
 	return openLog();
-}
-
-
-
-/** errLog function. Return errLog straem */
-ostream & Obj::errLog() {
-	return log();
 }
 
 
@@ -242,8 +196,7 @@ ostream & Obj::openLog() {
 bool Obj::saveInBuf() {
 	const string & buff = mBufOss.str();
 	if (!buff.empty()) {
-		pair<int, bool> first(mLevel, mIsErrorLog);
-		mLoadBuf.push_back(pair<pair<int, bool>, string>(first, buff));
+		mLoadBuf.push_back(pair<int, string>(mLevel, buff));
 		mBufOss.str("");
 		return true;
 	}
@@ -255,7 +208,7 @@ bool Obj::saveInBuf() {
 void Obj::loadFromBuf(ostream & os) {
 	for (vector<Pair>::iterator it = mLoadBuf.begin(); it != mLoadBuf.end(); ++it) {
 		Pair & p = (*it);
-		if ((!p.first.second && p.first.first <= mMaxLevel) || (p.first.second && p.first.first <= mMaxErrLevel)) {
+		if (p.first <= mMaxLevel) {
 			os << p.second;
 		}
 	}
@@ -266,58 +219,37 @@ void Obj::loadFromBuf(ostream & os) {
 /** Return level for syslog */
 #ifndef _WIN32
 
-int Obj::sysLogLevel(int level, bool isError /* = false */) {
-	if (isError) {
+int Obj::sysLogLevel(int level) {
 
-		switch (level) {
+	switch (level) {
 
-			case 0 :
-				return LOG_USER | LOG_CRIT;
+		case FATAL :
+			return LOG_USER | LOG_CRIT;
 
-			case 1 :
-				return LOG_USER | LOG_ERR;
+		case ERR :
+			return LOG_USER | LOG_ERR;
 
-			default :
-				return 0;
+		case WARN :
+			// Fallthrough
 
-		}
+		case INFO :
+			return LOG_USER | LOG_NOTICE;
 
-	} else {
+		case DEBUG :
+			return LOG_USER | LOG_INFO;
 
-		switch (level) {
+		case TRACE :
+			return LOG_USER | LOG_DEBUG;
 
-			case 0 :
-				// Fallthrough
+		default :
+			return 0;
 
-			case 1 :
-				// Fallthrough
-
-			case 2 :
-				return LOG_USER | LOG_NOTICE;
-
-			case 3 :
-				// Fallthrough
-
-			case 4 :
-				return LOG_USER | LOG_INFO;
-
-			case 5 :
-				// Fallthrough
-
-			case 6 :
-				return LOG_USER | LOG_DEBUG;
-
-			default :
-				return 0;
-
-		}
 	}
-	return 0;
 }
 
 #else
 
-int Obj::sysLogLevel(int, bool) {
+int Obj::sysLogLevel(int) {
 	return 0;
 }
 

@@ -84,7 +84,7 @@ void CallList::ufCallOne::operator() (Plugin * plugin) {
 	__try {
 		mCallReturn = mCallList->callOne(plugin);
 	} __except( EXCEPTION_EXECUTE_HANDLER) {
-		if (mCallList->mPluginList && mCallList->mPluginList->errLog(FATAL)) {
+		if (mCallList->mPluginList && mCallList->mPluginList->log(FATAL)) {
 			mCallList->mPluginList->logStream() << "error in plugin: " << plugin->getName() << endl;
 		}
 		plugin->suicide();

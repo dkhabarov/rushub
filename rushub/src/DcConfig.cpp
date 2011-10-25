@@ -59,7 +59,7 @@ DcConfig::DcConfig(ConfigLoader * configLoader, Server * server, const string & 
 	#ifndef _WIN32
 		// Go to the work directory
 		if ((chdir(mMainPath.c_str())) < 0) {
-			if (errLog(ERR)) {
+			if (log(ERR)) {
 				logStream() << "Can not go to the work directory '" << mMainPath << "'. Error: " << strerror(errno) << endl;
 			}
 		}
@@ -234,7 +234,6 @@ void DcConfig::addVars(Server * server) {
 	add("iMinNickLen",            mMinNickLen,                          2);
 	add("iUsersLimit",            mUsersLimit,                          -1);
 	add("iMaxLevel",              mMaxLevel,                            mMaxLevel); // set this default value for log
-	add("iMaxErrLevel",           mMaxErrLevel,                         mMaxErrLevel); // set this default value for log
 
 	add("sUDPAddresses",          mUdpAddresses,                        "0.0.0.0:1209");
 	add("bUDPServer",             mUdpServer,                           false);
@@ -308,9 +307,8 @@ int DcConfig::reload() {
 	if (ret < 0) {
 
 		if (ret != -4) {
-			// Set default log levels
-			mMaxErrLevel = 2;
-			mMaxLevel = 0;
+			// Set default log level
+			mMaxLevel = 2;
 		}
 
 		save();

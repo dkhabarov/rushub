@@ -271,7 +271,7 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 				conn->logStream() << "Del conn without user" << endl;
 			}
 		}
-	} else if (conn->errLog(FATAL)) {
+	} else if (conn->log(FATAL)) {
 		conn->logStream() << "Fail error in deleteConn: dcConn = " <<
 		(dcConn == NULL ? "NULL" : "not NULL") << ", dcServer = " << 
 		(dcServer == NULL ? "NULL" : "not NULL") << endl;

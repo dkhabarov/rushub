@@ -242,7 +242,7 @@ bool DcServer::listeningServer(const char * name, const char * addresses, const 
 	getAddresses(addresses, vAddresses, defaultPort);
 
 	if (vAddresses.size() == 0) {
-		if (errLog(FATAL)) {
+		if (log(FATAL)) {
 			logStream() << "Incorrect address of the " << name << endl;
 		}
 	}
@@ -640,13 +640,13 @@ void DcServer::doUserEnter(DcConn * dcConn) {
 /// Adding user in the user list
 bool DcServer::addToUserList(DcUser * dcUser) {
 	if (!dcUser) {
-		if (errLog(ERR)) {
+		if (log(ERR)) {
 			logStream() << "Adding a NULL user to userlist" << endl;
 		}
 		return false;
 	}
 	if (dcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
-		if (errLog(ERR)) {
+		if (log(ERR)) {
 			logStream() << "User is already in the user list" << endl;
 		}
 		return false;
@@ -754,7 +754,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 			}
 		} else {
 			// Such can happen only for users without connection or with different connection
-			if (dcUser->errLog(ERR)) {
+			if (dcUser->log(ERR)) {
 				dcUser->logStream() << "Not found the correct user for nick: " << dcUser->getUid() << endl;
 			}
 			return false;

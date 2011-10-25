@@ -257,7 +257,7 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 	// getaddrinfo
 	int ret = getaddrinfo(address, port, &hints, &mAddrInfo);
 	if (ret != 0) {
-		if (errLog(FATAL)) {
+		if (log(FATAL)) {
 			logStream() << "Error in getaddrinfo: " << 
 			#ifdef _WIN32
 				SOCK_ERR
@@ -275,7 +275,7 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 
 	// socket
 	if (SOCK_INVALID(sock = socket(mAddrInfo->ai_family, mAddrInfo->ai_socktype, 0))) {
-		if (errLog(FATAL)) {
+		if (log(FATAL)) {
 			logStream() << "Error in socket: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 		}
 		return INVALID_SOCKET;
@@ -286,7 +286,7 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 
 		// TIME_WAIT after close conn. Reuse address after disconn
 		if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(sockoptval_t)))) {
-			if (errLog(FATAL)) {
+			if (log(FATAL)) {
 				logStream() << "Error in setsockopt: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 			}
 			return INVALID_SOCKET;
@@ -310,7 +310,7 @@ tSocket Conn::socketBind(tSocket sock) {
 
 	// Bind
 	if (SOCK_ERROR(bind(sock, mAddrInfo->ai_addr, static_cast<int> (mAddrInfo->ai_addrlen)))) {
-		if (errLog(FATAL)) {
+		if (log(FATAL)) {
 			logStream() << "Error bind: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 		}
 		return INVALID_SOCKET;
@@ -328,7 +328,7 @@ tSocket Conn::socketListen(tSocket sock) {
 	}
 	if (SOCK_ERROR(listen(sock, SOCK_BACKLOG))) {
 		SOCK_CLOSE(sock);
-		if (errLog(ERR)) {
+		if (log(ERR)) {
 			logStream() << "Error listening: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 		}
 		return INVALID_SOCKET;
@@ -345,7 +345,7 @@ tSocket Conn::socketConnect(tSocket sock) {
 	}
 	if (SOCK_ERROR(connect(sock, mAddrInfo->ai_addr, static_cast<int> (mAddrInfo->ai_addrlen)))) {
 		SOCK_CLOSE(sock);
-		if (errLog(ERR)) {
+		if (log(ERR)) {
 			logStream() << "Error connecting: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 		}
 		return INVALID_SOCKET;
@@ -393,7 +393,7 @@ void Conn::close() {
 		if (log(DEBUG)) {
 			logStream() << "Closing socket: " << mSocket << endl;
 		}
-	} else if (errLog(ERR)) {
+	} else if (log(ERR)) {
 		logStream() << "Socket not closed: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 	}
 
@@ -452,7 +452,7 @@ void Conn::closeNow(int reason /* = 0 */) {
 			}
 		}
 	} else {
-		if (errLog(FATAL)) {
+		if (log(FATAL)) {
 			logStream() << "Close conn without Server" << endl;
 		}
 	}
@@ -490,7 +490,7 @@ Conn * Conn::createNewConn() {
 		newConn = new Conn(sock, mServer, CONN_TYPE_INCOMING_TCP); // Create simple connection object
 	}
 	if (!newConn) {
-		if (errLog(FATAL)) {
+		if (log(FATAL)) {
 			logStream() << "Fatal error: Can't create new connection object" << endl;
 		}
 		throw "Fatal error: Can't create new connection object";
@@ -530,7 +530,7 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 
 	sockoptval_t yes = 1;
 	if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(int)))) {
-		if (errLog(ERR)) {
+		if (log(ERR)) {
 			logStream() << "Socket not SO_KEEPALIVE: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 		}
 #ifdef _WIN32
@@ -544,7 +544,7 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 			if (log(INFO)) {
 				logStream() << "Couldn't set keepalive flag for accepted socket" << endl;
 			}
-		} else if (errLog(ERR)) {
+		} else if (log(ERR)) {
 			logStream() << "Socket not closed" << endl;
 		}
 		return INVALID_SOCKET;
@@ -552,7 +552,7 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 
 	// Non-block socket
 	if (socketNonBlock(sock) == INVALID_SOCKET) {
-		if (errLog(ERR)) {
+		if (log(ERR)) {
 			logStream() << "Couldn't set non-block flag for accepted socket" << endl;
 		}
 		return INVALID_SOCKET;
@@ -777,13 +777,13 @@ string * Conn::getCommandPtr() {
 	and installation main parameter */
 void Conn::setCommandPtr(string * pStr) {
 	if (mStatus != STRING_STATUS_NO_STR) {
-		if (errLog(FATAL)) {
+		if (log(FATAL)) {
 			logStream() << "Fatal error: Bad setCommandPtr" << endl;
 		}
 		throw "Fatal error: Bad setCommandPtr";
 	}
 	if (!pStr) {
-		if (errLog(FATAL)) {
+		if (log(FATAL)) {
 			logStream() << "Fatal error: Bad setCommandPtr. Null string pointer" << endl;
 		}
 		throw "Fatal error: Bad setCommandPtr. Null string pointer";
@@ -797,7 +797,7 @@ void Conn::setCommandPtr(string * pStr) {
 /// Reading data from buffer and record in line of the protocol
 size_t Conn::readFromRecvBuf() {
 	if (!mCommand) {
-		if (errLog(FATAL)) {
+		if (log(FATAL)) {
 			logStream() << "Fatal error: ReadFromBuf with null string pointer" << endl;
 		}
 		throw "Fatal error: ReadFromBuf with null string pointer";

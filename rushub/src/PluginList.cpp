@@ -89,7 +89,7 @@ bool PluginList::loadAll() {
 
 	DIR * dir = opendir(mPluginDir.c_str());
 	if (!dir) {
-		if (errLog(ERR)) {
+		if (log(ERR)) {
 			logStream() << "Open plugin dir error" << endl;
 		}
 		return false;
@@ -152,7 +152,7 @@ bool PluginList::loadPlugin(const string & filePath) {
 
 	} catch (...) {
 
-		if (errLog(ERR)) {
+		if (log(ERR)) {
 			logStream() << "Plugin " << filePath << 
 				" caused an exception" << endl;
 		}
@@ -178,7 +178,7 @@ bool PluginList::unloadPlugin(const string & name) {
 	PluginLoader * pluginLoader = mPluginLoaders.find(key);
 
 	if (!pluginLoader || !mPluginLoaders.remove(key)) {
-		if (errLog(ERR)) {
+		if (log(ERR)) {
 			logStream() << "Can't unload plugin name: '" << name << "'" << endl;
 		}
 		return false;
