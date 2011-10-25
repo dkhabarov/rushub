@@ -29,6 +29,10 @@
 
 using namespace ::std;
 
+
+namespace utils {
+
+
 #define LOG_FILE "system.%Y-%m-%d.log"
 #define ERR_LABEL "[ERROR]"
 #define MAX_LEVEL 6 // Max level for log
@@ -78,7 +82,7 @@ Obj::Obj(const char * name) :
 	mToLog(&cout)
 {
 	++mCounterObj;
-	//if (log(0)) logStream() << "+ " << mClassName << endl;
+	//if (log(WARN)) logStream() << "+ " << mClassName << endl;
 }
 
 
@@ -97,14 +101,14 @@ Obj::Obj() :
 	mToLog(&cout)
 {
 	++mCounterObj;
-	//if (log(0)) logStream() << "+ " << mClassName << endl;
+	//if (log(WARN)) logStream() << "+ " << mClassName << endl;
 }
 
 
 
 Obj::~Obj() {
 	--mCounterObj;
-	//if (string(mClassName) != "DcServer" && log(0)) logStream() << "- " << mClassName << endl;
+	//if (string(mClassName) != "DcServer" && log(WARN)) logStream() << "- " << mClassName << endl;
 }
 
 
@@ -144,7 +148,7 @@ int Obj::errLog(int level) {
 
 /** Set class name */
 void Obj::setClassName(const char * name) {
-	//if (log(0)) logStream() << "r " << mClassName << " -> " << name << endl;
+	//if (log(WARN)) logStream() << "r " << mClassName << " -> " << name << endl;
 	mClassName = name;
 }
 
@@ -318,6 +322,8 @@ int Obj::sysLogLevel(int, bool) {
 }
 
 #endif
+
+}; // namespace utils
 
 /**
  * $Id$

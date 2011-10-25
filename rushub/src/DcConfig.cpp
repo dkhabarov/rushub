@@ -59,7 +59,7 @@ DcConfig::DcConfig(ConfigLoader * configLoader, Server * server, const string & 
 	#ifndef _WIN32
 		// Go to the work directory
 		if ((chdir(mMainPath.c_str())) < 0) {
-			if (errLog(1)) {
+			if (errLog(ERR)) {
 				logStream() << "Can not go to the work directory '" << mMainPath << "'. Error: " << strerror(errno) << endl;
 			}
 		}

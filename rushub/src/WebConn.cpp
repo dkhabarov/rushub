@@ -73,7 +73,7 @@ void WebConnFactory::deleteConn(Conn * &conn) {
 
 void WebConnFactory::onNewData(Conn * conn, string * str) {
 
-	if (conn->log(1)) {
+	if (conn->log(INFO)) {
 		conn->logStream() << "WEB IN: " << (*str) << endl;
 	}
 
@@ -145,7 +145,7 @@ int WebConn::onTimer(Time &) {
 	DcServer * dcServer = server();
 	Time lastRecv(mLastRecv);
 	if (dcServer->minDelay(lastRecv, dcServer->mDcConfig.mWebTimeout)) {
-		if (log(2)) {
+		if (log(INFO)) {
 			logStream() << "Any action timeout..." << endl;
 		}
 		closeNice(9000, CLOSE_REASON_WEB);

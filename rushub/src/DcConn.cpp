@@ -64,7 +64,7 @@ size_t DcConn::send(const char * data, size_t len, bool addSep, bool flush) {
 	if (mWritable) {
 		if (len >= mSendBufMax) {
 			len = mSendBufMax;
-			if (log(0)) {
+			if (log(WARN)) {
 				logStream() << "Too long message. Size: " << len << ". Max size: " << mSendBufMax << endl;
 			}
 		}
@@ -109,7 +109,7 @@ int DcConn::onTimer(Time &now) {
 	if (!mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) { // Optimisation
 		for (int i = 0; i < HUB_TIME_OUT_MAX; ++i) {
 			if (!checkTimeOut(HubTimeOut(i), now)) {
-				if (log(2)) {
+				if (log(INFO)) {
 					logStream() << "Operation timeout (" << HubTimeOut(i) << ")" << endl;
 				}
 				string msg;
@@ -123,7 +123,7 @@ int DcConn::onTimer(Time &now) {
 
 	/*Time lastRecv(mLastRecv);
 	if (dcServer->minDelay(lastRecv, dcServer->mDcConfig.mTimeoutAny)) {
-		if (log(2)) {
+		if (log(INFO)) {
 			logStream() << "Any action timeout..." << endl;
 		}
 		dcServer->sendToUser(mDcUser, dcServer->mDcLang.mTimeoutAny.c_str(), dcServer->mDcConfig.mHubBot.c_str());
@@ -267,11 +267,11 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 			dcConn->mDcUser = NULL;
 			dcConn->mDcUserBase = NULL;
 		} else {
-			if (conn->log(3)) {
+			if (conn->log(DEBUG)) {
 				conn->logStream() << "Del conn without user" << endl;
 			}
 		}
-	} else if (conn->errLog(0)) {
+	} else if (conn->errLog(FATAL)) {
 		conn->logStream() << "Fail error in deleteConn: dcConn = " <<
 		(dcConn == NULL ? "NULL" : "not NULL") << ", dcServer = " << 
 		(dcServer == NULL ? "NULL" : "not NULL") << endl;

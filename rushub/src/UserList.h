@@ -37,7 +37,7 @@
 #include <vector>
 
 using namespace ::std;
-using namespace ::utils; /** for HashTable */
+using namespace ::utils; // HashTable, Obj
 
 
 namespace dcserver {

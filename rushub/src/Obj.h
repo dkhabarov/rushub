@@ -39,13 +39,25 @@
 
 using namespace ::std;
 
+namespace utils {
+
+enum {
+	FATAL, // falat error
+	ERR    // simple error
+};
+
+enum {
+	WARN,  // warning
+	INFO,  // information
+	DEBUG, // debug
+	TRACE  // tracing
+};
 
 
 /** Main object class (log class) */
 class Obj {
 
 public:
-
 	static bool mSysLogOn;
 
 public:
@@ -129,6 +141,8 @@ private:
 	int sysLogLevel(int level, bool isError = false);
 
 }; // class Obj
+
+}; // namespace utils
 
 #endif // OBJ_H
 

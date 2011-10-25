@@ -29,6 +29,7 @@
 
 using namespace ::configuration;
 using namespace ::std;
+using namespace ::utils;
 
 
 namespace dcserver {

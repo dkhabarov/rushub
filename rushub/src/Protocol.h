@@ -30,6 +30,7 @@
 #include <vector>
 
 using namespace ::std;
+using namespace ::utils;
 
 namespace server {
 
