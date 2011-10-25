@@ -251,7 +251,7 @@ bool DcServer::listeningServer(const char * name, const char * addresses, const 
 	for (vector<pair<string, string> >::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
 		if (Server::listening(connFactory, ((*it).first).c_str(), ((*it).second).c_str(), udp) != NULL) {
 			ret = true;
-			if (log(WARN)) {
+			if (log(INFO)) {
 				logStream() << name << " is running on [" 
 					<< ((*it).first) << "]:" << ((*it).second) 
 					<< (udp ? " UDP" : " TCP") << endl;
@@ -400,7 +400,7 @@ int DcServer::onNewConn(Conn * conn) {
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 
 	if (mSystemLoad == SYSTEM_LOAD_SYSTEM_DOWN) {
-		if (dcConn->log(INFO)) {
+		if (dcConn->log(WARN)) {
 			dcConn->logStream() << "System down, close" << endl;
 		}
 		dcConn->closeNow(CLOSE_REASON_HUB_LOAD);
@@ -529,7 +529,7 @@ bool DcServer::checkNick(DcConn *dcConn) {
 		DcUser * us = static_cast<DcUser *> (mDcUserList.find(uidHash));
 
 		if (!us->mDcConn || (us->getProfile() != -1 && us->getIp() != dcConn->getIp())) {
-			if (dcConn->log(INFO)) {
+			if (dcConn->log(DEBUG)) {
 				dcConn->logStream() << "Bad nick (used): '" 
 					<< dcConn->mDcUser->getUid() << "'["
 					<< dcConn->getIp() << "] vs '" << us->getUid() 
@@ -594,7 +594,7 @@ void DcServer::doUserEnter(DcConn * dcConn) {
 	// Check entry stages
 	if (!mDcConfig.mAdcOn) {
 		if (LOGIN_STATUS_LOGIN_DONE != dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE)) {
-			if (dcConn->log(INFO)) {
+			if (dcConn->log(DEBUG)) {
 				dcConn->logStream() << "User Login when not all done (" 
 					<< dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE) << ")" <<endl;
 			}
@@ -666,7 +666,7 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 	}
 
 	if (!mainUserList->add(uidHash, dcUser)) {
-		if (log(INFO)) {
+		if (log(DEBUG)) {
 			logStream() << "Adding twice user with same nick " << dcUser->getUid() << " (" << mainUserList->find(uidHash)->getUid() << ")" << endl;
 		}
 		dcUser->setBoolParam(USER_BOOL_PARAM_IN_USER_LIST, false);

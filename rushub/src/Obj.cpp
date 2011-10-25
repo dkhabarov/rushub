@@ -45,6 +45,7 @@ string * Obj::mLogsPath = NULL; /** Logs path */
 int Obj::mCounterObj = 0; /** Objects counter */
 int Obj::mLevel = 0;
 bool Obj::mCout = false;
+const char * Obj::mLevelNames[] = {"FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE"};
 
 ostringstream Obj::mSysLogOss;
 ostringstream Obj::mBufOss;
@@ -119,7 +120,7 @@ void Obj::setClassName(const char * name) {
 /** Main function putting log in stream */
 bool Obj::strLog() {
 	utils::Time now(true);
-	logStream() << "[" << now.asDateMsec() << "] " << "(" << mLevel << ") " << mClassName << ": ";
+	logStream() << "[" << now.asDateMsec() << "] " << "(" << mLevelNames[mLevel] << ") " << mClassName << ": ";
 	return true;
 }
 

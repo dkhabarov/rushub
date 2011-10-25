@@ -63,7 +63,7 @@ static void sigHandler(int sig) {
 			// Fallthrough
 
 		case SIGHUP :
-			if (DcServer::currentDcServer->log(WARN)) {
+			if (DcServer::currentDcServer->log(INFO)) {
 				DcServer::currentDcServer->logStream() << "Received a " << sig << " signal, quiting" << endl;
 			}
 			cout << "Received a " << sig << " signal, quiting" << endl;
@@ -72,7 +72,7 @@ static void sigHandler(int sig) {
 			break;
 
 		default :
-			if (DcServer::currentDcServer->log(WARN)) {
+			if (DcServer::currentDcServer->log(INFO)) {
 				DcServer::currentDcServer->logStream() << "Received a " << sig << " signal, ignoring it" << endl;
 			}
 			signal(sig, sigHandler);

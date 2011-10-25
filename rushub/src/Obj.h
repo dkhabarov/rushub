@@ -107,6 +107,7 @@ private:
 	static int mCounterObj;
 	static int mLevel;
 	static bool mCout;
+	static const char * mLevelNames[];
 
 	/** output log stream */
 	ostream * mToLog;

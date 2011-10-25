@@ -568,7 +568,7 @@ void AdcProtocol::onFlush(Conn * conn) {
 	if (dcConn->mNickListInProgress) {
 		dcConn->mNickListInProgress = false;
 		if (!dcConn->isOk() || !dcConn->isWritable()) {
-			if (dcConn->log(INFO)) {
+			if (dcConn->log(DEBUG)) {
 				dcConn->logStream() << "Connection closed during nicklist" << endl;
 			}
 		} else {
@@ -587,7 +587,7 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 	// TODO Checking length of command
 
 	if (adcParser->mType == ADC_TYPE_INVALID) {
-		if (dcConn->log(INFO)) {
+		if (dcConn->log(DEBUG)) {
 			dcConn->logStream() << "Wrong syntax cmd" << endl;
 		}
 		string msg("ISTA "), buff;
@@ -602,7 +602,7 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 
 	// Checking null chars
 	if (strlen(adcParser->mCommand.data()) < adcParser->mCommand.size()) {
-		if (dcConn->log(INFO)) {
+		if (dcConn->log(WARN)) {
 			dcConn->logStream() << "Sending null chars, probably attempt an attack" << endl;
 		}
 		dcConn->closeNow(CLOSE_REASON_CMD_NULL);
@@ -614,7 +614,7 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 	if (adcParser->splitChunks()) {
 		// Protection from commands, not belonging to DC protocol
 		if (adcParser->mType != ADC_TYPE_UNKNOWN || mDcServer->mDcConfig.mDisableNoDCCmd) {
-			if (dcConn->log(INFO)) {
+			if (dcConn->log(DEBUG)) {
 				dcConn->logStream() << "Unknown cmd: " << adcParser->mType << endl;
 			}
 			dcConn->closeNice(9000, CLOSE_REASON_CMD_SYNTAX);

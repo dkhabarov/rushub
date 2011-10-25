@@ -395,7 +395,7 @@ void WINAPI Service::ctrlHandler(DWORD dwCtrl) {
 			// Fallthrough
 
 		case SERVICE_CONTROL_STOP :
-			if (mCurService->log(WARN)) {
+			if (mCurService->log(INFO)) {
 				mCurService->logStream() << "Received a " << dwCtrl << " signal, service stop" << endl;
 			}
 
@@ -419,13 +419,13 @@ void WINAPI Service::ctrlHandler(DWORD dwCtrl) {
 			break;
 
 		case SERVICE_CONTROL_INTERROGATE :
-			if (mCurService->log(WARN)) {
+			if (mCurService->log(INFO)) {
 				mCurService->logStream() << "Received a " << dwCtrl << " signal, interrogate" << endl;
 			}
 			break;
 
 		default :
-			if (mCurService->log(WARN)) {
+			if (mCurService->log(INFO)) {
 				mCurService->logStream() << "Received a " << dwCtrl << " signal, default" << endl;
 			}
 			break;

@@ -103,7 +103,7 @@ Server::~Server() {
 	initWSA = false;
 #endif
 
-	if (log(INFO)) {
+	if (log(DEBUG)) {
 		logStream() << endl << "Allocated objects: " << Obj::getCount()
 		<< endl << "Unclosed sockets: " << Conn::mConnCounter << endl;
 	}
@@ -203,11 +203,11 @@ Conn * Server::addSimpleConn(int connType, const char * ip, const char * port) {
 	}
 
 	if (connType == CONN_TYPE_LISTEN) {
-		if (log(WARN)) {
+		if (log(INFO)) {
 			logStream() << "Listening on " << ip << ":" << port << " TCP" << endl;
 		}
 	} else if (connType == CONN_TYPE_INCOMING_UDP) {
-		if (log(WARN)) {
+		if (log(INFO)) {
 			logStream() << "Listening on " << ip << ":" << port << " UDP" << endl;
 		}
 	} else if (connType == CONN_TYPE_OUTGOING_TCP) {
@@ -495,13 +495,13 @@ int Server::newAccept() {
 int Server::addConnection(Conn * conn) {
 
 	if (!conn->isOk()) {
-		if (conn->log(INFO)) {
+		if (conn->log(DEBUG)) {
 			conn->logStream() << "Not reserved connection: " << conn->getIp() << endl;
 		}
 		if (conn->mSelfConnFactory != NULL) {
 			conn->mSelfConnFactory->deleteConn(conn);
 		} else {
-			if (conn->log(INFO)) {
+			if (conn->log(DEBUG)) {
 				conn->logStream() << "Connection without factory: " << conn->getIp() << endl;
 			}
 			delete conn;

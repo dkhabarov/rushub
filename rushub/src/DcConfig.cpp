@@ -305,12 +305,9 @@ int DcConfig::save() {
 int DcConfig::reload() {
 	int ret = load();
 	if (ret < 0) {
-
 		if (ret != -4) {
-			// Set default log level
-			mMaxLevel = 2;
+			mMaxLevel = INFO; // Set default log level
 		}
-
 		save();
 		return 1;
 	}

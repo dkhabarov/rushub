@@ -109,7 +109,7 @@ int DcConn::onTimer(Time &now) {
 	if (!mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) { // Optimisation
 		for (int i = 0; i < HUB_TIME_OUT_MAX; ++i) {
 			if (!checkTimeOut(HubTimeOut(i), now)) {
-				if (log(INFO)) {
+				if (log(DEBUG)) {
 					logStream() << "Operation timeout (" << HubTimeOut(i) << ")" << endl;
 				}
 				string msg;
@@ -123,7 +123,7 @@ int DcConn::onTimer(Time &now) {
 
 	/*Time lastRecv(mLastRecv);
 	if (dcServer->minDelay(lastRecv, dcServer->mDcConfig.mTimeoutAny)) {
-		if (log(INFO)) {
+		if (log(DEBUG)) {
 			logStream() << "Any action timeout..." << endl;
 		}
 		dcServer->sendToUser(mDcUser, dcServer->mDcLang.mTimeoutAny.c_str(), dcServer->mDcConfig.mHubBot.c_str());

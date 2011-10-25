@@ -541,7 +541,7 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 		if (SOCK_ERR != SOCK_EINTR)
 #endif
 		{
-			if (log(INFO)) {
+			if (log(WARN)) {
 				logStream() << "Couldn't set keepalive flag for accepted socket" << endl;
 			}
 		} else if (log(ERR)) {
@@ -574,7 +574,7 @@ int Conn::defineConnInfo(sockaddr_storage & storage) {
 		char host[NI_MAXHOST] = { 0 };
 		char port[NI_MAXSERV] = { 0 };
 		if (getnameinfo((struct sockaddr *) &storage, sizeof(struct sockaddr), host, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV) != 0) {
-			if (log(INFO)) {
+			if (log(WARN)) {
 				logStream() << "Error in getnameinfo: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 			}
 			closeNow(CLOSE_REASON_GETPEERNAME);
@@ -645,12 +645,12 @@ int Conn::recv() {
 			if (iBufLen == 0) {
 				return -1;
 			} else if (SOCK_ERR == EWOULDBLOCK) {
-				if (log(INFO)) {
+				if (log(DEBUG)) {
 					logStream() << "Operation would block" << endl;
 				}
 				return -2;
 			} else {
-				if (log(INFO)) {
+				if (log(DEBUG)) {
 					logStream() << "Error in receive: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 				}
 				closeNow(CLOSE_REASON_ERROR_RECV);
@@ -934,7 +934,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 	if (send(send_buf, size) < 0) {
 
 		if (SOCK_ERR != SOCK_EAGAIN) {
-			if (log(INFO)) {
+			if (log(DEBUG)) {
 				logStream() << "Error in sending: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << "(not EAGAIN), closing" << endl;
 			}
 			closeNow(CLOSE_REASON_ERROR_SEND);
