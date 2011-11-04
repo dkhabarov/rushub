@@ -1104,7 +1104,7 @@ int Conn::onTimer(Time &) {
 
 bool Conn::strLog() {
 	Obj::strLog();
-	logStream() << "(sock " << mSocket << ") ";
+	simpleLogStream() << "[sock:" << mSocket << "] ";
 	return true;
 }
 

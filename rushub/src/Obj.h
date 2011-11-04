@@ -50,6 +50,8 @@ enum {
 	TRACE  // tracing
 };
 
+/** Main stream of log system */
+#define logStream() logStreamLine(__LINE__)
 
 /** Main object class (log class) */
 class Obj {
@@ -70,14 +72,11 @@ public:
 	/** Return log straem */
 	int log(int level);
 
-	/** Return current log stream */
-	inline ostream & logStream() {
-		return *mToLog;
-	}
+	/** Return current log stream with line */
+	ostream & logStreamLine(const int line);
 
-	const char * getClassName() {
-		return mClassName;
-	}
+	/** Return class name */
+	const char * getClassName();
 
 protected:
 
@@ -100,6 +99,9 @@ protected:
 
 	/** Main function putting log in stream */
 	virtual bool strLog();
+
+	/** Return a simple log stream */
+	ostream & simpleLogStream();
 
 private:
 

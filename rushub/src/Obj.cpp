@@ -109,6 +109,21 @@ int Obj::log(int level) {
 
 
 
+/** Return current log stream */
+ostream & Obj::logStreamLine(const int line) {
+	simpleLogStream() << mClassName << "(" << line << "): ";
+	return simpleLogStream();
+}
+
+
+
+/** Return class name */
+const char * Obj::getClassName() {
+	return mClassName;
+}
+
+
+
 /** Set class name */
 void Obj::setClassName(const char * name) {
 	//if (log(WARN)) logStream() << "r " << mClassName << " -> " << name << endl;
@@ -120,8 +135,15 @@ void Obj::setClassName(const char * name) {
 /** Main function putting log in stream */
 bool Obj::strLog() {
 	utils::Time now(true);
-	logStream() << "[" << now.asDateMsec() << "] " << "(" << mLevelNames[mLevel] << ") " << mClassName << ": ";
+	simpleLogStream() << "[" << now.asDateMsec() << "] " << mLevelNames[mLevel] << " ";
 	return true;
+}
+
+
+
+/** Return a simple log stream */
+ostream & Obj::simpleLogStream() {
+	return *mToLog;
 }
 
 

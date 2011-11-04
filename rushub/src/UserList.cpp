@@ -329,7 +329,7 @@ void UserList::flushCacheAdc() {
 /** Redefining log level function */
 bool UserList::strLog() {
 	Obj::strLog();
-	logStream() << "(" << size() << ")" << "[" << mName << "] ";
+	simpleLogStream() << "[" << mName << ":" << size() << "] ";
 	return true;
 }
 
