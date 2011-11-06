@@ -177,6 +177,10 @@ public:
 		return mDcConfig.mMainPath;
 	}
 
+	const string & getLogDir() const {
+		return mDcConfig.mLogPath;
+	}
+
 	const string & getTime() {
 		stringstream oss;
 		oss << mTime.asDate();

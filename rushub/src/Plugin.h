@@ -73,7 +73,7 @@ using namespace ::std;
 
 /// Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10029
+	#define INTERNAL_PLUGIN_VERSION 10030
 #endif
 
 /// NMDC protocol separator
@@ -310,6 +310,9 @@ public:
 
 	/// Get main hub path
 	virtual const string & getMainDir() const = 0;
+
+	/// Get logs path
+	virtual const string & getLogDir() const = 0;
 
 	/// Get system date-time string (now)
 	virtual const string & getTime() = 0;
