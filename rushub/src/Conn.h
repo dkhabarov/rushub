@@ -56,6 +56,7 @@ public:
 	virtual void deleteConn(Conn * &);
 	virtual void onNewData(Conn *, string *);
 	virtual int onNewConn(Conn *);
+	Protocol * getProtocol(); // ToDo remove!
 
 protected:
 
