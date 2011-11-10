@@ -241,8 +241,8 @@ void DcConfig::addVars(Server * server) {
 	add("bAdcOn",                 mAdcOn,                               false);
 
 	#ifdef HAVE_LIBCAP
-		add("sGroupName",             mGroupName,                            "root");
-		add("sUserName",              mUserName,                            "root");
+		add("sGroupName",           mGroupName,                           string("root"));
+		add("sUserName",            mUserName,                            string("root"));
 	#endif
 
 	add("sLocale",                mLocale,                              string(setlocale(LC_ALL, "")));
