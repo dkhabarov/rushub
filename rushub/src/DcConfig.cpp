@@ -210,10 +210,12 @@ void DcConfig::addVars(Server * server) {
 		add(string("iTimeout").append(timeoutName[i]), mTimeout[i], timeoutDefault[i]);
 	}
 
+	unsigned long maxSendSize(MAX_SEND_SIZE);
+	
 	add("iTimeoutAny",            mTimeoutAny,                          600.);
 	add("iTimerServPeriod",       server->mTimerServPeriod,             2000u);
 	add("iTimerConnPeriod",       server->mTimerConnPeriod,             4000u);
-	add("iMaxSendSize",           server->mMaxSendSize,                 unsigned long(MAX_SEND_SIZE));
+	add("iMaxSendSize",           server->mMaxSendSize,                 maxSendSize);
 	add("iStepDelay",             server->mStepDelay,                   0);
 	add("iStrSizeMax",            mMaxNmdcCommandLength,                10240ul);
 	add("iSysLoading",            mSysLoading,                          1.);
