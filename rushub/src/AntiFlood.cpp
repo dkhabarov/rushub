@@ -38,7 +38,7 @@ AntiFlood::AntiFlood(unsigned & iCount, double & time) :
 AntiFlood::~AntiFlood() {
 	List_t * Item = NULL;
 	while (mList != NULL) {
-		sItem * Data = mList->remove(mList->mKey, Item);
+		Item * Data = mList->remove(mList->mKey, Item);
 		delete Data;
 		delete mList;
 		mList = Item;
@@ -51,7 +51,7 @@ void AntiFlood::del(Time & now) {
 	if (mList) {
 		List_t * Item = NULL;
 		if (mList->mData && double(now - mList->mData->mTime) > mTime) {
-			sItem * Data = mList->remove(mList->mKey, Item);
+			Item * Data = mList->remove(mList->mKey, Item);
 			delete Data;
 			delete mList;
 			mList = Item;
@@ -62,7 +62,7 @@ void AntiFlood::del(Time & now) {
 				Item = list;
 				list = list->mNext;
 				if (list->mData && double(now - list->mData->mTime) > mTime) {
-					sItem * Data = mList->remove(list->mKey, Item);
+					Item * Data = mList->remove(list->mKey, Item);
 					delete Data;
 					list = Item;
 				}
@@ -75,16 +75,16 @@ void AntiFlood::del(Time & now) {
 
 bool AntiFlood::check(const string & ip, const Time & now) {
 	HashType_t hash = mHash(ip);
-	sItem * Item = NULL;
+	Item * Item = NULL;
 	if (!mList) {
-		Item = new sItem();
+		Item = new Item();
 		mList = new List_t(hash, Item);
 		return false;
 	}
 
 	Item = mList->find(hash);
 	if (!Item) {
-		Item = new sItem();
+		Item = new Item();
 		mList->add(hash, Item);
 		return false;
 	}

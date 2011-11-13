@@ -95,6 +95,7 @@ enum {
 };
 
 
+/// ADC commands parser
 class AdcParser : public Parser {
 
 public:

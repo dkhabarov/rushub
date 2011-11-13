@@ -39,6 +39,8 @@ using namespace ::utils; // HashTable, Time
 
 namespace server {
 
+
+/// Choose events of the connections
 class ConnChoose {
 
 protected:
@@ -96,8 +98,10 @@ public:
 
 	inline ConnBase * operator [] (tSocket);
 
-	/** The Structure of the result of the choice, which returns the iterator.
-	Contains the structure, which defines the type socket and pointer on structure, prestored in structure of the choice */
+	/**
+		The Structure of the result of the choice, which returns the iterator.
+		Contains the structure, which defines the type socket and pointer on structure, prestored in structure of the choice
+	*/
 	struct ChooseRes {
 
 		/// Socket descriptor

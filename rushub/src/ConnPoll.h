@@ -49,11 +49,12 @@ namespace server {
 
 
 
-/** ConnPoll */
+/** Unix poll socket chooser */
 class ConnPoll : public ConnChoose {
 
 public:
 
+	/// Poll file descriptor struct
 	struct PollFd: public pollfd {
 		PollFd() {
 			reset();

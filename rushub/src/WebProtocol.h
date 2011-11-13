@@ -33,14 +33,16 @@ namespace server {
 }; // namespace server
 
 
+/// Web Server namespace
 namespace webserver {
 
 class WebConn;
 
+/// Web Server Protocol namespace
 namespace protocol {
 
 
-
+/// Web protocol
 class WebProtocol : public Protocol {
 
 public:

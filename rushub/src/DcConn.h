@@ -129,6 +129,7 @@ class DcServer; // server()
 
 
 
+/// Factory of DC connection
 class DcConnFactory : public ConnFactory {
 
 public:
@@ -143,6 +144,7 @@ public:
 
 
 
+/// Main DC connection
 class DcConn : public Conn, public DcConnBase {
 
 public:
@@ -154,7 +156,8 @@ public:
 	bool mNickListInProgress;  ///< True while sending first nicklist
 	DcUser * mDcUser;           ///< User object
 
-	struct Timers { ///< Timers
+	/// Timers struct
+	struct Timers {
 
 		Time mTime[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !
 		unsigned mCount[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !

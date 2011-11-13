@@ -25,10 +25,7 @@
 
 namespace utils {
 
-/**
-	\class AntiFlood
-	\brief Antiflood
-*/
+/// Main antiflood class
 class AntiFlood {
 
 public:
@@ -45,15 +42,16 @@ public:
 
 private:
 
-	struct sItem {
+	/// Main antiflood item
+	struct Item {
 		Time mTime;
 		unsigned miCount;
-		sItem() : mTime(true), miCount(0) {
+		Item() : mTime(true), miCount(0) {
 		}
 	};
 
 	typedef unsigned long HashType_t;
-	typedef List<HashType_t, sItem *> List_t;
+	typedef List<HashType_t, Item *> List_t;
 	List_t * mList;
 
 

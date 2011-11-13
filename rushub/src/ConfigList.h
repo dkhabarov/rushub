@@ -60,7 +60,7 @@ public:
 	}
 }; // ConfigFactory
 
-/** Base config class */
+/** Base configuration class */
 class ConfigListBase : public Obj {
 
 public:
@@ -152,7 +152,7 @@ public:
 
 
 /**
-	This class is a main class for each config with like structure.
+	This class is a main class for each configuration with like structure.
 	You may link real given with their names. You may get these data or change them.
 	Convert from/in string of the type std::string, read/write from/in stream. Very useful class.
 */

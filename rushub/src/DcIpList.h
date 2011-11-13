@@ -30,6 +30,9 @@ namespace dcserver {
 
 typedef List<tSocket, DcConn *> IpList;
 
+
+
+/// List which contain all IP of the DC server
 class DcIpList : public Obj, public HashTable<IpList *> {
 
 public:
@@ -54,6 +57,7 @@ public:
 		}
 	}
 
+	/// Iterator for IP list
 	class iterator {
 
 	public:

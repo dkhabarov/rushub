@@ -42,7 +42,7 @@ enum {
 };
 
 
-/// Main proto class
+/// Main protocol class
 class Protocol : public Obj {
 
 public:

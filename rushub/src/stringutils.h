@@ -42,6 +42,7 @@
 
 using namespace ::std;
 
+/// Utils namespace
 namespace utils {
 
 bool loadFileInString(const string &, string &);

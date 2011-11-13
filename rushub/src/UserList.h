@@ -46,6 +46,7 @@ class UserBase;
 
 
 
+/// Base template for user list
 template <class I, class T>
 class ListItem {
 
@@ -84,6 +85,7 @@ public:
 
 private:
 
+	/// Maker for list
 	struct Maker : public unary_function<void, I> {
 		Func mFunc;
 		string & mList;

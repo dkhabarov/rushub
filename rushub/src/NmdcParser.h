@@ -32,6 +32,8 @@ using namespace ::server;
 
 namespace dcserver {
 
+
+/// Protocol enums namespace
 namespace protoenums {
 
 typedef enum { /** Types of the commands */
@@ -220,6 +222,9 @@ namespace protocol {
 
 using namespace ::dcserver::protoenums;
 
+
+
+/// NMDC protocol parser
 class NmdcParser : public Parser {
 
 public:

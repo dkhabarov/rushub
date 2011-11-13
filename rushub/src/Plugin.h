@@ -71,24 +71,24 @@ using namespace ::std;
 	#endif // _WIN32
 #endif // REG_PLUGIN
 
-/// Internal plugin version
+// Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
 	#define INTERNAL_PLUGIN_VERSION 10030
 #endif
 
-/// NMDC protocol separator
+// NMDC protocol separator
 #ifndef NMDC_SEPARATOR
 	#define NMDC_SEPARATOR "|"
 	#define NMDC_SEPARATOR_LEN 1
 #endif
 
-/// ADC protocol separator
+// ADC protocol separator
 #ifndef ADC_SEPARATOR
 	#define ADC_SEPARATOR "\n"
 	#define ADC_SEPARATOR_LEN 1
 #endif
 
-/// Web protocol separator
+// Web protocol separator
 #ifndef WEB_SEPARATOR
 	#define WEB_SEPARATOR "\r\n\r\n"
 	#define WEB_SEPARATOR_LEN 4
@@ -96,6 +96,7 @@ using namespace ::std;
 
 
 
+/// DC Server namespace
 namespace dcserver {
 
 enum ClientType {
@@ -158,7 +159,7 @@ enum UserIntParam {
 
 
 
-
+/// Base param class
 class ParamBase {
 
 public:
@@ -460,6 +461,8 @@ namespace webserver {
 
 // ================ WebUserBase ================
 
+
+/// Base Web user
 class WebUserBase {
 
 public:
@@ -493,6 +496,7 @@ public:
 
 
 
+/// Plugin namespace
 namespace plugin {
 
 using namespace ::dcserver;

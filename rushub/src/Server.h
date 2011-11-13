@@ -50,11 +50,15 @@
 using namespace ::std;
 using namespace ::utils; // Time, Obj
 
+
+/// Server realization namespace
 namespace server {
 
 class Conn;
 class ConnFactory;
 
+
+/// Server realization
 class Server : public Obj {
 
 friend class Conn; // for closeNow and miNumCloseConn
@@ -135,7 +139,8 @@ protected:
 	/// Point to Server (for config)
 	Server * mServer;
 
-	struct Times { ///< Times
+	/// Time of server & connection periods
+	struct Times {
 		__int64 mServ; ///< Timer Serv Period
 		__int64 mConn; ///< Timer Conn Period
 	} mTimes;

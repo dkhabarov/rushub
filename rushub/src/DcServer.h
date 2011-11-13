@@ -83,6 +83,7 @@ class DcConfigLoader;
 
 
 
+/// List for get users into plugins
 class DcListIterator : public DcConnListIterator {
 
 public:
@@ -111,6 +112,9 @@ private:
 
 }; // DcListIterator
 
+
+
+/// Main DC Server class
 class DcServer : public Server, public DcServerBase {
 
 	friend class ::dcserver::DcListIterator; // for mClientList
@@ -343,6 +347,8 @@ private:
 
 	bool setCapabilities();
 
+
+	/// Call list struct for registration actions into the plugins
 	struct PluginCallList {
 
 		PluginCallList(PluginList * pluginList) :

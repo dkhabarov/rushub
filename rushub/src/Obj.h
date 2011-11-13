@@ -53,7 +53,7 @@ enum {
 /** Main stream of log system */
 #define logStream() logStreamLine(__LINE__)
 
-/** Main object class (log class) */
+/** Main object class (logger class) */
 class Obj {
 
 public:

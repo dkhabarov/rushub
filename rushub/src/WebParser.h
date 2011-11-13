@@ -31,6 +31,7 @@ namespace protocol {
 
 
 
+/// Web parser
 class WebParser : public Parser {
 
 public:

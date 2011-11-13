@@ -38,6 +38,7 @@
 #include <sys/stat.h>
 
 
+/// Command Line Interface for unix
 class Cli {
 
 private:

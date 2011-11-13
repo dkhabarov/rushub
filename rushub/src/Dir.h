@@ -68,6 +68,8 @@ using namespace ::std;
 
 namespace utils {
 
+
+/// Utility for action to directories
 class Dir {
 
 public:
