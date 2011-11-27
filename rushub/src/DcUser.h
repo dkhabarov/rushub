@@ -52,6 +52,54 @@ class DcConn;
 class DcServer;
 
 
+/// User param
+class Param : public ParamBase {
+
+public:
+
+	Param(const string & name, int type = TYPE_NONE) : 
+			ParamBase(), mName(name), mType(type)
+	{
+	}
+
+	template <class T>
+	Param & operator = (T const & value) {
+		ParamBase::operator = (value);
+		return *this;
+	}
+
+	template <class T>
+	Param & operator = (T * value) {
+		ParamBase::operator = (value);
+		return *this;
+	}
+
+	friend ostream & operator << (ostream & os, const Param & param) {
+		if (param.mObject) {
+			param.mObject->toStream(os);
+		}
+		return os;
+	}
+
+	const string & getName() const {
+		return mName;
+	}
+
+	int getType() const {
+		return mType;
+	}
+
+	void setType(int type) {
+		mType = type;
+	}
+
+private:
+
+	string mName;
+	int mType;
+}; // class Param
+
+
 
 /** Extended class of the user */
 class DcUser : public Obj, public DcUserBase, public UserBase {
@@ -150,6 +198,8 @@ private:
 
 	HashMap<string *> mParams;
 
+	HashMap<Param *> mParamList;
+
 	string myInfo;
 	string mInf; // ADC
 	string mIp; ///< IP address of user/bot
@@ -168,128 +218,6 @@ private:
 	bool mCollectInfo;
 
 }; // DcUser
-
-
-
-/// User param
-class Param : public ParamBase {
-
-public:
-
-	Param(const char * name, int category = 0, bool readOnly = false) : 
-		name(name),
-		type(TYPE_NONE),
-		category(category),
-		readOnly(readOnly)
-	{
-	}
-
-	~Param() {
-	}
-
-
-	const string & getName() const {
-		return name;
-	}
-
-	int getType() const {
-		return type;
-	}
-
-	int getCategory() const {
-		return category;
-	}
-
-	bool isReadOnly() const {
-		return readOnly;
-	}
-
-	void setReadOnly(bool readOnly) {
-		this->readOnly = readOnly;
-	}
-
-
-	const string & getString() const {
-		return value;
-	}
-
-	int getInt() const {
-		return atoi(value.c_str());
-	}
-
-	bool getBool() const {
-		return value == "true" || 0 != getInt();
-	}
-
-	double getDouble() const {
-		return atof(value.c_str());
-	}
-
-	long getLong() const {
-		return atol(value.c_str());
-	}
-	
-	__int64 getInt64() const {
-		return stringToInt64(value);
-	}
-
-
-	void setString(const char * data) {
-		if (!readOnly) {
-			value = data;
-			type = TYPE_STRING;
-		}
-	}
-
-	void setInt(const int & data) {
-		if (!readOnly) {
-			sprintf(mBuffer, "%d", data);
-			value = mBuffer;
-			type = TYPE_INT;
-		}
-	}
-
-	void setBool(const bool & data) {
-		if (!readOnly) {
-			value = (data ? "1" : "0");
-			type = TYPE_BOOL;
-		}
-	}
-
-	void setDouble(const double & data) {
-		if (!readOnly) {
-			sprintf(mBuffer, "%f", data);
-			value = mBuffer;
-			type = TYPE_DOUBLE;
-		}
-	}
-
-	void setLong(const long & data) {
-		if (!readOnly) {
-			sprintf(mBuffer, "%ld", data);
-			value = mBuffer;
-			type = TYPE_LONG;
-		}
-	}
-
-	void setInt64(const __int64 & data) {
-		if (!readOnly) {
-			value = int64ToString(data);
-			type = TYPE_INT64;
-		}
-	}
-
-
-private:
-
-	string name;
-	string value;
-	int type;
-	int category;
-	bool readOnly;
-	static char mBuffer[32];
-
-}; // class Param
 
 
 }; // namespace dcserver

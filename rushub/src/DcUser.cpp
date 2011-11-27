@@ -45,11 +45,18 @@ DcUser::DcUser() :
 
 
 DcUser::~DcUser() {
-	HashMap<string *>::iterator it = mParams.begin(), it_e = mParams.end();
-	while (it != mParams.end()) {
-		string * param = (*it++);
+	HashMap<string *>::iterator _it = mParams.begin(), _it_e = mParams.end();
+	while (_it != _it_e) {
+		string * param = (*_it++);
 		delete param;
 	}
+
+	HashMap<Param *>::iterator it = mParamList.begin(), it_e = mParamList.end();
+	while (it != it_e) {
+		Param * param = (*it++);
+		delete param;
+	}
+
 	mDcConn = NULL;
 	mDcConnBase = NULL;
 	mDcServer = NULL;
