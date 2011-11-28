@@ -121,8 +121,8 @@ public:
 	virtual void disconnect();
 
 
-	virtual const string * getParam(unsigned int key) const;
-	virtual void setParam(unsigned int key, const char * value);
+	virtual const string * getParamOld(unsigned int key) const;
+	virtual void setParamOld(unsigned int key, const char * value);
 
 
 	virtual const string & getStringParam(unsigned int key) const;
@@ -170,7 +170,7 @@ private:
 
 	DcUser & operator = (const DcUser &) { return *this; }
 
-	string & updateParam(unsigned long key, const char * value);
+	string & updateParamOld(unsigned long key, const char * value);
 	void parseDesc(string & description);
 	void parseTag();
 	void findParam(const string & tag, const char * find, unsigned long key);

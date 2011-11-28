@@ -251,7 +251,7 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 
 		if (dcConn->mDcUser != NULL) {
 
-			const string * share = dcConn->mDcUser->getParam(USER_PARAM_SHARE);
+			const string * share = dcConn->mDcUser->getParamOld(USER_PARAM_SHARE);
 			if (share != NULL) {
 				dcServer->miTotalShare -= stringToInt64(*share);
 			}

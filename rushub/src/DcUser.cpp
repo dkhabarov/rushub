@@ -85,15 +85,15 @@ void DcUser::disconnect() {
 
 
 
-const string * DcUser::getParam(unsigned int key) const {
+const string * DcUser::getParamOld(unsigned int key) const {
 	return mParams.find(key);
 }
 
 
 
-void DcUser::setParam(unsigned int key, const char * value) {
+void DcUser::setParamOld(unsigned int key, const char * value) {
 	if (value != NULL) {
-		updateParam(key, value);
+		updateParamOld(key, value);
 	} else {
 		mParams.remove(key);
 	}
@@ -277,7 +277,7 @@ unsigned long DcUser::getUidHash() const {
 
 
 void DcUser::appendParam(string & dst, const char * prefix, unsigned long key) {
-	const string * param = getParam(key);
+	const string * param = getParamOld(key);
 	if (param != NULL) {
 		dst.append(prefix).append(*param);
 	}
@@ -310,24 +310,24 @@ bool DcUser::setInfo(NmdcParser * parser) {
 	if (myInfo != parser->mCommand) {
 		myInfo = parser->mCommand;
 
-		const string * oldShare = getParam(USER_PARAM_SHARE);
+		const string * oldShare = getParamOld(USER_PARAM_SHARE);
 		if (oldShare != NULL) {
 			mDcServer->miTotalShare -= stringToInt64(*oldShare);
 		}
-		string & newShare = updateParam(USER_PARAM_SHARE, parser->chunkString(CHUNK_MI_SIZE).c_str());
+		string & newShare = updateParamOld(USER_PARAM_SHARE, parser->chunkString(CHUNK_MI_SIZE).c_str());
 		mDcServer->miTotalShare += stringToInt64(newShare);
 
-		updateParam(USER_PARAM_EMAIL, parser->chunkString(CHUNK_MI_MAIL).c_str());
+		updateParamOld(USER_PARAM_EMAIL, parser->chunkString(CHUNK_MI_MAIL).c_str());
 
 		size_t size = parser->chunkString(CHUNK_MI_SPEED).size();
 		if (size != 0) {
-			string & connection = updateParam(USER_PARAM_CONNECTION, parser->chunkString(CHUNK_MI_SPEED).c_str());
-			string & magicByte = updateParam(USER_PARAM_BYTE, "");
+			string & connection = updateParamOld(USER_PARAM_CONNECTION, parser->chunkString(CHUNK_MI_SPEED).c_str());
+			string & magicByte = updateParamOld(USER_PARAM_BYTE, "");
 			magicByte += connection[--size];
 			connection.assign(connection, 0, size);
 		}
 
-		string & description = updateParam(USER_PARAM_DESC, parser->chunkString(CHUNK_MI_DESC).c_str());
+		string & description = updateParamOld(USER_PARAM_DESC, parser->chunkString(CHUNK_MI_DESC).c_str());
 		parseDesc(description);
 	}
 	return true;
@@ -484,7 +484,7 @@ void DcUser::setHide(bool hide) {
 
 
 bool DcUser::isPassive() const {
-	const string * mode = getParam(USER_PARAM_MODE);
+	const string * mode = getParamOld(USER_PARAM_MODE);
 	unsigned int passive = (mode != NULL && mode->size()) ? mode->operator [](0) : 0;
 	return passive == 80 || passive == 53 || passive == 83;
 }
@@ -497,7 +497,7 @@ long DcUser::getConnectTime() const {
 
 
 
-string & DcUser::updateParam(unsigned long key, const char * value) {
+string & DcUser::updateParamOld(unsigned long key, const char * value) {
 	string * param = mParams.find(key);
 	if (param != NULL) {
 		*param = value;
@@ -516,8 +516,8 @@ void DcUser::parseDesc(string & description) {
 	if (size) { // optimization
 		size_t i = description.find_last_of('<');
 		if (i != description.npos && description[--size] == '>') {
-			const string * oldTag = getParam(USER_PARAM_TAG);
-			string & tag = updateParam(USER_PARAM_TAG, "");
+			const string * oldTag = getParamOld(USER_PARAM_TAG);
+			string & tag = updateParamOld(USER_PARAM_TAG, "");
 			++i;
 			tag.assign(description, i, size - i);
 			description.assign(description, 0, --i);
@@ -533,12 +533,12 @@ void DcUser::parseDesc(string & description) {
 void DcUser::parseTag() {
 
 	#ifdef _DEBUG
-		if (getParam(USER_PARAM_TAG) == NULL) {
+		if (getParamOld(USER_PARAM_TAG) == NULL) {
 			throw "tag is NULL";
 		}
 	#endif
 
-	const string & tag = *getParam(USER_PARAM_TAG);
+	const string & tag = *getParamOld(USER_PARAM_TAG);
 	size_t clientPos = tag.find(',');
 	size_t tagSize = tag.size();
 	if (clientPos == tag.npos) {
@@ -546,8 +546,8 @@ void DcUser::parseTag() {
 	}
 
 	// Get clientName and clientVersion
-	string & clientVersion = updateParam(USER_PARAM_CLIENT_VERSION, "");
-	string & clientName = updateParam(USER_PARAM_CLIENT_NAME, "");
+	string & clientVersion = updateParamOld(USER_PARAM_CLIENT_VERSION, "");
+	string & clientName = updateParamOld(USER_PARAM_CLIENT_NAME, "");
 
 	size_t v = tag.find("V:");
 	if (v != tag.npos) {
@@ -595,13 +595,13 @@ void DcUser::parseTag() {
 						opPos = tagSize;
 					}
 				}
-				string & opHubs = updateParam(USER_PARAM_OP_HUBS, "");
+				string & opHubs = updateParamOld(USER_PARAM_OP_HUBS, "");
 				opHubs.assign(tag, regPos, opPos - regPos);
 			}
-			string & regHubs = updateParam(USER_PARAM_REG_HUBS, "");
+			string & regHubs = updateParamOld(USER_PARAM_REG_HUBS, "");
 			regHubs.assign(tag, unregPos, regPos - unregPos - 1);
 		}
-		string & unregHubs = updateParam(USER_PARAM_UNREG_HUBS, "");
+		string & unregHubs = updateParamOld(USER_PARAM_UNREG_HUBS, "");
 		unregHubs.assign(tag, h, unregPos - h - 1);
 	}
 
@@ -625,7 +625,7 @@ void DcUser::findParam(const string & tag, const char * find, unsigned long key)
 		if (sepPos == tag.npos) {
 			sepPos = tag.size();
 		}
-		string & param = updateParam(key, "");
+		string & param = updateParamOld(key, "");
 		param.assign(tag, pos, sepPos - pos);
 	}
 }

@@ -79,7 +79,7 @@ void Uid::pushStringOrNil(lua_State * L, DcUserBase * dcUserBase, unsigned long 
 		const string & param = dcUserBase->getStringParam(key);
 		lua_pushstring(L, param.c_str());
 	} else {
-		const string * param = dcUserBase->getParam(key);
+		const string * param = dcUserBase->getParamOld(key);
 		if (param != NULL) {
 			lua_pushstring(L, (*param).c_str());
 		} else {
@@ -95,7 +95,7 @@ void Uid::pushNumberOrNil(lua_State * L, DcUserBase * dcUserBase, unsigned long 
 		const string & param = dcUserBase->getStringParam(key);
 		lua_pushnumber(L, atof(param.c_str()));
 	} else {
-		const string * param = dcUserBase->getParam(key);
+		const string * param = dcUserBase->getParamOld(key);
 		if (param != NULL) {
 			lua_pushnumber(L, atof((*param).c_str()));
 		} else {
