@@ -85,6 +85,25 @@ void DcUser::disconnect() {
 
 
 
+ParamBase * DcUser::getParam(const string & name) const {
+	return mParamList.find(getHash(name.c_str()));
+}
+
+
+
+ParamBase * DcUser::getParamForce(const string & name) {
+	ParamBase * paramBase = getParam(name);
+	if (paramBase != NULL) {
+		return paramBase;
+	} else {
+		Param * param = new Param(name);
+		mParamList.add(getHash(name.c_str()), param);
+		return param;
+	}
+}
+
+
+
 const string * DcUser::getParamOld(unsigned int key) const {
 	return mParams.find(key);
 }
@@ -628,6 +647,16 @@ void DcUser::findParam(const string & tag, const char * find, unsigned long key)
 		string & param = updateParamOld(key, "");
 		param.assign(tag, pos, sepPos - pos);
 	}
+}
+
+
+unsigned long DcUser::getHash(const char * s) {
+	size_t i, l = strlen(s);
+	unsigned long h = l;
+	for (i = l; i > 0;) {
+		h ^= ((h << 5) + (h >> 2) + (unsigned char)(s[--i]));
+	}
+	return h / 2;
 }
 
 

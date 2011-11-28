@@ -273,6 +273,9 @@ public:
 	virtual ~DcUserBase() {
 	}
 
+	virtual ParamBase * getParam(const string & name) const = 0;
+	virtual ParamBase * getParamForce(const string & name) = 0;
+
 	virtual const string * getParamOld(unsigned int key) const = 0;
 	virtual void setParamOld(unsigned int key, const char * value) = 0;
 

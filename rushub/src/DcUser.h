@@ -121,6 +121,10 @@ public:
 	virtual void disconnect();
 
 
+	virtual ParamBase * getParam(const string & name) const;
+	virtual ParamBase * getParamForce(const string & name);
+
+
 	virtual const string * getParamOld(unsigned int key) const;
 	virtual void setParamOld(unsigned int key, const char * value);
 
@@ -188,6 +192,8 @@ private:
 	void setInIpList(bool inIpList);
 
 	void setHide(bool hide);
+
+	static unsigned long DcUser::getHash(const char * s);
 
 private:
 
