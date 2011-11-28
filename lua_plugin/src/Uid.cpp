@@ -275,7 +275,7 @@ int Uid::userIndex(lua_State * L) {
 			break;
 
 		default :
-			lua_pushnil(L);
+			//pushValue(L, dcUserBase, str);
 			break;
 
 	}
@@ -291,76 +291,154 @@ int Uid::userNewIndex(lua_State * L) {
 		ERR_TYPEMETA(1, "UID", "userdata");
 	}
 
-	const char * s = lua_tostring(L, 2);
-	if (!s) {
+	const char * str = lua_tostring(L, 2);
+	if (!str) {
 		ERR_TYPEMETA(2, "UID", "string");
 	}
 
 	DcUserBase * dcUserBase = dcConnBase->mDcUserBase; // TODO refactoring
+	int type = lua_type(L, 3);
 
-	switch(getHash(s)) {
+	switch(getHash(str)) {
 
 		case PARAM_HASH_PROFILE :
 			dcUserBase->setIntParam(USER_INT_PARAM_PROFILE, luaL_checkint(L, 3));
 			break;
 
 		case PARAM_HASH_MYINFO :
-			s = lua_tostring(L, 3);
-			if (!s) {
+			str = lua_tostring(L, 3);
+			if (!str) {
 				ERR_TYPEMETA(3, "UID", "string");
 			}
-			dcUserBase->setInfo(s);
+			dcUserBase->setInfo(str);
 			break;
 
 		case PARAM_HASH_INOPLIST :
-			if (lua_type(L, 3) != LUA_TBOOLEAN) {
+			if (type != LUA_TBOOLEAN) {
 				ERR_TYPEMETA(3, "UID", "boolean");
 			}
 			dcUserBase->setBoolParam(USER_BOOL_PARAM_IN_OP_LIST, lua_toboolean(L, 3) != 0);
 			break;
 
 		case PARAM_HASH_INIPLIST :
-			if (lua_type(L, 3) != LUA_TBOOLEAN) {
+			if (type != LUA_TBOOLEAN) {
 				ERR_TYPEMETA(3, "UID", "boolean");
 			}
 			dcUserBase->setBoolParam(USER_BOOL_PARAM_IN_IP_LIST, lua_toboolean(L, 3) != 0);
 			break;
 
 		case PARAM_HASH_HIDE :
-			if (lua_type(L, 3) != LUA_TBOOLEAN) {
+			if (type != LUA_TBOOLEAN) {
 				ERR_TYPEMETA(3, "UID", "boolean");
 			}
 			dcUserBase->setBoolParam(USER_BOOL_PARAM_HIDE, lua_toboolean(L, 3) != 0);
 			break;
 
 		case PARAM_HASH_KICK :
-			if (lua_type(L, 3) != LUA_TBOOLEAN) {
+			if (type != LUA_TBOOLEAN) {
 				ERR_TYPEMETA(3, "UID", "boolean");
 			}
 			dcUserBase->setBoolParam(USER_BOOL_PARAM_CAN_KICK, lua_toboolean(L, 3) != 0 ? "1" : NULL);
 			break;
 
 		case PARAM_HASH_REDIRECT :
-			if (lua_type(L, 3) != LUA_TBOOLEAN) {
+			if (type != LUA_TBOOLEAN) {
 				ERR_TYPEMETA(3, "UID", "boolean");
 			}
 			dcUserBase->setBoolParam(USER_BOOL_PARAM_CAN_FORCE_MOVE, lua_toboolean(L, 3) != 0 ? "1" : NULL);
 			break;
 
 		case PARAM_HASH_DATA :
-			s = lua_tostring(L, 3);
-			if (!s) {
+			str = lua_tostring(L, 3);
+			if (!str) {
 				ERR_TYPEMETA(3, "UID", "string");
 			}
-			dcUserBase->setStringParam(USER_STRING_PARAM_DATA, s);
+			dcUserBase->setStringParam(USER_STRING_PARAM_DATA, str);
+			break;
+
+		default :
+			/*if (type == LUA_TSTRING) {
+				setValue(L, dcUserBase, str, ParamBase::TYPE_STRING);
+			} else if (type == LUA_TNUMBER) {
+				setValue(L, dcUserBase, str, ParamBase::TYPE_DOUBLE);
+			} else if (type == LUA_TBOOLEAN) {
+				setValue(L, dcUserBase, str, ParamBase::TYPE_BOOL);
+			} else if (type == LUA_TNIL) {
+				// TODO remove
+			}*/
+			break;
+
+	}
+	lua_settop(L, 0);
+	return 0;
+}
+
+
+
+void Uid::pushValue(lua_State * L, DcUserBase * dcUserBase, const string & name) {
+	ParamBase * paramBase = dcUserBase->getParam(name);
+	if (paramBase == NULL) {
+		lua_pushnil(L);
+	}
+	switch (paramBase->getType()) {
+		case ParamBase::TYPE_STRING :
+			lua_pushstring(L, static_cast<string> (*paramBase).c_str());
+			break;
+
+		case ParamBase::TYPE_BOOL :
+			lua_pushboolean(L, static_cast<bool> (*paramBase) ? 1 : 0);
+			break;
+
+		case ParamBase::TYPE_INT :
+			lua_pushinteger(L, static_cast<int> (*paramBase));
+			break;
+
+		case ParamBase::TYPE_DOUBLE :
+		case ParamBase::TYPE_INT64 :
+		case ParamBase::TYPE_LONG :
+			lua_pushnumber(L, static_cast<double> (*paramBase));
+			break;
+
+		case ParamBase::TYPE_NONE :
+			lua_pushnil(L);
+			break;
+
+		default :
+			throw "Unknown type";
+	}
+}
+
+
+
+void Uid::setValue(lua_State * L, DcUserBase * dcUserBase, const string & name, int type) {
+	ParamBase * paramBase = dcUserBase->getParamForce(name);
+	if (paramBase == NULL) {
+		throw "never";
+	}
+
+	paramBase->setType(type);
+	switch (type) {
+		case ParamBase::TYPE_STRING :
+			*paramBase = string(lua_tostring(L, 3));
+			break;
+
+		case ParamBase::TYPE_BOOL :
+			*paramBase = (lua_toboolean(L, 3) != 0);
+			break;
+
+		case ParamBase::TYPE_DOUBLE :
+		case ParamBase::TYPE_INT :
+		case ParamBase::TYPE_INT64 :
+		case ParamBase::TYPE_LONG :
+			*paramBase = (lua_tonumber(L, 3));
 			break;
 
 		default :
 			break;
 
 	}
+
 	lua_settop(L, 0);
-	return 0;
 }
 
 

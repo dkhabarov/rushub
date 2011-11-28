@@ -218,7 +218,7 @@ protected:
 	ParamBase() : mObject(NULL) {
 	}
 
-	~ParamBase() {
+	virtual ~ParamBase() {
 		if (mObject) {
 			delete mObject;
 		}
