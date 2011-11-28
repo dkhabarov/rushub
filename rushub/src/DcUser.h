@@ -175,7 +175,6 @@ private:
 	void parseTag();
 	void findParam(const string & tag, const char * find, unsigned long key);
 
-	void collectInfo();
 	void appendParam(string & dst, const char * prefix, unsigned long key);
 
 
@@ -215,7 +214,6 @@ private:
 
 	bool mCanKick;
 	bool mCanForceMove;
-	bool mCollectInfo;
 
 }; // DcUser
 

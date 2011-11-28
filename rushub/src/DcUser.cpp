@@ -36,8 +36,7 @@ DcUser::DcUser() :
 	mInIpList(false),
 	mHide(false),
 	mInUserList(false),
-	mCanSend(false),
-	mCollectInfo(false)
+	mCanSend(false)
 {
 	mDcConnBase = NULL;
 }
@@ -93,7 +92,6 @@ const string * DcUser::getParam(unsigned int key) const {
 
 
 void DcUser::setParam(unsigned int key, const char * value) {
-	mCollectInfo = true;
 	if (value != NULL) {
 		updateParam(key, value);
 	} else {
@@ -285,20 +283,9 @@ void DcUser::appendParam(string & dst, const char * prefix, unsigned long key) {
 	}
 }
 
-void DcUser::collectInfo() {
-	// TODO
-	//myInfo = "$MyINFO $ALL ";
-	//myInfo.append(getUid()).append(" ");
-	//appendParam(myInfo, "", USER_PARAM_DESC);
-	//" $ $$$0$"
-}
 
 
 const string & DcUser::getInfo() {
-	if (mCollectInfo) {
-		collectInfo();
-		mCollectInfo = false;
-	}
 	return myInfo;
 }
 
