@@ -275,7 +275,7 @@ int Uid::userIndex(lua_State * L) {
 			break;
 
 		default :
-			//pushValue(L, dcUserBase, str);
+			pushValue(L, dcUserBase, str);
 			break;
 
 	}
@@ -357,7 +357,7 @@ int Uid::userNewIndex(lua_State * L) {
 			break;
 
 		default :
-			/*if (type == LUA_TSTRING) {
+			if (type == LUA_TSTRING) {
 				setValue(L, dcUserBase, str, ParamBase::TYPE_STRING);
 			} else if (type == LUA_TNUMBER) {
 				setValue(L, dcUserBase, str, ParamBase::TYPE_DOUBLE);
@@ -365,7 +365,7 @@ int Uid::userNewIndex(lua_State * L) {
 				setValue(L, dcUserBase, str, ParamBase::TYPE_BOOL);
 			} else if (type == LUA_TNIL) {
 				// TODO remove
-			}*/
+			}
 			break;
 
 	}
@@ -382,29 +382,32 @@ void Uid::pushValue(lua_State * L, DcUserBase * dcUserBase, const string & name)
 	}
 	switch (paramBase->getType()) {
 		case ParamBase::TYPE_STRING :
-			lua_pushstring(L, static_cast<string> (*paramBase).c_str());
+			lua_pushstring(L, paramBase->getString().c_str());
 			break;
 
 		case ParamBase::TYPE_BOOL :
-			lua_pushboolean(L, static_cast<bool> (*paramBase) ? 1 : 0);
+			lua_pushboolean(L, paramBase->getBool() ? 1 : 0);
 			break;
 
 		case ParamBase::TYPE_INT :
-			lua_pushinteger(L, static_cast<int> (*paramBase));
+			lua_pushinteger(L, paramBase->getInt());
 			break;
 
 		case ParamBase::TYPE_DOUBLE :
-		case ParamBase::TYPE_INT64 :
-		case ParamBase::TYPE_LONG :
-			lua_pushnumber(L, static_cast<double> (*paramBase));
+			lua_pushnumber(L, paramBase->getDouble());
 			break;
 
-		case ParamBase::TYPE_NONE :
-			lua_pushnil(L);
+		case ParamBase::TYPE_INT64 :
+			lua_pushnumber(L, static_cast<double> (paramBase->getInt64()));
+			break;
+
+		case ParamBase::TYPE_LONG :
+			lua_pushnumber(L, static_cast<double> (paramBase->getLong()));
 			break;
 
 		default :
-			throw "Unknown type";
+			lua_pushnil(L);
+			break;
 	}
 }
 
@@ -416,21 +419,20 @@ void Uid::setValue(lua_State * L, DcUserBase * dcUserBase, const string & name, 
 		throw "never";
 	}
 
-	paramBase->setType(type);
 	switch (type) {
 		case ParamBase::TYPE_STRING :
-			*paramBase = string(lua_tostring(L, 3));
+			paramBase->setString(string(lua_tostring(L, 3)));
 			break;
 
 		case ParamBase::TYPE_BOOL :
-			*paramBase = (lua_toboolean(L, 3) != 0);
+			paramBase->setBool(lua_toboolean(L, 3) != 0);
 			break;
 
 		case ParamBase::TYPE_DOUBLE :
 		case ParamBase::TYPE_INT :
 		case ParamBase::TYPE_INT64 :
 		case ParamBase::TYPE_LONG :
-			*paramBase = (lua_tonumber(L, 3));
+			paramBase->setDouble(lua_tonumber(L, 3));
 			break;
 
 		default :

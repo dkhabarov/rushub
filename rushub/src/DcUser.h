@@ -27,6 +27,7 @@
 #include "NmdcParser.h"
 #include "HashMap.h"
 #include "stringutils.h"
+#include "Any.h"
 
 #include <stdlib.h> // atoi unix
 #include <string>
@@ -52,53 +53,83 @@ class DcConn;
 class DcServer;
 
 
-/// User param
+/// Param class
 class Param : public ParamBase {
 
 public:
 
-	Param(const string & name, int type = TYPE_NONE) : 
-			ParamBase(), mName(name), mType(type)
-	{
-	}
-
-	template <class T>
-	Param & operator = (T const & value) {
-		ParamBase::operator = (value);
-		return *this;
-	}
-
-	template <class T>
-	Param & operator = (T * value) {
-		ParamBase::operator = (value);
-		return *this;
-	}
-
-	friend ostream & operator << (ostream & os, const Param & param) {
-		if (param.mObject) {
-			param.mObject->toStream(os);
-		}
-		return os;
+	Param(const string & name) : mName(name), mType(TYPE_NONE) {
 	}
 
 	const string & getName() const {
 		return mName;
 	}
-
 	int getType() const {
 		return mType;
 	}
 
-	void setType(int type) {
-		mType = type;
+	const string & getString() const {
+		return mValue;
+	}
+
+	void setString(const string & value) {
+		mType = TYPE_STRING;
+		mValue = value;
+	}
+
+	int getInt() const {
+		return mValue;
+	}
+
+	void setInt(int value) {
+		mType = TYPE_INT;
+		mValue = value;
+	}
+
+	bool getBool() const {
+		return mValue;
+	}
+
+	void setBool(bool value) {
+		mType = TYPE_BOOL;
+		mValue = value;
+	}
+
+	double getDouble() const {
+		return mValue;
+	}
+
+	void setDouble(double value) {
+		mType = TYPE_DOUBLE;
+		mValue = value;
+	}
+
+	long getLong() const {
+		return mValue;
+	}
+
+	void setLong(long value) {
+		mType = TYPE_LONG;
+		mValue = value;
+	}
+
+	__int64 getInt64() const {
+		return mValue;
+	}
+
+	void setInt64(__int64 value) {
+		mType = TYPE_INT64;
+		mValue = value;
 	}
 
 private:
 
 	string mName;
 	int mType;
-}; // class Param
 
+	Any mValue;
+
+}; // class ParamBase
 
 
 /** Extended class of the user */

@@ -178,78 +178,19 @@ public:
 
 	virtual const string & getName() const = 0;
 	virtual int getType() const = 0;
-	virtual void setType(int type) = 0;
 
-	template <class T>
-	ParamBase & operator = (T const & value) {
-		if (mObject) {
-			delete mObject;
-		}
-		mObject = new Type<T>(value);
-		return *this;
-	}
-
-	template <class T>
-	ParamBase & operator = (T * value) {
-		if (mObject) {
-			delete mObject;
-		}
-		mObject = new Type<T>(value);
-		return *this;
-	}
-
-	template <class T>
-	operator const T & () {
-		if (!mObject) {
-			throw "never";
-		}
-		return dynamic_cast<Type<T> &> (*mObject).get();
-	}
-
-	friend ostream & operator << (ostream & os, const ParamBase & param) {
-		if (param.mObject) {
-			param.mObject->toStream(os);
-		}
-		return os;
-	}
-
-protected:
-
-	ParamBase() : mObject(NULL) {
-	}
-
-	virtual ~ParamBase() {
-		if (mObject) {
-			delete mObject;
-		}
-	}
-
-	class TypeBase {
-	public:
-		virtual ~TypeBase() {
-		}
-		virtual void toStream(ostream & os) = 0;
-	};
-
-	template <class T>
-	class Type : public TypeBase {
-	public:
-		Type(T const & t) : mObject(t), mRef(NULL) {
-		}
-		Type(T * t) : mRef(t) {
-		}
-		const T & get() const {
-			return mRef ? *mRef : mObject;
-		}
-		void toStream(ostream & os) {
-			os << (mRef ? *mRef : mObject);
-		}
-	private:
-		T mObject;
-		T const * mRef;
-	};
-
-	TypeBase * mObject;
+	virtual const string & getString() const = 0;
+	virtual void setString(const string &) = 0;
+	virtual int getInt() const = 0;
+	virtual void setInt(int) = 0;
+	virtual bool getBool() const = 0;
+	virtual void setBool(bool) = 0;
+	virtual double getDouble() const = 0;
+	virtual void setDouble(double) = 0;
+	virtual long getLong() const = 0;
+	virtual void setLong(long) = 0;
+	virtual __int64 getInt64() const = 0;
+	virtual void setInt64(__int64) = 0;
 
 }; // class ParamBase
 
