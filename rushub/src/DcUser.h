@@ -77,7 +77,7 @@ public:
 		mValue = value;
 	}
 
-	int getInt() const {
+	const int & getInt() const {
 		return mValue;
 	}
 
@@ -86,7 +86,7 @@ public:
 		mValue = value;
 	}
 
-	bool getBool() const {
+	const bool & getBool() const {
 		return mValue;
 	}
 
@@ -95,7 +95,7 @@ public:
 		mValue = value;
 	}
 
-	double getDouble() const {
+	const double & getDouble() const {
 		return mValue;
 	}
 
@@ -104,7 +104,7 @@ public:
 		mValue = value;
 	}
 
-	long getLong() const {
+	const long & getLong() const {
 		return mValue;
 	}
 
@@ -113,7 +113,7 @@ public:
 		mValue = value;
 	}
 
-	__int64 getInt64() const {
+	const __int64 & getInt64() const {
 		return mValue;
 	}
 
@@ -224,7 +224,7 @@ private:
 
 	void setHide(bool hide);
 
-	static unsigned long DcUser::getHash(const char * s);
+	static unsigned long getHash(const char * s);
 
 private:
 

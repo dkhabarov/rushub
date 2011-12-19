@@ -283,7 +283,6 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 
 	if (!udp) {
 		sockoptval_t so_reuseaddr = 1;
-		sockoptval_t tcp_nodelay = 1;
 
 		// TIME_WAIT after close conn. Reuse address after disconn
 		if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &so_reuseaddr, sizeof(sockoptval_t)))) {
@@ -294,6 +293,7 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 		}
 
 		#ifdef _WIN32
+		sockoptval_t tcp_nodelay = 1;
 		if (SOCK_ERROR(setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &tcp_nodelay, sizeof(sockoptval_t)))) {
 			if (log(FATAL)) {
 				logStream() << "Error in setsockopt: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;

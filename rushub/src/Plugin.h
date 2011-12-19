@@ -181,15 +181,15 @@ public:
 
 	virtual const string & getString() const = 0;
 	virtual void setString(const string &) = 0;
-	virtual int getInt() const = 0;
+	virtual const int & getInt() const = 0;
 	virtual void setInt(int) = 0;
-	virtual bool getBool() const = 0;
+	virtual const bool & getBool() const = 0;
 	virtual void setBool(bool) = 0;
-	virtual double getDouble() const = 0;
+	virtual const double & getDouble() const = 0;
 	virtual void setDouble(double) = 0;
-	virtual long getLong() const = 0;
+	virtual const long & getLong() const = 0;
 	virtual void setLong(long) = 0;
-	virtual __int64 getInt64() const = 0;
+	virtual const __int64 & getInt64() const = 0;
 	virtual void setInt64(__int64) = 0;
 
 }; // class ParamBase
