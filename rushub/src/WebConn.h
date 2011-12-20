@@ -33,9 +33,6 @@ namespace dcserver {
 
 namespace webserver {
 
-
-
-/// Factory for Web connetion
 class WebConnFactory : public ConnFactory {
 
 public:
@@ -56,7 +53,6 @@ class WebConn;
 
 
 
-/// Web user
 class WebUser : public WebUserBase {
 
 public:
@@ -92,7 +88,6 @@ public:
 
 
 
-/// Web connection
 class WebConn : public Conn {
 
 public:

@@ -83,7 +83,6 @@ class DcConfigLoader;
 
 
 
-/// List for get users into plugins
 class DcListIterator : public DcConnListIterator {
 
 public:
@@ -112,9 +111,6 @@ private:
 
 }; // DcListIterator
 
-
-
-/// Main DC Server class
 class DcServer : public Server, public DcServerBase {
 
 	friend class ::dcserver::DcListIterator; // for mClientList
@@ -179,10 +175,6 @@ public:
 
 	const string & getMainDir() const {
 		return mDcConfig.mMainPath;
-	}
-
-	const string & getLogDir() const {
-		return mDcConfig.mLogPath;
 	}
 
 	const string & getTime() {
@@ -347,8 +339,6 @@ private:
 
 	bool setCapabilities();
 
-
-	/// Call list struct for registration actions into the plugins
 	struct PluginCallList {
 
 		PluginCallList(PluginList * pluginList) :

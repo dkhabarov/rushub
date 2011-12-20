@@ -27,8 +27,6 @@ using ::std::string;
 namespace configuration {
 
 
-
-/// Class which contain name and path of configuration
 class ConfigStore {
 
 public:
@@ -39,9 +37,6 @@ public:
 
 class ConfigListBase;
 
-
-
-/// Abstract class for load/save configuration
 class ConfigLoader {
 
 public:

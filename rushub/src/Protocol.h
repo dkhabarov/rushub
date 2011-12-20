@@ -30,7 +30,6 @@
 #include <vector>
 
 using namespace ::std;
-using namespace ::utils;
 
 namespace server {
 
@@ -42,7 +41,7 @@ enum {
 };
 
 
-/// Main protocol class
+/// Main proto class
 class Protocol : public Obj {
 
 public:

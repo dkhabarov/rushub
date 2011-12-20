@@ -54,7 +54,7 @@ ConfigListBase::~ConfigListBase() {
 ConfigItem * ConfigListBase::add(const string & key, ConfigItem * configItem) {
 	Hash_t hash = mList.mHash(key);
 	if (!mList.add(hash, configItem)) { /** Add */
-		if (log(DEBUG)) {
+		if (log(1)) {
 			ConfigItem * other = mList.find(hash);
 			logStream() << "Don't add " << key << " because of " << (other ? other->mName.c_str() : "NULL") << endl;
 			return NULL;
@@ -91,6 +91,49 @@ void ConfigListBase::setBaseTo(void * new_base) {
 	mBase = new_base;
 }
 
+
+
+/** Creating and adding configs */
+#define ADDVAL(TYPE) \
+ConfigItem * ConfigList::add(const string & name, TYPE & var) { \
+	ConfigItem * configItem = this->mFactory->add(var); \
+	return this->ConfigListBase::add(name, configItem); \
+} \
+ConfigItem * ConfigList::add(const string & name, TYPE & var, TYPE const & def) { \
+	ConfigItem * configItem = this->add(name, var); \
+	*configItem = def; \
+	return configItem; \
+}
+
+
+
+#define ADDPVAL(TYPE) \
+ConfigItem * ConfigList::add(const string & name, TYPE* & var) { \
+	ConfigItem * configItem = this->mFactory->add(var); \
+	return this->ConfigListBase::add(name, configItem); \
+} \
+ConfigItem * ConfigList::add(const string & name, TYPE* & var, TYPE const & def) { \
+	ConfigItem * configItem = this->add(name, var); \
+	*configItem = &def; \
+	return configItem; \
+}
+
+
+
+#define ADDVALUES(TYPE) \
+ADDVAL(TYPE); \
+ADDPVAL(TYPE);
+
+ADDVAL(char);
+ADDVAL(char *);
+ADDVALUES(bool);
+ADDVALUES(int);
+ADDVALUES(double);
+ADDVALUES(long);
+ADDVALUES(unsigned);
+ADDVALUES(unsigned long);
+ADDVALUES(__int64);
+ADDVALUES(string);
 
 }; // namespace configuration
 

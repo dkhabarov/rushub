@@ -88,9 +88,6 @@ private:
 	static void pushStringOrNil(lua_State *, DcUserBase *, unsigned long key, bool userPapam = true);
 	static void pushNumberOrNil(lua_State *, DcUserBase *, unsigned long key, bool userPapam = true);
 
-	static void pushValue(lua_State *, DcUserBase *, const string & name);
-	static void setValue(lua_State *, DcUserBase *, const string & name, int type);
-
 	static unsigned int getHash(const char *);
 
 }; // class Uid

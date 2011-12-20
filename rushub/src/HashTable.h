@@ -37,9 +37,6 @@ using namespace ::std;
 
 namespace utils {
 
-
-
-/// Hash method
 template <class T = unsigned long> struct Hash {
 	T operator() (const char * s) const {
 		T h = 0;
@@ -53,9 +50,7 @@ template <class T = unsigned long> struct Hash {
 	}
 };
 
-
-
-/// Usual array data
+/** Usual array data */
 template <class V> class Array {
 
 protected:
@@ -336,7 +331,7 @@ public:
 }; // List
 
 
-/** Hash table or hash array (Array from list with hash) */
+/** Hesh table or hash array (Array from list with hash) */
 template <class V>
 class HashTable {
 

@@ -36,12 +36,12 @@ AntiFlood::AntiFlood(unsigned & iCount, double & time) :
 
 
 AntiFlood::~AntiFlood() {
-	List_t * list = NULL;
+	List_t * Item = NULL;
 	while (mList != NULL) {
-		Item * Data = mList->remove(mList->mKey, list);
+		sItem * Data = mList->remove(mList->mKey, Item);
 		delete Data;
 		delete mList;
-		mList = list;
+		mList = Item;
 	}
 }
 
@@ -49,22 +49,22 @@ AntiFlood::~AntiFlood() {
 
 void AntiFlood::del(Time & now) {
 	if (mList) {
-		List_t * lst = NULL;
+		List_t * Item = NULL;
 		if (mList->mData && double(now - mList->mData->mTime) > mTime) {
-			Item * Data = mList->remove(mList->mKey, lst);
+			sItem * Data = mList->remove(mList->mKey, Item);
 			delete Data;
 			delete mList;
-			mList = lst;
+			mList = Item;
 			del(now);
 		} else {
 			List_t * list = mList;
 			while (list->mNext) {
-				lst = list;
+				Item = list;
 				list = list->mNext;
 				if (list->mData && double(now - list->mData->mTime) > mTime) {
-					Item * Data = mList->remove(list->mKey, lst);
+					sItem * Data = mList->remove(list->mKey, Item);
 					delete Data;
-					list = lst;
+					list = Item;
 				}
 			}
 		}
@@ -75,29 +75,29 @@ void AntiFlood::del(Time & now) {
 
 bool AntiFlood::check(const string & ip, const Time & now) {
 	HashType_t hash = mHash(ip);
-	Item * item = NULL;
+	sItem * Item = NULL;
 	if (!mList) {
-		item = new Item();
-		mList = new List_t(hash, item);
+		Item = new sItem();
+		mList = new List_t(hash, Item);
 		return false;
 	}
 
-	item = mList->find(hash);
-	if (!item) {
-		item = new Item();
-		mList->add(hash, item);
+	Item = mList->find(hash);
+	if (!Item) {
+		Item = new sItem();
+		mList->add(hash, Item);
 		return false;
 	}
 
-	if (item->miCount < miCount) {
-		++item->miCount;
+	if (Item->miCount < miCount) {
+		++Item->miCount;
 	} else {
-		item->miCount = 0;
-		if (::fabs(double(now - item->mTime)) < mTime) {
-			item->mTime = now;
+		Item->miCount = 0;
+		if (::fabs(double(now - Item->mTime)) < mTime) {
+			Item->mTime = now;
 			return true;
 		}
-		item->mTime = now;
+		Item->mTime = now;
 	}
 	return false;
 }

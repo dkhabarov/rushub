@@ -39,24 +39,13 @@
 
 using namespace ::std;
 
-namespace utils {
 
-enum {
-	FATAL, // falat error
-	ERR,   // simple error
-	WARN,  // warning
-	INFO,  // information
-	DEBUG, // debug
-	TRACE  // tracing
-};
 
-/** Main stream of log system */
-#define logStream() logStreamLine(__LINE__)
-
-/** Main object class (logger class) */
+/** Main object class (log class) */
 class Obj {
 
 public:
+
 	static bool mSysLogOn;
 
 public:
@@ -72,11 +61,17 @@ public:
 	/** Return log straem */
 	int log(int level);
 
-	/** Return current log stream with line */
-	ostream & logStreamLine(const int line);
+	/** Return errLog stream */
+	int errLog(int level);
 
-	/** Return class name */
-	const char * getClassName();
+	/** Return current log stream */
+	inline ostream & logStream() {
+		return *mToLog;
+	}
+
+	const char * getClassName() {
+		return mClassName;
+	}
 
 protected:
 
@@ -100,16 +95,13 @@ protected:
 	/** Main function putting log in stream */
 	virtual bool strLog();
 
-	/** Return a simple log stream */
-	ostream & simpleLogStream();
-
 private:
 
 	/** Objects counter */
 	static int mCounterObj;
 	static int mLevel;
+	static bool mIsErrorLog;
 	static bool mCout;
-	static const char * mLevelNames[];
 
 	/** output log stream */
 	ostream * mToLog;
@@ -118,7 +110,7 @@ private:
 	static ostringstream mBufOss;
 
 	// Loading buffer
-	typedef pair<int, string> Pair;
+	typedef pair<pair<int, bool>, string> Pair;
 	static vector<Pair> mLoadBuf;
 
 private:
@@ -126,16 +118,17 @@ private:
 	/** log function */
 	ostream & log();
 
+	/** errLog function */
+	ostream & errLog();
+
 	ostream & openLog();
 	bool saveInBuf();
 	void loadFromBuf(ostream &);
 
 	/** Return level for syslog */
-	int sysLogLevel(int level);
+	int sysLogLevel(int level, bool isError = false);
 
 }; // class Obj
-
-}; // namespace utils
 
 #endif // OBJ_H
 

@@ -29,14 +29,12 @@
 
 using namespace ::configuration;
 using namespace ::std;
-using namespace ::utils;
 
 
 namespace dcserver {
 
 
 
-/// Configuration loader of DC Server
 class DcConfigLoader : public Obj, public ConfigLoader {
 
 public:

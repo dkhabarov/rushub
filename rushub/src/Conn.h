@@ -34,7 +34,7 @@
 #include <list>
 
 using namespace ::std; // string, cout, endl
-using namespace ::utils; // Time, Obj
+using namespace ::utils; // Time
 
 namespace server {
 
@@ -56,7 +56,6 @@ public:
 	virtual void deleteConn(Conn * &);
 	virtual void onNewData(Conn *, string *);
 	virtual int onNewConn(Conn *);
-	Protocol * getProtocol(); // ToDo remove!
 
 protected:
 

@@ -42,13 +42,9 @@ class DcUser;
 class UserList;
 class UserBase;
 
-
-/// Main Protocol namespace
 namespace protocol {
 
 
-
-/// NMDC protocol
 class NmdcProtocol : public Protocol {
 
 public:

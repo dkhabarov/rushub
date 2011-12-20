@@ -55,7 +55,6 @@ class PluginLoader;
 
 
 
-/// List with all plugins
 class PluginList : public Obj, public PluginListBase {
 
 	/** For LoadAll */

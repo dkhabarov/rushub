@@ -71,24 +71,24 @@ using namespace ::std;
 	#endif // _WIN32
 #endif // REG_PLUGIN
 
-// Internal plugin version
+/// Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10030
+	#define INTERNAL_PLUGIN_VERSION 10029
 #endif
 
-// NMDC protocol separator
+/// NMDC protocol separator
 #ifndef NMDC_SEPARATOR
 	#define NMDC_SEPARATOR "|"
 	#define NMDC_SEPARATOR_LEN 1
 #endif
 
-// ADC protocol separator
+/// ADC protocol separator
 #ifndef ADC_SEPARATOR
 	#define ADC_SEPARATOR "\n"
 	#define ADC_SEPARATOR_LEN 1
 #endif
 
-// Web protocol separator
+/// Web protocol separator
 #ifndef WEB_SEPARATOR
 	#define WEB_SEPARATOR "\r\n\r\n"
 	#define WEB_SEPARATOR_LEN 4
@@ -96,7 +96,6 @@ using namespace ::std;
 
 
 
-/// DC Server namespace
 namespace dcserver {
 
 enum ClientType {
@@ -159,7 +158,7 @@ enum UserIntParam {
 
 
 
-/// Base param class
+
 class ParamBase {
 
 public:
@@ -174,23 +173,24 @@ public:
 		TYPE_INT64
 	};
 
-public:
-
 	virtual const string & getName() const = 0;
 	virtual int getType() const = 0;
+	virtual int getCategory() const = 0;
+	virtual bool isReadOnly() const = 0;
 
 	virtual const string & getString() const = 0;
-	virtual void setString(const string &) = 0;
-	virtual const int & getInt() const = 0;
-	virtual void setInt(int) = 0;
-	virtual const bool & getBool() const = 0;
-	virtual void setBool(bool) = 0;
-	virtual const double & getDouble() const = 0;
-	virtual void setDouble(double) = 0;
-	virtual const long & getLong() const = 0;
-	virtual void setLong(long) = 0;
-	virtual const __int64 & getInt64() const = 0;
-	virtual void setInt64(__int64) = 0;
+	virtual int getInt() const = 0;
+	virtual bool getBool() const = 0;
+	virtual double getDouble() const = 0;
+	virtual long getLong() const = 0;
+	virtual __int64 getInt64() const = 0;
+
+	virtual void setString(const char *) = 0;
+	virtual void setInt(const int &) = 0;
+	virtual void setBool(const bool &) = 0;
+	virtual void setDouble(const double &) = 0;
+	virtual void setLong(const long &) = 0;
+	virtual void setInt64(const __int64 &) = 0;
 
 }; // class ParamBase
 
@@ -214,11 +214,8 @@ public:
 	virtual ~DcUserBase() {
 	}
 
-	virtual ParamBase * getParam(const string & name) const = 0;
-	virtual ParamBase * getParamForce(const string & name) = 0;
-
-	virtual const string * getParamOld(unsigned int key) const = 0;
-	virtual void setParamOld(unsigned int key, const char * value) = 0;
+	virtual const string * getParam(unsigned int key) const = 0;
+	virtual void setParam(unsigned int key, const char * value) = 0;
 
 	virtual const string & getStringParam(unsigned int key) const = 0;
 	virtual void setStringParam(unsigned int key, const string & value) = 0;
@@ -313,9 +310,6 @@ public:
 
 	/// Get main hub path
 	virtual const string & getMainDir() const = 0;
-
-	/// Get logs path
-	virtual const string & getLogDir() const = 0;
 
 	/// Get system date-time string (now)
 	virtual const string & getTime() = 0;
@@ -463,8 +457,6 @@ namespace webserver {
 
 // ================ WebUserBase ================
 
-
-/// Base Web user
 class WebUserBase {
 
 public:
@@ -498,7 +490,6 @@ public:
 
 
 
-/// Plugin namespace
 namespace plugin {
 
 using namespace ::dcserver;

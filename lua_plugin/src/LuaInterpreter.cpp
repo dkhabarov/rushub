@@ -362,7 +362,7 @@ void LuaInterpreter::newCallParam(lua_Number data, int type) {
 
 
 void LuaInterpreter::logError(const char * msg) {
-	string logs(LuaPlugin::mCurServer->getLogDir());
+	string logs(LuaPlugin::mCurServer->getMainDir() + "logs/");
 	Dir::checkPath(logs);
 	string logFile(logs + "lua_errors.log");
 

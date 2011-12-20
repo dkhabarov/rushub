@@ -26,7 +26,7 @@
 #define SERVER_H
 
 #define INTERNALNAME "RusHub"
-#define INTERNALVERSION "2.3.8[beta]" // without space!
+#define INTERNALVERSION "2.3.7" // without space!
 
 #include "ConnChoose.h" // first (def winsock2.h)
 #include "Obj.h"
@@ -48,17 +48,13 @@
 
 
 using namespace ::std;
-using namespace ::utils; // Time, Obj
+using namespace ::utils; // Time
 
-
-/// Server realization namespace
 namespace server {
 
 class Conn;
 class ConnFactory;
 
-
-/// Server realization
 class Server : public Obj {
 
 friend class Conn; // for closeNow and miNumCloseConn
@@ -139,8 +135,7 @@ protected:
 	/// Point to Server (for config)
 	Server * mServer;
 
-	/// Time of server & connection periods
-	struct Times {
+	struct Times { ///< Times
 		__int64 mServ; ///< Timer Serv Period
 		__int64 mConn; ///< Timer Conn Period
 	} mTimes;

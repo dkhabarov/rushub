@@ -257,7 +257,7 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 	// getaddrinfo
 	int ret = getaddrinfo(address, port, &hints, &mAddrInfo);
 	if (ret != 0) {
-		if (log(FATAL)) {
+		if (errLog(0)) {
 			logStream() << "Error in getaddrinfo: " << 
 			#ifdef _WIN32
 				SOCK_ERR
@@ -269,42 +269,32 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 		return INVALID_SOCKET;
 	}
 
-	if (log(DEBUG)) {
+	if (log(3)) {
 		logStream() << "Using " << (mAddrInfo->ai_family == AF_INET6 ? "IPv6" : "IPv4") << " socket" << endl;
 	}
 
 	// socket
 	if (SOCK_INVALID(sock = socket(mAddrInfo->ai_family, mAddrInfo->ai_socktype, 0))) {
-		if (log(FATAL)) {
+		if (errLog(0)) {
 			logStream() << "Error in socket: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 		}
 		return INVALID_SOCKET;
 	}
 
 	if (!udp) {
-		sockoptval_t so_reuseaddr = 1;
+		sockoptval_t yes = 1;
 
 		// TIME_WAIT after close conn. Reuse address after disconn
-		if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &so_reuseaddr, sizeof(sockoptval_t)))) {
-			if (log(FATAL)) {
+		if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(sockoptval_t)))) {
+			if (errLog(0)) {
 				logStream() << "Error in setsockopt: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 			}
 			return INVALID_SOCKET;
 		}
-
-		#ifdef _WIN32
-		sockoptval_t tcp_nodelay = 1;
-		if (SOCK_ERROR(setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &tcp_nodelay, sizeof(sockoptval_t)))) {
-			if (log(FATAL)) {
-				logStream() << "Error in setsockopt: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
-			}
-			return INVALID_SOCKET;
-		}
-		#endif
 	}
 
 	++mConnCounter;
-	if (log(DEBUG)) {
+	if (log(3)) {
 		logStream() << "Created new socket: " << sock << endl;
 	}
 	return sock;
@@ -320,7 +310,7 @@ tSocket Conn::socketBind(tSocket sock) {
 
 	// Bind
 	if (SOCK_ERROR(bind(sock, mAddrInfo->ai_addr, static_cast<int> (mAddrInfo->ai_addrlen)))) {
-		if (log(FATAL)) {
+		if (errLog(0)) {
 			logStream() << "Error bind: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 		}
 		return INVALID_SOCKET;
@@ -338,7 +328,7 @@ tSocket Conn::socketListen(tSocket sock) {
 	}
 	if (SOCK_ERROR(listen(sock, SOCK_BACKLOG))) {
 		SOCK_CLOSE(sock);
-		if (log(ERR)) {
+		if (errLog(1)) {
 			logStream() << "Error listening: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 		}
 		return INVALID_SOCKET;
@@ -355,7 +345,7 @@ tSocket Conn::socketConnect(tSocket sock) {
 	}
 	if (SOCK_ERROR(connect(sock, mAddrInfo->ai_addr, static_cast<int> (mAddrInfo->ai_addrlen)))) {
 		SOCK_CLOSE(sock);
-		if (log(ERR)) {
+		if (errLog(1)) {
 			logStream() << "Error connecting: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 		}
 		return INVALID_SOCKET;
@@ -400,10 +390,10 @@ void Conn::close() {
 	if (!(SOCK_ERROR(err))) {
 #endif
 		--mConnCounter;
-		if (log(DEBUG)) {
+		if (log(3)) {
 			logStream() << "Closing socket: " << mSocket << endl;
 		}
-	} else if (log(ERR)) {
+	} else if (errLog(1)) {
 		logStream() << "Socket not closed: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 	}
 
@@ -443,7 +433,7 @@ void Conn::closeNow(int reason /* = 0 */) {
 			if (reason) {
 				mCloseReason = reason;
 			}
-			if (log(DEBUG)) {
+			if (log(3)) {
 				logStream() << "closeNow (reason " << mCloseReason << ")" << endl;
 			}
 
@@ -457,12 +447,12 @@ void Conn::closeNow(int reason /* = 0 */) {
 #endif
 			
 		} else {
-			if (log(DEBUG)) {
+			if (log(3)) {
 				logStream() << "Re-closure (reason " << reason << ")" << endl;
 			}
 		}
 	} else {
-		if (log(FATAL)) {
+		if (errLog(0)) {
 			logStream() << "Close conn without Server" << endl;
 		}
 	}
@@ -471,7 +461,7 @@ void Conn::closeNow(int reason /* = 0 */) {
 
 
 void Conn::closeSelf() {
-	if (log(DEBUG)) {
+	if (log(3)) {
 		logStream() << "User itself was disconnected" << endl;
 	}
 	closeNow(CLOSE_REASON_CLIENT_DISCONNECT);
@@ -494,13 +484,13 @@ Conn * Conn::createNewConn() {
 	if (mCreatorConnFactory != NULL) {
 		newConn = mCreatorConnFactory->createConn(sock); // Create connection object by factory
 	} else {
-		if (log(DEBUG)) {
+		if (log(3)) {
 			logStream() << "Create simple connection object for socket: " << sock << endl;
 		}
 		newConn = new Conn(sock, mServer, CONN_TYPE_INCOMING_TCP); // Create simple connection object
 	}
 	if (!newConn) {
-		if (log(FATAL)) {
+		if (errLog(0)) {
 			logStream() << "Fatal error: Can't create new connection object" << endl;
 		}
 		throw "Fatal error: Can't create new connection object";
@@ -540,7 +530,7 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 
 	sockoptval_t yes = 1;
 	if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(int)))) {
-		if (log(ERR)) {
+		if (errLog(1)) {
 			logStream() << "Socket not SO_KEEPALIVE: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 		}
 #ifdef _WIN32
@@ -551,10 +541,10 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 		if (SOCK_ERR != SOCK_EINTR)
 #endif
 		{
-			if (log(WARN)) {
+			if (log(2)) {
 				logStream() << "Couldn't set keepalive flag for accepted socket" << endl;
 			}
-		} else if (log(ERR)) {
+		} else if (errLog(1)) {
 			logStream() << "Socket not closed" << endl;
 		}
 		return INVALID_SOCKET;
@@ -562,14 +552,14 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 
 	// Non-block socket
 	if (socketNonBlock(sock) == INVALID_SOCKET) {
-		if (log(ERR)) {
+		if (errLog(1)) {
 			logStream() << "Couldn't set non-block flag for accepted socket" << endl;
 		}
 		return INVALID_SOCKET;
 	}
 
 	// Accept new socket
-	if (log(DEBUG)) {
+	if (log(3)) {
 		logStream() << "Accept new socket: " << sock << endl;
 	}
 
@@ -584,7 +574,7 @@ int Conn::defineConnInfo(sockaddr_storage & storage) {
 		char host[NI_MAXHOST] = { 0 };
 		char port[NI_MAXSERV] = { 0 };
 		if (getnameinfo((struct sockaddr *) &storage, sizeof(struct sockaddr), host, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV) != 0) {
-			if (log(WARN)) {
+			if (log(2)) {
 				logStream() << "Error in getnameinfo: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 			}
 			closeNow(CLOSE_REASON_GETPEERNAME);
@@ -626,7 +616,7 @@ int Conn::recv() {
 		}
 
 	} else { // UDP
-		if (log(TRACE)) {
+		if (log(4)) {
 			logStream() << "Start read (UDP)" << endl;
 		}
 		while (
@@ -643,7 +633,7 @@ int Conn::recv() {
 				usleep(100);
 			#endif
 		}
-		if (log(TRACE)) {
+		if (log(4)) {
 			logStream() << "End read (UDP). Read bytes: " << iBufLen << endl;
 		}
 	}
@@ -655,12 +645,12 @@ int Conn::recv() {
 			if (iBufLen == 0) {
 				return -1;
 			} else if (SOCK_ERR == EWOULDBLOCK) {
-				if (log(DEBUG)) {
+				if (log(2)) {
 					logStream() << "Operation would block" << endl;
 				}
 				return -2;
 			} else {
-				if (log(DEBUG)) {
+				if (log(2)) {
 					logStream() << "Error in receive: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 				}
 				closeNow(CLOSE_REASON_ERROR_RECV);
@@ -787,13 +777,13 @@ string * Conn::getCommandPtr() {
 	and installation main parameter */
 void Conn::setCommandPtr(string * pStr) {
 	if (mStatus != STRING_STATUS_NO_STR) {
-		if (log(FATAL)) {
+		if (errLog(0)) {
 			logStream() << "Fatal error: Bad setCommandPtr" << endl;
 		}
 		throw "Fatal error: Bad setCommandPtr";
 	}
 	if (!pStr) {
-		if (log(FATAL)) {
+		if (errLog(0)) {
 			logStream() << "Fatal error: Bad setCommandPtr. Null string pointer" << endl;
 		}
 		throw "Fatal error: Bad setCommandPtr. Null string pointer";
@@ -807,7 +797,7 @@ void Conn::setCommandPtr(string * pStr) {
 /// Reading data from buffer and record in line of the protocol
 size_t Conn::readFromRecvBuf() {
 	if (!mCommand) {
-		if (log(FATAL)) {
+		if (errLog(0)) {
 			logStream() << "Fatal error: ReadFromBuf with null string pointer" << endl;
 		}
 		throw "Fatal error: ReadFromBuf with null string pointer";
@@ -860,12 +850,7 @@ string * Conn::getParserCommandPtr() {
 
 Parser * Conn::createParser() {
 	if (mProtocol == NULL) {
-		// ToDo remove!
-		if (mCreatorConnFactory == NULL) {
-			return NULL;
-		}
-		// ToDo remove!
-		mProtocol = mCreatorConnFactory->getProtocol();
+		return NULL;
 	}
 	return mProtocol->createParser();
 }
@@ -918,7 +903,7 @@ size_t Conn::getSeparatorLen() {
 size_t Conn::writeData(const char * data, size_t len, bool flush) {
 	size_t bufLen = mSendBuf.size();
 	if (bufLen + len >= mSendBufMax) {
-		if (log(WARN)) {
+		if (log(0)) {
 			logStream() << "Sending buffer has big size, closing" << endl;
 		}
 		closeNow(CLOSE_REASON_MAXSIZE_SEND);
@@ -949,14 +934,14 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 	if (send(send_buf, size) < 0) {
 
 		if (SOCK_ERR != SOCK_EAGAIN) {
-			if (log(DEBUG)) {
+			if (log(2)) {
 				logStream() << "Error in sending: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << "(not EAGAIN), closing" << endl;
 			}
 			closeNow(CLOSE_REASON_ERROR_SEND);
 			return 0;
 		}
 
-		if (log(DEBUG)) {
+		if (log(3)) {
 			logStream() << "Block sent. Was sent " << size << " bytes" << endl;
 		}
 		if (bufLen == 0) {
@@ -974,7 +959,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 			if (mBlockOutput) {
 				mBlockOutput = false;
 				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::eEF_OUTPUT);
-				if (log(DEBUG)) {
+				if (log(3)) {
 					logStream() << "Unblock output channel" << endl;
 				}
 			}
@@ -982,12 +967,12 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 			bufLen = mSendBuf.size();
 			if (mBlockInput && bufLen < MAX_SEND_UNBLOCK_SIZE) { // Unset block of input
 				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::eEF_INPUT);
-				if (log(DEBUG)) {
+				if (log(3)) {
 					logStream() << "Unblock input channel" << endl;
 				}
 			} else if (!mBlockInput && bufLen >= MAX_SEND_BLOCK_SIZE) { // Set block of input
 				mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::eEF_INPUT);
-				if (log(DEBUG)) {
+				if (log(3)) {
 					logStream() << "Block input channel" << endl;
 				}
 			}
@@ -1006,7 +991,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 		if (mServer && mOk && !mBlockOutput) {
 			mBlockOutput = true;
 			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::eEF_OUTPUT);
-			if (log(DEBUG)) {
+			if (log(3)) {
 				logStream() << "Block output channel" << endl;
 			}
 		}
@@ -1078,7 +1063,7 @@ int Conn::send(const char * buf, size_t & len) {
 
 		}
 
-/*		if (log(TRACE)) {
+/*		if (log(5)) {
 				logStream() << "len = " << len
 					<< " total=" << total
 					<< " left=" << bytesleft
@@ -1119,7 +1104,7 @@ int Conn::onTimer(Time &) {
 
 bool Conn::strLog() {
 	Obj::strLog();
-	simpleLogStream() << "[sock:" << mSocket << "] ";
+	logStream() << "(sock " << mSocket << ") ";
 	return true;
 }
 
@@ -1239,11 +1224,6 @@ int ConnFactory::onNewConn(Conn * conn) {
 		conn->mProtocol = mProtocol; // Set protocol
 	}
 	return mServer->onNewConn(conn);
-}
-
-// ToDo remove!
-Protocol * ConnFactory::getProtocol() {
-	return mProtocol;
 }
 
 

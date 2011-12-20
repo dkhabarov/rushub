@@ -46,7 +46,7 @@ using ::dcserver::protoenums::NMDC_TYPE_UNKNOWN;
 
 
 
-/** DC Server's configuration (settings)
+/** Server's configuration (settings)
 	Main config class */
 class DcConfig : public ConfigList {
 

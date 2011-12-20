@@ -37,7 +37,7 @@
 #include <vector>
 
 using namespace ::std;
-using namespace ::utils; // HashTable, Obj
+using namespace ::utils; /** for HashTable */
 
 
 namespace dcserver {
@@ -46,7 +46,6 @@ class UserBase;
 
 
 
-/// Base template for user list
 template <class I, class T>
 class ListItem {
 
@@ -85,7 +84,6 @@ public:
 
 private:
 
-	/// Maker for list
 	struct Maker : public unary_function<void, I> {
 		Func mFunc;
 		string & mList;

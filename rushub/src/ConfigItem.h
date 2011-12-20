@@ -66,7 +66,7 @@ typedef enum {
 
 
 
-/** Abstract class of the element configuration */
+/** Abstract class of the element configuration (ConfigItem) */
 class ConfigItem {
 
 	friend class ConfigListBase; /** for mAddress */

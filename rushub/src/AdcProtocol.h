@@ -36,8 +36,6 @@ class UserBase;
 
 namespace protocol {
 
-
-/// ADC protocol
 class AdcProtocol : public Protocol {
 
 public:

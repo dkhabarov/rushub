@@ -37,7 +37,6 @@
 using namespace ::utils; // for stringToInt64
 
 
-/// Main configuration namespace
 namespace configuration {
 
 

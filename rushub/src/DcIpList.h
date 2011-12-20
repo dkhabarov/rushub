@@ -30,9 +30,6 @@ namespace dcserver {
 
 typedef List<tSocket, DcConn *> IpList;
 
-
-
-/// List which contain all IP of the DC server
 class DcIpList : public Obj, public HashTable<IpList *> {
 
 public:
@@ -51,13 +48,12 @@ public:
 	void sendToIpWithNick(const char * ip, const char * start, const char * end, unsigned long profile = 0, bool addSep = false, bool flush = true);
 
 	virtual void onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
-		if (log(DEBUG)) {
+		if (log(3)) {
 			logStream() << "Autoresizing: size = " << currentSize << 
 				", capacity = " << oldCapacity << " -> " + newCapacity << endl;
 		}
 	}
 
-	/// Iterator for IP list
 	class iterator {
 
 	public:
