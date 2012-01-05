@@ -193,8 +193,12 @@ public:
 		return mListFlags & flag;
 	}
 
-	void setListFlag(unsigned int flag) {
+	void addListFlag(unsigned int flag) {
 		mListFlags |= flag;
+	}
+
+	void setListFlag(unsigned int flag) {
+		mListFlags = flag;
 	}
 private:
 
