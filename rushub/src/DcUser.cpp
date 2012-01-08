@@ -270,7 +270,8 @@ Param * DcUser::getParamForce(const char * name, bool setRules) {
 		} else if (strcmp(name, USER_PARAM_IN_OP_LIST) == 0) {
 			param->set(false, Param::TYPE_BOOL, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInOpList);
 		} else if (strcmp(name, USER_PARAM_SHARE) == 0) {
-			param->set(__int64(0), Param::TYPE_INT64, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetShare);
+			__int64 n = 0;
+			param->set(n, Param::TYPE_INT64, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetShare);
 		} else if (strcmp(name, USER_PARAM_EMAIL) == 0) {
 			param->set(string(""), Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 		} else if (strcmp(name, USER_PARAM_DESC) == 0) {
@@ -318,7 +319,8 @@ bool DcUser::removeParam(const char * name) {
 
 	// TODO remove it!
 	if (strcmp(name, USER_PARAM_SHARE) == 0) {
-		param->setInt64(__int64(0)); // for remove from total share
+		__int64 n = 0;
+		param->setInt64(n); // for remove from total share
 	}
 
 	mParamList.remove(name);
@@ -421,7 +423,7 @@ const string & DcUser::getInf() {
 		mInf = "BINF "; // TODO !
 		mInf.append(getUid());
 		for (set<string>::iterator it = mInfoNames.begin(); it != mInfoNames.end(); ++it) {
-			string & name = *it;
+			const string & name = (*it);
 			ParamBase * param = getParam(name.c_str());
 			if (param != NULL) {
 				mInf.append(" ").append(name).append(param->toString());
@@ -454,7 +456,7 @@ void DcUser::setInf(const string & info) {
 					string value;
 					value.assign(info, s, e - s);
 					mInfoNames.insert(name); // TODO refactoring
-					if (name == "I4" && value == "0.0.0.0" || name == "I6" && value == "::") {
+					if ((name == "I4" && value == "0.0.0.0") || (name == "I6" && value == "::")) {
 						getParamForce(name.c_str())->setString(getIp());
 					} else {
 						if (name == "SU") {

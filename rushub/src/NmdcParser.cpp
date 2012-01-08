@@ -24,6 +24,8 @@
 
 #include "NmdcParser.h"
 
+#include <stdlib.h>
+
 namespace dcserver {
 
 namespace protocol {
