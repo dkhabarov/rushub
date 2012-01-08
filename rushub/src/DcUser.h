@@ -31,6 +31,7 @@
 
 #include <stdlib.h> // atoi unix
 #include <string>
+#include <set>
 
 using namespace ::std;
 using namespace ::utils;
@@ -51,6 +52,9 @@ namespace dcserver {
 
 class DcConn;
 class DcServer;
+class DcUser;
+
+typedef int (DcUser::*Action)(const string &, const string &);
 
 
 /// Param class
@@ -58,78 +62,114 @@ class Param : public ParamBase {
 
 public:
 
-	Param(const string & name) : mName(name), mType(TYPE_NONE) {
+	enum {
+		MODE_NONE = 0,
+		MODE_NOT_CHANGE_TYPE = 1 << 0,
+		MODE_NOT_MODIFY = 1 << 1,
+		MODE_NOT_REMOVE = 1 << 2,
+	};
+
+public:
+
+	Param(DcUser * dcUser, const char * name);
+	~Param();
+
+	virtual const string & getName() const;
+	virtual int getType() const;
+	int getMode() const;
+
+	virtual const string & getString() const;
+	virtual int setString(const string & value);
+	int setString(string * value);
+
+	virtual const int & getInt() const;
+	virtual int setInt(int value);
+	int setInt(int * value);
+
+	virtual const bool & getBool() const;
+	virtual int setBool(bool value);
+	int setBool(bool * value);
+
+	virtual const double & getDouble() const;
+	virtual int setDouble(double value);
+	int setDouble(double * value);
+
+	virtual const long & getLong() const;
+	virtual int setLong(long value);
+	int setLong(long * value);
+
+	virtual const __int64 & getInt64() const;
+	virtual int setInt64(__int64 value);
+	int setInt64(__int64 * value);
+
+	virtual const string & toString();
+
+	template <class T>
+	int set(T const & value, int type) {
+		int n_err = check(value, type);
+		if (n_err == 0) {
+			mType = type;
+			mValue = value;
+		}
+		return n_err;
 	}
 
-	const string & getName() const {
-		return mName;
-	}
-	int getType() const {
-		return mType;
-	}
-
-	const string & getString() const {
-		return mValue;
-	}
-
-	void setString(const string & value) {
-		mType = TYPE_STRING;
-		mValue = value;
+	template <class T>
+	int set(T * value, int type) {
+		int n_err = check(*value, type);
+		if (n_err == 0) {
+			mType = type;
+			mValue = value;
+		}
+		return n_err;
 	}
 
-	const int & getInt() const {
-		return mValue;
+	template <class T>
+	int set(T const & value, int type, int mode, Action action = NULL) {
+		int n_err = set(value, type);
+		mAction = action;
+		mMode = mode;
+		return n_err;
 	}
 
-	void setInt(int value) {
-		mType = TYPE_INT;
-		mValue = value;
-	}
-
-	const bool & getBool() const {
-		return mValue;
-	}
-
-	void setBool(bool value) {
-		mType = TYPE_BOOL;
-		mValue = value;
-	}
-
-	const double & getDouble() const {
-		return mValue;
-	}
-
-	void setDouble(double value) {
-		mType = TYPE_DOUBLE;
-		mValue = value;
-	}
-
-	const long & getLong() const {
-		return mValue;
-	}
-
-	void setLong(long value) {
-		mType = TYPE_LONG;
-		mValue = value;
-	}
-
-	const __int64 & getInt64() const {
-		return mValue;
-	}
-
-	void setInt64(__int64 value) {
-		mType = TYPE_INT64;
-		mValue = value;
+	template <class T>
+	int set(T * value, int type, int mode, Action action = NULL) {
+		int n_err = set(value, type);
+		mAction = action;
+		mMode = mode;
+		return n_err;
 	}
 
 private:
 
+	template <class T>
+	int check(const T & now, int type) {
+		if (!(mMode & MODE_NOT_MODIFY) && (!(mMode & MODE_NOT_CHANGE_TYPE) || mType == type)) {
+			if (mAction != NULL) {
+				string oldStr, nowStr;
+				return (mDcUser->*mAction) (utils::toString(mValue, oldStr), utils::toString(now, nowStr));
+			}
+			return 0;
+		}
+		return -1;
+	}
+
+private:
+
+	string mBuf;
 	string mName;
 	int mType;
+	int mMode;
 
+	DcUser * mDcUser;
+	Action mAction;
 	Any mValue;
 
-}; // class ParamBase
+}; // class Param
+
+
+
+
 
 
 /** Extended class of the user */
@@ -144,113 +184,76 @@ public:
 
 public:
 
-	DcUser();
+	DcUser(DcConn *);
 	virtual ~DcUser();
 
 	virtual void send(const string & data, bool addSep = false, bool flush = true);
 	virtual void send(const char * data, size_t len, bool addSep = false, bool flush = true);
 	virtual void disconnect();
 
-
-	virtual ParamBase * getParam(const string & name) const;
-	virtual ParamBase * getParamForce(const string & name);
+	virtual bool hasFeature(const string & feature) const;
 
 
-	virtual const string * getParamOld(unsigned int key) const;
-	virtual void setParamOld(unsigned int key, const char * value);
-
-
-	virtual const string & getStringParam(unsigned int key) const;
-	virtual void setStringParam(unsigned int key, const string & value);
-	virtual void setStringParam(unsigned int key, const char * value);
-
-	virtual bool getBoolParam(unsigned int key) const;
-	virtual void setBoolParam(unsigned int key, bool value);
-
-	virtual int getIntParam(unsigned int key) const;
-	virtual void setIntParam(unsigned int key, int value);
-
+	virtual ParamBase * getParam(const char * name) const;
+	virtual ParamBase * getParamForce(const char * name);
+	virtual bool removeParam(const char * name);
 
 	virtual const string & getUid() const;
 	void setUid(const string & uid);
 	unsigned long getUidHash() const;
 
+	virtual const string & getNmdcTag();
 
 	virtual const string & getInfo();
 	virtual bool setInfo(const string & myInfo);
 	bool setInfo(NmdcParser * parser);
 
-	virtual const string & getInf() const;
+	virtual const string & getInf();
 	void setInf(const string & inf);
 
 	virtual const string & getIp() const;
 	void setIp(const string & ip);
-	int getPort() const;
-	int getPortConn() const;
 
 
 	virtual int getProfile() const;
-	void setProfile(int profile);
-
-	virtual bool isCanSend() const;
-	void setCanSend(bool canSend);
 
 	virtual bool isHide() const;
-	
-	bool isPassive() const;
+	virtual bool isCanSend() const;
+	void setCanSend(bool canSend);
+	void setInUserList(bool);
 
-	virtual long getConnectTime() const;
+	bool isPassive() const;
+	bool isTrueBoolParam(const char * name) const;
 
 private:
 
 	DcUser & operator = (const DcUser &) { return *this; }
 
-	string & updateParamOld(unsigned long key, const char * value);
-	void parseDesc(string & description);
-	void parseTag();
-	void findParam(const string & tag, const char * find, unsigned long key);
+	Param * getParamForce(const char * name, bool setRules);
 
-	void appendParam(string & dst, const char * prefix, unsigned long key);
-
-
-	bool isInUserList() const;
-	void setInUserList(bool);
-
-	bool isInOpList() const;
-	void setInOpList(bool inOpList);
-
-	bool isInIpList() const;
-	void setInIpList(bool inIpList);
-
-	void setHide(bool hide);
-
-	static unsigned long getHash(const char * s);
+	int onSetShare(const string & old, const string & now);
+	int onSetInOpList(const string & old, const string & now);
+	int onSetInIpList(const string & old, const string & now);
+	int onSetHide(const string & old, const string & now);
+	int onSetInfo(const string & old, const string & now);
 
 private:
 
-	string mUid; ///< UserID
 	unsigned long mUidHash; ///< UserID Hash
-	int mProfile; ///< Profile
 
-	HashMap<string *> mParams;
-
-	HashMap<Param *> mParamList;
-
+	string mUid; ///< UserID
+	string mTag;
 	string myInfo;
 	string mInf; // ADC
 	string mIp; ///< IP address of user/bot
-	string mData;
-	string mSupports; // NMDC
-	string mNmdcVersion; // NMDC
 
-	bool mInOpList; ///< User in op-list
-	bool mInIpList; ///< User in ip-list
-	bool mHide; ///< User was hide
 	bool mInUserList; ///< User in user-list
 	bool mCanSend; ///< Can send to user
+	bool mInfoChanged; ///< Can send to user
 
-	bool mCanKick;
-	bool mCanForceMove;
+	HashMap<Param *, string> mParamList;
+	set<string> mInfoNames;
+	set<string> mFeatures; // TODO refactoring to int
 
 }; // DcUser
 

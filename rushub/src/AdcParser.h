@@ -110,6 +110,8 @@ public:
 	const string & getCidSource() const;
 	const string & getErrorCode() const;
 	const string & getErrorText() const;
+	const vector<string> & getPositiveFeatures() const;
+	const vector<string> & getNegativeFeatures() const;
 	
 	/// Do parse for command and return type of this command
 	virtual int parse();
@@ -117,6 +119,9 @@ public:
 	virtual void reInit();
 
 	bool splitChunks();
+
+	static void parseInf(DcUserBase *, const string & info);
+	static void getInf(DcUserBase *, string & info);
 
 private:
 
@@ -129,9 +134,13 @@ private:
 	size_t mBodyPos;
 	bool mError;
 
+	vector<string> mPositiveFeature;
+	vector<string> mNegativeFeature;
+
 private:
 
 	bool checkHeaderSyntax();
+	bool parseFeatures();
 	void setError(const char * code, const char * text);
 
 }; // class AdcParser

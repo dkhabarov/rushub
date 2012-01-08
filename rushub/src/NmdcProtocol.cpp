@@ -278,7 +278,7 @@ int NmdcProtocol::eventSupports(NmdcParser * dcparser, DcConn * dcConn) {
 	}
 
 	if (dcparser->mCommand.size() > 10) {
-		dcConn->mDcUser->setStringParam(USER_STRING_PARAM_SUPPORTS, dcparser->mCommand);
+		dcConn->mDcUser->getParamForce(USER_PARAM_SUPPORTS)->setString(dcparser->mCommand.substr(10));
 	}
 
 	#ifndef WITHOUT_PLUGINS
@@ -443,7 +443,7 @@ int NmdcProtocol::eventVersion(NmdcParser * dcparser, DcConn * dcConn) {
 	#endif
 
 	dcConn->setLoginStatusFlag(LOGIN_STATUS_VERSION); /** Version was checked */
-	dcConn->mDcUser->setStringParam(USER_STRING_PARAM_NMDC_VERSION, version);
+	dcConn->mDcUser->getParamForce(USER_PARAM_VERSION)->setString(version);
 	return 0;
 }
 
@@ -507,15 +507,15 @@ int NmdcProtocol::eventMyInfo(NmdcParser * dcparser, DcConn * dcConn) {
 		iMode = mDcServer->mCalls.mOnMyINFO.callAll(dcConn->mDcUser);
 	#endif
 
-	if (iMode != 1 && dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (iMode != 1 && dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		if (sOldMyINFO != dcConn->mDcUser->getInfo()) {
-			if (dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_HIDE)) {
+			if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 				dcConn->send(dcConn->mDcUser->getInfo(), true); // Send to self only
 			} else {
 				sendMode(dcConn, dcConn->mDcUser->getInfo(), iMode, mDcServer->mDcUserList, true); // Use cache for send to all
 			}
 		}
-	} else if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		dcConn->setLoginStatusFlag(LOGIN_STATUS_MYINFO);
 
 		unsigned iWantedMask = LOGIN_STATUS_LOGIN_DONE;
@@ -544,7 +544,7 @@ int NmdcProtocol::eventMyInfo(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventChat(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		return -1;
 	}
 
@@ -578,7 +578,7 @@ int NmdcProtocol::eventChat(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventTo(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		return -1;
 	}
 
@@ -613,7 +613,7 @@ int NmdcProtocol::eventTo(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventMcTo(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		return -1;
 	}
 
@@ -652,7 +652,7 @@ int NmdcProtocol::eventMcTo(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventUserIp(NmdcParser * dcParser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		return -1;
 	}
 
@@ -703,7 +703,7 @@ int NmdcProtocol::eventUserIp(NmdcParser * dcParser, DcConn * dcConn) {
 */
 int NmdcProtocol::eventSearch(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		return -1;
 	}
 
@@ -777,7 +777,7 @@ int NmdcProtocol::eventSearch(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventSr(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		return -1;
 	}
 
@@ -827,7 +827,7 @@ int NmdcProtocol::eventSr(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		return -1;
 	}
 
@@ -860,7 +860,7 @@ int NmdcProtocol::eventConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventRevConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		return -1;
 	}
 
@@ -894,7 +894,7 @@ int NmdcProtocol::eventRevConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventMultiConnectToMe(NmdcParser *, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		return -1;
 	}
 
@@ -905,7 +905,7 @@ int NmdcProtocol::eventMultiConnectToMe(NmdcParser *, DcConn * dcConn) {
 
 int NmdcProtocol::eventKick(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		return -1;
 	}
 
@@ -915,7 +915,7 @@ int NmdcProtocol::eventKick(NmdcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_CAN_KICK)) {
+	if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_CAN_KICK)) {
 		return -2;
 	}
 
@@ -935,7 +935,7 @@ int NmdcProtocol::eventKick(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventOpForceMove(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		return -1;
 	}
 
@@ -945,7 +945,7 @@ int NmdcProtocol::eventOpForceMove(NmdcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_CAN_FORCE_MOVE)) {
+	if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_CAN_REDIRECT)) {
 		return -2;
 	}
 
@@ -965,7 +965,7 @@ int NmdcProtocol::eventOpForceMove(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventGetInfo(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		return -1;
 	}
 
@@ -986,7 +986,7 @@ int NmdcProtocol::eventGetInfo(NmdcParser * dcparser, DcConn * dcConn) {
 	#endif
 
 	//if(!(dcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO)){
-	if (!dcUser->getBoolParam(USER_BOOL_PARAM_HIDE)) {
+	if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 		dcConn->send(dcUser->getInfo(), true, false);
 	}
 	return 0;
@@ -1192,7 +1192,7 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 			dcConn->send(mDcServer->mOpList.getList(), true, false);
 		}
 
-		if (dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST) && dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_IP_LIST)) {
+		if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST) && dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
 			if (dcConn->log(DEBUG)) {
 				dcConn->logStream() << "Sending Iplist" << endl;
 			}
@@ -1310,7 +1310,7 @@ bool NmdcProtocol::validateUser(DcConn * dcConn, const string & nick) {
 bool NmdcProtocol::checkNickLength(DcConn * dcConn, size_t len) {
 
 	if (
-		dcConn->mDcUser->getProfile() == -1 && (
+		dcConn->mDcUser->getParamForce(USER_PARAM_PROFILE)->getInt() == -1 && (
 			len > mDcServer->mDcConfig.mMaxNickLen ||
 			len < mDcServer->mDcConfig.mMinNickLen
 		)
@@ -1371,10 +1371,10 @@ void NmdcProtocol::ipList(string & list, UserBase * userBase) {
 
 
 void NmdcProtocol::addToOps(DcUser * dcUser) {
-	if (dcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		string msg;
 		mDcServer->mOpList.add(dcUser->getUidHash(), dcUser);
-		if (dcUser->getBoolParam(USER_BOOL_PARAM_HIDE)) {
+		if (dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 			dcUser->send(appendOpList(msg, dcUser->getUid()), false, true);
 		} else {
 			mDcServer->mDcUserList.sendToAll(appendOpList(msg, dcUser->getUid()), true/*mDcServer->mDcConfig.mDelayedMyinfo*/, false);
@@ -1386,10 +1386,10 @@ void NmdcProtocol::addToOps(DcUser * dcUser) {
 
 
 void NmdcProtocol::delFromOps(DcUser * dcUser) {
-	if (dcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		string sMsg1, sMsg2, sMsg3;
 		mDcServer->mOpList.remove(dcUser->getUidHash());
-		if (dcUser->getBoolParam(USER_BOOL_PARAM_HIDE)) {
+		if (dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 			if (dcUser->mDcConn == NULL) {
 				return;
 			}
@@ -1403,7 +1403,7 @@ void NmdcProtocol::delFromOps(DcUser * dcUser) {
 				dcUser->send(appendHello(sMsg2, dcUser->getUid()), false, false);
 			}
 
-			if ((dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_USERIP2) || dcUser->getBoolParam(USER_BOOL_PARAM_IN_IP_LIST)) {
+			if ((dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_USERIP2) || dcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
 				dcUser->send(appendUserIp(sMsg3, dcUser->getUid(), dcUser->getIp()));
 			} else {
 				dcUser->send("", 0, false, true);
@@ -1422,7 +1422,7 @@ void NmdcProtocol::delFromOps(DcUser * dcUser) {
 
 
 void NmdcProtocol::addToIpList(DcUser * dcUser) {
-	if (dcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		mDcServer->mIpList.add(dcUser->getUidHash(), dcUser);
 		dcUser->send(mDcServer->mDcUserList.getList(USER_LIST_IP), true);
 	}
@@ -1431,7 +1431,7 @@ void NmdcProtocol::addToIpList(DcUser * dcUser) {
 
 
 void NmdcProtocol::delFromIpList(DcUser * dcUser) {
-	if (dcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		mDcServer->mIpList.remove(dcUser->getUidHash());
 	}
 }
@@ -1455,7 +1455,7 @@ void NmdcProtocol::addToHide(DcUser * dcUser) {
 void NmdcProtocol::delFromHide(DcUser * dcUser) {
 	if (dcUser->isCanSend()) {
 		string sMsg1, sMsg2, sMsg3;
-		if (dcUser->getBoolParam(USER_BOOL_PARAM_IN_OP_LIST)) {
+		if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
 			dcUser->setCanSend(false);
 			mDcServer->mHelloList.sendToAll(appendHello(sMsg1, dcUser->getUid()), false/*mDcServer->mDcConfig.mDelayedMyinfo*/, false);
 			mDcServer->mDcUserList.sendToAll(dcUser->getInfo(), true, true);

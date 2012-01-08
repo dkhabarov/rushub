@@ -147,6 +147,8 @@ public:
 /// Main DC connection
 class DcConn : public Conn, public DcConnBase {
 
+	friend class DcUser; // for Param
+
 public:
 
 	unsigned mFeatures;         ///< Features (PROTOCOL NMDC)

@@ -24,32 +24,183 @@
 namespace dcserver {
 
 
-DcUser::DcUser() :
+Param::Param(DcUser * dcUser, const char * name) : 
+	mName(name),
+	mType(TYPE_NONE),
+	mMode(MODE_NONE),
+	mDcUser(dcUser),
+	mAction(NULL)
+{
+}
+
+
+
+Param::~Param() {
+}
+
+
+
+const string & Param::getName() const {
+	return mName;
+}
+
+
+
+int Param::getType() const {
+	return mType;
+}
+
+
+
+int Param::getMode() const {
+	return mMode;
+}
+
+
+
+const string & Param::getString() const {
+	return mValue;
+}
+
+
+
+int Param::setString(const string & value) {
+	return set(value, TYPE_STRING);
+}
+
+
+
+int Param::setString(string * value) {
+	return set(value, TYPE_STRING);
+}
+
+
+
+const int & Param::getInt() const {
+	return mValue;
+}
+
+
+
+int Param::setInt(int value) {
+	return set(value, TYPE_INT);
+}
+
+
+
+int Param::setInt(int * value) {
+	return set(value, TYPE_INT);
+}
+
+
+
+const bool & Param::getBool() const {
+	return mValue;
+}
+
+
+
+int Param::setBool(bool value) {
+	return set(value, TYPE_BOOL);
+}
+
+
+
+int Param::setBool(bool * value) {
+	return set(value, TYPE_BOOL);
+}
+
+
+
+const double & Param::getDouble() const {
+	return mValue;
+}
+
+
+
+int Param::setDouble(double value) {
+	return set(value, TYPE_DOUBLE);
+}
+
+
+
+int Param::setDouble(double * value) {
+	return set(value, TYPE_DOUBLE);
+}
+
+
+
+const long & Param::getLong() const {
+	return mValue;
+}
+
+
+
+int Param::setLong(long value) {
+	return set(value, TYPE_LONG);
+}
+
+
+
+int Param::setLong(long * value) {
+	return set(value, TYPE_LONG);
+}
+
+
+
+const __int64 & Param::getInt64() const {
+	return mValue;
+}
+
+
+
+int Param::setInt64(__int64 value) {
+	return set(value, TYPE_INT64);
+}
+
+
+
+int Param::setInt64(__int64 * value) {
+	return set(value, TYPE_INT64);
+}
+
+
+
+const string & Param::toString() {
+	return utils::toString(mValue, mBuf);
+}
+
+
+
+DcUser::DcUser(DcConn * dcConn) :
 	Obj("DcUser"),
 	DcUserBase(),
 	mDcServer(NULL),
-	mDcConn(NULL),
+	mDcConn(dcConn),
 	mTimeEnter(true),
 	mUidHash(0),
-	mProfile(-1),
-	mInOpList(false),
-	mInIpList(false),
-	mHide(false),
 	mInUserList(false),
-	mCanSend(false)
+	mCanSend(false),
+	mInfoChanged(true)
 {
-	mDcConnBase = NULL;
+	mDcConnBase = dcConn;
+	if (dcConn != NULL) {
+		mDcServer = dcConn->server();
+		getParamForce(USER_PARAM_IP_CONN,     false)->set(&mDcConn->mIpConn,     Param::TYPE_STRING, Param::MODE_NOT_MODIFY);
+		getParamForce(USER_PARAM_MAC_ADDRESS, false)->set(&mDcConn->mMacAddress, Param::TYPE_STRING, Param::MODE_NOT_MODIFY);
+		getParamForce(USER_PARAM_PORT,        false)->set(&mDcConn->mPort,       Param::TYPE_INT,    Param::MODE_NOT_MODIFY);
+		getParamForce(USER_PARAM_PORT_CONN,   false)->set(&mDcConn->mPortConn,   Param::TYPE_INT,    Param::MODE_NOT_MODIFY);
+		getParamForce(USER_PARAM_ENTER_TIME,  false)->set(mTimeEnter.sec(),      Param::TYPE_LONG,   Param::MODE_NOT_MODIFY);
+	}
+	getParamForce(USER_PARAM_IP, false)->set(dcConn != NULL ? &mIp : &mDcConn->mIp, Param::TYPE_STRING, Param::MODE_NOT_MODIFY);
+	getParamForce(USER_PARAM_IN_USER_LIST, false)->set(&mInUserList, Param::TYPE_BOOL, Param::MODE_NOT_MODIFY);
+	getParamForce(USER_PARAM_PROFILE,      false)->set(-1,           Param::TYPE_INT,  Param::MODE_NOT_CHANGE_TYPE | Param::MODE_NOT_REMOVE);
 }
 
 
 
 DcUser::~DcUser() {
-	HashMap<string *>::iterator _it = mParams.begin(), _it_e = mParams.end();
-	while (_it != _it_e) {
-		delete (*_it++);
-	}
-
-	HashMap<Param *>::iterator it = mParamList.begin(), it_e = mParamList.end();
+	HashMap<Param *, string>::iterator it = mParamList.begin(), it_e = mParamList.end();
 	while (it != it_e) {
 		delete (*it++);
 	}
@@ -61,7 +212,7 @@ DcUser::~DcUser() {
 
 
 
-void DcUser::send(const string & data, bool addSep, bool flush) {
+void DcUser::send(const string & data, bool addSep /*= false*/, bool flush /*= true*/) {
 	if (mDcConn) {
 		mDcConn->send(data, addSep, flush);
 	}
@@ -69,7 +220,7 @@ void DcUser::send(const string & data, bool addSep, bool flush) {
 
 
 
-void DcUser::send(const char * data, size_t len, bool addSep, bool flush) {
+void DcUser::send(const char * data, size_t len, bool addSep /*= false*/, bool flush /*= true*/) {
 	if (mDcConn) {
 		mDcConn->send(data, len, addSep, flush);
 	}
@@ -83,192 +234,96 @@ void DcUser::disconnect() {
 
 
 
-ParamBase * DcUser::getParam(const string & name) const {
-	return mParamList.find(getHash(name.c_str()));
+bool DcUser::hasFeature(const string & feature) const {
+	return mFeatures.find(feature) != mFeatures.end();
 }
 
 
 
-ParamBase * DcUser::getParamForce(const string & name) {
-	ParamBase * paramBase = getParam(name);
-	if (paramBase != NULL) {
-		return paramBase;
-	} else {
-		Param * param = new Param(name);
-		mParamList.add(getHash(name.c_str()), param);
-		return param;
+ParamBase * DcUser::getParam(const char * name) const {
+	return mParamList.find(name);
+}
+
+
+
+ParamBase * DcUser::getParamForce(const char * name) {
+	return getParamForce(name, true);
+}
+
+
+
+Param * DcUser::getParamForce(const char * name, bool setRules) {
+	Param * param = mParamList.find(name);
+	if (param == NULL) {
+		param = new Param(this, name);
+		mParamList.add(name, param);
 	}
-}
-
-
-
-const string * DcUser::getParamOld(unsigned int key) const {
-	return mParams.find(key);
-}
-
-
-
-void DcUser::setParamOld(unsigned int key, const char * value) {
-	if (value != NULL) {
-		updateParamOld(key, value);
-	} else {
-		mParams.remove(key);
+	if (setRules) {
+		if (strcmp(name, USER_PARAM_CAN_KICK) == 0) {
+			param->set(false, Param::TYPE_BOOL, Param::MODE_NOT_CHANGE_TYPE);
+		} else if (strcmp(name, USER_PARAM_CAN_REDIRECT) == 0) {
+			param->set(false, Param::TYPE_BOOL, Param::MODE_NOT_CHANGE_TYPE);
+		} else if (strcmp(name, USER_PARAM_CAN_HIDE) == 0) {
+			param->set(false, Param::TYPE_BOOL, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetHide);
+		} else if (strcmp(name, USER_PARAM_IN_IP_LIST) == 0) {
+			param->set(false, Param::TYPE_BOOL, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInIpList);
+		} else if (strcmp(name, USER_PARAM_IN_OP_LIST) == 0) {
+			param->set(false, Param::TYPE_BOOL, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInOpList);
+		} else if (strcmp(name, USER_PARAM_SHARE) == 0) {
+			param->set(__int64(0), Param::TYPE_INT64, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetShare);
+		} else if (strcmp(name, USER_PARAM_EMAIL) == 0) {
+			param->set(string(""), Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+		} else if (strcmp(name, USER_PARAM_DESC) == 0) {
+			param->set(string(""), Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+		} else if (strcmp(name, USER_PARAM_BYTE) == 0) {
+			param->set(string(""), Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+		} else if (strcmp(name, USER_PARAM_CONNECTION) == 0) {
+			param->set(string(""), Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+		} else if (strcmp(name, USER_PARAM_CLIENT_NAME) == 0) {
+			param->set(string(""), Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+		} else if (strcmp(name, USER_PARAM_CLIENT_VERSION) == 0) {
+			param->set(string(""), Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+		} else if (strcmp(name, USER_PARAM_MODE) == 0) {
+			param->set(string(""), Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+		} else if (strcmp(name, USER_PARAM_UNREG_HUBS) == 0) {
+			param->set(int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+		} else if (strcmp(name, USER_PARAM_REG_HUBS) == 0) {
+			param->set(int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+		} else if (strcmp(name, USER_PARAM_OP_HUBS) == 0) {
+			param->set(int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+		} else if (strcmp(name, USER_PARAM_SLOTS) == 0) {
+			param->set(int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+		} else if (strcmp(name, USER_PARAM_LIMIT) == 0) {
+			param->set(int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+		} else if (strcmp(name, USER_PARAM_OPEN) == 0) {
+			param->set(int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+		} else if (strcmp(name, USER_PARAM_BANDWIDTH) == 0) {
+			param->set(int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+		} else if (strcmp(name, USER_PARAM_DOWNLOAD) == 0) {
+			param->set(int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+		} else if (strcmp(name, USER_PARAM_FRACTION) == 0) {
+			param->set(string(""), Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+		}
 	}
+	return param;
 }
 
 
 
-const string & DcUser::getStringParam(unsigned int key) const {
-	switch (key) {
-		case USER_STRING_PARAM_DATA :
-			return mData;
-
-		case USER_STRING_PARAM_SUPPORTS :
-			return mSupports;
-
-		case USER_STRING_PARAM_NMDC_VERSION :
-			return mNmdcVersion;
-
-		case USER_STRING_PARAM_MAC_ADDRESS :
-			return mDcConn->getMacAddress();
-
-		case USER_STRING_PARAM_IP :
-			return getIp();
-
-		case USER_STRING_PARAM_IP_CONN :
-			return mDcConn->getIpConn();
-
-		case USER_STRING_PARAM_UID :
-			return getUid();
-
-		default :
-			throw "Invalid key";
-
+bool DcUser::removeParam(const char * name) {
+	Param * param = mParamList.find(name);
+	if (param == NULL || param->getMode() & (Param::MODE_NOT_MODIFY | Param::MODE_NOT_REMOVE)) {
+		return false;
 	}
-}
 
-
-
-void DcUser::setStringParam(unsigned int key, const string & value) {
-	setStringParam(key, value.c_str());
-}
-
-
-
-void DcUser::setStringParam(unsigned int key, const char * value) {
-	switch (key) {
-		case USER_STRING_PARAM_DATA :
-			mData = value;
-			break;
-
-		case USER_STRING_PARAM_SUPPORTS :
-			value += 10;
-			mSupports = value;
-			break;
-
-		case USER_STRING_PARAM_NMDC_VERSION :
-			mNmdcVersion = value;
-			break;
-
-		default :
-			throw "Invalid key";
-
+	// TODO remove it!
+	if (strcmp(name, USER_PARAM_SHARE) == 0) {
+		param->setInt64(__int64(0)); // for remove from total share
 	}
-}
 
-
-
-bool DcUser::getBoolParam(unsigned int key) const {
-	switch (key) {
-		case USER_BOOL_PARAM_CAN_KICK :
-			return mCanKick;
-
-		case USER_BOOL_PARAM_CAN_FORCE_MOVE :
-			return mCanForceMove;
-
-		case USER_BOOL_PARAM_IN_USER_LIST :
-			return isInUserList();
-
-		case USER_BOOL_PARAM_IN_OP_LIST :
-			return isInOpList();
-
-		case USER_BOOL_PARAM_IN_IP_LIST :
-			return isInIpList();
-
-		case USER_BOOL_PARAM_HIDE :
-			return isHide();
-
-		default :
-			throw "Invalid key";
-
-	}
-}
-
-
-
-void DcUser::setBoolParam(unsigned int key, bool value) {
-	switch (key) {
-		case USER_BOOL_PARAM_CAN_KICK :
-			mCanKick = value;
-			break;
-
-		case USER_BOOL_PARAM_CAN_FORCE_MOVE :
-			mCanForceMove = value;
-			break;
-
-		case USER_BOOL_PARAM_IN_USER_LIST :
-			setInUserList(value);
-			break;
-
-		case USER_BOOL_PARAM_IN_OP_LIST :
-			setInOpList(value);
-			break;
-
-		case USER_BOOL_PARAM_IN_IP_LIST :
-			setInIpList(value);
-			break;
-
-		case USER_BOOL_PARAM_HIDE :
-			setHide(value);
-			break;
-
-		default :
-			throw "Invalid key";
-
-	}
-}
-
-
-
-int DcUser::getIntParam(unsigned int key) const {
-	switch (key) {
-		case USER_INT_PARAM_PROFILE :
-			return getProfile();
-
-		case USER_INT_PARAM_PORT :
-			return getPort();
-
-		case USER_INT_PARAM_PORT_CONN :
-			return getPortConn();
-
-		default :
-			throw "Invalid key";
-
-	}
-}
-
-
-
-void DcUser::setIntParam(unsigned int key, int value) {
-	switch (key) {
-		case USER_BOOL_PARAM_CAN_KICK :
-			setProfile(value);
-			break;
-
-		default :
-			throw "Invalid key";
-
-	}
+	mParamList.remove(name);
+	delete param;
+	return true;
 }
 
 
@@ -293,16 +348,21 @@ unsigned long DcUser::getUidHash() const {
 }
 
 
-void DcUser::appendParam(string & dst, const char * prefix, unsigned long key) {
-	const string * param = getParamOld(key);
-	if (param != NULL) {
-		dst.append(prefix).append(*param);
-	}
+
+const string & DcUser::getNmdcTag() {
+	// TODO NMDC protocol
+	NmdcParser::getTag(this, mTag);
+	return mTag;
 }
 
 
 
 const string & DcUser::getInfo() {
+	if (mInfoChanged) {
+		// TODO NMDC protocol
+		NmdcParser::getMyInfo(this, myInfo);
+		mInfoChanged = false;
+	}
 	return myInfo;
 }
 
@@ -312,7 +372,7 @@ const string & DcUser::getInfo() {
 /** Set MyINFO string (for plugins). With cmd & nick check */
 bool DcUser::setInfo(const string & newMyInfo) {
 
-	// TODO remove NmdcParser class from this function
+	// TODO NMDC protocol
 	NmdcParser dcParser;
 	if (NmdcParser::checkCmd(dcParser, newMyInfo, this) != NMDC_TYPE_MYNIFO) {
 		return false;
@@ -327,39 +387,96 @@ bool DcUser::setInfo(NmdcParser * parser) {
 	if (myInfo != parser->mCommand) {
 		myInfo = parser->mCommand;
 
-		const string * oldShare = getParamOld(USER_PARAM_SHARE);
-		if (oldShare != NULL) {
-			mDcServer->miTotalShare -= stringToInt64(*oldShare);
-		}
-		string & newShare = updateParamOld(USER_PARAM_SHARE, parser->chunkString(CHUNK_MI_SIZE).c_str());
-		mDcServer->miTotalShare += stringToInt64(newShare);
+		// Share
+		getParamForce(USER_PARAM_SHARE)->setInt64(stringToInt64(parser->chunkString(CHUNK_MI_SIZE)));
 
-		updateParamOld(USER_PARAM_EMAIL, parser->chunkString(CHUNK_MI_MAIL).c_str());
+		// Email
+		getParamForce(USER_PARAM_EMAIL)->setString(parser->chunkString(CHUNK_MI_MAIL));
 
-		size_t size = parser->chunkString(CHUNK_MI_SPEED).size();
+
+		string speed = parser->chunkString(CHUNK_MI_SPEED);
+		string magicByte;
+		size_t size = speed.size();
 		if (size != 0) {
-			string & connection = updateParamOld(USER_PARAM_CONNECTION, parser->chunkString(CHUNK_MI_SPEED).c_str());
-			string & magicByte = updateParamOld(USER_PARAM_BYTE, "");
-			magicByte += connection[--size];
-			connection.assign(connection, 0, size);
+			magicByte = speed[--size];
+			speed.assign(speed, 0, size);
 		}
 
-		string & description = updateParamOld(USER_PARAM_DESC, parser->chunkString(CHUNK_MI_DESC).c_str());
-		parseDesc(description);
+		getParamForce(USER_PARAM_BYTE)->setString(magicByte);
+		getParamForce(USER_PARAM_CONNECTION)->setString(speed);
+
+		// TODO NMDC protocol
+		NmdcParser::parseDesc(this, parser->chunkString(CHUNK_MI_DESC));
 	}
 	return true;
 }
 
 
 
-const string & DcUser::getInf() const {
+const string & DcUser::getInf() {
+	if (mInfoChanged || !mInf.size()) {
+		//AdcParser::getInf(this, mInf);
+		// TODO insert into AdcParser
+
+		mInf = "BINF "; // TODO !
+		mInf.append(getUid());
+		for (set<string>::iterator it = mInfoNames.begin(); it != mInfoNames.end(); ++it) {
+			string & name = *it;
+			ParamBase * param = getParam(name.c_str());
+			if (param != NULL) {
+				mInf.append(" ").append(name).append(param->toString());
+			}
+		}
+		mInfoChanged = false;
+	}
 	return mInf;
 }
 
 
 
-void DcUser::setInf(const string & inf) {
-	mInf = inf;
+void DcUser::setInf(const string & info) {
+	//AdcParser::parseInf(this, inf);
+	// TODO insert into AdcParser
+	size_t s = info.find(' ', 9);
+	if (s != info.npos) {
+		size_t e;
+		bool last = true;
+		while ((e = info.find(' ', ++s)) != info.npos || last) {
+			if (e == info.npos) {
+				e = info.size();
+				last = false;
+			}
+			if (s + 2 <= e) { // max 2 (for name)
+				string name;
+				name.assign(info, s, 2);
+				s += 2;
+				if (e != s) {
+					string value;
+					value.assign(info, s, e - s);
+					mInfoNames.insert(name); // TODO refactoring
+					if (name == "I4" && value == "0.0.0.0" || name == "I6" && value == "::") {
+						getParamForce(name.c_str())->setString(getIp());
+					} else {
+						if (name == "SU") {
+							// TODO check syntax
+							mFeatures.clear();
+							size_t i, j = 0;
+							while ((i = value.find(',', j)) != value.npos) {
+								mFeatures.insert(value.substr(j, i - j));
+								j = i + 1;
+							}
+							mFeatures.insert(value.substr(j));
+						}
+						getParamForce(name.c_str())->setString(value);
+					}
+				} else {
+					mInfoNames.erase(name); // TODO refactoring
+					removeParam(name.c_str());
+				}
+			}
+			s = e;
+		}
+	}
 }
 
 
@@ -382,27 +499,14 @@ void DcUser::setIp(const string & ip) {
 
 
 
-/// Get real clients port
-int DcUser::getPort() const {
-	return mDcConn->getPort();
-}
-
-
-
-/// Get connection port
-int DcUser::getPortConn() const {
-	return mDcConn->getPortConn();
-}
-
-
-
 int DcUser::getProfile() const {
-	return mProfile;
+	return getParam(USER_PARAM_PROFILE)->getInt();
 }
 
 
-void DcUser::setProfile(int profile) {
-	mProfile = profile;
+
+bool DcUser::isHide() const {
+	return isTrueBoolParam(USER_PARAM_CAN_HIDE);
 }
 
 
@@ -419,242 +523,94 @@ void DcUser::setCanSend(bool canSend) {
 
 
 
-bool DcUser::isInUserList() const {
-	return mInUserList;
-}
-
-
-
 void DcUser::setInUserList(bool inUserList) {
 	mInUserList = inUserList;
 }
 
 
 
-bool DcUser::isInOpList() const {
-	return mInOpList;
-}
-
-
-
-/** Set/unset user in OpList (for plugins) */
-void DcUser::setInOpList(bool inOpList) {
-	if (inOpList) {
-		if (!mInOpList) {
-			mDcServer->mNmdcProtocol.addToOps(this); // refactoring to DcProtocol pointer
-			mInOpList = true;
-		}
-	} else {
-		if (mInOpList) {
-			mDcServer->mNmdcProtocol.delFromOps(this); // refactoring to DcProtocol pointer
-			mInOpList = false;
-		}
-	}
-}
-
-
-
-bool DcUser::isInIpList() const {
-	return mInIpList;
-}
-
-
-
-/** Set/unset user in IpList (for plugins) */
-void DcUser::setInIpList(bool inIpList) {
-	if (inIpList) {
-		if (!mInIpList) {
-			mDcServer->mNmdcProtocol.addToIpList(this); // refactoring to DcProtocol pointer
-			mInIpList = true;
-		}
-	} else {
-		if (mInIpList) {
-			mDcServer->mNmdcProtocol.delFromIpList(this); // refactoring to DcProtocol pointer
-			mInIpList = false;
-		}
-	}
-}
-
-
-
-bool DcUser::isHide() const {
-	return mHide;
-}
-
-
-
-/** Set/unset user in HideList (for plugins) */
-void DcUser::setHide(bool hide) {
-	if (hide) {
-		if (!mHide) {
-			mDcServer->mNmdcProtocol.addToHide(this); // refactoring to DcProtocol pointer
-			mHide = true;
-		}
-	} else {
-		if (mHide) {
-			mDcServer->mNmdcProtocol.delFromHide(this); // refactoring to DcProtocol pointer
-			mHide = false;
-		}
-	}
-}
-
-
-
 bool DcUser::isPassive() const {
-	const string * mode = getParamOld(USER_PARAM_MODE);
-	unsigned int passive = (mode != NULL && mode->size()) ? mode->operator [](0) : 0;
+	// TODO NMDC protocol only
+	ParamBase * mode = getParam(USER_PARAM_MODE);
+	unsigned int passive = (mode != NULL && mode->getType() == Param::TYPE_STRING && mode->getString().size()) ? mode->getString()[0] : 0;
 	return passive == 80 || passive == 53 || passive == 83;
 }
 
 
 
-long DcUser::getConnectTime() const {
-	return mTimeEnter.sec();
+bool DcUser::isTrueBoolParam(const char * name) const {
+	ParamBase * param = getParam(name);
+	return param != NULL && param->getType() == Param::TYPE_BOOL && param->getBool();
 }
 
 
 
-string & DcUser::updateParamOld(unsigned long key, const char * value) {
-	string * param = mParams.find(key);
-	if (param != NULL) {
-		*param = value;
-		return *param;
-	}
-	string * val = new string(value);
-	mParams.add(key, val);
-	return *val;
+int DcUser::onSetShare(const string & old, const string & now) {
+	mDcServer->miTotalShare -= stringToInt64(old);
+	mDcServer->miTotalShare += stringToInt64(now);
+	onSetInfo(old, now);
+	return 0;
 }
 
 
 
-void DcUser::parseDesc(string & description) {
-
-	size_t size = description.size();
-	if (size) { // optimization
-		size_t i = description.find_last_of('<');
-		if (i != description.npos && description[--size] == '>') {
-			const string * oldTag = getParamOld(USER_PARAM_TAG);
-			string & tag = updateParamOld(USER_PARAM_TAG, "");
-			++i;
-			tag.assign(description, i, size - i);
-			description.assign(description, 0, --i);
-			if (oldTag == NULL || tag.compare(*oldTag) != 0) { // optimization
-				parseTag();
-			}
+/** Set/unset user in OpList (for plugins) */
+int DcUser::onSetInOpList(const string & old, const string & now) {
+	if (now != "0") {
+		if (old == "0") {
+			// TODO NMDC protocol
+			mDcServer->mNmdcProtocol.addToOps(this);
 		}
-	}
-}
-
-
-
-void DcUser::parseTag() {
-
-	#ifdef _DEBUG
-		if (getParamOld(USER_PARAM_TAG) == NULL) {
-			throw "tag is NULL";
-		}
-	#endif
-
-	const string & tag = *getParamOld(USER_PARAM_TAG);
-	size_t clientPos = tag.find(',');
-	size_t tagSize = tag.size();
-	if (clientPos == tag.npos) {
-		clientPos = tagSize;
-	}
-
-	// Get clientName and clientVersion
-	string & clientVersion = updateParamOld(USER_PARAM_CLIENT_VERSION, "");
-	string & clientName = updateParamOld(USER_PARAM_CLIENT_NAME, "");
-
-	size_t v = tag.find("V:");
-	if (v != tag.npos) {
-		clientVersion.assign(tag, v + 2, clientPos - v - 2);
-		clientName.assign(tag, 0, v);
 	} else {
-		size_t s = tag.find(' ');
-		if (s != tag.npos && s < clientPos) {
-			++s;
-			if (atof(tag.substr(s, clientPos - s).c_str())) {
-				clientVersion.assign(tag, s, clientPos - s);
-				clientName.assign(tag, 0, --s);
-			} else {
-				clientName.assign(tag, 0, clientPos);
-			}
-		} else {
-			clientName.assign(tag, 0, clientPos);
+		if (old != "0") {
+			// TODO NMDC protocol
+			mDcServer->mNmdcProtocol.delFromOps(this);
 		}
 	}
-	trim(clientName);
-	trim(clientVersion);
-		
-	// hubs
-	size_t h = tag.find("H:");
-	if (h != tag.npos) {
-		h += 2;
-		size_t unregPos = tag.find('/', h);
-		if (unregPos == tag.npos) {
-			unregPos = tag.find(',', h);
-			if (unregPos == tag.npos) {
-				unregPos = tagSize;
-			}
-		} else {
-			size_t regPos = tag.find('/', ++unregPos);
-			if (regPos == tag.npos) {
-				regPos = tag.find(',', unregPos);
-				if (regPos == tag.npos) {
-					regPos = tagSize;
-				}
-			} else {
-				size_t opPos = tag.find('/', ++regPos);
-				if (opPos == tag.npos) {
-					opPos = tag.find(',', regPos);
-					if (opPos == tag.npos) {
-						opPos = tagSize;
-					}
-				}
-				string & opHubs = updateParamOld(USER_PARAM_OP_HUBS, "");
-				opHubs.assign(tag, regPos, opPos - regPos);
-			}
-			string & regHubs = updateParamOld(USER_PARAM_REG_HUBS, "");
-			regHubs.assign(tag, unregPos, regPos - unregPos - 1);
-		}
-		string & unregHubs = updateParamOld(USER_PARAM_UNREG_HUBS, "");
-		unregHubs.assign(tag, h, unregPos - h - 1);
-	}
-
-	// slots and limits
-	findParam(tag, "M:", USER_PARAM_MODE);
-	findParam(tag, "S:", USER_PARAM_SLOTS);
-	findParam(tag, "L:", USER_PARAM_LIMIT);
-	findParam(tag, "O:", USER_PARAM_OPEN);
-	findParam(tag, "B:", USER_PARAM_BANDWIDTH);
-	findParam(tag, "D:", USER_PARAM_DOWNLOAD);
-	findParam(tag, "F:", USER_PARAM_FRACTION);
+	return 0;
 }
 
 
 
-void DcUser::findParam(const string & tag, const char * find, unsigned long key) {
-	size_t pos = tag.find(find);
-	if (pos != tag.npos) {
-		pos += 2;
-		size_t sepPos = tag.find(',', pos);
-		if (sepPos == tag.npos) {
-			sepPos = tag.size();
+int DcUser::onSetInIpList(const string & old, const string & now) {
+	if (now != "0") {
+		if (old == "0") {
+			// TODO NMDC protocol
+			mDcServer->mNmdcProtocol.addToIpList(this);
 		}
-		string & param = updateParamOld(key, "");
-		param.assign(tag, pos, sepPos - pos);
+	} else {
+		if (old != "0") {
+			// TODO NMDC protocol
+			mDcServer->mNmdcProtocol.delFromIpList(this);
+		}
 	}
+	return 0;
 }
 
 
-unsigned long DcUser::getHash(const char * s) {
-	size_t i, l = strlen(s);
-	unsigned long h = l;
-	for (i = l; i > 0;) {
-		h ^= ((h << 5) + (h >> 2) + (unsigned char)(s[--i]));
+
+int DcUser::onSetHide(const string & old, const string & now) {
+	if (now != "0") {
+		if (old == "0") {
+			// TODO NMDC protocol
+			mDcServer->mNmdcProtocol.addToHide(this);
+		}
+	} else {
+		if (old != "0") {
+			// TODO NMDC protocol
+			mDcServer->mNmdcProtocol.delFromHide(this);
+		}
 	}
-	return h / 2;
+	return 0;
+}
+
+
+
+int DcUser::onSetInfo(const string & old, const string & now) {
+	if (old != now) {
+		mInfoChanged = true;
+	}
+	return 0;
 }
 
 

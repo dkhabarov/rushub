@@ -106,7 +106,7 @@ int DcConn::onTimer(Time &now) {
 	DcServer * dcServer = server();
 
 	// Check timeouts. For entering only
-	if (!mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) { // Optimisation
+	if (!mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) { // Optimisation
 		for (int i = 0; i < HUB_TIME_OUT_MAX; ++i) {
 			if (!checkTimeOut(HubTimeOut(i), now)) {
 				if (log(DEBUG)) {
@@ -139,7 +139,7 @@ int DcConn::onTimer(Time &now) {
 	Ago -= dcServer->mDcConfig.mStartPing;
 	if (
 		dcServer->minDelay(mPingServer, dcServer->mDcConfig.mPingInterval) &&
-		mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST) && mDcUser->mTimeEnter < Ago
+		mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST) && mDcUser->mTimeEnter < Ago
 	) {
 		send("", 0, true, true);
 	}
@@ -158,9 +158,6 @@ void DcConn::closeNow(int iReason) {
 bool DcConn::setUser(DcUser * dcUser) {
 	mDcUser = dcUser;
 	mDcUserBase = dcUser;
-	dcUser->mDcConn = this;
-	dcUser->mDcConnBase = this;
-	dcUser->mDcServer = server();
 	return true;
 }
 
@@ -232,7 +229,7 @@ Conn * DcConnFactory::createConn(tSocket sock) {
 	dcConn->mSelfConnFactory = this; // Connection factory for current connection (DcConnFactory)
 
 	// Create DcUser
-	DcUser * dcUser = new DcUser();
+	DcUser * dcUser = new DcUser(dcConn);
 	dcConn->setUser(dcUser);
 
 	return static_cast<Conn *> (dcConn);
@@ -251,12 +248,12 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 
 		if (dcConn->mDcUser != NULL) {
 
-			const string * share = dcConn->mDcUser->getParamOld(USER_PARAM_SHARE);
+			Param * share = (Param *) dcConn->mDcUser->getParam(USER_PARAM_SHARE);
 			if (share != NULL) {
-				dcServer->miTotalShare -= stringToInt64(*share);
+				share->setInt64(__int64(0)); // for remove from total share
 			}
 
-			if (dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+			if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 				dcServer->removeFromDcUserList(static_cast<DcUser *> (dcConn->mDcUser));
 			} else { // remove from enter list, if user was already added in it, but user was not added in user list
 				dcServer->mEnterList.remove(dcConn->mDcUser->getUidHash());

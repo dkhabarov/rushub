@@ -39,14 +39,65 @@ struct ufSend : public unary_function<void, UserList::iterator> {
 	ufSend(const string & data, bool addSep) : mData(data), mAddSep(addSep) {
 	}
 
-	ufSend & operator = (const ufSend &) {
-		return *this;
-	}
-
 	void operator() (UserBase * userBase) {
 		if (userBase && userBase->isCanSend()) {
 			userBase->send(mData, mAddSep);
 		}
+	}
+
+private:
+
+	ufSend & operator = (const ufSend &) {
+		return *this;
+	}
+
+}; // struct ufSend
+
+
+
+/** Unary function for sending data to users with features */
+struct ufSendFeature : public unary_function<void, UserList::iterator> {
+	const string & mData; /** Data for sending */
+	bool mAddSep;
+	const vector<string> & mPositive;
+	const vector<string> & mNegative;
+
+	ufSendFeature(const string & data, bool addSep,
+		const vector<string> & positive, const vector<string> & negative) : 
+		mData(data),
+		mAddSep(addSep),
+		mPositive(positive),
+		mNegative(negative)
+	{
+	}
+
+	void operator() (UserBase * userBase) {
+		if (userBase && userBase->isCanSend()) {
+			bool canSend = true;
+			for (unsigned int i = 0; i < mPositive.size(); ++i) {
+				if (!userBase->hasFeature(mPositive[i])) {
+					canSend = false;
+					break;
+				}
+			}
+			if (canSend) {
+				for (unsigned int i = 0; i < mNegative.size(); ++i) {
+					if (userBase->hasFeature(mNegative[i])) {
+						canSend = false;
+						break;
+					}
+				}
+				if (canSend) {
+					userBase->send(mData, mAddSep, false); // not flush
+				}
+			}
+		}
+	}
+
+private:
+
+	ufSendFeature & operator = (const ufSendFeature &) {
+		return *this;
 	}
 
 }; // struct ufSend
@@ -64,10 +115,6 @@ struct ufSendProfile : public unary_function<void, UserList::iterator> {
 	{
 	}
 
-	ufSendProfile & operator = (const ufSendProfile &) {
-		return *this;
-	}
-
 	void operator() (UserBase * userBase) {
 		if (userBase && userBase->isCanSend()) {
 			int profile = userBase->getProfile() + 1;
@@ -81,6 +128,12 @@ struct ufSendProfile : public unary_function<void, UserList::iterator> {
 				userBase->send(mData, mAddSep);
 			}
 		}
+	}
+
+private:
+
+	ufSendProfile & operator = (const ufSendProfile &) {
+		return *this;
 	}
 
 }; // struct ufSendProfile
@@ -97,16 +150,18 @@ struct ufSendWithNick : public unary_function<void, UserList::iterator> {
 	{
 	}
 
-	ufSendWithNick & operator = (const ufSendWithNick &) {
-		return *this;
-	}
-
 	void operator() (UserBase * userBase) {
 		if (userBase && userBase->isCanSend() && !userBase->getUid().empty()) {
 			userBase->send(mDataStart, false, false);
 			userBase->send(userBase->getUid(), false, false);
 			userBase->send(mDataEnd, true);
 		}
+	}
+
+private:
+
+	ufSendWithNick & operator = (const ufSendWithNick &) {
+		return *this;
 	}
 
 }; // struct ufSendWithNick
@@ -125,10 +180,6 @@ struct ufSendWithNickProfile : public unary_function<void, UserList::iterator> {
 	{
 	}
 
-	ufSendWithNickProfile & operator = (const ufSendWithNickProfile &) {
-		return *this;
-	}
-
 	void operator() (UserBase * userBase) {
 		if (userBase && userBase->isCanSend()) { 
 			int profile = userBase->getProfile() + 1;
@@ -144,6 +195,12 @@ struct ufSendWithNickProfile : public unary_function<void, UserList::iterator> {
 				userBase->send(mDataEnd, true);
 			}
 		}
+	}
+
+private:
+
+	ufSendWithNickProfile & operator = (const ufSendWithNickProfile &) {
+		return *this;
 	}
 
 }; // struct ufSendWithNickProfile
@@ -263,6 +320,22 @@ void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 				mCache.append(ADC_SEPARATOR);
 			}
 		}
+	}
+}
+
+
+
+void UserList::sendToFeature(const string & data, const vector<string> & positive, 
+		const vector<string> & negative, bool addSep) {
+
+	if (log(TRACE)) {
+		logStream() << "sendToFeature begin" << endl;
+	}
+
+	for_each(begin(), end(), ufSendFeature(data, addSep, positive, negative));
+
+	if (log(TRACE)) {
+		logStream() << "sendToFeature end" << endl;
 	}
 }
 

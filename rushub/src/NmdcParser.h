@@ -245,6 +245,15 @@ public:
 	static bool isPassive(const string & description);
 	static int checkCmd(NmdcParser & dcParser, const string & data, DcUserBase * dcUserBase = NULL);
 
+
+	static void parseDesc(DcUserBase *, const string & desc);
+	static void parseTag(DcUserBase *, const string & tag);
+	static void findParam(DcUserBase *, const string & tag, const char * find, const char * key, bool toInt = true);
+	static void setParam(DcUserBase *, const char * name, const string & value, bool remove = false);
+	static void setParam(DcUserBase *, const char * name, int value, bool remove = false);
+	static void getTag(DcUserBase * dcUserBase, string & tag);
+	static void getMyInfo(DcUserBase * dcUserBase, string & myInfo);
+
 private:
 
 	bool mError;

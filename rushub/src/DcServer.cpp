@@ -158,7 +158,7 @@ DcServer::~DcServer() {
 		if (Us->mDcConn) {
 			delConnection(Us->mDcConn);
 		} else {
-			if (Us->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+			if (Us->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 				removeFromDcUserList(Us);
 			}
 			delete Us;
@@ -172,7 +172,7 @@ DcServer::~DcServer() {
 		if (Us->mDcConn) {
 			delConnection(Us->mDcConn);
 		} else {
-			if (Us->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+			if (Us->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 				removeFromDcUserList(Us);
 			}
 			delete Us;
@@ -528,7 +528,7 @@ bool DcServer::checkNick(DcConn *dcConn) {
 	if (mDcUserList.contain(uidHash)) {
 		DcUser * us = static_cast<DcUser *> (mDcUserList.find(uidHash));
 
-		if (!us->mDcConn || (us->getProfile() != -1 && us->getIp() != dcConn->getIp())) {
+		if (!us->mDcConn || (us->getParamForce(USER_PARAM_PROFILE)->getInt() != -1 && us->getIp() != dcConn->getIp())) {
 			if (dcConn->log(DEBUG)) {
 				dcConn->logStream() << "Bad nick (used): '" 
 					<< dcConn->mDcUser->getUid() << "'["
@@ -580,7 +580,7 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 		}
 
 		dcConn->mSendNickList = false;
-	} else if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		doUserEnter(dcConn);
 	}
 	return true;
@@ -645,7 +645,7 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 		}
 		return false;
 	}
-	if (dcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		if (log(ERR)) {
 			logStream() << "User is already in the user list" << endl;
 		}
@@ -669,7 +669,7 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 		if (log(DEBUG)) {
 			logStream() << "Adding twice user with same nick " << dcUser->getUid() << " (" << mainUserList->find(uidHash)->getUid() << ")" << endl;
 		}
-		dcUser->setBoolParam(USER_BOOL_PARAM_IN_USER_LIST, false);
+		dcUser->setInUserList(false);
 		return false;
 	}
 
@@ -682,15 +682,15 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 		if (!dcUser->isPassive()) {
 			mActiveList.add(uidHash, dcUser);
 		}
-		if (dcUser->getBoolParam(USER_BOOL_PARAM_IN_OP_LIST)) {
+		if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
 			mOpList.add(uidHash, dcUser);
 		}
-		if (dcUser->getBoolParam(USER_BOOL_PARAM_IN_IP_LIST)) {
+		if (dcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
 			mIpList.add(uidHash, dcUser);
 		}
 	}
 
-	dcUser->setBoolParam(USER_BOOL_PARAM_IN_USER_LIST, true);
+	dcUser->setInUserList(true);
 	dcUser->setCanSend(true);
 
 	if (dcUser->mDcConn) {
@@ -772,10 +772,10 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 		mHelloList.remove(uidHash); // NMDC
 	}
 
-	if (dcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
-		dcUser->setBoolParam(USER_BOOL_PARAM_IN_USER_LIST, false);
+	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
+		dcUser->setInUserList(false);
 
-		if (!dcUser->getBoolParam(USER_BOOL_PARAM_HIDE)) {
+		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 			string msg;
 
 			if (!mDcConfig.mAdcOn) {
@@ -797,7 +797,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 
 	if (!mDcConfig.mAdcOn) {
 		string hello;
-		if (dcUser->getBoolParam(USER_BOOL_PARAM_HIDE) && dcUser->mDcConn) {
+		if (dcUser->mDcConn && dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 			if (dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
 				dcUser->mDcConn->send(dcUser->getInfo(), true, false);
 			} else if (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
@@ -807,7 +807,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 				dcUser->mDcConn->send(mNmdcProtocol.appendHello(hello, dcUser->getUid()), false, false); // refactoring to DcProtocol pointer
 			}
 
-			if (dcUser->getBoolParam(USER_BOOL_PARAM_IN_OP_LIST)) {
+			if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
 				string opList;
 				dcUser->mDcConn->send(mNmdcProtocol.appendOpList(opList, dcUser->getUid()), false, false); // refactoring to DcProtocol pointer
 			}
@@ -823,7 +823,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 			mEnterList.sendToAll(dcUser->getInfo(), true/*mDcConfig.mDelayedMyinfo*/);
 
 			// Op entry
-			if (dcUser->getBoolParam(USER_BOOL_PARAM_IN_OP_LIST)) {
+			if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
 				string opList;
 				mDcUserList.sendToAll(mNmdcProtocol.appendOpList(opList, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false); // refactoring to DcProtocol pointer
 				mEnterList.sendToAll(opList, true/*mDcConfig.mDelayedMyinfo*/, false);
@@ -847,7 +847,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 				mIpList.sendToAll(ipList, true, false);
 			}
 
-			if (dcUser->getBoolParam(USER_BOOL_PARAM_IN_IP_LIST)) {
+			if (dcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
 				dcUser->send(mDcUserList.getList(USER_LIST_IP), true, false);
 			} else if (ipList.size() && dcUser->mDcConn && (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_USERIP2)) { // UserIP2
 				dcUser->send(ipList, false, false);
@@ -859,7 +859,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 
 		bool canSend = dcUser->isCanSend();
 
-		if (!dcUser->getBoolParam(USER_BOOL_PARAM_HIDE)) {
+		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 
 			// Show MyINFO string to all users
 			mAdcUserList.sendToAllAdc(dcUser->getInf(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
@@ -1260,7 +1260,8 @@ bool DcServer::setLang(const string & name, const string & value) {
 
 
 int DcServer::regBot(const string & uid, const string & info, const string & ip, bool key) {
-	DcUser * dcUser = new DcUser();
+	DcUser * dcUser = new DcUser(NULL);
+	dcUser->mDcServer = this;
 	string sid;
 	if (!mDcConfig.mAdcOn) {
 		dcUser->setUid(uid);
@@ -1268,9 +1269,8 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 		sid = mAdcProtocol.getSid(1); // TODO: set bot SID!
 		dcUser->setUid(sid);
 	}
-	dcUser->setProfile(30);
-	dcUser->mDcServer = this;
-	dcUser->setBoolParam(USER_BOOL_PARAM_IN_OP_LIST, key);
+	dcUser->getParamForce(USER_PARAM_PROFILE)->setInt(30);
+	dcUser->getParamForce(USER_PARAM_IN_OP_LIST)->setBool(key);
 
 	if (DcConn::checkIp(ip)) {
 		dcUser->setIp(ip);

@@ -662,23 +662,23 @@ int setUser(lua_State * L) {
 
 	unsigned num = (unsigned)luaL_checkinteger(L, 2);
 	if (num == USERVALUE_PROFILE) {
-		dcUserBase->setIntParam(USER_INT_PARAM_PROFILE, luaL_checkint(L, 3));
+		Uid::setValue(L, dcUserBase, USER_PARAM_PROFILE, ParamBase::TYPE_INT);
 	} else if (num == USERVALUE_MYINFO) {
 		string myInfo(luaL_checkstring(L, 3));
 		if (!dcUserBase->setInfo(myInfo)) {
 			return LuaUtils::pushError(L, "wrong syntax");
 		}
 	} else if (num == USERVALUE_DATA) {
-		dcUserBase->setStringParam(USER_STRING_PARAM_DATA, luaL_checkstring(L, 3));
+		Uid::setValue(L, dcUserBase, "sData", ParamBase::TYPE_STRING);
 	} else if (num == USERVALUE_OPLIST) {
 		luaL_checktype(L, 3, LUA_TBOOLEAN);
-		dcUserBase->setBoolParam(USER_BOOL_PARAM_IN_OP_LIST, lua_toboolean(L, 3) != 0);
+		Uid::setValue(L, dcUserBase, USER_PARAM_IN_OP_LIST, ParamBase::TYPE_BOOL);
 	} else if (num == USERVALUE_HIDE) {
 		luaL_checktype(L, 3, LUA_TBOOLEAN);
-		dcUserBase->setBoolParam(USER_BOOL_PARAM_HIDE, lua_toboolean(L, 3) != 0);
+		Uid::setValue(L, dcUserBase, USER_PARAM_CAN_HIDE, ParamBase::TYPE_BOOL);
 	} else if (num == USERVALUE_IPLIST) {
 		luaL_checktype(L, 3, LUA_TBOOLEAN);
-		dcUserBase->setBoolParam(USER_BOOL_PARAM_IN_IP_LIST, lua_toboolean(L, 3) != 0);
+		Uid::setValue(L, dcUserBase, USER_PARAM_IN_IP_LIST, ParamBase::TYPE_BOOL);
 	}
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
@@ -698,7 +698,7 @@ int getUsers(lua_State * L) {
 		}
 		const vector<DcConnBase *> & v = LuaPlugin::mCurServer->getDcConnBase(lua_tostring(L, 1));
 		for (vector<DcConnBase *>::const_iterator it = v.begin(); it != v.end(); ++it) {
-			if (all || ((*it)->mDcUserBase && (*it)->mDcUserBase->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST))) {
+			if (all || ((*it)->mDcUserBase && (*it)->mDcUserBase->getParam(USER_PARAM_IN_USER_LIST)->getBool())) {
 				lua_pushnumber(L, i);
 				void ** userdata = (void **) lua_newuserdata(L, sizeof(void *));
 				*userdata = (void *) (*it);
@@ -719,7 +719,7 @@ int getUsers(lua_State * L) {
 			if (dcConnBase->mType != CLIENT_TYPE_NMDC) {
 				continue;
 			}
-			if (all || (dcConnBase->mDcUserBase && dcConnBase->mDcUserBase->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST))) {
+			if (all || (dcConnBase->mDcUserBase && dcConnBase->mDcUserBase->getParam(USER_PARAM_IN_USER_LIST)->getBool())) {
 				lua_pushnumber(L, i);
 				void ** userdata = (void **) lua_newuserdata(L, sizeof(void *));
 				*userdata = (void *) dcConnBase; // TODO refactoring
@@ -848,7 +848,11 @@ int disconnectIp(lua_State * L) {
 	} else {
 		int prf;
 		for (it = v.begin(); it != v.end(); ++it) {
-			prf = (*it)->mDcUserBase->getIntParam(USER_INT_PARAM_PROFILE) + 1;
+			ParamBase * paramBase = (*it)->mDcUserBase->getParamForce(USER_PARAM_PROFILE);
+			if (paramBase == NULL) {
+				continue;
+			}
+			prf = paramBase->getInt() + 1;
 			if (prf < 0) {
 				prf = -prf;
 			}

@@ -150,6 +150,9 @@ public:
 	/** Sending data to all from the list */
 	void sendToAllAdc(const string & data, bool useCache = false, bool addSep = true);
 
+	void sendToFeature(const string & data, const vector<string> & positive, 
+		const vector<string> & negative, bool addSep = true);
+
 	/** Sending data to profiles */
 	void sendToProfiles(unsigned long profile, const string & data, bool addSep = true);
 

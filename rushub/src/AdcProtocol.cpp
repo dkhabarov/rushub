@@ -141,19 +141,38 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 	}
 
 	if (0 == (this->*(this->events[adcParser->mType])) (adcParser, dcConn)) {
-		if (adcParser->getHeader() == HEADER_BROADCAST) {
-			mDcServer->mAdcUserList.sendToAllAdc(adcParser->mCommand, true);
-		} else if (adcParser->getHeader() == HEADER_ECHO || adcParser->getHeader() == HEADER_DIRECT) {
-			// Search user
-			DcUser * dcUser = static_cast<DcUser *> (mDcServer->mAdcUserList.getUserBaseByUid(adcParser->getSidTarget()));
-			if (dcUser) { // User is found
-				dcUser->send(adcParser->mCommand, true);
-				dcConn->mDcUser->send(adcParser->mCommand, true);
-			}
-		} else if (adcParser->getHeader() == HEADER_FEATURE) {
-			// TODO: send to all with this feature
-		}
+		DcUser * dcUser = NULL;
+		switch(adcParser->getHeader()) {
 
+			case HEADER_BROADCAST:
+				mDcServer->mAdcUserList.sendToAllAdc(adcParser->mCommand, true);
+				break;
+
+			case HEADER_DIRECT:
+				dcUser = static_cast<DcUser *> (mDcServer->mAdcUserList.getUserBaseByUid(adcParser->getSidTarget()));
+				if (dcUser) { // User was found
+					dcUser->send(adcParser->mCommand, true);
+				}
+				break;
+
+			case HEADER_ECHO:
+				dcUser = static_cast<DcUser *> (mDcServer->mAdcUserList.getUserBaseByUid(adcParser->getSidTarget()));
+				if (dcUser) { // User was found
+					dcUser->send(adcParser->mCommand, true);
+					dcConn->mDcUser->send(adcParser->mCommand, true);
+				}
+				break;
+
+			case HEADER_FEATURE:
+				mDcServer->mAdcUserList.sendToFeature(adcParser->mCommand, 
+					adcParser->getPositiveFeatures(), 
+					adcParser->getNegativeFeatures(),
+					true);
+				break;
+
+			default:
+				break;
+		}
 	}
 
 	if (dcConn->log(TRACE)) {
@@ -276,14 +295,14 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 
 	dcConn->mDcUser->setInf(inf);
 
-	if (dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
-		if (dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_HIDE)) {
+	if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
+		if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 			dcConn->send(dcConn->mDcUser->getInf(), true); // Send to self only
 		} else {
 			// TODO sendMode
 			mDcServer->mAdcUserList.sendToAllAdc(dcConn->mDcUser->getInf(), true);
 		}
-	} else if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		dcConn->mSendNickList = true;
 		dcConn->clearTimeOut(HUB_TIME_OUT_LOGIN);
 		mDcServer->beforeUserEnter(dcConn);
@@ -298,7 +317,7 @@ int AdcProtocol::eventMsg(AdcParser * adcParser, DcConn * dcConn) {
 
 	// TODO check SID
 
-	if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		return -1;
 	}
 

@@ -69,6 +69,14 @@ bool isBase32(char);
 bool isUpperAlpha(char);
 bool isUpperAlphaNum(char);
 
+template <class T>
+string & toString(const T & value, string & str) {
+	ostringstream oss;
+	oss << value;
+	str = oss.str();
+	return str;
+}
+
 }; // namespace utils
 
 #endif // STRING_UTILS_H

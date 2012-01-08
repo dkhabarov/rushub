@@ -144,6 +144,18 @@ const string & AdcParser::getErrorText() const {
 
 
 
+const vector<string> & AdcParser::getPositiveFeatures() const {
+	return mPositiveFeature;
+}
+
+
+
+const vector<string> & AdcParser::getNegativeFeatures() const {
+	return mNegativeFeature;
+}
+
+
+
 /// Do parse for command and return type of this command
 int AdcParser::parse() {
 
@@ -240,17 +252,19 @@ bool AdcParser::checkHeaderSyntax() {
 
 		case 'F': // Feature broadcast
 			// 'F' command_name ' ' base32_character{4} ' ' (('+'|'-') [A-Z] [A-Z0-9]{3})+
+			// example: FSCH AA7V +TCP4-NAT0 TOauto TRZSIJM5OH6FCOIC6Y6LR5FUA2TXG5N3ZS7P6M5DQ
 			mHeader = HEADER_FEATURE;
-			if (mLength < 15 || mCommand[4] != ' ' || mCommand[9] != ' ' || (mCommand[10] != '+' && mCommand[10] != '-')) {
+			if (mLength < 15 || mCommand[4] != ' ' || mCommand[9] != ' ') {
 				setError("40", "Protocol syntax error");
 				return false;
 			} else if (!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8])) {
 				setError("40", "Invalid source SID");
 				return false;
-			} else if (!isUpperAlpha(mCommand[11]) || !isUpperAlphaNum(mCommand[12]) || !isUpperAlphaNum(mCommand[13]) || !isUpperAlphaNum(mCommand[14])) {
+			} else if (!parseFeatures()) {
 				setError("40", "Invalid feature");
 				return false;
 			}
+
 			mSidSource.assign(mCommand, 5, 4);
 			mBodyPos = 14;
 			break;
@@ -278,6 +292,38 @@ bool AdcParser::checkHeaderSyntax() {
 
 	}
 
+	return true;
+}
+
+
+
+bool AdcParser::parseFeatures() {
+	size_t pos = 10;
+	size_t endPos = mCommand.find(' ', 15);
+	if (endPos == mCommand.npos) {
+		endPos = mLength;
+	}
+	mPositiveFeature.clear();
+	mNegativeFeature.clear();
+	while (pos < endPos) {
+		if (pos + 4 > endPos || 
+			mCommand[pos] != '+' && mCommand[pos] != '-' ||
+			!isUpperAlpha(mCommand[pos + 1]) || 
+			!isUpperAlphaNum(mCommand[pos + 2]) || 
+			!isUpperAlphaNum(mCommand[pos + 3]) || 
+			!isUpperAlphaNum(mCommand[pos + 4])
+		) {
+				mPositiveFeature.clear();
+				mNegativeFeature.clear();
+				return false;
+		}
+		if (mCommand[pos] == '+') {
+			mPositiveFeature.push_back(mCommand.substr(pos + 1, 4));
+		} else {
+			mNegativeFeature.push_back(mCommand.substr(pos + 1, 4));
+		}
+		pos += 5;
+	}
 	return true;
 }
 
@@ -407,6 +453,33 @@ bool AdcParser::splitChunks() {
 	}
 	return mError;
 }
+
+
+
+void AdcParser::parseInf(DcUserBase * dcUserBase, const string & info) {
+	size_t s = info.find(' ', 9);
+	if (s != info.npos) {
+		size_t e;
+		while ((e = info.find(' ', ++s)) != info.npos) {
+			if (s + 2 <= e) { // max 2 (for name)
+				string name;
+				name.assign(info, s, 2);
+				s += 2;
+				if (e != s) {
+					dcUserBase->getParamForce(name.c_str())->setString(string().assign(info, s, e - s));
+				} else {
+					dcUserBase->removeParam(name.c_str());
+				}
+			}
+			s = e;
+		}
+	}
+}
+
+void AdcParser::getInf(DcUserBase *, string &) {
+	// TODO
+}
+
 
 }; // namespace protocol
 
