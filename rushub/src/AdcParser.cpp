@@ -307,7 +307,7 @@ bool AdcParser::parseFeatures() {
 	mNegativeFeature.clear();
 	while (pos < endPos) {
 		if (pos + 4 > endPos || 
-			mCommand[pos] != '+' && mCommand[pos] != '-' ||
+			(mCommand[pos] != '+' && mCommand[pos] != '-') ||
 			!isUpperAlpha(mCommand[pos + 1]) || 
 			!isUpperAlphaNum(mCommand[pos + 2]) || 
 			!isUpperAlphaNum(mCommand[pos + 3]) || 

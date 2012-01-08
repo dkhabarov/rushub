@@ -28,6 +28,9 @@
 
 namespace dcserver {
 
+#if (!defined _WIN32) && (!defined __int64)
+	#define __int64 long long
+#endif
 
 DcConn::DcConn(int type, tSocket sock, Server * server) : 
 	Conn(sock, server, CONN_TYPE_INCOMING_TCP),
