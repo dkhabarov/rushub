@@ -360,26 +360,91 @@ const string & DcUser::getNmdcTag() {
 
 
 const string & DcUser::getInfo() {
-	if (mInfoChanged) {
-		// TODO NMDC protocol
-		NmdcParser::getMyInfo(this, myInfo);
-		mInfoChanged = false;
+	if (mDcServer->mDcConfig.mAdcOn) {
+		if (mInfoChanged || !mInf.size()) {
+			//AdcParser::getInf(this, mInf);
+			// TODO insert into AdcParser
+
+			mInf = "BINF "; // TODO !
+			mInf.append(getUid());
+			for (set<string>::iterator it = mInfoNames.begin(); it != mInfoNames.end(); ++it) {
+				const string & name = (*it);
+				ParamBase * param = getParam(name.c_str());
+				if (param != NULL) {
+					mInf.append(" ").append(name).append(param->toString());
+				}
+			}
+			mInfoChanged = false;
+		}
+		return mInf;
+	} else {
+		if (mInfoChanged) {
+			// TODO NMDC protocol
+			NmdcParser::getMyInfo(this, myInfo);
+			mInfoChanged = false;
+		}
+		return myInfo;
 	}
-	return myInfo;
 }
 
 
 
 // Only NMDC
 /** Set MyINFO string (for plugins). With cmd & nick check */
-bool DcUser::setInfo(const string & newMyInfo) {
-
-	// TODO NMDC protocol
-	NmdcParser dcParser;
-	if (NmdcParser::checkCmd(dcParser, newMyInfo, this) != NMDC_TYPE_MYNIFO) {
-		return false;
+bool DcUser::setInfo(const string & info) {
+	if (mDcServer->mDcConfig.mAdcOn) {
+		//AdcParser::parseInf(this, inf);
+		// TODO insert into AdcParser
+		size_t s = info.find(' ', 9);
+		if (s != info.npos) {
+			size_t e;
+			bool last = true;
+			mInfoChanged = true; // !
+			mDcServer->mAdcUserList.remake(); // !
+			while ((e = info.find(' ', ++s)) != info.npos || last) {
+				if (e == info.npos) {
+					e = info.size();
+					last = false;
+				}
+				if (s + 2 <= e) { // max 2 (for name)
+					string name;
+					name.assign(info, s, 2);
+					s += 2;
+					if (e != s) {
+						string value;
+						value.assign(info, s, e - s);
+						mInfoNames.insert(name); // TODO refactoring
+						if ((name == "I4" && value == "0.0.0.0") || (name == "I6" && value == "::")) {
+							getParamForce(name.c_str())->setString(getIp());
+						} else {
+							if (name == "SU") {
+								// TODO check syntax
+								mFeatures.clear();
+								size_t i, j = 0;
+								while ((i = value.find(',', j)) != value.npos) {
+									mFeatures.insert(value.substr(j, i - j));
+									j = i + 1;
+								}
+								mFeatures.insert(value.substr(j));
+							}
+							getParamForce(name.c_str())->setString(value);
+						}
+					} else {
+						mInfoNames.erase(name); // TODO refactoring
+						removeParam(name.c_str());
+					}
+				}
+				s = e;
+			}
+		}
+		return true;
+	} else {
+		NmdcParser dcParser;
+		if (NmdcParser::checkCmd(dcParser, info, this) != NMDC_TYPE_MYNIFO) {
+			return false;
+		}
+		return setInfo(&dcParser);
 	}
-	return setInfo(&dcParser);
 }
 
 
@@ -411,76 +476,6 @@ bool DcUser::setInfo(NmdcParser * parser) {
 		NmdcParser::parseDesc(this, parser->chunkString(CHUNK_MI_DESC));
 	}
 	return true;
-}
-
-
-
-const string & DcUser::getInf() {
-	if (mInfoChanged || !mInf.size()) {
-		//AdcParser::getInf(this, mInf);
-		// TODO insert into AdcParser
-
-		mInf = "BINF "; // TODO !
-		mInf.append(getUid());
-		for (set<string>::iterator it = mInfoNames.begin(); it != mInfoNames.end(); ++it) {
-			const string & name = (*it);
-			ParamBase * param = getParam(name.c_str());
-			if (param != NULL) {
-				mInf.append(" ").append(name).append(param->toString());
-			}
-		}
-		mInfoChanged = false;
-	}
-	return mInf;
-}
-
-
-
-void DcUser::setInf(const string & info) {
-	//AdcParser::parseInf(this, inf);
-	// TODO insert into AdcParser
-	size_t s = info.find(' ', 9);
-	if (s != info.npos) {
-		size_t e;
-		bool last = true;
-		mInfoChanged = true; // !
-		mDcServer->mAdcUserList.remake(); // !
-		while ((e = info.find(' ', ++s)) != info.npos || last) {
-			if (e == info.npos) {
-				e = info.size();
-				last = false;
-			}
-			if (s + 2 <= e) { // max 2 (for name)
-				string name;
-				name.assign(info, s, 2);
-				s += 2;
-				if (e != s) {
-					string value;
-					value.assign(info, s, e - s);
-					mInfoNames.insert(name); // TODO refactoring
-					if ((name == "I4" && value == "0.0.0.0") || (name == "I6" && value == "::")) {
-						getParamForce(name.c_str())->setString(getIp());
-					} else {
-						if (name == "SU") {
-							// TODO check syntax
-							mFeatures.clear();
-							size_t i, j = 0;
-							while ((i = value.find(',', j)) != value.npos) {
-								mFeatures.insert(value.substr(j, i - j));
-								j = i + 1;
-							}
-							mFeatures.insert(value.substr(j));
-						}
-						getParamForce(name.c_str())->setString(value);
-					}
-				} else {
-					mInfoNames.erase(name); // TODO refactoring
-					removeParam(name.c_str());
-				}
-			}
-			s = e;
-		}
-	}
 }
 
 

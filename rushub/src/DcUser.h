@@ -208,9 +208,6 @@ public:
 	virtual bool setInfo(const string & myInfo);
 	bool setInfo(NmdcParser * parser);
 
-	virtual const string & getInf();
-	void setInf(const string & inf);
-
 	virtual const string & getIp() const;
 	void setIp(const string & ip);
 

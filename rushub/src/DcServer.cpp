@@ -862,10 +862,10 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 
 			// Show MyINFO string to all users
-			mAdcUserList.sendToAllAdc(dcUser->getInf(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
+			mAdcUserList.sendToAllAdc(dcUser->getInfo(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
 
 			// Show INF string of the current user to all enterring users
-			mEnterList.sendToAllAdc(dcUser->getInf(), true/*mDcConfig.mDelayedMyinfo*/);
+			mEnterList.sendToAllAdc(dcUser->getInfo(), true/*mDcConfig.mDelayedMyinfo*/);
 
 		}
 
@@ -1298,7 +1298,7 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 		string inf("IINF ");
 		inf.append(sid).append(" CT").append(ct).append(" NI").append(uid);
 		inf.append(" SS0 HN0 HR0 HO1 VEBot\\sV:1.0 SL0 DERusHub\\sbot");
-		dcUser->setInf(inf);
+		dcUser->setInfo(inf);
 	}
 
 	if (log(DEBUG)) {

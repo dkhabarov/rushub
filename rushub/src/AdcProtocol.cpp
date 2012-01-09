@@ -293,7 +293,7 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 		}
 	}
 
-	dcConn->mDcUser->setInf(inf);
+	dcConn->mDcUser->setInfo(inf);
 
 	if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
@@ -541,7 +541,7 @@ int AdcProtocol::eventUnknown(AdcParser *, DcConn *) {
 void AdcProtocol::infList(string & list, UserBase * userBase) {
 	// INF ...\nINF ...\n
 	if (!userBase->isHide()) {
-		list.append(userBase->getInf());
+		list.append(userBase->getInfo());
 		list.append(ADC_SEPARATOR);
 	}
 }
