@@ -252,7 +252,7 @@ public:
 	static void setParam(DcUserBase *, const char * name, const string & value, bool remove = false);
 	static void setParam(DcUserBase *, const char * name, int value, bool remove = false);
 	static void getTag(DcUserBase * dcUserBase, string & tag);
-	static void getMyInfo(DcUserBase * dcUserBase, string & myInfo);
+	static void getMyInfo(DcUserBase * dcUserBase, string & info);
 
 private:
 

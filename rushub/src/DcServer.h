@@ -258,7 +258,7 @@ public:
 	bool setConfig(const string & name, const string & value);
 	bool setLang(const string & name, const string & value);
 
-	int regBot(const string & nick, const string & myInfo, const string & ip, bool key = true);
+	int regBot(const string & nick, const string & info, const string & ip, bool key = true);
 	int unregBot(const string & nick);
 
 	void stopHub() {

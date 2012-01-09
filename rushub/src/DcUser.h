@@ -205,7 +205,7 @@ public:
 	virtual const string & getNmdcTag();
 
 	virtual const string & getInfo();
-	virtual bool setInfo(const string & myInfo);
+	virtual bool setInfo(const string & info);
 	bool setInfo(NmdcParser * parser);
 
 	virtual const string & getIp() const;
@@ -240,8 +240,7 @@ private:
 
 	string mUid; ///< UserID
 	string mTag;
-	string myInfo;
-	string mInf; // ADC
+	string mInfo;
 	string mIp; ///< IP address of user/bot
 
 	bool mInUserList; ///< User in user-list

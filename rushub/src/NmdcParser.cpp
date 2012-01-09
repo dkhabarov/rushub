@@ -616,36 +616,36 @@ void NmdcParser::getTag(DcUserBase * dcUserBase, string & tag) {
 
 
 
-void NmdcParser::getMyInfo(DcUserBase * dcUserBase, string & myInfo) {
+void NmdcParser::getMyInfo(DcUserBase * dcUserBase, string & info) {
 	ParamBase * param = NULL;
-	myInfo = "$MyINFO $ALL ";
-	myInfo.append(dcUserBase->getUid());
-	myInfo.append(" ");
+	info = "$MyINFO $ALL ";
+	info.append(dcUserBase->getUid());
+	info.append(" ");
 	param = dcUserBase->getParam(USER_PARAM_DESC);
 	if (param != NULL) {
-		myInfo.append(param->toString());
+		info.append(param->toString());
 	}
-	myInfo.append(dcUserBase->getNmdcTag());
-	myInfo.append("$ $");
+	info.append(dcUserBase->getNmdcTag());
+	info.append("$ $");
 	param = dcUserBase->getParam(USER_PARAM_CONNECTION);
 	if (param != NULL) {
-		myInfo.append(param->toString());
+		info.append(param->toString());
 	}
 	param = dcUserBase->getParam(USER_PARAM_BYTE);
 	if (param != NULL) {
-		myInfo.append(param->toString());
+		info.append(param->toString());
 	}
-	myInfo.append("$");
+	info.append("$");
 	param = dcUserBase->getParam(USER_PARAM_EMAIL);
 	if (param != NULL) {
-		myInfo.append(param->toString());
+		info.append(param->toString());
 	}
-	myInfo.append("$");
+	info.append("$");
 	param = dcUserBase->getParam(USER_PARAM_SHARE);
 	if (param != NULL) {
-		myInfo.append(param->toString());
+		info.append(param->toString());
 	}
-	myInfo.append("$");
+	info.append("$");
 }
 
 

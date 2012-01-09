@@ -664,8 +664,7 @@ int setUser(lua_State * L) {
 	if (num == USERVALUE_PROFILE) {
 		Uid::setValue(L, dcUserBase, USER_PARAM_PROFILE, ParamBase::TYPE_INT);
 	} else if (num == USERVALUE_MYINFO) {
-		string myInfo(luaL_checkstring(L, 3));
-		if (!dcUserBase->setInfo(myInfo)) {
+		if (!dcUserBase->setInfo(string(luaL_checkstring(L, 3)))) {
 			return LuaUtils::pushError(L, "wrong syntax");
 		}
 	} else if (num == USERVALUE_DATA) {
@@ -1316,7 +1315,7 @@ int call(lua_State * L) {
 int regBot(lua_State * L) {
 	size_t len;
 	int type;
-	string nick, myInfo, ip;
+	string nick, info, ip;
 	bool key = true;
 
 	switch (lua_gettop(L)) {
@@ -1329,7 +1328,7 @@ int regBot(lua_State * L) {
 		case 3 :
 			type = lua_type(L, 3);
 			if (type != LUA_TNIL) {
-				myInfo = luaL_checklstring(L, 3, &len);
+				info = luaL_checklstring(L, 3, &len);
 			}
 
 		case 2 :
@@ -1350,7 +1349,7 @@ int regBot(lua_State * L) {
 
 	}
 
-	int res = LuaPlugin::mCurServer->regBot(nick, myInfo, ip, key);
+	int res = LuaPlugin::mCurServer->regBot(nick, info, ip, key);
 	if (res < 0) {
 		if (res == -1) {
 			return LuaUtils::pushError(L, "bad nick");

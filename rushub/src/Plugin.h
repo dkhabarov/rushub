@@ -214,7 +214,7 @@ public:
 	virtual const string & getInfo() = 0;
 
 	/// Set user's MyINFO cmd
-	virtual bool setInfo(const string & myInfo) = 0;
+	virtual bool setInfo(const string & info) = 0;
 
 }; // class DcUserBase
 
@@ -409,7 +409,7 @@ public:
 	/// Registration bot
 	virtual int regBot(
 		const string & nick,
-		const string & myInfo,
+		const string & info,
 		const string & ip,
 		bool key = true
 	) = 0;

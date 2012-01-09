@@ -361,29 +361,29 @@ const string & DcUser::getNmdcTag() {
 
 const string & DcUser::getInfo() {
 	if (mDcServer->mDcConfig.mAdcOn) {
-		if (mInfoChanged || !mInf.size()) {
-			//AdcParser::getInf(this, mInf);
+		if (mInfoChanged || !mInfo.size()) {
+			//AdcParser::getInf(this, mInfo);
 			// TODO insert into AdcParser
 
-			mInf = "BINF "; // TODO !
-			mInf.append(getUid());
+			mInfo = "BINF "; // TODO !
+			mInfo.append(getUid());
 			for (set<string>::iterator it = mInfoNames.begin(); it != mInfoNames.end(); ++it) {
 				const string & name = (*it);
 				ParamBase * param = getParam(name.c_str());
 				if (param != NULL) {
-					mInf.append(" ").append(name).append(param->toString());
+					mInfo.append(" ").append(name).append(param->toString());
 				}
 			}
 			mInfoChanged = false;
 		}
-		return mInf;
+		return mInfo;
 	} else {
 		if (mInfoChanged) {
 			// TODO NMDC protocol
-			NmdcParser::getMyInfo(this, myInfo);
+			NmdcParser::getMyInfo(this, mInfo);
 			mInfoChanged = false;
 		}
-		return myInfo;
+		return mInfo;
 	}
 }
 
@@ -451,8 +451,8 @@ bool DcUser::setInfo(const string & info) {
 
 // Only NMDC
 bool DcUser::setInfo(NmdcParser * parser) {
-	if (myInfo != parser->mCommand) {
-		myInfo = parser->mCommand;
+	if (mInfo != parser->mCommand) {
+		mInfo = parser->mCommand;
 
 		// Share
 		getParamForce(USER_PARAM_SHARE)->setInt64(stringToInt64(parser->chunkString(CHUNK_MI_SIZE)));
