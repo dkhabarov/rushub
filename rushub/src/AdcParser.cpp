@@ -31,30 +31,36 @@ namespace dcserver {
 
 namespace protocol {
 
+#define CMD(a, b, c) (int) ((a << 16) | (b << 8) | c)
 
 /// ADC command
 class AdcCommand {
 
 public:
 
-	AdcCommand() {
-	}
-
-	AdcCommand(const char * cmd) {
-		mCmd = cmd;
+	AdcCommand(int command, AdcType adcType) : mCommand(command), mAdcType(adcType) {
 	}
 
 	virtual ~AdcCommand() {
 	}
 
-	bool check(const string & cmd) const {
-		return 0 == cmd.compare(1, 3, mCmd);
+	bool check(int command) const {
+		return mCommand == command;
+	}
+
+	const AdcType getAdcType() const {
+		return mAdcType;
 	}
 
 private:
 
 	//hash = *reinterpret_cast<const unsigned int*>(cmd);
-	const char * mCmd;
+	const int mCommand;
+	const AdcType mAdcType;
+
+	AdcCommand & operator = (const AdcCommand &) {
+		return *this;
+	}
 
 }; // AdcCommand
 
@@ -62,26 +68,26 @@ private:
 
 /// Main ADC commands
 AdcCommand AdcCommands[] = {
-	AdcCommand("SUP"), // SUP
-	AdcCommand("STA"), // STA
-	AdcCommand("INF"), // INF
-	AdcCommand("MSG"), // MSG
-	AdcCommand("SCH"), // SCH
-	AdcCommand("RES"), // RES
-	AdcCommand("CTM"), // CTM
-	AdcCommand("RCM"), // RCM
-	AdcCommand("GPA"), // GPA
-	AdcCommand("PAS"), // PAS
-	AdcCommand("QUI"), // QUI
-	AdcCommand("GET"), // GET
-	AdcCommand("GFI"), // GFI
-	AdcCommand("SND"), // SND
-	AdcCommand("SID"), // SID
-	AdcCommand("CMD"), // CMD
-	AdcCommand("NAT"), // NAT
-	AdcCommand("RNT"), // RNT
-	AdcCommand("PSR"), // PSR
-	AdcCommand("PUB")  // PUB
+	AdcCommand(CMD('S', 'U', 'P'), ADC_TYPE_SUP), // SUP
+	AdcCommand(CMD('S', 'T', 'A'), ADC_TYPE_STA), // STA
+	AdcCommand(CMD('I', 'N', 'F'), ADC_TYPE_INF), // INF
+	AdcCommand(CMD('M', 'S', 'G'), ADC_TYPE_MSG), // MSG
+	AdcCommand(CMD('S', 'C', 'H'), ADC_TYPE_SCH), // SCH
+	AdcCommand(CMD('R', 'E', 'S'), ADC_TYPE_RES), // RES
+	AdcCommand(CMD('C', 'T', 'M'), ADC_TYPE_CTM), // CTM
+	AdcCommand(CMD('R', 'C', 'M'), ADC_TYPE_RCM), // RCM
+	AdcCommand(CMD('G', 'P', 'A'), ADC_TYPE_GPA), // GPA
+	AdcCommand(CMD('P', 'A', 'S'), ADC_TYPE_PAS), // PAS
+	AdcCommand(CMD('Q', 'U', 'I'), ADC_TYPE_QUI), // QUI
+	AdcCommand(CMD('G', 'E', 'T'), ADC_TYPE_GET), // GET
+	AdcCommand(CMD('G', 'F', 'I'), ADC_TYPE_GFI), // GFI
+	AdcCommand(CMD('S', 'N', 'D'), ADC_TYPE_SND), // SND
+	AdcCommand(CMD('S', 'I', 'D'), ADC_TYPE_SID), // SID
+	AdcCommand(CMD('C', 'M', 'D'), ADC_TYPE_CMD), // CMD
+	AdcCommand(CMD('N', 'A', 'T'), ADC_TYPE_NAT), // NAT
+	AdcCommand(CMD('R', 'N', 'T'), ADC_TYPE_RNT), // RNT
+	AdcCommand(CMD('P', 'S', 'R'), ADC_TYPE_PSR), // PSR
+	AdcCommand(CMD('P', 'U', 'B'), ADC_TYPE_PUB), // PUB
 };
 
 
@@ -164,10 +170,11 @@ int AdcParser::parse() {
 	if (mLength >= 4) { // ADC cmd key must contain 4 symbols
 
 		if (checkHeaderSyntax()) {
-
+			int cmd = CMD(mCommand[1], mCommand[2], mCommand[3]);
 			for (unsigned int i = 0; i < ADC_TYPE_INVALID; ++i) {
-				if (AdcCommands[i].check(mCommand)) { // Check cmd from mCommand
-					return mType = AdcType(i); // Set cmd type
+				AdcCommand & adcCommand = AdcCommands[i];
+				if (adcCommand.check(cmd)) { // Check cmd from mCommand
+					return mType = adcCommand.getAdcType(); // Set cmd type
 				}
 			}
 			return mType = ADC_TYPE_UNKNOWN; // Unknown cmd
