@@ -218,6 +218,8 @@ enum {
 
 }; // namespace protoenums
 
+class DcUser;
+
 namespace protocol {
 
 using namespace ::dcserver::protoenums;
@@ -243,16 +245,17 @@ public:
 	
 	bool splitChunks();
 	static bool isPassive(const string & description);
-	static int checkCmd(NmdcParser & dcParser, const string & data, DcUserBase * dcUserBase = NULL);
+	static int checkCmd(NmdcParser & dcParser, const string & data, DcUser * dcUser = NULL);
 
 
-	static void parseDesc(DcUserBase *, const string & desc);
-	static void parseTag(DcUserBase *, const string & tag);
-	static void findParam(DcUserBase *, const string & tag, const char * find, const char * key, bool toInt = true);
-	static void setParam(DcUserBase *, const char * name, const string & value, bool remove = false);
-	static void setParam(DcUserBase *, const char * name, int value, bool remove = false);
-	static void getTag(DcUserBase * dcUserBase, string & tag);
-	static void getMyInfo(DcUserBase * dcUserBase, string & info);
+	static void parseDesc(DcUser *, const string & desc);
+	static void parseTag(DcUser *, const string & tag);
+	static void findParam(DcUser *, const string & tag, const char * find, const char * key, bool toInt = true);
+	static void setParam(DcUser *, const char * name, const string & value, bool remove = false);
+	static void setParam(DcUser *, const char * name, int value, bool remove = false);
+	static void getTag(DcUser *, string & tag);
+	static void parseInfo(DcUser *, NmdcParser * parser);
+	static void formingInfo(DcUser *, string & info);
 
 private:
 

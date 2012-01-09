@@ -23,8 +23,9 @@
  */
 
 #include "NmdcParser.h"
+#include "DcUser.h"
 
-#include <stdlib.h>
+#include <stdlib.h> // atoi unix
 
 namespace dcserver {
 
@@ -364,7 +365,7 @@ bool NmdcParser::splitChunks() {
 	return mError;
 }
 
-int NmdcParser::checkCmd(NmdcParser & dcParser, const string & data, DcUserBase * dcUserBase /*= NULL*/) {
+int NmdcParser::checkCmd(NmdcParser & dcParser, const string & data, DcUser * dcUser /*= NULL*/) {
 	dcParser.reInit();
 	dcParser.mCommand = data;
 	dcParser.parse();
@@ -372,10 +373,9 @@ int NmdcParser::checkCmd(NmdcParser & dcParser, const string & data, DcUserBase 
 		return -1;
 	}
 
-	const string & uid = dcUserBase->getUid();
-	if (dcParser.mType == NMDC_TYPE_MYNIFO && (dcUserBase == NULL ||
-			uid.empty() ||
-			uid != dcParser.chunkString(CHUNK_MI_NICK))
+	if (dcParser.mType == NMDC_TYPE_MYNIFO && (dcUser == NULL ||
+			dcUser->getUid().empty() ||
+			dcUser->getUid() != dcParser.chunkString(CHUNK_MI_NICK))
 	) {
 		return -2;
 	}
@@ -388,7 +388,31 @@ int NmdcParser::checkCmd(NmdcParser & dcParser, const string & data, DcUserBase 
 
 
 
-void NmdcParser::parseDesc(DcUserBase * dcUserBase, const string & description) {
+void NmdcParser::parseInfo(DcUser * dcUser, NmdcParser * parser) {
+	// Share
+	dcUser->getParamForce(USER_PARAM_SHARE)->setInt64(stringToInt64(parser->chunkString(CHUNK_MI_SIZE)));
+
+	// Email
+	dcUser->getParamForce(USER_PARAM_EMAIL)->setString(parser->chunkString(CHUNK_MI_MAIL));
+
+
+	string speed = parser->chunkString(CHUNK_MI_SPEED);
+	string magicByte;
+	size_t size = speed.size();
+	if (size != 0) {
+		magicByte = speed[--size];
+		speed.assign(speed, 0, size);
+	}
+
+	dcUser->getParamForce(USER_PARAM_BYTE)->setString(magicByte);
+	dcUser->getParamForce(USER_PARAM_CONNECTION)->setString(speed);
+
+	parseDesc(dcUser, parser->chunkString(CHUNK_MI_DESC));
+}
+
+
+
+void NmdcParser::parseDesc(DcUser * dcUser, const string & description) {
 	string tag, desc = description;
 	size_t size = desc.size();
 	if (size) {
@@ -400,15 +424,15 @@ void NmdcParser::parseDesc(DcUserBase * dcUserBase, const string & description) 
 		}
 	}
 
-	dcUserBase->getParamForce(USER_PARAM_DESC)->setString(desc);
+	dcUser->getParamForce(USER_PARAM_DESC)->setString(desc);
 
 	// TODO: optimization check old tag
-	parseTag(dcUserBase, tag);
+	parseTag(dcUser, tag);
 }
 
 
 
-void NmdcParser::parseTag(DcUserBase * dcUserBase, const string & tag) {
+void NmdcParser::parseTag(DcUser * dcUser, const string & tag) {
 
 	size_t tagSize = tag.size();
 
@@ -472,25 +496,25 @@ void NmdcParser::parseTag(DcUserBase * dcUserBase, const string & tag) {
 		}
 	}
 
-	setParam(dcUserBase, USER_PARAM_CLIENT_NAME, clientName, !clientName.size());
-	setParam(dcUserBase, USER_PARAM_CLIENT_VERSION, clientVersion, !clientVersion.size());
-	setParam(dcUserBase, USER_PARAM_UNREG_HUBS, atoi(unregHubs.c_str()), !unregHubs.size());
-	setParam(dcUserBase, USER_PARAM_REG_HUBS, atoi(regHubs.c_str()), !regHubs.size());
-	setParam(dcUserBase, USER_PARAM_OP_HUBS, atoi(opHubs.c_str()), !opHubs.size());
+	setParam(dcUser, USER_PARAM_CLIENT_NAME, clientName, !clientName.size());
+	setParam(dcUser, USER_PARAM_CLIENT_VERSION, clientVersion, !clientVersion.size());
+	setParam(dcUser, USER_PARAM_UNREG_HUBS, atoi(unregHubs.c_str()), !unregHubs.size());
+	setParam(dcUser, USER_PARAM_REG_HUBS, atoi(regHubs.c_str()), !regHubs.size());
+	setParam(dcUser, USER_PARAM_OP_HUBS, atoi(opHubs.c_str()), !opHubs.size());
 
 	// slots and limits
-	findParam(dcUserBase, tag, "M:", USER_PARAM_MODE, false);
-	findParam(dcUserBase, tag, "S:", USER_PARAM_SLOTS);
-	findParam(dcUserBase, tag, "L:", USER_PARAM_LIMIT);
-	findParam(dcUserBase, tag, "O:", USER_PARAM_OPEN);
-	findParam(dcUserBase, tag, "B:", USER_PARAM_BANDWIDTH);
-	findParam(dcUserBase, tag, "D:", USER_PARAM_DOWNLOAD);
-	findParam(dcUserBase, tag, "F:", USER_PARAM_FRACTION, false);
+	findParam(dcUser, tag, "M:", USER_PARAM_MODE, false);
+	findParam(dcUser, tag, "S:", USER_PARAM_SLOTS);
+	findParam(dcUser, tag, "L:", USER_PARAM_LIMIT);
+	findParam(dcUser, tag, "O:", USER_PARAM_OPEN);
+	findParam(dcUser, tag, "B:", USER_PARAM_BANDWIDTH);
+	findParam(dcUser, tag, "D:", USER_PARAM_DOWNLOAD);
+	findParam(dcUser, tag, "F:", USER_PARAM_FRACTION, false);
 }
 
 
 
-void NmdcParser::findParam(DcUserBase * dcUserBase, const string & tag, const char * find, const char * key, bool toInt /*= true*/) {
+void NmdcParser::findParam(DcUser * dcUser, const string & tag, const char * find, const char * key, bool toInt /*= true*/) {
 	string param;
 	size_t pos = tag.find(find);
 	if (pos != tag.npos) {
@@ -502,107 +526,107 @@ void NmdcParser::findParam(DcUserBase * dcUserBase, const string & tag, const ch
 		param.assign(tag, pos, sepPos - pos);
 	}
 	if (toInt) {
-		setParam(dcUserBase, key, atoi(param.c_str()), !param.size());
+		setParam(dcUser, key, atoi(param.c_str()), !param.size());
 	} else {
-		setParam(dcUserBase, key, param, !param.size());
+		setParam(dcUser, key, param, !param.size());
 	}
 }
 
 
 
-void NmdcParser::setParam(DcUserBase * dcUserBase, const char * name, const string & value, bool remove /*= false*/) {
+void NmdcParser::setParam(DcUser * dcUser, const char * name, const string & value, bool remove /*= false*/) {
 	if (remove) {
-		dcUserBase->removeParam(name);
+		dcUser->removeParam(name);
 	} else {
-		dcUserBase->getParamForce(name)->setString(value);
+		dcUser->getParamForce(name)->setString(value);
 	}
 }
 
 
 
-void NmdcParser::setParam(DcUserBase * dcUserBase, const char * name, int value, bool remove /*= false*/) {
+void NmdcParser::setParam(DcUser * dcUser, const char * name, int value, bool remove /*= false*/) {
 	if (remove) {
-		dcUserBase->removeParam(name);
+		dcUser->removeParam(name);
 	} else {
-		dcUserBase->getParamForce(name)->setInt(value);
+		dcUser->getParamForce(name)->setInt(value);
 	}
 }
 
 
 
-void NmdcParser::getTag(DcUserBase * dcUserBase, string & tag) {
+void NmdcParser::getTag(DcUser * dcUser, string & tag) {
 	tag = "";
-	ParamBase * param = dcUserBase->getParam(USER_PARAM_CLIENT_NAME);
+	ParamBase * param = dcUser->getParam(USER_PARAM_CLIENT_NAME);
 	if (param) {
 		tag.append(param->toString());
 	}
-	param = dcUserBase->getParam(USER_PARAM_CLIENT_VERSION);
+	param = dcUser->getParam(USER_PARAM_CLIENT_VERSION);
 	if (param) {
 		if (tag.size()) {
 			tag.append(" ");
 		}
 		tag.append("V:").append(param->toString());
 	}
-	param = dcUserBase->getParam(USER_PARAM_MODE);
+	param = dcUser->getParam(USER_PARAM_MODE);
 	if (param) {
 		if (tag.size()) {
 			tag.append(",");
 		}
 		tag.append("M:").append(param->toString());
 	}
-	param = dcUserBase->getParam(USER_PARAM_UNREG_HUBS);
+	param = dcUser->getParam(USER_PARAM_UNREG_HUBS);
 	if (param) {
 		if (tag.size()) {
 			tag.append(",");
 		}
 		tag.append("H:").append(param->toString());
 
-		param = dcUserBase->getParam(USER_PARAM_REG_HUBS);
+		param = dcUser->getParam(USER_PARAM_REG_HUBS);
 		if (param) {
 			tag.append("/").append(param->toString());
 		}
 
-		param = dcUserBase->getParam(USER_PARAM_OP_HUBS);
+		param = dcUser->getParam(USER_PARAM_OP_HUBS);
 		if (param) {
 			tag.append("/").append(param->toString());
 		}
 	}
-	param = dcUserBase->getParam(USER_PARAM_SLOTS);
+	param = dcUser->getParam(USER_PARAM_SLOTS);
 	if (param) {
 		if (tag.size()) {
 			tag.append(",");
 		}
 		tag.append("S:").append(param->toString());
 	}
-	param = dcUserBase->getParam(USER_PARAM_OPEN);
+	param = dcUser->getParam(USER_PARAM_OPEN);
 	if (param) {
 		if (tag.size()) {
 			tag.append(",");
 		}
 		tag.append("O:").append(param->toString());
 	}
-	param = dcUserBase->getParam(USER_PARAM_LIMIT);
+	param = dcUser->getParam(USER_PARAM_LIMIT);
 	if (param) {
 		if (tag.size()) {
 			tag.append(",");
 		}
 		tag.append("L:").append(param->toString());
 	}
-	param = dcUserBase->getParam(USER_PARAM_BANDWIDTH);
+	param = dcUser->getParam(USER_PARAM_BANDWIDTH);
 	if (param) {
 		if (tag.size()) {
 			tag.append(",");
 		}
 		tag.append("B:").append(param->toString());
 	}
-	param = dcUserBase->getParam(USER_PARAM_DOWNLOAD);
+	param = dcUser->getParam(USER_PARAM_DOWNLOAD);
 	if (param) {
 		if (tag.size()) {
 			tag.append(",");
 		}
 		tag.append("D:").append(param->toString());
 	}
-	param = dcUserBase->getParam(USER_PARAM_FRACTION);
+	param = dcUser->getParam(USER_PARAM_FRACTION);
 	if (param) {
 		if (tag.size()) {
 			tag.append(",");
@@ -616,32 +640,32 @@ void NmdcParser::getTag(DcUserBase * dcUserBase, string & tag) {
 
 
 
-void NmdcParser::getMyInfo(DcUserBase * dcUserBase, string & info) {
+void NmdcParser::formingInfo(DcUser * dcUser, string & info) {
 	ParamBase * param = NULL;
 	info = "$MyINFO $ALL ";
-	info.append(dcUserBase->getUid());
+	info.append(dcUser->getUid());
 	info.append(" ");
-	param = dcUserBase->getParam(USER_PARAM_DESC);
+	param = dcUser->getParam(USER_PARAM_DESC);
 	if (param != NULL) {
 		info.append(param->toString());
 	}
-	info.append(dcUserBase->getNmdcTag());
+	info.append(dcUser->getNmdcTag());
 	info.append("$ $");
-	param = dcUserBase->getParam(USER_PARAM_CONNECTION);
+	param = dcUser->getParam(USER_PARAM_CONNECTION);
 	if (param != NULL) {
 		info.append(param->toString());
 	}
-	param = dcUserBase->getParam(USER_PARAM_BYTE);
-	if (param != NULL) {
-		info.append(param->toString());
-	}
-	info.append("$");
-	param = dcUserBase->getParam(USER_PARAM_EMAIL);
+	param = dcUser->getParam(USER_PARAM_BYTE);
 	if (param != NULL) {
 		info.append(param->toString());
 	}
 	info.append("$");
-	param = dcUserBase->getParam(USER_PARAM_SHARE);
+	param = dcUser->getParam(USER_PARAM_EMAIL);
+	if (param != NULL) {
+		info.append(param->toString());
+	}
+	info.append("$");
+	param = dcUser->getParam(USER_PARAM_SHARE);
 	if (param != NULL) {
 		info.append(param->toString());
 	}

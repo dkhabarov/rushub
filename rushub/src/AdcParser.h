@@ -28,9 +28,13 @@
 #include "Protocol.h"
 #include "Plugin.h"
 
+#include <set>
+
 using namespace ::server;
 
 namespace dcserver {
+
+class DcUser;
 
 namespace protocol {
 
@@ -109,8 +113,8 @@ public:
 	const string & getCidSource() const;
 	const string & getErrorCode() const;
 	const string & getErrorText() const;
-	const vector<string> & getPositiveFeatures() const;
-	const vector<string> & getNegativeFeatures() const;
+	const vector<int> & getPositiveFeatures() const;
+	const vector<int> & getNegativeFeatures() const;
 	
 	/// Do parse for command and return type of this command
 	virtual int parse();
@@ -119,8 +123,9 @@ public:
 
 	bool splitChunks();
 
-	static void parseInf(DcUserBase *, const string & info);
-	static void getInf(DcUserBase *, string & info);
+	static void parseFeatures(DcUser *, set<int> & features);
+	static void parseInfo(DcUser *, const string & info, set<string> & names);
+	static void formingInfo(DcUser *, string & info, const set<string> & names);
 
 private:
 
@@ -133,14 +138,16 @@ private:
 	size_t mBodyPos;
 	bool mError;
 
-	vector<string> mPositiveFeature;
-	vector<string> mNegativeFeature;
+	vector<int> mPositiveFeature;
+	vector<int> mNegativeFeature;
 
 private:
 
 	bool checkHeaderSyntax();
 	bool parseFeatures();
 	void setError(const char * code, const char * text);
+
+	static void replaceParam(ParamBase * param, const char * oldValue, const string & newValue);
 
 }; // class AdcParser
 

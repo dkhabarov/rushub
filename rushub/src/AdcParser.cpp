@@ -23,6 +23,7 @@
  */
 
 #include "AdcParser.h"
+#include "DcUser.h"
 #include "stringutils.h"
 
 using namespace utils;
@@ -32,6 +33,7 @@ namespace dcserver {
 namespace protocol {
 
 #define CMD(a, b, c) (int) ((a << 16) | (b << 8) | c)
+#define FOURCC(a, b, c, d) (int) ((a << 24) | (b << 16) | (c << 8) | d)
 
 /// ADC command
 class AdcCommand {
@@ -48,7 +50,7 @@ public:
 		return mCommand == command;
 	}
 
-	const AdcType getAdcType() const {
+	AdcType getAdcType() const {
 		return mAdcType;
 	}
 
@@ -150,13 +152,13 @@ const string & AdcParser::getErrorText() const {
 
 
 
-const vector<string> & AdcParser::getPositiveFeatures() const {
+const vector<int> & AdcParser::getPositiveFeatures() const {
 	return mPositiveFeature;
 }
 
 
 
-const vector<string> & AdcParser::getNegativeFeatures() const {
+const vector<int> & AdcParser::getNegativeFeatures() const {
 	return mNegativeFeature;
 }
 
@@ -325,9 +327,9 @@ bool AdcParser::parseFeatures() {
 				return false;
 		}
 		if (mCommand[pos] == '+') {
-			mPositiveFeature.push_back(mCommand.substr(pos + 1, 4));
+			mPositiveFeature.push_back(FOURCC(mCommand[pos + 1], mCommand[pos + 2], mCommand[pos + 3], mCommand[pos + 4]));
 		} else {
-			mNegativeFeature.push_back(mCommand.substr(pos + 1, 4));
+			mNegativeFeature.push_back(FOURCC(mCommand[pos + 1], mCommand[pos + 2], mCommand[pos + 3], mCommand[pos + 4]));
 		}
 		pos += 5;
 	}
@@ -463,28 +465,84 @@ bool AdcParser::splitChunks() {
 
 
 
-void AdcParser::parseInf(DcUserBase * dcUserBase, const string & info) {
+void AdcParser::parseInfo(DcUser * dcUser, const string & info, set<string> & names) {
 	size_t s = info.find(' ', 9);
 	if (s != info.npos) {
 		size_t e;
-		while ((e = info.find(' ', ++s)) != info.npos) {
+		bool last = true;
+		while ((e = info.find(' ', ++s)) != info.npos || last) {
+			if (e == info.npos) {
+				e = info.size();
+				last = false;
+			}
 			if (s + 2 <= e) { // max 2 (for name)
 				string name;
 				name.assign(info, s, 2);
 				s += 2;
 				if (e != s) {
-					dcUserBase->getParamForce(name.c_str())->setString(string().assign(info, s, e - s));
+					string value;
+					value.assign(info, s, e - s);
+					names.insert(name); // TODO refactoring
+					dcUser->getParamForce(name.c_str())->setString(value);
 				} else {
-					dcUserBase->removeParam(name.c_str());
+					names.erase(name); // TODO refactoring
+					dcUser->removeParam(name.c_str());
 				}
 			}
 			s = e;
 		}
 	}
+
+	// Raplace IP
+	replaceParam(dcUser->getParam("I4"), "0.0.0.0", dcUser->getIp());
+	replaceParam(dcUser->getParam("I6"), "::", dcUser->getIp());
 }
 
-void AdcParser::getInf(DcUserBase *, string &) {
-	// TODO
+
+
+void AdcParser::replaceParam(ParamBase * param, const char * oldValue, const string & newValue) {
+	if (param != NULL) {
+		if (param->toString() == oldValue) {
+			param->setString(newValue);
+		}
+	}
+}
+
+
+
+void AdcParser::parseFeatures(DcUser * dcUser, set<int> & features) {
+
+	ParamBase * param = dcUser->getParam("SU"); // TODO replace name to macros
+	if (param) {
+		const string & value = param->toString();
+
+		// TODO check syntax
+		features.clear();
+		size_t i, j = 0;
+		while ((i = value.find(',', j)) != value.npos) {
+			if (i - j == 4) {
+				features.insert(FOURCC(value[j], value[j + 1], value[j + 2], value[j + 3]));
+			}
+			j = i + 1;
+		}
+		if (value.size() - j == 4) {
+			features.insert(FOURCC(value[j], value[j + 1], value[j + 2], value[j + 3]));
+		}
+	}
+}
+
+
+
+void AdcParser::formingInfo(DcUser * dcUser, string & info, const set<string> & names) {
+	info = "BINF ";
+	info.append(dcUser->getUid());
+	for (set<string>::const_iterator it = names.begin(); it != names.end(); ++it) {
+		const string & name = (*it);
+		ParamBase * param = dcUser->getParam(name.c_str());
+		if (param != NULL) {
+			info.append(" ").append(name).append(param->toString());
+		}
+	}
 }
 
 

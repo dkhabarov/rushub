@@ -24,157 +24,8 @@
 namespace dcserver {
 
 
-Param::Param(DcUser * dcUser, const char * name) : 
-	mName(name),
-	mType(TYPE_NONE),
-	mMode(MODE_NONE),
-	mDcUser(dcUser),
-	mAction(NULL)
-{
-}
-
-
-
-Param::~Param() {
-}
-
-
-
-const string & Param::getName() const {
-	return mName;
-}
-
-
-
-int Param::getType() const {
-	return mType;
-}
-
-
-
-int Param::getMode() const {
-	return mMode;
-}
-
-
-
-const string & Param::getString() const {
-	return mValue;
-}
-
-
-
-int Param::setString(const string & value) {
-	return set(value, TYPE_STRING);
-}
-
-
-
-int Param::setString(string * value) {
-	return set(value, TYPE_STRING);
-}
-
-
-
-const int & Param::getInt() const {
-	return mValue;
-}
-
-
-
-int Param::setInt(int value) {
-	return set(value, TYPE_INT);
-}
-
-
-
-int Param::setInt(int * value) {
-	return set(value, TYPE_INT);
-}
-
-
-
-const bool & Param::getBool() const {
-	return mValue;
-}
-
-
-
-int Param::setBool(bool value) {
-	return set(value, TYPE_BOOL);
-}
-
-
-
-int Param::setBool(bool * value) {
-	return set(value, TYPE_BOOL);
-}
-
-
-
-const double & Param::getDouble() const {
-	return mValue;
-}
-
-
-
-int Param::setDouble(double value) {
-	return set(value, TYPE_DOUBLE);
-}
-
-
-
-int Param::setDouble(double * value) {
-	return set(value, TYPE_DOUBLE);
-}
-
-
-
-const long & Param::getLong() const {
-	return mValue;
-}
-
-
-
-int Param::setLong(long value) {
-	return set(value, TYPE_LONG);
-}
-
-
-
-int Param::setLong(long * value) {
-	return set(value, TYPE_LONG);
-}
-
-
-
-const __int64 & Param::getInt64() const {
-	return mValue;
-}
-
-
-
-int Param::setInt64(__int64 value) {
-	return set(value, TYPE_INT64);
-}
-
-
-
-int Param::setInt64(__int64 * value) {
-	return set(value, TYPE_INT64);
-}
-
-
-
-const string & Param::toString() {
-	return utils::toString(mValue, mBuf);
-}
-
-
-
 DcUser::DcUser(DcConn * dcConn) :
 	Obj("DcUser"),
-	DcUserBase(),
 	mDcServer(NULL),
 	mDcConn(dcConn),
 	mTimeEnter(true),
@@ -204,7 +55,6 @@ DcUser::~DcUser() {
 	while (it != it_e) {
 		delete (*it++);
 	}
-
 	mDcConn = NULL;
 	mDcConnBase = NULL;
 	mDcServer = NULL;
@@ -234,7 +84,7 @@ void DcUser::disconnect() {
 
 
 
-bool DcUser::hasFeature(const string & feature) const {
+bool DcUser::hasFeature(int feature) const {
 	return mFeatures.find(feature) != mFeatures.end();
 }
 
@@ -351,92 +201,32 @@ unsigned long DcUser::getUidHash() const {
 
 
 
-const string & DcUser::getNmdcTag() {
-	// TODO NMDC protocol
-	NmdcParser::getTag(this, mTag);
-	return mTag;
-}
-
-
-
 const string & DcUser::getInfo() {
 	if (mDcServer->mDcConfig.mAdcOn) {
-		if (mInfoChanged || !mInfo.size()) {
-			//AdcParser::getInf(this, mInfo);
-			// TODO insert into AdcParser
-
-			mInfo = "BINF "; // TODO !
-			mInfo.append(getUid());
-			for (set<string>::iterator it = mInfoNames.begin(); it != mInfoNames.end(); ++it) {
-				const string & name = (*it);
-				ParamBase * param = getParam(name.c_str());
-				if (param != NULL) {
-					mInfo.append(" ").append(name).append(param->toString());
-				}
-			}
+		if (mInfoChanged) {
+			AdcParser::formingInfo(this, mInfo, mInfoNames); // ADC
 			mInfoChanged = false;
 		}
-		return mInfo;
 	} else {
 		if (mInfoChanged) {
-			// TODO NMDC protocol
-			NmdcParser::getMyInfo(this, mInfo);
+			NmdcParser::formingInfo(this, mInfo); // NMDC
 			mInfoChanged = false;
 		}
-		return mInfo;
 	}
+	return mInfo;
 }
 
 
 
-// Only NMDC
-/** Set MyINFO string (for plugins). With cmd & nick check */
+/// Set MyINFO string. With cmd & nick check */
 bool DcUser::setInfo(const string & info) {
 	if (mDcServer->mDcConfig.mAdcOn) {
-		//AdcParser::parseInf(this, inf);
-		// TODO insert into AdcParser
-		size_t s = info.find(' ', 9);
-		if (s != info.npos) {
-			size_t e;
-			bool last = true;
-			mInfoChanged = true; // !
-			mDcServer->mAdcUserList.remake(); // !
-			while ((e = info.find(' ', ++s)) != info.npos || last) {
-				if (e == info.npos) {
-					e = info.size();
-					last = false;
-				}
-				if (s + 2 <= e) { // max 2 (for name)
-					string name;
-					name.assign(info, s, 2);
-					s += 2;
-					if (e != s) {
-						string value;
-						value.assign(info, s, e - s);
-						mInfoNames.insert(name); // TODO refactoring
-						if ((name == "I4" && value == "0.0.0.0") || (name == "I6" && value == "::")) {
-							getParamForce(name.c_str())->setString(getIp());
-						} else {
-							if (name == "SU") {
-								// TODO check syntax
-								mFeatures.clear();
-								size_t i, j = 0;
-								while ((i = value.find(',', j)) != value.npos) {
-									mFeatures.insert(value.substr(j, i - j));
-									j = i + 1;
-								}
-								mFeatures.insert(value.substr(j));
-							}
-							getParamForce(name.c_str())->setString(value);
-						}
-					} else {
-						mInfoNames.erase(name); // TODO refactoring
-						removeParam(name.c_str());
-					}
-				}
-				s = e;
-			}
-		}
+		// Parse Info
+		AdcParser::parseInfo(this, info, mInfoNames);
+
+		// Parse features
+		AdcParser::parseFeatures(this, mFeatures);
+
 		return true;
 	} else {
 		NmdcParser dcParser;
@@ -449,43 +239,40 @@ bool DcUser::setInfo(const string & info) {
 
 
 
-// Only NMDC
+// NMDC protocol only
 bool DcUser::setInfo(NmdcParser * parser) {
 	if (mInfo != parser->mCommand) {
 		mInfo = parser->mCommand;
-
-		// Share
-		getParamForce(USER_PARAM_SHARE)->setInt64(stringToInt64(parser->chunkString(CHUNK_MI_SIZE)));
-
-		// Email
-		getParamForce(USER_PARAM_EMAIL)->setString(parser->chunkString(CHUNK_MI_MAIL));
-
-
-		string speed = parser->chunkString(CHUNK_MI_SPEED);
-		string magicByte;
-		size_t size = speed.size();
-		if (size != 0) {
-			magicByte = speed[--size];
-			speed.assign(speed, 0, size);
-		}
-
-		getParamForce(USER_PARAM_BYTE)->setString(magicByte);
-		getParamForce(USER_PARAM_CONNECTION)->setString(speed);
-
-		// TODO NMDC protocol
-		NmdcParser::parseDesc(this, parser->chunkString(CHUNK_MI_DESC));
+		NmdcParser::parseInfo(this, parser);
 	}
 	return true;
 }
 
 
 
-/** Get IP address of user */
+// NMDC protocol only
+const string & DcUser::getNmdcTag() {
+	NmdcParser::getTag(this, mNmdcTag);
+	return mNmdcTag;
+}
+
+
+
+/// Get IP address of user
 const string & DcUser::getIp() const {
 	if (mDcConn != NULL) {
 		return mDcConn->getIp();
 	}
 	return mIp; // TODO remove this param (now for bot only)
+}
+
+
+
+// NMDC protocol only
+bool DcUser::isPassive() const {
+	ParamBase * mode = getParam(USER_PARAM_MODE);
+	unsigned int passive = (mode != NULL && mode->getType() == Param::TYPE_STRING && mode->getString().size()) ? mode->getString()[0] : 0;
+	return passive == 80 || passive == 53 || passive == 83;
 }
 
 
@@ -524,15 +311,6 @@ void DcUser::setCanSend(bool canSend) {
 
 void DcUser::setInUserList(bool inUserList) {
 	mInUserList = inUserList;
-}
-
-
-
-bool DcUser::isPassive() const {
-	// TODO NMDC protocol only
-	ParamBase * mode = getParam(USER_PARAM_MODE);
-	unsigned int passive = (mode != NULL && mode->getType() == Param::TYPE_STRING && mode->getString().size()) ? mode->getString()[0] : 0;
-	return passive == 80 || passive == 53 || passive == 83;
 }
 
 
@@ -608,6 +386,7 @@ int DcUser::onSetHide(const string & old, const string & now) {
 int DcUser::onSetInfo(const string & old, const string & now) {
 	if (old != now) {
 		mInfoChanged = true;
+		mDcServer->mAdcUserList.remake(); // !
 	}
 	return 0;
 }
