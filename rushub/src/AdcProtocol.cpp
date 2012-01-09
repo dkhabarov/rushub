@@ -297,10 +297,10 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 
 	if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
-			dcConn->send(dcConn->mDcUser->getInf(), true); // Send to self only
+			dcConn->send(inf, true); // Send to self only
 		} else {
 			// TODO sendMode
-			mDcServer->mAdcUserList.sendToAllAdc(dcConn->mDcUser->getInf(), true);
+			mDcServer->mAdcUserList.sendToAllAdc(inf, true);
 		}
 	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		dcConn->mSendNickList = true;
