@@ -555,7 +555,8 @@ void NmdcParser::setParam(DcUser * dcUser, const char * name, int value, bool re
 
 
 void NmdcParser::getTag(DcUser * dcUser, string & tag) {
-	tag = "";
+	tag.reserve(0x2F); // usual length of tag
+	tag.erase();
 	ParamBase * param = dcUser->getParam(USER_PARAM_CLIENT_NAME);
 	if (param) {
 		tag.append(param->toString());
@@ -634,7 +635,8 @@ void NmdcParser::getTag(DcUser * dcUser, string & tag) {
 		tag.append("F:").append(param->toString());
 	}
 	if (tag.size()) {
-		tag = "<" + tag + ">";
+		tag = "<" + tag;
+		tag += ">";
 	}
 }
 
@@ -642,6 +644,7 @@ void NmdcParser::getTag(DcUser * dcUser, string & tag) {
 
 void NmdcParser::formingInfo(DcUser * dcUser, string & info) {
 	ParamBase * param = NULL;
+	info.reserve(0x7F); // usual length of command
 	info = "$MyINFO $ALL ";
 	info.append(dcUser->getUid());
 	info.append(" ");

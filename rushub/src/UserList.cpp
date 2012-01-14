@@ -264,6 +264,7 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 		}
 
 		if (mCache.size()) {
+			mCache.reserve(mCache.size() + data.size() + NMDC_SEPARATOR_LEN);
 			mCache.append(data);
 			if (addSep) {
 				if (mCache.find(NMDC_SEPARATOR, mCache.size() - NMDC_SEPARATOR_LEN, NMDC_SEPARATOR_LEN)) {
@@ -271,7 +272,7 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 				}
 			}
 			for_each(begin(), end(), ufSend(mCache, false));
-			mCache.erase(0, mCache.size());
+			string().swap(mCache); // erase & free memory
 		} else {
 			for_each(begin(), end(), ufSend(data, addSep));
 		}
@@ -280,6 +281,7 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 			logStream() << "sendToAll end" << endl;
 		}
 	} else {
+		mCache.reserve(mCache.size() + data.size() + NMDC_SEPARATOR_LEN);
 		mCache.append(data);
 		if (addSep) {
 			if (mCache.find(NMDC_SEPARATOR, mCache.size() - NMDC_SEPARATOR_LEN, NMDC_SEPARATOR_LEN)) {
@@ -298,6 +300,7 @@ void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 		}
 
 		if (mCache.size()) {
+			mCache.reserve(mCache.size() + data.size() + ADC_SEPARATOR_LEN);
 			mCache.append(data);
 			if (addSep) {
 				if (mCache.find(ADC_SEPARATOR, mCache.size() - ADC_SEPARATOR_LEN, ADC_SEPARATOR_LEN)) {
@@ -305,7 +308,7 @@ void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 				}
 			}
 			for_each(begin(), end(), ufSend(mCache, false));
-			mCache.erase(0, mCache.size());
+			string().swap(mCache); // erase & free memory
 		} else {
 			for_each(begin(), end(), ufSend(data, addSep));
 		}
@@ -314,6 +317,7 @@ void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 			logStream() << "sendToAll end" << endl;
 		}
 	} else {
+		mCache.reserve(mCache.size() + data.size() + ADC_SEPARATOR_LEN);
 		mCache.append(data);
 		if (addSep) {
 			if (mCache.find(ADC_SEPARATOR, mCache.size() - ADC_SEPARATOR_LEN, ADC_SEPARATOR_LEN)) {

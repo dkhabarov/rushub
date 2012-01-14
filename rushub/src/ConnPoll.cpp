@@ -31,7 +31,7 @@ namespace server {
 
 
 ConnPoll::ConnPoll() {
-	mvFD.reserve(16384);
+	mvFD.reserve(1024);
 }
 
 

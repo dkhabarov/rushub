@@ -75,7 +75,7 @@ public:
 
 	const string & getList(I begin, I end) {
 		if (mRemake) {
-			mList.erase(0, mList.size());
+			mList.erase();
 			mList.append(mStart);
 			for_each(begin, end, mMaker);
 			mRemake = false;

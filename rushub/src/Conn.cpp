@@ -826,16 +826,19 @@ size_t Conn::readFromRecvBuf() {
 
 	const char * pos_sep = NULL;
 	if ((pos_sep = strstr(buf, sep)) == NULL) {
-		if (mCommand->size() + len > maxCommandLength) {
+		size_t size = mCommand->size() + len;
+		if (size > maxCommandLength) {
 			closeNow(CLOSE_REASON_MAXSIZE_RECV);
 			return 0;
 		}
+		mCommand->reserve(size);
 		mCommand->append(buf, len);
 		mRecvBufRead = mRecvBufEnd = 0;
 		return len;
 	}
 	size_t pos = pos_sep - buf;
 	len = pos + sep_len;
+	mCommand->reserve(mCommand->size() + len);
 	mCommand->append(buf, pos);
 	mRecvBufRead += len;
 	mStatus = STRING_STATUS_STR_DONE;
@@ -891,10 +894,12 @@ size_t Conn::remaining() {
 
 	char * buf = mRecvBuf + mRecvBufRead;
 	size_t len = mRecvBufEnd - mRecvBufRead;
-	if (mCommand->size() + len > maxCommandLength) {
+	size_t size = mCommand->size() + len;
+	if (size > maxCommandLength) {
 		closeNow(CLOSE_REASON_MAXSIZE_REMAINING);
 		return 0;
 	}
+	mCommand->reserve(size);
 	mCommand->append(buf, len);
 	mRecvBufRead = mRecvBufEnd = 0;
 	return len;
@@ -926,6 +931,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 	}
 
 	if (!flush && (bufLen < (mSendBufMax >> 1))) { 
+		mSendBuf.reserve(bufLen + len);
 		mSendBuf.append(data, len);
 		return 0;
 	}
@@ -934,6 +940,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 	size_t size;
 
 	if (bufLen != 0) {
+		mSendBuf.reserve(bufLen + len);
 		mSendBuf.append(data, len);
 		size = mSendBuf.size();
 		send_buf = mSendBuf.c_str();
@@ -960,7 +967,9 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 			logStream() << "Block sent. Was sent " << size << " bytes" << endl;
 		}
 		if (bufLen == 0) {
-			mSendBuf.append(data + size, len - size); // Now sData.size() != size
+			size_t s = len - size;
+			mSendBuf.reserve(s);
+			mSendBuf.append(data + size, s); // Now sData.size() != size
 		} else {
 			string(mSendBuf, size, mSendBuf.size() - size).swap(mSendBuf); // Del from buf sent data
 		}
@@ -994,8 +1003,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 		}
 	} else {
 		if (bufLen != 0) {
-			mSendBuf.erase();
-			mSendBuf.reserve();
+			string().swap(mSendBuf); // erase & free memory
 		}
 
 		if (bool(mCloseTime)) {

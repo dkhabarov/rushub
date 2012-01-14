@@ -754,6 +754,7 @@ int NmdcProtocol::eventSearch(NmdcParser * dcparser, DcConn * dcConn) {
 				dcConn->closeNice(9000, CLOSE_REASON_NICK_SEARCH);
 				return -1;
 			}
+			msg.reserve(9 + dcparser->chunkString(CHUNK_AS_ADDR).size() + dcparser->chunkString(CHUNK_AS_QUERY).size());
 			msg = "$Search ";
 			msg.append(dcparser->chunkString(CHUNK_AS_ADDR));
 			msg.append(" ", 1);
@@ -796,7 +797,7 @@ int NmdcProtocol::eventSr(NmdcParser * dcparser, DcConn * dcConn) {
 
 	DcUser * dcUser = NULL;
 	const string & nick = dcparser->chunkString(CHUNK_SR_TO);
-	if (nick != "") {
+	if (nick.size()) {
 		dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(nick));
 
 		/** Is user exist? */

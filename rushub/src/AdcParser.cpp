@@ -534,6 +534,7 @@ void AdcParser::parseFeatures(DcUser * dcUser, set<int> & features) {
 
 
 void AdcParser::formingInfo(DcUser * dcUser, string & info, const set<string> & names) {
+	info.reserve(0xFF); // usual length of command
 	info = "BINF ";
 	info.append(dcUser->getUid());
 	for (set<string>::const_iterator it = names.begin(); it != names.end(); ++it) {

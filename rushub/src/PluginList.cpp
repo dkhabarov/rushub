@@ -187,7 +187,7 @@ bool PluginList::unloadPlugin(const string & name) {
 	CallList * callList = NULL;
 	for (CallListMap::iterator it = mCallLists.begin(); it != mCallLists.end(); ++it) {
 		callList = (*it);
-		if (callList->mName != "") {
+		if (callList->mName.size()) {
 			callList->unreg(pluginLoader->mPlugin);
 		}
 	}

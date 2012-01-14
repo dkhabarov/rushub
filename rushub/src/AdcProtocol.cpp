@@ -202,16 +202,16 @@ int AdcProtocol::onNewConn(Conn * conn) {
 
 	dcConn->mDcUser->setUid(string(sid));
 
-	string cmds("ISUP ADBASE ADTIGR");
+	string cmds;
+	cmds.reserve(70 + mDcServer->mDcConfig.mTopic.size());
+	cmds.append("ISUP ADBASE ADTIGR");
 	cmds.append(ADC_SEPARATOR);
 	cmds.append("ISID ").append(sid);
 	cmds.append(ADC_SEPARATOR);
-
 	cmds.append("IINF CT32 VE" INTERNALVERSION " NIADC" INTERNALNAME);
 	cmds.append(" DE").append(mDcServer->mDcConfig.mTopic);
 
 	dcConn->send(cmds, true, false);
-
 
 
 	static __int64 iShareVal = -1;
@@ -541,6 +541,7 @@ int AdcProtocol::eventUnknown(AdcParser *, DcConn *) {
 void AdcProtocol::infList(string & list, UserBase * userBase) {
 	// INF ...\nINF ...\n
 	if (!userBase->isHide()) {
+		list.reserve(userBase->getInfo().size() + ADC_SEPARATOR_LEN);
 		list.append(userBase->getInfo());
 		list.append(ADC_SEPARATOR);
 	}
@@ -610,6 +611,7 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 			dcConn->logStream() << "Wrong syntax cmd" << endl;
 		}
 		string msg("ISTA "), buff;
+		msg.reserve(10 + adcParser->getErrorText().size());
 		msg.append("2"); // Disconnect
 		msg.append(adcParser->getErrorCode()); // Error code
 		msg.append(" ");

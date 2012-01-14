@@ -1296,6 +1296,7 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 			ct = "5";
 		}
 		string inf("IINF ");
+		inf.reserve(79);
 		inf.append(sid).append(" CT").append(ct).append(" NI").append(uid);
 		inf.append(" SS0 HN0 HR0 HO1 VEBot\\sV:1.0 SL0 DERusHub\\sbot");
 		dcUser->setInfo(inf);
