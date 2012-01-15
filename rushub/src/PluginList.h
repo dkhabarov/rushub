@@ -56,7 +56,7 @@ class PluginLoader;
 
 
 /// List with all plugins
-class PluginList : public Obj, public PluginListBase {
+class PluginList : public Obj, public PluginListBase, private NonCopyable {
 
 	/** For LoadAll */
 	friend class ::dcserver::DcServer;
@@ -73,10 +73,6 @@ public:
 	PluginList(const string & path);
 
 	virtual ~PluginList();
-
-	virtual PluginList & operator = (const PluginList &) {
-		return *this;
-	}
 
 	void setServer(DcServerBase *);
 

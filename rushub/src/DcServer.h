@@ -115,7 +115,7 @@ private:
 
 
 /// Main DC Server class
-class DcServer : public Server, public DcServerBase {
+class DcServer : public Server, public DcServerBase, private NonCopyable {
 
 	friend class ::dcserver::DcListIterator; // for mClientList
 	friend class ::dcserver::DcConn; // for doUserEnter in DcConn::onFlush and minDelay in DcConn::onTimer
@@ -172,10 +172,6 @@ public:
 	DcServer(const string & configFile, const string & execFile);
 
 	virtual ~DcServer();
-
-	virtual DcServer & operator = (const DcServer &) {
-		return *this;
-	}
 
 	const string & getMainDir() const {
 		return mDcConfig.mMainPath;

@@ -45,9 +45,7 @@ struct ufSend : public unary_function<void, UserList::iterator> {
 		}
 	}
 
-private:
-
-	ufSend & operator = (const ufSend &) {
+	const ufSend & operator = (const ufSend &) { // for_each
 		return *this;
 	}
 
@@ -94,13 +92,11 @@ struct ufSendFeature : public unary_function<void, UserList::iterator> {
 		}
 	}
 
-private:
-
-	ufSendFeature & operator = (const ufSendFeature &) {
+	const ufSendFeature & operator = (const ufSendFeature &) { // for_each
 		return *this;
 	}
 
-}; // struct ufSend
+}; // struct ufSendFeature
 
 
 
@@ -130,9 +126,7 @@ struct ufSendProfile : public unary_function<void, UserList::iterator> {
 		}
 	}
 
-private:
-
-	ufSendProfile & operator = (const ufSendProfile &) {
+	const ufSendProfile & operator = (const ufSendProfile &) { // for_each
 		return *this;
 	}
 
@@ -158,9 +152,7 @@ struct ufSendWithNick : public unary_function<void, UserList::iterator> {
 		}
 	}
 
-private:
-
-	ufSendWithNick & operator = (const ufSendWithNick &) {
+	const ufSendWithNick & operator = (const ufSendWithNick &) { // for_each
 		return *this;
 	}
 
@@ -197,9 +189,7 @@ struct ufSendWithNickProfile : public unary_function<void, UserList::iterator> {
 		}
 	}
 
-private:
-
-	ufSendWithNickProfile & operator = (const ufSendWithNickProfile &) {
+	const ufSendWithNickProfile & operator = (const ufSendWithNickProfile &) { // for_each
 		return *this;
 	}
 
@@ -433,12 +423,6 @@ void UserList::onResize(size_t & currentSize, size_t & oldCapacity, size_t & new
 		logStream() << "Autoresizing: size = " << currentSize << 
 		", capacity = " << oldCapacity << " -> " << newCapacity << endl;
 	}
-}
-
-
-
-UserList & UserList::operator = (const UserList &) {
-	return *this;
 }
 
 

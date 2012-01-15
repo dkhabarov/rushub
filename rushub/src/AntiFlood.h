@@ -33,10 +33,6 @@ public:
 	AntiFlood(unsigned & iCount, double & time);
 	~AntiFlood();
 
-	AntiFlood & operator = (const AntiFlood &) {
-		return *this;
-	}
-
 	bool check(const string & ip, const Time & now);
 	void del(Time & now);
 
@@ -58,6 +54,8 @@ private:
 	Hash<HashType_t> mHash;
 	unsigned & miCount;
 	double & mTime;
+
+	AntiFlood & operator = (const AntiFlood &);
 
 }; // AntiFlood
 

@@ -52,7 +52,7 @@ class DcServer;
 
 
 /** Extended class of the user */
-class DcUser : public Obj, public DcUserBase, public UserBase {
+class DcUser : public Obj, public DcUserBase, public UserBase, private NonCopyable {
 
 public:
 
@@ -102,8 +102,6 @@ public:
 	bool isTrueBoolParam(const char * name) const;
 
 private:
-
-	DcUser & operator = (const DcUser &) { return *this; }
 
 	Param * getParamForce(const char * name, bool setRules);
 

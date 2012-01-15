@@ -109,7 +109,7 @@ enum {
 
 
 /// Main connection class for server
-class Conn : public Obj, public ConnBase {
+class Conn : public Obj, public ConnBase, private NonCopyable {
 
 	friend class Server; // for mIterator and ports
 
@@ -343,7 +343,6 @@ private:
 	/// Send len byte from buf
 	int send(const char * buf, size_t & len);
 
-	Conn & operator = (const Conn &);
 }; // class Conn
 
 }; // namespace server

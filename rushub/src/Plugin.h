@@ -242,10 +242,6 @@ public:
 	virtual ~DcConnBase() {
 	}
 
-	virtual DcConnBase & operator = (const DcConnBase &) {
-		return *this;
-	}
-
 	/// Disconnect this client
 	virtual void disconnect() {
 		if (mDcUserBase != NULL) {
@@ -257,6 +253,10 @@ public:
 	virtual bool parseCommand(const char * cmd) = 0;
 
 	virtual const char * getCommand() = 0;
+
+private:
+
+	DcConnBase & operator = (const DcConnBase &);
 
 }; // class DcConnBase
 
@@ -456,14 +456,14 @@ public:
 	virtual ~WebUserBase() {
 	}
 
-	virtual WebUserBase & operator = (const WebUserBase &) {
-		return *this;
-	}
-
 	virtual const char * getCommand() = 0;
 
 	/// Disconnect this client
 	virtual void disconnect() = 0;
+
+private:
+
+	WebUserBase & operator = (const WebUserBase &);
 
 }; // class WebUserBase
 
@@ -520,10 +520,6 @@ public:
 	}
 
 	virtual ~Plugin() {
-	}
-
-	virtual Plugin & operator = (const Plugin &) {
-		return *this;
 	}
 
 	/// Reg function in all call lists
@@ -687,6 +683,7 @@ private:
 	/// Pointer to list of all plugins
 	PluginListBase * mPluginListBase;
 
+	Plugin & operator = (const Plugin &);
 
 }; // class Plugin
 

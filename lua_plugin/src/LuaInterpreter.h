@@ -46,12 +46,8 @@ public:
 public:
 
 	LuaInterpreter(const string & name, string & fullName);
-
 	~LuaInterpreter();
 
-	LuaInterpreter & operator = (const LuaInterpreter &) {
-		return *this;
-	}
 
 	int start(); // (-1 - is running already)
 	int stop();
@@ -99,6 +95,8 @@ private:
 
 	void regFunc(const char * funcName, int (*)(lua_State *));
 	void regStrField(const char * name, const char * value);
+
+	LuaInterpreter & operator = (const LuaInterpreter &);
 
 }; // class LuaInterpreter
 

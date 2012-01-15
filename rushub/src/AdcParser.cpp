@@ -36,7 +36,7 @@ namespace protocol {
 #define FOURCC(a, b, c, d) (int) ((a << 24) | (b << 16) | (c << 8) | d)
 
 /// ADC command
-class AdcCommand {
+class AdcCommand : private NonCopyable {
 
 public:
 
@@ -59,10 +59,6 @@ private:
 	//hash = *reinterpret_cast<const unsigned int*>(cmd);
 	const int mCommand;
 	const AdcType mAdcType;
-
-	AdcCommand & operator = (const AdcCommand &) {
-		return *this;
-	}
 
 }; // AdcCommand
 

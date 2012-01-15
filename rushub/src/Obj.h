@@ -53,6 +53,18 @@ enum {
 /** Main stream of log system */
 #define logStream() logStreamLine(__LINE__)
 
+
+/** NonCopyable class */
+class NonCopyable {
+	protected:
+		NonCopyable() {}
+		~NonCopyable() {}
+	private:
+		NonCopyable(const NonCopyable &);
+		const NonCopyable & operator = (const NonCopyable &);
+}; // class NonCopyable
+
+
 /** Main object class (logger class) */
 class Obj {
 

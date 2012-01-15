@@ -50,10 +50,6 @@ public:
 	WebProtocol(unsigned long & maxCommandLength);
 	virtual ~WebProtocol();
 
-	virtual WebProtocol & operator = (const WebProtocol &) {
-		return *this;
-	}
-
 	void setServer(Server *);
 
 	/** Execution of the command */
@@ -88,6 +84,10 @@ protected:
 
 	Server * mServer;
 	unsigned long & mMaxCommandLength;
+
+private:
+
+	WebProtocol & operator = (const WebProtocol &);
 
 }; // class WebProtocol
 
