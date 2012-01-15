@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz@verliba.cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -37,6 +37,7 @@
 using namespace ::utils; // for stringToInt64
 
 
+/// Main configuration namespace
 namespace configuration {
 
 

@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz@verliba.cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -84,7 +84,7 @@ void CallList::ufCallOne::operator() (Plugin * plugin) {
 	__try {
 		mCallReturn = mCallList->callOne(plugin);
 	} __except( EXCEPTION_EXECUTE_HANDLER) {
-		if (mCallList->mPluginList && mCallList->mPluginList->errLog(0)) {
+		if (mCallList->mPluginList && mCallList->mPluginList->log(FATAL)) {
 			mCallList->mPluginList->logStream() << "error in plugin: " << plugin->getName() << endl;
 		}
 		plugin->suicide();

@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
 #define SERVER_H
 
 #define INTERNALNAME "RusHub"
-#define INTERNALVERSION "2.3.7" // without space!
+#define INTERNALVERSION "2.3.8" // without space!
 
 #include "ConnChoose.h" // first (def winsock2.h)
 #include "Obj.h"
@@ -48,13 +48,17 @@
 
 
 using namespace ::std;
-using namespace ::utils; // Time
+using namespace ::utils; // Time, Obj
 
+
+/// Server realization namespace
 namespace server {
 
 class Conn;
 class ConnFactory;
 
+
+/// Server realization
 class Server : public Obj {
 
 friend class Conn; // for closeNow and miNumCloseConn
@@ -135,7 +139,8 @@ protected:
 	/// Point to Server (for config)
 	Server * mServer;
 
-	struct Times { ///< Times
+	/// Time of server & connection periods
+	struct Times {
 		__int64 mServ; ///< Timer Serv Period
 		__int64 mConn; ///< Timer Conn Period
 	} mTimes;

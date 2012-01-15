@@ -1,7 +1,7 @@
 /*
  * RusHub - hub server for Direct Connect peer to peer network.
  *
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -33,24 +33,22 @@ namespace server {
 }; // namespace server
 
 
+/// Web Server namespace
 namespace webserver {
 
 class WebConn;
 
+/// Web Server Protocol namespace
 namespace protocol {
 
 
-
+/// Web protocol
 class WebProtocol : public Protocol {
 
 public:
 
 	WebProtocol(unsigned long & maxCommandLength);
 	virtual ~WebProtocol();
-
-	virtual WebProtocol & operator = (const WebProtocol &) {
-		return *this;
-	}
 
 	void setServer(Server *);
 
@@ -86,6 +84,10 @@ protected:
 
 	Server * mServer;
 	unsigned long & mMaxCommandLength;
+
+private:
+
+	WebProtocol & operator = (const WebProtocol &);
 
 }; // class WebProtocol
 

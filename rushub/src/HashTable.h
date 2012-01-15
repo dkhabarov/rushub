@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -37,6 +37,9 @@ using namespace ::std;
 
 namespace utils {
 
+
+
+/// Hash method
 template <class T = unsigned long> struct Hash {
 	T operator() (const char * s) const {
 		T h = 0;
@@ -50,7 +53,9 @@ template <class T = unsigned long> struct Hash {
 	}
 };
 
-/** Usual array data */
+
+
+/// Usual array data
 template <class V> class Array {
 
 protected:
@@ -331,7 +336,7 @@ public:
 }; // List
 
 
-/** Hesh table or hash array (Array from list with hash) */
+/** Hash table or hash array (Array from list with hash) */
 template <class V>
 class HashTable {
 

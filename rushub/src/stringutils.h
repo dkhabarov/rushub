@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -42,6 +42,7 @@
 
 using namespace ::std;
 
+/// Utils namespace
 namespace utils {
 
 bool loadFileInString(const string &, string &);
@@ -55,6 +56,8 @@ string & stringReplace(const string &, const string &, string &, __int64, bool b
 string int64ToString(__int64 const &);
 __int64 stringToInt64(const string &);
 
+string toString(int value);
+
 int countLines(const string &);
 bool limitLines(const string &, int);
 
@@ -67,6 +70,15 @@ string & cp1251ToUtf8(const string & in, string & out, void (*escape)(char, stri
 bool isBase32(char);
 bool isUpperAlpha(char);
 bool isUpperAlphaNum(char);
+
+template <class T>
+string & toString(const T & value, string & str) {
+	ostringstream oss;
+	oss << value;
+	str = oss.str();
+	return str;
+}
+
 
 }; // namespace utils
 

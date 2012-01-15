@@ -1,7 +1,7 @@
 /*
  * RusHub - hub server for Direct Connect peer to peer network.
  *
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -68,6 +68,8 @@ using namespace ::std;
 
 namespace utils {
 
+
+/// Utility for action to directories
 class Dir {
 
 public:

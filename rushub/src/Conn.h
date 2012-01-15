@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -34,7 +34,7 @@
 #include <list>
 
 using namespace ::std; // string, cout, endl
-using namespace ::utils; // Time
+using namespace ::utils; // Time, Obj
 
 namespace server {
 
@@ -56,6 +56,7 @@ public:
 	virtual void deleteConn(Conn * &);
 	virtual void onNewData(Conn *, string *);
 	virtual int onNewConn(Conn *);
+	Protocol * getProtocol(); // ToDo remove!
 
 protected:
 
@@ -108,7 +109,7 @@ enum {
 
 
 /// Main connection class for server
-class Conn : public Obj, public ConnBase {
+class Conn : public Obj, public ConnBase, private NonCopyable {
 
 	friend class Server; // for mIterator and ports
 
@@ -342,7 +343,6 @@ private:
 	/// Send len byte from buf
 	int send(const char * buf, size_t & len);
 
-	Conn & operator = (const Conn &);
 }; // class Conn
 
 }; // namespace server

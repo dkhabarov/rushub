@@ -1,7 +1,7 @@
 /*
  * RusHub - hub server for Direct Connect peer to peer network.
  *
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -427,7 +427,7 @@ int LuaPlugin::callAll(const char * funcName, unsigned int listFlag, vectorLuaIn
 				vli.push_back(script); // adding in cache
 			}
 		}
-		setListFlag(listFlag);
+		addListFlag(listFlag);
 	}
 
 	// loop cache
@@ -474,7 +474,7 @@ int LuaPlugin::onTimer() {
 				mTimer.push_back(script); // adding in cache
 			}
 		}
-		setListFlag(LIST_TIMER);
+		addListFlag(LIST_TIMER);
 	}
 
 	// loop cache
@@ -521,7 +521,7 @@ int LuaPlugin::onConfigChange(const char * name, const char * value) {
 				mConfigChange.push_back(script); // adding in cache
 			}
 		}
-		setListFlag(LIST_CONFIG_CHANGE);
+		addListFlag(LIST_CONFIG_CHANGE);
 	}
 
 	// loop cache
@@ -553,7 +553,7 @@ int LuaPlugin::onFlood(DcUserBase * dcUserBase, int type1, int type2) {
 				mFlood.push_back(script); // adding in cache
 			}
 		}
-		setListFlag(LIST_FLOOD);
+		addListFlag(LIST_FLOOD);
 	}
 
 	// loop cache
@@ -591,7 +591,7 @@ int LuaPlugin::onWebData(WebUserBase * webUserBase) {
 				mWebData.push_back(script); // adding in cache
 			}
 		}
-		setListFlag(LIST_WEB_DATA);
+		addListFlag(LIST_WEB_DATA);
 	}
 
 	// loop cache
@@ -627,7 +627,7 @@ int LuaPlugin::onScriptError(LuaInterpreter * current, const char * scriptName, 
 				mScriptError.push_back(script); // adding in cache
 			}
 		}
-		setListFlag(LIST_SCRIPT_ERROR);
+		addListFlag(LIST_SCRIPT_ERROR);
 	}
 
 	// loop cache
@@ -662,7 +662,7 @@ int LuaPlugin::onAny(DcUserBase * dcUserBase, int type) {
 				mAny.push_back(script); // adding in cache
 			}
 		}
-		setListFlag(LIST_ANY);
+		addListFlag(LIST_ANY);
 	}
 
 	// loop cache

@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz@verliba.cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,6 +23,7 @@
  */
 
 #include "AdcParser.h"
+#include "DcUser.h"
 #include "stringutils.h"
 
 using namespace utils;
@@ -31,30 +32,35 @@ namespace dcserver {
 
 namespace protocol {
 
+#define CMD(a, b, c) (int) ((a << 16) | (b << 8) | c)
+#define FOURCC(a, b, c, d) (int) ((a << 24) | (b << 16) | (c << 8) | d)
 
 /// ADC command
 class AdcCommand {
 
 public:
 
-	AdcCommand() {
-	}
-
-	AdcCommand(const char * cmd) {
-		mCmd = cmd;
+	AdcCommand(int command, AdcType adcType) : mCommand(command), mAdcType(adcType) {
 	}
 
 	virtual ~AdcCommand() {
 	}
 
-	bool check(const string & cmd) const {
-		return 0 == cmd.compare(1, 3, mCmd);
+	bool check(int command) const {
+		return mCommand == command;
+	}
+
+	AdcType getAdcType() const {
+		return mAdcType;
 	}
 
 private:
 
 	//hash = *reinterpret_cast<const unsigned int*>(cmd);
-	const char * mCmd;
+	const int mCommand;
+	const AdcType mAdcType;
+
+	const AdcCommand & operator = (const AdcCommand &); // for gcc
 
 }; // AdcCommand
 
@@ -62,26 +68,26 @@ private:
 
 /// Main ADC commands
 AdcCommand AdcCommands[] = {
-	AdcCommand("SUP"), // SUP
-	AdcCommand("STA"), // STA
-	AdcCommand("INF"), // INF
-	AdcCommand("MSG"), // MSG
-	AdcCommand("SCH"), // SCH
-	AdcCommand("RES"), // RES
-	AdcCommand("CTM"), // CTM
-	AdcCommand("RCM"), // RCM
-	AdcCommand("GPA"), // GPA
-	AdcCommand("PAS"), // PAS
-	AdcCommand("QUI"), // QUI
-	AdcCommand("GET"), // GET
-	AdcCommand("GFI"), // GFI
-	AdcCommand("SND"), // SND
-	AdcCommand("SID"), // SID
-	AdcCommand("CMD"), // CMD
-	AdcCommand("NAT"), // NAT
-	AdcCommand("RNT"), // RNT
-	AdcCommand("PSR"), // PSR
-	AdcCommand("PUB")  // PUB
+	AdcCommand(CMD('S', 'U', 'P'), ADC_TYPE_SUP), // SUP
+	AdcCommand(CMD('S', 'T', 'A'), ADC_TYPE_STA), // STA
+	AdcCommand(CMD('I', 'N', 'F'), ADC_TYPE_INF), // INF
+	AdcCommand(CMD('M', 'S', 'G'), ADC_TYPE_MSG), // MSG
+	AdcCommand(CMD('S', 'C', 'H'), ADC_TYPE_SCH), // SCH
+	AdcCommand(CMD('R', 'E', 'S'), ADC_TYPE_RES), // RES
+	AdcCommand(CMD('C', 'T', 'M'), ADC_TYPE_CTM), // CTM
+	AdcCommand(CMD('R', 'C', 'M'), ADC_TYPE_RCM), // RCM
+	AdcCommand(CMD('G', 'P', 'A'), ADC_TYPE_GPA), // GPA
+	AdcCommand(CMD('P', 'A', 'S'), ADC_TYPE_PAS), // PAS
+	AdcCommand(CMD('Q', 'U', 'I'), ADC_TYPE_QUI), // QUI
+	AdcCommand(CMD('G', 'E', 'T'), ADC_TYPE_GET), // GET
+	AdcCommand(CMD('G', 'F', 'I'), ADC_TYPE_GFI), // GFI
+	AdcCommand(CMD('S', 'N', 'D'), ADC_TYPE_SND), // SND
+	AdcCommand(CMD('S', 'I', 'D'), ADC_TYPE_SID), // SID
+	AdcCommand(CMD('C', 'M', 'D'), ADC_TYPE_CMD), // CMD
+	AdcCommand(CMD('N', 'A', 'T'), ADC_TYPE_NAT), // NAT
+	AdcCommand(CMD('R', 'N', 'T'), ADC_TYPE_RNT), // RNT
+	AdcCommand(CMD('P', 'S', 'R'), ADC_TYPE_PSR), // PSR
+	AdcCommand(CMD('P', 'U', 'B'), ADC_TYPE_PUB), // PUB
 };
 
 
@@ -89,6 +95,7 @@ AdcCommand AdcCommands[] = {
 AdcParser::AdcParser() :
 	Parser(9), // Max number of chunks - 9 !!!
 	mHeader(HEADER_UNKNOWN),
+	mErrorCode(ERROR_CODE_GENERIC),
 	mBodyPos(0),
 	mError(false)
 { 
@@ -132,7 +139,7 @@ const string & AdcParser::getCidSource() const {
 
 
 
-const string & AdcParser::getErrorCode() const {
+int AdcParser::getErrorCode() const {
 	return mErrorCode;
 }
 
@@ -140,6 +147,18 @@ const string & AdcParser::getErrorCode() const {
 
 const string & AdcParser::getErrorText() const {
 	return mErrorText;
+}
+
+
+
+const vector<int> & AdcParser::getPositiveFeatures() const {
+	return mPositiveFeature;
+}
+
+
+
+const vector<int> & AdcParser::getNegativeFeatures() const {
+	return mNegativeFeature;
 }
 
 
@@ -152,10 +171,11 @@ int AdcParser::parse() {
 	if (mLength >= 4) { // ADC cmd key must contain 4 symbols
 
 		if (checkHeaderSyntax()) {
-
+			int cmd = CMD(mCommand[1], mCommand[2], mCommand[3]);
 			for (unsigned int i = 0; i < ADC_TYPE_INVALID; ++i) {
-				if (AdcCommands[i].check(mCommand)) { // Check cmd from mCommand
-					return mType = AdcType(i); // Set cmd type
+				AdcCommand & adcCommand = AdcCommands[i];
+				if (adcCommand.check(cmd)) { // Check cmd from mCommand
+					return mType = adcCommand.getAdcType(); // Set cmd type
 				}
 			}
 			return mType = ADC_TYPE_UNKNOWN; // Unknown cmd
@@ -181,56 +201,56 @@ bool AdcParser::checkHeaderSyntax() {
 
 	switch (mCommand[0]) {
 
-		case 'B': // Broadcast
+		case HEADER_SYMBOL_BROADCAST: // Broadcast
 			// 'B' command_name ' ' base32_character{4}
 			mHeader = HEADER_BROADCAST;
 			if (mLength < 9 || mCommand[4] != ' ') {
-				setError("40", "Protocol syntax error");
+				setError(ERROR_CODE_PROTOCOL_ERROR, "Protocol syntax error");
 				return false;
 			} else if (!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8])) {
-				setError("40", "Invalid source SID");
+				setError(ERROR_CODE_PROTOCOL_ERROR, "Invalid source SID");
 				return false;
 			}
 			mSidSource.assign(mCommand, 5, 4);
 			mBodyPos = 9;
 			break;
 
-		case 'H': // Hub message
+		case HEADER_SYMBOL_HUB: // Hub message
 			// 'H' command_name
 			mHeader = HEADER_HUB;
 			mBodyPos = 4;
 			break;
 
-		case 'I': // Info message
+		case HEADER_SYMBOL_INFO: // Info message
 			// 'I' command_name
 			mHeader = HEADER_INFO;
 			mBodyPos = 4;
 			break;
 
-		case 'C': // Client message
+		case HEADER_SYMBOL_CLIENT: // Client message
 			// 'C' command_name
 			mHeader =  HEADER_CLIENT;
 			mBodyPos = 4;
 			break;
 
-		case 'D': // Direct message
+		case HEADER_SYMBOL_DIRECT: // Direct message
 			// 'D' command_name ' ' base32_character{4} ' ' base32_character{4}
 			mHeader = HEADER_DIRECT;
 			// Fallthrough
 
-		case 'E': // Echo message
+		case HEADER_SYMBOL_ECHO: // Echo message
 			// 'E' command_name ' ' base32_character{4} ' ' base32_character{4}
 			if (mHeader == HEADER_UNKNOWN) {
 				mHeader = HEADER_ECHO;
 			}
 			if (mLength < 14 || mCommand[4] != ' ' || mCommand[9] != ' ') {
-				setError("40", "Protocol syntax error");
+				setError(ERROR_CODE_PROTOCOL_ERROR, "Protocol syntax error");
 				return false;
 			} else if (!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8])) {
-				setError("40", "Invalid source SID");
+				setError(ERROR_CODE_PROTOCOL_ERROR, "Invalid source SID");
 				return false;
 			} else if (!isBase32(mCommand[10]) || !isBase32(mCommand[11]) || !isBase32(mCommand[12]) || !isBase32(mCommand[13])) {
-				setError("40", "Invalid target SID");
+				setError(ERROR_CODE_PROTOCOL_ERROR, "Invalid target SID");
 				return false;
 			}
 			mSidSource.assign(mCommand, 5, 4);
@@ -238,35 +258,37 @@ bool AdcParser::checkHeaderSyntax() {
 			mBodyPos = 14;
 			break;
 
-		case 'F': // Feature broadcast
+		case HEADER_SYMBOL_FEATURE: // Feature broadcast
 			// 'F' command_name ' ' base32_character{4} ' ' (('+'|'-') [A-Z] [A-Z0-9]{3})+
+			// example: FSCH AA7V +TCP4-NAT0 TOauto TRZSIJM5OH6FCOIC6Y6LR5FUA2TXG5N3ZS7P6M5DQ
 			mHeader = HEADER_FEATURE;
-			if (mLength < 15 || mCommand[4] != ' ' || mCommand[9] != ' ' || (mCommand[10] != '+' && mCommand[10] != '-')) {
-				setError("40", "Protocol syntax error");
+			if (mLength < 15 || mCommand[4] != ' ' || mCommand[9] != ' ') {
+				setError(ERROR_CODE_PROTOCOL_ERROR, "Protocol syntax error");
 				return false;
 			} else if (!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8])) {
-				setError("40", "Invalid source SID");
+				setError(ERROR_CODE_PROTOCOL_ERROR, "Invalid source SID");
 				return false;
-			} else if (!isUpperAlpha(mCommand[11]) || !isUpperAlphaNum(mCommand[12]) || !isUpperAlphaNum(mCommand[13]) || !isUpperAlphaNum(mCommand[14])) {
-				setError("40", "Invalid feature");
+			} else if (!parseFeatures()) {
+				setError(ERROR_CODE_PROTOCOL_ERROR, "Invalid feature");
 				return false;
 			}
+
 			mSidSource.assign(mCommand, 5, 4);
 			mBodyPos = 14;
 			break;
 
-		case 'U': // UDP message
+		case HEADER_SYMBOL_UDP: // UDP message
 			// 'U' command_name ' ' base32_character+
 			mHeader = HEADER_UDP;
 			if (mLength < 6 || mCommand[4] != ' ' || !isBase32(mCommand[5])) {
-				setError("40", "Protocol syntax error");
+				setError(ERROR_CODE_PROTOCOL_ERROR, "Protocol syntax error");
 				return false;
 			}
 			counter = 6;
 			while (counter < mLength && isBase32(mCommand[counter++])) {
 			}
 			if (counter != mLength && mCommand[counter] != ' ') {
-				setError("40", "Invalid source SID");
+				setError(ERROR_CODE_PROTOCOL_ERROR, "Invalid source SID");
 				return false;
 			}
 			mCidSource.assign(mCommand, 5, counter - 5);
@@ -283,7 +305,39 @@ bool AdcParser::checkHeaderSyntax() {
 
 
 
-void AdcParser::setError(const char * code, const char * text) {
+bool AdcParser::parseFeatures() {
+	size_t pos = 10;
+	size_t endPos = mCommand.find(' ', 15);
+	if (endPos == mCommand.npos) {
+		endPos = mLength;
+	}
+	mPositiveFeature.clear();
+	mNegativeFeature.clear();
+	while (pos < endPos) {
+		if (pos + 4 > endPos || 
+			(mCommand[pos] != '+' && mCommand[pos] != '-') ||
+			!isUpperAlpha(mCommand[pos + 1]) || 
+			!isUpperAlphaNum(mCommand[pos + 2]) || 
+			!isUpperAlphaNum(mCommand[pos + 3]) || 
+			!isUpperAlphaNum(mCommand[pos + 4])
+		) {
+				mPositiveFeature.clear();
+				mNegativeFeature.clear();
+				return false;
+		}
+		if (mCommand[pos] == '+') {
+			mPositiveFeature.push_back(FOURCC(mCommand[pos + 1], mCommand[pos + 2], mCommand[pos + 3], mCommand[pos + 4]));
+		} else {
+			mNegativeFeature.push_back(FOURCC(mCommand[pos + 1], mCommand[pos + 2], mCommand[pos + 3], mCommand[pos + 4]));
+		}
+		pos += 5;
+	}
+	return true;
+}
+
+
+
+void AdcParser::setError(int code, const char * text) {
 	mErrorCode = code;
 	mErrorText = text;
 }
@@ -407,6 +461,90 @@ bool AdcParser::splitChunks() {
 	}
 	return mError;
 }
+
+
+
+void AdcParser::parseInfo(DcUser * dcUser, const string & info, set<string> & names) {
+	size_t s = info.find(' ', 9);
+	if (s != info.npos) {
+		size_t e;
+		bool last = true;
+		while ((e = info.find(' ', ++s)) != info.npos || last) {
+			if (e == info.npos) {
+				e = info.size();
+				last = false;
+			}
+			if (s + 2 <= e) { // max 2 (for name)
+				string name;
+				name.assign(info, s, 2);
+				s += 2;
+				if (e != s) {
+					string value;
+					value.assign(info, s, e - s);
+					names.insert(name); // TODO refactoring
+					dcUser->getParamForce(name.c_str())->setString(value);
+				} else {
+					names.erase(name); // TODO refactoring
+					dcUser->removeParam(name.c_str());
+				}
+			}
+			s = e;
+		}
+	}
+
+	// Raplace IP
+	replaceParam(dcUser->getParam("I4"), "0.0.0.0", dcUser->getIp());
+	replaceParam(dcUser->getParam("I6"), "::", dcUser->getIp());
+}
+
+
+
+void AdcParser::replaceParam(ParamBase * param, const char * oldValue, const string & newValue) {
+	if (param != NULL) {
+		if (param->toString() == oldValue) {
+			param->setString(newValue);
+		}
+	}
+}
+
+
+
+void AdcParser::parseFeatures(DcUser * dcUser, set<int> & features) {
+
+	ParamBase * param = dcUser->getParam("SU"); // TODO replace name to macros
+	if (param) {
+		const string & value = param->toString();
+
+		// TODO check syntax
+		features.clear();
+		size_t i, j = 0;
+		while ((i = value.find(',', j)) != value.npos) {
+			if (i - j == 4) {
+				features.insert(FOURCC(value[j], value[j + 1], value[j + 2], value[j + 3]));
+			}
+			j = i + 1;
+		}
+		if (value.size() - j == 4) {
+			features.insert(FOURCC(value[j], value[j + 1], value[j + 2], value[j + 3]));
+		}
+	}
+}
+
+
+
+void AdcParser::formingInfo(DcUser * dcUser, string & info, const set<string> & names) {
+	info.reserve(0xFF); // usual length of command
+	info = "BINF ";
+	info.append(dcUser->getUid());
+	for (set<string>::const_iterator it = names.begin(); it != names.end(); ++it) {
+		const string & name = (*it);
+		ParamBase * param = dcUser->getParam(name.c_str());
+		if (param != NULL) {
+			info.append(" ").append(name).append(param->toString());
+		}
+	}
+}
+
 
 }; // namespace protocol
 

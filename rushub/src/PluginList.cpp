@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz@verliba.cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@ PluginList::PluginList(const string & path) :
 	mDcServerBase(NULL)
 {
 
-	if (log(1)) {
+	if (log(INFO)) {
 		logStream() << "Using plugins in: " << mPluginDir << endl;
 	}
 
@@ -83,13 +83,13 @@ void PluginList::setServer(DcServerBase * dcServerBase) {
 
 /** Loading all plugins from plugins dir */
 bool PluginList::loadAll() {
-	if (log(3)) {
+	if (log(DEBUG)) {
 		logStream() << "Open plugin dir: " << mPluginDir << endl;
 	}
 
 	DIR * dir = opendir(mPluginDir.c_str());
 	if (!dir) {
-		if (errLog(1)) {
+		if (log(ERR)) {
 			logStream() << "Open plugin dir error" << endl;
 		}
 		return false;
@@ -105,7 +105,7 @@ bool PluginList::loadAll() {
 			if ((file.size() > 3) && (0 == file.compare(file.size() - 3, 3, ".so")))
 		#endif
 		{
-			if (log(3)) {
+			if (log(DEBUG)) {
 				logStream() << "Plugin file name: " << file << endl;
 			}
 			loadPlugin(mPluginDir + file);
@@ -122,7 +122,7 @@ bool PluginList::loadAll() {
 bool PluginList::loadPlugin(const string & filePath) {
 
 	PluginLoader * pluginLoader = new PluginLoader(filePath);
-	if (log(3)) {
+	if (log(DEBUG)) {
 		logStream() << "Attempt loading plugin: " << filePath << endl;
 	}
 
@@ -135,7 +135,7 @@ bool PluginList::loadPlugin(const string & filePath) {
 		) {
 
 			const string & error = pluginLoader->getError();
-			if (log(0)) {
+			if (log(WARN)) {
 				logStream() << "Failure loading plugin: " << filePath << 
 					(error.empty() ? "" : (" (" + error + ")")) << endl;
 			}
@@ -152,7 +152,7 @@ bool PluginList::loadPlugin(const string & filePath) {
 
 	} catch (...) {
 
-		if (errLog(1)) {
+		if (log(ERR)) {
 			logStream() << "Plugin " << filePath << 
 				" caused an exception" << endl;
 		}
@@ -162,7 +162,7 @@ bool PluginList::loadPlugin(const string & filePath) {
 		return false;
 	}
 
-	if (log(3)) {
+	if (log(DEBUG)) {
 		logStream() << "Success loading plugin: " << filePath << endl;
 	}
 
@@ -178,7 +178,7 @@ bool PluginList::unloadPlugin(const string & name) {
 	PluginLoader * pluginLoader = mPluginLoaders.find(key);
 
 	if (!pluginLoader || !mPluginLoaders.remove(key)) {
-		if (errLog(2)) {
+		if (log(ERR)) {
 			logStream() << "Can't unload plugin name: '" << name << "'" << endl;
 		}
 		return false;
@@ -187,7 +187,7 @@ bool PluginList::unloadPlugin(const string & name) {
 	CallList * callList = NULL;
 	for (CallListMap::iterator it = mCallLists.begin(); it != mCallLists.end(); ++it) {
 		callList = (*it);
-		if (callList->mName != "") {
+		if (callList->mName.size()) {
 			callList->unreg(pluginLoader->mPlugin);
 		}
 	}
@@ -283,7 +283,7 @@ Plugin * PluginList::getPluginByLib(const string & lib) {
 /** onPluginLoad */
 void PluginList::onPluginLoad(Plugin * plugin) {
 
-	if (log(1)) {
+	if (log(INFO)) {
 		const string & name = plugin->getName();
 		const string & version = plugin->getVersion();
 		logStream() << "Plugin detected: " << (name != "" ? name : "n/a") <<

@@ -1,7 +1,7 @@
 /*
  * RusHub - hub server for Direct Connect peer to peer network.
  *
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -33,6 +33,9 @@ namespace dcserver {
 
 namespace webserver {
 
+
+
+/// Factory for Web connetion
 class WebConnFactory : public ConnFactory {
 
 public:
@@ -53,6 +56,7 @@ class WebConn;
 
 
 
+/// Web user
 class WebUser : public WebUserBase {
 
 public:
@@ -88,6 +92,7 @@ public:
 
 
 
+/// Web connection
 class WebConn : public Conn {
 
 public:

@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz@verliba.cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -39,17 +39,64 @@ struct ufSend : public unary_function<void, UserList::iterator> {
 	ufSend(const string & data, bool addSep) : mData(data), mAddSep(addSep) {
 	}
 
-	ufSend & operator = (const ufSend &) {
-		return *this;
-	}
-
 	void operator() (UserBase * userBase) {
 		if (userBase && userBase->isCanSend()) {
 			userBase->send(mData, mAddSep);
 		}
 	}
 
+	const ufSend & operator = (const ufSend &) { // for_each
+		return *this;
+	}
+
 }; // struct ufSend
+
+
+
+/** Unary function for sending data to users with features */
+struct ufSendFeature : public unary_function<void, UserList::iterator> {
+	const string & mData; /** Data for sending */
+	bool mAddSep;
+	const vector<int> & mPositive;
+	const vector<int> & mNegative;
+
+	ufSendFeature(const string & data, bool addSep,
+		const vector<int> & positive, const vector<int> & negative) : 
+		mData(data),
+		mAddSep(addSep),
+		mPositive(positive),
+		mNegative(negative)
+	{
+	}
+
+	void operator() (UserBase * userBase) {
+		if (userBase && userBase->isCanSend()) {
+			bool canSend = true;
+			for (unsigned int i = 0; i < mPositive.size(); ++i) {
+				if (!userBase->hasFeature(mPositive[i])) {
+					canSend = false;
+					break;
+				}
+			}
+			if (canSend) {
+				for (unsigned int i = 0; i < mNegative.size(); ++i) {
+					if (userBase->hasFeature(mNegative[i])) {
+						canSend = false;
+						break;
+					}
+				}
+				if (canSend) {
+					userBase->send(mData, mAddSep, false); // not flush
+				}
+			}
+		}
+	}
+
+	const ufSendFeature & operator = (const ufSendFeature &) { // for_each
+		return *this;
+	}
+
+}; // struct ufSendFeature
 
 
 
@@ -62,10 +109,6 @@ struct ufSendProfile : public unary_function<void, UserList::iterator> {
 	ufSendProfile(const string & data, unsigned long profile, bool addSep) : 
 		mData(data), mProfile(profile), mAddSep(addSep)
 	{
-	}
-
-	ufSendProfile & operator = (const ufSendProfile &) {
-		return *this;
 	}
 
 	void operator() (UserBase * userBase) {
@@ -83,6 +126,10 @@ struct ufSendProfile : public unary_function<void, UserList::iterator> {
 		}
 	}
 
+	const ufSendProfile & operator = (const ufSendProfile &) { // for_each
+		return *this;
+	}
+
 }; // struct ufSendProfile
 
 
@@ -97,16 +144,16 @@ struct ufSendWithNick : public unary_function<void, UserList::iterator> {
 	{
 	}
 
-	ufSendWithNick & operator = (const ufSendWithNick &) {
-		return *this;
-	}
-
 	void operator() (UserBase * userBase) {
 		if (userBase && userBase->isCanSend() && !userBase->getUid().empty()) {
 			userBase->send(mDataStart, false, false);
 			userBase->send(userBase->getUid(), false, false);
 			userBase->send(mDataEnd, true);
 		}
+	}
+
+	const ufSendWithNick & operator = (const ufSendWithNick &) { // for_each
+		return *this;
 	}
 
 }; // struct ufSendWithNick
@@ -125,10 +172,6 @@ struct ufSendWithNickProfile : public unary_function<void, UserList::iterator> {
 	{
 	}
 
-	ufSendWithNickProfile & operator = (const ufSendWithNickProfile &) {
-		return *this;
-	}
-
 	void operator() (UserBase * userBase) {
 		if (userBase && userBase->isCanSend()) { 
 			int profile = userBase->getProfile() + 1;
@@ -144,6 +187,10 @@ struct ufSendWithNickProfile : public unary_function<void, UserList::iterator> {
 				userBase->send(mDataEnd, true);
 			}
 		}
+	}
+
+	const ufSendWithNickProfile & operator = (const ufSendWithNickProfile &) { // for_each
+		return *this;
 	}
 
 }; // struct ufSendWithNickProfile
@@ -202,11 +249,12 @@ const string & UserList::getList(int number) {
  */
 void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 	if (!useCache) {
-		if (log(4)) {
+		if (log(TRACE)) {
 			logStream() << "sendToAll begin" << endl;
 		}
 
 		if (mCache.size()) {
+			mCache.reserve(mCache.size() + data.size() + NMDC_SEPARATOR_LEN);
 			mCache.append(data);
 			if (addSep) {
 				if (mCache.find(NMDC_SEPARATOR, mCache.size() - NMDC_SEPARATOR_LEN, NMDC_SEPARATOR_LEN)) {
@@ -214,15 +262,16 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 				}
 			}
 			for_each(begin(), end(), ufSend(mCache, false));
-			mCache.erase(0, mCache.size());
+			string().swap(mCache); // erase & free memory
 		} else {
 			for_each(begin(), end(), ufSend(data, addSep));
 		}
 
-		if (log(4)) {
+		if (log(TRACE)) {
 			logStream() << "sendToAll end" << endl;
 		}
 	} else {
+		mCache.reserve(mCache.size() + data.size() + NMDC_SEPARATOR_LEN);
 		mCache.append(data);
 		if (addSep) {
 			if (mCache.find(NMDC_SEPARATOR, mCache.size() - NMDC_SEPARATOR_LEN, NMDC_SEPARATOR_LEN)) {
@@ -236,11 +285,12 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 
 void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 	if (!useCache) {
-		if (log(4)) {
+		if (log(TRACE)) {
 			logStream() << "sendToAll begin" << endl;
 		}
 
 		if (mCache.size()) {
+			mCache.reserve(mCache.size() + data.size() + ADC_SEPARATOR_LEN);
 			mCache.append(data);
 			if (addSep) {
 				if (mCache.find(ADC_SEPARATOR, mCache.size() - ADC_SEPARATOR_LEN, ADC_SEPARATOR_LEN)) {
@@ -248,15 +298,16 @@ void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 				}
 			}
 			for_each(begin(), end(), ufSend(mCache, false));
-			mCache.erase(0, mCache.size());
+			string().swap(mCache); // erase & free memory
 		} else {
 			for_each(begin(), end(), ufSend(data, addSep));
 		}
 
-		if (log(4)) {
+		if (log(TRACE)) {
 			logStream() << "sendToAll end" << endl;
 		}
 	} else {
+		mCache.reserve(mCache.size() + data.size() + ADC_SEPARATOR_LEN);
 		mCache.append(data);
 		if (addSep) {
 			if (mCache.find(ADC_SEPARATOR, mCache.size() - ADC_SEPARATOR_LEN, ADC_SEPARATOR_LEN)) {
@@ -268,15 +319,31 @@ void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 
 
 
+void UserList::sendToFeature(const string & data, const vector<int> & positive, 
+		const vector<int> & negative, bool addSep) {
+
+	if (log(TRACE)) {
+		logStream() << "sendToFeature begin" << endl;
+	}
+
+	for_each(begin(), end(), ufSendFeature(data, addSep, positive, negative));
+
+	if (log(TRACE)) {
+		logStream() << "sendToFeature end" << endl;
+	}
+}
+
+
+
 /** Sending data to profiles */
 void UserList::sendToProfiles(unsigned long profile, const string & data, bool addSep) {
-	if (log(4)) {
+	if (log(TRACE)) {
 		logStream() << "sendToProfiles begin" << endl;
 	}
 
 	for_each(begin(), end(), ufSendProfile(data, profile, addSep));
 
-	if (log(4)) {
+	if (log(TRACE)) {
 		logStream() << "sendToProfiles end" << endl;
 	}
 }
@@ -329,7 +396,7 @@ void UserList::flushCacheAdc() {
 /** Redefining log level function */
 bool UserList::strLog() {
 	Obj::strLog();
-	logStream() << "(" << size() << ")" << "[" << mName << "] ";
+	simpleLogStream() << "[" << mName << ":" << size() << "] ";
 	return true;
 }
 
@@ -352,16 +419,10 @@ void UserList::onRemove(UserBase *) {
 
 
 void UserList::onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
-	if (log(3)) {
+	if (log(DEBUG)) {
 		logStream() << "Autoresizing: size = " << currentSize << 
 		", capacity = " << oldCapacity << " -> " << newCapacity << endl;
 	}
-}
-
-
-
-UserList & UserList::operator = (const UserList &) {
-	return *this;
 }
 
 

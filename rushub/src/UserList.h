@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@
 #include <vector>
 
 using namespace ::std;
-using namespace ::utils; /** for HashTable */
+using namespace ::utils; // HashTable, Obj
 
 
 namespace dcserver {
@@ -46,8 +46,9 @@ class UserBase;
 
 
 
+/// Base template for user list
 template <class I, class T>
-class ListItem {
+class ListItem : private NonCopyable {
 
 public:
 
@@ -74,7 +75,7 @@ public:
 
 	const string & getList(I begin, I end) {
 		if (mRemake) {
-			mList.erase(0, mList.size());
+			mList.erase();
 			mList.append(mStart);
 			for_each(begin, end, mMaker);
 			mRemake = false;
@@ -84,6 +85,7 @@ public:
 
 private:
 
+	/// Maker for list
 	struct Maker : public unary_function<void, I> {
 		Func mFunc;
 		string & mList;
@@ -95,8 +97,7 @@ private:
 			mFunc(mList, t);
 		}
 
-	private:
-		Maker & operator = (const Maker &) {
+		const Maker & operator = (const Maker &) { // for_each
 			return *this;
 		}
 	}; // struct ListMaker
@@ -108,12 +109,6 @@ private:
 
 	Maker mMaker;
 
-private:
-
-	ListItem & operator = (const ListItem &) {
-		return *this;
-	}
-
 }; // class ListItem
 
 
@@ -124,7 +119,7 @@ typedef ListItem<HashTable<UserBase *>::iterator, UserBase *> UserListItem;
 
 
 /** The structure, allowing add and delete users. Quick iterations cycle for sending */
-class UserList : public Obj, public HashTable<UserBase *> {
+class UserList : public Obj, public HashTable<UserBase *>, private NonCopyable {
 
 public:
 
@@ -147,6 +142,9 @@ public:
 
 	/** Sending data to all from the list */
 	void sendToAllAdc(const string & data, bool useCache = false, bool addSep = true);
+
+	void sendToFeature(const string & data, const vector<int> & positive, 
+		const vector<int> & negative, bool addSep = true);
 
 	/** Sending data to profiles */
 	void sendToProfiles(unsigned long profile, const string & data, bool addSep = true);
@@ -180,10 +178,6 @@ private:
 	string mCache;
 
 	vector<UserListItem*> mListItems;
-
-private:
-
-	UserList & operator = (const UserList &);
 
 }; // UserList
 

@@ -1,7 +1,7 @@
 /*
  * RusHub - hub server for Direct Connect peer to peer network.
  *
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -33,12 +33,12 @@ public:
 
 	virtual const string & getUid() const = 0;
 	virtual const string & getInfo() = 0;
-	virtual const string & getInf() const = 0;
 	virtual const string & getIp() const = 0;
 	virtual int getProfile() const = 0;
 	virtual bool isHide() const = 0;
 	virtual bool isCanSend() const = 0;
 	virtual void send(const string & msg, bool sep = false, bool flush = true) = 0;
+	virtual bool hasFeature(int feature) const = 0;
 
 }; // UserBase
 

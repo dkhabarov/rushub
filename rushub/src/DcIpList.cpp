@@ -1,7 +1,7 @@
 /*
  * RusHub - hub server for Direct Connect peer to peer network.
  *
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -126,7 +126,7 @@ size_t DcIpList::send(DcConn * dcConn) {
 		return 0;
 	}
 	if (mProfile) {
-		int profile = dcConn->mDcUser->getProfile() + 1;
+		int profile = dcConn->mDcUser->getParamForce(USER_PARAM_PROFILE)->getInt() + 1;
 		if (profile < 0) {
 			profile = -profile;
 		}
@@ -150,7 +150,7 @@ size_t DcIpList::sendWithNick(DcConn * dcConn) {
 		return 0;
 	}
 	if (mProfile) {
-		int profile = dcConn->mDcUser->getProfile() + 1;
+		int profile = dcConn->mDcUser->getParamForce(USER_PARAM_PROFILE)->getInt() + 1;
 		if (profile < 0) {
 			profile = -profile;
 		}

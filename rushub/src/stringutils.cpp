@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz@verliba.cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -136,18 +136,18 @@ string & stringReplace(const string & str, const string & varname, string & dest
 
 
 /** Typecasting __int64 to string */
-string int64ToString(__int64 const & ll) {
-	char sBuf[32] = { '\0' };
+string int64ToString(__int64 const & value) {
+	char buf[32] = { '\0' };
 #ifdef _WIN32
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
-		sprintf_s(sBuf, 32, "%I64d", ll);
+		sprintf_s(buf, 32, "%I64d", value);
 	#else
-		sprintf(sBuf, "%I64d", ll);
+		sprintf(buf, "%I64d", value);
 	#endif
 #else
-	sprintf(sBuf, "%lld", ll);
+	sprintf(buf, "%lld", value);
 #endif
-	return sBuf;
+	return buf;
 }
 
 
@@ -165,6 +165,18 @@ __int64 stringToInt64(const string & str) {
 #else
 	return strtoll(str.c_str(), NULL, 10);
 #endif
+}
+
+
+
+string toString(int value) {
+	char buf[16] = { '\0' };
+	#if defined(_WIN32) && defined(_MSC_VER) && (_MSC_VER >= 1400)
+		sprintf_s(buf, 16, "%d", value);
+	#else
+		sprintf(buf, "%d", value);
+	#endif
+	return buf;
 }
 
 

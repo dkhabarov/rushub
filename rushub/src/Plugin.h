@@ -1,7 +1,7 @@
 /*
  * RusHub - hub server for Direct Connect peer to peer network.
  *
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -71,24 +71,24 @@ using namespace ::std;
 	#endif // _WIN32
 #endif // REG_PLUGIN
 
-/// Internal plugin version
+// Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10029
+	#define INTERNAL_PLUGIN_VERSION 10032
 #endif
 
-/// NMDC protocol separator
+// NMDC protocol separator
 #ifndef NMDC_SEPARATOR
 	#define NMDC_SEPARATOR "|"
 	#define NMDC_SEPARATOR_LEN 1
 #endif
 
-/// ADC protocol separator
+// ADC protocol separator
 #ifndef ADC_SEPARATOR
 	#define ADC_SEPARATOR "\n"
 	#define ADC_SEPARATOR_LEN 1
 #endif
 
-/// Web protocol separator
+// Web protocol separator
 #ifndef WEB_SEPARATOR
 	#define WEB_SEPARATOR "\r\n\r\n"
 	#define WEB_SEPARATOR_LEN 4
@@ -96,6 +96,7 @@ using namespace ::std;
 
 
 
+/// DC Server namespace
 namespace dcserver {
 
 enum ClientType {
@@ -104,61 +105,44 @@ enum ClientType {
 }; // enum ClientType
 
 
-enum UserParam {
-	USER_PARAM_DESC = 0,
-	USER_PARAM_EMAIL,
-	USER_PARAM_CONNECTION,
-	USER_PARAM_BYTE,
-	USER_PARAM_TAG,
-	USER_PARAM_CLIENT_NAME,
-	USER_PARAM_CLIENT_VERSION,
-	USER_PARAM_UNREG_HUBS,
-	USER_PARAM_REG_HUBS,
-	USER_PARAM_OP_HUBS,
-	USER_PARAM_SLOTS,
-	USER_PARAM_LIMIT,
-	USER_PARAM_OPEN,
-	USER_PARAM_BANDWIDTH,
-	USER_PARAM_DOWNLOAD,
-	USER_PARAM_FRACTION,
-	USER_PARAM_MODE,
-	USER_PARAM_SHARE
-}; // enum UserParam
+#define USER_PARAM_DESC "sDesc"
+#define USER_PARAM_TAG "sTag"
+#define USER_PARAM_CLIENT_NAME "sClientName"
+#define USER_PARAM_CLIENT_VERSION "sClientVersion"
+#define USER_PARAM_MODE "sMode"
+#define USER_PARAM_UNREG_HUBS "iUsHubs"
+#define USER_PARAM_REG_HUBS "iRegHubs"
+#define USER_PARAM_OP_HUBS "iOpHubs"
+#define USER_PARAM_SLOTS "iSlots"
+#define USER_PARAM_LIMIT "iLimit"
+#define USER_PARAM_OPEN "iOpen"
+#define USER_PARAM_BANDWIDTH "iBandwidth"
+#define USER_PARAM_DOWNLOAD "iDownload"
+#define USER_PARAM_FRACTION "sFraction"
+#define USER_PARAM_CONNECTION "sConn"
+#define USER_PARAM_BYTE "iByte"
+#define USER_PARAM_EMAIL "sEmail"
+#define USER_PARAM_SHARE "iShare"
+#define USER_PARAM_SUPPORTS "sSupports"
+#define USER_PARAM_VERSION "sVersion"
 
-
-enum UserStringParam {
-	USER_STRING_PARAM_DATA = 0,
-	USER_STRING_PARAM_SUPPORTS,
-	USER_STRING_PARAM_NMDC_VERSION,
-	USER_STRING_PARAM_MAC_ADDRESS,
-	USER_STRING_PARAM_IP,
-	USER_STRING_PARAM_IP_CONN,
-	USER_STRING_PARAM_UID,
-	USER_STRING_PARAM_MAX
-}; // enum UserStringParam
-
-
-enum UserBoolParam {
-	USER_BOOL_PARAM_CAN_KICK = 0,
-	USER_BOOL_PARAM_CAN_FORCE_MOVE,
-	USER_BOOL_PARAM_IN_USER_LIST,
-	USER_BOOL_PARAM_IN_OP_LIST,
-	USER_BOOL_PARAM_IN_IP_LIST,
-	USER_BOOL_PARAM_HIDE,
-	USER_BOOL_PARAM_MAX
-}; // enum UserBoolParam
-
-
-enum UserIntParam {
-	USER_INT_PARAM_PROFILE = 0,
-	USER_INT_PARAM_PORT,
-	USER_INT_PARAM_PORT_CONN,
-	USER_INT_PARAM_MAX
-}; // enum UserBoolParam
+#define USER_PARAM_PROFILE "iProfile"
+#define USER_PARAM_IP "sIP"
+#define USER_PARAM_IP_CONN "sIPConn"
+#define USER_PARAM_PORT "iPort"
+#define USER_PARAM_PORT_CONN "iPortConn"
+#define USER_PARAM_MAC_ADDRESS "sMacAddress"
+#define USER_PARAM_ENTER_TIME "iEnterTime"
+#define USER_PARAM_CAN_KICK "bKick"
+#define USER_PARAM_CAN_REDIRECT "bRedirect"
+#define USER_PARAM_CAN_HIDE "bHide"
+#define USER_PARAM_IN_USER_LIST "bInUserList"
+#define USER_PARAM_IN_IP_LIST "bInIpList"
+#define USER_PARAM_IN_OP_LIST "bInOpList"
 
 
 
-
+/// Base param class
 class ParamBase {
 
 public:
@@ -173,24 +157,24 @@ public:
 		TYPE_INT64
 	};
 
+public:
+
 	virtual const string & getName() const = 0;
 	virtual int getType() const = 0;
-	virtual int getCategory() const = 0;
-	virtual bool isReadOnly() const = 0;
+	virtual const string & toString() = 0;
 
 	virtual const string & getString() const = 0;
-	virtual int getInt() const = 0;
-	virtual bool getBool() const = 0;
-	virtual double getDouble() const = 0;
-	virtual long getLong() const = 0;
-	virtual __int64 getInt64() const = 0;
-
-	virtual void setString(const char *) = 0;
-	virtual void setInt(const int &) = 0;
-	virtual void setBool(const bool &) = 0;
-	virtual void setDouble(const double &) = 0;
-	virtual void setLong(const long &) = 0;
-	virtual void setInt64(const __int64 &) = 0;
+	virtual int setString(const string &) = 0;
+	virtual const int & getInt() const = 0;
+	virtual int setInt(int) = 0;
+	virtual const bool & getBool() const = 0;
+	virtual int setBool(bool) = 0;
+	virtual const double & getDouble() const = 0;
+	virtual int setDouble(double) = 0;
+	virtual const long & getLong() const = 0;
+	virtual int setLong(long) = 0;
+	virtual const __int64 & getInt64() const = 0;
+	virtual int setInt64(__int64) = 0;
 
 }; // class ParamBase
 
@@ -214,30 +198,23 @@ public:
 	virtual ~DcUserBase() {
 	}
 
-	virtual const string * getParam(unsigned int key) const = 0;
-	virtual void setParam(unsigned int key, const char * value) = 0;
-
-	virtual const string & getStringParam(unsigned int key) const = 0;
-	virtual void setStringParam(unsigned int key, const string & value) = 0;
-	virtual void setStringParam(unsigned int key, const char * value) = 0;
-
-	virtual bool getBoolParam(unsigned int key) const = 0;
-	virtual void setBoolParam(unsigned int key, bool value) = 0;
-
-	virtual int getIntParam(unsigned int key) const = 0;
-	virtual void setIntParam(unsigned int key, int value) = 0;
+	virtual ParamBase * getParam(const char * name) const = 0;
+	virtual ParamBase * getParamForce(const char * name) = 0;
+	virtual bool removeParam(const char * name) = 0;
 
 	/// Disconnect this client
 	virtual void disconnect() = 0;
+
+	/// Get user's UID
+	virtual const string & getUid() const = 0;
+
+	virtual const string & getNmdcTag() = 0;
 
 	/// Get user's Info string
 	virtual const string & getInfo() = 0;
 
 	/// Set user's MyINFO cmd
-	virtual bool setInfo(const string & myInfo) = 0;
-
-	/// Get enter time (in unix time sec)
-	virtual long getConnectTime() const = 0;
+	virtual bool setInfo(const string & info) = 0;
 
 }; // class DcUserBase
 
@@ -265,10 +242,6 @@ public:
 	virtual ~DcConnBase() {
 	}
 
-	virtual DcConnBase & operator = (const DcConnBase &) {
-		return *this;
-	}
-
 	/// Disconnect this client
 	virtual void disconnect() {
 		if (mDcUserBase != NULL) {
@@ -280,6 +253,10 @@ public:
 	virtual bool parseCommand(const char * cmd) = 0;
 
 	virtual const char * getCommand() = 0;
+
+private:
+
+	DcConnBase & operator = (const DcConnBase &);
 
 }; // class DcConnBase
 
@@ -310,6 +287,9 @@ public:
 
 	/// Get main hub path
 	virtual const string & getMainDir() const = 0;
+
+	/// Get logs path
+	virtual const string & getLogDir() const = 0;
 
 	/// Get system date-time string (now)
 	virtual const string & getTime() = 0;
@@ -429,7 +409,7 @@ public:
 	/// Registration bot
 	virtual int regBot(
 		const string & nick,
-		const string & myInfo,
+		const string & info,
 		const string & ip,
 		bool key = true
 	) = 0;
@@ -457,6 +437,8 @@ namespace webserver {
 
 // ================ WebUserBase ================
 
+
+/// Base Web user
 class WebUserBase {
 
 public:
@@ -474,14 +456,14 @@ public:
 	virtual ~WebUserBase() {
 	}
 
-	virtual WebUserBase & operator = (const WebUserBase &) {
-		return *this;
-	}
-
 	virtual const char * getCommand() = 0;
 
 	/// Disconnect this client
 	virtual void disconnect() = 0;
+
+private:
+
+	WebUserBase & operator = (const WebUserBase &);
 
 }; // class WebUserBase
 
@@ -490,6 +472,7 @@ public:
 
 
 
+/// Plugin namespace
 namespace plugin {
 
 using namespace ::dcserver;
@@ -537,10 +520,6 @@ public:
 	}
 
 	virtual ~Plugin() {
-	}
-
-	virtual Plugin & operator = (const Plugin &) {
-		return *this;
 	}
 
 	/// Reg function in all call lists
@@ -704,6 +683,7 @@ private:
 	/// Pointer to list of all plugins
 	PluginListBase * mPluginListBase;
 
+	Plugin & operator = (const Plugin &);
 
 }; // class Plugin
 

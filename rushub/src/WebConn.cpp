@@ -1,7 +1,7 @@
 /*
  * RusHub - hub server for Direct Connect peer to peer network.
  *
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -73,7 +73,7 @@ void WebConnFactory::deleteConn(Conn * &conn) {
 
 void WebConnFactory::onNewData(Conn * conn, string * str) {
 
-	if (conn->log(1)) {
+	if (conn->log(DEBUG)) {
 		conn->logStream() << "WEB IN: " << (*str) << endl;
 	}
 
@@ -145,7 +145,7 @@ int WebConn::onTimer(Time &) {
 	DcServer * dcServer = server();
 	Time lastRecv(mLastRecv);
 	if (dcServer->minDelay(lastRecv, dcServer->mDcConfig.mWebTimeout)) {
-		if (log(2)) {
+		if (log(DEBUG)) {
 			logStream() << "Any action timeout..." << endl;
 		}
 		closeNice(9000, CLOSE_REASON_WEB);

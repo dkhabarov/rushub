@@ -137,7 +137,7 @@ sudo service rushub start
 	Скачиваем исходники с SVN:
 
 		cd ~
-		svn co https://rushub.svn.sourceforge.net/svnroot/rushub/trunk/ rushub
+		svn co https://rushub.svn.sourceforge.net/svnroot/rushub/tags/last rushub
 
 Шаг 3
 

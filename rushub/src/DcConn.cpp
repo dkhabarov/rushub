@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz@verliba.cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -28,6 +28,9 @@
 
 namespace dcserver {
 
+#if (!defined _WIN32) && (!defined __int64)
+	#define __int64 long long
+#endif
 
 DcConn::DcConn(int type, tSocket sock, Server * server) : 
 	Conn(sock, server, CONN_TYPE_INCOMING_TCP),
@@ -64,7 +67,7 @@ size_t DcConn::send(const char * data, size_t len, bool addSep, bool flush) {
 	if (mWritable) {
 		if (len >= mSendBufMax) {
 			len = mSendBufMax;
-			if (log(0)) {
+			if (log(WARN)) {
 				logStream() << "Too long message. Size: " << len << ". Max size: " << mSendBufMax << endl;
 			}
 		}
@@ -106,10 +109,10 @@ int DcConn::onTimer(Time &now) {
 	DcServer * dcServer = server();
 
 	// Check timeouts. For entering only
-	if (!mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) { // Optimisation
+	if (!mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) { // Optimisation
 		for (int i = 0; i < HUB_TIME_OUT_MAX; ++i) {
 			if (!checkTimeOut(HubTimeOut(i), now)) {
-				if (log(2)) {
+				if (log(DEBUG)) {
 					logStream() << "Operation timeout (" << HubTimeOut(i) << ")" << endl;
 				}
 				string msg;
@@ -123,7 +126,7 @@ int DcConn::onTimer(Time &now) {
 
 	/*Time lastRecv(mLastRecv);
 	if (dcServer->minDelay(lastRecv, dcServer->mDcConfig.mTimeoutAny)) {
-		if (log(2)) {
+		if (log(DEBUG)) {
 			logStream() << "Any action timeout..." << endl;
 		}
 		dcServer->sendToUser(mDcUser, dcServer->mDcLang.mTimeoutAny.c_str(), dcServer->mDcConfig.mHubBot.c_str());
@@ -139,7 +142,7 @@ int DcConn::onTimer(Time &now) {
 	Ago -= dcServer->mDcConfig.mStartPing;
 	if (
 		dcServer->minDelay(mPingServer, dcServer->mDcConfig.mPingInterval) &&
-		mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST) && mDcUser->mTimeEnter < Ago
+		mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST) && mDcUser->mTimeEnter < Ago
 	) {
 		send("", 0, true, true);
 	}
@@ -158,9 +161,6 @@ void DcConn::closeNow(int iReason) {
 bool DcConn::setUser(DcUser * dcUser) {
 	mDcUser = dcUser;
 	mDcUserBase = dcUser;
-	dcUser->mDcConn = this;
-	dcUser->mDcConnBase = this;
-	dcUser->mDcServer = server();
 	return true;
 }
 
@@ -232,7 +232,7 @@ Conn * DcConnFactory::createConn(tSocket sock) {
 	dcConn->mSelfConnFactory = this; // Connection factory for current connection (DcConnFactory)
 
 	// Create DcUser
-	DcUser * dcUser = new DcUser();
+	DcUser * dcUser = new DcUser(dcConn);
 	dcConn->setUser(dcUser);
 
 	return static_cast<Conn *> (dcConn);
@@ -251,12 +251,13 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 
 		if (dcConn->mDcUser != NULL) {
 
-			const string * share = dcConn->mDcUser->getParam(USER_PARAM_SHARE);
+			Param * share = (Param *) dcConn->mDcUser->getParam(USER_PARAM_SHARE);
 			if (share != NULL) {
-				dcServer->miTotalShare -= stringToInt64(*share);
+				__int64 n = 0;
+				share->setInt64(n); // for remove from total share
 			}
 
-			if (dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+			if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 				dcServer->removeFromDcUserList(static_cast<DcUser *> (dcConn->mDcUser));
 			} else { // remove from enter list, if user was already added in it, but user was not added in user list
 				dcServer->mEnterList.remove(dcConn->mDcUser->getUidHash());
@@ -267,11 +268,11 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 			dcConn->mDcUser = NULL;
 			dcConn->mDcUserBase = NULL;
 		} else {
-			if (conn->log(3)) {
+			if (conn->log(DEBUG)) {
 				conn->logStream() << "Del conn without user" << endl;
 			}
 		}
-	} else if (conn->errLog(0)) {
+	} else if (conn->log(FATAL)) {
 		conn->logStream() << "Fail error in deleteConn: dcConn = " <<
 		(dcConn == NULL ? "NULL" : "not NULL") << ", dcServer = " << 
 		(dcServer == NULL ? "NULL" : "not NULL") << endl;

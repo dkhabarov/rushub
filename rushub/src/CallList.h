@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -35,6 +35,7 @@
 #include <functional>
 
 using namespace ::std;
+using namespace ::utils;
 
 
 
@@ -45,7 +46,7 @@ class PluginList;
 class PluginListBase;
 struct ufCallOne;
 
-/** Base class for call list */
+/// Subclass for call list
 class CallList : public Obj {
 
 	friend struct ufCallOne; // for mPluginList
@@ -121,6 +122,7 @@ private:
 
 
 
+/// Base class for call list
 class CallListBase : public CallList {
 
 public:
@@ -136,6 +138,7 @@ public:
 
 
 
+/// Simple call list
 class CallListSimple : public CallListBase {
 
 public:
@@ -164,6 +167,8 @@ protected:
 }; // class CallListSimple
 
 
+
+/// Call list with one argument
 template <class A>
 class CallListType1 : public CallListBase {
 
@@ -200,6 +205,7 @@ protected:
 
 
 
+/// Call list with two arguments
 template <class A, class B>
 class CallListType2 : public CallListBase {
 
@@ -236,6 +242,9 @@ protected:
 
 }; // class CallListType2
 
+
+
+/// Call list with three arguments
 template <class A, class B, class C>
 class CallListType3 : public CallListBase {
 

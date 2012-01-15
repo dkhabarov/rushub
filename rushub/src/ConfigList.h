@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -46,23 +46,21 @@ class ConfigFactory {
 
 public:
 
-  ConfigFactory() {
-	}
-	NEWITEM(bool, Bool);            /** virtual ConfigItemBool    * add(bool & var) { return new ConfigItemBool(var) } */
-	NEWITEM(double, Double);        /** virtual ConfigItemDouble  * add(double & var) { return new ConfigItemDouble(var) } */
-	NEWITEM(int, Int);              /** virtual ConfigItemInt     * add(int & var) { return new ConfigItemInt(var) } */
-	NEWITEM(long, Long);            /** virtual ConfigItemLong    * add(long & var) { return new ConfigItemLong(var) } */
-	NEWITEM(unsigned int, UInt);    /** virtual ConfigItemUInt    * add(unsigned int & var) { return new ConfigItemUInt(var) } */
-	NEWITEM(unsigned long, ULong);  /** virtual ConfigItemULong   * add(unsigned long & var) { return new ConfigItemULong(var) } */
-	NEWITEM(__int64, Int64);        /** virtual ConfigItemInt64   * add(__int64 & var) { return new ConfigItemInt64(var) } */
-	NEWITEM(char, Char);            /** virtual ConfigItemChar    * add(char & var) { return new ConfigItemChar(var) } */
-	NEWITEM(string, String);        /** virtual ConfigItemString  * add(string & var) { return new ConfigItemString(var) } */
+	NEWITEM(bool, Bool);            // virtual ConfigItemBool    * add(bool & var) { return new ConfigItemBool(var); }
+	NEWITEM(double, Double);        // virtual ConfigItemDouble  * add(double & var) { return new ConfigItemDouble(var); }
+	NEWITEM(int, Int);              // virtual ConfigItemInt     * add(int & var) { return new ConfigItemInt(var); }
+	NEWITEM(long, Long);            // virtual ConfigItemLong    * add(long & var) { return new ConfigItemLong(var); }
+	NEWITEM(unsigned int, UInt);    // virtual ConfigItemUInt    * add(unsigned int & var) { return new ConfigItemUInt(var); }
+	NEWITEM(unsigned long, ULong);  // virtual ConfigItemULong   * add(unsigned long & var) { return new ConfigItemULong(var); }
+	NEWITEM(__int64, Int64);        // virtual ConfigItemInt64   * add(__int64 & var) { return new ConfigItemInt64(var); }
+	NEWITEM(char, Char);            // virtual ConfigItemChar    * add(char & var) { return new ConfigItemChar(var); }
+	NEWITEM(string, String);        // virtual ConfigItemString  * add(string & var) { return new ConfigItemString(var); }
 	virtual void del(ConfigItem * configItem) { /** Removing config item */
 		delete configItem;
 	}
 }; // ConfigFactory
 
-/** Base config class */
+/** Base configuration class */
 class ConfigListBase : public Obj {
 
 public:
@@ -151,22 +149,10 @@ public:
 
 }; // class ConfigListBase
 
-/** Adding */
-#define ADDMTDS(TYPE) \
-ConfigItem * add(const string & name, TYPE & var); \
-ConfigItem * add(const string & name, TYPE & var, TYPE const & def);
-
-#define ADDPMTDS(TYPE) \
-ConfigItem * add(const string & name, TYPE * & var); \
-ConfigItem * add(const string & name, TYPE * & var, TYPE const & def);
-
-#define ADDMETHODS(TYPE) \
-ADDMTDS(TYPE); \
-ADDPMTDS(TYPE);
 
 
 /**
-	This class is a main class for each config with like structure.
+	This class is a main class for each configuration with like structure.
 	You may link real given with their names. You may get these data or change them.
 	Convert from/in string of the type std::string, read/write from/in stream. Very useful class.
 */
@@ -177,16 +163,18 @@ public:
 	virtual ~ConfigList() {
 	}
 
-	ADDMTDS(char);
-	ADDMTDS(char *);
-	ADDMETHODS(bool);
-	ADDMETHODS(int);
-	ADDMETHODS(long);
-	ADDMETHODS(double);
-	ADDMETHODS(unsigned int);
-	ADDMETHODS(unsigned long);
-	ADDMETHODS(__int64);
-	ADDMETHODS(string);
+	template <typename T>
+	ConfigItem * add(const string & name, T & var) {
+		ConfigItem * configItem = this->mFactory->add(var);
+		return this->ConfigListBase::add(name, configItem);
+	}
+
+	template <typename T>
+	ConfigItem * add(const string & name, T & var, T const & def) {
+		ConfigItem * configItem = this->add(name, var);
+		*configItem = def;
+		return configItem;
+	}
 
 }; // class ConfigList
 

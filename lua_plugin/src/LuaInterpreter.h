@@ -1,7 +1,7 @@
 /*
  * RusHub - hub server for Direct Connect peer to peer network.
  *
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -46,12 +46,8 @@ public:
 public:
 
 	LuaInterpreter(const string & name, string & fullName);
-
 	~LuaInterpreter();
 
-	LuaInterpreter & operator = (const LuaInterpreter &) {
-		return *this;
-	}
 
 	int start(); // (-1 - is running already)
 	int stop();
@@ -99,6 +95,8 @@ private:
 
 	void regFunc(const char * funcName, int (*)(lua_State *));
 	void regStrField(const char * name, const char * value);
+
+	LuaInterpreter & operator = (const LuaInterpreter &);
 
 }; // class LuaInterpreter
 

@@ -1,7 +1,7 @@
 /*
  * RusHub - hub server for Direct Connect peer to peer network.
  *
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -362,7 +362,7 @@ void LuaInterpreter::newCallParam(lua_Number data, int type) {
 
 
 void LuaInterpreter::logError(const char * msg) {
-	string logs(LuaPlugin::mCurServer->getMainDir() + "logs/");
+	string logs(LuaPlugin::mCurServer->getLogDir());
 	Dir::checkPath(logs);
 	string logFile(logs + "lua_errors.log");
 

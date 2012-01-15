@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -39,13 +39,36 @@
 
 using namespace ::std;
 
+namespace utils {
+
+enum {
+	FATAL, // falat error
+	ERR,   // simple error
+	WARN,  // warning
+	INFO,  // information
+	DEBUG, // debug
+	TRACE  // tracing
+};
+
+/** Main stream of log system */
+#define logStream() logStreamLine(__LINE__)
 
 
-/** Main object class (log class) */
+/** NonCopyable class */
+class NonCopyable {
+	protected:
+		NonCopyable() {}
+		~NonCopyable() {}
+	private:
+		NonCopyable(const NonCopyable &);
+		const NonCopyable & operator = (const NonCopyable &);
+}; // class NonCopyable
+
+
+/** Main object class (logger class) */
 class Obj {
 
 public:
-
 	static bool mSysLogOn;
 
 public:
@@ -61,17 +84,11 @@ public:
 	/** Return log straem */
 	int log(int level);
 
-	/** Return errLog stream */
-	int errLog(int level);
+	/** Return current log stream with line */
+	ostream & logStreamLine(const int line);
 
-	/** Return current log stream */
-	inline ostream & logStream() {
-		return *mToLog;
-	}
-
-	const char * getClassName() {
-		return mClassName;
-	}
+	/** Return class name */
+	const char * getClassName();
 
 protected:
 
@@ -95,13 +112,16 @@ protected:
 	/** Main function putting log in stream */
 	virtual bool strLog();
 
+	/** Return a simple log stream */
+	ostream & simpleLogStream();
+
 private:
 
 	/** Objects counter */
 	static int mCounterObj;
 	static int mLevel;
-	static bool mIsErrorLog;
 	static bool mCout;
+	static const char * mLevelNames[];
 
 	/** output log stream */
 	ostream * mToLog;
@@ -110,7 +130,7 @@ private:
 	static ostringstream mBufOss;
 
 	// Loading buffer
-	typedef pair<pair<int, bool>, string> Pair;
+	typedef pair<int, string> Pair;
 	static vector<Pair> mLoadBuf;
 
 private:
@@ -118,17 +138,16 @@ private:
 	/** log function */
 	ostream & log();
 
-	/** errLog function */
-	ostream & errLog();
-
 	ostream & openLog();
 	bool saveInBuf();
 	void loadFromBuf(ostream &);
 
 	/** Return level for syslog */
-	int sysLogLevel(int level, bool isError = false);
+	int sysLogLevel(int level);
 
 }; // class Obj
+
+}; // namespace utils
 
 #endif // OBJ_H
 

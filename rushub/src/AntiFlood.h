@@ -1,7 +1,7 @@
 /*
  * RusHub - hub server for Direct Connect peer to peer network.
  *
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,10 +25,7 @@
 
 namespace utils {
 
-/**
-	\class AntiFlood
-	\brief Antiflood
-*/
+/// Main antiflood class
 class AntiFlood {
 
 public:
@@ -36,30 +33,29 @@ public:
 	AntiFlood(unsigned & iCount, double & time);
 	~AntiFlood();
 
-	AntiFlood & operator = (const AntiFlood &) {
-		return *this;
-	}
-
 	bool check(const string & ip, const Time & now);
 	void del(Time & now);
 
 private:
 
-	struct sItem {
+	/// Main antiflood item
+	struct Item {
 		Time mTime;
 		unsigned miCount;
-		sItem() : mTime(true), miCount(0) {
+		Item() : mTime(true), miCount(0) {
 		}
 	};
 
 	typedef unsigned long HashType_t;
-	typedef List<HashType_t, sItem *> List_t;
+	typedef List<HashType_t, Item *> List_t;
 	List_t * mList;
 
 
 	Hash<HashType_t> mHash;
 	unsigned & miCount;
 	double & mTime;
+
+	AntiFlood & operator = (const AntiFlood &);
 
 }; // AntiFlood
 

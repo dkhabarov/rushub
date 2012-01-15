@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -129,6 +129,7 @@ class DcServer; // server()
 
 
 
+/// Factory of DC connection
 class DcConnFactory : public ConnFactory {
 
 public:
@@ -143,7 +144,10 @@ public:
 
 
 
+/// Main DC connection
 class DcConn : public Conn, public DcConnBase {
+
+	friend class DcUser; // for Param
 
 public:
 
@@ -154,7 +158,8 @@ public:
 	bool mNickListInProgress;  ///< True while sending first nicklist
 	DcUser * mDcUser;           ///< User object
 
-	struct Timers { ///< Timers
+	/// Timers struct
+	struct Timers {
 
 		Time mTime[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !
 		unsigned mCount[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !

@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz@verliba.cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -37,36 +37,26 @@ Protocol::~Protocol(){
 
 
 
-
-
 Parser::Parser(int max) : 
 	Obj("Parser"),
 	mType(TYPE_UNPARSED),
 	mChunks(max),
 	mLength(0),
-	mStrings(NULL),
+	mStrings(new string[max]),
 	mStrMap(0l),
 	mIsParsed(false),
 	mMaxChunks(max)
 {
-	mStrings = new std::string[mMaxChunks];
-	mCommand.resize(0);
-	mCommand.reserve(512);
 	for(int i = 0; i < mMaxChunks; ++i) {
 		tChunk & p = mChunks[i];
-		p.first = 0;
-		p.second = 0;
+		p.first = p.second = 0;
 	}
 }
 
 
 
 Parser::~Parser() {
-	mChunks.clear();
-	if (mStrings != NULL) {
-		delete[] mStrings;
-		mStrings = NULL;
-	}
+	delete[] mStrings;
 }
 
 
@@ -77,12 +67,10 @@ void Parser::reInit() {
 	mLength = 0;
 	mStrMap = 0l;
 	mIsParsed = false;
-	mCommand.resize(0);
-	mCommand.reserve(512);
+	string().swap(mCommand); // erase & free memory
 	for(int i = 0; i < mMaxChunks; ++i) {
 		tChunk & p = mChunks[i];
-		p.first = 0;
-		p.second = 0;
+		p.first = p.second = 0;
 	}
 }
 
@@ -108,7 +96,7 @@ string & Parser::chunkString(unsigned int n) {
 		return mCommand; // Empty line always full, and this pointer for empty line
 	}
 	if (n > mChunks.size()) { // This must not never happen, but if this happens, we are prepared
-		if (errLog(0)) {
+		if (log(FATAL)) {
 			logStream() << "Error number of chunks" << endl;
 		}
 		return mStrings[0];
@@ -117,17 +105,12 @@ string & Parser::chunkString(unsigned int n) {
 	unsigned long flag = 1 << n;
 	if (!(mStrMap & flag)) {
 		mStrMap |= flag;
-		try {
-			tChunk &c = mChunks[n];
-			if (c.first < mCommand.size() && c.second < mCommand.size()) {
-				mStrings[n].assign(mCommand, c.first, c.second); // Record n part in n element of the array of the lines
-			} else if (errLog(1)) {
-				logStream() << "Badly parsed message : " << mCommand << endl;
-			}
-		} catch(...) {
-			if (errLog(1)) {
-				logStream() << "Ecxeption in chunk string" << endl;
-			}
+		tChunk & c = mChunks[n];
+		size_t size = mCommand.size();
+		if (c.first < size && c.second < size) {
+			mStrings[n].assign(mCommand, c.first, c.second); // Record n part in n element of the array of the lines
+		} else if (log(ERR)) {
+			logStream() << "Badly parsed message : " << mCommand << endl;
 		}
 	}
 	return mStrings[n];
@@ -152,8 +135,9 @@ bool Parser::splitOnTwo(size_t start, const string & lim, int cn1, int cn2, size
 			return false;
 		}
 	}
+	lim_len += i;
 	setChunk(cn1, start, i - start);
-	setChunk(cn2, i + lim_len, mLength - i - lim_len);
+	setChunk(cn2, lim_len, mLength - lim_len);
 	return true;
 }
 

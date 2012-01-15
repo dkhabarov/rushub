@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz@verliba.cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -78,7 +78,7 @@ bool PluginLoader::open() {
 		if (!mHandle) {
 			isError(); // ???
 		}
-		if (errLog(1)) {
+		if (log(ERR)) {
 			logStream() << "Can't open file '" << mFile << "' because:" << getError() << " handle(" << mHandle << ")" << endl;
 		}
 		return false;
@@ -96,7 +96,7 @@ bool PluginLoader::close() {
 				__try {
 					mDelPluginFunc(mPlugin);
 				} __except( EXCEPTION_EXECUTE_HANDLER) {
-					if (errLog(0)) {
+					if (log(FATAL)) {
 						logStream() << "error in DelPluginFunc (" << mPlugin->getName() << ")" << endl;
 					}
 				}
@@ -107,7 +107,7 @@ bool PluginLoader::close() {
 		mPlugin = NULL;
 		dlclose(mHandle);
 		if (isError()) {
-			if (errLog(1)) {
+			if (log(ERR)) {
 				logStream() << "Can't close :" << getError() << endl;
 			}
 			return false;
@@ -150,7 +150,7 @@ bool PluginLoader::loadSym() {
 void * PluginLoader::loadSym(const char * name) {
 	void * func = dlsym(mHandle, name);
 	if (isError()) {
-		if (errLog(1)) {
+		if (log(ERR)) {
 			logStream() << "Can't load " << name <<" exported interface :" << getError() << endl;
 		}
 		return NULL;
@@ -163,7 +163,7 @@ void * PluginLoader::loadSym(const char * name) {
 /** log */
 bool PluginLoader::strLog() {
 	Obj::strLog();
-	logStream() << "(" << mFile << ") ";
+	simpleLogStream() << "[" << mFile << "] ";
 	return true;
 }
 

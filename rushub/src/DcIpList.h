@@ -1,7 +1,7 @@
 /*
  * RusHub - hub server for Direct Connect peer to peer network.
  *
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -30,6 +30,9 @@ namespace dcserver {
 
 typedef List<tSocket, DcConn *> IpList;
 
+
+
+/// List which contain all IP of the DC server
 class DcIpList : public Obj, public HashTable<IpList *> {
 
 public:
@@ -48,12 +51,13 @@ public:
 	void sendToIpWithNick(const char * ip, const char * start, const char * end, unsigned long profile = 0, bool addSep = false, bool flush = true);
 
 	virtual void onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
-		if (log(3)) {
+		if (log(DEBUG)) {
 			logStream() << "Autoresizing: size = " << currentSize << 
 				", capacity = " << oldCapacity << " -> " + newCapacity << endl;
 		}
 	}
 
+	/// Iterator for IP list
 	class iterator {
 
 	public:

@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz@verliba.cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -103,7 +103,7 @@ Server::~Server() {
 	initWSA = false;
 #endif
 
-	if (log(1)) {
+	if (log(DEBUG)) {
 		logStream() << endl << "Allocated objects: " << Obj::getCount()
 		<< endl << "Unclosed sockets: " << Conn::mConnCounter << endl;
 	}
@@ -181,7 +181,7 @@ Conn * Server::addSimpleConn(int connType, const char * ip, const char * port) {
 	Conn * conn = new Conn(0, this, connType);
 
 	if (conn->makeSocket(port, ip, connType) == INVALID_SOCKET) {
-		if (errLog(0)) {
+		if (log(FATAL)) {
 			if (connType == CONN_TYPE_LISTEN) {
 				logStream() << "Fatal error: Can't listen on " << ip << ":" << port << " TCP" << endl;
 			} else if (connType == CONN_TYPE_INCOMING_UDP) {
@@ -203,19 +203,19 @@ Conn * Server::addSimpleConn(int connType, const char * ip, const char * port) {
 	}
 
 	if (connType == CONN_TYPE_LISTEN) {
-		if (log(0)) {
+		if (log(INFO)) {
 			logStream() << "Listening on " << ip << ":" << port << " TCP" << endl;
 		}
 	} else if (connType == CONN_TYPE_INCOMING_UDP) {
-		if (log(0)) {
+		if (log(INFO)) {
 			logStream() << "Listening on " << ip << ":" << port << " UDP" << endl;
 		}
 	} else if (connType == CONN_TYPE_OUTGOING_TCP) {
-		if (log(4)) {
+		if (log(TRACE)) {
 			logStream() << "Connected to " << ip << ":" << port << " TCP" << endl;
 		}
 	} else if (connType == CONN_TYPE_OUTGOING_UDP) {
-		if (log(4)) {
+		if (log(TRACE)) {
 			logStream() << "Connected to " << ip << ":" << port << " UDP" << endl;
 		}
 	}
@@ -227,7 +227,7 @@ Conn * Server::addSimpleConn(int connType, const char * ip, const char * port) {
 /// Main cycle
 int Server::run() {
 	// mRun = true; // by default server was run
-	if (log(1)) {
+	if (log(INFO)) {
 		logStream() << "Main loop start" << endl;
 	}
 
@@ -252,17 +252,17 @@ int Server::run() {
 			}
 			mMeanFrequency.insert(mTime); // MeanFrequency
 		} catch(const char * exception) {
-			if (errLog(0)) {
+			if (log(FATAL)) {
 				logStream() << "Exception: " << exception << endl;
 			}
 		} catch(...) {
-			if (errLog(0)) {
+			if (log(FATAL)) {
 				logStream() << "Exception in Run function" << endl;
 			}
 			throw "Server::run()";
 		}
 	}
-	if (log(1)) {
+	if (log(INFO)) {
 		logStream() << "Main loop stop(" << mMainLoopCode << ")" << endl;
 	}
 	return mMainLoopCode;
@@ -295,18 +295,18 @@ void Server::step() {
 			return;
 		}
 	} catch(const char * exception) {
-		if (errLog(0)) {
+		if (log(FATAL)) {
 			logStream() << "Exception in choose: " << exception << endl;
 		}
 		return;
 	} catch(...) {
-		if (errLog(0)) {
+		if (log(FATAL)) {
 			logStream() << "Exception in choose" << endl;
 		}
 		throw "Exception in choose";
 	}
 
-	if (log(5)) {
+	if (log(TRACE)) {
 		logStream() << "<new actions>: " << ret << " [" << miNumCloseConn << "]" << endl;
 	}
 
@@ -333,7 +333,7 @@ void Server::step() {
 			(connType == CONN_TYPE_LISTEN)
 		) {
 
-			if (mNowConn->log(5)) {
+			if (mNowConn->log(TRACE)) {
 				mNowConn->logStream() << "::(s)NewConn" << endl;
 			}
 
@@ -346,7 +346,7 @@ void Server::step() {
 				}
 			}
 
-			if (mNowConn->log(5)) {
+			if (mNowConn->log(TRACE)) {
 				mNowConn->logStream() << "::(e)NewConn. Number connections: " << mConnChooser.mConnBaseList.size() << endl;
 			}
 
@@ -359,7 +359,7 @@ void Server::step() {
 					connType == CONN_TYPE_OUTGOING_UDP
 			)) {
 				try {
-					if (mNowConn->log(5)) {
+					if (mNowConn->log(TRACE)) {
 						mNowConn->logStream() << "::(s)inputEvent" << endl;
 					}
 
@@ -367,16 +367,16 @@ void Server::step() {
 						mNowConn->setOk(false);
 					}
 
-					if (mNowConn->log(5)) {
+					if (mNowConn->log(TRACE)) {
 						mNowConn->logStream() << "::(e)inputEvent" << endl;
 					}
 				} catch (const char * exception) {
-					if (errLog(0)) {
+					if (log(FATAL)) {
 						logStream() << "Exception in inputEvent: " << exception << endl;
 					}
 					throw "Exception in inputEvent";
 				} catch (...) {
-					if (errLog(0)) {
+					if (log(FATAL)) {
 						logStream() << "Exception in inputEvent" << endl;
 					}
 					throw "Exception in inputEvent";
@@ -385,22 +385,22 @@ void Server::step() {
 
 			if (ok && (activity & ConnChoose::eEF_OUTPUT)) {
 				try {
-					if (mNowConn->log(5)) {
+					if (mNowConn->log(TRACE)) {
 						mNowConn->logStream() << "::(s)outputEvent" << endl;
 					}
 
 					outputEvent(mNowConn);
 
-					if (mNowConn->log(5)) {
+					if (mNowConn->log(TRACE)) {
 						mNowConn->logStream() << "::(e)outputEvent" << endl;
 					}
 				} catch (const char * exception) {
-					if (errLog(0)) {
+					if (log(FATAL)) {
 						logStream() << "Exception in outputEvent: " << exception << endl;
 					}
 					throw "Exception in outputEvent";
 				} catch (...) {
-					if (errLog(0)) {
+					if (log(FATAL)) {
 						logStream() << "Exception in outputEvent" << endl;
 					}
 					throw "Exception in outputEvent";
@@ -416,22 +416,22 @@ void Server::step() {
 				}
 
 				try {
-					if (log(5)) {
+					if (log(TRACE)) {
 						logStream() << "::(s)delConnection" << endl;
 					}
 
 					delConnection(mNowConn);
 
-					if (log(5)) {
+					if (log(TRACE)) {
 						logStream() << "::(e)delConnection. Number connections: " << mConnChooser.mConnBaseList.size() << endl;
 					}
 				} catch (const char * exception) {
-					if (errLog(0)) {
+					if (log(FATAL)) {
 						logStream() << "Exception in delConnection: " << exception << endl;
 					}
 					throw "Exception in delConnection";
 				} catch (...) {
-					if (errLog(0)) {
+					if (log(FATAL)) {
 						logStream() << "Exception in delConnection" << endl;
 					}
 					throw "Exception in delConnection";
@@ -441,13 +441,13 @@ void Server::step() {
 	}
 
 	if (miNumCloseConn && forDel) {
-		if (errLog(1)) {
+		if (log(ERR)) {
 			logStream() << "Control not closed connections: " << miNumCloseConn << endl;
 		}
 		--miNumCloseConn;
 	}
 
-	if (log(5)) {
+	if (log(TRACE)) {
 		logStream() << "<exit actions>" << endl;
 	}
 }
@@ -480,7 +480,7 @@ int Server::newAccept() {
 	}
 
 	if (newConn->mProtocol == NULL) {
-		if (errLog(0)) {
+		if (log(FATAL)) {
 			logStream() << "Protocol was not set" << endl;
 		}
 	}
@@ -495,13 +495,13 @@ int Server::newAccept() {
 int Server::addConnection(Conn * conn) {
 
 	if (!conn->isOk()) {
-		if (conn->log(2)) {
+		if (conn->log(DEBUG)) {
 			conn->logStream() << "Not reserved connection: " << conn->getIp() << endl;
 		}
 		if (conn->mSelfConnFactory != NULL) {
 			conn->mSelfConnFactory->deleteConn(conn);
 		} else {
-			if (conn->log(2)) {
+			if (conn->log(DEBUG)) {
 				conn->logStream() << "Connection without factory: " << conn->getIp() << endl;
 			}
 			delete conn;
@@ -519,7 +519,7 @@ int Server::addConnection(Conn * conn) {
 		!mConnChooser.ConnChoose::optIn(static_cast<ConnBase *> (conn),
 		ConnChoose::tEventFlag(ConnChoose::eEF_INPUT | ConnChoose::eEF_ERROR)))
 	{
-		if (conn->errLog(0)) {
+		if (conn->log(FATAL)) {
 			conn->logStream() << "Error: Can't add socket!" << endl;
 		}
 		mConnChooser.deleteConn(conn);
@@ -546,7 +546,7 @@ int Server::addConnection(Conn * conn) {
 /// delConnection
 int Server::delConnection(Conn * conn) {
 	if (conn == NULL) {
-		if (mNowConn && mNowConn->errLog(0)) {
+		if (mNowConn && mNowConn->log(FATAL)) {
 			mNowConn->logStream() << "Fatal error: delConnection null pointer" << endl;
 		}
 		throw "Fatal error: delConnection null pointer";
@@ -558,7 +558,7 @@ int Server::delConnection(Conn * conn) {
 	// Removing from client or listen list
 	if (conn->getConnType() == CONN_TYPE_INCOMING_TCP) {
 		if (it == mClientList.end() || found != conn) {
-			if (conn->errLog(0)) {
+			if (conn->log(FATAL)) {
 				conn->logStream() << "Fatal error: Delete unknown connection: " << conn << endl;
 			}
 			throw "Fatal error: Delete unknown connection";
@@ -567,7 +567,7 @@ int Server::delConnection(Conn * conn) {
 		conn->mIterator = mClientList.end();
 	} else {
 		if (it == mListenList.end() || found != conn) {
-			if (conn->errLog(0)) {
+			if (conn->log(FATAL)) {
 				conn->logStream() << "Fatal error: Delete unknown connection: " << conn << endl;
 			}
 			throw "Fatal error: Delete unknown connection";

@@ -1,7 +1,7 @@
 /*
  * RusHub - hub server for Direct Connect peer to peer network.
  *
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -136,27 +136,46 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 		}
 	#endif
 
-	if (dcConn->log(5)) {
+	if (dcConn->log(TRACE)) {
 		dcConn->logStream() << "[S]Stage " << adcParser->mType << endl;
 	}
 
 	if (0 == (this->*(this->events[adcParser->mType])) (adcParser, dcConn)) {
-		if (adcParser->getHeader() == HEADER_BROADCAST) {
-			mDcServer->mAdcUserList.sendToAllAdc(adcParser->mCommand, true);
-		} else if (adcParser->getHeader() == HEADER_ECHO || adcParser->getHeader() == HEADER_DIRECT) {
-			// Search user
-			DcUser * dcUser = static_cast<DcUser *> (mDcServer->mAdcUserList.getUserBaseByUid(adcParser->getSidTarget()));
-			if (dcUser) { // User is found
-				dcUser->send(adcParser->mCommand, true);
-				dcConn->mDcUser->send(adcParser->mCommand, true);
-			}
-		} else if (adcParser->getHeader() == HEADER_FEATURE) {
-			// TODO: send to all with this feature
-		}
+		DcUser * dcUser = NULL;
+		switch(adcParser->getHeader()) {
 
+			case HEADER_BROADCAST:
+				mDcServer->mAdcUserList.sendToAllAdc(adcParser->mCommand, true);
+				break;
+
+			case HEADER_DIRECT:
+				dcUser = static_cast<DcUser *> (mDcServer->mAdcUserList.getUserBaseByUid(adcParser->getSidTarget()));
+				if (dcUser) { // User was found
+					dcUser->send(adcParser->mCommand, true);
+				}
+				break;
+
+			case HEADER_ECHO:
+				dcUser = static_cast<DcUser *> (mDcServer->mAdcUserList.getUserBaseByUid(adcParser->getSidTarget()));
+				if (dcUser) { // User was found
+					dcUser->send(adcParser->mCommand, true);
+					dcConn->mDcUser->send(adcParser->mCommand, true);
+				}
+				break;
+
+			case HEADER_FEATURE:
+				mDcServer->mAdcUserList.sendToFeature(adcParser->mCommand, 
+					adcParser->getPositiveFeatures(), 
+					adcParser->getNegativeFeatures(),
+					true);
+				break;
+
+			default:
+				break;
+		}
 	}
 
-	if (dcConn->log(5)) {
+	if (dcConn->log(TRACE)) {
 		dcConn->logStream() << "[E]Stage " << adcParser->mType << endl;
 	}
 	return 0;
@@ -183,16 +202,16 @@ int AdcProtocol::onNewConn(Conn * conn) {
 
 	dcConn->mDcUser->setUid(string(sid));
 
-	string cmds("ISUP ADBASE ADTIGR");
+	string cmds;
+	cmds.reserve(70 + mDcServer->mDcConfig.mTopic.size());
+	cmds.append("ISUP ADBASE ADTIGR");
 	cmds.append(ADC_SEPARATOR);
 	cmds.append("ISID ").append(sid);
 	cmds.append(ADC_SEPARATOR);
-
 	cmds.append("IINF CT32 VE" INTERNALVERSION " NIADC" INTERNALNAME);
 	cmds.append(" DE").append(mDcServer->mDcConfig.mTopic);
 
 	dcConn->send(cmds, true, false);
-
 
 
 	static __int64 iShareVal = -1;
@@ -274,16 +293,16 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 		}
 	}
 
-	dcConn->mDcUser->setInf(inf);
+	dcConn->mDcUser->setInfo(inf);
 
-	if (dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
-		if (dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_HIDE)) {
-			dcConn->send(dcConn->mDcUser->getInf(), true); // Send to self only
+	if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
+		if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
+			dcConn->send(inf, true); // Send to self only
 		} else {
 			// TODO sendMode
-			mDcServer->mAdcUserList.sendToAllAdc(dcConn->mDcUser->getInf(), true);
+			mDcServer->mAdcUserList.sendToAllAdc(inf, true);
 		}
-	} else if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		dcConn->mSendNickList = true;
 		dcConn->clearTimeOut(HUB_TIME_OUT_LOGIN);
 		mDcServer->beforeUserEnter(dcConn);
@@ -298,7 +317,7 @@ int AdcProtocol::eventMsg(AdcParser * adcParser, DcConn * dcConn) {
 
 	// TODO check SID
 
-	if (!dcConn->mDcUser->getBoolParam(USER_BOOL_PARAM_IN_USER_LIST)) {
+	if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		return -1;
 	}
 
@@ -522,7 +541,8 @@ int AdcProtocol::eventUnknown(AdcParser *, DcConn *) {
 void AdcProtocol::infList(string & list, UserBase * userBase) {
 	// INF ...\nINF ...\n
 	if (!userBase->isHide()) {
-		list.append(userBase->getInf());
+		list.reserve(userBase->getInfo().size() + ADC_SEPARATOR_LEN);
+		list.append(userBase->getInfo());
 		list.append(ADC_SEPARATOR);
 	}
 }
@@ -553,7 +573,7 @@ int AdcProtocol::sendNickList(DcConn * dcConn) {
 		dcConn->send(mDcServer->mAdcUserList.getList(), true);
 
 	} catch(...) {
-		if (dcConn->errLog(0)) {
+		if (dcConn->log(FATAL)) {
 			dcConn->logStream() << "exception in sendNickList" << endl;
 		}
 		return -1;
@@ -568,11 +588,11 @@ void AdcProtocol::onFlush(Conn * conn) {
 	if (dcConn->mNickListInProgress) {
 		dcConn->mNickListInProgress = false;
 		if (!dcConn->isOk() || !dcConn->isWritable()) {
-			if (dcConn->log(2)) {
+			if (dcConn->log(DEBUG)) {
 				dcConn->logStream() << "Connection closed during nicklist" << endl;
 			}
 		} else {
-			if (dcConn->log(3)) {
+			if (dcConn->log(DEBUG)) {
 				dcConn->logStream() << "Enter after nicklist" << endl;
 			}
 			mDcServer->doUserEnter(dcConn);
@@ -587,12 +607,13 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 	// TODO Checking length of command
 
 	if (adcParser->mType == ADC_TYPE_INVALID) {
-		if (dcConn->log(1)) {
+		if (dcConn->log(DEBUG)) {
 			dcConn->logStream() << "Wrong syntax cmd" << endl;
 		}
 		string msg("ISTA "), buff;
-		msg.append("2"); // Disconnect
-		msg.append(adcParser->getErrorCode()); // Error code
+		msg.reserve(10 + adcParser->getErrorText().size());
+		msg.append(toString(SEVERITY_LEVEL_FATAL)); // Disconnect
+		msg.append(toString(adcParser->getErrorCode())); // Error code
 		msg.append(" ");
 		msg.append(cp1251ToUtf8(adcParser->getErrorText(), buff, escaper)); // Error text
 		dcConn->send(msg, true);
@@ -602,7 +623,7 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 
 	// Checking null chars
 	if (strlen(adcParser->mCommand.data()) < adcParser->mCommand.size()) {
-		if (dcConn->log(1)) {
+		if (dcConn->log(WARN)) {
 			dcConn->logStream() << "Sending null chars, probably attempt an attack" << endl;
 		}
 		dcConn->closeNow(CLOSE_REASON_CMD_NULL);
@@ -614,7 +635,7 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 	if (adcParser->splitChunks()) {
 		// Protection from commands, not belonging to DC protocol
 		if (adcParser->mType != ADC_TYPE_UNKNOWN || mDcServer->mDcConfig.mDisableNoDCCmd) {
-			if (dcConn->log(1)) {
+			if (dcConn->log(DEBUG)) {
 				dcConn->logStream() << "Unknown cmd: " << adcParser->mType << endl;
 			}
 			dcConn->closeNice(9000, CLOSE_REASON_CMD_SYNTAX);

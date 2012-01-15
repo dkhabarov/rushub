@@ -6,7 +6,7 @@
  * E-Mail: dan at verliba dot cz
  *
  * modified: 27 Aug 2009
- * Copyright (C) 2009-2011 by Setuper
+ * Copyright (C) 2009-2012 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -83,6 +83,7 @@ class DcConfigLoader;
 
 
 
+/// List for get users into plugins
 class DcListIterator : public DcConnListIterator {
 
 public:
@@ -111,7 +112,10 @@ private:
 
 }; // DcListIterator
 
-class DcServer : public Server, public DcServerBase {
+
+
+/// Main DC Server class
+class DcServer : public Server, public DcServerBase, private NonCopyable {
 
 	friend class ::dcserver::DcListIterator; // for mClientList
 	friend class ::dcserver::DcConn; // for doUserEnter in DcConn::onFlush and minDelay in DcConn::onTimer
@@ -169,12 +173,12 @@ public:
 
 	virtual ~DcServer();
 
-	virtual DcServer & operator = (const DcServer &) {
-		return *this;
-	}
-
 	const string & getMainDir() const {
 		return mDcConfig.mMainPath;
+	}
+
+	const string & getLogDir() const {
+		return mDcConfig.mLogPath;
 	}
 
 	const string & getTime() {
@@ -250,7 +254,7 @@ public:
 	bool setConfig(const string & name, const string & value);
 	bool setLang(const string & name, const string & value);
 
-	int regBot(const string & nick, const string & myInfo, const string & ip, bool key = true);
+	int regBot(const string & nick, const string & info, const string & ip, bool key = true);
 	int unregBot(const string & nick);
 
 	void stopHub() {
@@ -339,6 +343,8 @@ private:
 
 	bool setCapabilities();
 
+
+	/// Call list struct for registration actions into the plugins
 	struct PluginCallList {
 
 		PluginCallList(PluginList * pluginList) :
