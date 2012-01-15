@@ -56,6 +56,8 @@ string & stringReplace(const string &, const string &, string &, __int64, bool b
 string int64ToString(__int64 const &);
 __int64 stringToInt64(const string &);
 
+string toString(int value);
+
 int countLines(const string &);
 bool limitLines(const string &, int);
 
@@ -76,6 +78,7 @@ string & toString(const T & value, string & str) {
 	str = oss.str();
 	return str;
 }
+
 
 }; // namespace utils
 
