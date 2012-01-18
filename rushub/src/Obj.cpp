@@ -45,7 +45,7 @@ string * Obj::mLogsPath = NULL; /** Logs path */
 int Obj::mCounterObj = 0; /** Objects counter */
 int Obj::mLevel = 0;
 bool Obj::mCout = false;
-const char * Obj::mLevelNames[] = {"FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE"};
+const char * Obj::mLevelNames[] = {"FATAL", "ERROR", "WARN ", "INFO ", "DEBUG", "TRACE"};
 
 ostringstream Obj::mSysLogOss;
 ostringstream Obj::mBufOss;
