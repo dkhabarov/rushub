@@ -62,13 +62,12 @@ Conn::Conn(tSocket socket, Server * server, int connType) :
 	mServer(server),
 	mProtocol(NULL),
 	mParser(NULL),
-	mConnType(connType),
 	mOk(socket > 0),
 	mWritable(true),
 	mPort(0),
 	mPortConn(0),
 	mSendBufMax(server->mMaxSendSize),
-	mConnect(true),
+	mConnType(connType),
 	mSocket(socket),
 	mRecvBufEnd(0),
 	mRecvBufRead(0),
@@ -594,7 +593,7 @@ int Conn::defineConnInfo(sockaddr_storage & storage) {
 		mPort = atoi(port);
 
 		if (mServer->mMac) {
-			calcMacAddress(mIp, mMacAddress);
+			calcMacAddress();
 		}
 		return 0;
 	}
@@ -713,7 +712,7 @@ bool Conn::checkIp(const string & ip) {
 
 /// Calculate mac-address
 #ifdef _WIN32
-void Conn::calcMacAddress(const string & ip, string & mac) {
+void Conn::calcMacAddress() {
 	DWORD size;
 	DWORD ret = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, NULL, NULL, &size);
 	if (ret != ERROR_BUFFER_OVERFLOW) {
@@ -743,13 +742,13 @@ void Conn::calcMacAddress(const string & ip, string & mac) {
 					) {
 						continue;
 					}
-					if (strcmp(ip.c_str(), address) == 0) {
+					if (strcmp(mIp.c_str(), address) == 0) {
 						char buf[18] = { '\0' };
 						sprintf(buf, "%02x-%02x-%02x-%02x-%02x-%02x",
 							curr->PhysicalAddress[0], curr->PhysicalAddress[1],
 							curr->PhysicalAddress[2], curr->PhysicalAddress[3],
 							curr->PhysicalAddress[4], curr->PhysicalAddress[5]);
-						mac = buf;
+						mMacAddress = buf;
 						free(addr);
 						return;
 					}
@@ -761,7 +760,7 @@ void Conn::calcMacAddress(const string & ip, string & mac) {
 	free(addr);
 }
 #else
-void Conn::calcMacAddress(const string &, string &) {
+void Conn::calcMacAddress() {
 }
 #endif
 
@@ -1132,7 +1131,7 @@ bool Conn::strLog() {
 }
 
 
-
+/* // It is not using now
 const char * Conn::inetNtop(int af, const void * src, char * dst, socklen_t cnt) {
 	#ifndef _WIN32
 	if (inet_ntop(af, src, dst, cnt)) {
@@ -1202,7 +1201,7 @@ int Conn::inetPton(int af, const char * src, void * dst) {
 		return 1;
 	#endif // _WIN32
 }
-
+*/
 
 
 

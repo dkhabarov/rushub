@@ -163,14 +163,13 @@ public:
 
 	void flushCacheAdc();
 
-	/** Redefining log level function */
-	virtual bool strLog();
-
 protected:
 
 	virtual void onAdd(UserBase * userBase);
 	virtual void onRemove(UserBase *);
 	virtual void onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity);
+
+	virtual bool strLog(); ///< Redefining log level function
 
 private:
 

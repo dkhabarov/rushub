@@ -130,17 +130,18 @@ public:
 	Conn(tSocket socket, Server * server, int connType);
 	virtual ~Conn();
 
-	// === static functions ===
-
-	static const char * inetNtop(int af, const void * src, char * dst, socklen_t cnt);
-	static int inetPton(int af, const char * src, void * dst);
-	static bool checkIp(const string & ip);
-
-
 	virtual operator tSocket() const;
 
+	static bool checkIp(const string & ip);
+	//static const char * inetNtop(int af, const void * src, char * dst, socklen_t cnt);
+	//static int inetPton(int af, const char * src, void * dst);
 
-	// === getter / setter ===
+
+	/// Set OK
+	void setOk(bool);
+
+	/// Is OK
+	bool isOk() const;
 
 	/// Get connection type
 	int getConnType() const;
@@ -148,38 +149,29 @@ public:
 	/// Get status
 	int getStatus() const;
 
-	/// Is OK
-	bool isOk() const;
-
-	/// Set OK
-	void setOk(bool);
-
 	/// Is writable
 	bool isWritable() const;
 
 	/// Is closed
 	bool isClosed() const;
 
-	/// Get string of IP
+	/// Get client IP address
 	const string & getIp() const;
 
-	/// Get string of server IP (host)
+	/// Get server IP address (host)
 	const string & getIpConn() const;
 
-	/// Get IP for UDP
+	/// Get IP address for UDP
 	const string & getIpUdp() const;
 
-	/// Get real port
+	/// Get client port
 	int getPort() const;
 
-	/// Get connection port
+	/// Get server port
 	int getPortConn() const;
 
-	/// Get mac-address
+	/// Get client mac-address
 	const string & getMacAddress() const;
-
-	/// Server first init conn
-	bool isServerInit() const;
 
 
 	/// Create, bind and listen socket
@@ -242,8 +234,6 @@ public:
 	void flush();
 
 
-	virtual bool strLog();
-
 	/// Main base timer
 	void onTimerBase(Time &now);
 
@@ -258,9 +248,6 @@ public:
 
 protected:
 
-	/// Socket type
-	int mConnType;
-
 	bool mOk; ///< Points that given connection is registered (socket of connection is created and bound)
 	bool mWritable; ///< Points that data can be read and be written
 	
@@ -271,16 +258,10 @@ protected:
 	int mPortConn; ///< listen-conn port
 
 	string mMacAddress; ///< mac address
-	string mHost; ///< DNS
 
-	static char mRecvBuf[MAX_RECV_SIZE + 1]; ///< Recv buffer
-	string mSendBuf; ///< Buffer for sending
 	unsigned long & mSendBufMax; ///< Max size sending buf
 
 	list<Conn *>::iterator mIterator; ///< Optimisation
-
-	/// Time entering into the hub
-	Time mConnect;
 
 protected:
 
@@ -289,15 +270,20 @@ protected:
 
 	virtual void onOk(bool);
 
-	/// Server first initiated the connection
-	void setServerInit();
+	virtual bool strLog();
 
 private:
 
+	int mConnType; ///< Socket type
+
 	tSocket mSocket; ///< Socket descriptor
 	Time mCloseTime; ///< Time before closing the conn
+
+	static char mRecvBuf[MAX_RECV_SIZE + 1]; ///< Recv buffer
 	size_t mRecvBufEnd; ///< Final position of the buffer mRecvBuf
 	size_t mRecvBufRead; ///< Current position of the buffer mRecvBuf
+	string mSendBuf; ///< Buffer for sending
+
 	int mStatus; ///< Status of the line
 
 	/// struct sockaddr_in
@@ -338,7 +324,7 @@ private:
 	int defineConnInfo(struct sockaddr_storage &);
 
 	/// Calculate mac-address
-	static void calcMacAddress(const string & ip, string & mac);
+	void calcMacAddress();
 
 	/// Send len byte from buf
 	int send(const char * buf, size_t & len);
