@@ -192,7 +192,7 @@ int WebUser::getPortConn() {
 
 
 size_t WebConn::send(const string & data, bool flush /* = true */) {
-	if (!mWritable) {
+	if (!isWritable()) {
 		return 0;
 	}
 	return writeData(data.c_str(), data.size(), flush);

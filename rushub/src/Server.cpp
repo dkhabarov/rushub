@@ -552,33 +552,20 @@ int Server::delConnection(Conn * conn) {
 		throw "Fatal error: delConnection null pointer";
 	}
 
-	tCLIt it = conn->mIterator;
-	Conn * found = (*it);
-
 	// Removing from client or listen list
-	if (conn->getConnType() == CONN_TYPE_INCOMING_TCP) {
-		if (it == mClientList.end() || found != conn) {
-			if (conn->log(FATAL)) {
-				conn->logStream() << "Fatal error: Delete unknown connection: " << conn << endl;
-			}
-			throw "Fatal error: Delete unknown connection";
+	tCLIt it = conn->mIterator;
+	tConnList * connList = (conn->getConnType() == CONN_TYPE_INCOMING_TCP) ? &mClientList : &mListenList;
+	if (it == connList->end() || (*it) != conn) {
+		if (conn->log(FATAL)) {
+			conn->logStream() << "Fatal error: Delete unknown connection: " << conn << endl;
 		}
-		mClientList.erase(it);
-		conn->mIterator = mClientList.end();
-	} else {
-		if (it == mListenList.end() || found != conn) {
-			if (conn->log(FATAL)) {
-				conn->logStream() << "Fatal error: Delete unknown connection: " << conn << endl;
-			}
-			throw "Fatal error: Delete unknown connection";
-		}
-		mListenList.erase(it);
-		conn->mIterator = mListenList.end();
+		throw "Fatal error: Delete unknown connection";
 	}
+	connList->erase(it);
+	conn->mIterator = connList->end();
 
 	// Removing from common list
 	mConnChooser.deleteConn(conn);
-
 
 	// Removing self connection
 	if (conn->mSelfConnFactory != NULL) {

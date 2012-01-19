@@ -64,7 +64,7 @@ DcServer * DcConn::server() {
 
 size_t DcConn::send(const char * data, size_t len, bool addSep, bool flush) {
 	size_t ret = 0;
-	if (mWritable) {
+	if (isWritable()) {
 		if (len >= mSendBufMax) {
 			len = mSendBufMax;
 			if (log(WARN)) {

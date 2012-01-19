@@ -146,13 +146,13 @@ public:
 	/// Get connection type
 	int getConnType() const;
 
-	/// Get status
+	/// Get status (Server)
 	int getStatus() const;
 
 	/// Is writable
 	bool isWritable() const;
 
-	/// Is closed
+	/// Is closed (Server)
 	bool isClosed() const;
 
 	/// Get client IP address
@@ -174,7 +174,7 @@ public:
 	const string & getMacAddress() const;
 
 
-	/// Create, bind and listen socket
+	/// Create, bind and listen socket (Server)
 	tSocket makeSocket(const char * port, const char * ip = NULL, int connType = CONN_TYPE_LISTEN);
 
 	/// Close connection (socket)
@@ -186,16 +186,16 @@ public:
 	/// Now close conn
 	void closeNow(int reason = 0);
 
-	/// Client close conn
+	/// Client close conn (Server)
 	void closeSelf();
 
-	/// Creating the new object for enterring connection
+	/// Creating the new object for enterring connection (Server)
 	virtual Conn * createNewConn();
 
-	/// Reading all data from socket to buffer of the conn
+	/// Reading all data from socket to buffer of the conn (Server)
 	virtual int recv();
 
-	/// Check empty recv buf
+	/// Check empty recv buf (Server)
 	int recvBufIsEmpty() const {
 		return mRecvBufEnd == mRecvBufRead;
 	}
@@ -215,7 +215,7 @@ public:
 	and installation main parameter */
 	void setCommandPtr(string *);
 
-	/// Reading data from buffer and record in line of the protocol
+	/// Reading data from buffer and record in line of the protocol (Server)
 	size_t readFromRecvBuf();
 
 	/// Get pointer for string
@@ -234,7 +234,7 @@ public:
 	void flush();
 
 
-	/// Main base timer
+	/// Main base timer (Server)
 	void onTimerBase(Time &now);
 
 	/// Main timer
@@ -247,17 +247,14 @@ public:
 	size_t getSeparatorLen();
 
 protected:
-
-	bool mOk; ///< Points that given connection is registered (socket of connection is created and bound)
-	bool mWritable; ///< Points that data can be read and be written
 	
-	string mIp; ///< String ip
-	string mIpConn; ///< String ip (host) of server
-	string mIpUdp;
-	int mPort; ///< port
-	int mPortConn; ///< listen-conn port
+	string mIp; ///< Client IP address
+	string mIpConn; ///< Server IP address (host)
+	string mIpUdp; /// UDP IP address
+	string mMacAddress; ///< MAC-address
 
-	string mMacAddress; ///< mac address
+	int mPort; ///< Client port
+	int mPortConn; ///< Server port
 
 	unsigned long & mSendBufMax; ///< Max size sending buf
 
@@ -273,6 +270,9 @@ protected:
 	virtual bool strLog();
 
 private:
+
+	bool mOk; ///< Points that given connection is registered (socket of connection is created and bound)
+	bool mWritable; ///< Points that data can be read and be written
 
 	int mConnType; ///< Socket type
 
