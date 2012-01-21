@@ -813,34 +813,25 @@ size_t Conn::readFromRecvBuf() {
 	}
 
 	char * buf = mRecvBuf + mRecvBufRead;
-	const char * sep = "\0";
-	size_t sep_len = 1, len = (mRecvBufEnd - mRecvBufRead);
-	unsigned long maxCommandLength = 10240;
-	
-	if (mProtocol != NULL) {
-		sep = mProtocol->getSeparator();
-		sep_len = mProtocol->getSeparatorLen();
-		maxCommandLength = mProtocol->getMaxCommandLength();
+	const char * pos_sep = strstr(buf, mProtocol ? mProtocol->getSeparator() : "\0");
+	size_t len = 0;
+
+	if (pos_sep) { // separator was found
+		len = pos_sep - buf;
+		mRecvBufRead += (len + (mProtocol ? mProtocol->getSeparatorLen() : 1));
+		mStatus = STRING_STATUS_STR_DONE;
+	} else { // separator was not found
+		len = mRecvBufEnd - mRecvBufRead;
+		mRecvBufRead = mRecvBufEnd = 0;
 	}
 
-	const char * pos_sep = NULL;
-	if ((pos_sep = strstr(buf, sep)) == NULL) {
-		size_t size = mCommand->size() + len;
-		if (size > maxCommandLength) {
-			closeNow(CLOSE_REASON_MAXSIZE_RECV);
-			return 0;
-		}
-		mCommand->reserve(size);
-		mCommand->append(buf, len);
-		mRecvBufRead = mRecvBufEnd = 0;
-		return len;
+	size_t size = mCommand->size() + len;
+	if (size > (mProtocol ? mProtocol->getMaxCommandLength() : 10240)) {
+		closeNow(CLOSE_REASON_MAXSIZE_RECV);
+		return 0;
 	}
-	size_t pos = pos_sep - buf;
-	len = pos + sep_len;
-	mCommand->reserve(mCommand->size() + len);
-	mCommand->append(buf, pos);
-	mRecvBufRead += len;
-	mStatus = STRING_STATUS_STR_DONE;
+	mCommand->reserve(size);
+	mCommand->append(buf, len);
 	return len;
 }
 
@@ -848,7 +839,7 @@ size_t Conn::readFromRecvBuf() {
 
 /// Get pointer for string
 string * Conn::getParserCommandPtr() {
-	if (mParser == NULL) {
+	if (!mParser) {
 		if ((mParser = createParser()) == NULL) {
 			return NULL;
 		}
@@ -861,9 +852,9 @@ string * Conn::getParserCommandPtr() {
 
 
 Parser * Conn::createParser() {
-	if (mProtocol == NULL) {
+	if (!mProtocol) {
 		// ToDo remove!
-		if (mCreatorConnFactory == NULL) {
+		if (!mCreatorConnFactory) {
 			return NULL;
 		}
 		// ToDo remove!
@@ -875,8 +866,8 @@ Parser * Conn::createParser() {
 
 
 void Conn::deleteParser(Parser * parser) {
-	if (parser != NULL) {
-		if (mProtocol != NULL) {
+	if (parser) {
+		if (mProtocol) {
 			mProtocol->deleteParser(parser);
 		} else {
 			delete parser;
@@ -889,12 +880,10 @@ void Conn::deleteParser(Parser * parser) {
 /// Remaining (for web-server)
 size_t Conn::remaining() {
 
-	unsigned long maxCommandLength = (mProtocol != NULL ? mProtocol->getMaxCommandLength() : 10240);
-
 	char * buf = mRecvBuf + mRecvBufRead;
 	size_t len = mRecvBufEnd - mRecvBufRead;
 	size_t size = mCommand->size() + len;
-	if (size > maxCommandLength) {
+	if (size > (mProtocol ? mProtocol->getMaxCommandLength() : 10240)) {
 		closeNow(CLOSE_REASON_MAXSIZE_REMAINING);
 		return 0;
 	}
@@ -907,13 +896,13 @@ size_t Conn::remaining() {
 
 
 const char * Conn::getSeparator() {
-	return mProtocol != NULL ? mProtocol->getSeparator() : "\0";
+	return mProtocol ? mProtocol->getSeparator() : "\0";
 }
 
 
 
 size_t Conn::getSeparatorLen() {
-	return mProtocol != NULL ? mProtocol->getSeparatorLen() : 1;
+	return mProtocol ? mProtocol->getSeparatorLen() : 1;
 }
 
 

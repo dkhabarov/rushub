@@ -137,7 +137,7 @@ public:
 	//static int inetPton(int af, const char * src, void * dst);
 
 
-	/// Set OK
+	/// Set OK (Server)
 	void setOk(bool);
 
 	/// Is OK
@@ -198,11 +198,6 @@ public:
 	/// Check empty recv buf (Server)
 	int recvBufIsEmpty() const {
 		return mRecvBufEnd == mRecvBufRead;
-	}
-
-	/// Check empty recv buf
-	int sendBufIsEmpty() const {
-		return mSendBuf.size() == 0;
 	}
 
 	/// Remaining (for web-server)

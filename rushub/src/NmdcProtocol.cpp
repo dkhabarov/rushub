@@ -1200,11 +1200,7 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 			// seperator "|" was not added in getIpList function, because seperator was "$$"
 			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_IP), true);
 		} else {
-			if (!dcConn->sendBufIsEmpty()) { // buf would not flush, if it was empty
-				dcConn->flush(); // newPolitic
-			} else {
-				dcConn->send("", 0 , true, true);
-			}
+			dcConn->send("", 0 , true, true); // for flush (don't replace to flush function!)
 		}
 	} catch(...) {
 		if (dcConn->log(FATAL)) {
