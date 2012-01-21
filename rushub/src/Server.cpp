@@ -581,14 +581,10 @@ int Server::delConnection(Conn * conn) {
 
 /// inputEvent
 size_t Server::inputEvent(Conn * conn) {
-	int ret = conn->recv();
-	if (ret <= 0) {
-		if (ret == -1) {
-			conn->closeSelf();
-		}
-		return 0;
+	if (conn->recv() > 0) {
+		return onRecv(conn);
 	}
-	return onRecv(conn);
+	return 0;
 }
 
 

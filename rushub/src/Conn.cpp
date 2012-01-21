@@ -454,15 +454,6 @@ void Conn::closeNow(int reason /* = 0 */) {
 
 
 
-void Conn::closeSelf() {
-	if (log(DEBUG)) {
-		logStream() << "User itself was disconnected" << endl;
-	}
-	closeNow(CLOSE_REASON_CLIENT_DISCONNECT);
-}
-
-
-
 /// createNewConn
 Conn * Conn::createNewConn() {
 
@@ -637,6 +628,10 @@ int Conn::recv() {
 	if (iBufLen <= 0) {
 		if (!udp) {
 			if (iBufLen == 0) {
+				if (log(DEBUG)) {
+					logStream() << "User itself was disconnected" << endl;
+				}
+				closeNow(CLOSE_REASON_CLIENT_DISCONNECT);
 				return -1;
 			} else if (SOCK_ERR == EWOULDBLOCK) {
 				if (log(DEBUG)) {
@@ -818,6 +813,13 @@ size_t Conn::readFromRecvBuf() {
 	mCommand->reserve(size);
 	mCommand->append(buf, len);
 	return len;
+}
+
+
+
+/// Check empty recv buf
+bool Conn::recvBufIsEmpty() const {
+	return mRecvBufEnd == mRecvBufRead;
 }
 
 

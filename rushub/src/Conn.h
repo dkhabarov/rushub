@@ -183,19 +183,17 @@ public:
 	/// Now close conn
 	void closeNow(int reason = 0);
 
-	/// Client close conn (for Server)
-	void closeSelf();
-
 	/// Creating the new object for enterring connection (for Server)
 	virtual Conn * createNewConn();
 
 	/// Reading all data from socket to buffer of the conn (for Server)
 	virtual int recv();
 
+	/// Reading data from buffer and record in line of the protocol (for Server)
+	size_t readFromRecvBuf();
+
 	/// Check empty recv buf (for Server)
-	int recvBufIsEmpty() const {
-		return mRecvBufEnd == mRecvBufRead;
-	}
+	bool recvBufIsEmpty() const;
 
 	/// Remaining (for web-server)
 	virtual size_t remaining();
@@ -206,9 +204,6 @@ public:
 	/** Installing the string, in which will be recorded received data, 
 	and installation main parameter */
 	void setCommandPtr(string *);
-
-	/// Reading data from buffer and record in line of the protocol (for Server)
-	size_t readFromRecvBuf();
 
 	/// Get pointer for string (for DcServer and Stress-test client)
 	virtual string * getParserCommandPtr();
