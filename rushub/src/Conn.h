@@ -115,10 +115,6 @@ class Conn : public Obj, public ConnBase, private NonCopyable {
 
 public:
 
-	static unsigned long mConnCounter; ///< Conn counter
-
-	Time mLastRecv; ///< Time of the last recv action from the client
-
 	ConnFactory * mSelfConnFactory; ///< Self Conn Factory
 	ConnFactory * mCreatorConnFactory; ///< Conn Factory Creator
 	Server * mServer; ///< Server
@@ -133,6 +129,7 @@ public:
 	virtual operator tSocket() const;
 
 	static bool checkIp(const string & ip);
+	static unsigned long getCount();
 	//static const char * inetNtop(int af, const void * src, char * dst, socklen_t cnt);
 	//static int inetPton(int af, const char * src, void * dst);
 
@@ -232,6 +229,8 @@ protected:
 	int mPort; ///< Client port
 	int mPortConn; ///< Server port
 
+	Time mLastRecv; ///< Time of the last recv action from the client
+
 	unsigned long & mSendBufMax; ///< Max size sending buf
 
 	list<Conn *>::iterator mIterator; ///< Optimisation
@@ -266,6 +265,8 @@ private:
 	/// struct sockaddr_in
 	struct sockaddr_in mSockAddrIn;
 	static socklen_t mSockAddrInSize;
+
+	static unsigned long mConnCounter; ///< Conn counter
 
 	/// ipv6
 	struct addrinfo * mAddrInfo;
@@ -310,14 +311,14 @@ private:
 	/// Main timer
 	virtual int onTimer(Time & now);
 
+	/// Send len byte from buf
+	int send(const char * buf, size_t & len);
+
 	// Define conn info
 	int defineConnInfo(struct sockaddr_storage &);
 
 	/// Calculate mac-address
 	void calcMacAddress();
-
-	/// Send len byte from buf
-	int send(const char * buf, size_t & len);
 
 }; // class Conn
 

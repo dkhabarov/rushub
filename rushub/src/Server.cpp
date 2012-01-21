@@ -105,7 +105,7 @@ Server::~Server() {
 
 	if (log(DEBUG)) {
 		logStream() << endl << "Allocated objects: " << Obj::getCount()
-		<< endl << "Unclosed sockets: " << Conn::mConnCounter << endl;
+		<< endl << "Unclosed sockets: " << Conn::getCount() << endl;
 	}
 	if (mOfs.is_open()) {
 		mOfs.close();

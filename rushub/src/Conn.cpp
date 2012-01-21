@@ -56,7 +56,6 @@ char Conn::mRecvBuf[MAX_RECV_SIZE + 1];
 
 Conn::Conn(tSocket socket, Server * server, int connType) :
 	Obj("Conn"),
-	mLastRecv(true),
 	mSelfConnFactory(NULL),
 	mCreatorConnFactory(NULL),
 	mServer(server),
@@ -64,6 +63,7 @@ Conn::Conn(tSocket socket, Server * server, int connType) :
 	mParser(NULL),
 	mPort(0),
 	mPortConn(0),
+	mLastRecv(true),
 	mSendBufMax(server->mMaxSendSize),
 	mOk(socket > 0),
 	mWritable(true),
@@ -688,6 +688,13 @@ bool Conn::checkIp(const string & ip) {
 		return false;
 	#endif // _WIN32
 }
+
+
+
+unsigned long Conn::getCount() {
+	return mConnCounter;
+}
+
 
 
 /// Calculate mac-address
