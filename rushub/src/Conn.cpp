@@ -1002,7 +1002,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 
 /// onFlush
 void Conn::onFlush() {
-	if (mProtocol != NULL) {
+	if (mProtocol && mOk && mWritable) {
 		mProtocol->onFlush(this);
 	}
 }

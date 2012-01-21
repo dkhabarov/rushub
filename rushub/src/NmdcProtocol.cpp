@@ -199,18 +199,12 @@ Conn * NmdcProtocol::getConnForUdpData(Conn * conn, Parser * parser) {
 void NmdcProtocol::onFlush(Conn * conn) {
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 	if (dcConn->mNickListInProgress) {
-		dcConn->setLoginStatusFlag(LOGIN_STATUS_NICKLST);
-		dcConn->mNickListInProgress = false;
-		if (!dcConn->isOk() || !dcConn->isWritable()) {
-			if (dcConn->log(DEBUG)) {
-				dcConn->logStream() << "Connection closed during nicklist" << endl;
-			}
-		} else {
-			if (dcConn->log(DEBUG)) {
-				dcConn->logStream() << "Enter after nicklist" << endl;
-			}
-			mDcServer->doUserEnter(dcConn);
+		if (dcConn->log(DEBUG)) {
+			dcConn->logStream() << "Enter after nicklist" << endl;
 		}
+		dcConn->mNickListInProgress = false;
+		dcConn->setLoginStatusFlag(LOGIN_STATUS_NICKLST);
+		mDcServer->doUserEnter(dcConn);
 	}
 }
 

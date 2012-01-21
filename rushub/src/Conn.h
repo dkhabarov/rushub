@@ -137,24 +137,6 @@ public:
 	//static int inetPton(int af, const char * src, void * dst);
 
 
-	/// Set OK (for Server)
-	void setOk(bool);
-
-	/// Is OK
-	bool isOk() const;
-
-	/// Get connection type
-	int getConnType() const;
-
-	/// Get status (for Server)
-	int getStatus() const;
-
-	/// Is writable
-	bool isWritable() const;
-
-	/// Is closed (for Server)
-	bool isClosed() const;
-
 	/// Get client IP address
 	const string & getIp() const;
 
@@ -164,24 +146,46 @@ public:
 	/// Get IP address for UDP
 	const string & getIpUdp() const;
 
+	/// Get client mac-address
+	const string & getMacAddress() const;
+
 	/// Get client port
 	int getPort() const;
 
 	/// Get server port
 	int getPortConn() const;
 
-	/// Get client mac-address
-	const string & getMacAddress() const;
 
+	/// Is writable
+	bool isWritable() const;
 
-	/// Create, bind and listen socket (for Server)
-	tSocket makeSocket(const char * port, const char * ip = NULL, int connType = CONN_TYPE_LISTEN);
+	/// Is OK
+	bool isOk() const;
+
+	/// Set OK (for Server)
+	void setOk(bool);
+
+	/// Get connection type
+	int getConnType() const;
+
+	/// Get status (for Server)
+	int getStatus() const;
+
+	/// Is closed (for Server)
+	bool isClosed() const;
+
 
 	/// Nice close conn
 	void closeNice(int msec = 0, int reason = 0);
 
 	/// Now close conn
 	void closeNow(int reason = 0);
+
+	/// Flush buffer
+	void flush();
+
+	/// Create, bind and listen socket (for Server)
+	tSocket makeSocket(const char * port, const char * ip = NULL, int connType = CONN_TYPE_LISTEN);
 
 	/// Creating the new object for enterring connection (for Server)
 	virtual Conn * createNewConn();
@@ -210,9 +214,6 @@ public:
 
 	/// Get pointer for string with data
 	string * getCommandPtr();
-
-	/// Flush buffer
-	void flush();
 
 
 	/// Call timer (for Server)

@@ -586,17 +586,11 @@ int AdcProtocol::sendNickList(DcConn * dcConn) {
 void AdcProtocol::onFlush(Conn * conn) {
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 	if (dcConn->mNickListInProgress) {
-		dcConn->mNickListInProgress = false;
-		if (!dcConn->isOk() || !dcConn->isWritable()) {
-			if (dcConn->log(DEBUG)) {
-				dcConn->logStream() << "Connection closed during nicklist" << endl;
-			}
-		} else {
-			if (dcConn->log(DEBUG)) {
-				dcConn->logStream() << "Enter after nicklist" << endl;
-			}
-			mDcServer->doUserEnter(dcConn);
+		if (dcConn->log(DEBUG)) {
+			dcConn->logStream() << "Enter after nicklist" << endl;
 		}
+		dcConn->mNickListInProgress = false;
+		mDcServer->doUserEnter(dcConn);
 	}
 }
 
