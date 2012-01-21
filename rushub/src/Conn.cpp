@@ -798,12 +798,12 @@ size_t Conn::readFromRecvBuf() {
 	}
 
 	char * buf = mRecvBuf + mRecvBufRead;
-	const char * pos_sep = strstr(buf, mProtocol ? mProtocol->getSeparator() : "\0");
+	const char * pos_sep = strstr(buf, getSeparator());
 	size_t len = 0;
 
 	if (pos_sep) { // separator was found
 		len = pos_sep - buf;
-		mRecvBufRead += (len + (mProtocol ? mProtocol->getSeparatorLen() : 1));
+		mRecvBufRead += (len + getSeparatorLen());
 		mStatus = STRING_STATUS_STR_DONE;
 	} else { // separator was not found
 		len = mRecvBufEnd - mRecvBufRead;

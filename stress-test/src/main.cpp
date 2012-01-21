@@ -83,13 +83,13 @@ public:
 	virtual void deleteParser(Parser * parser) {
 		delete parser;
 	}
-	virtual const char * getSeparator() {
+	virtual const char * getSeparator() const {
 		return "|";
 	}
-	virtual size_t getSeparatorLen() {
+	virtual size_t getSeparatorLen() const {
 		return 1;
 	}
-	virtual unsigned long getMaxCommandLength() {
+	virtual unsigned long getMaxCommandLength() const {
 		return 102400;
 	}
 	virtual Conn * getConnForUdpData(Conn *, Parser *) {
@@ -106,6 +106,7 @@ public:
 class NmdcClient : public Server {
 
 public:
+
 	ConnFactory * mConnFactory;
 	int mConnCount;
 	Time mChecker;
@@ -116,7 +117,8 @@ public:
 	int mBatch;
 
 public:
-	NmdcClient(const char * ip, const char * port, int maxConn, int batch, const char * logPath, int logLevel, int errLevel) : 
+
+	NmdcClient(const char * ip, const char * port, int maxConn, int batch, const char * logPath, int logLevel) : 
 		Server(),
 		mConnFactory(NULL),
 		mConnCount(0),
@@ -127,7 +129,6 @@ public:
 	{
 		mLogsPath = new string(logPath);
 		mMaxLevel = logLevel;
-		mMaxErrLevel = errLevel;
 	}
 
 	~NmdcClient() {
@@ -164,7 +165,7 @@ public:
 					if (conn != NULL) {
 						ostringstream nick;
 						nick << "test" << mConnCount;
-						conn->mParser = conn->createParser();
+						conn->getParserCommandPtr();
 						static_cast<NmdcParser*> (conn->mParser)->mNick = nick.str();
 					} else {
 						--mConnCount;
@@ -203,8 +204,7 @@ int main(int argc, char ** argv) {
 	const char * logPath = "";
 	int maxConn = 50;
 	int batch = 25;
-	int logLevel = 0;
-	int errLevel = 2;
+	int logLevel = INFO;
 
 	if (argc == 1) {
 		printHelp();
@@ -228,8 +228,6 @@ int main(int argc, char ** argv) {
 			logPath = argv[i];
 		} else if(!strcmp(last, "-logLevel")) {
 			logLevel = atoi(argv[i]);
-		} else if(!strcmp(last, "-errLevel")) {
-			errLevel = atoi(argv[i]);
 		}
 		last = argv[i];
 		++i;
@@ -242,7 +240,7 @@ int main(int argc, char ** argv) {
 		batch = 100;
 	}
 
-	NmdcClient client(ip, port, maxConn, batch, logPath, logLevel, errLevel);
+	NmdcClient client(ip, port, maxConn, batch, logPath, logLevel);
 	curServer = &client;
 
 	NmdcProtocol nmdcProtocol;

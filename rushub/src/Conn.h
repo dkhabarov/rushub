@@ -210,7 +210,7 @@ public:
 	/// Reading data from buffer and record in line of the protocol (for Server)
 	size_t readFromRecvBuf();
 
-	/// Get pointer for string
+	/// Get pointer for string (for DcServer and Stress-test client)
 	virtual string * getParserCommandPtr();
 
 	/// Get pointer for string with data
@@ -220,17 +220,14 @@ public:
 	void flush();
 
 
-	/// Main base timer (for Server)
+	/// Call timer (for Server)
 	void onTimerBase(Time & now);
 
 	/// Write data in sending buffer
 	size_t writeData(const char * data, size_t len, bool flush);
 
-	const char * getSeparator();
-	size_t getSeparatorLen();
-
 protected:
-	
+
 	string mIp; ///< Client IP address
 	string mIpConn; ///< Server IP address (host)
 	string mIpUdp; /// UDP IP address
@@ -245,9 +242,13 @@ protected:
 
 protected:
 
+	virtual bool strLog();
+
 	virtual void onOk(bool);
 
-	virtual bool strLog();
+	const char * getSeparator();
+
+	size_t getSeparatorLen();
 
 private:
 

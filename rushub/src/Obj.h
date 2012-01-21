@@ -98,9 +98,6 @@ protected:
 	/** Max log level of events */
 	static int mMaxLevel;
 
-	/** Max log level of errors */
-	static int mMaxErrLevel;
-
 	static ofstream mOfs;
 	static string * mLogsPath;
 
