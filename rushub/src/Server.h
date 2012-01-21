@@ -26,7 +26,7 @@
 #define SERVER_H
 
 #define INTERNALNAME "RusHub"
-#define INTERNALVERSION "2.3.8" // without space!
+#define INTERNALVERSION "2.3.9[beta]" // without space!
 
 #include "ConnChoose.h" // first (def winsock2.h)
 #include "Obj.h"
@@ -161,9 +161,6 @@ protected:
 
 	/// onNewData
 	virtual void onNewData(Conn *, string *);
-	
-	/// onClose conn
-	virtual void onClose(Conn *);
 
 	void deleteAll();
 

@@ -105,7 +105,7 @@ int DcConn::checkTimeOut(HubTimeOut to, Time &now) {
 }
 
 /// Timer for the current connection
-int DcConn::onTimer(Time &now) {
+int DcConn::onTimer(Time & now) {
 	DcServer * dcServer = server();
 
 	// Check timeouts. For entering only

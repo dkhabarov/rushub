@@ -93,7 +93,28 @@ Conn::~Conn() {
 	mCreatorConnFactory = NULL;
 	mServer = NULL;
 	mProtocol = NULL;
-	close();
+
+	if (mAddrInfo != NULL) {
+		freeaddrinfo(mAddrInfo);
+	}
+
+	if (mSocket > 0) {
+	#ifndef _WIN32
+		SOCK_CLOSE(mSocket);
+		if (SOCK_ERR != SOCK_EINTR || (mServer && !mServer->mRun)) { // Interrupted system call on exit
+	#else
+		int err = SOCK_CLOSE(mSocket);
+		if (!(SOCK_ERROR(err))) {
+	#endif
+			--mConnCounter;
+			if (log(DEBUG)) {
+				logStream() << "Closing socket: " << mSocket << endl;
+			}
+		} else if (log(ERR)) {
+			logStream() << "Socket not closed: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
+		}
+		mSocket = 0;
+	}
 }
 
 
@@ -378,42 +399,6 @@ tSocket Conn::socketNonBlock(tSocket sock) {
 
 
 ////////////////////////////////////////////////////////
-/// Close socket
-void Conn::close() {
-	if (mSocket <= 0) {
-		return;
-	}
-	mWritable = false;
-	setOk(false);
-
-	// onClose
-	if (mServer) {
-		mServer->onClose(this);
-	}
-
-#ifndef _WIN32
-	SOCK_CLOSE(mSocket);
-	if (SOCK_ERR != SOCK_EINTR || (mServer && !mServer->mRun)) { // Interrupted system call on exit
-#else
-	int err = SOCK_CLOSE(mSocket);
-	if (!(SOCK_ERROR(err))) {
-#endif
-		--mConnCounter;
-		if (log(DEBUG)) {
-			logStream() << "Closing socket: " << mSocket << endl;
-		}
-	} else if (log(ERR)) {
-		logStream() << "Socket not closed: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
-	}
-
-	if (mAddrInfo != NULL) {
-		freeaddrinfo(mAddrInfo);
-	}
-	mSocket = 0;
-}
-
-
-
 /// closeNice
 void Conn::closeNice(int msec /* = 0 */, int reason /* = 0 */) {
 	mWritable = false;
@@ -1217,7 +1202,6 @@ Conn * ConnFactory::createConn(tSocket sock) {
 
 
 void ConnFactory::deleteConn(Conn * & conn) {
-	conn->close(); // close socket
 	delete conn;
 	conn = NULL;
 }

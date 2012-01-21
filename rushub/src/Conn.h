@@ -137,7 +137,7 @@ public:
 	//static int inetPton(int af, const char * src, void * dst);
 
 
-	/// Set OK (Server)
+	/// Set OK (for Server)
 	void setOk(bool);
 
 	/// Is OK
@@ -146,13 +146,13 @@ public:
 	/// Get connection type
 	int getConnType() const;
 
-	/// Get status (Server)
+	/// Get status (for Server)
 	int getStatus() const;
 
 	/// Is writable
 	bool isWritable() const;
 
-	/// Is closed (Server)
+	/// Is closed (for Server)
 	bool isClosed() const;
 
 	/// Get client IP address
@@ -174,28 +174,25 @@ public:
 	const string & getMacAddress() const;
 
 
-	/// Create, bind and listen socket (Server)
+	/// Create, bind and listen socket (for Server)
 	tSocket makeSocket(const char * port, const char * ip = NULL, int connType = CONN_TYPE_LISTEN);
 
-	/// Close connection (socket)
-	void close();
-
-	/// Nice close conn (socket)
+	/// Nice close conn
 	void closeNice(int msec = 0, int reason = 0);
 
 	/// Now close conn
 	void closeNow(int reason = 0);
 
-	/// Client close conn (Server)
+	/// Client close conn (for Server)
 	void closeSelf();
 
-	/// Creating the new object for enterring connection (Server)
+	/// Creating the new object for enterring connection (for Server)
 	virtual Conn * createNewConn();
 
-	/// Reading all data from socket to buffer of the conn (Server)
+	/// Reading all data from socket to buffer of the conn (for Server)
 	virtual int recv();
 
-	/// Check empty recv buf (Server)
+	/// Check empty recv buf (for Server)
 	int recvBufIsEmpty() const {
 		return mRecvBufEnd == mRecvBufRead;
 	}
@@ -210,17 +207,11 @@ public:
 	and installation main parameter */
 	void setCommandPtr(string *);
 
-	/// Reading data from buffer and record in line of the protocol (Server)
+	/// Reading data from buffer and record in line of the protocol (for Server)
 	size_t readFromRecvBuf();
 
 	/// Get pointer for string
 	virtual string * getParserCommandPtr();
-
-	/// Get parser
-	virtual Parser * createParser();
-
-	/// Remove parser
-	virtual void deleteParser(Parser *);
 
 	/// Get pointer for string with data
 	string * getCommandPtr();
@@ -229,11 +220,8 @@ public:
 	void flush();
 
 
-	/// Main base timer (Server)
-	void onTimerBase(Time &now);
-
-	/// Main timer
-	virtual int onTimer(Time &now);
+	/// Main base timer (for Server)
+	void onTimerBase(Time & now);
 
 	/// Write data in sending buffer
 	size_t writeData(const char * data, size_t len, bool flush);
@@ -256,9 +244,6 @@ protected:
 	list<Conn *>::iterator mIterator; ///< Optimisation
 
 protected:
-
-	/// onFlush
-	virtual void onFlush();
 
 	virtual void onOk(bool);
 
@@ -316,6 +301,19 @@ private:
 	/// Accept new conn
 	tSocket socketAccept(struct sockaddr_storage &);
 
+	/// Get parser
+	virtual Parser * createParser();
+
+	/// Remove parser
+	virtual void deleteParser(Parser *);
+
+	/// onFlush
+	virtual void onFlush();
+
+	/// Main timer
+	virtual int onTimer(Time & now);
+
+	// Define conn info
 	int defineConnInfo(struct sockaddr_storage &);
 
 	/// Calculate mac-address

@@ -646,16 +646,6 @@ int Server::onNewConn(Conn * conn) {
 
 
 
-/// onClose
-void Server::onClose(Conn * conn) {
-	if (!conn) {
-		return;
-	}
-	mConnChooser.deleteConn(conn);
-}
-
-
-
 /// onNewData
 void Server::onNewData(Conn *, string *) {
 }

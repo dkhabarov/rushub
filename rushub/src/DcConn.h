@@ -191,14 +191,9 @@ public:
 
 	// =====================
 
-
-
-	/// Timer for current connection
-	virtual int onTimer(Time & now);
-
 	virtual void closeNow(int iReason = 0);
-	virtual void closeNice(int msec, int iReason = 0);
 
+	virtual void closeNice(int msec, int iReason = 0);
 
 
 	/// Pointer to the server
@@ -260,6 +255,10 @@ private:
 	/// Login status
 	unsigned int mLoginStatus;
 
+private:
+
+	/// Timer for current connection
+	virtual int onTimer(Time & now);
 
 }; // class DcConn
 
