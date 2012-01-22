@@ -54,21 +54,31 @@ enum {
 #define logStream() logStreamLine(__LINE__)
 
 
-/** NonCopyable class */
+/**
+ * NonCopyable class
+ */
 class NonCopyable {
-	protected:
-		NonCopyable() {}
-		~NonCopyable() {}
-	private:
-		NonCopyable(const NonCopyable &);
-		const NonCopyable & operator = (const NonCopyable &);
+
+protected:
+
+	NonCopyable() {}
+	~NonCopyable() {}
+
+private:
+
+	NonCopyable(const NonCopyable &);
+	const NonCopyable & operator = (const NonCopyable &);
+
 }; // class NonCopyable
 
 
-/** Main object class (logger class) */
+/**
+ * Main object class (logger class)
+ */
 class Obj {
 
 public:
+
 	static bool mSysLogOn;
 
 public:
@@ -78,24 +88,21 @@ public:
 	Obj(const char * name, bool); // Without Count Control (use only if you control this object)
 	virtual ~Obj();
 
-	/** Get counts of objects */
+	///< Get counts of objects
 	static int getCount();
 
-	/** Return log straem */
+	///< Return log straem
 	int log(int level);
 
-	/** Return current log stream with line */
+	///< Return current log stream with line
 	ostream & logStreamLine(const int line);
 
-	/** Return class name */
+	///< Return class name
 	const char * getClassName();
 
 protected:
 
-	/** Class name */
-	const char * mClassName;
-
-	/** Max log level of events */
+	///< Max log level of events
 	static int mMaxLevel;
 
 	static ofstream mOfs;
@@ -103,25 +110,28 @@ protected:
 
 protected:
 
-	/** Set class name */
+	///< Set class name
 	void setClassName(const char * name);
 
-	/** Main function putting log in stream */
+	///< Main function putting log in stream
 	virtual bool strLog();
 
-	/** Return a simple log stream */
+	///< Return a simple log stream
 	ostream & simpleLogStream();
 
 private:
 
-	/** Objects counter */
+	///< Class name
+	const char * mClassName;
+
+	///< output log stream
+	ostream * mToLog;
+
+	///< Objects counter
 	static int mCounterObj;
 	static int mLevel;
 	static bool mCout;
 	static const char * mLevelNames[];
-
-	/** output log stream */
-	ostream * mToLog;
 
 	static ostringstream mSysLogOss;
 	static ostringstream mBufOss;
@@ -132,15 +142,15 @@ private:
 
 private:
 
-	/** log function */
-	ostream & log();
+	///< log function
+	static ostream & log();
 
-	ostream & openLog();
-	bool saveInBuf();
-	void loadFromBuf(ostream &);
+	static ostream & openLog();
+	static bool saveInBuf();
+	static void loadFromBuf(ostream &);
 
-	/** Return level for syslog */
-	int sysLogLevel(int level);
+	///< Return level for syslog
+	static int sysLogLevel(int level);
 
 }; // class Obj
 

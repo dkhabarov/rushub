@@ -135,7 +135,7 @@ void Obj::setClassName(const char * name) {
 /** Main function putting log in stream */
 bool Obj::strLog() {
 	utils::Time now(true);
-	simpleLogStream() << "[" << now.asDateMsec() << "] " << mLevelNames[mLevel] << " ";
+	simpleLogStream() << now.asDateMsec() << " " << mLevelNames[mLevel] << " ";
 	return true;
 }
 

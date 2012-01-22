@@ -28,6 +28,7 @@
 #include <string.h> // strlen
 #include <time.h> // ctime_s
 
+#define DATE_FORMAT "%Y-%m-%d %H:%M:%S"
 
 #ifdef _WIN32
 	void gettimeofday(struct timeval * tv, struct timezone *) {
@@ -278,15 +279,6 @@ void Time::asTimeVals(int & w, int & d, int & h, int & m) const {
 
 
 std::ostream & operator << (std::ostream & os, const Time & t) {
-	#if defined(_WIN32) && defined(_MSC_VER) && (_MSC_VER >= 1400)
-		char buf[26] = { '\0' };
-	#elif defined(_WIN32)
-		char * buf;
-	#else
-		char * buf;
-		char buff[26] = { '\0' };
-	#endif
-	long n, rest;
 
 	switch (t.mPrintType) {
 
@@ -294,25 +286,40 @@ std::ostream & operator << (std::ostream & os, const Time & t) {
 		case 1 : // asDate
 			#ifdef _WIN32
 				time_t ta;
+				struct tm * tinfo;
 				ta = (time_t)t.tv_sec;
 				#if defined(_MSC_VER) && (_MSC_VER >= 1400)
-					ctime_s(buf, 26, &ta);
+					struct tm ti;
+					tinfo = &ti;
+					localtime_s(tinfo, &ta);
 				#else
-					buf = ctime(&ta);
+					tinfo = localtime(&ta);
 				#endif
 			#else
 				const time_t * ta;
+				struct tm * tinfo;
 				ta = (time_t*)&t.tv_sec;
-				buf = ctime_r(ta, buff);
+				tinfo = localtime(ta);
 			#endif
-			buf[strlen(buf) - 1] = 0;
+			char buf[20];
+			strftime(buf, 20, DATE_FORMAT, tinfo);
 			os << buf;
 			if (t.mPrintType == 4) {
-				os << "|" << t.tv_usec / 1000;
+				long usec;
+				usec = t.tv_usec / 1000;
+				os << ",";
+				if (usec < 10) {
+					os << "00" << usec;
+				} else if (usec < 100) {
+					os << "0" << usec;
+				} else {
+					os << usec;
+				}
 			}
 			break;
 
 		case 2 : // asPeriod
+			long rest;
 			rest = t.tv_sec;
 			os << rest << " sec ";
 			os << t.tv_usec / 1000 << " ms ";
@@ -320,32 +327,33 @@ std::ostream & operator << (std::ostream & os, const Time & t) {
 			break;
 
 		case 3 : // asFullPeriod
-			rest = t.tv_sec;
+			long n, res;
+			res = t.tv_sec;
 
-			n = rest / (24 * 3600 * 7);
-			rest %= (24 * 3600 * 7);
+			n = res / (24 * 3600 * 7);
+			res %= (24 * 3600 * 7);
 			if (n) {
 				os << n << " weeks ";
 			}
 
-			n = rest / (24 * 3600);
-			rest %= (24 * 3600);
+			n = res / (24 * 3600);
+			res %= (24 * 3600);
 			if (n) {
 				os << n << " days ";
 			}
 
-			n = rest / 3600;
-			rest %= 3600;
+			n = res / 3600;
+			res %= 3600;
 			if (n) {
 				os << n << " hours ";
 			}
 
-			n = rest / 60;
+			n = res / 60;
 			if (n) {
 				os << n << " min ";
 			}
-			rest %= 60;
-			os << rest << " sec";
+			res %= 60;
+			os << res << " sec";
 			break;
 
 		default : // asString
