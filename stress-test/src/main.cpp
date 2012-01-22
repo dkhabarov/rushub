@@ -108,13 +108,6 @@ class NmdcClient : public Server {
 public:
 
 	ConnFactory * mConnFactory;
-	int mConnCount;
-	Time mChecker;
-
-	const char * mIp;
-	const char * mPort;
-	int mMaxConn;
-	int mBatch;
 
 public:
 
@@ -134,6 +127,18 @@ public:
 	~NmdcClient() {
 		deleteAll();
 	}
+
+private:
+
+	int mConnCount;
+	Time mChecker;
+
+	const char * mIp;
+	const char * mPort;
+	int mMaxConn;
+	int mBatch;
+
+private:
 
 	void onNewData(Conn * conn, string * str) {
 		const string & cmd(*str);
@@ -176,6 +181,7 @@ public:
 		}
 		return 0;
 	}
+
 }; // class NmdcClient
 
 

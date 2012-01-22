@@ -36,7 +36,6 @@ using namespace ::utils;
 namespace dcserver {
 
 
-
 /// Time outs during entering on hub only (HubTimeOut)
 typedef enum {
 
@@ -151,12 +150,12 @@ class DcConn : public Conn, public DcConnBase {
 
 public:
 
-	unsigned mFeatures;         ///< Features (PROTOCOL NMDC)
+	unsigned int mFeatures;    ///< Features (PROTOCOL NMDC)
 
 	bool mSendNickList;        ///< Sending user list when login
 	bool mIpRecv;              ///< Permit on reception of the messages, sending on my ip
 	bool mNickListInProgress;  ///< True while sending first nicklist
-	DcUser * mDcUser;           ///< User object
+	DcUser * mDcUser;          ///< User object
 
 	/// Timers struct
 	struct Timers {
@@ -210,7 +209,6 @@ public:
 	void emptySrCounter();
 
 
-
 	/// Setting entry status flag
 	void setLoginStatusFlag(unsigned int s) {
 		mLoginStatus |= s;
@@ -232,22 +230,17 @@ public:
 	/// Clear timeout
 	void clearTimeOut(HubTimeOut);
 
-	/// Check timeout
-	int checkTimeOut(HubTimeOut t, Time & now);
-
-
-protected:
-
-	TimeOut mTimeOut[HUB_TIME_OUT_MAX];
-
-	/// Time last ping from server to client
-	Time mPingServer;
-
 protected:
 
 	virtual void onOk(bool);
 
 private:
+
+	/// Time last ping from server to client
+	Time mPingServer;
+
+	/// Timeouts
+	TimeOut mTimeOut[HUB_TIME_OUT_MAX];
 
 	/// Counter search results
 	unsigned int mSrCounter;
@@ -259,6 +252,9 @@ private:
 
 	/// Timer for current connection
 	virtual int onTimer(Time & now);
+
+	/// Check timeout
+	int checkTimeOut(HubTimeOut t, Time & now);
 
 }; // class DcConn
 
