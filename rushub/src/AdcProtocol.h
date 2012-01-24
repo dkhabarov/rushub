@@ -65,7 +65,7 @@ public:
 	static void infList(string & list, UserBase *);
 	static const char * getSid(unsigned int num);
 
-	int sendNickList(DcConn *);
+	virtual int sendNickList(DcConn *);
 
 protected:
 
