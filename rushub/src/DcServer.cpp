@@ -206,6 +206,79 @@ DcServer::~DcServer() {
 
 
 
+const string & DcServer::getMainDir() const {
+	return mDcConfig.mMainPath;
+}
+
+
+
+const string & DcServer::getLogDir() const {
+	return mDcConfig.mLogPath;
+}
+
+
+
+const string & DcServer::getTime() {
+	stringstream oss;
+	oss << mTime.asDate();
+	mTimeBuf = oss.str();
+	return mTimeBuf;
+}
+
+
+
+const string & DcServer::getHubInfo() const {
+	return mHubName;
+}
+
+
+
+const string & DcServer::getLocale() const {
+	return mDcConfig.mLocale;
+}
+
+
+
+const string & DcServer::getSystemVersion() const {
+	return mSysVersion;
+}
+
+
+
+__int64 DcServer::getMsec() const {
+	Time tm(true);
+	return tm.msec();
+}
+
+
+
+/// Work time (sec)
+int DcServer::getUpTime() const {
+	Time tm(true);
+	tm -= mStartTime;
+	return tm.sec();
+}
+
+
+
+int DcServer::getUsersCount() const {
+	return miTotalUserCount;
+}
+
+
+
+__int64 DcServer::getTotalShare() const {
+	return miTotalShare;
+}
+
+
+
+DcConnListIterator * DcServer::getDcConnListIterator() {
+	return new DcListIterator(this);
+}
+
+
+
 // static
 void DcServer::getAddresses(
 	const char * sAddresses,
@@ -1186,8 +1259,8 @@ const char * DcServer::getConfig(const string & name) {
 	if (configItem == NULL) {
 		return NULL;
 	}
-	configItem->convertTo(sBuf);
-	return sBuf.c_str();
+	configItem->convertTo(mBuf);
+	return mBuf.c_str();
 }
 
 
@@ -1241,8 +1314,8 @@ const char * DcServer::getLang(const string & name) {
 	if (configItem == NULL) {
 		return NULL;
 	}
-	configItem->convertTo(sBuf);
-	return sBuf.c_str();
+	configItem->convertTo(mBuf);
+	return mBuf.c_str();
 }
 
 

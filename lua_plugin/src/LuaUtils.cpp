@@ -76,9 +76,9 @@ int LuaUtils::deprecatedFunc(lua_State * L, const char * instead) {
 
 bool LuaUtils::checkCount(lua_State * L, int argNumber) {
 	if (lua_gettop(L) != argNumber) {
-		char sBuf[32] = { '\0' };
-		sprintf(sBuf, "%d", argNumber);
-		LuaUtils::errCount(L, sBuf);
+		char buf[32] = { '\0' };
+		sprintf(buf, "%d", argNumber);
+		LuaUtils::errCount(L, buf);
 		return false;
 	}
 	return true;

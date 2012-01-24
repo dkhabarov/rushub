@@ -315,6 +315,15 @@ public:
 	/// Get total hub share size
 	virtual __int64 getTotalShare() const = 0;
 
+	/// Get iterator of conn base
+	virtual DcConnListIterator * getDcConnListIterator() = 0;
+
+	/// Get conn base by ip
+	virtual const vector<DcConnBase*> & getDcConnBase(const char * ip) = 0;
+
+	/// Get user base by nick
+	virtual DcUserBase * getDcUserBase(const char * nick) = 0;
+
 	/// Send comand to user
 	virtual bool sendToUser(
 		DcUserBase *,
@@ -378,17 +387,6 @@ public:
 		const char * address,
 		const char * reason = NULL
 	) = 0;
-
-
-	/// Get conn base by ip
-	virtual const vector<DcConnBase*> & getDcConnBase(const char * ip) = 0;
-
-	/// Get user base by nick
-	virtual DcUserBase * getDcUserBase(const char * nick) = 0;
-
-	/// Get iterator of conn base
-	virtual DcConnListIterator * getDcConnListIterator() = 0;
-
 
 	/// Get all configs names
 	virtual const vector<string> & getConfig() = 0;
