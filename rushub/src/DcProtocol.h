@@ -47,6 +47,7 @@ public:
 		mDcServer = dcServer;
 	}
 
+	virtual void forceMove(DcConn * dcConn, const char * address, const char * reason = NULL) = 0;
 	virtual int sendNickList(DcConn *) = 0;
 
 protected:

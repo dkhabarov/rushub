@@ -25,8 +25,6 @@
 #ifndef DC_SERVER_H
 #define DC_SERVER_H
 
-//#define WITHOUT_PLUGINS 1
-
 #include "Server.h" // first (def winsock2.h)
 #include "DcConn.h"
 #include "NmdcProtocol.h"

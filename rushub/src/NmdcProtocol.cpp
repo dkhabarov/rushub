@@ -1151,56 +1151,65 @@ void NmdcProtocol::sendMode(DcConn * dcConn, const string & str, int mode, UserL
 
 
 
+void NmdcProtocol::forceMove(DcConn * dcConn, const char * address, const char * reason /*= NULL*/) {
+	string msg, force, nick("<unknown>");
+	if (dcConn->mDcUser && !dcConn->mDcUser->getUid().empty()) {
+		nick = dcConn->mDcUser->getUid();
+	}
+
+	stringReplace(mDcServer->mDcLang.mForceMove, "address", force, address);
+	stringReplace(force, "reason", force, reason != NULL ? reason : "");
+	appendPm(msg, nick, mDcServer->mDcConfig.mHubBot, mDcServer->mDcConfig.mHubBot, force);
+	appendChat(msg, mDcServer->mDcConfig.mHubBot, force);
+	dcConn->send(appendForceMove(msg, address));
+	dcConn->closeNice(9000, CLOSE_REASON_CMD_FORCE_MOVE);
+}
+
+
+
 /// Sending the user-list and op-list
 int NmdcProtocol::sendNickList(DcConn * dcConn) {
-	try {
-		if ((dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE) != LOGIN_STATUS_LOGIN_DONE) && mDcServer->mDcConfig.mNicklistOnLogin) {
-			dcConn->mNickListInProgress = true;
-		}
+	if ((dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE) != LOGIN_STATUS_LOGIN_DONE) && mDcServer->mDcConfig.mNicklistOnLogin) {
+		dcConn->mNickListInProgress = true;
+	}
 
-		if (dcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
-			if (dcConn->log(DEBUG)) {
-				dcConn->logStream() << "Sending MyINFO list" << endl;
-			}
-			// seperator "|" was added in getInfoList function
-			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false, false);
-		} else if (dcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
-			if (dcConn->log(DEBUG)) {
-				dcConn->logStream() << "Sending MyINFO list and Nicklist" << endl;
-			}
-			// seperator "|" was not added in getNickList function, because seperator was "$$"
-			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_NICK), true, false);
-			// seperator "|" was added in getInfoList function
-			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false, false);
-		} else {
-			if (dcConn->log(DEBUG)) {
-				dcConn->logStream() << "Sending Nicklist" << endl;
-			}
-			// seperator "|" was not added in getNickList function, because seperator was "$$"
-			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_NICK), true, false);
+	if (dcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
+		if (dcConn->log(DEBUG)) {
+			dcConn->logStream() << "Sending MyINFO list" << endl;
 		}
-		if (mDcServer->mOpList.size()) {
-			if (dcConn->log(DEBUG)) {
-				dcConn->logStream() << "Sending Oplist" << endl;
-			}
-			// seperator "|" was not added in getNickList function, because seperator was "$$"
-			dcConn->send(mDcServer->mOpList.getList(), true, false);
+		// seperator "|" was added in getInfoList function
+		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false, false);
+	} else if (dcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
+		if (dcConn->log(DEBUG)) {
+			dcConn->logStream() << "Sending MyINFO list and Nicklist" << endl;
 		}
+		// seperator "|" was not added in getNickList function, because seperator was "$$"
+		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_NICK), true, false);
+		// seperator "|" was added in getInfoList function
+		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false, false);
+	} else {
+		if (dcConn->log(DEBUG)) {
+			dcConn->logStream() << "Sending Nicklist" << endl;
+		}
+		// seperator "|" was not added in getNickList function, because seperator was "$$"
+		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_NICK), true, false);
+	}
+	if (mDcServer->mOpList.size()) {
+		if (dcConn->log(DEBUG)) {
+			dcConn->logStream() << "Sending Oplist" << endl;
+		}
+		// seperator "|" was not added in getNickList function, because seperator was "$$"
+		dcConn->send(mDcServer->mOpList.getList(), true, false);
+	}
 
-		if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST) && dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
-			if (dcConn->log(DEBUG)) {
-				dcConn->logStream() << "Sending Iplist" << endl;
-			}
-			// seperator "|" was not added in getIpList function, because seperator was "$$"
-			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_IP), true);
-		} else {
-			dcConn->send("", 0 , true, true); // for flush (don't replace to flush function!)
+	if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST) && dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
+		if (dcConn->log(DEBUG)) {
+			dcConn->logStream() << "Sending Iplist" << endl;
 		}
-	} catch(...) {
-		if (dcConn->log(FATAL)) {
-			dcConn->logStream() << "exception in sendNickList" << endl;
-		}
-		return -1;
+		// seperator "|" was not added in getIpList function, because seperator was "$$"
+		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_IP), true);
+	} else {
+		dcConn->send("", 0 , true, true); // for flush (don't replace to flush function!)
 	}
 	return 0;
 }

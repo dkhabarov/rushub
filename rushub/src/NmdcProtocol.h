@@ -99,6 +99,7 @@ public:
 	void appendPmToAll(string & start, string & end, const string & from, const string & nick, const string & msg);
 
 
+	virtual void forceMove(DcConn *, const char * address, const char * reason = NULL);
 	virtual int sendNickList(DcConn *); ///< Sending user-list and op-list
 
 	static void nickList(string & list, UserBase * userBase);

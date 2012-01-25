@@ -56,8 +56,29 @@ DcConn::~DcConn() {
 	}
 }
 
+
+
+
 DcServer * DcConn::server() {
+	if (!mServer) {
+		if (log(FATAL)) {
+			logStream() << "Server is NULL" << endl;
+			throw "Server is NULL";
+		}
+	}
 	return static_cast<DcServer *> (mServer);
+}
+
+
+
+DcProtocol * DcConn::dcProtocol() {
+	if (!mProtocol) {
+		if (log(FATAL)) {
+			logStream() << "Protocol is NULL" << endl;
+			throw "Protocol is NULL";
+		}
+	}
+	return static_cast<DcProtocol *> (mProtocol);
 }
 
 

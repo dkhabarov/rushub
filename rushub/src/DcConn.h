@@ -126,6 +126,10 @@ enum CloseReason {
 
 class DcServer; // server()
 
+namespace protocol {
+	class DcProtocol;
+};
+
 
 
 /// Factory of DC connection
@@ -197,6 +201,9 @@ public:
 
 	/// Pointer to the server
 	DcServer * server();
+
+	/// Pointer to the dcProtocol
+	DcProtocol * dcProtocol();
 
 	/// Set user object for current connection
 	bool setUser(DcUser * dcUser);

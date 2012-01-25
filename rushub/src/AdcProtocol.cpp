@@ -562,22 +562,20 @@ const char * AdcProtocol::getSid(unsigned int num) {
 
 
 
+void AdcProtocol::forceMove(DcConn * /*dcConn*/, const char * /*address*/, const char * /*reason*/ /*= NULL*/) {
+
+	// TODO
+
+}
+
+
+
 /// Sending the user-list
 int AdcProtocol::sendNickList(DcConn * dcConn) {
-	try {
-
-		if (mDcServer->mEnterList.find(dcConn->mDcUser->getUidHash())) {
-			dcConn->mNickListInProgress = true;
-		}
-
-		dcConn->send(mDcServer->mAdcUserList.getList(), true);
-
-	} catch(...) {
-		if (dcConn->log(FATAL)) {
-			dcConn->logStream() << "exception in sendNickList" << endl;
-		}
-		return -1;
+	if (mDcServer->mEnterList.find(dcConn->mDcUser->getUidHash())) {
+		dcConn->mNickListInProgress = true;
 	}
+	dcConn->send(mDcServer->mAdcUserList.getList(), true);
 	return 0;
 }
 

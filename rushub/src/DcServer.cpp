@@ -665,13 +665,7 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 		}
 
 		// Can happen so that list not to send at a time
-
-		// Protocol dependence
-		if (mDcConfig.mAdcOn) { // ADC
-			mAdcProtocol.sendNickList(dcConn);
-		} else { // NMDC
-			mNmdcProtocol.sendNickList(dcConn);
-		}
+		dcConn->dcProtocol()->sendNickList(dcConn);
 
 		dcConn->mSendNickList = false;
 	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
@@ -834,11 +828,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 			if (dcUser->mDcConn) {
 
 				// Protocol dependence
-				if (mDcConfig.mAdcOn) { // ADC
-
-					// TODO
-
-				} else { // NMDC
+				if (!mDcConfig.mAdcOn) { // Only NMDC now
 					mCalls.mOnUserExit.callAll(dcUser);
 				}
 
@@ -1008,11 +998,7 @@ void DcServer::afterUserEnter(DcConn *dcConn) {
 	#ifndef WITHOUT_PLUGINS
 
 		// Protocol dependence
-		if (mDcConfig.mAdcOn) { // ADC
-
-			// TODO
-
-		} else { // NMDC
+		if (!mDcConfig.mAdcOn) { // Only NMDC now
 			mCalls.mOnUserEnter.callAll(dcConn->mDcUser);
 		}
 
@@ -1357,27 +1343,8 @@ void DcServer::forceMove(DcUserBase * dcUserBase, const char * address, const ch
 	if (!address) {
 		return;
 	}
-
 	DcConn * dcConn = static_cast<DcConn *> (dcUserBase->mDcConnBase);
-
-	// Protocol dependence
-	if (mDcConfig.mAdcOn) { // ADC
-
-		// TODO
-
-	} else { // NMDC
-		string msg, force, nick("<unknown>");
-		if (dcConn->mDcUser && !dcConn->mDcUser->getUid().empty()) {
-			nick = dcConn->mDcUser->getUid();
-		}
-
-		stringReplace(mDcLang.mForceMove, "address", force, address);
-		stringReplace(force, "reason", force, reason != NULL ? reason : "");
-		mNmdcProtocol.appendPm(msg, nick, mDcConfig.mHubBot, mDcConfig.mHubBot, force); // refactoring to DcProtocol pointer
-		mNmdcProtocol.appendChat(msg, mDcConfig.mHubBot, force); // refactoring to DcProtocol pointer
-		dcConn->send(mNmdcProtocol.appendForceMove(msg, address)); // refactoring to DcProtocol pointer
-		dcConn->closeNice(9000, CLOSE_REASON_CMD_FORCE_MOVE);
-	}
+	dcConn->dcProtocol()->forceMove(dcConn, address, reason);
 }
 
 
