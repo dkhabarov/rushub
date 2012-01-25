@@ -20,7 +20,7 @@
 #ifndef ADC_PROTOCOL_H
 #define ADC_PROTOCOL_H
 
-#include "Protocol.h"
+#include "DcProtocol.h"
 #include "AdcParser.h"
 
 #include <string>
@@ -38,7 +38,7 @@ namespace protocol {
 
 
 /// ADC protocol
-class AdcProtocol : public Protocol {
+class AdcProtocol : public DcProtocol {
 
 public:
 

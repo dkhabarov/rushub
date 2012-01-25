@@ -25,7 +25,7 @@
 #ifndef NMDC_PROTOCOL_H
 #define NMDC_PROTOCOL_H
 
-#include "Protocol.h"
+#include "DcProtocol.h"
 #include "NmdcParser.h"
 
 #include <string>
@@ -49,7 +49,7 @@ namespace protocol {
 
 
 /// NMDC protocol
-class NmdcProtocol : public Protocol {
+class NmdcProtocol : public DcProtocol {
 
 public:
 
