@@ -178,6 +178,10 @@ private:
 
 	vector<UserListItem*> mListItems;
 
+private:
+
+	static void addInCache(string & cache, const string & data, const char * sep, size_t sepLen, bool addSep = true);
+
 }; // UserList
 
 

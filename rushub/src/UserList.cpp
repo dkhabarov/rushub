@@ -254,13 +254,7 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 		}
 
 		if (mCache.size()) {
-			mCache.reserve(mCache.size() + data.size() + NMDC_SEPARATOR_LEN);
-			mCache.append(data);
-			if (addSep) {
-				if (mCache.find(NMDC_SEPARATOR, mCache.size() - NMDC_SEPARATOR_LEN, NMDC_SEPARATOR_LEN)) {
-					mCache.append(NMDC_SEPARATOR);
-				}
-			}
+			addInCache(mCache, data, NMDC_SEPARATOR, NMDC_SEPARATOR_LEN, addSep);
 			for_each(begin(), end(), ufSend(mCache, false));
 			string().swap(mCache); // erase & free memory
 		} else {
@@ -271,13 +265,7 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 			logStream() << "sendToAll end" << endl;
 		}
 	} else {
-		mCache.reserve(mCache.size() + data.size() + NMDC_SEPARATOR_LEN);
-		mCache.append(data);
-		if (addSep) {
-			if (mCache.find(NMDC_SEPARATOR, mCache.size() - NMDC_SEPARATOR_LEN, NMDC_SEPARATOR_LEN)) {
-				mCache.append(NMDC_SEPARATOR);
-			}
-		}
+		addInCache(mCache, data, NMDC_SEPARATOR, NMDC_SEPARATOR_LEN, addSep);
 	}
 }
 
@@ -290,13 +278,7 @@ void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 		}
 
 		if (mCache.size()) {
-			mCache.reserve(mCache.size() + data.size() + ADC_SEPARATOR_LEN);
-			mCache.append(data);
-			if (addSep) {
-				if (mCache.find(ADC_SEPARATOR, mCache.size() - ADC_SEPARATOR_LEN, ADC_SEPARATOR_LEN)) {
-					mCache.append(ADC_SEPARATOR);
-				}
-			}
+			addInCache(mCache, data, ADC_SEPARATOR, ADC_SEPARATOR_LEN, addSep);
 			for_each(begin(), end(), ufSend(mCache, false));
 			string().swap(mCache); // erase & free memory
 		} else {
@@ -307,13 +289,7 @@ void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 			logStream() << "sendToAll end" << endl;
 		}
 	} else {
-		mCache.reserve(mCache.size() + data.size() + ADC_SEPARATOR_LEN);
-		mCache.append(data);
-		if (addSep) {
-			if (mCache.find(ADC_SEPARATOR, mCache.size() - ADC_SEPARATOR_LEN, ADC_SEPARATOR_LEN)) {
-				mCache.append(ADC_SEPARATOR);
-			}
-		}
+		addInCache(mCache, data, ADC_SEPARATOR, ADC_SEPARATOR_LEN, addSep);
 	}
 }
 
@@ -422,6 +398,18 @@ void UserList::onResize(size_t & currentSize, size_t & oldCapacity, size_t & new
 	if (log(DEBUG)) {
 		logStream() << "Autoresizing: size = " << currentSize << 
 		", capacity = " << oldCapacity << " -> " << newCapacity << endl;
+	}
+}
+
+
+
+void UserList::addInCache(string & cache, const string & data, const char * sep, size_t sepLen, bool addSep /*= true*/) {
+	cache.reserve(cache.size() + data.size() + sepLen);
+	cache.append(data);
+	if (addSep) {
+		if (cache.find(sep, cache.size() - sepLen, sepLen)) {
+			cache.append(sep);
+		}
 	}
 }
 
