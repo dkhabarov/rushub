@@ -161,8 +161,6 @@ public:
 	/** Sending data from cache to all and clear cache */
 	void flushCache();
 
-	void flushCacheAdc();
-
 protected:
 
 	virtual void onAdd(UserBase * userBase);
@@ -174,7 +172,8 @@ protected:
 private:
 
 	string mName; ///< Name of list
-	string mCache;
+	string mCacheNmdc;
+	string mCacheAdc;
 
 	vector<UserListItem*> mListItems;
 

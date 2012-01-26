@@ -253,10 +253,10 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 			logStream() << "sendToAll begin" << endl;
 		}
 
-		if (mCache.size()) {
-			addInCache(mCache, data, NMDC_SEPARATOR, NMDC_SEPARATOR_LEN, addSep);
-			for_each(begin(), end(), ufSend(mCache, false));
-			string().swap(mCache); // erase & free memory
+		if (mCacheNmdc.size()) {
+			addInCache(mCacheNmdc, data, NMDC_SEPARATOR, NMDC_SEPARATOR_LEN, addSep);
+			for_each(begin(), end(), ufSend(mCacheNmdc, false));
+			string().swap(mCacheNmdc); // erase & free memory
 		} else {
 			for_each(begin(), end(), ufSend(data, addSep));
 		}
@@ -265,7 +265,7 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 			logStream() << "sendToAll end" << endl;
 		}
 	} else {
-		addInCache(mCache, data, NMDC_SEPARATOR, NMDC_SEPARATOR_LEN, addSep);
+		addInCache(mCacheNmdc, data, NMDC_SEPARATOR, NMDC_SEPARATOR_LEN, addSep);
 	}
 }
 
@@ -277,10 +277,10 @@ void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 			logStream() << "sendToAll begin" << endl;
 		}
 
-		if (mCache.size()) {
-			addInCache(mCache, data, ADC_SEPARATOR, ADC_SEPARATOR_LEN, addSep);
-			for_each(begin(), end(), ufSend(mCache, false));
-			string().swap(mCache); // erase & free memory
+		if (mCacheAdc.size()) {
+			addInCache(mCacheAdc, data, ADC_SEPARATOR, ADC_SEPARATOR_LEN, addSep);
+			for_each(begin(), end(), ufSend(mCacheAdc, false));
+			string().swap(mCacheAdc); // erase & free memory
 		} else {
 			for_each(begin(), end(), ufSend(data, addSep));
 		}
@@ -289,7 +289,7 @@ void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 			logStream() << "sendToAll end" << endl;
 		}
 	} else {
-		addInCache(mCache, data, ADC_SEPARATOR, ADC_SEPARATOR_LEN, addSep);
+		addInCache(mCacheAdc, data, ADC_SEPARATOR, ADC_SEPARATOR_LEN, addSep);
 	}
 }
 
@@ -343,8 +343,11 @@ void UserList::sendWithNick(const string & dataStart, const string & dataEnd, un
 
 /** Flush user cache */
 void UserList::flushForUser(UserBase * userBase) {
-	if (mCache.size()) {
-		ufSend(mCache, false).operator() (userBase);
+	if (mCacheNmdc.size()) {
+		ufSend(mCacheNmdc, false).operator() (userBase);
+	}
+	if (mCacheAdc.size()) {
+		ufSend(mCacheAdc, false).operator() (userBase);
 	}
 }
 
@@ -352,16 +355,11 @@ void UserList::flushForUser(UserBase * userBase) {
 
 /** Flush common cache */
 void UserList::flushCache() {
-	if (mCache.size()) {
+	if (mCacheNmdc.size()) {
 		string str;
 		sendToAll(str, false, false);
 	}
-}
-
-
-
-void UserList::flushCacheAdc() {
-	if (mCache.size()) {
+	if (mCacheAdc.size()) {
 		string str;
 		sendToAllAdc(str, false, false);
 	}

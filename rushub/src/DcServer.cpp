@@ -403,26 +403,15 @@ int DcServer::onTimer(Time & now) {
 
 		mChecker = now;
 
-		// Protocol dependence
-		if (mDcConfig.mAdcOn) { // ADC
-			mAdcUserList.flushCacheAdc(); // ADC
-			mBotList.flushCacheAdc();
-			mEnterList.flushCacheAdc();
-			mOpList.flushCacheAdc();
-			mIpList.flushCacheAdc();
-			mChatList.flushCacheAdc();
-			mActiveList.flushCacheAdc();
-		} else { // NMDC
-			mHelloList.flushCache(); // NMDC
-			mDcUserList.flushCache(); // NMDC
-			mBotList.flushCache();
-			mEnterList.flushCache();
-			mOpList.flushCache();
-			mIpList.flushCache();
-			mChatList.flushCache();
-			mActiveList.flushCache();
-		}
-
+		mAdcUserList.flushCache(); // ADC
+		mHelloList.flushCache(); // NMDC
+		mDcUserList.flushCache(); // NMDC
+		mBotList.flushCache();
+		mEnterList.flushCache();
+		mOpList.flushCache();
+		mIpList.flushCache();
+		mChatList.flushCache();
+		mActiveList.flushCache();
 
 		int SysLoading = mSystemLoad;
 
@@ -916,8 +905,8 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 		// Prevention of the double sending
 		if (!mDcConfig.mDelayedLogin) {
 			dcUser->setCanSend(false);
-			mAdcUserList.flushCacheAdc();
-			mEnterList.flushCacheAdc();
+			mAdcUserList.flushCache();
+			mEnterList.flushCache();
 			dcUser->setCanSend(canSend);
 		}
 
