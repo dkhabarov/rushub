@@ -1059,34 +1059,39 @@ bool DcServer::sendToUser(DcUserBase * dcUserBase, const char * data, const char
 	}
 	DcConn * dcConn = static_cast<DcConn *> (dcUserBase->mDcConnBase);
 
-	// Protocol dependence
-	if (mDcConfig.mAdcOn) { // ADC
+	// PM
+	if (from && nick) {
 
-		// TODO
-		return false;
+		// Protocol dependence
+		if (mDcConfig.mAdcOn) { // ADC
+			// TODO: ADC PM
+			return false;
+		}
 
-	} else { // NMDC
-
-		// PM
-		if (from && nick) {
-			string to("<unknown>"), str;
-			if (dcConn->mDcUser && !dcConn->mDcUser->getUid().empty()) {
+		string to("<unknown>"), str;
+		if (dcConn->mDcUser && !dcConn->mDcUser->getUid().empty()) {
 			to = dcConn->mDcUser->getUid();
-			}
-			dcConn->send(mNmdcProtocol.appendPm(str, to, from, nick, data)); // refactoring to DcProtocol pointer
-			return true;
 		}
-
-		// Chat
-		if (nick) {
-			string str;
-			dcConn->send(mNmdcProtocol.appendChat(str, nick, data)); // refactoring to DcProtocol pointer
-			return true;
-		}
-
-		// Simple Msg
-		dcConn->send(data, strlen(data), dcConn->mType == CLIENT_TYPE_NMDC); // TODO refactoring len
+		dcConn->send(mNmdcProtocol.appendPm(str, to, from, nick, data)); // refactoring to DcProtocol pointer
+		return true;
 	}
+
+	// Chat
+	if (nick) {
+
+		// Protocol dependence
+		if (mDcConfig.mAdcOn) { // ADC
+			// TODO: ADC CHAT
+			return false;
+		}
+
+		string str;
+		dcConn->send(mNmdcProtocol.appendChat(str, nick, data)); // refactoring to DcProtocol pointer
+		return true;
+	}
+
+	// Simple Msg
+	dcConn->send(data, strlen(data), dcConn->mType == CLIENT_TYPE_NMDC); // TODO refactoring len
 	return true;
 }
 
@@ -1094,6 +1099,13 @@ bool DcServer::sendToUser(DcUserBase * dcUserBase, const char * data, const char
 
 /// Send data to nick
 bool DcServer::sendToNick(const char * to, const char * data, const char * nick, const char * from) {
+
+	// Protocol dependence
+	if (mDcConfig.mAdcOn) { // ADC
+		// TODO: ADC getDcUser
+		return false;
+	}
+
 	DcUser * dcUser = getDcUser(to);
 	if (!dcUser || !dcUser->mDcConn) { // Check exist and not bot
 		return false;
@@ -1109,28 +1121,35 @@ bool DcServer::sendToAll(const char * data, const char * nick, const char * from
 		return false;
 	}
 
+	// PM
+	if (from && nick) {
+		// Protocol dependence
+		if (mDcConfig.mAdcOn) { // ADC
+			// TODO: ADC PM
+			return false;
+		}
+		string start, end;
+		mNmdcProtocol.appendPmToAll(start, end, from, nick, data); // refactoring to DcProtocol pointer
+		mDcUserList.sendWithNick(start, end);
+		return true;
+	}
+
+	// Chat
+	if (nick) {
+		// Protocol dependence
+		if (mDcConfig.mAdcOn) { // ADC
+			// TODO: ADC CHAT
+			return false;
+		}
+		string str;
+		mDcUserList.sendToAll(mNmdcProtocol.appendChat(str, nick, data), false, false); // refactoring to DcProtocol pointer
+		return true;
+	}
+
 	// Protocol dependence
 	if (mDcConfig.mAdcOn) { // ADC
-
 		mAdcUserList.sendToAllAdc(data, false, true);
-
 	} else { // NMDC
-
-		// PM
-		if (from && nick) {
-			string start, end;
-			mNmdcProtocol.appendPmToAll(start, end, from, nick, data); // refactoring to DcProtocol pointer
-			mDcUserList.sendWithNick(start, end);
-			return true;
-		}
-
-		// Chat
-		if (nick) {
-			string str;
-			mDcUserList.sendToAll(mNmdcProtocol.appendChat(str, nick, data), false, false); // refactoring to DcProtocol pointer
-			return true;
-		}
-
 		mDcUserList.sendToAll(data, false, true);
 	}
 	return true;
@@ -1144,28 +1163,39 @@ bool DcServer::sendToProfiles(unsigned long profile, const char * data, const ch
 		return false;
 	}
 
+	// PM
+	if (from && nick) {
+
+		// Protocol dependence
+		if (mDcConfig.mAdcOn) { // ADC
+			// TODO: ADC PM
+			return false;
+		}
+
+		string start, end;
+		mNmdcProtocol.appendPmToAll(start, end, from, nick, data); // refactoring to DcProtocol pointer
+		mDcUserList.sendWithNick(start, end, profile);
+		return true;
+	}
+
+	// Chat
+	if (nick) {
+
+		// Protocol dependence
+		if (mDcConfig.mAdcOn) { // ADC
+			// TODO: ADC CHAT
+			return false;
+		}
+
+		string str;
+		mDcUserList.sendToProfiles(profile, mNmdcProtocol.appendChat(str, nick, data), false); // refactoring to DcProtocol pointer
+		return true;
+	}
+
 	// Protocol dependence
 	if (mDcConfig.mAdcOn) { // ADC
-
-		// TODO
+		// TODO: ADC sendToProfiles
 		return false;
-
-	} else { // NMDC
-
-		// PM
-		if (from && nick) {
-			string start, end;
-			mNmdcProtocol.appendPmToAll(start, end, from, nick, data); // refactoring to DcProtocol pointer
-			mDcUserList.sendWithNick(start, end, profile);
-			return true;
-		}
-
-		// Chat
-		if (nick) {
-			string str;
-			mDcUserList.sendToProfiles(profile, mNmdcProtocol.appendChat(str, nick, data), false); // refactoring to DcProtocol pointer
-			return true;
-		}
 	}
 
 	// Simple Msg
@@ -1180,29 +1210,40 @@ bool DcServer::sendToIp(const char * ip, const char * data, unsigned long profil
 		return false;
 	}
 
+	// PM
+	if (from && nick) {
+
+		// Protocol dependence
+		if (mDcConfig.mAdcOn) { // ADC
+			// TODO: ADC PM
+			return false;
+		}
+
+		string start, end;
+		mNmdcProtocol.appendPmToAll(start, end, from, nick, data); // refactoring to DcProtocol pointer
+		mIpListConn->sendToIpWithNick(ip, start.c_str(), end.c_str(), profile);
+		return true;
+	}
+
+	// Chat
+	if (nick) {
+
+		// Protocol dependence
+		if (mDcConfig.mAdcOn) { // ADC
+			// TODO: ADC CHAT
+			return false;
+		}
+
+		string str;
+		mIpListConn->sendToIp(ip, mNmdcProtocol.appendChat(str, nick, data).c_str(), profile); // refactoring to DcProtocol pointer
+		return true;
+	}
+
+
 	// Protocol dependence
 	if (mDcConfig.mAdcOn) { // ADC
-
-		// TODO
+		// TODO: ADC sendToIp
 		return false;
-
-	} else { // NMDC
-
-		// PM
-		if (from && nick) {
-			string start, end;
-			mNmdcProtocol.appendPmToAll(start, end, from, nick, data); // refactoring to DcProtocol pointer
-			mIpListConn->sendToIpWithNick(ip, start.c_str(), end.c_str(), profile);
-			return true;
-		}
-
-		// Chat
-		if (nick) {
-			string str;
-			mIpListConn->sendToIp(ip, mNmdcProtocol.appendChat(str, nick, data).c_str(), profile); // refactoring to DcProtocol pointer
-			return true;
-		}
-
 	}
 
 	// Simple Msg
