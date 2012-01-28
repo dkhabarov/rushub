@@ -1072,16 +1072,18 @@ string & NmdcProtocol::appendHubTopic(string & str, const string & hubTopic) {
 }
 
 // <nick> msg|
-string & NmdcProtocol::appendChat(string & str, const string & nick, const string & msg) {
-	str.reserve(str.size() + nick.size() + msg.size() + 3 + getSeparatorLen());
-	return str.append("<").append(nick).append("> ").append(msg).append(getSeparator());
+string & NmdcProtocol::appendChat(string & str, const string & uid, const string & msg) {
+	str.reserve(str.size() + uid.size() + msg.size() + 3 + getSeparatorLen());
+	return str.append("<").append(uid).append("> ").append(msg).append(getSeparator());
 }
 
 // $To: to From: from $<nick> msg|
-string & NmdcProtocol::appendPm(string & str, const string & to, const string & from, const string & nick, const string & msg) {
-	str.reserve(str.size() + to.size() + from.size() + nick.size() + msg.size() + 17 + getSeparatorLen());
-	str.append("$To: ").append(to).append(" From: ").append(from).append(" $<").append(nick);
-	return str.append("> ").append(msg).append(getSeparator());
+string & NmdcProtocol::appendPm(string & str, const string & to, const string & from, const string & uid, const string & msg) {
+	str.reserve(str.size() + to.size() + from.size() + uid.size() + msg.size() + 17 + getSeparatorLen());
+	str.append("$To: ").append(to);
+	str.append(" From: ").append(from);
+	str.append(" $<").append(uid).append("> ");
+	return str.append(msg).append(getSeparator());
 }
 
 // $To: to From: from $<nick> msg|

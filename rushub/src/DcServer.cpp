@@ -1061,32 +1061,18 @@ bool DcServer::sendToUser(DcUserBase * dcUserBase, const char * data, const char
 
 	// PM
 	if (from && nick) {
-
-		// Protocol dependence
-		if (mDcConfig.mAdcOn) { // ADC
-			// TODO: ADC PM
-			return false;
-		}
-
 		string to("<unknown>"), str;
 		if (dcConn->mDcUser && !dcConn->mDcUser->getUid().empty()) {
 			to = dcConn->mDcUser->getUid();
 		}
-		dcConn->send(mNmdcProtocol.appendPm(str, to, from, nick, data)); // refactoring to DcProtocol pointer
+		dcConn->send(dcConn->dcProtocol()->appendPm(str, to, from, nick, data));
 		return true;
 	}
 
 	// Chat
 	if (nick) {
-
-		// Protocol dependence
-		if (mDcConfig.mAdcOn) { // ADC
-			// TODO: ADC CHAT
-			return false;
-		}
-
 		string str;
-		dcConn->send(mNmdcProtocol.appendChat(str, nick, data)); // refactoring to DcProtocol pointer
+		dcConn->send(dcConn->dcProtocol()->appendChat(str, nick, data));
 		return true;
 	}
 

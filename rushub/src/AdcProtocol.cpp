@@ -327,6 +327,7 @@ int AdcProtocol::eventMsg(AdcParser * adcParser, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
 		// TODO call plugins
+		mDcServer->mCalls.mOnChat.callAll(dcConn->mDcUser);
 	#endif
 
 	/** Sending message */
@@ -558,6 +559,26 @@ const char * AdcProtocol::getSid(unsigned int num) {
 	ret[3] = base32[num & 0x1F];
 	ret[4] = 0;
 	return ret;
+}
+
+
+
+// BMSG <my_sid> <msg>
+string & AdcProtocol::appendChat(string & str, const string & uid, const string & msg) {
+	str.reserve(str.size() + uid.size() + msg.size() + 6 + getSeparatorLen());
+	return str.append("BMSG ").append(uid).append(" ").append(msg).append(getSeparator());
+}
+
+
+
+// EMSG <my_sid> <target_sid> <msg> PM<group_sid>
+string & AdcProtocol::appendPm(string & str, const string & to, const string & from, const string & uid, const string & msg) {
+	str.reserve(str.size() + to.size() + from.size() + uid.size() + msg.size() + 10 + getSeparatorLen());
+	str.append("EMSG ").append(uid);
+	str.append(" ").append(to);
+	str.append(" ").append(msg);
+	str.append(" PM").append(from);
+	return str.append(getSeparator());
 }
 
 
