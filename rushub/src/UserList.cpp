@@ -136,7 +136,8 @@ struct ufSendProfile : public unary_function<void, UserList::iterator> {
 
 /** Unary function for sending data dataS + nick + dataE to each user */
 struct ufSendWithNick : public unary_function<void, UserList::iterator> {
-	const string &mDataStart, &mDataEnd; /** Data for sending */
+	const string & mDataStart;
+	const string & mDataEnd;
 
 	ufSendWithNick(const string & dataStart, const string & dataEnd) : 
 		mDataStart(dataStart),

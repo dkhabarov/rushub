@@ -63,6 +63,8 @@
 	#define EWOULDBLOCK WSAEWOULDBLOCK
 	#define SOCK_ERR WSAGetLastError()
 	#define SOCK_ERR_MSG ""
+	#define SOCK_ERR_GAI(e) WSAGetLastError()
+	#define SOCK_ERR_GAI_MSG(e) "getnameinfo error"
 	#define SOCK_EAGAIN WSAEWOULDBLOCK
 	#define SOCK_EINTR WSAEINTR
 	#define SOCK_INVALID(SOCK) (SOCK) == INVALID_SOCKET
@@ -77,6 +79,8 @@
 	#define sockoptval_t int
 	#define SOCK_ERR errno
 	#define SOCK_ERR_MSG strerror(errno)
+	#define SOCK_ERR_GAI(e) (e)
+	#define SOCK_ERR_GAI_MSG(e) gai_strerror(e)
 	#define SOCK_EAGAIN EAGAIN
 	#define SOCK_EINTR EINTR
 	#define SOCK_INVALID(SOCK) (SOCK) < 0

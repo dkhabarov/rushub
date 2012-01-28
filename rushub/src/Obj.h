@@ -42,7 +42,7 @@ using namespace ::std;
 namespace utils {
 
 enum {
-	FATAL, // falat error
+	FATAL, // fatal error
 	ERR,   // simple error
 	WARN,  // warning
 	INFO,  // information
