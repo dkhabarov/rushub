@@ -105,6 +105,10 @@ public:
 	bool isPassive() const;
 	bool isTrueBoolParam(const char * name) const;
 
+	set<string> & getInfoNames() {
+		return mInfoNames;
+	}
+
 private:
 
 	Param * getParamForce(const char * name, bool setRules);

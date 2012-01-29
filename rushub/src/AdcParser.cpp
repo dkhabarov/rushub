@@ -464,11 +464,12 @@ bool AdcParser::splitChunks() {
 
 
 
-void AdcParser::parseInfo(DcUser * dcUser, const string & info, set<string> & names) {
+void AdcParser::parseInfo(DcUser * dcUser, const string & info) {
 	size_t s = info.find(' ', 9);
 	if (s != info.npos) {
 		size_t e;
 		bool last = true;
+		set<string> & names = dcUser->getInfoNames();
 		while ((e = info.find(' ', ++s)) != info.npos || last) {
 			if (e == info.npos) {
 				e = info.size();
@@ -532,10 +533,11 @@ void AdcParser::parseFeatures(DcUser * dcUser, set<int> & features) {
 
 
 
-void AdcParser::formingInfo(DcUser * dcUser, string & info, const set<string> & names) {
+void AdcParser::formingInfo(DcUser * dcUser, string & info) {
 	info.reserve(0xFF); // usual length of command
 	info = "BINF ";
 	info.append(dcUser->getUid());
+	const set<string> & names = dcUser->getInfoNames();
 	for (set<string>::const_iterator it = names.begin(); it != names.end(); ++it) {
 		const string & name = (*it);
 		ParamBase * param = dcUser->getParam(name.c_str());

@@ -218,17 +218,14 @@ unsigned long DcUser::getUidHash() const {
 
 
 const string & DcUser::getInfo() {
-	if (mDcServer->mDcConfig.mAdcOn) {
-		if (mInfoChanged) {
-			AdcParser::formingInfo(this, mInfo, mInfoNames); // ADC
-			mInfoChanged = false;
-		}
-	} else {
-		if (mInfoChanged) {
+	if (mInfoChanged) {
+		if (mDcServer->mDcConfig.mAdcOn) {
+			AdcParser::formingInfo(this, mInfo); // ADC
+		} else {
 			NmdcParser::formingInfo(this, mInfo); // NMDC
-			mInfoChanged = false;
 		}
-	}
+		mInfoChanged = false;
+	}	
 	return mInfo;
 }
 
@@ -238,7 +235,7 @@ const string & DcUser::getInfo() {
 bool DcUser::setInfo(const string & info) {
 	if (mDcServer->mDcConfig.mAdcOn) {
 		// Parse Info
-		AdcParser::parseInfo(this, info, mInfoNames);
+		AdcParser::parseInfo(this, info);
 
 		// Parse features
 		AdcParser::parseFeatures(this, mFeatures);

@@ -174,8 +174,8 @@ public:
 	bool splitChunks();
 
 	static void parseFeatures(DcUser *, set<int> & features);
-	static void parseInfo(DcUser *, const string & info, set<string> & names);
-	static void formingInfo(DcUser *, string & info, const set<string> & names);
+	static void parseInfo(DcUser *, const string & info);
+	static void formingInfo(DcUser *, string & info);
 
 private:
 
