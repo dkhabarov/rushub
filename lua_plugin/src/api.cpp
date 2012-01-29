@@ -53,7 +53,7 @@ namespace luaplugin {
 DcConnBase * getDcConnBase(lua_State * L, int indx) {
 	void ** userdata = (void **) lua_touserdata(L, indx);
 	DcConnBase * dcConnBase = (DcConnBase *) *userdata; // TODO refactoring
-	if (dcConnBase->mType != CLIENT_TYPE_DC) {
+	if (dcConnBase->mDcUserBase->mType != CLIENT_TYPE_DC) {
 		return NULL;
 	}
 	return dcConnBase;
@@ -695,12 +695,12 @@ int getUsers(lua_State * L) {
 		if (lua_isboolean(L, 2) && lua_toboolean(L, 2) == 1) {
 			all = true;
 		}
-		const vector<DcConnBase *> & v = LuaPlugin::mCurServer->getDcConnBase(lua_tostring(L, 1));
-		for (vector<DcConnBase *>::const_iterator it = v.begin(); it != v.end(); ++it) {
-			if (all || ((*it)->mDcUserBase && (*it)->mDcUserBase->getParam(USER_PARAM_IN_USER_LIST)->getBool())) {
+		const vector<DcUserBase *> & v = LuaPlugin::mCurServer->getDcUserBaseByIp(lua_tostring(L, 1));
+		for (vector<DcUserBase *>::const_iterator it = v.begin(); it != v.end(); ++it) {
+			if (all || (*it)->getParam(USER_PARAM_IN_USER_LIST)->getBool()) {
 				lua_pushnumber(L, i);
 				void ** userdata = (void **) lua_newuserdata(L, sizeof(void *));
-				*userdata = (void *) (*it);
+				*userdata = (void *) (*it)->mDcConnBase;
 				luaL_getmetatable(L, MT_USER_CONN);
 				lua_setmetatable(L, -2);
 				lua_rawset(L, topTab);
@@ -712,20 +712,19 @@ int getUsers(lua_State * L) {
 		if (lua_isboolean(L, 1) && lua_toboolean(L, 1) == 1) {
 			all = true;
 		}
-		DcConnListIterator * it = LuaPlugin::mCurServer->getDcConnListIterator(); // TODO refactoring
-		DcConnBase * dcConnBase = NULL;
-		while ((dcConnBase = it->operator ()()) != NULL) {
-			if (dcConnBase->mType != CLIENT_TYPE_DC) {
-				continue;
-			}
-			if (all || (dcConnBase->mDcUserBase && dcConnBase->mDcUserBase->getParam(USER_PARAM_IN_USER_LIST)->getBool())) {
-				lua_pushnumber(L, i);
-				void ** userdata = (void **) lua_newuserdata(L, sizeof(void *));
-				*userdata = (void *) dcConnBase; // TODO refactoring
-				luaL_getmetatable(L, MT_USER_CONN);
-				lua_setmetatable(L, -2);
-				lua_rawset(L, topTab);
-				++i;
+		DcListIteratorBase * it = LuaPlugin::mCurServer->getDcListIterator(); // TODO refactoring
+		DcUserBase * dcUserBase = NULL;
+		while ((dcUserBase = it->operator ()()) != NULL) {
+			if (dcUserBase->mType == CLIENT_TYPE_DC) {
+				if (all || (dcUserBase->getParam(USER_PARAM_IN_USER_LIST)->getBool())) {
+					lua_pushnumber(L, i);
+					void ** userdata = (void **) lua_newuserdata(L, sizeof(void *));
+					*userdata = (void *) dcUserBase->mDcConnBase; // TODO refactoring
+					luaL_getmetatable(L, MT_USER_CONN);
+					lua_setmetatable(L, -2);
+					lua_rawset(L, topTab);
+					++i;
+				}
 			}
 		}
 		delete it;
@@ -838,8 +837,8 @@ int disconnectIp(lua_State * L) {
 		}
 	}
 
-	const vector<DcConnBase *> & v = LuaPlugin::mCurServer->getDcConnBase(ip);
-	vector<DcConnBase *>::const_iterator it;
+	const vector<DcUserBase *> & v = LuaPlugin::mCurServer->getDcUserBaseByIp(ip);
+	vector<DcUserBase *>::const_iterator it;
 	if (!profile) {
 		for (it = v.begin(); it != v.end(); ++it) {
 			(*it)->disconnect();
@@ -847,19 +846,18 @@ int disconnectIp(lua_State * L) {
 	} else {
 		int prf;
 		for (it = v.begin(); it != v.end(); ++it) {
-			ParamBase * paramBase = (*it)->mDcUserBase->getParamForce(USER_PARAM_PROFILE);
-			if (paramBase == NULL) {
-				continue;
-			}
-			prf = paramBase->getInt() + 1;
-			if (prf < 0) {
-				prf = -prf;
-			}
-			if (prf > 31) {
-				prf = (prf % 32) - 1;
-			}
-			if (profile & (1 << prf)) {
-				(*it)->disconnect();
+			ParamBase * paramBase = (*it)->getParamForce(USER_PARAM_PROFILE);
+			if (paramBase != NULL) {
+				prf = paramBase->getInt() + 1;
+				if (prf < 0) {
+					prf = -prf;
+				}
+				if (prf > 31) {
+					prf = (prf % 32) - 1;
+				}
+				if (profile & (1 << prf)) {
+					(*it)->disconnect();
+				}
 			}
 		}
 	}
@@ -1121,7 +1119,7 @@ int setCmd(lua_State * L) {
 		luaL_argerror(L, 1, "internal fatal error");
 		return 0;
 	}
-	if (!LuaPlugin::mCurLua->mCurDCConn->parseCommand(data)) {
+	if (!LuaPlugin::mCurLua->mCurDCConn->mDcUserBase->parseCommand(data)) {
 		luaL_argerror(L, 1, "wrong syntax");
 		return 0;
 	}

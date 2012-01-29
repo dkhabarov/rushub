@@ -63,7 +63,7 @@ public:
 
 public:
 
-	DcUser(DcConn *);
+	DcUser(int type, DcConn *);
 	virtual ~DcUser();
 
 	virtual ParamBase * getParam(const char * name) const;
@@ -80,6 +80,10 @@ public:
 
 	virtual const string & getInfo();
 	virtual bool setInfo(const string & info);
+
+	virtual bool parseCommand(const char * cmd);
+
+	virtual const char * getCommand();
 
 	virtual const string & getIp() const;
 	void setIp(const string & ip);

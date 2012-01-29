@@ -178,7 +178,7 @@ public:
 
 public:
 
-	DcConn(int type, tSocket sock = 0, Server * server = NULL);
+	DcConn(tSocket sock = 0, Server * server = NULL);
 	virtual ~DcConn();
 
 

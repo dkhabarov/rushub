@@ -24,8 +24,9 @@
 namespace dcserver {
 
 
-DcUser::DcUser(DcConn * dcConn) :
+DcUser::DcUser(int type, DcConn * dcConn) :
 	Obj("DcUser"),
+	DcUserBase(type),
 	mDcServer(NULL),
 	mDcConn(dcConn),
 	mTimeEnter(true),
@@ -95,7 +96,9 @@ void DcUser::sendToPm(const string & data, const string & uid, const string & fr
 
 
 void DcUser::disconnect() {
-	mDcConn->closeNice(9000, CLOSE_REASON_PLUGIN);
+	if (mDcConn) {
+		mDcConn->closeNice(9000, CLOSE_REASON_PLUGIN);
+	}
 }
 
 
@@ -241,6 +244,24 @@ bool DcUser::setInfo(const string & info) {
 		NmdcParser::parseInfo(this, info);
 	}
 	return true;
+}
+
+
+
+bool DcUser::parseCommand(const char * cmd) {
+	if (mDcConn) {
+		return mDcConn->parseCommand(cmd);
+	}
+	return false;
+}
+
+
+
+const char * DcUser::getCommand() {
+	if (mDcConn) {
+		return mDcConn->getCommand();
+	}
+	return NULL;
 }
 
 

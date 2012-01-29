@@ -32,9 +32,8 @@ namespace dcserver {
 	#define __int64 long long
 #endif
 
-DcConn::DcConn(int type, tSocket sock, Server * server) : 
+DcConn::DcConn(tSocket sock, Server * server) : 
 	Conn(sock, server, CONN_TYPE_INCOMING_TCP),
-	DcConnBase(type),
 	mFeatures(0),
 	mSendNickList(false),
 	mIpRecv(false),
@@ -248,11 +247,11 @@ Conn * DcConnFactory::createConn(tSocket sock) {
 		return NULL;
 	}
 
-	DcConn * dcConn = new DcConn(CLIENT_TYPE_DC, sock, mServer);
+	DcConn * dcConn = new DcConn(sock, mServer);
 	dcConn->mSelfConnFactory = this; // Connection factory for current connection (DcConnFactory)
 
 	// Create DcUser
-	DcUser * dcUser = new DcUser(dcConn);
+	DcUser * dcUser = new DcUser(CLIENT_TYPE_DC, dcConn);
 	dcConn->setUser(dcUser);
 
 	return static_cast<Conn *> (dcConn);

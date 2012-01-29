@@ -73,7 +73,7 @@ using namespace ::std;
 
 // Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10035
+	#define INTERNAL_PLUGIN_VERSION 10036
 #endif
 
 // NMDC protocol separator
@@ -191,9 +191,16 @@ class DcUserBase {
 
 public:
 
-	DcConnBase * mDcConnBase; /// Connection
+	DcConnBase * mDcConnBase; ///< Connection
+
+	const int mType; ///< Type (for protection and compatibility)
 
 public:
+
+	DcUserBase(int type) :
+		mType(type)
+	{
+	}
 
 	virtual ~DcUserBase() {
 	}
@@ -216,6 +223,16 @@ public:
 	/// Set user's MyINFO cmd
 	virtual bool setInfo(const string & info) = 0;
 
+	/// Check cmd syntax
+	virtual bool parseCommand(const char * cmd) = 0;
+
+	/// Get command
+	virtual const char * getCommand() = 0;
+
+private:
+
+	DcUserBase & operator = (const DcUserBase &);
+
 }; // class DcUserBase
 
 
@@ -228,31 +245,10 @@ public:
 	/// User
 	DcUserBase * mDcUserBase;
 
-	/// Connection type (for protection and compatibility)
-	const int mType;
-
 public:
-
-	DcConnBase(int type) :
-		mDcUserBase(NULL),
-		mType(type)
-	{
-	}
 
 	virtual ~DcConnBase() {
 	}
-
-	/// Disconnect this client
-	virtual void disconnect() {
-		if (mDcUserBase != NULL) {
-			mDcUserBase->disconnect();
-		}
-	}
-
-
-	virtual bool parseCommand(const char * cmd) = 0;
-
-	virtual const char * getCommand() = 0;
 
 private:
 
@@ -262,19 +258,19 @@ private:
 
 
 
-// ================ DcConnListIterator ================
+// ================ DcListIteratorBase ================
 
 /** Iterator for list of base connections */
-class DcConnListIterator {
+class DcListIteratorBase {
 
 public:
 
-	virtual ~DcConnListIterator() {
+	virtual ~DcListIteratorBase() {
 	}
 
-	virtual DcConnBase * operator() (void) = 0;
+	virtual DcUserBase * operator() (void) = 0;
 
-}; // class DcConnListIterator
+}; // class DcListIteratorBase
 
 
 
@@ -316,10 +312,10 @@ public:
 	virtual __int64 getTotalShare() const = 0;
 
 	/// Get iterator of conn base
-	virtual DcConnListIterator * getDcConnListIterator() = 0;
+	virtual DcListIteratorBase * getDcListIterator() = 0;
 
 	/// Get conn base by ip
-	virtual const vector<DcConnBase*> & getDcConnBase(const char * ip) = 0;
+	virtual const vector<DcUserBase *> & getDcUserBaseByIp(const char * ip) = 0;
 
 	/// Get user base by uid
 	virtual DcUserBase * getDcUserBase(const char * uid) = 0;

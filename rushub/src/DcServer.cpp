@@ -261,7 +261,7 @@ __int64 DcServer::getTotalShare() const {
 
 
 
-DcConnListIterator * DcServer::getDcConnListIterator() {
+DcListIteratorBase * DcServer::getDcListIterator() {
 	return new DcListIterator(this);
 }
 
@@ -953,7 +953,7 @@ DcUser * DcServer::getDcUser(const char * uid) {
 		DcConn * dcConn = NULL;
 		for (tCLIt it = mClientList.begin(); it != mClientList.end(); ++it) {
 			dcConn = static_cast<DcConn *> (*it);
-			if (dcConn && dcConn->mType == CLIENT_TYPE_DC && 
+			if (dcConn && dcConn->mDcUser->mType == CLIENT_TYPE_DC && 
 				dcConn->mDcUser && dcConn->mDcUser->getUid() == uidStr
 			) {
 				return static_cast<DcUser *> (dcConn->mDcUser);
@@ -973,15 +973,16 @@ DcUserBase * DcServer::getDcUserBase(const char * uid) {
 
 
 
-const vector<DcConnBase *> & DcServer::getDcConnBase(const char * ip) {
-	mIpConnList.clear();
+const vector<DcUserBase *> & DcServer::getDcUserBaseByIp(const char * ip) {
+	// TODO: add bots in list
+	mIpUserList.clear();
 	for (DcIpList::iterator it = mIpListConn->begin(ip); it != mIpListConn->end(); ++it) {
 		DcConn * dcConn = static_cast<DcConn *> (*it);
-		if (dcConn->mType == CLIENT_TYPE_DC && dcConn->getIp() == ip) {
-			mIpConnList.push_back(dcConn);
+		if (dcConn->mDcUser->mType == CLIENT_TYPE_DC && dcConn->getIp() == ip) {
+			mIpUserList.push_back(dcConn->mDcUser);
 		}
 	}
-	return mIpConnList;
+	return mIpUserList;
 }
 
 
@@ -997,7 +998,7 @@ bool DcServer::sendToUser(DcUserBase * dcUserBase, const string & data, const ch
 	} else if (uid) {
 		dcConn->mDcUser->sendToChat(data, uid, true); // Chat
 	} else {
-		dcConn->send(data, dcConn->mType == CLIENT_TYPE_DC); // Simple Msg
+		dcConn->send(data, dcConn->mDcUser->mType == CLIENT_TYPE_DC); // Simple Msg
 	}
 	return true;
 }
@@ -1240,7 +1241,7 @@ bool DcServer::setLang(const string & name, const string & value) {
 
 
 int DcServer::regBot(const string & uid, const string & info, const string & ip, bool key) {
-	DcUser * dcUser = new DcUser(NULL);
+	DcUser * dcUser = new DcUser(CLIENT_TYPE_DC, NULL);
 	dcUser->mDcServer = this;
 
 	// Protocol dependence

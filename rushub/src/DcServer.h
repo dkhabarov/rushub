@@ -82,7 +82,7 @@ class DcConfigLoader;
 
 
 /// List for get users into plugins
-class DcListIterator : public DcConnListIterator {
+class DcListIterator : public DcListIteratorBase {
 
 public:
 
@@ -91,7 +91,7 @@ public:
 	~DcListIterator() {
 	}
 
-	virtual DcConnBase * operator() (void) {
+	virtual DcUserBase * operator() (void) {
 		if (mIt == mEnd) {
 			return NULL;
 		}
@@ -101,7 +101,7 @@ public:
 			return this->operator() ();
 		}
 		++mIt;
-		return dcConn;
+		return dcConn->mDcUser;
 	}
 
 private:
@@ -190,9 +190,9 @@ public:
 
 	virtual __int64 getTotalShare() const;
 	
-	virtual DcConnListIterator * getDcConnListIterator();
+	virtual DcListIteratorBase * getDcListIterator();
 
-	virtual const vector<DcConnBase*> & getDcConnBase(const char * ip);
+	virtual const vector<DcUserBase *> & getDcUserBaseByIp(const char * ip);
 	virtual DcUserBase * getDcUserBase(const char * nick);
 
 	virtual bool sendToUser(DcUserBase *, const string & data, const char * uid = NULL, const char * from = NULL);
@@ -272,7 +272,7 @@ private:
 	Time mChecker; ///< Checking time
 	string mHubName; ///< Hub name for plugins
 	string mBuf; ///< Temp buffer
-	vector<DcConnBase *> mIpConnList; ///< Conn with same ip for plugins
+	vector<DcUserBase *> mIpUserList; ///< Users with same ip for plugins
 	vector<string> mConfigNameList; ///< Config names for plugins
 
 	vector<ConnFactory *> mConnFactories; ///< Server Conn Factories

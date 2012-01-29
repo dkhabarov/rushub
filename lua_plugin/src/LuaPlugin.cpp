@@ -438,7 +438,7 @@ int LuaPlugin::callAll(const char * funcName, unsigned int listFlag, vectorLuaIn
 
 			// TODO
 			if (param) {
-				script->newCallParam((void *) dcConnBase->getCommand(), LUA_TSTRING); // TODO refactoring
+				script->newCallParam((void *) dcConnBase->mDcUserBase->getCommand(), LUA_TSTRING); // TODO refactoring
 			}
 
 			ret = script->callFunc(funcName);
@@ -670,7 +670,7 @@ int LuaPlugin::onAny(DcUserBase * dcUserBase, int type) {
 		script = mAny[i];
 		if (script && script->mL) {
 			script->newCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA); // TODO refactoring
-			script->newCallParam((void *) dcConnBase->getCommand(), LUA_TSTRING); // TODO refactoring
+			script->newCallParam((void *) dcConnBase->mDcUserBase->getCommand(), LUA_TSTRING); // TODO refactoring
 			script->newCallParam(lua_Number(type), LUA_TNUMBER);
 			ret = script->callFunc("OnAny");
 			if (ret == 1) {
