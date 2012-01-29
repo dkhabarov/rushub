@@ -37,12 +37,11 @@ public:
 	virtual int getProfile() const = 0;
 	virtual bool isHide() const = 0;
 	virtual bool isCanSend() const = 0;
-	virtual void send(const string & msg, bool sep = false, bool flush = true) = 0;
+	virtual bool hasFeature(int feature) const = 0;
 
+	virtual void send(const string & msg, bool sep = false, bool flush = true) = 0;
 	virtual void sendToChat(const string & data, const string & uid, bool flush = true) = 0;
 	virtual void sendToPm(const string & data, const string & uid, const string & from, bool flush = true) = 0;
-
-	virtual bool hasFeature(int feature) const = 0;
 
 }; // UserBase
 
