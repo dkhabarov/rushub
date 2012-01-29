@@ -108,7 +108,6 @@ int NmdcProtocol::onNewConn(Conn * conn) {
 
 	#ifndef WITHOUT_PLUGINS
 		if (mDcServer->mCalls.mOnUserConnected.callAll(dcConn->mDcUser)) {
-			dcConn->flush();
 		} else
 	#endif
 	{
@@ -212,33 +211,37 @@ void NmdcProtocol::onFlush(Conn * conn) {
 
 int NmdcProtocol::doCommand(Parser * parser, Conn * conn) {
 
-	NmdcParser * dcParser = static_cast<NmdcParser *> (parser);
+	NmdcParser * nmdcParser = static_cast<NmdcParser *> (parser);
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 
-	if (checkCommand(dcParser, dcConn) < 0) {
+	if (log(TRACE)) {
+		logStream() << "doCommand" << endl;
+	}
+
+	if (checkCommand(nmdcParser, dcConn) < 0) {
 		return -1;
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnAny.callAll(dcConn->mDcUser, dcParser->mType)) {
+		if (mDcServer->mCalls.mOnAny.callAll(dcConn->mDcUser, nmdcParser->mType)) {
 			return 1;
 		}
 	#endif
 
 	#ifdef _DEBUG
-		if (dcParser->mType == TYPE_UNPARSED) {
+		if (nmdcParser->mType == TYPE_UNPARSED) {
 			throw "Unparsed command";
 		}
 	#endif
 
 	if (dcConn->log(TRACE)) {
-		dcConn->logStream() << "[S]Stage " << dcParser->mType << endl;
+		dcConn->logStream() << "[S]Stage " << nmdcParser->mType << endl;
 	}
 
-	(this->*(this->events[dcParser->mType])) (dcParser, dcConn);
+	(this->*(this->events[nmdcParser->mType])) (nmdcParser, dcConn);
 
 	if (dcConn->log(TRACE)) {
-		dcConn->logStream() << "[E]Stage " << dcParser->mType << endl;
+		dcConn->logStream() << "[E]Stage " << nmdcParser->mType << endl;
 	}
 	return 0;
 }

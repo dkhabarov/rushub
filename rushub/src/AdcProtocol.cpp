@@ -122,12 +122,18 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 	AdcParser * adcParser = static_cast<AdcParser *> (parser);
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 
+	if (log(TRACE)) {
+		logStream() << "doCommand" << endl;
+	}
+
 	if (checkCommand(adcParser, dcConn) < 0) {
 		return -1;
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins (OnAny)
+		if (mDcServer->mCalls.mOnAny.callAll(dcConn->mDcUser, adcParser->mType)) {
+			return 1;
+		}
 	#endif
 
 	#ifdef _DEBUG
@@ -145,7 +151,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 		switch(adcParser->getHeader()) {
 
 			case HEADER_BROADCAST:
-				mDcServer->mDcUserList.sendToAllAdc(adcParser->mCommand, true);
+				mDcServer->sendToAll(adcParser->mCommand, true, true);
 				break;
 
 			case HEADER_DIRECT:
@@ -193,74 +199,70 @@ int AdcProtocol::onNewConn(Conn * conn) {
 
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 
-	const char * sid = NULL;
-	UserBase * userBase = NULL;
-	do {
-		sid = getSid(++mSidNum);
-		userBase = mDcServer->mDcUserList.getUserBaseByUid(sid);
-	} while (userBase != NULL || strcmp(sid, "AAAA") == 0); // "AAAA" is a hub
+	dcConn->mDcUser->setUid(string(genNewSid()));
 
-	dcConn->mDcUser->setUid(string(sid));
+	dcConn->send("ISUP ADBASE ADTIGR", 18, true, false);
+	dcConn->send("ISID ", 5, false, false);
+	dcConn->send(dcConn->mDcUser->getUid(), true, false);
+	dcConn->send(string("IINF CT32 VE" INTERNALVERSION " NIADC" INTERNALNAME), false, false);
+	dcConn->send(" DE", 3, false, false);
+	dcConn->send(mDcServer->mDcConfig.mTopic, true, false);
 
-	string cmds;
-	cmds.reserve(70 + mDcServer->mDcConfig.mTopic.size());
-	cmds.append("ISUP ADBASE ADTIGR");
-	cmds.append(ADC_SEPARATOR);
-	cmds.append("ISID ").append(sid);
-	cmds.append(ADC_SEPARATOR);
-	cmds.append("IINF CT32 VE" INTERNALVERSION " NIADC" INTERNALNAME);
-	cmds.append(" DE").append(mDcServer->mDcConfig.mTopic);
-
-	dcConn->send(cmds, true, false);
-
-
-	static __int64 iShareVal = -1;
-	static int iUsersVal = -1;
-	static long iTimeVal = -1;
-	static string sTimeCache, sShareCache, sCache;
-	bool useCache = true;
-	Time Uptime(mDcServer->mTime);
-	Uptime -= mDcServer->mStartTime;
-	long min = Uptime.sec() / 60;
-	if (iTimeVal != min) {
-		iTimeVal = min;
-		useCache = false;
-		stringstream oss;
-		int w, d, h, m;
-		Uptime.asTimeVals(w, d, h, m);
-		if (w) {
-			oss << w << " " << mDcServer->mDcLang.mTimes[0] << " ";
+	#ifndef WITHOUT_PLUGINS
+		if (mDcServer->mCalls.mOnUserConnected.callAll(dcConn->mDcUser)) {
+		} else
+	#endif
+	{
+		static __int64 iShareVal = -1;
+		static int iUsersVal = -1;
+		static long iTimeVal = -1;
+		static string sTimeCache, sShareCache, sCache;
+		bool useCache = true;
+		Time Uptime(mDcServer->mTime);
+		Uptime -= mDcServer->mStartTime;
+		long min = Uptime.sec() / 60;
+		if (iTimeVal != min) {
+			iTimeVal = min;
+			useCache = false;
+			stringstream oss;
+			int w, d, h, m;
+			Uptime.asTimeVals(w, d, h, m);
+			if (w) {
+				oss << w << " " << mDcServer->mDcLang.mTimes[0] << " ";
+			}
+			if (d) {
+				oss << d << " " << mDcServer->mDcLang.mTimes[1] << " ";
+			}
+			if (h) {
+				oss << h << " " << mDcServer->mDcLang.mTimes[2] << " ";
+			}
+			oss << m << " " << mDcServer->mDcLang.mTimes[3];
+			sTimeCache = oss.str();
 		}
-		if (d) {
-			oss << d << " " << mDcServer->mDcLang.mTimes[1] << " ";
+		if (iShareVal != mDcServer->miTotalShare) {
+			iShareVal = mDcServer->miTotalShare;
+			useCache = false;
+			DcServer::getNormalShare(iShareVal, sShareCache);
 		}
-		if (h) {
-			oss << h << " " << mDcServer->mDcLang.mTimes[2] << " ";
+		if (iUsersVal != mDcServer->getUsersCount()) {
+			iUsersVal = mDcServer->getUsersCount();
+			useCache = false;
 		}
-		oss << m << " " << mDcServer->mDcLang.mTimes[3];
-		sTimeCache = oss.str();
-	}
-	if (iShareVal != mDcServer->miTotalShare) {
-		iShareVal = mDcServer->miTotalShare;
-		useCache = false;
-		DcServer::getNormalShare(iShareVal, sShareCache);
-	}
-	if (iUsersVal != mDcServer->getUsersCount()) {
-		iUsersVal = mDcServer->getUsersCount();
-		useCache = false;
-	}
-	if (!useCache) {
-		string buff;
-		stringReplace(mDcServer->mDcLang.mFirstMsg, "HUB", buff, INTERNALNAME " " INTERNALVERSION);
-		stringReplace(buff, "uptime", buff, sTimeCache);
-		stringReplace(buff, "users", buff, iUsersVal);
-		stringReplace(buff, "share", buff, sShareCache);
-		cp1251ToUtf8(buff, sCache, escaper);
-	}
+		if (!useCache) {
+			string buff;
+			stringReplace(mDcServer->mDcLang.mFirstMsg, "HUB", buff, INTERNALNAME " " INTERNALVERSION);
+			stringReplace(buff, "uptime", buff, sTimeCache);
+			stringReplace(buff, "users", buff, iUsersVal);
+			stringReplace(buff, "share", buff, sShareCache);
+			cp1251ToUtf8(buff, sCache, escaper);
+		}
 
-	dcConn->send(string("IMSG ").append(sCache), true);
+		dcConn->send("IMSG ", 4, false, false);
+		dcConn->send(sCache, true, false);
+	}
 
 	dcConn->setTimeOut(HUB_TIME_OUT_LOGIN, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_LOGIN], mDcServer->mTime); /** Timeout for enter */
+	dcConn->flush();
 	return 0;
 }
 
@@ -268,7 +270,14 @@ int AdcProtocol::onNewConn(Conn * conn) {
 
 
 
-int AdcProtocol::eventSup(AdcParser *, DcConn *) {
+int AdcProtocol::eventSup(AdcParser *, DcConn * dcConn) {
+
+	#ifndef WITHOUT_PLUGINS
+		if (mDcServer->mCalls.mOnSupports.callAll(dcConn->mDcUser)) {
+			return -1;
+		}
+	#endif
+
 	return 0;
 }
 
@@ -295,18 +304,21 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 
 	dcConn->mDcUser->setInfo(inf);
 
+	#ifndef WITHOUT_PLUGINS
+		mDcServer->mCalls.mOnMyINFO.callAll(dcConn->mDcUser);
+	#endif
+
 	if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
-			dcConn->send(inf, true); // Send to self only
+			dcConn->send(dcConn->mDcUser->getInfo(), true); // Send to self only
 		} else {
 			// TODO sendMode
-			mDcServer->mDcUserList.sendToAllAdc(inf, true);
+			mDcServer->sendToAll(dcConn->mDcUser->getInfo(), true, true);
 		}
 	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		dcConn->mSendNickList = true;
 		mDcServer->beforeUserEnter(dcConn);
 	}
-
 	return 1;
 }
 
@@ -325,7 +337,15 @@ int AdcProtocol::eventMsg(AdcParser * adcParser, DcConn * dcConn) {
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		mDcServer->mCalls.mOnChat.callAll(dcConn->mDcUser);
+		if (adcParser->mCommand.find(" PM") != adcParser->mCommand.npos) { // TODO refactoring
+			if (mDcServer->mCalls.mOnTo.callAll(dcConn->mDcUser)) {
+				return -2;
+			}
+		} else{
+			if (mDcServer->mCalls.mOnChat.callAll(dcConn->mDcUser)) {
+				return -2;
+			}
+		}
 	#endif
 
 	/** Sending message */
@@ -339,10 +359,12 @@ int AdcProtocol::eventMsg(AdcParser * adcParser, DcConn * dcConn) {
 
 
 
-int AdcProtocol::eventSch(AdcParser *, DcConn *) {
+int AdcProtocol::eventSch(AdcParser *, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		if (mDcServer->mCalls.mOnSearch.callAll(dcConn->mDcUser)) {
+			return -1;
+		}
 	#endif
 
 	return 0;
@@ -350,10 +372,12 @@ int AdcProtocol::eventSch(AdcParser *, DcConn *) {
 
 
 
-int AdcProtocol::eventRes(AdcParser *, DcConn *) {
+int AdcProtocol::eventRes(AdcParser *, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		if (mDcServer->mCalls.mOnSR.callAll(dcConn->mDcUser)) {
+			return -1;
+		}
 	#endif
 
 	return 0;
@@ -361,10 +385,12 @@ int AdcProtocol::eventRes(AdcParser *, DcConn *) {
 
 
 
-int AdcProtocol::eventCtm(AdcParser *, DcConn *) {
+int AdcProtocol::eventCtm(AdcParser *, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		if (mDcServer->mCalls.mOnConnectToMe.callAll(dcConn->mDcUser)) {
+			return -1;
+		}
 	#endif
 
 	return 0;
@@ -372,10 +398,12 @@ int AdcProtocol::eventCtm(AdcParser *, DcConn *) {
 
 
 
-int AdcProtocol::eventRcm(AdcParser *, DcConn *) {
+int AdcProtocol::eventRcm(AdcParser *, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		if (mDcServer->mCalls.mOnRevConnectToMe.callAll(dcConn->mDcUser)) {
+			return -1;
+		}
 	#endif
 
 	return 0;
@@ -394,10 +422,10 @@ int AdcProtocol::eventGpa(AdcParser *, DcConn *) {
 
 
 
-int AdcProtocol::eventPas(AdcParser *, DcConn *) {
+int AdcProtocol::eventPas(AdcParser *, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		mDcServer->mCalls.mOnMyPass.callAll(dcConn->mDcUser);
 	#endif
 
 	return 0;
@@ -516,20 +544,18 @@ int AdcProtocol::eventPub(AdcParser *, DcConn *) {
 
 
 int AdcProtocol::eventVoid(AdcParser *, DcConn *) {
-
-	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
-	#endif
-
 	return 0;
 }
 
 
 
-int AdcProtocol::eventUnknown(AdcParser *, DcConn *) {
+int AdcProtocol::eventUnknown(AdcParser *, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		if (!mDcServer->mCalls.mOnUnknown.callAll(dcConn->mDcUser)) {
+			dcConn->closeNice(9000, CLOSE_REASON_CMD_UNKNOWN);
+			return -1;
+		}
 	#endif
 
 	return 0;
@@ -557,6 +583,18 @@ const char * AdcProtocol::getSid(unsigned int num) {
 	ret[3] = base32[num & 0x1F];
 	ret[4] = 0;
 	return ret;
+}
+
+
+
+const char * AdcProtocol::genNewSid() {
+	const char * sid = NULL;
+	UserBase * userBase = NULL;
+	do {
+		sid = getSid(++mSidNum);
+		userBase = mDcServer->mDcUserList.getUserBaseByUid(sid);
+	} while (userBase != NULL || strcmp(sid, "AAAA") == 0); // "AAAA" is a hub
+	return sid;
 }
 
 

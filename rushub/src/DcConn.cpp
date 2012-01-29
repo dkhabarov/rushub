@@ -84,27 +84,26 @@ DcProtocol * DcConn::dcProtocol() {
 
 
 size_t DcConn::send(const char * data, size_t len, bool addSep, bool flush) {
-	size_t ret = 0;
-	if (isWritable()) {
-		if (len >= mSendBufMax) {
-			len = mSendBufMax;
-			if (log(WARN)) {
-				logStream() << "Too long message. Size: " << len << ". Max size: " << mSendBufMax << endl;
-			}
-		}
+	if (!isWritable()) {
+		return 0;
+	}
 
-		const char * sep = getSeparator();
-		size_t sep_len = getSeparatorLen();
-
-		// if addSep then check for separator at end of data
-		if (addSep && (len < sep_len || strstr(data + len - sep_len, sep) == NULL)) {
-			writeData(data, len, false);
-			ret = writeData(sep, sep_len, flush);
-		} else {
-			ret = writeData(data, len, flush);
+	if (len >= mSendBufMax) {
+		len = mSendBufMax;
+		if (log(WARN)) {
+			logStream() << "Too long message. Size: " << len << ". Max size: " << mSendBufMax << endl;
 		}
 	}
-	return ret;
+
+	// check for separator at end of data
+	if (addSep) {
+		const char * sep = getSeparator();
+		size_t sepLen = getSeparatorLen();
+		if (len < sepLen || strstr(data + len - sepLen, sep) == NULL) {
+			return writeData(data, len, false) + writeData(sep, sepLen, flush);
+		}
+	}
+	return writeData(data, len, flush);
 }
 
 

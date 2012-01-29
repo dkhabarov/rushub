@@ -819,16 +819,11 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 
 			// Protocol dependence
 			if (mDcConfig.mAdcOn) { // ADC
-
 				msg.append("IQUI ").append(dcUser->getUid()).append(ADC_SEPARATOR);
-				mDcUserList.sendToAllAdc(msg, true/*mDcConfig.mDelayedMyinfo*/, false);
-
 			} else { // NMDC
-
 				mNmdcProtocol.appendQuit(msg, dcUser->getUid());
-				mDcUserList.sendToAll(msg, true/*mDcConfig.mDelayedMyinfo*/, false); // Delay in sending MyINFO (and Quit)
-
 			}
+			sendToAll(msg, false, true/*mDcConfig.mDelayedMyinfo*/); // Delay in sending MyINFO (and Quit)
 		}
 	}
 	return true;
@@ -847,7 +842,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 
 			// Show INF string to all users
-			mDcUserList.sendToAllAdc(dcUser->getInfo(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
+			sendToAll(dcUser->getInfo(), true, true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
 
 			// Show INF string of the current user to all enterring users
 			mEnterList.sendToAllAdc(dcUser->getInfo(), true/*mDcConfig.mDelayedMyinfo*/);
@@ -887,7 +882,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 			mHelloList.sendToAll(mNmdcProtocol.appendHello(hello, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false); // refactoring to DcProtocol pointer
 
 			// Show MyINFO string to all users
-			mDcUserList.sendToAll(dcUser->getInfo(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
+			sendToAll(dcUser->getInfo(), true, true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
 
 			// Show MyINFO string of the current user to all enterring users
 			mEnterList.sendToAll(dcUser->getInfo(), true/*mDcConfig.mDelayedMyinfo*/);
@@ -1025,21 +1020,25 @@ bool DcServer::sendToNick(const char * to, const string & data, const char * uid
 
 
 
+void DcServer::sendToAll(const string & data, bool addSep, bool flush) {
+	// Protocol dependence
+	if (mDcConfig.mAdcOn) { // ADC
+		mDcUserList.sendToAllAdc(data, flush, addSep);
+	} else { // NMDC
+		mDcUserList.sendToAll(data, flush, addSep);
+	}
+}
+
+
+
 /// Send data to all
 bool DcServer::sendToAll(const string & data, const char * uid, const char * from) {
 	if (from && uid) {
 		mDcUserList.sendToAllPm(data, uid, from); // PM
 	} else if (uid) {
 		mDcUserList.sendToAllChat(data, uid); // Chat
-	} else { // Simple Msg
-
-		// Protocol dependence
-		if (mDcConfig.mAdcOn) { // ADC
-			mDcUserList.sendToAllAdc(data, false, true);
-		} else { // NMDC
-			mDcUserList.sendToAll(data, false, true);
-		}
-
+	} else {
+		sendToAll(data, true, false); // Simple Msg
 	}
 	return true;
 }
@@ -1094,15 +1093,8 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & nickList, const strin
 		mDcUserList.sendToAllPm(data, uid, from); // PM
 	} else if (uid) {
 		mDcUserList.sendToAllChat(data, uid);  // Chat
-	} else { // Simple Msg
-
-		// Protocol dependence
-		if (mDcConfig.mAdcOn) { // ADC
-			mDcUserList.sendToAllAdc(data, false, true);
-		} else { // NMDC
-			mDcUserList.sendToAll(data, false, true);
-		}
-
+	} else {
+		sendToAll(data, true, false); // Simple Msg
 	}
 
 	for (vector<DcUser *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
@@ -1133,15 +1125,8 @@ bool DcServer::sendToAllExceptIps(const vector<string> & ipList, const string & 
 		mDcUserList.sendToAllPm(data, uid, from);
 	} else if (uid) { // Chat
 		mDcUserList.sendToAllChat(data, uid);
-	} else { // Simple Msg
-
-		// Protocol dependence
-		if (mDcConfig.mAdcOn) { // ADC
-			mDcUserList.sendToAllAdc(data, false, true);
-		} else { // NMDC
-			mDcUserList.sendToAll(data, false, true);
-		}
-
+	} else {
+		sendToAll(data, true, false); // Simple Msg
 	}
 
 	for (vector<DcConn*>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
@@ -1262,12 +1247,10 @@ bool DcServer::setLang(const string & name, const string & value) {
 int DcServer::regBot(const string & uid, const string & info, const string & ip, bool key) {
 	DcUser * dcUser = new DcUser(NULL);
 	dcUser->mDcServer = this;
-	string sid;
 
 	// Protocol dependence
 	if (mDcConfig.mAdcOn) { // ADC
-		sid = mAdcProtocol.getSid(1); // TODO: set bot SID!
-		dcUser->setUid(sid);
+		dcUser->setUid(string(mAdcProtocol.genNewSid()));
 	} else { // NMDC
 		dcUser->setUid(uid);
 	}
@@ -1287,7 +1270,7 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 		}
 		string inf("IINF ");
 		inf.reserve(79);
-		inf.append(sid).append(" CT").append(ct).append(" NI").append(uid);
+		inf.append(dcUser->getUid()).append(" CT").append(ct).append(" NI").append(uid);
 		inf.append(" SS0 HN0 HR0 HO1 VEBot\\sV:1.0 SL0 DERusHub\\sbot");
 		dcUser->setInfo(inf);
 	} else { // NMDC
@@ -1327,7 +1310,6 @@ int DcServer::unregBot(const string & uid) {
 	}
 
 	DcUser * dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByUid(uid));
-
 	if (!dcUser) { // Not found
 		return -1;
 	}

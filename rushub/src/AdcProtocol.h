@@ -71,6 +71,8 @@ public:
 	virtual void forceMove(DcConn *, const char * address, const char * reason = NULL);
 	virtual int sendNickList(DcConn *);
 
+	const char * genNewSid();
+
 protected:
 
 	DcServer * mDcServer;

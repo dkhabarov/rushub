@@ -321,8 +321,8 @@ public:
 	/// Get conn base by ip
 	virtual const vector<DcConnBase*> & getDcConnBase(const char * ip) = 0;
 
-	/// Get user base by nick
-	virtual DcUserBase * getDcUserBase(const char * nick) = 0;
+	/// Get user base by uid
+	virtual DcUserBase * getDcUserBase(const char * uid) = 0;
 
 	/// Send comand to user
 	virtual bool sendToUser(
@@ -406,14 +406,14 @@ public:
 
 	/// Registration bot
 	virtual int regBot(
-		const string & nick,
+		const string & uid,
 		const string & info,
 		const string & ip,
 		bool key = true
 	) = 0;
 
 	/// Unreg bot
-	virtual int unregBot(const string & nick) = 0;
+	virtual int unregBot(const string & uid) = 0;
 
 
 	/// Stop hub
