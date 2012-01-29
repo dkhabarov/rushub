@@ -1008,6 +1008,13 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 
 
 
+/// Reserve space in send buffer
+void Conn::reserve(size_t len) {
+	mSendBuf.reserve(mSendBuf.size() + len);
+}
+
+
+
 /// onFlush
 void Conn::onFlush() {
 	if (mProtocol && mOk && mWritable) {

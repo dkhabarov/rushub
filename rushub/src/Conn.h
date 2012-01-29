@@ -219,6 +219,9 @@ public:
 	/// Write data in sending buffer
 	size_t writeData(const char * data, size_t len, bool flush);
 
+	/// Reserve space in send buffer
+	void reserve(size_t len);
+
 protected:
 
 	string mIp; ///< Client IP address

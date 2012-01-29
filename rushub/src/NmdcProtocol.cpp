@@ -412,7 +412,7 @@ int NmdcProtocol::eventMyPass(NmdcParser *, DcConn * dcConn) {
 	if (bOp) { /** If entered operator, that sends command LoggedIn ($LogedIn !) */
 		msg.append("$LogedIn ", 9);
 		msg.append(dcConn->mDcUser->getUid());
-		msg.append(getSeparator());
+		msg.append(NMDC_SEPARATOR);
 	}
 	dcConn->send(msg);
 	dcConn->clearTimeOut(HUB_TIME_OUT_PASS);
@@ -1032,50 +1032,51 @@ int NmdcProtocol::eventUnknown(NmdcParser *, DcConn * dcConn) {
 // $Lock ...|
 string & NmdcProtocol::appendLock(string & str) {
 	str.append("$Lock EXTENDEDPROTOCOL_" INTERNALNAME "_by_setuper_" INTERNALVERSION " Pk=" INTERNALNAME);
-	return str.append(getSeparator());
+	return str.append(NMDC_SEPARATOR);
 }
 
 // $Hello nick|
 string & NmdcProtocol::appendHello(string & str, const string & nick) {
-	str.reserve(str.size() + nick.size() + 7 + getSeparatorLen());
-	return str.append("$Hello ").append(nick).append(getSeparator());
+	str.reserve(str.size() + nick.size() + 8);
+	return str.append("$Hello ").append(nick).append(NMDC_SEPARATOR);
 }
 
 // $HubIsFull|
 string & NmdcProtocol::appendHubIsFull(string & str) {
-	return str.append("$HubIsFull").append(getSeparator());
+	return str.append("$HubIsFull").append(NMDC_SEPARATOR);
 }
 
 // $GetPass|
 string & NmdcProtocol::appendGetPass(string & str) {
-	return str.append("$GetPass").append(getSeparator());
+	return str.append("$GetPass").append(NMDC_SEPARATOR);
 }
 
 // $ValidateDenide nick|
 string & NmdcProtocol::appendValidateDenied(string & str, const string & nick) {
-	str.reserve(str.size() + nick.size() + 16 + getSeparatorLen());
-	return str.append("$ValidateDenide ").append(nick).append(getSeparator());
+	str.reserve(str.size() + nick.size() + 17);
+	return str.append("$ValidateDenide ").append(nick).append(NMDC_SEPARATOR);
 }
 
 // $HubName hubName - topic|
 string & NmdcProtocol::appendHubName(string & str, const string & hubName, const string & topic) {
 	if (topic.size()) {
-		str.reserve(str.size() + hubName.size() + topic.size() + 12 + getSeparatorLen());
-		return str.append("$HubName ").append(hubName).append(" - ", 3).append(topic).append(getSeparator());
+		str.reserve(str.size() + hubName.size() + topic.size() + 13);
+		return str.append("$HubName ", 9).append(hubName).append(" - ", 3).append(topic).append(NMDC_SEPARATOR);
 	} else {
-		str.reserve(str.size() + hubName.size() + 9 + getSeparatorLen());
-		return str.append("$HubName ").append(hubName).append(getSeparator());
+		str.reserve(str.size() + hubName.size() + 10);
+		return str.append("$HubName ", 9).append(hubName).append(NMDC_SEPARATOR);
 	}
 }
 
 // $HubTopic hubTopic|
 string & NmdcProtocol::appendHubTopic(string & str, const string & hubTopic) {
-	str.reserve(str.size() + hubTopic.size() + 10 + getSeparatorLen());
-	return str.append("$HubTopic ").append(hubTopic).append(getSeparator());
+	str.reserve(str.size() + hubTopic.size() + 11);
+	return str.append("$HubTopic ", 10).append(hubTopic).append(NMDC_SEPARATOR);
 }
 
 // <nick> msg|
 void NmdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string & uid, bool flush /*= true*/) {
+	dcConn->reserve(uid.size() + data.size() + 4); // 1 + uid.size() + 2 + data.size() + 1
 	dcConn->send("<", 1, false, false);
 	dcConn->send(uid, false, false);
 	dcConn->send("> ", 2, false, false);
@@ -1084,9 +1085,17 @@ void NmdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string
 
 // $To: to From: from $<nick> msg|
 void NmdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string & uid, const string & from, bool flush /*= true*/) {
-	dcConn->send("$To: ", 5, false, false);
-	dcConn->send(dcConn->mDcUser->getUid(), false, false);
-	dcConn->send(" From: ", 7, false, false);
+	size_t len = from.size() + uid.size() + data.size() + 6; // from.size() + 3 + uid.size() + 2 + data.size() + 1
+	const string nick = dcConn->mDcUser->getUid();
+	if (!nick.empty()) {
+		dcConn->reserve(len + 12 + nick.size()); // 5 + nick.size() + 7 + len
+		dcConn->send("$To: ", 5, false, false);
+		dcConn->send(nick, false, false);
+		dcConn->send(" From: ", 7, false, false);
+	} else {
+		dcConn->reserve(len + 21);
+		dcConn->send("$To: <unknown> From: ", 21, false, false);
+	}
 	dcConn->send(from, false, false);
 	dcConn->send(" $<", 3, false, false);
 	dcConn->send(uid, false, false);
@@ -1094,39 +1103,33 @@ void NmdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string &
 	dcConn->send(data, true, flush);
 }
 
-// $To: to From: from $<nick> msg|
-void NmdcProtocol::appendPmToAll(string & start, string & end, const string & from, const string & nick, const string & msg) {
-	start.append("$To: ");
-	end.reserve(end.size() + from.size() + nick.size() + msg.size() + 12 + getSeparatorLen());
-	end.append(" From: ").append(from).append(" $<").append(nick);
-	end.append("> ").append(msg).append(getSeparator());
-}
+
 
 // $Quit nick|
 string & NmdcProtocol::appendQuit(string & str, const string & nick) {
-	str.reserve(str.size() + nick.size() + 6 + getSeparatorLen());
-	return str.append("$Quit ").append(nick).append(getSeparator());
+	str.reserve(str.size() + nick.size() + 7);
+	return str.append("$Quit ").append(nick).append(NMDC_SEPARATOR);
 }
 
 // $OpList nick$$|
 string & NmdcProtocol::appendOpList(string & str, const string & nick) {
-	str.reserve(str.size() + nick.size() + 10 + getSeparatorLen());
-	return str.append("$OpList ").append(nick).append("$$").append(getSeparator());
+	str.reserve(str.size() + nick.size() + 11);
+	return str.append("$OpList ").append(nick).append("$$").append(NMDC_SEPARATOR);
 }
 
 // $UserIP nick ip$$|
 string & NmdcProtocol::appendUserIp(string & str, const string & nick, const string & ip) {
 	if (ip.size()) {
-		str.reserve(str.size() + nick.size() + ip.size() + 11 + getSeparatorLen());
-		str.append("$UserIP ").append(nick).append(" ").append(ip).append("$$").append(getSeparator());
+		str.reserve(str.size() + nick.size() + ip.size() + 12);
+		str.append("$UserIP ").append(nick).append(" ").append(ip).append("$$").append(NMDC_SEPARATOR);
 	}
 	return str;
 }
 
 // $ForceMove address|
 string & NmdcProtocol::appendForceMove(string & str, const string & address) {
-	str.reserve(address.size() + 11 + getSeparatorLen());
-	return str.append("$ForceMove ").append(address).append(getSeparator());
+	str.reserve(address.size() + 12);
+	return str.append("$ForceMove ").append(address).append(NMDC_SEPARATOR);
 }
 
 

@@ -992,12 +992,7 @@ bool DcServer::sendToUser(DcUserBase * dcUserBase, const string & data, const ch
 		return false;
 	}
 	DcConn * dcConn = static_cast<DcConn *> (dcUserBase->mDcConnBase);
-
 	if (from && uid) {
-		string to("<unknown>"), str;
-		if (dcConn->mDcUser && !dcConn->mDcUser->getUid().empty()) {
-			to = dcConn->mDcUser->getUid();
-		}
 		dcConn->mDcUser->sendToPm(data, uid, from, true); // PM
 	} else if (uid) {
 		dcConn->mDcUser->sendToChat(data, uid, true); // Chat

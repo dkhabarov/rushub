@@ -96,7 +96,6 @@ public:
 	string & appendOpList(string & str, const string & nick);
 	string & appendUserIp(string & str, const string & nick, const string & ip);
 	string & appendForceMove(string & str, const string & address);
-	void appendPmToAll(string & start, string & end, const string & from, const string & nick, const string & msg);
 
 
 	virtual void forceMove(DcConn *, const char * address, const char * reason = NULL);
