@@ -820,7 +820,7 @@ size_t Conn::readFromRecvBuf() {
 	}
 	mCommand->reserve(size);
 	mCommand->append(buf, len);
-	return len;
+	return pos_sep ? len + getSeparatorLen() : len; // fix read len
 }
 
 
