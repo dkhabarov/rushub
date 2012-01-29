@@ -496,6 +496,9 @@ void AdcParser::parseInfo(DcUser * dcUser, const string & info) {
 	// Raplace IP
 	replaceParam(dcUser->getParam("I4"), "0.0.0.0", dcUser->getIp());
 	replaceParam(dcUser->getParam("I6"), "::", dcUser->getIp());
+
+	// Parse features
+	AdcParser::parseFeatures(dcUser);
 }
 
 
@@ -510,11 +513,12 @@ void AdcParser::replaceParam(ParamBase * param, const char * oldValue, const str
 
 
 
-void AdcParser::parseFeatures(DcUser * dcUser, set<int> & features) {
+void AdcParser::parseFeatures(DcUser * dcUser) {
 
 	ParamBase * param = dcUser->getParam("SU"); // TODO replace name to macros
 	if (param) {
 		const string & value = param->toString();
+		set<int> & features = dcUser->getFeatures();
 
 		// TODO check syntax
 		features.clear();

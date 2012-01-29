@@ -173,7 +173,6 @@ public:
 
 	bool splitChunks();
 
-	static void parseFeatures(DcUser *, set<int> & features);
 	static void parseInfo(DcUser *, const string & info);
 	static void formingInfo(DcUser *, string & info);
 
@@ -198,6 +197,7 @@ private:
 	void setError(int code, const char * text);
 
 	static void replaceParam(ParamBase * param, const char * oldValue, const string & newValue);
+	static void parseFeatures(DcUser *);
 
 }; // class AdcParser
 

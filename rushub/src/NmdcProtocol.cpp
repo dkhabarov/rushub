@@ -497,7 +497,7 @@ int NmdcProtocol::eventMyInfo(NmdcParser * dcparser, DcConn * dcConn) {
 	}
 
 	string sOldMyINFO = dcConn->mDcUser->getInfo();
-	dcConn->mDcUser->setInfo(dcparser);
+	dcConn->mDcUser->setInfo(dcparser->mCommand);
 
 	int iMode = 0;
 	#ifndef WITHOUT_PLUGINS

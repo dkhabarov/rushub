@@ -231,32 +231,14 @@ const string & DcUser::getInfo() {
 
 
 
-/// Set MyINFO string. With cmd & nick check */
+/// Set Info string
 bool DcUser::setInfo(const string & info) {
-	if (mDcServer->mDcConfig.mAdcOn) {
-		// Parse Info
+
+	// Protocol dependence
+	if (mDcServer->mDcConfig.mAdcOn) { // ADC
 		AdcParser::parseInfo(this, info);
-
-		// Parse features
-		AdcParser::parseFeatures(this, mFeatures);
-
-		return true;
-	} else {
-		NmdcParser dcParser;
-		if (NmdcParser::checkCmd(dcParser, info, this) != NMDC_TYPE_MYNIFO) {
-			return false;
-		}
-		return setInfo(&dcParser);
-	}
-}
-
-
-
-// NMDC protocol only
-bool DcUser::setInfo(NmdcParser * parser) {
-	if (mInfo != parser->mCommand) {
-		mInfo = parser->mCommand;
-		NmdcParser::parseInfo(this, parser);
+	} else { // NMDC
+		NmdcParser::parseInfo(this, info);
 	}
 	return true;
 }
@@ -271,21 +253,22 @@ const string & DcUser::getNmdcTag() {
 
 
 
+// NMDC protocol only
+bool DcUser::isPassive() const {
+	// TODO: refactoring!
+	ParamBase * mode = getParam(USER_PARAM_MODE);
+	unsigned int passive = (mode != NULL && mode->getType() == Param::TYPE_STRING && mode->getString().size()) ? mode->getString()[0] : 0;
+	return passive == 80 || passive == 53 || passive == 83;
+}
+
+
+
 /// Get IP address of user
 const string & DcUser::getIp() const {
 	if (mDcConn != NULL) {
 		return mDcConn->getIp();
 	}
 	return mIp; // TODO remove this param (now for bot only)
-}
-
-
-
-// NMDC protocol only
-bool DcUser::isPassive() const {
-	ParamBase * mode = getParam(USER_PARAM_MODE);
-	unsigned int passive = (mode != NULL && mode->getType() == Param::TYPE_STRING && mode->getString().size()) ? mode->getString()[0] : 0;
-	return passive == 80 || passive == 53 || passive == 83;
 }
 
 

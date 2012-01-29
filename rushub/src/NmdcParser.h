@@ -245,7 +245,6 @@ public:
 	
 	bool splitChunks();
 	static bool isPassive(const string & description);
-	static int checkCmd(NmdcParser & dcParser, const string & data, DcUser * dcUser = NULL);
 
 
 	static void parseDesc(DcUser *, const string & desc);
@@ -254,7 +253,7 @@ public:
 	static void setParam(DcUser *, const char * name, const string & value, bool remove = false);
 	static void setParam(DcUser *, const char * name, int value, bool remove = false);
 	static void getTag(DcUser *, string & tag);
-	static void parseInfo(DcUser *, NmdcParser * parser);
+	static void parseInfo(DcUser *, const string & info);
 	static void formingInfo(DcUser *, string & info);
 
 private:

@@ -89,7 +89,6 @@ public:
 
 	virtual const string & getInfo();
 	virtual bool setInfo(const string & info);
-	bool setInfo(NmdcParser * parser);
 
 	virtual const string & getIp() const;
 	void setIp(const string & ip);
@@ -107,6 +106,10 @@ public:
 
 	set<string> & getInfoNames() {
 		return mInfoNames;
+	}
+
+	set<int> & getFeatures() {
+		return mFeatures;
 	}
 
 private:

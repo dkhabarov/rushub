@@ -365,49 +365,39 @@ bool NmdcParser::splitChunks() {
 	return mError;
 }
 
-int NmdcParser::checkCmd(NmdcParser & dcParser, const string & data, DcUser * dcUser /*= NULL*/) {
-	dcParser.reInit();
-	dcParser.mCommand = data;
-	dcParser.parse();
-	if (dcParser.splitChunks()) {
-		return -1;
+
+
+void NmdcParser::parseInfo(DcUser * dcUser, const string & info) {
+
+	if (dcUser->getInfo() == info) {
+		return;
 	}
 
-	if (dcParser.mType == NMDC_TYPE_MYNIFO && (dcUser == NULL ||
-			dcUser->getUid().empty() ||
-			dcUser->getUid() != dcParser.chunkString(CHUNK_MI_NICK))
-	) {
-		return -2;
+	NmdcParser nmdcParser;
+	nmdcParser.mCommand = info;
+	nmdcParser.parse();
+
+	if (!nmdcParser.splitChunks() && nmdcParser.mType == NMDC_TYPE_MYNIFO) {
+
+		// Share
+		dcUser->getParamForce(USER_PARAM_SHARE)->setInt64(stringToInt64(nmdcParser.chunkString(CHUNK_MI_SIZE)));
+
+		// Email
+		dcUser->getParamForce(USER_PARAM_EMAIL)->setString(nmdcParser.chunkString(CHUNK_MI_MAIL));
+
+		string speed = nmdcParser.chunkString(CHUNK_MI_SPEED);
+		string magicByte;
+		size_t size = speed.size();
+		if (size != 0) {
+			magicByte = speed[--size];
+			speed.assign(speed, 0, size);
+		}
+
+		dcUser->getParamForce(USER_PARAM_BYTE)->setString(magicByte);
+		dcUser->getParamForce(USER_PARAM_CONNECTION)->setString(speed);
+
+		parseDesc(dcUser, nmdcParser.chunkString(CHUNK_MI_DESC));
 	}
-
-	if (dcParser.mType > 0 && dcParser.mType < 3) {
-		return 3;
-	}
-	return dcParser.mType;
-}
-
-
-
-void NmdcParser::parseInfo(DcUser * dcUser, NmdcParser * parser) {
-	// Share
-	dcUser->getParamForce(USER_PARAM_SHARE)->setInt64(stringToInt64(parser->chunkString(CHUNK_MI_SIZE)));
-
-	// Email
-	dcUser->getParamForce(USER_PARAM_EMAIL)->setString(parser->chunkString(CHUNK_MI_MAIL));
-
-
-	string speed = parser->chunkString(CHUNK_MI_SPEED);
-	string magicByte;
-	size_t size = speed.size();
-	if (size != 0) {
-		magicByte = speed[--size];
-		speed.assign(speed, 0, size);
-	}
-
-	dcUser->getParamForce(USER_PARAM_BYTE)->setString(magicByte);
-	dcUser->getParamForce(USER_PARAM_CONNECTION)->setString(speed);
-
-	parseDesc(dcUser, parser->chunkString(CHUNK_MI_DESC));
 }
 
 
