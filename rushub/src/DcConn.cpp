@@ -249,7 +249,7 @@ Conn * DcConnFactory::createConn(tSocket sock) {
 		return NULL;
 	}
 
-	DcConn * dcConn = new DcConn(CLIENT_TYPE_NMDC, sock, mServer);
+	DcConn * dcConn = new DcConn(CLIENT_TYPE_DC, sock, mServer);
 	dcConn->mSelfConnFactory = this; // Connection factory for current connection (DcConnFactory)
 
 	// Create DcUser

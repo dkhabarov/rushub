@@ -145,18 +145,18 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 		switch(adcParser->getHeader()) {
 
 			case HEADER_BROADCAST:
-				mDcServer->mAdcUserList.sendToAllAdc(adcParser->mCommand, true);
+				mDcServer->mDcUserList.sendToAllAdc(adcParser->mCommand, true);
 				break;
 
 			case HEADER_DIRECT:
-				dcUser = static_cast<DcUser *> (mDcServer->mAdcUserList.getUserBaseByUid(adcParser->getSidTarget()));
+				dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(adcParser->getSidTarget()));
 				if (dcUser) { // User was found
 					dcUser->send(adcParser->mCommand, true);
 				}
 				break;
 
 			case HEADER_ECHO:
-				dcUser = static_cast<DcUser *> (mDcServer->mAdcUserList.getUserBaseByUid(adcParser->getSidTarget()));
+				dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(adcParser->getSidTarget()));
 				if (dcUser) { // User was found
 					dcUser->send(adcParser->mCommand, true);
 					dcConn->mDcUser->send(adcParser->mCommand, true);
@@ -164,7 +164,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 				break;
 
 			case HEADER_FEATURE:
-				mDcServer->mAdcUserList.sendToFeature(adcParser->mCommand, 
+				mDcServer->mDcUserList.sendToFeature(adcParser->mCommand, 
 					adcParser->getPositiveFeatures(), 
 					adcParser->getNegativeFeatures(),
 					true);
@@ -197,7 +197,7 @@ int AdcProtocol::onNewConn(Conn * conn) {
 	UserBase * userBase = NULL;
 	do {
 		sid = getSid(++mSidNum);
-		userBase = mDcServer->mAdcUserList.getUserBaseByUid(sid);
+		userBase = mDcServer->mDcUserList.getUserBaseByUid(sid);
 	} while (userBase != NULL || strcmp(sid, "AAAA") == 0); // "AAAA" is a hub
 
 	dcConn->mDcUser->setUid(string(sid));
@@ -300,11 +300,10 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 			dcConn->send(inf, true); // Send to self only
 		} else {
 			// TODO sendMode
-			mDcServer->mAdcUserList.sendToAllAdc(inf, true);
+			mDcServer->mDcUserList.sendToAllAdc(inf, true);
 		}
 	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		dcConn->mSendNickList = true;
-		dcConn->clearTimeOut(HUB_TIME_OUT_LOGIN);
 		mDcServer->beforeUserEnter(dcConn);
 	}
 
@@ -326,7 +325,6 @@ int AdcProtocol::eventMsg(AdcParser * adcParser, DcConn * dcConn) {
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
 		mDcServer->mCalls.mOnChat.callAll(dcConn->mDcUser);
 	#endif
 
@@ -596,7 +594,7 @@ int AdcProtocol::sendNickList(DcConn * dcConn) {
 	if (mDcServer->mEnterList.find(dcConn->mDcUser->getUidHash())) {
 		dcConn->mNickListInProgress = true;
 	}
-	dcConn->send(mDcServer->mAdcUserList.getList(), true);
+	dcConn->send(mDcServer->mDcUserList.getList(), true);
 	return 0;
 }
 

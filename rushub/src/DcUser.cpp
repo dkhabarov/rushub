@@ -386,7 +386,7 @@ int DcUser::onSetHide(const string & old, const string & now) {
 int DcUser::onSetInfo(const string & old, const string & now) {
 	if (old != now) {
 		mInfoChanged = true;
-		mDcServer->mAdcUserList.remake(); // !
+		mDcServer->mDcUserList.remake(); // !
 	}
 	return 0;
 }

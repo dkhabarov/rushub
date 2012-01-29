@@ -73,7 +73,7 @@ using namespace ::std;
 
 // Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10033
+	#define INTERNAL_PLUGIN_VERSION 10034
 #endif
 
 // NMDC protocol separator
@@ -100,7 +100,7 @@ using namespace ::std;
 namespace dcserver {
 
 enum ClientType {
-	CLIENT_TYPE_NMDC = 1000,
+	CLIENT_TYPE_DC = 1000,
 	CLIENT_TYPE_WEB = 1001,
 }; // enum ClientType
 

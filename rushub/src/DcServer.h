@@ -154,8 +154,6 @@ public:
 	UserList mEnterList; ///< Enter list (NMDC)
 	UserList mChatList; ///< Chat list
 
-	UserList mAdcUserList; ///< ADC User list
-
 	int miTotalUserCount; ///< Total number of the users
 	__int64 miTotalShare; ///< Total hub share size
 
