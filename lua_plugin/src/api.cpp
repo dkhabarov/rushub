@@ -53,7 +53,7 @@ namespace luaplugin {
 DcConnBase * getDcConnBase(lua_State * L, int indx) {
 	void ** userdata = (void **) lua_touserdata(L, indx);
 	DcConnBase * dcConnBase = (DcConnBase *) *userdata; // TODO refactoring
-	if (dcConnBase->mType != CLIENT_TYPE_NMDC) {
+	if (dcConnBase->mType != CLIENT_TYPE_DC) {
 		return NULL;
 	}
 	return dcConnBase;
@@ -715,7 +715,7 @@ int getUsers(lua_State * L) {
 		DcConnListIterator * it = LuaPlugin::mCurServer->getDcConnListIterator(); // TODO refactoring
 		DcConnBase * dcConnBase = NULL;
 		while ((dcConnBase = it->operator ()()) != NULL) {
-			if (dcConnBase->mType != CLIENT_TYPE_NMDC) {
+			if (dcConnBase->mType != CLIENT_TYPE_DC) {
 				continue;
 			}
 			if (all || (dcConnBase->mDcUserBase && dcConnBase->mDcUserBase->getParam(USER_PARAM_IN_USER_LIST)->getBool())) {
