@@ -562,21 +562,25 @@ const char * AdcProtocol::getSid(unsigned int num) {
 
 
 // BMSG <my_sid> <msg>
-string & AdcProtocol::appendChat(string & str, const string & uid, const string & msg) {
-	str.reserve(str.size() + uid.size() + msg.size() + 6 + getSeparatorLen());
-	return str.append("BMSG ").append(uid).append(" ").append(msg).append(getSeparator());
+void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string & uid, bool flush /*= true*/) {
+	dcConn->send("BMSG ", 5, false, false);
+	dcConn->send(uid, false, false);
+	dcConn->send(" ", 1, false, false);
+	dcConn->send(data, true, flush);
 }
 
 
 
 // EMSG <my_sid> <target_sid> <msg> PM<group_sid>
-string & AdcProtocol::appendPm(string & str, const string & to, const string & from, const string & uid, const string & msg) {
-	str.reserve(str.size() + to.size() + from.size() + uid.size() + msg.size() + 10 + getSeparatorLen());
-	str.append("EMSG ").append(uid);
-	str.append(" ").append(to);
-	str.append(" ").append(msg);
-	str.append(" PM").append(from);
-	return str.append(getSeparator());
+void AdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string & uid, const string & from, bool flush /*= true*/) {
+	dcConn->send("EMSG ", 5, false, false);
+	dcConn->send(uid, false, false);
+	dcConn->send(" ", 1, false, false);
+	dcConn->send(dcConn->mDcUser->getUid(), false, false);
+	dcConn->send(" ", 1, false, false);
+	dcConn->send(data, false, false);
+	dcConn->send(" PM", 1, false, false);
+	dcConn->send(from, true, flush);
 }
 
 

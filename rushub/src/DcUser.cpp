@@ -78,6 +78,22 @@ void DcUser::send(const char * data, size_t len, bool addSep /*= false*/, bool f
 
 
 
+void DcUser::sendToChat(const string & data, const string & uid, bool flush /*= true*/) {
+	if (mDcConn) {
+		mDcConn->dcProtocol()->sendToChat(mDcConn, data, uid, flush);
+	}
+}
+
+
+
+void DcUser::sendToPm(const string & data, const string & uid, const string & from, bool flush /*= true*/) {
+	if (mDcConn) {
+		mDcConn->dcProtocol()->sendToPm(mDcConn, data, uid, from, flush);
+	}
+}
+
+
+
 void DcUser::disconnect() {
 	mDcConn->closeNice(9000, CLOSE_REASON_PLUGIN);
 }

@@ -149,11 +149,17 @@ public:
 	/** Sending data to profiles */
 	void sendToProfiles(unsigned long profile, const string & data, bool addSep = true);
 
-	/** Sending data sStart+Nick+sEnd to all list */
-	void sendWithNick(const string & dataStart, const string & dataEnd);
+	/** Sending to all chat */
+	void sendToAllChat(const string & data, const string & uid);
 
-	/** Sending data sStart+Nick+sEnd to profiles */
-	void sendWithNick(const string & dataStart, const string & dataEnd, unsigned long profile);
+	/** Sending to all profiles chat */
+	void sendToAllChat(const string & data, const string & uid, unsigned long profile);
+
+	/** Sending to all pm */
+	void sendToAllPm(const string & data, const string & uid, const string & from);
+
+	/** Sending to all profiles pm */
+	void sendToAllPm(const string & data, const string & uid, const string & from, unsigned long profile);
 
 	/** Sending data from cache to user */
 	void flushForUser(UserBase * userBase);

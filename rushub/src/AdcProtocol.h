@@ -65,8 +65,8 @@ public:
 	static void infList(string & list, UserBase *);
 	static const char * getSid(unsigned int num);
 
-	virtual string & appendChat(string & str, const string & uid, const string & msg);
-	virtual string & appendPm(string & str, const string & to, const string & from, const string & uid, const string & msg);
+	virtual void sendToChat(DcConn *, const string & data, const string & uid, bool flush = true);
+	virtual void sendToPm(DcConn *, const string & data, const string & uid, const string & from, bool flush = true);
 
 	virtual void forceMove(DcConn *, const char * address, const char * reason = NULL);
 	virtual int sendNickList(DcConn *);

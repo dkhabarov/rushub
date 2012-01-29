@@ -68,6 +68,10 @@ public:
 
 	virtual void send(const string & data, bool addSep = false, bool flush = true);
 	virtual void send(const char * data, size_t len, bool addSep = false, bool flush = true);
+
+	virtual void sendToChat(const string & data, const string & uid, bool flush = true);
+	virtual void sendToPm(const string & data, const string & uid, const string & from, bool flush = true);
+
 	virtual void disconnect();
 
 	virtual bool hasFeature(int feature) const;

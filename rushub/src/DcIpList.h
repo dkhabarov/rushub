@@ -47,8 +47,9 @@ public:
 	bool add(DcConn *);
 	bool remove(DcConn *);
 
-	void sendToIp(const char * ip, const char * data, unsigned long profile = 0, bool addSep = false, bool flush = true);
-	void sendToIpWithNick(const char * ip, const char * start, const char * end, unsigned long profile = 0, bool addSep = false, bool flush = true);
+	void sendToIp(const string & ip, const string & data, unsigned long profile = 0, bool addSep = false, bool flush = true);
+	void sendToIpChat(const string & ip, const string & data, const string & uid, unsigned long profile = 0, bool flush = true);
+	void sendToIpPm(const string & ip, const string & data, const string & uid, const string & from, unsigned long profile = 0, bool flush = true);
 
 	virtual void onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
 		if (log(DEBUG)) {
@@ -102,15 +103,10 @@ public:
 private:
 
 	typedef HashTable<IpList *> IpTable;
-	bool mFlush, mAddSep;
-	unsigned long mProfile;
-	const char * msData1;
-	const char * msData2;
 
 private:
 
-	size_t send(DcConn * conn);
-	size_t sendWithNick(DcConn * conn);
+	bool checkProfile(DcConn *, unsigned long profile);
 
 }; // class DcIpList
 

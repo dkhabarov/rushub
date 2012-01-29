@@ -73,7 +73,7 @@ using namespace ::std;
 
 // Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10034
+	#define INTERNAL_PLUGIN_VERSION 10035
 #endif
 
 // NMDC protocol separator
@@ -327,56 +327,56 @@ public:
 	/// Send comand to user
 	virtual bool sendToUser(
 		DcUserBase *,
-		const char * data,
-		const char * nick = NULL,
+		const string & data,
+		const char * uid = NULL,
 		const char * from = NULL
 	) = 0;
 
 	/// Send comand to nick
 	virtual bool sendToNick(
 		const char * to,
-		const char * data,
-		const char * nick = NULL,
+		const string & data,
+		const char * uid = NULL,
 		const char * from = NULL
 	) = 0;
 
 	/// Send comand to all
 	virtual bool sendToAll(
-		const char * data,
-		const char * nick = NULL,
+		const string & data,
+		const char * uid = NULL,
 		const char * from = NULL
 	) = 0;
 
 	/// Send comand to profiles
 	virtual bool sendToProfiles(
 		unsigned long profile,
-		const char * data,
-		const char * nick = NULL,
+		const string & data,
+		const char * uid = NULL,
 		const char * from = NULL
 	) = 0;
 
 	/// Send comand to ip
 	virtual bool sendToIp(
-		const char * ip,
-		const char * data,
+		const string & ip,
+		const string & data,
 		unsigned long profile = 0,
-		const char * nick = NULL,
+		const char * uid = NULL,
 		const char * from = NULL
 	) = 0;
 
 	/// Send comand to all except nicks
 	virtual bool sendToAllExceptNicks(
 		const vector<string> & nickList,
-		const char * data,
-		const char * nick = NULL,
+		const string & data,
+		const char * uid = NULL,
 		const char * from = NULL
 	) = 0;
 
 	/// Send comand to all except ips
 	virtual bool sendToAllExceptIps(
 		const vector<string> & ipList,
-		const char * data,
-		const char * nick = NULL,
+		const string & data,
+		const char * uid = NULL,
 		const char * from = NULL
 	) = 0;
 

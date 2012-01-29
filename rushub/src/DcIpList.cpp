@@ -27,12 +27,7 @@ namespace dcserver {
 
 DcIpList::DcIpList() : 
 	Obj("DcIpList"),
-	HashTable<IpList *> (1024),
-	mFlush(false),
-	mAddSep(false),
-	mProfile(0),
-	msData1(NULL),
-	msData2(NULL)
+	HashTable<IpList *> (1024)
 {
 }
 
@@ -86,16 +81,15 @@ bool DcIpList::remove(DcConn * dcConn) {
 
 
 
-void DcIpList::sendToIp(const char * ip, const char * data, unsigned long profile, bool addSep, bool flush) {
+void DcIpList::sendToIp(const string & ip, const string & data, unsigned long profile, bool addSep /*= false*/, bool flush /*= true*/) {
 	unsigned long ipHash = mHash(ip);
-	mProfile = profile;
-	msData1 = data;
-	mFlush = flush;
-	mAddSep = addSep;
 	IpList * ipList = IpTable::find(ipHash);
 	while (ipList != NULL) {
-		if (0 == strcmp(ipList->mData->getIp().c_str(), ip)) {
-			send(ipList->mData);
+		DcConn * dcConn = ipList->mData;
+		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv) {
+			if (!profile || checkProfile(dcConn, profile)) {
+				dcConn->send(data, addSep, flush);
+			}
 		}
 		ipList = ipList->mNext;
 	}
@@ -103,17 +97,15 @@ void DcIpList::sendToIp(const char * ip, const char * data, unsigned long profil
 
 
 
-void DcIpList::sendToIpWithNick(const char * ip, const char * start, const char * end, unsigned long profile, bool addSep, bool flush) {
+void DcIpList::sendToIpChat(const string & ip, const string & data, const string & uid, unsigned long profile, bool flush /*= true*/) {
 	unsigned long ipHash = mHash(ip);
-	mProfile = profile;
-	msData1 = start;
-	msData2 = end;
-	mFlush = flush;
-	mAddSep = addSep;
 	IpList * ipList = IpTable::find(ipHash);
 	while (ipList != NULL) {
-		if (0 == strcmp(ipList->mData->getIp().c_str(), ip)) {
-			sendWithNick(ipList->mData);
+		DcConn * dcConn = ipList->mData;
+		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv && dcConn->mIpRecv && !dcConn->mDcUser->getUid().empty()) {
+			if (!profile || checkProfile(dcConn, profile)) {
+				dcConn->mDcUser->sendToChat(data, uid, flush);
+			}
 		}
 		ipList = ipList->mNext;
 	}
@@ -121,53 +113,34 @@ void DcIpList::sendToIpWithNick(const char * ip, const char * start, const char 
 
 
 
-size_t DcIpList::send(DcConn * dcConn) {
-	if (!dcConn || !dcConn->mIpRecv) {
-		return 0;
+void DcIpList::sendToIpPm(const string & ip, const string & data, const string & uid, const string & from, unsigned long profile, bool flush /*= true*/) {
+	unsigned long ipHash = mHash(ip);
+	IpList * ipList = IpTable::find(ipHash);
+	while (ipList != NULL) {
+		DcConn * dcConn = ipList->mData;
+		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv && dcConn->mIpRecv && !dcConn->mDcUser->getUid().empty()) {
+			if (!profile || checkProfile(dcConn, profile)) {
+				dcConn->mDcUser->sendToPm(data, uid, from, flush);
+			}
+		}
+		ipList = ipList->mNext;
 	}
-	if (mProfile) {
-		int profile = dcConn->mDcUser->getParamForce(USER_PARAM_PROFILE)->getInt() + 1;
-		if (profile < 0) {
-			profile = -profile;
-		}
-		if (profile > 31) {
-			profile = (profile % 32) - 1;
-		}
-		if (mProfile & (1 << profile)) {
-			return dcConn->send(msData1, strlen(msData1), mAddSep, mFlush); // TODO: refactoring
-		}
-	} else {
-		return dcConn->send(msData1, strlen(msData1), mAddSep, mFlush); // TODO: refactoring
-	}
-	return 0;
 }
 
 
 
-size_t DcIpList::sendWithNick(DcConn * dcConn) {
-	// check empty nick!
-	if (!dcConn->mIpRecv || dcConn->mDcUser->getUid().empty()) {
-		return 0;
+bool DcIpList::checkProfile(DcConn * dcConn, unsigned long profile) {
+	int p = dcConn->mDcUser->getParamForce(USER_PARAM_PROFILE)->getInt() + 1;
+	if (p < 0) {
+		p = -p;
 	}
-	if (mProfile) {
-		int profile = dcConn->mDcUser->getParamForce(USER_PARAM_PROFILE)->getInt() + 1;
-		if (profile < 0) {
-			profile = -profile;
-		}
-		if (profile > 31) {
-			profile = (profile % 32) - 1;
-		}
-		if (mProfile & (1 << profile)) {
-			dcConn->send(msData1, strlen(msData1), false, false);
-			dcConn->send(dcConn->mDcUser->getUid(), false, false);
-			return dcConn->send(msData2, strlen(msData2), mAddSep, mFlush);
-		}
-	} else {
-		dcConn->send(msData1, strlen(msData1), false, false);
-		dcConn->send(dcConn->mDcUser->getUid(), false, false);
-		return dcConn->send(msData2, strlen(msData2), mAddSep, mFlush);
+	if (p > 31) {
+		p = (p % 32) - 1;
 	}
-	return 0;
+	if (profile & (1 << p)) {
+		return true;
+	}
+	return false;
 }
 
 

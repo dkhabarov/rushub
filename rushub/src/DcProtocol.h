@@ -47,8 +47,8 @@ public:
 		mDcServer = dcServer;
 	}
 
-	virtual string & appendChat(string & str, const string & uid, const string & msg) = 0;
-	virtual string & appendPm(string & str, const string & to, const string & from, const string & uid, const string & msg) = 0;
+	virtual void sendToChat(DcConn *, const string & data, const string & uid, bool flush = true) = 0;
+	virtual void sendToPm(DcConn *, const string & data, const string & uid, const string & from, bool flush = true) = 0;
 
 	virtual void forceMove(DcConn * dcConn, const char * address, const char * reason = NULL) = 0;
 	virtual int sendNickList(DcConn *) = 0;

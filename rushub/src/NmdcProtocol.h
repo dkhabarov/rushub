@@ -90,8 +90,8 @@ public:
 	string & appendValidateDenied(string & str, const string & nick);
 	string & appendHubName(string & str, const string & hubName, const string & topic);
 	string & appendHubTopic(string & str, const string & hubTopic);
-	virtual string & appendChat(string & str, const string & uid, const string & msg);
-	virtual string & appendPm(string & str, const string & to, const string & from, const string & uid, const string & msg);
+	virtual void sendToChat(DcConn *, const string & data, const string & uid, bool flush = true);
+	virtual void sendToPm(DcConn *, const string & data, const string & uid, const string & from, bool flush = true);
 	string & appendQuit(string & str, const string & nick);
 	string & appendOpList(string & str, const string & nick);
 	string & appendUserIp(string & str, const string & nick, const string & ip);

@@ -195,13 +195,13 @@ public:
 	virtual const vector<DcConnBase*> & getDcConnBase(const char * ip);
 	virtual DcUserBase * getDcUserBase(const char * nick);
 
-	virtual bool sendToUser(DcUserBase *, const char * data, const char * nick = NULL, const char * from = NULL);
-	virtual bool sendToNick(const char * to, const char * data, const char * nick = NULL, const char * from = NULL);
-	virtual bool sendToAll(const char * data, const char * nick = NULL, const char * from = NULL);
-	virtual bool sendToProfiles(unsigned long profile, const char * data, const char * nick = NULL, const char * from = NULL);
-	virtual bool sendToIp(const char * ip, const char * data, unsigned long profile = 0, const char * nick = NULL, const char * from = NULL);
-	virtual bool sendToAllExceptNicks(const vector<string> & nickList, const char * data, const char * nick = NULL, const char * from = NULL);
-	virtual bool sendToAllExceptIps(const vector<string> & ipList, const char * data, const char * nick = NULL, const char * from = NULL);
+	virtual bool sendToUser(DcUserBase *, const string & data, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToNick(const char * to, const string & data, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToAll(const string & data, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToProfiles(unsigned long profile, const string & data, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToIp(const string & ip, const string & data, unsigned long profile = 0, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToAllExceptNicks(const vector<string> & nickList, const string & data, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToAllExceptIps(const vector<string> & ipList, const string & data, const char * uid = NULL, const char * from = NULL);
 
 	virtual void forceMove(DcUserBase *, const char * address, const char * reason = NULL); ///< Redirection client
 

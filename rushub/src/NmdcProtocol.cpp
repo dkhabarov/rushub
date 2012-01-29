@@ -153,7 +153,7 @@ int NmdcProtocol::onNewConn(Conn * conn) {
 			stringReplace(sCache, "users", sCache, iUsersVal);
 			stringReplace(sCache, "share", sCache, sShareCache);
 		}
-		mDcServer->sendToUser(dcConn->mDcUser, sCache.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+		mDcServer->sendToUser(dcConn->mDcUser, sCache, mDcServer->mDcConfig.mHubBot.c_str());
 	}
 	dcConn->setTimeOut(HUB_TIME_OUT_LOGIN, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_LOGIN], mDcServer->mTime); /** Timeout for enter */
 	dcConn->setTimeOut(HUB_TIME_OUT_KEY, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_KEY], mDcServer->mTime);
@@ -352,7 +352,7 @@ int NmdcProtocol::eventValidateNick(NmdcParser * dcparser, DcConn * dcConn) {
 		if (dcConn->log(DEBUG)) {
 			dcConn->logStream() << "User " << nick << " was disconnected (user's limit: " << mDcServer->mDcConfig.mUsersLimit << ")" << endl;
 		}
-		mDcServer->sendToUser(dcConn->mDcUser, mDcServer->mDcLang.mUsersLimit.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+		mDcServer->sendToUser(dcConn->mDcUser, mDcServer->mDcLang.mUsersLimit, mDcServer->mDcConfig.mHubBot.c_str());
 		dcConn->closeNice(9000, CLOSE_REASON_USERS_LIMIT);
 		return -3;
 	}
@@ -388,7 +388,7 @@ int NmdcProtocol::eventMyPass(NmdcParser *, DcConn * dcConn) {
 		if (dcConn->log(DEBUG)) {
 			dcConn->logStream() << "Mypass before validatenick" << endl;
 		}
-		mDcServer->sendToUser(dcConn->mDcUser, mDcServer->mDcLang.mBadLoginSequence.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+		mDcServer->sendToUser(dcConn->mDcUser, mDcServer->mDcLang.mBadLoginSequence, mDcServer->mDcConfig.mHubBot.c_str());
 		dcConn->closeNice(9000, CLOSE_REASON_CMD_PASSWORD_ERR);
 		return -1;
 	}
@@ -480,7 +480,7 @@ int NmdcProtocol::eventMyInfo(NmdcParser * dcparser, DcConn * dcConn) {
 			if (dcConn->log(DEBUG)) {
 				dcConn->logStream() << "Myinfo without user: " << dcparser->mCommand << endl;
 			}
-			mDcServer->sendToUser(dcConn->mDcUser, mDcServer->mDcLang.mBadLoginSequence.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+			mDcServer->sendToUser(dcConn->mDcUser, mDcServer->mDcLang.mBadLoginSequence, mDcServer->mDcConfig.mHubBot.c_str());
 			dcConn->closeNice(9000, CLOSE_REASON_CMD_MYINFO_WITHOUT_USER);
 			return -2;
 		}
@@ -488,7 +488,7 @@ int NmdcProtocol::eventMyInfo(NmdcParser * dcparser, DcConn * dcConn) {
 		if (dcConn->log(DEBUG)) {
 			dcConn->logStream() << "Bad nick in MyINFO, closing" << endl;
 		}
-		mDcServer->sendToUser(dcConn->mDcUser, mDcServer->mDcLang.mBadMyinfoNick.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+		mDcServer->sendToUser(dcConn->mDcUser, mDcServer->mDcLang.mBadMyinfoNick, mDcServer->mDcConfig.mHubBot.c_str());
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_MYINFO);
 		return -1;
 	}
@@ -550,7 +550,7 @@ int NmdcProtocol::eventChat(NmdcParser * dcparser, DcConn * dcConn) {
 		string msg;
 		stringReplace(mDcServer->mDcLang.mBadChatNick, "nick", msg, dcparser->chunkString(CHUNK_CH_NICK));
 		stringReplace(msg, "real_nick", msg, dcConn->mDcUser->getUid());
-		mDcServer->sendToUser(dcConn->mDcUser, msg.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+		mDcServer->sendToUser(dcConn->mDcUser, msg, mDcServer->mDcConfig.mHubBot.c_str());
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_CHAT);
 		return -2;
 	}
@@ -634,10 +634,10 @@ int NmdcProtocol::eventMcTo(NmdcParser * dcparser, DcConn * dcConn) {
 		return -2;
 	}
 
-	string msg;
-	dcUser->send(appendChat(msg, dcConn->mDcUser->getUid(), dcparser->chunkString(CHUNK_MC_MSG)));
+	const string & msg = dcparser->chunkString(CHUNK_MC_MSG);
+	dcUser->sendToChat(msg, dcConn->mDcUser->getUid());
 	if (dcConn->mDcUser->getUid() != nick) {
-		dcConn->send(msg);
+		dcConn->mDcUser->sendToChat(msg, dcConn->mDcUser->getUid());
 	}
 	return 0;
 }
@@ -725,7 +725,7 @@ int NmdcProtocol::eventSearch(NmdcParser * dcparser, DcConn * dcConn) {
 				}
 				stringReplace(mDcServer->mDcLang.mBadSearchIp, "ip", msg, dcparser->chunkString(CHUNK_AS_IP));
 				stringReplace(msg, "real_ip", msg, dcConn->getIp());
-				mDcServer->sendToUser(dcConn->mDcUser, msg.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+				mDcServer->sendToUser(dcConn->mDcUser, msg, mDcServer->mDcConfig.mHubBot.c_str());
 				dcConn->closeNice(9000, CLOSE_REASON_NICK_SEARCH);
 				return -1;
 			}
@@ -744,7 +744,7 @@ int NmdcProtocol::eventSearch(NmdcParser * dcparser, DcConn * dcConn) {
 				}
 				stringReplace(mDcServer->mDcLang.mBadSearchIp, "ip", msg, dcparser->chunkString(CHUNK_AS_IP));
 				stringReplace(msg, "real_ip", msg, dcConn->getIp());
-				mDcServer->sendToUser(dcConn->mDcUser, msg.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+				mDcServer->sendToUser(dcConn->mDcUser, msg, mDcServer->mDcConfig.mHubBot.c_str());
 				dcConn->closeNice(9000, CLOSE_REASON_NICK_SEARCH);
 				return -1;
 			}
@@ -784,7 +784,7 @@ int NmdcProtocol::eventSr(NmdcParser * dcparser, DcConn * dcConn) {
 		string msg;
 		stringReplace(mDcServer->mDcLang.mBadSrNick, "nick", msg, dcparser->chunkString(CHUNK_SR_FROM));
 		stringReplace(msg, "real_nick", msg, dcConn->mDcUser->getUid());
-		mDcServer->sendToUser(dcConn->mDcUser, msg.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+		mDcServer->sendToUser(dcConn->mDcUser, msg, mDcServer->mDcConfig.mHubBot.c_str());
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_SR);
 		return -1;
 	}
@@ -830,7 +830,7 @@ int NmdcProtocol::eventConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 		string msg;
 		stringReplace(mDcServer->mDcLang.mBadCtmIp, "ip", msg, dcparser->chunkString(CHUNK_CM_IP));
 		stringReplace(msg, "real_ip", msg, dcConn->getIp());
-		mDcServer->sendToUser(dcConn->mDcUser, msg.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+		mDcServer->sendToUser(dcConn->mDcUser, msg, mDcServer->mDcConfig.mHubBot.c_str());
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_CTM);
 		return -1;
 	}
@@ -864,7 +864,7 @@ int NmdcProtocol::eventRevConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 		string msg;
 		stringReplace(mDcServer->mDcLang.mBadRevConNick, "nick", msg, dcparser->chunkString(CHUNK_RC_NICK));
 		stringReplace(msg, "real_nick", msg, dcConn->mDcUser->getUid());
-		mDcServer->sendToUser(dcConn->mDcUser, msg.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+		mDcServer->sendToUser(dcConn->mDcUser, msg, mDcServer->mDcConfig.mHubBot.c_str());
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_RCTM);
 		return -1;
 	}
@@ -1072,18 +1072,23 @@ string & NmdcProtocol::appendHubTopic(string & str, const string & hubTopic) {
 }
 
 // <nick> msg|
-string & NmdcProtocol::appendChat(string & str, const string & uid, const string & msg) {
-	str.reserve(str.size() + uid.size() + msg.size() + 3 + getSeparatorLen());
-	return str.append("<").append(uid).append("> ").append(msg).append(getSeparator());
+void NmdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string & uid, bool flush /*= true*/) {
+	dcConn->send("<", 1, false, false);
+	dcConn->send(uid, false, false);
+	dcConn->send("> ", 2, false, false);
+	dcConn->send(data, true, flush);
 }
 
 // $To: to From: from $<nick> msg|
-string & NmdcProtocol::appendPm(string & str, const string & to, const string & from, const string & uid, const string & msg) {
-	str.reserve(str.size() + to.size() + from.size() + uid.size() + msg.size() + 17 + getSeparatorLen());
-	str.append("$To: ").append(to);
-	str.append(" From: ").append(from);
-	str.append(" $<").append(uid).append("> ");
-	return str.append(msg).append(getSeparator());
+void NmdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string & uid, const string & from, bool flush /*= true*/) {
+	dcConn->send("$To: ", 5, false, false);
+	dcConn->send(dcConn->mDcUser->getUid(), false, false);
+	dcConn->send(" From: ", 7, false, false);
+	dcConn->send(from, false, false);
+	dcConn->send(" $<", 3, false, false);
+	dcConn->send(uid, false, false);
+	dcConn->send("> ", 2, false, false);
+	dcConn->send(data, true, flush);
 }
 
 // $To: to From: from $<nick> msg|
@@ -1161,8 +1166,10 @@ void NmdcProtocol::forceMove(DcConn * dcConn, const char * address, const char *
 
 	stringReplace(mDcServer->mDcLang.mForceMove, "address", force, address);
 	stringReplace(force, "reason", force, reason != NULL ? reason : "");
-	appendPm(msg, nick, mDcServer->mDcConfig.mHubBot, mDcServer->mDcConfig.mHubBot, force);
-	appendChat(msg, mDcServer->mDcConfig.mHubBot, force);
+
+	dcConn->mDcUser->sendToPm(force, mDcServer->mDcConfig.mHubBot, mDcServer->mDcConfig.mHubBot, false);
+	dcConn->mDcUser->sendToChat(force, mDcServer->mDcConfig.mHubBot, false);
+
 	dcConn->send(appendForceMove(msg, address));
 	dcConn->closeNice(9000, CLOSE_REASON_CMD_FORCE_MOVE);
 }
@@ -1268,7 +1275,7 @@ bool NmdcProtocol::antiflood(DcConn * dcConn, unsigned int type) {
 		if (!mDcServer->mCalls.mOnFlood.callAll(dcConn->mDcUser, (int) type, 1))
 		#endif
 		{
-			mDcServer->sendToUser(dcConn->mDcUser, (mDcServer->mDcLang.mFlood[type]).c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+			mDcServer->sendToUser(dcConn->mDcUser, mDcServer->mDcLang.mFlood[type], mDcServer->mDcConfig.mHubBot.c_str());
 			dcConn->closeNice(9000, CLOSE_REASON_FLOOD);
 			return true;
 		}
@@ -1280,7 +1287,7 @@ bool NmdcProtocol::antiflood(DcConn * dcConn, unsigned int type) {
 		if (!mDcServer->mCalls.mOnFlood.callAll(dcConn->mDcUser, (int) type, 2))
 		#endif
 		{
-			mDcServer->sendToUser(dcConn->mDcUser, (mDcServer->mDcLang.mFlood[type]).c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+			mDcServer->sendToUser(dcConn->mDcUser, mDcServer->mDcLang.mFlood[type], mDcServer->mDcConfig.mHubBot.c_str());
 			dcConn->closeNice(9000, CLOSE_REASON_FLOOD);
 			return true;
 		}
@@ -1298,7 +1305,7 @@ bool NmdcProtocol::validateUser(DcConn * dcConn, const string & nick) {
 		}
 		mDcServer->sendToUser(
 			dcConn->mDcUser,
-			mDcServer->mDcLang.mBadChars.c_str(),
+			mDcServer->mDcLang.mBadChars,
 			mDcServer->mDcConfig.mHubBot.c_str()
 		);
 		return false;
@@ -1330,7 +1337,7 @@ bool NmdcProtocol::checkNickLength(DcConn * dcConn, size_t len) {
 		stringReplace(mDcServer->mDcLang.mBadNickLen, "min", msg, (int) mDcServer->mDcConfig.mMinNickLen);
 		stringReplace(msg, "max", msg, (int) mDcServer->mDcConfig.mMaxNickLen);
 
-		mDcServer->sendToUser(dcConn->mDcUser, msg.c_str(), mDcServer->mDcConfig.mHubBot.c_str());
+		mDcServer->sendToUser(dcConn->mDcUser, msg, mDcServer->mDcConfig.mHubBot.c_str());
 
 		return false;
 	}
