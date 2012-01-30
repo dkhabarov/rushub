@@ -35,7 +35,6 @@ DcUser::DcUser(int type, DcConn * dcConn) :
 	mCanSend(false),
 	mInfoChanged(true)
 {
-	mDcConnBase = dcConn;
 	if (dcConn != NULL) {
 		mDcServer = dcConn->server();
 		getParamForce(USER_PARAM_IP_CONN,     false)->set(&mDcConn->mIpConn,     Param::TYPE_STRING, Param::MODE_NOT_MODIFY);
@@ -57,7 +56,6 @@ DcUser::~DcUser() {
 		delete (*it++);
 	}
 	mDcConn = NULL;
-	mDcConnBase = NULL;
 	mDcServer = NULL;
 }
 

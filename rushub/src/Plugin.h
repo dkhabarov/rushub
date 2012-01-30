@@ -180,18 +180,12 @@ public:
 
 
 
-class DcConnBase;
-
-
-
 // ================ DcUserBase ================
 
 /** Base DC user */
 class DcUserBase {
 
 public:
-
-	DcConnBase * mDcConnBase; ///< Connection
 
 	const int mType; ///< Type (for protection and compatibility)
 
@@ -234,27 +228,6 @@ private:
 	DcUserBase & operator = (const DcUserBase &);
 
 }; // class DcUserBase
-
-
-
-/** Base DC connection */
-class DcConnBase {
-
-public:
-
-	/// User
-	DcUserBase * mDcUserBase;
-
-public:
-
-	virtual ~DcConnBase() {
-	}
-
-private:
-
-	DcConnBase & operator = (const DcConnBase &);
-
-}; // class DcConnBase
 
 
 

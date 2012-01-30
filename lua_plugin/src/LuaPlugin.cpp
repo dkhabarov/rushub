@@ -36,7 +36,7 @@ bool LuaPlugin::mSetLuaPath = false;
 
 LuaPlugin::LuaPlugin() : 
 	mCurScript(NULL),
-	mCurDCConn(NULL),
+	mCurUser(NULL),
 	mListFlags(0)
 {
 	mCurLua = this;
@@ -412,10 +412,9 @@ int LuaPlugin::moveDown(LuaInterpreter * script) {
 /** 1 - blocked */
 int LuaPlugin::callAll(const char * funcName, unsigned int listFlag, vectorLuaInterpreter & vli, DcUserBase * dcUserBase, bool param /*= true*/) {
 
-	DcConnBase * dcConnBase = dcUserBase->mDcConnBase; // TODO refactoring
 	int ret = 0;
 	int block = 0; // On defaults don't block
-	mCurDCConn = dcConnBase; // TODO refactoring
+	mCurUser = dcUserBase;
 	LuaInterpreter * script = NULL;
 
 	if (!getListFlag(listFlag)) {
@@ -434,16 +433,14 @@ int LuaPlugin::callAll(const char * funcName, unsigned int listFlag, vectorLuaIn
 	for (size_t i = 0; i < vli.size(); ++i) {
 		script = vli[i];
 		if (script && script->mL) {
-			script->newCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA); // TODO refactoring
-
-			// TODO
+			script->newCallParam((void *) dcUserBase, LUA_TLIGHTUSERDATA);
 			if (param) {
-				script->newCallParam((void *) dcConnBase->mDcUserBase->getCommand(), LUA_TSTRING); // TODO refactoring
+				script->newCallParam((void *) dcUserBase->getCommand(), LUA_TSTRING);
 			}
 
 			ret = script->callFunc(funcName);
 			if (ret == 1) { // 1 - blocked
-				mCurDCConn = NULL; // TODO refactoring
+				mCurUser = NULL;
 				return 1;
 			} else if (ret && (!block || block > ret)) {
 				block = ret;
@@ -451,7 +448,7 @@ int LuaPlugin::callAll(const char * funcName, unsigned int listFlag, vectorLuaIn
 		}
 	}
 
-	mCurDCConn = NULL; // TODO refactoring
+	mCurUser = NULL;
 	return block;
 }
 
@@ -540,10 +537,8 @@ int LuaPlugin::onConfigChange(const char * name, const char * value) {
 
 /** onFlood event */
 int LuaPlugin::onFlood(DcUserBase * dcUserBase, int type1, int type2) {
-	DcConnBase * dcConnBase = dcUserBase->mDcConnBase; // TODO refactoring
 	int ret = 0, block = 0; // On defaults don't block
 	LuaInterpreter * script = NULL;
-
 	if (!getListFlag(LIST_FLOOD)) {
 		mFlood.clear();
 		listLuaInterpreter::iterator it, it_e = mLua.end();
@@ -560,7 +555,7 @@ int LuaPlugin::onFlood(DcUserBase * dcUserBase, int type1, int type2) {
 	for (size_t i = 0; i < mFlood.size(); ++i) {
 		script = mFlood[i];
 		if (script && script->mL) {
-			script->newCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA); // TODO refactoring
+			script->newCallParam((void *) dcUserBase, LUA_TLIGHTUSERDATA);
 			script->newCallParam(lua_Number(type1), LUA_TNUMBER);
 			script->newCallParam(lua_Number(type2), LUA_TNUMBER);
 			ret = script->callFunc("OnFlood");
@@ -650,7 +645,6 @@ int LuaPlugin::onScriptError(LuaInterpreter * current, const char * scriptName, 
 /** onAny event */
 int LuaPlugin::onAny(DcUserBase * dcUserBase, int type) {
 
-	DcConnBase * dcConnBase = dcUserBase->mDcConnBase; // TODO refactoring
 	int ret = 0, block = 0; // On defaults don't block
 	LuaInterpreter * script = NULL;
 	if (!getListFlag(LIST_ANY)) {
@@ -669,8 +663,8 @@ int LuaPlugin::onAny(DcUserBase * dcUserBase, int type) {
 	for (size_t i = 0; i < mAny.size(); ++i) {
 		script = mAny[i];
 		if (script && script->mL) {
-			script->newCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA); // TODO refactoring
-			script->newCallParam((void *) dcConnBase->mDcUserBase->getCommand(), LUA_TSTRING); // TODO refactoring
+			script->newCallParam((void *) dcUserBase, LUA_TLIGHTUSERDATA);
+			script->newCallParam((void *) dcUserBase->getCommand(), LUA_TSTRING);
 			script->newCallParam(lua_Number(type), LUA_TNUMBER);
 			ret = script->callFunc("OnAny");
 			if (ret == 1) {

@@ -40,7 +40,7 @@ typedef enum {
 } UserValue; /** UserValue */
 
 
-DcConnBase * getDcConnBase(lua_State * L, int indx);
+DcUserBase * getDcUserBase(lua_State * L, int indx);
 
 void copyValue(lua_State * from, lua_State * to, int pos);
 

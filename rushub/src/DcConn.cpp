@@ -43,7 +43,6 @@ DcConn::DcConn(tSocket sock, Server * server) :
 	mSrCounter(0),
 	mLoginStatus(0)
 {
-	mDcUserBase = NULL;
 	setClassName("DcConn");
 }
 
@@ -179,7 +178,6 @@ void DcConn::closeNow(int iReason) {
 /// Set user object for current connection
 bool DcConn::setUser(DcUser * dcUser) {
 	mDcUser = dcUser;
-	mDcUserBase = dcUser;
 	return true;
 }
 
@@ -285,7 +283,6 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 			// Remove DcUser
 			delete dcConn->mDcUser;
 			dcConn->mDcUser = NULL;
-			dcConn->mDcUserBase = NULL;
 		} else {
 			if (conn->log(DEBUG)) {
 				conn->logStream() << "Del conn without user" << endl;

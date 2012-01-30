@@ -50,13 +50,10 @@ namespace luaplugin {
 
 
 
-DcConnBase * getDcConnBase(lua_State * L, int indx) {
+DcUserBase * getDcUserBase(lua_State * L, int indx) {
 	void ** userdata = (void **) lua_touserdata(L, indx);
-	DcConnBase * dcConnBase = (DcConnBase *) *userdata; // TODO refactoring
-	if (dcConnBase->mDcUserBase->mType != CLIENT_TYPE_DC) {
-		return NULL;
-	}
-	return dcConnBase;
+	DcUserBase * dcUserBase = (DcUserBase *) *userdata;
+	return dcUserBase->mType == CLIENT_TYPE_DC ? dcUserBase : NULL;
 }
 
 
@@ -101,7 +98,7 @@ void copyValue(lua_State * from, lua_State * to, int idx) {
 			break;
 
 		case LUA_TUSERDATA :
-			udata = (void *) getDcConnBase(from, idx);
+			udata = (void *) getDcUserBase(from, idx);
 			if (udata) {
 				userdata = (void**) lua_newuserdata(to, sizeof(void *));
 				*userdata = udata;
@@ -219,10 +216,10 @@ int sendToUser(lua_State * L) {
 	}
 
 	if (type == LUA_TUSERDATA) {
-		DcConnBase * dcConnBase = getDcConnBase(L, 1); // TODO refactoring
-		if (!dcConnBase) {
+		DcUserBase * dcUserBase = getDcUserBase(L, 1);
+		if (!dcUserBase) {
 			return LuaUtils::pushError(L, "user was not found");
-		} else if (!LuaPlugin::mCurServer->sendToUser(dcConnBase->mDcUserBase, string(data), nick, from)) {
+		} else if (!LuaPlugin::mCurServer->sendToUser(dcUserBase, string(data), nick, from)) {
 			return LuaUtils::pushError(L, "user was not found");
 		}
 	} else if (type == LUA_TSTRING) {
@@ -619,7 +616,7 @@ int getUser(lua_State * L) {
 			return LuaUtils::pushError(L, "user was not found");
 		}
 		void ** userdata = (void **) lua_newuserdata(L, sizeof(void *));
-		*userdata = (void *) dcUserBase->mDcConnBase; // TODO refactoring
+		*userdata = (void *) dcUserBase;
 		luaL_getmetatable(L, MT_USER_CONN);
 		lua_setmetatable(L, -2);
 	} else {
@@ -641,10 +638,7 @@ int setUser(lua_State * L) {
 	}
 	DcUserBase * dcUserBase = NULL;
 	if (lua_type(L, 1) == LUA_TUSERDATA) {
-		DcConnBase * dcConnBase = getDcConnBase(L, 1); // TODO refactoring
-		if (dcConnBase != NULL) {
-			dcUserBase = dcConnBase->mDcUserBase; // TODO refactoring
-		}
+		dcUserBase = getDcUserBase(L, 1);
 	} else if (lua_isstring(L, 1)) {
 		size_t len;
 		const char * nick = lua_tolstring(L, 1, &len);
@@ -700,7 +694,7 @@ int getUsers(lua_State * L) {
 			if (all || (*it)->getParam(USER_PARAM_IN_USER_LIST)->getBool()) {
 				lua_pushnumber(L, i);
 				void ** userdata = (void **) lua_newuserdata(L, sizeof(void *));
-				*userdata = (void *) (*it)->mDcConnBase;
+				*userdata = (void *) (*it);
 				luaL_getmetatable(L, MT_USER_CONN);
 				lua_setmetatable(L, -2);
 				lua_rawset(L, topTab);
@@ -712,14 +706,14 @@ int getUsers(lua_State * L) {
 		if (lua_isboolean(L, 1) && lua_toboolean(L, 1) == 1) {
 			all = true;
 		}
-		DcListIteratorBase * it = LuaPlugin::mCurServer->getDcListIterator(); // TODO refactoring
+		DcListIteratorBase * it = LuaPlugin::mCurServer->getDcListIterator();
 		DcUserBase * dcUserBase = NULL;
 		while ((dcUserBase = it->operator ()()) != NULL) {
 			if (dcUserBase->mType == CLIENT_TYPE_DC) {
 				if (all || (dcUserBase->getParam(USER_PARAM_IN_USER_LIST)->getBool())) {
 					lua_pushnumber(L, i);
 					void ** userdata = (void **) lua_newuserdata(L, sizeof(void *));
-					*userdata = (void *) dcUserBase->mDcConnBase; // TODO refactoring
+					*userdata = (void *) dcUserBase;
 					luaL_getmetatable(L, MT_USER_CONN);
 					lua_setmetatable(L, -2);
 					lua_rawset(L, topTab);
@@ -766,10 +760,7 @@ int disconnect(lua_State * L) {
 	int type = lua_type(L, 1);
 	DcUserBase * dcUserBase = NULL;
 	if (type == LUA_TUSERDATA) {
-		DcConnBase * dcConnBase = getDcConnBase(L, 1); // TODO refactoring
-		if (dcConnBase != NULL) {
-			dcUserBase = dcConnBase->mDcUserBase; // TODO refactoring
-		}
+		dcUserBase = getDcUserBase(L, 1);
 	} else if (type == LUA_TSTRING) {
 		size_t len;
 		const char * nick = lua_tolstring(L, 1, &len);
@@ -1115,11 +1106,11 @@ int setCmd(lua_State * L) {
 		return 0;
 	}
 	const char * data = luaL_checkstring(L, 1);
-	if (!LuaPlugin::mCurLua->mCurDCConn) {
+	if (!LuaPlugin::mCurLua->mCurUser) {
 		luaL_argerror(L, 1, "internal fatal error");
 		return 0;
 	}
-	if (!LuaPlugin::mCurLua->mCurDCConn->mDcUserBase->parseCommand(data)) {
+	if (!LuaPlugin::mCurLua->mCurUser->parseCommand(data)) {
 		luaL_argerror(L, 1, "wrong syntax");
 		return 0;
 	}
@@ -1430,10 +1421,7 @@ int redirect(lua_State * L) {
 		}
 		dcUserBase = LuaPlugin::mCurServer->getDcUserBase(lua_tostring(L, 1));
 	} else {
-		DcConnBase * dcConnBase = getDcConnBase(L, 1); // TODO refactoring
-		if (dcConnBase != NULL) {
-			dcUserBase = dcConnBase->mDcUserBase; // TODO refactoring
-		}
+		dcUserBase = getDcUserBase(L, 1);
 	}
 
 	if (dcUserBase == NULL) {

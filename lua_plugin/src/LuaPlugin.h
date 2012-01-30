@@ -107,7 +107,7 @@ public:
 	TasksList mTasksList;
 	TimerList * mTimerList;
 
-	DcConnBase * mCurDCConn; /** Current connection (only for events) */
+	DcUserBase * mCurUser; /** Current user (only for events) */
 
 public:
 

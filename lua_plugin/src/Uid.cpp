@@ -65,8 +65,8 @@ int Uid::uidToString(lua_State * L) {
 
 int Uid::userIndex(lua_State * L) {
 
-	DcConnBase * dcConnBase = getDcConnBase(L, 1); // TODO refactoring
-	if (!dcConnBase) {
+	DcUserBase * dcUserBase = getDcUserBase(L, 1);
+	if (!dcUserBase) {
 		ERR_TYPEMETA(1, "UID", "userdata");
 	}
 
@@ -74,8 +74,6 @@ int Uid::userIndex(lua_State * L) {
 	if (!str) {
 		ERR_TYPEMETA(2, "UID", "string");
 	}
-
-	DcUserBase * dcUserBase = dcConnBase->mDcUserBase; // TODO refactoring
 
 	void ** userdata = NULL;
 	switch(getHash(str)) {
@@ -94,7 +92,7 @@ int Uid::userIndex(lua_State * L) {
 
 		case PARAM_HASH_UID :
 			userdata = (void **) lua_newuserdata(L, sizeof(void *));
-			*userdata = (void *) dcConnBase; // TODO refactoring
+			*userdata = (void *) dcUserBase;
 			luaL_getmetatable(L, MT_USER_CONN);
 			lua_setmetatable(L, -2);
 			break;
@@ -111,8 +109,8 @@ int Uid::userIndex(lua_State * L) {
 
 int Uid::userNewIndex(lua_State * L) {
 
-	DcConnBase * dcConnBase = getDcConnBase(L, 1); // TODO refactoring
-	if (!dcConnBase) {
+	DcUserBase * dcUserBase = getDcUserBase(L, 1);
+	if (!dcUserBase) {
 		ERR_TYPEMETA(1, "UID", "userdata");
 	}
 
@@ -121,7 +119,6 @@ int Uid::userNewIndex(lua_State * L) {
 		ERR_TYPEMETA(2, "UID", "string");
 	}
 
-	DcUserBase * dcUserBase = dcConnBase->mDcUserBase; // TODO refactoring
 	int type = lua_type(L, 3);
 
 	switch(getHash(str)) {

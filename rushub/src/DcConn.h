@@ -148,7 +148,7 @@ public:
 
 
 /// Main DC connection
-class DcConn : public Conn, public DcConnBase {
+class DcConn : public Conn {
 
 	friend class DcUser; // for Param
 

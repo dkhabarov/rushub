@@ -989,10 +989,11 @@ const vector<DcUserBase *> & DcServer::getDcUserBaseByIp(const char * ip) {
 
 /// Send data to user
 bool DcServer::sendToUser(DcUserBase * dcUserBase, const string & data, const char * uid, const char * from) {
-	if (!dcUserBase || !dcUserBase->mDcConnBase) {
+	DcUser * dcUser = static_cast<DcUser *> (dcUserBase);
+	if (!dcUser || !dcUser->mDcConn) {
 		return false;
 	}
-	DcConn * dcConn = static_cast<DcConn *> (dcUserBase->mDcConnBase);
+	DcConn * dcConn = dcUser->mDcConn;
 	if (from && uid) {
 		dcConn->mDcUser->sendToPm(data, uid, from, true); // PM
 	} else if (uid) {
@@ -1134,11 +1135,11 @@ bool DcServer::sendToAllExceptIps(const vector<string> & ipList, const string & 
 
 
 void DcServer::forceMove(DcUserBase * dcUserBase, const char * address, const char * reason /* = NULL */) {
-	if (!address) {
+	DcUser * dcUser = static_cast<DcUser *> (dcUserBase);
+	if (!address || !dcUser || !dcUser->mDcConn) {
 		return;
 	}
-	DcConn * dcConn = static_cast<DcConn *> (dcUserBase->mDcConnBase);
-	dcConn->dcProtocol()->forceMove(dcConn, address, reason);
+	dcUser->mDcConn->dcProtocol()->forceMove(dcUser->mDcConn, address, reason);
 }
 
 
