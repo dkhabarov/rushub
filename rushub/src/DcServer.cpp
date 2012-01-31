@@ -206,6 +206,12 @@ const string & DcServer::getLogDir() const {
 
 
 
+const string & DcServer::getPluginDir() const {
+	return mPluginList.getPluginDir();
+}
+
+
+
 const string & DcServer::getTime() {
 	stringstream oss;
 	oss << mTime.asDate();
@@ -263,6 +269,18 @@ __int64 DcServer::getTotalShare() const {
 
 DcListIteratorBase * DcServer::getDcListIterator() {
 	return new DcListIterator(this);
+}
+
+
+
+bool DcServer::regCallList(const char * id, Plugin * plugin) {
+	return mPluginList.regCallList(id, plugin);
+}
+
+
+
+bool DcServer::unregCallList(const char * id, Plugin * plugin) {
+	return mPluginList.unregCallList(id, plugin);
 }
 
 

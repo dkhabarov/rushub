@@ -119,7 +119,7 @@ public:
 	}
 
 	virtual void onLoad(DcServerBase *); /** Actions when loading plugin */
-	virtual bool regAll(PluginListBase *); /** Registration all events for this plugin */
+	bool regAll(DcServerBase *); /** Registration all events for this plugin */
 
 	// events
 	virtual int onUserConnected(DcUserBase *);

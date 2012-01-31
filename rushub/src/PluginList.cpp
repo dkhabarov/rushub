@@ -146,8 +146,6 @@ bool PluginList::loadPlugin(const string & filePath) {
 		}
 		mPluginLoaderHash.push_back(mPluginLoaders.mHash(pluginLoader->mPlugin->getName()));
 
-		pluginLoader->mPlugin->setPluginList(this); /** Set pointer on list for plugin */
-		pluginLoader->mPlugin->regAll(this); /** Reg all call-function for this plugin */
 		onPluginLoad(pluginLoader->mPlugin); /** OnLoad */
 
 	} catch (...) {

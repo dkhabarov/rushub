@@ -73,7 +73,7 @@ using namespace ::std;
 
 // Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10037
+	#define INTERNAL_PLUGIN_VERSION 10038
 #endif
 
 // NMDC protocol separator
@@ -260,6 +260,9 @@ public:
 	/// Get logs path
 	virtual const string & getLogDir() const = 0;
 
+	/// Get plugins path
+	virtual const string & getPluginDir() const = 0;
+
 	/// Get system date-time string (now)
 	virtual const string & getTime() = 0;
 
@@ -392,6 +395,12 @@ public:
 	virtual void restartHub() = 0;
 
 
+	/// Reg plugin in list with id
+	virtual bool regCallList(const char * id, Plugin *) = 0;
+
+	/// Unreg plugin from list with id
+	virtual bool unregCallList(const char * id, Plugin *) = 0;
+
 }; // class DcServerBase
 
 
@@ -445,27 +454,6 @@ namespace plugin {
 using namespace ::dcserver;
 using namespace ::webserver;
 
-class Plugin;
-
-
-// ================ PluginListBase ================
-
-/** Base plugin list */
-class PluginListBase {
-
-public:
-
-	/// Get plugins path
-	virtual const string & getPluginDir() const = 0;
-
-	/// Reg plugin in list with id
-	virtual bool regCallList(const char * id, Plugin *) = 0;
-
-	/// Unreg plugin from list with id
-	virtual bool unregCallList(const char * id, Plugin *) = 0;
-
-}; // class PluginListBase
-
 
 // ================ Plugin ================
 
@@ -481,16 +469,12 @@ public:
 
 	Plugin() : 
 		mInternalPluginVersion(INTERNAL_PLUGIN_VERSION),
-		mIsAlive(true),
-		mPluginListBase(NULL)
+		mIsAlive(true)
 	{
 	}
 
 	virtual ~Plugin() {
 	}
-
-	/// Reg function in all call lists
-	virtual bool regAll(PluginListBase *) = 0;
 
 	/// OnLoad plugin function
 	virtual void onLoad(DcServerBase *) {
@@ -624,16 +608,6 @@ public:
 		return mIsAlive;
 	}
 
-	/// Set plugin-list for plugin
-	void setPluginList(PluginListBase * pluginListBase) {
-		mPluginListBase = pluginListBase;
-	}
-
-	/// Get plugins path
-	virtual const string & getPluginDir() const {
-		return mPluginListBase->getPluginDir();
-	}
-
 protected:
 
 	/// Name of the plugin
@@ -646,9 +620,6 @@ private:
 
 	/// State of plugin (loaded or not loaded)
 	bool mIsAlive;
-
-	/// Pointer to list of all plugins
-	PluginListBase * mPluginListBase;
 
 	Plugin & operator = (const Plugin &);
 

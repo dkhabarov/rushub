@@ -56,6 +56,8 @@ void LuaPlugin::onLoad(DcServerBase * dcServerBase) {
 	//setlocale(LC_ALL, dcServerBase->getLocale().c_str());
 	mCurServer = dcServerBase;
 
+	regAll(dcServerBase); // Registration all events for this plugin
+
 	string mainDir(dcServerBase->getMainDir());
 
 	mScriptsDir = mainDir + "scripts/";
@@ -102,33 +104,33 @@ void LuaPlugin::onLoad(DcServerBase * dcServerBase) {
 }
 
 /** Registration all events */
-bool LuaPlugin::regAll(PluginListBase * pluginListBase) {
-	pluginListBase->regCallList("Timer",       this);
-	pluginListBase->regCallList("Conn",        this);
-	pluginListBase->regCallList("Disconn",     this);
-	pluginListBase->regCallList("Enter",       this);
-	pluginListBase->regCallList("Exit",        this);
-	pluginListBase->regCallList("Supports",    this);
-	pluginListBase->regCallList("Key",         this);
-	pluginListBase->regCallList("Validate",    this);
-	pluginListBase->regCallList("MyPass",      this);
-	pluginListBase->regCallList("Version",     this);
-	pluginListBase->regCallList("GetNickList", this);
-	pluginListBase->regCallList("MyINFO",      this);
-	pluginListBase->regCallList("Chat",        this);
-	pluginListBase->regCallList("To",          this);
-	pluginListBase->regCallList("CTM",         this);
-	pluginListBase->regCallList("RCTM",        this);
-	pluginListBase->regCallList("Search",      this);
-	pluginListBase->regCallList("SR",          this);
-	pluginListBase->regCallList("Kick",        this);
-	pluginListBase->regCallList("OpForce",     this);
-	pluginListBase->regCallList("GetINFO",     this);
-	pluginListBase->regCallList("MCTo",        this);
-	pluginListBase->regCallList("Any",         this);
-	pluginListBase->regCallList("Unknown",     this);
-	pluginListBase->regCallList("Flood",       this);
-	pluginListBase->regCallList("WebData",     this);
+bool LuaPlugin::regAll(DcServerBase * dcServerBase) {
+	dcServerBase->regCallList("Timer",       this);
+	dcServerBase->regCallList("Conn",        this);
+	dcServerBase->regCallList("Disconn",     this);
+	dcServerBase->regCallList("Enter",       this);
+	dcServerBase->regCallList("Exit",        this);
+	dcServerBase->regCallList("Supports",    this);
+	dcServerBase->regCallList("Key",         this);
+	dcServerBase->regCallList("Validate",    this);
+	dcServerBase->regCallList("MyPass",      this);
+	dcServerBase->regCallList("Version",     this);
+	dcServerBase->regCallList("GetNickList", this);
+	dcServerBase->regCallList("MyINFO",      this);
+	dcServerBase->regCallList("Chat",        this);
+	dcServerBase->regCallList("To",          this);
+	dcServerBase->regCallList("CTM",         this);
+	dcServerBase->regCallList("RCTM",        this);
+	dcServerBase->regCallList("Search",      this);
+	dcServerBase->regCallList("SR",          this);
+	dcServerBase->regCallList("Kick",        this);
+	dcServerBase->regCallList("OpForce",     this);
+	dcServerBase->regCallList("GetINFO",     this);
+	dcServerBase->regCallList("MCTo",        this);
+	dcServerBase->regCallList("Any",         this);
+	dcServerBase->regCallList("Unknown",     this);
+	dcServerBase->regCallList("Flood",       this);
+	dcServerBase->regCallList("WebData",     this);
 	return true;
 }
 
@@ -289,7 +291,7 @@ int LuaPlugin::restartScripts(LuaInterpreter * curScript, int type) {
 
 /** Loading all scripts */
 int LuaPlugin::loadScripts() {
-	TiXmlDocument file((this->getPluginDir() + "scripts.xml").c_str());
+	TiXmlDocument file((mCurServer->getPluginDir() + "scripts.xml").c_str());
 	if (file.LoadFile()) {
 		TiXmlHandle mainHandle(&file);
 		TiXmlElement * mainItem = mainHandle.FirstChild("Scripts").Element();
@@ -355,7 +357,7 @@ int LuaPlugin::clear() {
 }
 
 void LuaPlugin::save() {
-	TiXmlDocument file((this->getPluginDir() + "scripts.xml").c_str());
+	TiXmlDocument file((mCurServer->getPluginDir() + "scripts.xml").c_str());
 	file.InsertEndChild(TiXmlDeclaration("1.0", "windows-1251", "yes"));
 	TiXmlElement mainItem("Scripts");
 	mainItem.SetAttribute("Version", PLUGIN_VERSION);

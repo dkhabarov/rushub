@@ -173,6 +173,8 @@ public:
 
 	virtual const string & getLogDir() const;
 
+	virtual const string & getPluginDir() const;
+
 	virtual const string & getTime();
 
 	virtual const string & getHubInfo() const;
@@ -221,6 +223,9 @@ public:
 	virtual void restartHub() {
 		stop(1);
 	}
+
+	virtual bool regCallList(const char * id, Plugin *);
+	virtual bool unregCallList(const char * id, Plugin *);
 
 
 
