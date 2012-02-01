@@ -21,10 +21,19 @@
 #include "LuaPlugin.h"
 #include "Dir.h"
 
-#include "tinyxml/tinyxml.h"
+#ifdef HAVE_CONFIG_H
+  #include <config.h>
+#endif // HAVE_CONFIG_H
+
+#if HAVE_TINYXML_H
+  #include <tinyxml.h>
+#else
+  #include "tinyxml/tinyxml.h"
+#endif // HAVE_TINYXML_H
+
 #ifdef _WIN32
 	#pragma comment(lib, "tinyxml.lib")
-#endif
+#endif // _WIN32
 
 using namespace ::utils;
 
