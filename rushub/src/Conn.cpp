@@ -558,7 +558,7 @@ int Conn::defineConnInfo(sockaddr_storage & storage) {
 	if (mSocket) {
 		char host[NI_MAXHOST] = { 0 };
 		char port[NI_MAXSERV] = { 0 };
-		int ret = getnameinfo((struct sockaddr *) &storage, sizeof(struct sockaddr), host, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+		int ret = getnameinfo((struct sockaddr *) &storage, sizeof(struct sockaddr_storage), host, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
 		if (ret != 0) {
 			if (log(WARN)) {
 				logStream() << "Error in getnameinfo: " << SOCK_ERR_GAI_MSG(ret) << " [" << SOCK_ERR_GAI(ret) << "]" << endl;
