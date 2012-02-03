@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
-
 #include <signal.h>
 
 using namespace ::std;
@@ -114,9 +113,9 @@ public:
 	NmdcClient(const char * ip, const char * port, int maxConn, int batch, const char * logPath, int logLevel) : 
 		Server(),
 		mConnFactory(NULL),
-		mConnCount(0),
 		mIp(ip),
 		mPort(port),
+		mConnCount(0),
 		mMaxConn(maxConn),
 		mBatch(batch)
 	{
@@ -130,13 +129,13 @@ public:
 
 private:
 
-	int mConnCount;
-	Time mChecker;
-
 	const char * mIp;
 	const char * mPort;
+	int mConnCount;
 	int mMaxConn;
 	int mBatch;
+	
+	Time mChecker;
 
 private:
 
@@ -195,7 +194,6 @@ void printHelp() {
 		"  -batch <batch>\tset entering batch" << endl <<
 		"  -logPath <path>\tset log path" << endl <<
 		"  -logLevel <level>\tset log level" << endl <<
-		"  -errLevel <level>\tset error level" << endl <<
 		"  -help\t\t\tshow this help" << endl;
 }
 
@@ -242,7 +240,7 @@ int main(int argc, char ** argv) {
 	if (batch > maxConn) {
 		batch = maxConn;
 	}
-	if (batch > 100) {
+	if (batch > 100) { // max 100
 		batch = 100;
 	}
 
@@ -251,7 +249,6 @@ int main(int argc, char ** argv) {
 
 	NmdcProtocol nmdcProtocol;
 	client.mConnFactory = new ConnFactory(&nmdcProtocol, &client);
-
 	client.run();
 
 	return 0;
