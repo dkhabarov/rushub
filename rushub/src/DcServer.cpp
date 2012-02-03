@@ -1514,7 +1514,7 @@ string DcServer::getSysVersion() {
 #if defined(SOLARIS) || defined(_SOLARIS)
 	return "Solaris";
 #else
-	utsname osname;
+	struct utsname osname;
 	if (uname(&osname) == 0) {
 		string version(osname.sysname);
 		version.append(" ", 1);
