@@ -59,7 +59,7 @@ DcConfig::DcConfig(ConfigLoader * configLoader, Server * server, const string & 
 	#ifndef _WIN32
 		// Go to the work directory
 		if ((chdir(mMainPath.c_str())) < 0) {
-			if (log(ERR)) {
+			if (log(LEVEL_ERROR)) {
 				logStream() << "Can not go to the work directory '" << mMainPath << "'. Error: " << strerror(errno) << endl;
 			}
 		}
@@ -308,7 +308,7 @@ int DcConfig::reload() {
 	int ret = load();
 	if (ret < 0) {
 		if (ret != -4) {
-			mMaxLevel = INFO; // Set default log level
+			mMaxLevel = LEVEL_INFO; // Set default log level
 		}
 		save();
 		return 1;

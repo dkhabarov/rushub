@@ -96,7 +96,7 @@ string & Parser::chunkString(unsigned int n) {
 		return mCommand; // Empty line always full, and this pointer for empty line
 	}
 	if (n > mChunks.size()) { // This must not never happen, but if this happens, we are prepared
-		if (log(FATAL)) {
+		if (log(LEVEL_FATAL)) {
 			logStream() << "Error number of chunks" << endl;
 		}
 		return mStrings[0];
@@ -109,7 +109,7 @@ string & Parser::chunkString(unsigned int n) {
 		size_t size = mCommand.size();
 		if (c.first < size && c.second < size) {
 			mStrings[n].assign(mCommand, c.first, c.second); // Record n part in n element of the array of the lines
-		} else if (log(ERR)) {
+		} else if (log(LEVEL_ERROR)) {
 			logStream() << "Badly parsed message : " << mCommand << endl;
 		}
 	}

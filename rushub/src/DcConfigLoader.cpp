@@ -65,7 +65,7 @@ int DcConfigLoader::save(ConfigListBase * configListBase, const ConfigStore & co
 int DcConfigLoader::loadFromXml(ConfigListBase * configListBase, const string & fileName) {
 	TiXmlDocument file(fileName.c_str());
 	if (!file.LoadFile()) {
-		if (log(WARN)) {
+		if (log(LEVEL_WARN)) {
 			logStream() << "Can't open file '" << fileName <<
 			"' for reading." << endl;
 		}
@@ -101,7 +101,7 @@ int DcConfigLoader::loadFromXml(ConfigListBase * configListBase, const string & 
 			delete iss;
 			iss = NULL;
 		} else {
-			if (log(TRACE)) {
+			if (log(LEVEL_TRACE)) {
 				logStream() << "Uknown variable '" << name <<
 				"' in file '" << fileName << "', ignoring it" << endl;
 			}

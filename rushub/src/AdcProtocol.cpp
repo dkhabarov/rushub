@@ -122,7 +122,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 	AdcParser * adcParser = static_cast<AdcParser *> (parser);
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 
-	if (log(TRACE)) {
+	if (log(LEVEL_TRACE)) {
 		logStream() << "doCommand" << endl;
 	}
 
@@ -142,7 +142,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 		}
 	#endif
 
-	if (dcConn->log(TRACE)) {
+	if (dcConn->log(LEVEL_TRACE)) {
 		dcConn->logStream() << "[S]Stage " << adcParser->mType << endl;
 	}
 
@@ -181,7 +181,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 		}
 	}
 
-	if (dcConn->log(TRACE)) {
+	if (dcConn->log(LEVEL_TRACE)) {
 		dcConn->logStream() << "[E]Stage " << adcParser->mType << endl;
 	}
 	return 0;
@@ -650,7 +650,7 @@ int AdcProtocol::sendNickList(DcConn * dcConn) {
 void AdcProtocol::onFlush(Conn * conn) {
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 	if (dcConn->mNickListInProgress) {
-		if (dcConn->log(DEBUG)) {
+		if (dcConn->log(LEVEL_DEBUG)) {
 			dcConn->logStream() << "Enter after nicklist" << endl;
 		}
 		dcConn->mNickListInProgress = false;
@@ -665,7 +665,7 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 	// TODO Checking length of command
 
 	if (adcParser->mType == ADC_TYPE_INVALID) {
-		if (dcConn->log(DEBUG)) {
+		if (dcConn->log(LEVEL_DEBUG)) {
 			dcConn->logStream() << "Wrong syntax cmd" << endl;
 		}
 		string msg("ISTA "), buff;
@@ -681,7 +681,7 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 
 	// Checking null chars
 	if (strlen(adcParser->mCommand.data()) < adcParser->mCommand.size()) {
-		if (dcConn->log(WARN)) {
+		if (dcConn->log(LEVEL_WARN)) {
 			dcConn->logStream() << "Sending null chars, probably attempt an attack" << endl;
 		}
 		dcConn->closeNow(CLOSE_REASON_CMD_NULL);
@@ -693,7 +693,7 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 	if (adcParser->splitChunks()) {
 		// Protection from commands, not belonging to DC protocol
 		if (adcParser->mType != ADC_TYPE_UNKNOWN || mDcServer->mDcConfig.mDisableNoDCCmd) {
-			if (dcConn->log(DEBUG)) {
+			if (dcConn->log(LEVEL_DEBUG)) {
 				dcConn->logStream() << "Unknown cmd: " << adcParser->mType << endl;
 			}
 			dcConn->closeNice(9000, CLOSE_REASON_CMD_SYNTAX);

@@ -36,7 +36,7 @@ namespace utils {
 #define LOG_FILE "system.%Y-%m-%d.log"
 
 bool Obj::mSysLogOn = false;
-int Obj::mMaxLevel = TRACE; // set max level for log before load config
+int Obj::mMaxLevel = LEVEL_TRACE; // set max level for log before load config
 
 
 ofstream Obj::mOfs;
@@ -59,7 +59,7 @@ Obj::Obj(const char * name) :
 	mToLog(&cout)
 {
 	++mCounterObj;
-	//if (log(WARN)) logStream() << "+ " << mClassName << endl;
+	//if (log(LEVEL_WARN)) logStream() << "+ " << mClassName << endl;
 }
 
 
@@ -78,14 +78,14 @@ Obj::Obj() :
 	mToLog(&cout)
 {
 	++mCounterObj;
-	//if (log(WARN)) logStream() << "+ " << mClassName << endl;
+	//if (log(LEVEL_WARN)) logStream() << "+ " << mClassName << endl;
 }
 
 
 
 Obj::~Obj() {
 	--mCounterObj;
-	//if (string(mClassName) != "DcServer" && log(WARN)) logStream() << "- " << mClassName << endl;
+	//if (string(mClassName) != "DcServer" && log(LEVEL_WARN)) logStream() << "- " << mClassName << endl;
 }
 
 
@@ -126,7 +126,7 @@ const char * Obj::getClassName() {
 
 /** Set class name */
 void Obj::setClassName(const char * name) {
-	//if (log(WARN)) logStream() << "r " << mClassName << " -> " << name << endl;
+	//if (log(LEVEL_WARN)) logStream() << "r " << mClassName << " -> " << name << endl;
 	mClassName = name;
 }
 
@@ -246,22 +246,22 @@ int Obj::sysLogLevel(int level) {
 
 	switch (level) {
 
-		case FATAL :
+		case LEVEL_FATAL :
 			return LOG_USER | LOG_CRIT;
 
-		case ERR :
+		case LEVEL_ERROR :
 			return LOG_USER | LOG_ERR;
 
-		case WARN :
+		case LEVEL_WARN :
 			// Fallthrough
 
-		case INFO :
+		case LEVEL_INFO :
 			return LOG_USER | LOG_NOTICE;
 
-		case DEBUG :
+		case LEVEL_DEBUG :
 			return LOG_USER | LOG_INFO;
 
-		case TRACE :
+		case LEVEL_TRACE :
 			return LOG_USER | LOG_DEBUG;
 
 		default :

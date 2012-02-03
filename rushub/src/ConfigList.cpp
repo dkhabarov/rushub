@@ -54,7 +54,7 @@ ConfigListBase::~ConfigListBase() {
 ConfigItem * ConfigListBase::add(const string & key, ConfigItem * configItem) {
 	Hash_t hash = mList.mHash(key);
 	if (!mList.add(hash, configItem)) { /** Add */
-		if (log(DEBUG)) {
+		if (log(LEVEL_DEBUG)) {
 			ConfigItem * other = mList.find(hash);
 			logStream() << "Don't add " << key << " because of " << (other ? other->mName.c_str() : "NULL") << endl;
 			return NULL;

@@ -75,6 +75,9 @@
 	#include <sys/socket.h> ///< for AF_INET
 	#include <netdb.h>      ///< for gethostbyaddr
 	#include <fcntl.h>      ///< for nonblock flags F_GETFL & etc
+	#ifndef MSG_NOSIGNAL
+		#define MSG_NOSIGNAL 0 ///< OpenSolaris
+	#endif
 	#define sockoptval_t int
 	#define SOCK_ERR errno
 	#define SOCK_ERR_MSG strerror(errno)

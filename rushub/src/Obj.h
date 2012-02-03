@@ -42,12 +42,12 @@ using namespace ::std;
 namespace utils {
 
 enum {
-	FATAL, // fatal error
-	ERR,   // simple error
-	WARN,  // warning
-	INFO,  // information
-	DEBUG, // debug
-	TRACE  // tracing
+	LEVEL_FATAL, // fatal error
+	LEVEL_ERROR, // simple error
+	LEVEL_WARN,  // warning
+	LEVEL_INFO,  // information
+	LEVEL_DEBUG, // debug
+	LEVEL_TRACE  // tracing
 };
 
 /** Main stream of log system */

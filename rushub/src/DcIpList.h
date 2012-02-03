@@ -52,7 +52,7 @@ public:
 	void sendToIpPm(const string & ip, const string & data, const string & uid, const string & from, unsigned long profile = 0, bool flush = true);
 
 	virtual void onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
-		if (log(DEBUG)) {
+		if (log(LEVEL_DEBUG)) {
 			logStream() << "Autoresizing: size = " << currentSize << 
 				", capacity = " << oldCapacity << " -> " + newCapacity << endl;
 		}

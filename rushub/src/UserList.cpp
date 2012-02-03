@@ -312,7 +312,7 @@ const string & UserList::getList(int number) {
  */
 void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 	if (!useCache) {
-		if (log(TRACE)) {
+		if (log(LEVEL_TRACE)) {
 			logStream() << "sendToAll begin" << endl;
 		}
 
@@ -324,7 +324,7 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 			for_each(begin(), end(), ufSend(data, addSep));
 		}
 
-		if (log(TRACE)) {
+		if (log(LEVEL_TRACE)) {
 			logStream() << "sendToAll end" << endl;
 		}
 	} else {
@@ -336,7 +336,7 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 
 void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 	if (!useCache) {
-		if (log(TRACE)) {
+		if (log(LEVEL_TRACE)) {
 			logStream() << "sendToAll begin" << endl;
 		}
 
@@ -348,7 +348,7 @@ void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 			for_each(begin(), end(), ufSend(data, addSep));
 		}
 
-		if (log(TRACE)) {
+		if (log(LEVEL_TRACE)) {
 			logStream() << "sendToAll end" << endl;
 		}
 	} else {
@@ -361,13 +361,13 @@ void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 void UserList::sendToFeature(const string & data, const vector<int> & positive, 
 		const vector<int> & negative, bool addSep) {
 
-	if (log(TRACE)) {
+	if (log(LEVEL_TRACE)) {
 		logStream() << "sendToFeature begin" << endl;
 	}
 
 	for_each(begin(), end(), ufSendFeature(data, addSep, positive, negative));
 
-	if (log(TRACE)) {
+	if (log(LEVEL_TRACE)) {
 		logStream() << "sendToFeature end" << endl;
 	}
 }
@@ -376,13 +376,13 @@ void UserList::sendToFeature(const string & data, const vector<int> & positive,
 
 /** Sending data to profiles */
 void UserList::sendToProfiles(unsigned long profile, const string & data, bool addSep) {
-	if (log(TRACE)) {
+	if (log(LEVEL_TRACE)) {
 		logStream() << "sendToProfiles begin" << endl;
 	}
 
 	for_each(begin(), end(), ufSendProfile(data, profile, addSep));
 
-	if (log(TRACE)) {
+	if (log(LEVEL_TRACE)) {
 		logStream() << "sendToProfiles end" << endl;
 	}
 }
@@ -467,7 +467,7 @@ void UserList::onRemove(UserBase *) {
 
 
 void UserList::onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
-	if (log(DEBUG)) {
+	if (log(LEVEL_DEBUG)) {
 		logStream() << "Autoresizing: size = " << currentSize << 
 		", capacity = " << oldCapacity << " -> " << newCapacity << endl;
 	}

@@ -221,7 +221,7 @@ int Service::serviceStop(char * name) {
 int Service::start() {
 	ss.dwCurrentState = SERVICE_RUNNING;
 	if (::SetServiceStatus(ssh, &ss) == false) {
-		if (mCurService->log(FATAL)) {
+		if (mCurService->log(LEVEL_FATAL)) {
 			mCurService->logStream() << "Set Service Status failed (" << (unsigned long)GetLastError() << ")" << endl;
 		}
 		return -1;
@@ -261,7 +261,7 @@ int Service::cli(int argc, char * argv[], string & configFile) {
 
 			case eService :
 				if (++i >= argc) {
-					if (mCurService->log(FATAL)) {
+					if (mCurService->log(LEVEL_FATAL)) {
 						mCurService->logStream() << "Please, set service name." << endl;
 					}
 					return -1;
@@ -395,7 +395,7 @@ void WINAPI Service::ctrlHandler(DWORD dwCtrl) {
 			// Fallthrough
 
 		case SERVICE_CONTROL_STOP :
-			if (mCurService->log(INFO)) {
+			if (mCurService->log(LEVEL_INFO)) {
 				mCurService->logStream() << "Received a " << dwCtrl << " signal, service stop" << endl;
 			}
 
@@ -404,7 +404,7 @@ void WINAPI Service::ctrlHandler(DWORD dwCtrl) {
 			ss.dwCheckPoint = 0;
 			ss.dwWaitHint = 10 * 1000;
 			if (SetServiceStatus(ssh, &ss) == false) {
-				if (mCurService->log(FATAL)) {
+				if (mCurService->log(LEVEL_FATAL)) {
 					mCurService->logStream() << "Set Service status failed (" << (unsigned long)GetLastError() << ")" << endl;
 					return;
 				}
@@ -419,13 +419,13 @@ void WINAPI Service::ctrlHandler(DWORD dwCtrl) {
 			break;
 
 		case SERVICE_CONTROL_INTERROGATE :
-			if (mCurService->log(INFO)) {
+			if (mCurService->log(LEVEL_INFO)) {
 				mCurService->logStream() << "Received a " << dwCtrl << " signal, interrogate" << endl;
 			}
 			break;
 
 		default :
-			if (mCurService->log(INFO)) {
+			if (mCurService->log(LEVEL_INFO)) {
 				mCurService->logStream() << "Received a " << dwCtrl << " signal, default" << endl;
 			}
 			break;
@@ -437,7 +437,7 @@ void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 
 	SC_HANDLE manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 	if (!manager) {
-		if (mCurService->log(FATAL)) {
+		if (mCurService->log(LEVEL_FATAL)) {
 			mCurService->logStream() << "Open SCManager failed (" << GetLastError() << ")" << endl;
 		}
 		return;
@@ -445,7 +445,7 @@ void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 
 	SC_HANDLE service = OpenService(manager, lpszArgv[0], SERVICE_ALL_ACCESS);
 	if (!service) {
-		if (mCurService->log(FATAL)) {
+		if (mCurService->log(LEVEL_FATAL)) {
 			mCurService->logStream() << "Open service failed (" << GetLastError() << ")" << endl;
 		}
 		::CloseServiceHandle(manager);
@@ -457,7 +457,7 @@ void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 	if (lpBuf != NULL) {
 		DWORD dwBytesNeeded;
 		if (!::QueryServiceConfig(service, lpBuf, 4096, &dwBytesNeeded)) {
-			if (mCurService->log(FATAL)) {
+			if (mCurService->log(LEVEL_FATAL)) {
 				mCurService->logStream() << "QueryServiceConfig failed (" << GetLastError() << ")" << endl;
 			}
 			::CloseServiceHandle(service);
@@ -474,7 +474,7 @@ void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 
 	ssh = ::RegisterServiceCtrlHandler(lpszArgv[0], ctrlHandler);
 	if (!ssh) {
-		if (mCurService->log(FATAL)) {
+		if (mCurService->log(LEVEL_FATAL)) {
 			mCurService->logStream() << "Register service ctrl handler failed (" << (unsigned long)GetLastError() << ")" << endl;
 		}
 		return;
@@ -486,7 +486,7 @@ void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 	ss.dwCheckPoint = 0;
 	ss.dwWaitHint = 10 * 1000;
 	if (::SetServiceStatus(ssh, &ss) == false) {
-		if (mCurService->log(FATAL)) {
+		if (mCurService->log(LEVEL_FATAL)) {
 			mCurService->logStream() << "Set service status failed (" << (unsigned long)GetLastError() << ")" << endl;
 		}
 		return;

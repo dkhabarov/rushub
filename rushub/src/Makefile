@@ -12,6 +12,9 @@ all: RusHub
 freebsd: $(OBJS)
 	$(CXX) -lrt -o RusHub $(OBJS) $(CURDIR)/tinyxml/tinyxml.a
 
+solaris: $(OBJS)
+	$(CXX) -lrt -ldl -lsocket -lresolv -o RusHub $(OBJS) $(CURDIR)/tinyxml/tinyxml.a
+
 RusHub_shared: $(OBJS)
 	$(CXX) -lrt -ldl -lcap -ltinyxml -o RusHub $(OBJS)
 
