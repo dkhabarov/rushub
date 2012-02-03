@@ -85,18 +85,6 @@ Conn::Conn(tSocket socket, Server * server, int connType) :
 
 
 Conn::~Conn() {
-	if (mParser) {
-		deleteParser(mParser);
-		mParser = NULL;
-	}
-	mSelfConnFactory = NULL;
-	mCreatorConnFactory = NULL;
-	mServer = NULL;
-	mProtocol = NULL;
-
-	if (mAddrInfo != NULL) {
-		freeaddrinfo(mAddrInfo);
-	}
 
 	if (mSocket > 0) {
 	#ifndef _WIN32
@@ -115,6 +103,20 @@ Conn::~Conn() {
 		}
 		mSocket = 0;
 	}
+
+	if (mParser) {
+		deleteParser(mParser);
+		mParser = NULL;
+	}
+
+	if (mAddrInfo != NULL) {
+		freeaddrinfo(mAddrInfo);
+	}
+
+	mSelfConnFactory = NULL;
+	mCreatorConnFactory = NULL;
+	mServer = NULL;
+	mProtocol = NULL;
 }
 
 
