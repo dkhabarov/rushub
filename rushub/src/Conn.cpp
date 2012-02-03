@@ -632,9 +632,9 @@ int Conn::recv() {
 		if (!udp) {
 			if (iBufLen == 0) {
 				if (log(DEBUG)) {
-					logStream() << "User itself was disconnected" << endl;
+					logStream() << "Other side has closed connection" << endl;
 				}
-				closeNow(CLOSE_REASON_CLIENT_DISCONNECT);
+				closeNow(CLOSE_REASON_OTHER_SIDE);
 				return -1;
 			} else if (SOCK_ERR == EWOULDBLOCK) {
 				if (log(DEBUG)) {

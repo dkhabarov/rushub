@@ -95,7 +95,7 @@ enum StringStatus {
 /// Enumeration of reasons to closing connection (Close Reason)
 enum {
 
-	CLOSE_REASON_CLIENT_DISCONNECT = 1,
+	CLOSE_REASON_OTHER_SIDE = 1,
 	CLOSE_REASON_ERROR_RECV,
 	CLOSE_REASON_ERROR_SEND,
 	CLOSE_REASON_GETPEERNAME,
