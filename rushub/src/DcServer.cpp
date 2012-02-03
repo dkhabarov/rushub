@@ -1511,6 +1511,9 @@ string DcServer::getSysVersion() {
 
 #else
 
+#if defined(SOLARIS) || defined(_SOLARIS)
+	return "Solaris";
+#else
 	utsname osname;
 	if (uname(&osname) == 0) {
 		string version(osname.sysname);
@@ -1522,6 +1525,7 @@ string DcServer::getSysVersion() {
 		return version;
 	}
 	return "unknown";
+#endif
 
 #endif
 
