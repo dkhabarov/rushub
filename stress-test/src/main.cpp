@@ -208,7 +208,7 @@ int main(int argc, char ** argv) {
 	const char * logPath = "";
 	int maxConn = 50;
 	int batch = 25;
-	int logLevel = INFO;
+	int logLevel = LEVEL_INFO;
 
 	if (argc == 1) {
 		printHelp();
