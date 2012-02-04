@@ -313,16 +313,6 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 			}
 			return INVALID_SOCKET;
 		}
-
-		#ifdef _WIN32
-		sockoptval_t tcp_nodelay = 1;
-		if (SOCK_ERROR(setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &tcp_nodelay, sizeof(sockoptval_t)))) {
-			if (log(LEVEL_FATAL)) {
-				logStream() << "Error in setsockopt: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
-			}
-			return INVALID_SOCKET;
-		}
-		#endif
 	}
 
 	++mConnCounter;
