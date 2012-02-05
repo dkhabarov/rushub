@@ -70,11 +70,11 @@ void LuaPlugin::onLoad(DcServerBase * dcServerBase) {
 	string mainDir(dcServerBase->getMainDir());
 
 	mScriptsDir = mainDir;
-	mScriptsDir.append("scripts/", 8);
+	mScriptsDir.append(STR_LEN("scripts/"));
 	Dir::checkPath(mScriptsDir);
 
 	string libs = mainDir;
-	libs.append("libs/", 5);
+	libs.append(STR_LEN("libs/"));
 	Dir::checkPath(libs);
 
 	#ifdef _WIN32
@@ -319,7 +319,7 @@ int LuaPlugin::loadScripts() {
 				}
 				string file(name);
 				if ((file.size() <= 4) || (0 != file.compare(file.size() - 4, 4, ".lua"))) {
-					file.append(".lua", 4);
+					file.append(STR_LEN(".lua"));
 				}
 				LuaInterpreter * script = addScript(file, true);
 				if (strcmp(enabled, "false") != 0 && strcmp(enabled, "0") != 0) {

@@ -539,14 +539,14 @@ void AdcParser::parseFeatures(DcUser * dcUser) {
 
 void AdcParser::formingInfo(DcUser * dcUser, string & info) {
 	info.reserve(0xFF); // usual length of command
-	info.assign("BINF ", 5);
+	info.assign(STR_LEN("BINF "));
 	info.append(dcUser->getUid());
 	const set<string> & names = dcUser->getInfoNames();
 	for (set<string>::const_iterator it = names.begin(); it != names.end(); ++it) {
 		const string & name = (*it);
 		ParamBase * param = dcUser->getParam(name.c_str());
 		if (param != NULL) {
-			info.append(" ", 1).append(name).append(param->toString());
+			info.append(STR_LEN(" ")).append(name).append(param->toString());
 		}
 	}
 }

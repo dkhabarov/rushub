@@ -147,10 +147,10 @@ int NmdcProtocol::onNewConn(Conn * conn) {
 			useCache = false;
 		}
 		if (!useCache) {
-			stringReplace(mDcServer->mDcLang.mFirstMsg, string("HUB", 3), sCache, INTERNALNAME " " INTERNALVERSION);
-			stringReplace(sCache, string("uptime", 6), sCache, sTimeCache);
-			stringReplace(sCache, string("users", 5), sCache, iUsersVal);
-			stringReplace(sCache, string("share", 5), sCache, sShareCache);
+			stringReplace(mDcServer->mDcLang.mFirstMsg, string(STR_LEN("HUB")), sCache, string(STR_LEN(INTERNALNAME " " INTERNALVERSION)));
+			stringReplace(sCache, string(STR_LEN("uptime")), sCache, sTimeCache);
+			stringReplace(sCache, string(STR_LEN("users")), sCache, iUsersVal);
+			stringReplace(sCache, string(STR_LEN("share")), sCache, sShareCache);
 		}
 		mDcServer->sendToUser(dcConn->mDcUser, sCache, mDcServer->mDcConfig.mHubBot.c_str());
 	}
@@ -410,9 +410,9 @@ int NmdcProtocol::eventMyPass(NmdcParser *, DcConn * dcConn) {
 	dcConn->setLoginStatusFlag(LOGIN_STATUS_PASSWD); /** Password is accepted */
 	appendHello(msg, dcConn->mDcUser->getUid());
 	if (bOp) { /** If entered operator, that sends command LoggedIn ($LogedIn !) */
-		msg.append("$LogedIn ", 9);
+		msg.append(STR_LEN("$LogedIn "));
 		msg.append(dcConn->mDcUser->getUid());
-		msg.append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+		msg.append(STR_LEN(NMDC_SEPARATOR));
 	}
 	dcConn->send(msg);
 	dcConn->clearTimeOut(HUB_TIME_OUT_PASS);
@@ -551,8 +551,8 @@ int NmdcProtocol::eventChat(NmdcParser * dcparser, DcConn * dcConn) {
 			dcConn->logStream() << "Bad nick in chat, closing" << endl;
 		}
 		string msg;
-		stringReplace(mDcServer->mDcLang.mBadChatNick, string("nick", 4), msg, dcparser->chunkString(CHUNK_CH_NICK));
-		stringReplace(msg, string("real_nick", 9), msg, dcConn->mDcUser->getUid());
+		stringReplace(mDcServer->mDcLang.mBadChatNick, string(STR_LEN("nick")), msg, dcparser->chunkString(CHUNK_CH_NICK));
+		stringReplace(msg, string(STR_LEN("real_nick")), msg, dcConn->mDcUser->getUid());
 		mDcServer->sendToUser(dcConn->mDcUser, msg, mDcServer->mDcConfig.mHubBot.c_str());
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_CHAT);
 		return -2;
@@ -658,7 +658,7 @@ int NmdcProtocol::eventUserIp(NmdcParser * dcParser, DcConn * dcConn) {
 	}
 
 	const string & param = dcParser->chunkString(CHUNK_1_PARAM);
-	string nick, result("$UserIP ", 8);
+	string nick, result(STR_LEN("$UserIP "));
 
 	size_t pos = param.find("$$");
 	size_t cur = 0;
@@ -668,7 +668,7 @@ int NmdcProtocol::eventUserIp(NmdcParser * dcParser, DcConn * dcConn) {
 			// PROTOCOL NMDC
 			UserBase * userBase = mDcServer->mDcUserList.getUserBaseByUid(nick);
 			if (userBase != NULL) {
-				result.append(nick).append(" ", 1).append(userBase->getIp()).append("$$", 2);
+				result.append(nick).append(STR_LEN(" ")).append(userBase->getIp()).append(STR_LEN("$$"));
 			}
 		}
 		cur = pos + 2;
@@ -681,7 +681,7 @@ int NmdcProtocol::eventUserIp(NmdcParser * dcParser, DcConn * dcConn) {
 		// PROTOCOL NMDC
 		UserBase * userBase = mDcServer->mDcUserList.getUserBaseByUid(nick);
 		if (userBase != NULL) {
-			result.append(nick).append(" ", 1).append(userBase->getIp());
+			result.append(nick).append(STR_LEN(" ")).append(userBase->getIp());
 		}
 	}
 
@@ -726,8 +726,8 @@ int NmdcProtocol::eventSearch(NmdcParser * dcparser, DcConn * dcConn) {
 				if (dcConn->log(LEVEL_DEBUG)) {
 					dcConn->logStream() << "Bad ip in active search, closing" << endl;
 				}
-				stringReplace(mDcServer->mDcLang.mBadSearchIp, string("ip", 2), msg, dcparser->chunkString(CHUNK_AS_IP));
-				stringReplace(msg, string("real_ip", 7), msg, dcConn->getIp());
+				stringReplace(mDcServer->mDcLang.mBadSearchIp, string(STR_LEN("ip")), msg, dcparser->chunkString(CHUNK_AS_IP));
+				stringReplace(msg, string(STR_LEN("real_ip")), msg, dcConn->getIp());
 				mDcServer->sendToUser(dcConn->mDcUser, msg, mDcServer->mDcConfig.mHubBot.c_str());
 				dcConn->closeNice(9000, CLOSE_REASON_NICK_SEARCH);
 				return -1;
@@ -745,16 +745,16 @@ int NmdcProtocol::eventSearch(NmdcParser * dcparser, DcConn * dcConn) {
 				if (dcConn->log(LEVEL_DEBUG)) {
 					dcConn->logStream() << "Bad ip in active search, closing" << endl;
 				}
-				stringReplace(mDcServer->mDcLang.mBadSearchIp, string("ip", 2), msg, dcparser->chunkString(CHUNK_AS_IP));
-				stringReplace(msg, string("real_ip", 7), msg, dcConn->getIp());
+				stringReplace(mDcServer->mDcLang.mBadSearchIp, string(STR_LEN("ip")), msg, dcparser->chunkString(CHUNK_AS_IP));
+				stringReplace(msg, string(STR_LEN("real_ip")), msg, dcConn->getIp());
 				mDcServer->sendToUser(dcConn->mDcUser, msg, mDcServer->mDcConfig.mHubBot.c_str());
 				dcConn->closeNice(9000, CLOSE_REASON_NICK_SEARCH);
 				return -1;
 			}
 			msg.reserve(9 + dcparser->chunkString(CHUNK_AS_ADDR).size() + dcparser->chunkString(CHUNK_AS_QUERY).size());
-			msg.assign("$Search ", 8);
+			msg.assign(STR_LEN("$Search "));
 			msg.append(dcparser->chunkString(CHUNK_AS_ADDR));
-			msg.append(" ", 1);
+			msg.append(STR_LEN(" "));
 			msg.append(dcparser->chunkString(CHUNK_AS_QUERY));
 			sendMode(dcConn, msg, iMode, mDcServer->mDcUserList, true); // Use cache for send to all
 			break;
@@ -785,8 +785,8 @@ int NmdcProtocol::eventSr(NmdcParser * dcparser, DcConn * dcConn) {
 			dcConn->logStream() << "Bad nick in search response, closing" << endl;
 		}
 		string msg;
-		stringReplace(mDcServer->mDcLang.mBadSrNick, string("nick", 4), msg, dcparser->chunkString(CHUNK_SR_FROM));
-		stringReplace(msg, string("real_nick", 9), msg, dcConn->mDcUser->getUid());
+		stringReplace(mDcServer->mDcLang.mBadSrNick, string(STR_LEN("nick")), msg, dcparser->chunkString(CHUNK_SR_FROM));
+		stringReplace(msg, string(STR_LEN("real_nick")), msg, dcConn->mDcUser->getUid());
 		mDcServer->sendToUser(dcConn->mDcUser, msg, mDcServer->mDcConfig.mHubBot.c_str());
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_SR);
 		return -1;
@@ -831,8 +831,8 @@ int NmdcProtocol::eventConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 
 	if (mDcServer->mDcConfig.mCheckCtmIp && dcConn->getIp() != dcparser->chunkString(CHUNK_CM_IP)) {
 		string msg;
-		stringReplace(mDcServer->mDcLang.mBadCtmIp, string("ip", 2), msg, dcparser->chunkString(CHUNK_CM_IP));
-		stringReplace(msg, string("real_ip", 7), msg, dcConn->getIp());
+		stringReplace(mDcServer->mDcLang.mBadCtmIp, string(STR_LEN("ip")), msg, dcparser->chunkString(CHUNK_CM_IP));
+		stringReplace(msg, string(STR_LEN("real_ip")), msg, dcConn->getIp());
 		mDcServer->sendToUser(dcConn->mDcUser, msg, mDcServer->mDcConfig.mHubBot.c_str());
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_CTM);
 		return -1;
@@ -865,8 +865,8 @@ int NmdcProtocol::eventRevConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 	// Checking the nick (PROTOCOL NMDC)
 	if (mDcServer->mDcConfig.mCheckRctmNick && (dcparser->chunkString(CHUNK_RC_NICK) != dcConn->mDcUser->getUid())) {
 		string msg;
-		stringReplace(mDcServer->mDcLang.mBadRevConNick, string("nick", 4), msg, dcparser->chunkString(CHUNK_RC_NICK));
-		stringReplace(msg, string("real_nick", 9), msg, dcConn->mDcUser->getUid());
+		stringReplace(mDcServer->mDcLang.mBadRevConNick, string(STR_LEN("nick")), msg, dcparser->chunkString(CHUNK_RC_NICK));
+		stringReplace(msg, string(STR_LEN("real_nick")), msg, dcConn->mDcUser->getUid());
 		mDcServer->sendToUser(dcConn->mDcUser, msg, mDcServer->mDcConfig.mHubBot.c_str());
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_RCTM);
 		return -1;
@@ -1031,55 +1031,55 @@ int NmdcProtocol::eventUnknown(NmdcParser *, DcConn * dcConn) {
 
 // $Lock ...|
 string & NmdcProtocol::appendLock(string & str) {
-	str.append("$Lock EXTENDEDPROTOCOL_" INTERNALNAME "_by_setuper_" INTERNALVERSION " Pk=" INTERNALNAME);
-	return str.append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	str.append(STR_LEN("$Lock EXTENDEDPROTOCOL_" INTERNALNAME "_by_setuper_" INTERNALVERSION " Pk=" INTERNALNAME));
+	return str.append(STR_LEN(NMDC_SEPARATOR));
 }
 
 // $Hello nick|
 string & NmdcProtocol::appendHello(string & str, const string & nick) {
 	str.reserve(str.size() + nick.size() + 8);
-	return str.append("$Hello ", 7).append(nick).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	return str.append(STR_LEN("$Hello ")).append(nick).append(STR_LEN(NMDC_SEPARATOR));
 }
 
 // $HubIsFull|
 string & NmdcProtocol::appendHubIsFull(string & str) {
-	return str.append("$HubIsFull", 10).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	return str.append(STR_LEN("$HubIsFull")).append(STR_LEN(NMDC_SEPARATOR));
 }
 
 // $GetPass|
 string & NmdcProtocol::appendGetPass(string & str) {
-	return str.append("$GetPass", 8).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	return str.append(STR_LEN("$GetPass")).append(STR_LEN(NMDC_SEPARATOR));
 }
 
 // $ValidateDenide nick|
 string & NmdcProtocol::appendValidateDenied(string & str, const string & nick) {
 	str.reserve(str.size() + nick.size() + 17);
-	return str.append("$ValidateDenide ", 16).append(nick).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	return str.append(STR_LEN("$ValidateDenide ")).append(nick).append(STR_LEN(NMDC_SEPARATOR));
 }
 
 // $HubName hubName - topic|
 string & NmdcProtocol::appendHubName(string & str, const string & hubName, const string & topic) {
 	if (topic.size()) {
 		str.reserve(str.size() + hubName.size() + topic.size() + 13);
-		return str.append("$HubName ", 9).append(hubName).append(" - ", 3).append(topic).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+		return str.append(STR_LEN("$HubName ")).append(hubName).append(STR_LEN(" - ")).append(topic).append(STR_LEN(NMDC_SEPARATOR));
 	} else {
 		str.reserve(str.size() + hubName.size() + 10);
-		return str.append("$HubName ", 9).append(hubName).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+		return str.append(STR_LEN("$HubName ")).append(hubName).append(STR_LEN(NMDC_SEPARATOR));
 	}
 }
 
 // $HubTopic hubTopic|
 string & NmdcProtocol::appendHubTopic(string & str, const string & hubTopic) {
 	str.reserve(str.size() + hubTopic.size() + 11);
-	return str.append("$HubTopic ", 10).append(hubTopic).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	return str.append(STR_LEN("$HubTopic ")).append(hubTopic).append(STR_LEN(NMDC_SEPARATOR));
 }
 
 // <nick> msg|
 void NmdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string & uid, bool flush /*= true*/) {
 	dcConn->reserve(uid.size() + data.size() + 4); // 1 + uid.size() + 2 + data.size() + 1
-	dcConn->send("<", 1, false, false);
+	dcConn->send(STR_LEN("<"), false, false);
 	dcConn->send(uid, false, false);
-	dcConn->send("> ", 2, false, false);
+	dcConn->send(STR_LEN("> "), false, false);
 	dcConn->send(data, true, flush);
 }
 
@@ -1089,17 +1089,17 @@ void NmdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string &
 	const string nick = dcConn->mDcUser->getUid();
 	if (!nick.empty()) {
 		dcConn->reserve(len + 12 + nick.size()); // 5 + nick.size() + 7 + len
-		dcConn->send("$To: ", 5, false, false);
+		dcConn->send(STR_LEN("$To: "), false, false);
 		dcConn->send(nick, false, false);
-		dcConn->send(" From: ", 7, false, false);
+		dcConn->send(STR_LEN(" From: "), false, false);
 	} else {
 		dcConn->reserve(len + 21);
-		dcConn->send("$To: <unknown> From: ", 21, false, false);
+		dcConn->send(STR_LEN("$To: <unknown> From: "), false, false);
 	}
 	dcConn->send(from, false, false);
-	dcConn->send(" $<", 3, false, false);
+	dcConn->send(STR_LEN(" $<"), false, false);
 	dcConn->send(uid, false, false);
-	dcConn->send("> ", 2, false, false);
+	dcConn->send(STR_LEN("> "), false, false);
 	dcConn->send(data, true, flush);
 }
 
@@ -1108,20 +1108,20 @@ void NmdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string &
 // $Quit nick|
 string & NmdcProtocol::appendQuit(string & str, const string & nick) {
 	str.reserve(str.size() + nick.size() + 7);
-	return str.append("$Quit ", 6).append(nick).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	return str.append(STR_LEN("$Quit ")).append(nick).append(STR_LEN(NMDC_SEPARATOR));
 }
 
 // $OpList nick$$|
 string & NmdcProtocol::appendOpList(string & str, const string & nick) {
 	str.reserve(str.size() + nick.size() + 11);
-	return str.append("$OpList ", 8).append(nick).append("$$", 2).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	return str.append(STR_LEN("$OpList ")).append(nick).append(STR_LEN("$$")).append(STR_LEN(NMDC_SEPARATOR));
 }
 
 // $UserIP nick ip$$|
 string & NmdcProtocol::appendUserIp(string & str, const string & nick, const string & ip) {
 	if (ip.size()) {
 		str.reserve(str.size() + nick.size() + ip.size() + 12);
-		str.append("$UserIP ", 8).append(nick).append(" ", 1).append(ip).append("$$", 2).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+		str.append(STR_LEN("$UserIP ")).append(nick).append(STR_LEN(" ")).append(ip).append(STR_LEN("$$")).append(STR_LEN(NMDC_SEPARATOR));
 	}
 	return str;
 }
@@ -1129,7 +1129,7 @@ string & NmdcProtocol::appendUserIp(string & str, const string & nick, const str
 // $ForceMove address|
 string & NmdcProtocol::appendForceMove(string & str, const string & address) {
 	str.reserve(address.size() + 12);
-	return str.append("$ForceMove ", 11).append(address).append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+	return str.append(STR_LEN("$ForceMove ")).append(address).append(STR_LEN(NMDC_SEPARATOR));
 }
 
 
@@ -1165,13 +1165,13 @@ void NmdcProtocol::sendMode(DcConn * dcConn, const string & str, int mode, UserL
 
 
 void NmdcProtocol::forceMove(DcConn * dcConn, const char * address, const char * reason /*= NULL*/) {
-	string msg, force, nick("<unknown>", 9);
+	string msg, force, nick(STR_LEN("<unknown>"));
 	if (dcConn->mDcUser && !dcConn->mDcUser->getUid().empty()) {
 		nick = dcConn->mDcUser->getUid();
 	}
 
-	stringReplace(mDcServer->mDcLang.mForceMove, string("address", 7), force, address);
-	stringReplace(force, string("reason", 6), force, reason != NULL ? reason : "");
+	stringReplace(mDcServer->mDcLang.mForceMove, string(STR_LEN("address")), force, address);
+	stringReplace(force, string(STR_LEN("reason")), force, reason != NULL ? reason : "");
 
 	dcConn->mDcUser->sendToPm(force, mDcServer->mDcConfig.mHubBot, mDcServer->mDcConfig.mHubBot, false);
 	dcConn->mDcUser->sendToChat(force, mDcServer->mDcConfig.mHubBot, false);
@@ -1340,8 +1340,8 @@ bool NmdcProtocol::checkNickLength(DcConn * dcConn, size_t len) {
 				<< mDcServer->mDcConfig.mMaxNickLen << "]" << endl;
 		}
 
-		stringReplace(mDcServer->mDcLang.mBadNickLen, string("min", 3), msg, (int) mDcServer->mDcConfig.mMinNickLen);
-		stringReplace(msg, string("max", 3), msg, (int) mDcServer->mDcConfig.mMaxNickLen);
+		stringReplace(mDcServer->mDcLang.mBadNickLen, string(STR_LEN("min")), msg, (int) mDcServer->mDcConfig.mMinNickLen);
+		stringReplace(msg, string(STR_LEN("max")), msg, (int) mDcServer->mDcConfig.mMaxNickLen);
 
 		mDcServer->sendToUser(dcConn->mDcUser, msg, mDcServer->mDcConfig.mHubBot.c_str());
 
@@ -1357,7 +1357,7 @@ void NmdcProtocol::nickList(string & list, UserBase * userBase) {
 	// $OpList nick1$$nick2$$
 	if (!userBase->isHide() && !userBase->getUid().empty()) {
 		list.append(userBase->getUid());
-		list.append("$$", 2);
+		list.append(STR_LEN("$$"));
 	}
 }
 
@@ -1367,7 +1367,7 @@ void NmdcProtocol::myInfoList(string & list, UserBase * userBase) {
 	// $MyINFO nick1 ...|$MyINFO nick2 ...|
 	if (!userBase->isHide()) {
 		list.append(userBase->getInfo());
-		list.append(NMDC_SEPARATOR, NMDC_SEPARATOR_LEN);
+		list.append(STR_LEN(NMDC_SEPARATOR));
 	}
 }
 
@@ -1377,9 +1377,9 @@ void NmdcProtocol::ipList(string & list, UserBase * userBase) {
 	// $UserIP nick1 ip1$$nick2 ip2$$
 	if (!userBase->isHide() && userBase->getIp().size() && !userBase->getUid().empty()) {
 		list.append(userBase->getUid());
-		list.append(" ", 1);
+		list.append(STR_LEN(" "));
 		list.append(userBase->getIp());
-		list.append("$$", 2);
+		list.append(STR_LEN("$$"));
 	}
 }
 

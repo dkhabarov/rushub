@@ -68,31 +68,31 @@ public:
 
 /// Main NMDC commands keywords
 ProtocolCommand aDC_Commands[] = {
-	ProtocolCommand("$MultiSearch ", 13),      // check: ip, delay
-	ProtocolCommand("$MultiSearch Hub:", 17),  // check: nick, delay
-	ProtocolCommand("$Search Hub:", 12),       // check: nick, delay //this must be first!! before the next one
-	ProtocolCommand("$Search ", 8),            // check: ip, delay
-	ProtocolCommand("$SR ", 4),                // check: nick
-	ProtocolCommand("$SR ", 4),                // check: nick (UDP SR)
-	ProtocolCommand("$MyINFO ", 8),            // check: after_nick, nick, share_min_max
-	ProtocolCommand("$Supports ", 10),
-	ProtocolCommand("$Key ", 5),
-	ProtocolCommand("$ValidateNick ", 14),
-	ProtocolCommand("$Version ", 9),
-	ProtocolCommand("$GetNickList", 12),
-	ProtocolCommand("<", 1),                   // check: nick, delay, size, line_count
-	ProtocolCommand("$To: ", 5),               // check: nick, other_nick
-	ProtocolCommand("$Quit ", 6),              // no check necessary
-	ProtocolCommand("$MyPass ", 8),
-	ProtocolCommand("$ConnectToMe ", 13),      // check: ip, nick
-	ProtocolCommand("$RevConnectToMe ", 16),   // check: nick, other_nick
-	ProtocolCommand("$MultiConnectToMe ", 18), // not implemented
-	ProtocolCommand("$Kick ", 6),              // check: op, nick, conn
-	ProtocolCommand("$OpForceMove $Who:", 18), // check: op, nick
-	ProtocolCommand("$GetINFO ", 9),           // check: logged_in(FI), nick
-	ProtocolCommand("$MCTo: ", 7),             // check: nick, other_nick
-	ProtocolCommand("$UserIP ", 8),
-	ProtocolCommand("|", 1)                    // ping cmd (cap)
+	ProtocolCommand(STR_LEN("$MultiSearch ")),      // check: ip, delay
+	ProtocolCommand(STR_LEN("$MultiSearch Hub:")),  // check: nick, delay
+	ProtocolCommand(STR_LEN("$Search Hub:")),       // check: nick, delay //this must be first!! before the next one
+	ProtocolCommand(STR_LEN("$Search ")),           // check: ip, delay
+	ProtocolCommand(STR_LEN("$SR ")),               // check: nick
+	ProtocolCommand(STR_LEN("$SR ")),               // check: nick (UDP SR)
+	ProtocolCommand(STR_LEN("$MyINFO ")),           // check: after_nick, nick, share_min_max
+	ProtocolCommand(STR_LEN("$Supports ")),
+	ProtocolCommand(STR_LEN("$Key ")),
+	ProtocolCommand(STR_LEN("$ValidateNick ")),
+	ProtocolCommand(STR_LEN("$Version ")),
+	ProtocolCommand(STR_LEN("$GetNickList")),
+	ProtocolCommand(STR_LEN("<")),                  // check: nick, delay, size, line_count
+	ProtocolCommand(STR_LEN("$To: ")),              // check: nick, other_nick
+	ProtocolCommand(STR_LEN("$Quit ")),             // no check necessary
+	ProtocolCommand(STR_LEN("$MyPass ")),
+	ProtocolCommand(STR_LEN("$ConnectToMe ")),      // check: ip, nick
+	ProtocolCommand(STR_LEN("$RevConnectToMe ")),   // check: nick, other_nick
+	ProtocolCommand(STR_LEN("$MultiConnectToMe ")), // not implemented
+	ProtocolCommand(STR_LEN("$Kick ")),             // check: op, nick, conn
+	ProtocolCommand(STR_LEN("$OpForceMove $Who:")), // check: op, nick
+	ProtocolCommand(STR_LEN("$GetINFO ")),          // check: logged_in(FI), nick
+	ProtocolCommand(STR_LEN("$MCTo: ")),            // check: nick, other_nick
+	ProtocolCommand(STR_LEN("$UserIP ")),
+	ProtocolCommand(STR_LEN("|"))                   // ping cmd (cap)
 };
 
 
@@ -556,21 +556,21 @@ void NmdcParser::getTag(DcUser * dcUser, string & tag) {
 		if (tag.size()) {
 			tag += ' ';
 		}
-		tag.append("V:", 2).append(param->toString());
+		tag.append(STR_LEN("V:")).append(param->toString());
 	}
 	param = dcUser->getParam(USER_PARAM_MODE);
 	if (param) {
 		if (tag.size()) {
 			tag += ',';
 		}
-		tag.append("M:", 2).append(param->toString());
+		tag.append(STR_LEN("M:")).append(param->toString());
 	}
 	param = dcUser->getParam(USER_PARAM_UNREG_HUBS);
 	if (param) {
 		if (tag.size()) {
 			tag += ',';
 		}
-		tag.append("H:", 2).append(param->toString());
+		tag.append(STR_LEN("H:")).append(param->toString());
 
 		param = dcUser->getParam(USER_PARAM_REG_HUBS);
 		if (param) {
@@ -589,42 +589,42 @@ void NmdcParser::getTag(DcUser * dcUser, string & tag) {
 		if (tag.size()) {
 			tag += ',';
 		}
-		tag.append("S:", 2).append(param->toString());
+		tag.append(STR_LEN("S:")).append(param->toString());
 	}
 	param = dcUser->getParam(USER_PARAM_OPEN);
 	if (param) {
 		if (tag.size()) {
 			tag += ',';
 		}
-		tag.append("O:", 2).append(param->toString());
+		tag.append(STR_LEN("O:")).append(param->toString());
 	}
 	param = dcUser->getParam(USER_PARAM_LIMIT);
 	if (param) {
 		if (tag.size()) {
 			tag += ',';
 		}
-		tag.append("L:", 2).append(param->toString());
+		tag.append(STR_LEN("L:")).append(param->toString());
 	}
 	param = dcUser->getParam(USER_PARAM_BANDWIDTH);
 	if (param) {
 		if (tag.size()) {
 			tag += ',';
 		}
-		tag.append("B:", 2).append(param->toString());
+		tag.append(STR_LEN("B:")).append(param->toString());
 	}
 	param = dcUser->getParam(USER_PARAM_DOWNLOAD);
 	if (param) {
 		if (tag.size()) {
 			tag += ',';
 		}
-		tag.append("D:", 2).append(param->toString());
+		tag.append(STR_LEN("D:")).append(param->toString());
 	}
 	param = dcUser->getParam(USER_PARAM_FRACTION);
 	if (param) {
 		if (tag.size()) {
 			tag += ',';
 		}
-		tag.append("F:", 2).append(param->toString());
+		tag.append(STR_LEN("F:")).append(param->toString());
 	}
 	if (tag.size()) {
 		tag = "<" + tag;
@@ -637,7 +637,7 @@ void NmdcParser::getTag(DcUser * dcUser, string & tag) {
 void NmdcParser::formingInfo(DcUser * dcUser, string & info) {
 	ParamBase * param = NULL;
 	info.reserve(0x7F); // usual length of command
-	info.assign("$MyINFO $ALL ", 13);
+	info.assign(STR_LEN("$MyINFO $ALL "));
 	info.append(dcUser->getUid());
 	info += ' ';
 	param = dcUser->getParam(USER_PARAM_DESC);
@@ -645,7 +645,7 @@ void NmdcParser::formingInfo(DcUser * dcUser, string & info) {
 		info.append(param->toString());
 	}
 	info.append(dcUser->getNmdcTag());
-	info.append("$ $", 3);
+	info.append(STR_LEN("$ $"));
 	param = dcUser->getParam(USER_PARAM_CONNECTION);
 	if (param != NULL) {
 		info.append(param->toString());

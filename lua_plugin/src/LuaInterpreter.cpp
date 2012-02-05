@@ -370,7 +370,7 @@ void LuaInterpreter::newCallParam(lua_Number data, int type) {
 void LuaInterpreter::logError(const string & msg) {
 	string log(LuaPlugin::mCurServer->getLogDir());
 	Dir::checkPath(log);
-	log.append("lua_errors.log", 14);
+	log.append(STR_LEN("lua_errors.log"));
 
 	ofstream ofs(log.c_str(), ios_base::app);
 	ofs << "[" << LuaPlugin::mCurServer->getTime() << "] " << msg << endl;

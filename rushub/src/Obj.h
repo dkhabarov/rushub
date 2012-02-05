@@ -54,6 +54,11 @@ enum {
 #define logStream() logStreamLine(__LINE__)
 
 
+#ifndef STR_LEN
+# define STR_LEN(S) S ## , ## sizeof(S) / sizeof(S[0]) - 1
+#endif
+
+
 /**
  * NonCopyable class
  */

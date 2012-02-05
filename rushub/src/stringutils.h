@@ -40,6 +40,10 @@
 	#include <stdlib.h> // for strtoll
 #endif
 
+#ifndef STR_LEN
+# define STR_LEN(S) S ## , ## sizeof(S) / sizeof(S[0]) - 1
+#endif
+
 using namespace ::std;
 
 /// Utils namespace

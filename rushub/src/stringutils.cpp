@@ -61,7 +61,7 @@ bool loadFileInString(const string & fileName, string & str) {
 	while (!ifs.eof()) {
 		getline(ifs, buf);
 		if (addLine) {
-			str.append("\r\n", 2);
+			str.append(STR_LEN("\r\n"));
 		} else {
 			addLine = true;
 		}
@@ -77,9 +77,9 @@ bool loadFileInString(const string & fileName, string & str) {
 string & stringReplace(const string & str, const string & varname, string & dest, const string & by, bool b, bool first) {
 	dest = str;
 	if (!b) {
-		string search("%[", 2);
+		string search(STR_LEN("%["));
 		search.append(varname);
-		search.append("]", 1);
+		search.append(STR_LEN("]"));
 		size_t pos = dest.find(search);
 		if (first != true || pos == 0) {
 			while (pos != dest.npos) {

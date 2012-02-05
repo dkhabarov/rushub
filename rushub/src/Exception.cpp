@@ -98,7 +98,7 @@ long __stdcall Exception::exceptionFilter(LPEXCEPTION_POINTERS e) {
 		<< "Time: " << buffer << endl << endl;
 
 	WIN32_FIND_DATA fd;
-	if (FindFirstFile(path.append("\\rushub.pdb", 11).c_str(), &fd) == INVALID_HANDLE_VALUE) {
+	if (FindFirstFile(path.append(STR_LEN("\\rushub.pdb")).c_str(), &fd) == INVALID_HANDLE_VALUE) {
 		#ifndef _DEBUG
 			f << "Debug symbols was not found" << endl;
 			f.close();
@@ -127,24 +127,24 @@ int Exception::init(const char * path) {
 	SymSetOptions(SYMOPT_DEFERRED_LOADS | SYMOPT_FAIL_CRITICAL_ERRORS | SYMOPT_LOAD_LINES );
 
 	char buf[BUFFERSIZE] = { '\0' };
-	string symbolPath(".", 1);
+	string symbolPath(STR_LEN("."));
 	if (GetEnvironmentVariableA("_NT_SYMBOL_PATH", buf, BUFFERSIZE)) {
-		symbolPath.append(";", 1);
+		symbolPath.append(STR_LEN(";"));
 		symbolPath.append(buf);
 	}
 	if (GetEnvironmentVariableA("_NT_ALTERNATE_SYMBOL_PATH", buf, BUFFERSIZE)) {
-		symbolPath.append(";", 1);
+		symbolPath.append(STR_LEN(";"));
 		symbolPath.append(buf);
 	}
 	if (GetEnvironmentVariableA("SYSTEMROOT", buf, BUFFERSIZE)) {
-		symbolPath.append(";", 1);
+		symbolPath.append(STR_LEN(";"));
 		symbolPath.append(buf);
-		symbolPath.append(";", 1);
+		symbolPath.append(STR_LEN(";"));
 		symbolPath.append(buf);
-		symbolPath.append("\\System32", 9);
+		symbolPath.append(STR_LEN("\\System32"));
 	}
 	if (path != NULL && path[0] != '\0') {
-		symbolPath.append(";", 1);
+		symbolPath.append(STR_LEN(";"));
 		symbolPath.append(path);
 	}
 	return SymInitialize(GetCurrentProcess(), symbolPath.c_str(), 1);

@@ -609,7 +609,7 @@ bool DcServer::checkNick(DcConn *dcConn) {
 						<< "'[" << us->getIp() << "]" << endl;
 				}
 				string msg;
-				stringReplace(mDcLang.mUsedNick, string("nick", 4), msg, dcConn->mDcUser->getUid());
+				stringReplace(mDcLang.mUsedNick, string(STR_LEN("nick")), msg, dcConn->mDcUser->getUid());
 				sendToUser(dcConn->mDcUser, msg, mDcConfig.mHubBot.c_str());
 				dcConn->send(mNmdcProtocol.appendValidateDenied(msg.erase(), dcConn->mDcUser->getUid())); // refactoring to DcProtocol pointer
 				return false;
@@ -837,7 +837,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 
 			// Protocol dependence
 			if (mDcConfig.mAdcOn) { // ADC
-				msg.append("IQUI ", 5).append(dcUser->getUid()).append(ADC_SEPARATOR, ADC_SEPARATOR_LEN);
+				msg.append(STR_LEN("IQUI ")).append(dcUser->getUid()).append(STR_LEN(ADC_SEPARATOR));
 			} else { // NMDC
 				mNmdcProtocol.appendQuit(msg, dcUser->getUid());
 			}
@@ -1283,20 +1283,20 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 		if (key) {
 			ct = "5";
 		}
-		string inf("IINF ", 5);
+		string inf(STR_LEN("IINF "));
 		inf.reserve(79);
-		inf.append(dcUser->getUid()).append(" CT", 3).append(ct, 1).append(" NI", 3).append(uid);
-		inf.append(" SS0 HN0 HR0 HO1 VEBot\\sV:1.0 SL0 DERusHub\\sbot", 47);
+		inf.append(dcUser->getUid()).append(STR_LEN(" CT")).append(ct, 1).append(STR_LEN(" NI")).append(uid);
+		inf.append(STR_LEN(" SS0 HN0 HR0 HO1 VEBot\\sV:1.0 SL0 DERusHub\\sbot"));
 		dcUser->setInfo(inf);
 	} else { // NMDC
 		if (!uid.size() || uid.size() > 0x40 || uid.find_first_of(" |$") != uid.npos) {
 			delete dcUser;
 			return -1;
 		}
-		string myInfo("$MyINFO $ALL ", 13);
-		if (!dcUser->setInfo(myInfo.append(uid).append(" ", 1).append(info))) {
-			myInfo.assign("$MyINFO $ALL ", 13);
-			if (!dcUser->setInfo(myInfo.append(uid).append(" $ $$$0$", 9))) {
+		string myInfo(STR_LEN("$MyINFO $ALL "));
+		if (!dcUser->setInfo(myInfo.append(uid).append(STR_LEN(" ")).append(info))) {
+			myInfo.assign(STR_LEN("$MyINFO $ALL "));
+			if (!dcUser->setInfo(myInfo.append(uid).append(STR_LEN(" $ $$$0$")))) {
 				delete dcUser;
 				return -2;
 			}
@@ -1382,10 +1382,10 @@ string DcServer::getSysVersion() {
 		case VER_PLATFORM_WIN32_NT : // Windows NT
 
 			if (osvi.dwMajorVersion <= 4) {
-				version.append("Microsoft Windows NT ");
+				version.append(STR_LEN("Microsoft Windows NT "));
 			}
 			if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0) {
-				version.append("Microsoft Windows 2000 ");
+				version.append(STR_LEN("Microsoft Windows 2000 "));
 			}
 
 			if (osVersionInfoEx) {
@@ -1394,46 +1394,46 @@ string DcServer::getSysVersion() {
 				if (osvi.wProductType == VER_NT_WORKSTATION) {
 
 					if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1) {
-						version.append("Microsoft Windows XP ");
+						version.append(STR_LEN("Microsoft Windows XP "));
 					} else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0) {
-						version.append("Microsoft Windows Vista ");
+						version.append(STR_LEN("Microsoft Windows Vista "));
 					} else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 1) {
-						version.append("Microsoft Windows 7 ");
+						version.append(STR_LEN("Microsoft Windows 7 "));
 					} else {
-						version.append("Microsoft Windows (unknown version) ");
+						version.append(STR_LEN("Microsoft Windows (unknown version) "));
 					}
 
 
 					if (osvi.wSuiteMask & VER_SUITE_PERSONAL) {
-						version.append("Home Edition ");
+						version.append(STR_LEN("Home Edition "));
 					} else {
-						version.append("Professional ");
+						version.append(STR_LEN("Professional "));
 					}
 
 				} else if (osvi.wProductType == VER_NT_SERVER) { // Check server type
 
 					if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2) {
-						version.append("Microsoft Windows 2003 ");
+						version.append(STR_LEN("Microsoft Windows 2003 "));
 					} else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0) {
-						version.append("Microsoft Windows Server 2008 ");
+						version.append(STR_LEN("Microsoft Windows Server 2008 "));
 					} else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 1) {
-						version.append("Microsoft Windows Server 2008 R2 ");
+						version.append(STR_LEN("Microsoft Windows Server 2008 R2 "));
 					} else {
-						version.append("Microsoft Windows (unknown version) ");
+						version.append(STR_LEN("Microsoft Windows (unknown version) "));
 					}
 
 					if (osvi.wSuiteMask & VER_SUITE_DATACENTER) {
-						version.append("DataCenter Server ");
+						version.append(STR_LEN("DataCenter Server "));
 					} else if (osvi.wSuiteMask & VER_SUITE_ENTERPRISE) {
 						if (osvi.dwMajorVersion == 4) {
-							version.append("Advanced Server ");
+							version.append(STR_LEN("Advanced Server "));
 						} else {
-							version.append("Enterprise Server ");
+							version.append(STR_LEN("Enterprise Server "));
 						}
 					} else if (osvi.wSuiteMask == VER_SUITE_BLADE) {
-						version.append("Web Server ");
+						version.append(STR_LEN("Web Server "));
 					} else {
-						version.append("Server ");
+						version.append(STR_LEN("Server "));
 					}
 
 				}
@@ -1448,7 +1448,7 @@ string DcServer::getSysVersion() {
 					return "unknown";
 				}
 
-				lRet = RegQueryValueExA( hKey, "ProductType", NULL, NULL, (LPBYTE) szProductType, &dwBufLen);
+				lRet = RegQueryValueExA(hKey, "ProductType", NULL, NULL, (LPBYTE) szProductType, &dwBufLen);
 
 				if ((lRet != ERROR_SUCCESS) || (dwBufLen > 80)) {
 					return "unknown";
@@ -1457,13 +1457,13 @@ string DcServer::getSysVersion() {
 				RegCloseKey(hKey);
 
 				if (lstrcmpiA("WINNT", szProductType) == 0) {
-					version.append("Professional ");
+					version.append(STR_LEN("Professional "));
 				}
 				if (lstrcmpiA("LANMANNT", szProductType) == 0) {
-					version.append("Server ");
+					version.append(STR_LEN("Server "));
 				}
-				if (lstrcmpiA( "SERVERNT", szProductType) == 0) {
-					version.append("Advanced Server ");
+				if (lstrcmpiA("SERVERNT", szProductType) == 0) {
+					version.append(STR_LEN("Advanced Server "));
 				}
 			}
 
@@ -1482,26 +1482,26 @@ string DcServer::getSysVersion() {
 		case VER_PLATFORM_WIN32_WINDOWS : // Windows 95
 
 			if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 0) {
-				version.append("Microsoft Windows 95 ");
+				version.append(STR_LEN("Microsoft Windows 95 "));
 				if (osvi.szCSDVersion[1] == 'C' || osvi.szCSDVersion[1] == 'B') {
-					version.append("OSR2 ");
+					version.append(STR_LEN("OSR2 "));
 				}
 			}
 
 			if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 10) {
-				version.append("Microsoft Windows 98 ");
+				version.append(STR_LEN("Microsoft Windows 98 "));
 				if (osvi.szCSDVersion[1] == 'A') {
-					version.append("SE ");
+					version.append(STR_LEN("SE "));
 				}
 			}
 
 			if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 90) {
-				version.append("Microsoft Windows Millennium Edition ");
+				version.append(STR_LEN("Microsoft Windows Millennium Edition "));
 			}
 			break;
 
 		case VER_PLATFORM_WIN32s : // Windows
-			version.append("Microsoft Win32s ");
+			version.append(STR_LEN("Microsoft Win32s "));
 			break;
 
 		default :
@@ -1517,11 +1517,11 @@ string DcServer::getSysVersion() {
 	struct utsname osname;
 	if (uname(&osname) == 0) {
 		string version(osname.sysname);
-		version.append(" ", 1);
+		version.append(STR_LEN(" "));
 		version.append(osname.release);
-		version.append(" (", 2);
+		version.append(STR_LEN(" ("));
 		version.append(osname.machine);
-		version.append(")", 1);
+		version.append(STR_LEN(")"));
 		return version;
 	}
 	return "unknown";

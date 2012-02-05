@@ -77,7 +77,7 @@ void WebConnFactory::onNewData(Conn * conn, string * str) {
 		conn->logStream() << "WEB IN: " << (*str) << endl;
 	}
 
-	(*str).append(WEB_SEPARATOR, WEB_SEPARATOR_LEN);
+	(*str).append(STR_LEN(WEB_SEPARATOR));
 	conn->remaining();
 	if (!conn->isOk()) {
 		return;

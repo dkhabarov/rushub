@@ -97,7 +97,7 @@ int runHub(int argc, char ** argv, bool isService /*= false*/) {
 		#ifndef _WIN32
 			if (cli.getConfigFile().empty()) {
 				Dir::pathForFile(argv[0], configFile);
-				configFile.append("RusHub.xml", 10);
+				configFile.append(STR_LEN("RusHub.xml"));
 			} else {
 				configFile = cli.getConfigFile();
 			}
@@ -107,7 +107,7 @@ int runHub(int argc, char ** argv, bool isService /*= false*/) {
 		#else
 			Service service;
 			Dir::execPath(configFile);
-			configFile.append("RusHub.xml", 10);
+			configFile.append(STR_LEN("RusHub.xml"));
 			if (service.cli(argc, argv, configFile) <= 0) {
 				return -1;
 			}

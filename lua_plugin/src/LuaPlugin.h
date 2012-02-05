@@ -38,6 +38,11 @@
 #define PLUGIN_NAME "LuaPlugin"
 #define PLUGIN_VERSION "2.7"
 
+
+#ifndef STR_LEN
+# define STR_LEN(S) S ## , ## sizeof(S) / sizeof(S[0]) - 1
+#endif
+
 namespace dcserver {
 
 	class DcServerBase;

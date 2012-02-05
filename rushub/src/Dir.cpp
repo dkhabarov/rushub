@@ -27,6 +27,9 @@
 	#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
 #endif
 
+#ifndef STR_LEN
+# define STR_LEN(S) S ## , ## sizeof(S) / sizeof(S[0]) - 1
+#endif
 
 
 DIR * opendir(const char * name) {
@@ -159,7 +162,7 @@ void Dir::execPath(string & path) {
 		const char * slash = strrchr(exPath, '\\');
 		path = slash ? string(exPath, slash - exPath + 1) : exPath;
 	#else
-		path.assign("./", 2);
+		path.assign(STR_LEN("./"));
 	#endif
 	checkPath(path);
 }

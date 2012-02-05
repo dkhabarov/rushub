@@ -201,13 +201,13 @@ int AdcProtocol::onNewConn(Conn * conn) {
 
 	dcConn->mDcUser->setUid(string(genNewSid()));
 
-	static const string hubInf("IINF CT32 VE" INTERNALVERSION " NIADC" INTERNALNAME);
+	static const string hubInf(STR_LEN("IINF CT32 VE" INTERNALVERSION " NIADC" INTERNALNAME));
 	dcConn->reserve(33 + hubInf.size() + mDcServer->mDcConfig.mTopic.size()); // 18 + 1 + 5 + 4 + 1 + hubInf.size() + 3 + Topic.size() + 1
-	dcConn->send("ISUP ADBASE ADTIGR", 18, true, false);
-	dcConn->send("ISID ", 5, false, false);
+	dcConn->send(STR_LEN("ISUP ADBASE ADTIGR"), true, false);
+	dcConn->send(STR_LEN("ISID "), false, false);
 	dcConn->send(dcConn->mDcUser->getUid(), true, false);
 	dcConn->send(hubInf, false, false);
-	dcConn->send(" DE", 3, false, false);
+	dcConn->send(STR_LEN(" DE"), false, false);
 	dcConn->send(mDcServer->mDcConfig.mTopic, true, false);
 
 	#ifndef WITHOUT_PLUGINS
@@ -252,15 +252,15 @@ int AdcProtocol::onNewConn(Conn * conn) {
 		}
 		if (!useCache) {
 			string buff;
-			stringReplace(mDcServer->mDcLang.mFirstMsg, string("HUB", 3), buff, INTERNALNAME " " INTERNALVERSION);
-			stringReplace(buff, string("uptime", 6), buff, sTimeCache);
-			stringReplace(buff, string("users", 5), buff, iUsersVal);
-			stringReplace(buff, string("share", 5), buff, sShareCache);
+			stringReplace(mDcServer->mDcLang.mFirstMsg, string(STR_LEN("HUB")), buff, string(STR_LEN(INTERNALNAME " " INTERNALVERSION)));
+			stringReplace(buff, string(STR_LEN("uptime")), buff, sTimeCache);
+			stringReplace(buff, string(STR_LEN("users")), buff, iUsersVal);
+			stringReplace(buff, string(STR_LEN("share")), buff, sShareCache);
 			cp1251ToUtf8(buff, sCache, escaper);
 		}
 
 		dcConn->reserve(5 + sCache.size()); //  4 + sCache.size() + 1
-		dcConn->send("IMSG ", 4, false, false);
+		dcConn->send(STR_LEN("IMSG "), false, false);
 		dcConn->send(sCache, true, false);
 	}
 
@@ -571,7 +571,7 @@ void AdcProtocol::infList(string & list, UserBase * userBase) {
 	if (!userBase->isHide()) {
 		list.reserve(userBase->getInfo().size() + ADC_SEPARATOR_LEN);
 		list.append(userBase->getInfo());
-		list.append(ADC_SEPARATOR, ADC_SEPARATOR_LEN);
+		list.append(STR_LEN(ADC_SEPARATOR));
 	}
 }
 
@@ -605,9 +605,9 @@ const char * AdcProtocol::genNewSid() {
 // BMSG <my_sid> <msg>
 void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string & uid, bool flush /*= true*/) {
 	dcConn->reserve(11 + data.size()); // 5 + 4 + 1 + data.size() + 1
-	dcConn->send("BMSG ", 5, false, false);
+	dcConn->send(STR_LEN("BMSG "), false, false);
 	dcConn->send(uid, false, false);
-	dcConn->send(" ", 1, false, false);
+	dcConn->send(STR_LEN(" "), false, false);
 	dcConn->send(data, true, flush);
 }
 
@@ -616,13 +616,13 @@ void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string 
 // EMSG <my_sid> <target_sid> <msg> PM<group_sid>
 void AdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string & uid, const string & from, bool flush /*= true*/) {
 	dcConn->reserve(23 + data.size()); // 5 + 4 + 1 + 4 + 1 + data.size() + 3 + 4 + 1
-	dcConn->send("EMSG ", 5, false, false);
+	dcConn->send(STR_LEN("EMSG "), false, false);
 	dcConn->send(uid, false, false);
-	dcConn->send(" ", 1, false, false);
+	dcConn->send(STR_LEN(" "), false, false);
 	dcConn->send(dcConn->mDcUser->getUid(), false, false);
-	dcConn->send(" ", 1, false, false);
+	dcConn->send(STR_LEN(" "), false, false);
 	dcConn->send(data, false, false);
-	dcConn->send(" PM", 3, false, false);
+	dcConn->send(STR_LEN(" PM"), false, false);
 	dcConn->send(from, true, flush);
 }
 
@@ -668,11 +668,11 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 		if (dcConn->log(LEVEL_DEBUG)) {
 			dcConn->logStream() << "Wrong syntax cmd" << endl;
 		}
-		string msg("ISTA ", 5), buff;
+		string msg(STR_LEN("ISTA ")), buff;
 		msg.reserve(10 + adcParser->getErrorText().size());
 		msg.append(toString(SEVERITY_LEVEL_FATAL)); // Disconnect
 		msg.append(toString(adcParser->getErrorCode())); // Error code
-		msg.append(" ", 1);
+		msg.append(STR_LEN(" "));
 		msg.append(cp1251ToUtf8(adcParser->getErrorText(), buff, escaper)); // Error text
 		dcConn->send(msg, true);
 		dcConn->closeNice(9000, CLOSE_REASON_CMD_SYNTAX);

@@ -317,7 +317,7 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 		}
 
 		if (mCacheNmdc.size()) {
-			addInCache(mCacheNmdc, data, NMDC_SEPARATOR, NMDC_SEPARATOR_LEN, addSep);
+			addInCache(mCacheNmdc, data, STR_LEN(NMDC_SEPARATOR), addSep);
 			for_each(begin(), end(), ufSend(mCacheNmdc, false));
 			string().swap(mCacheNmdc); // erase & free memory
 		} else {
@@ -328,7 +328,7 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 			logStream() << "sendToAll end" << endl;
 		}
 	} else {
-		addInCache(mCacheNmdc, data, NMDC_SEPARATOR, NMDC_SEPARATOR_LEN, addSep);
+		addInCache(mCacheNmdc, data, STR_LEN(NMDC_SEPARATOR), addSep);
 	}
 }
 
@@ -341,7 +341,7 @@ void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 		}
 
 		if (mCacheAdc.size()) {
-			addInCache(mCacheAdc, data, ADC_SEPARATOR, ADC_SEPARATOR_LEN, addSep);
+			addInCache(mCacheAdc, data, STR_LEN(ADC_SEPARATOR), addSep);
 			for_each(begin(), end(), ufSend(mCacheAdc, false));
 			string().swap(mCacheAdc); // erase & free memory
 		} else {
@@ -352,7 +352,7 @@ void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 			logStream() << "sendToAll end" << endl;
 		}
 	} else {
-		addInCache(mCacheAdc, data, ADC_SEPARATOR, ADC_SEPARATOR_LEN, addSep);
+		addInCache(mCacheAdc, data, STR_LEN(ADC_SEPARATOR), addSep);
 	}
 }
 
