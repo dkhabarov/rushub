@@ -41,7 +41,7 @@ DcConfig::DcConfig(ConfigLoader * configLoader, Server * server, const string & 
 {
 
 	mConfigStore.mPath = cfgFile;
-	mConfigStore.mName = "";
+	mConfigStore.mName.clear();
 
 	// Path of RusHub.xml
 	Dir::pathForFile(mConfigStore.mPath.c_str(), mConfigPath);
@@ -181,9 +181,9 @@ void DcConfig::addVars(Server * server) {
 	add("iWebStrSizeMax",         mMaxWebCommandLength,                 10240ul);
 	add("sWebAddresses",          mWebAddresses,
 		#ifdef _WIN32
-			string("0.0.0.0:80")
+			string("0.0.0.0:80", 10)
 		#else
-			string("0.0.0.0:8080")
+			string("0.0.0.0:8080", 12)
 		#endif
 	);
 	add("bWebServer",             mWebServer,                           false);
@@ -207,7 +207,7 @@ void DcConfig::addVars(Server * server) {
 
 	for (int i = 0; i < 5; ++i) {
 		mTimeout[i] = timeoutDefault[i];
-		add(string("iTimeout").append(timeoutName[i]), mTimeout[i], timeoutDefault[i]);
+		add(string("iTimeout", 8).append(timeoutName[i]), mTimeout[i], timeoutDefault[i]);
 	}
 
 	unsigned long maxSendSize(MAX_SEND_SIZE);
@@ -237,67 +237,73 @@ void DcConfig::addVars(Server * server) {
 	add("iUsersLimit",            mUsersLimit,                          -1);
 	add("iMaxLevel",              mMaxLevel,                            mMaxLevel); // set this default value for log
 
-	add("sUDPAddresses",          mUdpAddresses,                        string("0.0.0.0:1209"));
+	add("sUDPAddresses",          mUdpAddresses,                        string("0.0.0.0:1209", 12));
 	add("bUDPServer",             mUdpServer,                           false);
 
 	add("bAdcOn",                 mAdcOn,                               false);
 
 	#ifdef HAVE_LIBCAP
-		add("sGroupName",           mGroupName,                           string("root"));
-		add("sUserName",            mUserName,                            string("root"));
+		add("sGroupName",           mGroupName,                           string("root", 4));
+		add("sUserName",            mUserName,                            string("root", 4));
 	#endif
 
 	add("sLocale",                mLocale,                              string(setlocale(LC_ALL, "")));
-	add("sMainBotIP",             mMainBotIp,                           string("127.0.0.1"));
-	add("sMainBotMyINFO",         mMainBotMyinfo,                       string("RusHub bot<Bot V:1.0,M:A,H:0/0/1,S:0>$ $$$0$"));
+	add("sMainBotIP",             mMainBotIp,                           string("127.0.0.1", 9));
+	add("sMainBotMyINFO",         mMainBotMyinfo,                       string("RusHub bot<Bot V:1.0,M:A,H:0/0/1,S:0>$ $$$0$", 45));
 	add("bMainBotKey",            mMainBotKey,                          true);
-	add("sHubBot",                mHubBot,                              string("RusHub"));
+	add("sHubBot",                mHubBot,                              string("RusHub", 6));
 	add("bRegMainBot",            mRegMainBot,                          true);
-	add("sTopic",                 mTopic,                               string("Russian hub software"));
-	add("sHubName",               mHubName,                             string("RusHub"));
+	add("sTopic",                 mTopic,                               string("Russian hub software", 20));
+	add("sHubName",               mHubName,                             string("RusHub", 6));
 	add("sAddresses",             mAddresses,
 		#ifdef _WIN32
-			string("0.0.0.0:411")
+			string("0.0.0.0:411", 11)
 		#else
-			string("0.0.0.0:4111")
+			string("0.0.0.0:4111", 12)
 		#endif
 	);
 
 	// TODO: auto detect lang
-	add("sLang",       mLang,       string("Russian"));
-	add("sLangPath",   mLangPath,   string("./lang/"));
-	add("sLogPath",    mLogPath,    string("./logs/"));
-	add("sPluginPath", mPluginPath, string("./plugins/"));
-	add("sMainPath",   mMainPath,   string("./"));
+	add("sLang",       mLang,       string("Russian", 7));
+	add("sLangPath",   mLangPath,   string("./lang/", 7));
+	add("sLogPath",    mLogPath,    string("./logs/", 7));
+	add("sPluginPath", mPluginPath, string("./plugins/", 10));
+	add("sMainPath",   mMainPath,   string("./", 2));
 }
 
 
 
 int DcConfig::load() {
+
+	const string curDir("./", 2);
+
 	int res = mConfigLoader->load(this, mConfigStore);
 	// Replace in start of the string only
-	stringReplace(mMainPath,   "./", mMainPath,   mConfigPath, true, true);
-	stringReplace(mPluginPath, "./", mPluginPath, mConfigPath, true, true);
-	stringReplace(mLogPath,    "./", mLogPath,    mConfigPath, true, true);
-	stringReplace(mLangPath,   "./", mLangPath,   mConfigPath, true, true);
+	stringReplace(mMainPath,   curDir, mMainPath,   mConfigPath, true, true);
+	stringReplace(mPluginPath, curDir, mPluginPath, mConfigPath, true, true);
+	stringReplace(mLogPath,    curDir, mLogPath,    mConfigPath, true, true);
+	stringReplace(mLangPath,   curDir, mLangPath,   mConfigPath, true, true);
 	return res;
 }
 
 
 
 int DcConfig::save() {
+
+	const string curDir("./", 2);
+
 	// Replace in start of the string only
-	stringReplace(mMainPath,   mConfigPath, mMainPath,   "./", true, true);
-	stringReplace(mPluginPath, mConfigPath, mPluginPath, "./", true, true);
-	stringReplace(mLogPath,    mConfigPath, mLogPath,    "./", true, true);
-	stringReplace(mLangPath,   mConfigPath, mLangPath,   "./", true, true);
+	stringReplace(mMainPath,   mConfigPath, mMainPath,   curDir, true, true);
+	stringReplace(mPluginPath, mConfigPath, mPluginPath, curDir, true, true);
+	stringReplace(mLogPath,    mConfigPath, mLogPath,    curDir, true, true);
+	stringReplace(mLangPath,   mConfigPath, mLangPath,   curDir, true, true);
 
 	int res = mConfigLoader->save(this, mConfigStore);
 
-	stringReplace(mMainPath,   "./", mMainPath,   mConfigPath, true, true);
-	stringReplace(mPluginPath, "./", mPluginPath, mConfigPath, true, true);
-	stringReplace(mLogPath,    "./", mLogPath,    mConfigPath, true, true);
-	stringReplace(mLangPath,   "./", mLangPath,   mConfigPath, true, true);
+	stringReplace(mMainPath,   curDir, mMainPath,   mConfigPath, true, true);
+	stringReplace(mPluginPath, curDir, mPluginPath, mConfigPath, true, true);
+	stringReplace(mLogPath,    curDir, mLogPath,    mConfigPath, true, true);
+	stringReplace(mLangPath,   curDir, mLangPath,   mConfigPath, true, true);
 
 	return res;
 }
@@ -330,10 +336,10 @@ DcLang::DcLang(ConfigLoader * configLoader, ConfigListBase * configListBase) :
 		langPathConfig->convertTo(mConfigStore.mPath);
 		langConfig->convertTo(mConfigStore.mName);
 		if (mConfigStore.mPath.size() == 0) {
-			mConfigStore.mPath = "./";
+			mConfigStore.mPath.assign("./", 2);
 		}
 		if (mConfigStore.mName.size() == 0) {
-			mConfigStore.mName = "English";
+			mConfigStore.mName.assign("English", 7);
 		}
 
 		// set xml file for lang
@@ -405,7 +411,7 @@ void DcLang::addVars() {
 	};
 
 	for (int i = 0; i < 5; ++i) {
-		add(string("sTimeout").append(name[i]), mTimeoutCmd[i], string(reason[i]));
+		add(string("sTimeout", 8).append(name[i]), mTimeoutCmd[i], string(reason[i]));
 	}
 
 	const char * units[] = {
@@ -430,7 +436,7 @@ void DcLang::addVars() {
 
 	for (int i = 0; i < 7; ++i) {
 		mUnits[i] = unitsDef[i];
-		add(string("sUnit").append(units[i]), mUnits[i], string(unitsDef[i]));
+		add(string("sUnit", 5).append(units[i]), mUnits[i], string(unitsDef[i]));
 	}
 
 	const char * times[] = {
@@ -451,7 +457,7 @@ void DcLang::addVars() {
 
 	for (int i = 0; i < 5; ++i) {
 		mTimes[i] = timesDef[i];
-		add(string("sTimes").append(times[i]), mTimes[i], string(timesDef[i]));
+		add(string("sTimes", 6).append(times[i]), mTimes[i], string(timesDef[i]));
 	}
 
 }
@@ -477,7 +483,7 @@ int DcLang::reload() {
 
 		if (ret != -4) {
 			// save default lang file
-			mConfigStore.mName = "Russian.xml";
+			mConfigStore.mName.assign("Russian.xml", 11);
 		}
 
 		save();

@@ -198,13 +198,14 @@ void Uid::pushValue(lua_State * L, DcUserBase * dcUserBase, const char * name) {
 int Uid::setValue(lua_State * L, DcUserBase * dcUserBase, const char * name, int type) {
 	ParamBase * paramBase = dcUserBase->getParamForce(name);
 	const char * str = NULL;
+	size_t len;
 	switch (type) {
 		case ParamBase::TYPE_STRING :
-			str = lua_tostring(L, 3);
+			str = lua_tolstring(L, 3, &len);
 			if (!str) {
 				ERR_TYPEMETA(3, "UID", "string");
 			}
-			paramBase->setString(string(str));
+			paramBase->setString(string(str, len));
 			break;
 
 		case ParamBase::TYPE_BOOL :

@@ -64,11 +64,12 @@ int Service::installService(char * name, const char * configFile) {
 	}
 
 	// Service path + name
-	string cmd = "\"" + string(buf) + "\" -s \"" + string(name) + "\"";
+	string cmd;
+	cmd.append("\"", 1).append(buf).append("\" -s \"", 6).append(name).append("\"", 1);
 
 	// Service config path
 	if (configFile) {
-		cmd += " -c \"" + string(configFile) + "\"";
+		cmd.append(" -c \"", 5).append(configFile).append("\"", 1);
 	}
 
 	// Create service

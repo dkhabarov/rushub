@@ -127,7 +127,7 @@ int Exception::init(const char * path) {
 	SymSetOptions(SYMOPT_DEFERRED_LOADS | SYMOPT_FAIL_CRITICAL_ERRORS | SYMOPT_LOAD_LINES );
 
 	char buf[BUFFERSIZE] = { '\0' };
-	string symbolPath(".");
+	string symbolPath(".", 1);
 	if (GetEnvironmentVariableA("_NT_SYMBOL_PATH", buf, BUFFERSIZE)) {
 		symbolPath.append(";", 1);
 		symbolPath.append(buf);

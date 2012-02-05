@@ -252,10 +252,10 @@ int AdcProtocol::onNewConn(Conn * conn) {
 		}
 		if (!useCache) {
 			string buff;
-			stringReplace(mDcServer->mDcLang.mFirstMsg, "HUB", buff, INTERNALNAME " " INTERNALVERSION);
-			stringReplace(buff, "uptime", buff, sTimeCache);
-			stringReplace(buff, "users", buff, iUsersVal);
-			stringReplace(buff, "share", buff, sShareCache);
+			stringReplace(mDcServer->mDcLang.mFirstMsg, string("HUB", 3), buff, INTERNALNAME " " INTERNALVERSION);
+			stringReplace(buff, string("uptime", 6), buff, sTimeCache);
+			stringReplace(buff, string("users", 5), buff, iUsersVal);
+			stringReplace(buff, string("share", 5), buff, sShareCache);
 			cp1251ToUtf8(buff, sCache, escaper);
 		}
 
@@ -571,7 +571,7 @@ void AdcProtocol::infList(string & list, UserBase * userBase) {
 	if (!userBase->isHide()) {
 		list.reserve(userBase->getInfo().size() + ADC_SEPARATOR_LEN);
 		list.append(userBase->getInfo());
-		list.append(ADC_SEPARATOR);
+		list.append(ADC_SEPARATOR, ADC_SEPARATOR_LEN);
 	}
 }
 
@@ -668,11 +668,11 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 		if (dcConn->log(LEVEL_DEBUG)) {
 			dcConn->logStream() << "Wrong syntax cmd" << endl;
 		}
-		string msg("ISTA "), buff;
+		string msg("ISTA ", 5), buff;
 		msg.reserve(10 + adcParser->getErrorText().size());
 		msg.append(toString(SEVERITY_LEVEL_FATAL)); // Disconnect
 		msg.append(toString(adcParser->getErrorCode())); // Error code
-		msg.append(" ");
+		msg.append(" ", 1);
 		msg.append(cp1251ToUtf8(adcParser->getErrorText(), buff, escaper)); // Error text
 		dcConn->send(msg, true);
 		dcConn->closeNice(9000, CLOSE_REASON_CMD_SYNTAX);

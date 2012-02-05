@@ -75,14 +75,20 @@ int LuaInterpreter::start() {
 	lua_gettable(mL, LUA_GLOBALSINDEX);
 
 	if (!LuaPlugin::mCurLua->mSetLuaPath) {
+		size_t len = 0;
+
 		lua_pushliteral(mL, "path");
 		lua_rawget(mL, -2);
-		LuaPlugin::mCurLua->mLuaPath.append(lua_tostring(mL, -1));
+
+		const char * path = lua_tolstring(mL, -1, &len);
+		LuaPlugin::mCurLua->mLuaPath.append(path, len);
 		lua_pop(mL, 1);
 
 		lua_pushliteral(mL, "cpath");
 		lua_rawget(mL, -2);
-		LuaPlugin::mCurLua->mLuaCPath.append(lua_tostring(mL, -1));
+
+		path = lua_tolstring(mL, -1, &len);
+		LuaPlugin::mCurLua->mLuaCPath.append(path, len);
 		lua_pop(mL, 1);
 
 		LuaPlugin::mCurLua->mSetLuaPath = true;
@@ -291,7 +297,7 @@ bool LuaInterpreter::onError(const char * funcName, const char * errMsg, bool st
 		errMsg = "unknown LUA error";
 	}
 	LuaPlugin::mCurLua->mLastError = errMsg;
-	logError(errMsg);
+	logError(LuaPlugin::mCurLua->mLastError);
 	if (strcmp(funcName, "OnError")) {
 		newCallParam((void *) errMsg, LUA_TSTRING);
 		stoped = !callFunc("OnError");
@@ -361,14 +367,13 @@ void LuaInterpreter::newCallParam(lua_Number data, int type) {
 
 
 
-void LuaInterpreter::logError(const char * msg) {
-	string logs(LuaPlugin::mCurServer->getLogDir());
-	Dir::checkPath(logs);
-	string logFile(logs + "lua_errors.log");
+void LuaInterpreter::logError(const string & msg) {
+	string log(LuaPlugin::mCurServer->getLogDir());
+	Dir::checkPath(log);
+	log.append("lua_errors.log", 14);
 
-	ofstream ofs(logFile.c_str(), ios_base::app);
-	ofs << "[" << LuaPlugin::mCurServer->getTime() << "] "
-		<< (msg != NULL ? string(msg) : "unknown LUA error") << endl;
+	ofstream ofs(log.c_str(), ios_base::app);
+	ofs << "[" << LuaPlugin::mCurServer->getTime() << "] " << msg << endl;
 
 	ofs.flush();
 	ofs.close();

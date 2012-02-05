@@ -166,7 +166,7 @@ bool Parser::splitOnTwo(size_t start, const char lim, int cn1, int cn2, size_t l
 
 
 
-bool Parser::splitOnTwo(const string &lim, int ch, int cn1, int cn2, bool left) {
+bool Parser::splitOnTwo(const string & lim, int ch, int cn1, int cn2, bool left) {
 	tChunk & chunk = mChunks[ch];
 	return splitOnTwo(chunk.first, lim, cn1, cn2, chunk.second, left);
 }

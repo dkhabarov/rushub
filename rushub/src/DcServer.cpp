@@ -609,7 +609,7 @@ bool DcServer::checkNick(DcConn *dcConn) {
 						<< "'[" << us->getIp() << "]" << endl;
 				}
 				string msg;
-				stringReplace(mDcLang.mUsedNick, "nick", msg, dcConn->mDcUser->getUid());
+				stringReplace(mDcLang.mUsedNick, string("nick", 4), msg, dcConn->mDcUser->getUid());
 				sendToUser(dcConn->mDcUser, msg, mDcConfig.mHubBot.c_str());
 				dcConn->send(mNmdcProtocol.appendValidateDenied(msg.erase(), dcConn->mDcUser->getUid())); // refactoring to DcProtocol pointer
 				return false;
@@ -837,7 +837,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 
 			// Protocol dependence
 			if (mDcConfig.mAdcOn) { // ADC
-				msg.append("IQUI ").append(dcUser->getUid()).append(ADC_SEPARATOR);
+				msg.append("IQUI ", 5).append(dcUser->getUid()).append(ADC_SEPARATOR, ADC_SEPARATOR_LEN);
 			} else { // NMDC
 				mNmdcProtocol.appendQuit(msg, dcUser->getUid());
 			}
@@ -1283,19 +1283,19 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 		if (key) {
 			ct = "5";
 		}
-		string inf("IINF ");
+		string inf("IINF ", 5);
 		inf.reserve(79);
-		inf.append(dcUser->getUid()).append(" CT").append(ct).append(" NI").append(uid);
-		inf.append(" SS0 HN0 HR0 HO1 VEBot\\sV:1.0 SL0 DERusHub\\sbot");
+		inf.append(dcUser->getUid()).append(" CT", 3).append(ct, 1).append(" NI", 3).append(uid);
+		inf.append(" SS0 HN0 HR0 HO1 VEBot\\sV:1.0 SL0 DERusHub\\sbot", 47);
 		dcUser->setInfo(inf);
 	} else { // NMDC
 		if (!uid.size() || uid.size() > 0x40 || uid.find_first_of(" |$") != uid.npos) {
 			delete dcUser;
 			return -1;
 		}
-		string myInfo("$MyINFO $ALL ");
+		string myInfo("$MyINFO $ALL ", 13);
 		if (!dcUser->setInfo(myInfo.append(uid).append(" ", 1).append(info))) {
-			myInfo = "$MyINFO $ALL ";
+			myInfo.assign("$MyINFO $ALL ", 13);
 			if (!dcUser->setInfo(myInfo.append(uid).append(" $ $$$0$", 9))) {
 				delete dcUser;
 				return -2;

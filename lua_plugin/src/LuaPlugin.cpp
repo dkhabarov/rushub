@@ -69,18 +69,21 @@ void LuaPlugin::onLoad(DcServerBase * dcServerBase) {
 
 	string mainDir(dcServerBase->getMainDir());
 
-	mScriptsDir = mainDir + "scripts/";
-	string libs = mainDir + "libs/";
+	mScriptsDir = mainDir;
+	mScriptsDir.append("scripts/", 8);
 	Dir::checkPath(mScriptsDir);
+
+	string libs = mainDir;
+	libs.append("libs/", 5);
 	Dir::checkPath(libs);
 
 	#ifdef _WIN32
 
 		// replace slashes
-		size_t pos = mainDir.find("/");
+		size_t pos = mainDir.find('/');
 		while (pos != mainDir.npos) {
 			mainDir.replace(pos, 1, LUA_DIRSEP);
-			pos = mainDir.find("/", pos);
+			pos = mainDir.find('/', pos);
 		}
 
 		mLuaCPath = mainDir + "libs" LUA_DIRSEP "?.dll;" +

@@ -125,6 +125,7 @@ Param * DcUser::getParamForce(const char * name, bool setRules) {
 		param = new Param(this, name);
 		mParamList.add(name, param);
 		if (setRules) {
+			static const string empty("");
 			if (strcmp(name, USER_PARAM_CAN_KICK) == 0) {
 				param->set(false, Param::TYPE_BOOL, Param::MODE_NOT_CHANGE_TYPE);
 			} else if (strcmp(name, USER_PARAM_CAN_REDIRECT) == 0) {
@@ -139,19 +140,19 @@ Param * DcUser::getParamForce(const char * name, bool setRules) {
 				__int64 n = 0;
 				param->set(n, Param::TYPE_INT64, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetShare);
 			} else if (strcmp(name, USER_PARAM_EMAIL) == 0) {
-				param->set(string(""), Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param->set(empty, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_DESC) == 0) {
-				param->set(string(""), Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param->set(empty, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_BYTE) == 0) {
-				param->set(string(""), Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param->set(empty, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_CONNECTION) == 0) {
-				param->set(string(""), Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param->set(empty, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_CLIENT_NAME) == 0) {
-				param->set(string(""), Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param->set(empty, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_CLIENT_VERSION) == 0) {
-				param->set(string(""), Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param->set(empty, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_MODE) == 0) {
-				param->set(string(""), Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param->set(empty, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_UNREG_HUBS) == 0) {
 				param->set(int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_REG_HUBS) == 0) {
@@ -169,7 +170,7 @@ Param * DcUser::getParamForce(const char * name, bool setRules) {
 			} else if (strcmp(name, USER_PARAM_DOWNLOAD) == 0) {
 				param->set(int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_FRACTION) == 0) {
-				param->set(string(""), Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param->set(empty, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			}
 		}
 	}

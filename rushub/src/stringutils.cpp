@@ -77,7 +77,7 @@ bool loadFileInString(const string & fileName, string & str) {
 string & stringReplace(const string & str, const string & varname, string & dest, const string & by, bool b, bool first) {
 	dest = str;
 	if (!b) {
-		string search("%[");
+		string search("%[", 2);
 		search.append(varname);
 		search.append("]", 1);
 		size_t pos = dest.find(search);

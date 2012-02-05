@@ -134,7 +134,7 @@ int DcConn::onTimer(Time & now) {
 					logStream() << "Operation timeout (" << HubTimeOut(i) << ")" << endl;
 				}
 				string msg;
-				stringReplace(dcServer->mDcLang.mTimeout, "reason", msg, dcServer->mDcLang.mTimeoutCmd[i]);
+				stringReplace(dcServer->mDcLang.mTimeout, string("reason", 6), msg, dcServer->mDcLang.mTimeoutCmd[i]);
 				dcServer->sendToUser(mDcUser, msg, dcServer->mDcConfig.mHubBot.c_str());
 				closeNice(9000, CLOSE_REASON_TIMEOUT);
 				return 1;

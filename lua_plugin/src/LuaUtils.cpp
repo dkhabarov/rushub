@@ -68,7 +68,7 @@ int LuaUtils::deprecatedFunc(lua_State * L, const char * instead) {
 	oss << "warning: function '" << ar2.name << 
 		"' was deprecated. Use '" << instead << "' instead";
 
-	LuaInterpreter::logError(oss.str().c_str());
+	LuaInterpreter::logError(oss.str());
 	return 1;
 }
 

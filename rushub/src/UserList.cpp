@@ -480,7 +480,7 @@ void UserList::addInCache(string & cache, const string & data, const char * sep,
 	cache.append(data);
 	if (addSep) {
 		if (cache.find(sep, cache.size() - sepLen, sepLen)) {
-			cache.append(sep);
+			cache.append(sep, sepLen);
 		}
 	}
 }
