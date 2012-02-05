@@ -45,6 +45,8 @@ using namespace ::std;
 /// Utils namespace
 namespace utils {
 
+static const string emptyStr("");
+
 bool loadFileInString(const string &, string &);
 
 string & stringReplace(const string &, const string &, string &, const string &, bool b = false, bool first = false);
