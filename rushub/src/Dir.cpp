@@ -28,7 +28,7 @@
 #endif
 
 #ifndef STR_LEN
-# define STR_LEN(S) S ## , ## sizeof(S) / sizeof(S[0]) - 1
+# define STR_LEN(S) S , sizeof(S) / sizeof(S[0]) - 1
 #endif
 
 
