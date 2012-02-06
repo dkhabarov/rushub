@@ -21,14 +21,14 @@
 
 #include <string.h>
 
+#ifndef STR_LEN
+# define STR_LEN(S) S , sizeof(S) / sizeof(S[0]) - 1
+#endif
+
 #ifdef _WIN32
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1400)
 	#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
-#endif
-
-#ifndef STR_LEN
-# define STR_LEN(S) S , sizeof(S) / sizeof(S[0]) - 1
 #endif
 
 
