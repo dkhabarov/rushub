@@ -520,17 +520,24 @@ void AdcParser::parseFeatures(DcUser * dcUser) {
 		const string & value = param->toString();
 		set<int> & features = dcUser->getFeatures();
 
-		// TODO check syntax
 		features.clear();
 		size_t i, j = 0;
 		while ((i = value.find(',', j)) != value.npos) {
 			if (i - j == 4) {
-				features.insert(FOURCC(value[j], value[j + 1], value[j + 2], value[j + 3]));
+				if (isUpperAlpha(value[j]) && isUpperAlphaNum(value[j + 1]) && 
+					isUpperAlphaNum(value[j + 2]) && isUpperAlphaNum(value[j + 3]))
+				{
+					features.insert(FOURCC(value[j], value[j + 1], value[j + 2], value[j + 3]));
+				}
 			}
 			j = i + 1;
 		}
 		if (value.size() - j == 4) {
-			features.insert(FOURCC(value[j], value[j + 1], value[j + 2], value[j + 3]));
+			if (isUpperAlpha(value[j]) && isUpperAlphaNum(value[j + 1]) && 
+				isUpperAlphaNum(value[j + 2]) && isUpperAlphaNum(value[j + 3]))
+			{
+				features.insert(FOURCC(value[j], value[j + 1], value[j + 2], value[j + 3]));
+			}
 		}
 	}
 }
