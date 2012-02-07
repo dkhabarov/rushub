@@ -46,6 +46,9 @@ class ConfigLoader {
 
 public:
 
+	virtual ~ConfigLoader() {
+	}
+
 	virtual int load(ConfigListBase *, const ConfigStore &) = 0;
 	virtual int save(ConfigListBase *, const ConfigStore &) = 0;
 

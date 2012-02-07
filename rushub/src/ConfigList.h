@@ -37,8 +37,8 @@ using namespace ::utils;
 namespace configuration {
 
 #define NEWITEM(TYPE, SUFFIX) \
-virtual ConfigItem##SUFFIX * add(TYPE & v) { return new ConfigItem##SUFFIX(v); } \
-virtual ConfigItemP##SUFFIX * add(TYPE * & v) { return new ConfigItemP##SUFFIX(v); }
+ConfigItem##SUFFIX * add(TYPE & v) { return new ConfigItem##SUFFIX(v); } \
+ConfigItemP##SUFFIX * add(TYPE * & v) { return new ConfigItemP##SUFFIX(v); }
 
 /** The Class of the making the object for any type. 
 Contains the functions of the creation of all available types. */
@@ -55,7 +55,7 @@ public:
 	NEWITEM(__int64, Int64);        // virtual ConfigItemInt64   * add(__int64 & var) { return new ConfigItemInt64(var); }
 	NEWITEM(char, Char);            // virtual ConfigItemChar    * add(char & var) { return new ConfigItemChar(var); }
 	NEWITEM(string, String);        // virtual ConfigItemString  * add(string & var) { return new ConfigItemString(var); }
-	virtual void del(ConfigItem * configItem) { /** Removing config item */
+	void del(ConfigItem * configItem) { /** Removing config item */
 		delete configItem;
 	}
 }; // ConfigFactory

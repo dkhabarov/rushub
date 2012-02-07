@@ -56,7 +56,7 @@ public:
 public:
 
 	Param(DcUser * dcUser, const char * name);
-	~Param();
+	virtual ~Param();
 
 	virtual const string & getName() const;
 	virtual int getType() const;

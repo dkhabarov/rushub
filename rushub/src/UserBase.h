@@ -31,6 +31,9 @@ class UserBase {
 
 public:
 
+	virtual ~UserBase() {
+	}
+
 	virtual const string & getUid() const = 0;
 	virtual const string & getInfo() = 0;
 	virtual const string & getIp() const = 0;

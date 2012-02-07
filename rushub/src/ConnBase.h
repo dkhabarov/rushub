@@ -147,6 +147,9 @@ class ConnBase {
 
 public:
 
+	virtual ~ConnBase() {
+	}
+
 	/** Get socket */
 	virtual operator tSocket() const = 0;
 

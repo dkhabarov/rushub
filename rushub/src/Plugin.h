@@ -159,6 +159,9 @@ public:
 
 public:
 
+	virtual ~ParamBase() {
+	}
+
 	virtual const string & getName() const = 0;
 	virtual int getType() const = 0;
 	virtual const string & toString() = 0;
@@ -253,6 +256,9 @@ public:
 class DcServerBase {
 
 public:
+
+	virtual ~DcServerBase() {
+	}
 
 	/// Get main hub path
 	virtual const string & getMainDir() const = 0;

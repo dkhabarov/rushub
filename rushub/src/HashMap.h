@@ -51,7 +51,7 @@ public:
 	HashMap() {
 	}
 
-	~HashMap() {
+	virtual ~HashMap() {
 	}
 
 	/** Number element in container HashMap */
