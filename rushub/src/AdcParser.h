@@ -192,9 +192,9 @@ private:
 
 private:
 
-	bool checkHeaderSyntax();
+	bool parseHeader();
 	bool parseFeatures();
-	void setError(int code, const char * text);
+	void setError(int code, const char * text, size_t textLen);
 
 	static void replaceParam(ParamBase * param, const char * oldValue, const string & newValue);
 	static void parseFeatures(DcUser *);

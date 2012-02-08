@@ -168,9 +168,9 @@ int AdcParser::parse() {
 
 	mLength = mCommand.size(); // Set cmd len
 
-	if (mLength >= 4) { // ADC cmd key must contain 4 symbols
+	if (mLength >= 4) { // ADC cmd key must contain 4 symbols, else it's invalid cmd
 
-		if (checkHeaderSyntax()) {
+		if (parseHeader()) {
 			int cmd = CMD(mCommand[1], mCommand[2], mCommand[3]);
 			for (unsigned int i = 0; i < ADC_TYPE_INVALID; ++i) {
 				AdcCommand & adcCommand = AdcCommands[i];
@@ -190,10 +190,11 @@ int AdcParser::parse() {
 
 
 
-bool AdcParser::checkHeaderSyntax() {
+bool AdcParser::parseHeader() {
 
 	// Check cmd name ([A-Z] [A-Z0-9] [A-Z0-9])
 	if (!isUpperAlpha(mCommand[1]) || !isUpperAlphaNum(mCommand[2]) || !isUpperAlphaNum(mCommand[3])) {
+		// Unknown cmd
 		return false;
 	}
 
@@ -205,10 +206,10 @@ bool AdcParser::checkHeaderSyntax() {
 			// 'B' command_name ' ' base32_character{4}
 			mHeader = HEADER_BROADCAST;
 			if (mLength < 9 || mCommand[4] != ' ') {
-				setError(ERROR_CODE_PROTOCOL_ERROR, "Protocol syntax error");
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Protocol syntax error"));
 				return false;
 			} else if (!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8])) {
-				setError(ERROR_CODE_PROTOCOL_ERROR, "Invalid source SID");
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid source SID"));
 				return false;
 			}
 			mSidSource.assign(mCommand, 5, 4);
@@ -244,13 +245,13 @@ bool AdcParser::checkHeaderSyntax() {
 				mHeader = HEADER_ECHO;
 			}
 			if (mLength < 14 || mCommand[4] != ' ' || mCommand[9] != ' ') {
-				setError(ERROR_CODE_PROTOCOL_ERROR, "Protocol syntax error");
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Protocol syntax error"));
 				return false;
 			} else if (!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8])) {
-				setError(ERROR_CODE_PROTOCOL_ERROR, "Invalid source SID");
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid source SID"));
 				return false;
 			} else if (!isBase32(mCommand[10]) || !isBase32(mCommand[11]) || !isBase32(mCommand[12]) || !isBase32(mCommand[13])) {
-				setError(ERROR_CODE_PROTOCOL_ERROR, "Invalid target SID");
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid target SID"));
 				return false;
 			}
 			mSidSource.assign(mCommand, 5, 4);
@@ -263,13 +264,13 @@ bool AdcParser::checkHeaderSyntax() {
 			// example: FSCH AA7V +TCP4-NAT0 TOauto TRZSIJM5OH6FCOIC6Y6LR5FUA2TXG5N3ZS7P6M5DQ
 			mHeader = HEADER_FEATURE;
 			if (mLength < 15 || mCommand[4] != ' ' || mCommand[9] != ' ') {
-				setError(ERROR_CODE_PROTOCOL_ERROR, "Protocol syntax error");
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Protocol syntax error"));
 				return false;
 			} else if (!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8])) {
-				setError(ERROR_CODE_PROTOCOL_ERROR, "Invalid source SID");
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid source SID"));
 				return false;
 			} else if (!parseFeatures()) {
-				setError(ERROR_CODE_PROTOCOL_ERROR, "Invalid feature");
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid feature"));
 				return false;
 			}
 
@@ -281,21 +282,21 @@ bool AdcParser::checkHeaderSyntax() {
 			// 'U' command_name ' ' base32_character+
 			mHeader = HEADER_UDP;
 			if (mLength < 6 || mCommand[4] != ' ' || !isBase32(mCommand[5])) {
-				setError(ERROR_CODE_PROTOCOL_ERROR, "Protocol syntax error");
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Protocol syntax error"));
 				return false;
 			}
 			counter = 6;
 			while (counter < mLength && isBase32(mCommand[counter++])) {
 			}
 			if (counter != mLength && mCommand[counter] != ' ') {
-				setError(ERROR_CODE_PROTOCOL_ERROR, "Invalid source SID");
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid source SID"));
 				return false;
 			}
 			mCidSource.assign(mCommand, 5, counter - 5);
 			mBodyPos = counter;
 			break;
 
-		default: // Unknown
+		default: // Unknown cmd
 			return false;
 
 	}
@@ -337,9 +338,10 @@ bool AdcParser::parseFeatures() {
 
 
 
-void AdcParser::setError(int code, const char * text) {
+void AdcParser::setError(int code, const char * text, size_t textLen) {
+	mErrorText.reserve(textLen);
 	mErrorCode = code;
-	mErrorText = text;
+	mErrorText.assign(text, textLen);
 }
 
 

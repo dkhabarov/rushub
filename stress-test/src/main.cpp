@@ -145,15 +145,19 @@ private:
 		//cout << cmd << endl;
 
 		if (cmd.find("$Lock ", 0, 6) != cmd.npos) {
-			string data("$Supports NoGetINFO NoHello UserIP2|$Key key|$ValidateNick ");
-			data.append(static_cast<NmdcParser*> (conn->mParser)->mNick).append("|");
-			size_t len = data.size();
-			conn->writeData(data.c_str(), len, true);
+			string data;
+			data.reserve(150);
+			data.append(STR_LEN("$Supports NoGetINFO NoHello UserIP2|$Key key|$ValidateNick "));
+			data.append(static_cast<NmdcParser*> (conn->mParser)->mNick);
+			data.append(STR_LEN("|"));
+			conn->writeData(data.c_str(), data.size(), true);
 		} else if (cmd.find("$Hello ", 0, 7) != cmd.npos) {
-			string data("$Version 1,0091|$GetNickList|$MyINFO $ALL ");
-			data.append(static_cast<NmdcParser*> (conn->mParser)->mNick).append(" any description<TestDC++ 1.00,M:A,H:1/0/0,S:32>$ $1000$some@email.ru$1234554321$|");
-			size_t len = data.size();
-			conn->writeData(data.c_str(), len, true);
+			string data;
+			data.reserve(150);
+			data.append(STR_LEN("$Version 1,0091|$GetNickList|$MyINFO $ALL "));
+			data.append(static_cast<NmdcParser*> (conn->mParser)->mNick);
+			data.append(STR_LEN(" any description<TestDC++ 1.00,M:A,H:1/0/0,S:32>$ $1000$some@email.ru$1234554321$|"));
+			conn->writeData(data.c_str(), data.size(), true);
 		}
 		str->clear();
 	}
