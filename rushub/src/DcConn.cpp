@@ -98,7 +98,9 @@ size_t DcConn::send(const char * data, size_t len, bool addSep, bool flush) {
 		const char * sep = getSeparator();
 		size_t sepLen = getSeparatorLen();
 		if (len < sepLen || strstr(data + len - sepLen, sep) == NULL) {
-			return writeData(data, len, false) + writeData(sep, sepLen, flush);
+			size_t ret = writeData(data, len, false);
+			ret += writeData(sep, sepLen, flush);
+			return ret;
 		}
 	}
 	return writeData(data, len, flush);
