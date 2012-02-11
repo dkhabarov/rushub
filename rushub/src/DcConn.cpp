@@ -144,7 +144,12 @@ int DcConn::onTimer(Time & now) {
 		}
 	}
 
-	/*Time lastRecv(mLastRecv);
+	/*
+		Connection timeout. It's equal 600 sec by default.
+		Some older clients can't ping the hub. So if hub will often drop clients, 
+		you need increase this setting.
+	*/
+	Time lastRecv(mLastRecv);
 	if (dcServer->minDelay(lastRecv, dcServer->mDcConfig.mTimeoutAny)) {
 		if (log(LEVEL_DEBUG)) {
 			logStream() << "Any action timeout..." << endl;
@@ -152,7 +157,7 @@ int DcConn::onTimer(Time & now) {
 		dcServer->sendToUser(mDcUser, dcServer->mDcLang.mTimeoutAny, dcServer->mDcConfig.mHubBot.c_str());
 		closeNice(9000, CLOSE_REASON_TIMEOUT_ANYACTION);
 		return 2;
-	}*/
+	}
 
 	/* Check user on freeze.
 		 Sending void msg to all users, starting on mStartPing sec after entry,

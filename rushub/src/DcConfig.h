@@ -76,7 +76,7 @@ public:
 
 	double mPingInterval;       ///< User's ping interval
 	double mTimeout[5];         ///< Timeouts of the protocol entering commands
-	double mTimeoutAny;         ///< Timeout connection
+	double mTimeoutAny;         ///< Timeout connection (If hub will often drop clients, you need increase this setting)
 	double mWebTimeout;         ///< Timeout connection with web-client (in sec)
 	double mSysLoading;         ///< Factor of the system loading
 
