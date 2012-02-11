@@ -68,26 +68,26 @@ private:
 
 /// Main ADC commands
 AdcCommand AdcCommands[] = {
-	AdcCommand(CMD('S', 'U', 'P'), ADC_TYPE_SUP), // SUP
-	AdcCommand(CMD('S', 'T', 'A'), ADC_TYPE_STA), // STA
-	AdcCommand(CMD('I', 'N', 'F'), ADC_TYPE_INF), // INF
-	AdcCommand(CMD('M', 'S', 'G'), ADC_TYPE_MSG), // MSG
 	AdcCommand(CMD('S', 'C', 'H'), ADC_TYPE_SCH), // SCH
 	AdcCommand(CMD('R', 'E', 'S'), ADC_TYPE_RES), // RES
 	AdcCommand(CMD('C', 'T', 'M'), ADC_TYPE_CTM), // CTM
 	AdcCommand(CMD('R', 'C', 'M'), ADC_TYPE_RCM), // RCM
+	AdcCommand(CMD('S', 'U', 'P'), ADC_TYPE_SUP), // SUP
+	AdcCommand(CMD('S', 'T', 'A'), ADC_TYPE_STA), // STA
+	AdcCommand(CMD('I', 'N', 'F'), ADC_TYPE_INF), // INF
+	AdcCommand(CMD('M', 'S', 'G'), ADC_TYPE_MSG), // MSG
 	AdcCommand(CMD('G', 'P', 'A'), ADC_TYPE_GPA), // GPA
 	AdcCommand(CMD('P', 'A', 'S'), ADC_TYPE_PAS), // PAS
 	AdcCommand(CMD('Q', 'U', 'I'), ADC_TYPE_QUI), // QUI
-	AdcCommand(CMD('G', 'E', 'T'), ADC_TYPE_GET), // GET
-	AdcCommand(CMD('G', 'F', 'I'), ADC_TYPE_GFI), // GFI
-	AdcCommand(CMD('S', 'N', 'D'), ADC_TYPE_SND), // SND
 	AdcCommand(CMD('S', 'I', 'D'), ADC_TYPE_SID), // SID
 	AdcCommand(CMD('C', 'M', 'D'), ADC_TYPE_CMD), // CMD
+	AdcCommand(CMD('G', 'F', 'I'), ADC_TYPE_GFI), // GFI
 	AdcCommand(CMD('N', 'A', 'T'), ADC_TYPE_NAT), // NAT
 	AdcCommand(CMD('R', 'N', 'T'), ADC_TYPE_RNT), // RNT
 	AdcCommand(CMD('P', 'S', 'R'), ADC_TYPE_PSR), // PSR
 	AdcCommand(CMD('P', 'U', 'B'), ADC_TYPE_PUB), // PUB
+	AdcCommand(CMD('G', 'E', 'T'), ADC_TYPE_GET), // GET
+	AdcCommand(CMD('S', 'N', 'D'), ADC_TYPE_SND), // SND
 };
 
 
@@ -166,7 +166,7 @@ const vector<int> & AdcParser::getNegativeFeatures() const {
 /// Do parse for command and return type of this command
 int AdcParser::parse() {
 
-	mLength = mCommand.size(); // Set cmd len
+	mLength = mCommand.size(); // Set command len
 
 	if (mLength >= 4) { // ADC cmd key must contain 4 symbols, else it's invalid cmd
 
@@ -174,27 +174,28 @@ int AdcParser::parse() {
 			int cmd = CMD(mCommand[1], mCommand[2], mCommand[3]);
 			for (unsigned int i = 0; i < ADC_TYPE_INVALID; ++i) {
 				AdcCommand & adcCommand = AdcCommands[i];
-				if (adcCommand.check(cmd)) { // Check cmd from mCommand
+				if (adcCommand.check(cmd)) { // Check command from mCommand
 					return mType = adcCommand.getAdcType(); // Set cmd type
 				}
 			}
-			return mType = ADC_TYPE_UNKNOWN; // Unknown cmd
+			return mType = ADC_TYPE_UNKNOWN; // Unknown command
 		}
 
 	} else if (mLength == 0) {
-		return mType = ADC_TYPE_VOID; // Void cmd
+		return mType = ADC_TYPE_VOID; // Void command (ping)
 	}
 
-	return mType = ADC_TYPE_INVALID; // Invalid cmd
+	return mType = ADC_TYPE_INVALID; // Invalid command
 }
 
 
 
 bool AdcParser::parseHeader() {
 
-	// Check cmd name ([A-Z] [A-Z0-9] [A-Z0-9])
+	// Check command name ([A-Z] [A-Z0-9] [A-Z0-9])
 	if (!isUpperAlpha(mCommand[1]) || !isUpperAlphaNum(mCommand[2]) || !isUpperAlphaNum(mCommand[3])) {
-		// Unknown cmd
+		// Invalid command name
+		setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid command name"));
 		return false;
 	}
 
@@ -206,10 +207,10 @@ bool AdcParser::parseHeader() {
 			// 'B' command_name ' ' base32_character{4}
 			mHeader = HEADER_BROADCAST;
 			if (mLength < 9 || mCommand[4] != ' ') {
-				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Protocol syntax error"));
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid source SID length"));
 				return false;
 			} else if (!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8])) {
-				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid source SID"));
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid source SID syntax"));
 				return false;
 			}
 			mSidSource.assign(mCommand, 5, 4);
@@ -245,13 +246,13 @@ bool AdcParser::parseHeader() {
 				mHeader = HEADER_ECHO;
 			}
 			if (mLength < 14 || mCommand[4] != ' ' || mCommand[9] != ' ') {
-				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Protocol syntax error"));
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid source SID or target SID length"));
 				return false;
 			} else if (!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8])) {
-				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid source SID"));
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid source SID syntax"));
 				return false;
 			} else if (!isBase32(mCommand[10]) || !isBase32(mCommand[11]) || !isBase32(mCommand[12]) || !isBase32(mCommand[13])) {
-				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid target SID"));
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid target SID syntax"));
 				return false;
 			}
 			mSidSource.assign(mCommand, 5, 4);
@@ -264,13 +265,13 @@ bool AdcParser::parseHeader() {
 			// example: FSCH AA7V +TCP4-NAT0 TOauto TRZSIJM5OH6FCOIC6Y6LR5FUA2TXG5N3ZS7P6M5DQ
 			mHeader = HEADER_FEATURE;
 			if (mLength < 15 || mCommand[4] != ' ' || mCommand[9] != ' ') {
-				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Protocol syntax error"));
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid source SID or feature length"));
 				return false;
 			} else if (!isBase32(mCommand[5]) || !isBase32(mCommand[6]) || !isBase32(mCommand[7]) || !isBase32(mCommand[8])) {
-				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid source SID"));
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid source SID syntax"));
 				return false;
 			} else if (!parseFeatures()) {
-				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid feature"));
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid feature syntax"));
 				return false;
 			}
 
@@ -282,22 +283,26 @@ bool AdcParser::parseHeader() {
 			// 'U' command_name ' ' base32_character+
 			mHeader = HEADER_UDP;
 			if (mLength < 6 || mCommand[4] != ' ' || !isBase32(mCommand[5])) {
-				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Protocol syntax error"));
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid source CID length"));
 				return false;
 			}
 			counter = 6;
 			while (counter < mLength && isBase32(mCommand[counter++])) {
 			}
 			if (counter != mLength && mCommand[counter] != ' ') {
-				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid source SID"));
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid source CID syntax"));
 				return false;
 			}
 			mCidSource.assign(mCommand, 5, counter - 5);
 			mBodyPos = counter;
 			break;
 
-		default: // Unknown cmd
-			return false;
+		default: // Unknown command
+			if (!isUpperAlpha(mCommand[0])) { // Is it ADC message_header?
+				// Invalid command name
+				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid command name"));
+				return false;
+			}
 
 	}
 
