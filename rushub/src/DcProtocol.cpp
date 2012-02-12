@@ -38,6 +38,56 @@ DcProtocol::~DcProtocol() {
 }
 
 
+
+// return true if use cache
+const string & DcProtocol::getFirstMsg(bool & useCache) {
+
+	static __int64 shareVal = -1;
+	static int usersVal = -1;
+	static long timeVal = -1;
+	static string timeCache, shareCache, cache;
+	Time Uptime(mDcServer->mTime);
+	Uptime -= mDcServer->mStartTime;
+	long min = Uptime.sec() / 60;
+	if (timeVal != min) {
+		timeVal = min;
+		useCache = false;
+		stringstream oss;
+		int w, d, h, m;
+		Uptime.asTimeVals(w, d, h, m);
+		if (w) {
+			oss << w << " " << mDcServer->mDcLang.mTimes[0] << " ";
+		}
+		if (d) {
+			oss << d << " " << mDcServer->mDcLang.mTimes[1] << " ";
+		}
+		if (h) {
+			oss << h << " " << mDcServer->mDcLang.mTimes[2] << " ";
+		}
+		oss << m << " " << mDcServer->mDcLang.mTimes[3];
+		timeCache = oss.str();
+	}
+	if (shareVal != mDcServer->miTotalShare) {
+		shareVal = mDcServer->miTotalShare;
+		useCache = false;
+		DcServer::getNormalShare(shareVal, shareCache);
+	}
+	if (usersVal != mDcServer->getUsersCount()) {
+		usersVal = mDcServer->getUsersCount();
+		useCache = false;
+	}	
+
+	if (!useCache) {
+		stringReplace(mDcServer->mDcLang.mFirstMsg, string(STR_LEN("HUB")), cache, string(STR_LEN(INTERNALNAME " " INTERNALVERSION)));
+		stringReplace(cache, string(STR_LEN("uptime")), cache, timeCache);
+		stringReplace(cache, string(STR_LEN("users")), cache, usersVal);
+		stringReplace(cache, string(STR_LEN("share")), cache, shareCache);
+	}
+
+	return cache;
+}
+
+
 }; // namespace protocol
 
 }; // namespace dcserver

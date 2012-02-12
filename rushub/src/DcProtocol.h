@@ -57,6 +57,9 @@ protected:
 
 	DcServer * mDcServer;
 
+protected:
+
+	const string & getFirstMsg(bool & useCache);
 
 }; // DcProtocol
 

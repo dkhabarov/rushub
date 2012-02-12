@@ -78,10 +78,6 @@ public:
 	virtual int onNewConn(Conn *);
 	virtual void onFlush(Conn *);
 
-	void setServer(DcServer * dcServer) {
-		mDcServer = dcServer;
-	}
-
 
 	string & appendLock(string & str);
 	string & appendHello(string & str, const string & nick);
@@ -113,8 +109,6 @@ public:
 	void delFromHide(DcUser *);
 
 protected:
-
-	DcServer * mDcServer;
 
 	typedef int (NmdcProtocol::*Event) (NmdcParser *, DcConn *);
 	Event events[NMDC_TYPE_UNKNOWN + 1];

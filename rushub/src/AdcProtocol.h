@@ -58,9 +58,6 @@ public:
 	virtual int onNewConn(Conn *);
 	virtual void onFlush(Conn *);
 
-	void setServer(DcServer * dcServer) {
-		mDcServer = dcServer;
-	}
 
 	static void infList(string & list, UserBase *);
 	static const char * getSid(unsigned int num);
@@ -74,8 +71,6 @@ public:
 	const char * genNewSid();
 
 protected:
-
-	DcServer * mDcServer;
 
 	typedef int (AdcProtocol::*Event) (AdcParser *, DcConn *);
 	Event events[ADC_TYPE_INVALID + 1];

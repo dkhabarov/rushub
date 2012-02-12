@@ -33,8 +33,8 @@ namespace dcserver {
 namespace protocol {
 
 
-NmdcProtocol::NmdcProtocol() :
-	mDcServer(NULL)
+NmdcProtocol::NmdcProtocol() : 
+	DcProtocol()
 {
 	setClassName("NmdcProtocol");
 
@@ -111,48 +111,9 @@ int NmdcProtocol::onNewConn(Conn * conn) {
 		} else
 	#endif
 	{
-		static __int64 iShareVal = -1;
-		static int iUsersVal = -1;
-		static long iTimeVal = -1;
-		static string sTimeCache, sShareCache, sCache;
+		// Send First Message
 		bool useCache = true;
-		Time Uptime(mDcServer->mTime);
-		Uptime -= mDcServer->mStartTime;
-		long min = Uptime.sec() / 60;
-		if (iTimeVal != min) {
-			iTimeVal = min;
-			useCache = false;
-			stringstream oss;
-			int w, d, h, m;
-			Uptime.asTimeVals(w, d, h, m);
-			if (w) {
-				oss << w << " " << mDcServer->mDcLang.mTimes[0] << " ";
-			}
-			if (d) {
-				oss << d << " " << mDcServer->mDcLang.mTimes[1] << " ";
-			}
-			if (h) {
-				oss << h << " " << mDcServer->mDcLang.mTimes[2] << " ";
-			}
-			oss << m << " " << mDcServer->mDcLang.mTimes[3];
-			sTimeCache = oss.str();
-		}
-		if (iShareVal != mDcServer->miTotalShare) {
-			iShareVal = mDcServer->miTotalShare;
-			useCache = false;
-			DcServer::getNormalShare(iShareVal, sShareCache);
-		}
-		if (iUsersVal != mDcServer->getUsersCount()) {
-			iUsersVal = mDcServer->getUsersCount();
-			useCache = false;
-		}
-		if (!useCache) {
-			stringReplace(mDcServer->mDcLang.mFirstMsg, string(STR_LEN("HUB")), sCache, string(STR_LEN(INTERNALNAME " " INTERNALVERSION)));
-			stringReplace(sCache, string(STR_LEN("uptime")), sCache, sTimeCache);
-			stringReplace(sCache, string(STR_LEN("users")), sCache, iUsersVal);
-			stringReplace(sCache, string(STR_LEN("share")), sCache, sShareCache);
-		}
-		mDcServer->sendToUser(dcConn->mDcUser, sCache, mDcServer->mDcConfig.mHubBot.c_str());
+		mDcServer->sendToUser(dcConn->mDcUser, getFirstMsg(useCache), mDcServer->mDcConfig.mHubBot.c_str());
 	}
 	dcConn->setTimeOut(HUB_TIME_OUT_LOGIN, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_LOGIN], mDcServer->mTime); /** Timeout for enter */
 	dcConn->setTimeOut(HUB_TIME_OUT_KEY, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_KEY], mDcServer->mTime);

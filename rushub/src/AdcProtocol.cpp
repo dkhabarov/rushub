@@ -27,7 +27,7 @@ namespace protocol {
 
 
 AdcProtocol::AdcProtocol() :
-	mDcServer(NULL),
+	DcProtocol(),
 	mSidNum(0)
 {
 	setClassName("AdcProtocol");
@@ -198,71 +198,11 @@ Conn * AdcProtocol::getConnForUdpData(Conn *, Parser *) {
 int AdcProtocol::onNewConn(Conn * conn) {
 
 	DcConn * dcConn = static_cast<DcConn *> (conn);
-
 	dcConn->mDcUser->setUid(string(genNewSid()));
 
-	static const string hubInf(STR_LEN("IINF CT32 VE" INTERNALVERSION " NIADC" INTERNALNAME));
-	dcConn->reserve(33 + hubInf.size() + mDcServer->mDcConfig.mTopic.size()); // 18 + 1 + 5 + 4 + 1 + hubInf.size() + 3 + Topic.size() + 1
-	dcConn->send(STR_LEN("ISUP ADBASE ADTIGR"), true, false);
-	dcConn->send(STR_LEN("ISID "), false, false);
-	dcConn->send(dcConn->mDcUser->getUid(), true, false);
-	dcConn->send(hubInf, false, false);
-	dcConn->send(STR_LEN(" DE"), false, false);
-	dcConn->send(mDcServer->mDcConfig.mTopic, true, false);
-
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnUserConnected.callAll(dcConn->mDcUser)) {
-		} else
+		mDcServer->mCalls.mOnUserConnected.callAll(dcConn->mDcUser);
 	#endif
-	{
-		static __int64 iShareVal = -1;
-		static int iUsersVal = -1;
-		static long iTimeVal = -1;
-		static string sTimeCache, sShareCache, sCache;
-		bool useCache = true;
-		Time Uptime(mDcServer->mTime);
-		Uptime -= mDcServer->mStartTime;
-		long min = Uptime.sec() / 60;
-		if (iTimeVal != min) {
-			iTimeVal = min;
-			useCache = false;
-			stringstream oss;
-			int w, d, h, m;
-			Uptime.asTimeVals(w, d, h, m);
-			if (w) {
-				oss << w << " " << mDcServer->mDcLang.mTimes[0] << " ";
-			}
-			if (d) {
-				oss << d << " " << mDcServer->mDcLang.mTimes[1] << " ";
-			}
-			if (h) {
-				oss << h << " " << mDcServer->mDcLang.mTimes[2] << " ";
-			}
-			oss << m << " " << mDcServer->mDcLang.mTimes[3];
-			sTimeCache = oss.str();
-		}
-		if (iShareVal != mDcServer->miTotalShare) {
-			iShareVal = mDcServer->miTotalShare;
-			useCache = false;
-			DcServer::getNormalShare(iShareVal, sShareCache);
-		}
-		if (iUsersVal != mDcServer->getUsersCount()) {
-			iUsersVal = mDcServer->getUsersCount();
-			useCache = false;
-		}
-		if (!useCache) {
-			string buff;
-			stringReplace(mDcServer->mDcLang.mFirstMsg, string(STR_LEN("HUB")), buff, string(STR_LEN(INTERNALNAME " " INTERNALVERSION)));
-			stringReplace(buff, string(STR_LEN("uptime")), buff, sTimeCache);
-			stringReplace(buff, string(STR_LEN("users")), buff, iUsersVal);
-			stringReplace(buff, string(STR_LEN("share")), buff, sShareCache);
-			cp1251ToUtf8(buff, sCache, escaper);
-		}
-
-		dcConn->reserve(5 + sCache.size()); //  4 + sCache.size() + 1
-		dcConn->send(STR_LEN("IMSG "), false, false);
-		dcConn->send(sCache, true, false);
-	}
 
 	dcConn->setTimeOut(HUB_TIME_OUT_LOGIN, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_LOGIN], mDcServer->mTime); /** Timeout for enter */
 	dcConn->flush();
@@ -275,12 +215,36 @@ int AdcProtocol::onNewConn(Conn * conn) {
 
 int AdcProtocol::eventSup(AdcParser *, DcConn * dcConn) {
 
+	dcConn->reserve(29); // 18 + 1 + 5 + 4 + 1
+	dcConn->send(STR_LEN("ISUP ADBASE ADTIGR"), true, false);
+	dcConn->send(STR_LEN("ISID "), false, false);
+	dcConn->send(dcConn->mDcUser->getUid(), true, false);
+
 	#ifndef WITHOUT_PLUGINS
 		if (mDcServer->mCalls.mOnSupports.callAll(dcConn->mDcUser)) {
+			// Don't send first msg and hubinfo
 			return -1;
 		}
 	#endif
 
+	// Get First Message
+	static string cache;
+	bool useCache = true;
+	const string & buff = getFirstMsg(useCache);
+	if (!useCache) {
+		cp1251ToUtf8(buff, cache, escaper);
+	}
+
+	// Send Hub Info
+	static const string hubInf(STR_LEN("IINF CT32 VE" INTERNALVERSION " NIADC" INTERNALNAME));
+	dcConn->reserve(9 + hubInf.size() + mDcServer->mDcConfig.mTopic.size() + cache.size()); // hubInf.size() + 3 + topic.size() + 1 + 4 + cache.size() + 1
+	dcConn->send(hubInf, false, false);
+	dcConn->send(STR_LEN(" DE"), false, false);
+	dcConn->send(mDcServer->mDcConfig.mTopic, true, false);
+
+	// Send First Message
+	dcConn->send(STR_LEN("IMSG "), false, false);
+	dcConn->send(cache, true, false);
 	return 0;
 }
 
