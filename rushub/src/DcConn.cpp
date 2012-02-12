@@ -114,15 +114,21 @@ void DcConn::setTimeOut(HubTimeOut to, double Sec, Time &now) {
 	mTimeOut[to].reset(now);
 }
 
+
+
 /// Clear timeout
 void DcConn::clearTimeOut(HubTimeOut to) {
 	mTimeOut[to].disable();
 }
 
+
+
 /// Check timeout
 int DcConn::checkTimeOut(HubTimeOut to, Time &now) {
 	return 0 == mTimeOut[to].check(now);
 }
+
+
 
 /// Timer for the current connection
 int DcConn::onTimer(Time & now) {
@@ -174,13 +180,19 @@ int DcConn::onTimer(Time & now) {
 	return 0;
 }
 
+
+
 void DcConn::closeNice(int msec, int iReason) {
 	Conn::closeNice(msec, iReason);
 }
 
+
+
 void DcConn::closeNow(int iReason) {
 	Conn::closeNow(iReason);
 }
+
+
 
 /// Set user object for current connection
 bool DcConn::setUser(DcUser * dcUser) {
@@ -208,6 +220,8 @@ void DcConn::onOk(bool ok) {
 	}
 }
 
+
+
 bool DcConn::parseCommand(const char * cmd) {
 
 	// TODO: set command pointer
@@ -227,6 +241,8 @@ bool DcConn::parseCommand(const char * cmd) {
 	return true;
 }
 
+
+
 const char * DcConn::getCommand() {
 	string * command = getCommandPtr();
 	if (command == NULL) {
@@ -244,8 +260,12 @@ DcConnFactory::DcConnFactory(Protocol * protocol, Server * server) :
 {
 }
 
+
+
 DcConnFactory::~DcConnFactory() {
 }
+
+
 
 Conn * DcConnFactory::createConn(tSocket sock) {
 	if (!mServer) {
@@ -261,6 +281,8 @@ Conn * DcConnFactory::createConn(tSocket sock) {
 
 	return static_cast<Conn *> (dcConn);
 }
+
+
 
 void DcConnFactory::deleteConn(Conn * &conn) {
 	DcConn * dcConn = static_cast<DcConn *> (conn);
