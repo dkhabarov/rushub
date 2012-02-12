@@ -215,6 +215,8 @@ int AdcProtocol::onNewConn(Conn * conn) {
 
 int AdcProtocol::eventSup(AdcParser *, DcConn * dcConn) {
 
+	// TODO: check existing BASE feature!
+
 	dcConn->reserve(29); // 18 + 1 + 5 + 4 + 1
 	dcConn->send(STR_LEN("ISUP ADBASE ADTIGR"), true, false);
 	dcConn->send(STR_LEN("ISID "), false, false);
@@ -223,6 +225,7 @@ int AdcProtocol::eventSup(AdcParser *, DcConn * dcConn) {
 	#ifndef WITHOUT_PLUGINS
 		if (mDcServer->mCalls.mOnSupports.callAll(dcConn->mDcUser)) {
 			// Don't send first msg and hubinfo
+			dcConn->flush();
 			return -1;
 		}
 	#endif
@@ -235,16 +238,22 @@ int AdcProtocol::eventSup(AdcParser *, DcConn * dcConn) {
 		cp1251ToUtf8(buff, cache, escaper);
 	}
 
+	// TODO: optimization of transformation
+	string hubName, topic;
+	cp1251ToUtf8(mDcServer->mDcConfig.mHubName, hubName, escaper);
+	cp1251ToUtf8(mDcServer->mDcConfig.mTopic, topic, escaper);
+
 	// Send Hub Info
-	static const string hubInf(STR_LEN("IINF CT32 VE" INTERNALVERSION " NIADC" INTERNALNAME));
-	dcConn->reserve(9 + hubInf.size() + mDcServer->mDcConfig.mTopic.size() + cache.size()); // hubInf.size() + 3 + topic.size() + 1 + 4 + cache.size() + 1
+	static const string hubInf(STR_LEN("IINF CT32 VE" INTERNALVERSION " NI"));
+	dcConn->reserve(9 + hubInf.size() + hubName.size() + topic.size() + cache.size()); // hubInf.size() + hubName.size() + 3 + topic.size() + 1 + 4 + cache.size() + 1
 	dcConn->send(hubInf, false, false);
+	dcConn->send(hubName, false, false);
 	dcConn->send(STR_LEN(" DE"), false, false);
-	dcConn->send(mDcServer->mDcConfig.mTopic, true, false);
+	dcConn->send(topic, true, false);
 
 	// Send First Message
 	dcConn->send(STR_LEN("IMSG "), false, false);
-	dcConn->send(cache, true, false);
+	dcConn->send(cache, true, true);
 	return 0;
 }
 
@@ -268,6 +277,8 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 			inf.erase(pos, pos_s - pos);
 		}
 	}
+
+	// TODO: verify PID by CID
 
 	dcConn->mDcUser->setInfo(inf);
 
