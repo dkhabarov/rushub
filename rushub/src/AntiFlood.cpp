@@ -92,11 +92,10 @@ bool AntiFlood::check(const string & ip, const Time & now) {
 	if (item->miCount < miCount) {
 		++item->miCount;
 	} else {
-		item->miCount = 0;
 		if (::fabs(double(now - item->mTime)) < mTime) {
-			item->mTime = now;
 			return true;
 		}
+		item->miCount = 0;
 		item->mTime = now;
 	}
 	return false;
