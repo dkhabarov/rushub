@@ -375,6 +375,7 @@ void DcLang::addVars() {
 	add("sBadNickLen", mBadNickLen, string(STR_LEN("Недопустимая длина ника. Допустимая длина ника от %[min] до %[max] символов.")));
 	add("sBadChars", mBadChars, string(STR_LEN("Недопустимые символы в нике.")));
 	add("sUsersLimit", mUsersLimit, string(STR_LEN("Достигнут придел по количеству подключенных пользователей.")));
+	add("sFloodReEnter", mFloodReEnter, string(STR_LEN("Вы слишком часто перезаходите на хаб. Пожалуйста подождите.")));
 	add("sForceMove", mForceMove, string(STR_LEN("Вы были перенаправлены на хаб dchub://%[address] причина: %[reason]")));
 
 	add("sFloodMyINFO", mFlood[NMDC_TYPE_MYNIFO], string(STR_LEN("Пожалуйста не флудите командой MyINFO.")));

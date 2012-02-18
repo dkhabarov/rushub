@@ -33,7 +33,7 @@ public:
 	AntiFlood(unsigned & iCount, double & time);
 	~AntiFlood();
 
-	bool check(const string & ip, const Time & now);
+	int check(const string & ip, const Time & now);
 	void del(Time & now);
 
 private:
@@ -42,7 +42,8 @@ private:
 	struct Item {
 		Time mTime;
 		unsigned miCount;
-		Item() : mTime(true), miCount(0) {
+		bool mMoreOne;
+		Item() : mTime(true), miCount(0), mMoreOne(false) {
 		}
 	};
 

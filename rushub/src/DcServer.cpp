@@ -476,8 +476,15 @@ int DcServer::onNewConn(Conn * conn) {
 	}
 
 	// Checking flood-entry (by ip)
-	if (mIpEnterFlood.check(dcConn->getIp(), mTime)) {
-		dcConn->closeNow(CLOSE_REASON_FLOOD_IP_ENTRY);
+	int ret = mIpEnterFlood.check(dcConn->getIp(), mTime);
+	if (ret) {
+		if (ret == 1 && !mDcConfig.mAdcOn) {
+			// TODO ADC
+			sendToUser(dcConn->mDcUser, mDcLang.mFloodReEnter, mDcConfig.mHubBot.c_str());
+			dcConn->closeNice(9000, CLOSE_REASON_FLOOD_IP_ENTRY);
+		} else {
+			dcConn->closeNow(CLOSE_REASON_FLOOD_IP_ENTRY);
+		}
 		return -2;
 	}
 

@@ -73,32 +73,37 @@ void AntiFlood::del(Time & now) {
 
 
 
-bool AntiFlood::check(const string & ip, const Time & now) {
+int AntiFlood::check(const string & ip, const Time & now) {
 	HashType_t hash = mHash(ip);
 	Item * item = NULL;
 	if (!mList) {
 		item = new Item();
 		mList = new List_t(hash, item);
-		return false;
+		return 0;
 	}
 
 	item = mList->find(hash);
 	if (!item) {
 		item = new Item();
 		mList->add(hash, item);
-		return false;
+		return 0;
 	}
 
 	if (item->miCount < miCount) {
 		++item->miCount;
 	} else {
 		if (::fabs(double(now - item->mTime)) < mTime) {
-			return true;
+			if (item->mMoreOne) {
+				return 2;
+			}
+			item->mMoreOne = true;
+			return 1;
 		}
 		item->miCount = 0;
 		item->mTime = now;
 	}
-	return false;
+	item->mMoreOne = false;
+	return 0;
 }
 
 
