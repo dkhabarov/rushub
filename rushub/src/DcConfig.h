@@ -173,6 +173,8 @@ public:
 	DcLang(ConfigLoader *, ConfigListBase *);
 	~DcLang();
 	void addVars();
+	void setRussianLang();
+	void setEnglishLang();
 
 	int load();
 	int save();

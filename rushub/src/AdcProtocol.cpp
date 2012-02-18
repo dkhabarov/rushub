@@ -645,8 +645,8 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 		}
 		string msg(STR_LEN("ISTA ")), buff;
 		msg.reserve(10 + adcParser->getErrorText().size());
-		msg.append(toString(SEVERITY_LEVEL_FATAL)); // Disconnect
-		msg.append(toString(adcParser->getErrorCode())); // Error code
+		msg.append(toString(SEVERITY_LEVEL_FATAL, buff)); // Disconnect
+		msg.append(toString(adcParser->getErrorCode(), buff)); // Error code
 		msg.append(STR_LEN(" "));
 		msg.append(cp1251ToUtf8(adcParser->getErrorText(), buff, escaper)); // Error text
 		dcConn->send(msg, true);

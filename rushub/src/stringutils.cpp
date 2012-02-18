@@ -169,18 +169,6 @@ __int64 stringToInt64(const string & str) {
 
 
 
-string toString(int value) {
-	char buf[16] = { '\0' };
-	#if defined(_WIN32) && defined(_MSC_VER) && (_MSC_VER >= 1400)
-		sprintf_s(buf, 16, "%d", value);
-	#else
-		sprintf(buf, "%d", value);
-	#endif
-	return buf;
-}
-
-
-
 int countLines(const string & str) {
 	int lines = 1;
 	size_t pos = 0;

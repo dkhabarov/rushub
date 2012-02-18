@@ -109,7 +109,7 @@ bool HashMap<V, K>::add(const K & hash, V data) {
 	}
 
 	// Insert data
-	iterator it = mList.insert(mList.begin(), data);
+	iterator it = mList.insert(mList.end(), data);
 	if (it == mList.end()) {
 		return false;
 	}
