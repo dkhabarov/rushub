@@ -48,30 +48,6 @@ static const int cp1251ToUtf8Table[128] = {
 };
 
 
-/** Record from the file to the string */
-bool loadFileInString(const string & fileName, string & str) {
-	string buf;
-	bool addLine = false;
-	ifstream ifs(fileName.c_str());
-
-	if (!ifs.is_open()) {
-		return false;
-	}
-
-	while (!ifs.eof()) {
-		getline(ifs, buf);
-		if (addLine) {
-			str.append(STR_LEN("\r\n"));
-		} else {
-			addLine = true;
-		}
-		str.append(buf);
-	}
-	ifs.close();
-	return true;
-}
-
-
 
 /** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
 string & stringReplace(const string & str, const string & varname, string & dest, const string & by, bool b, bool first) {
@@ -165,31 +141,6 @@ __int64 stringToInt64(const string & str) {
 #else
 	return strtoll(str.c_str(), NULL, 10);
 #endif
-}
-
-
-
-int countLines(const string & str) {
-	int lines = 1;
-	size_t pos = 0;
-	while (str.npos != (pos = str.find_first_of("\n", pos ? pos + 1 : 0))) {
-		++lines;
-	}
-	return lines;
-}
-
-
-
-/** Function will return true, if number of the strings less than max */
-bool limitLines(const string & str, int max) {
-	int lines = 1;
-	size_t pos = 0;
-	while (str.npos != (pos = str.find_first_of("\n", pos ? pos + 1 : 0))) {
-		if (++lines > max) {
-			return false;
-		}
-	}
-	return true;
 }
 
 

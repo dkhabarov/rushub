@@ -35,11 +35,9 @@ using ::server::Server;
 namespace dcserver {
 
 
-
 DcConfig::DcConfig(ConfigLoader * configLoader, Server * server, const string & cfgFile) : 
 	mConfigLoader(configLoader)
 {
-
 	mConfigStore.mPath = cfgFile;
 	mConfigStore.mName.clear();
 
@@ -74,7 +72,6 @@ DcConfig::~DcConfig() {
 
 
 void DcConfig::addVars(Server * server) {
-
 	add("sMainPath",   mMainPath,   string(STR_LEN("./")));
 	add("sPluginPath", mPluginPath, string(STR_LEN("./plugins/")));
 	add("sLogPath",    mLogPath,    string(STR_LEN("./logs/")));
@@ -151,7 +148,6 @@ void DcConfig::addVars(Server * server) {
 	);
 	add("iWebStrSizeMax",         mMaxWebCommandLength,                 10240ul);
 	add("iWebTimeout",            mWebTimeout,                          30.);
-
 
 	add("iLenCmdMSearch",         mMaxCmdLen[NMDC_TYPE_MSEARCH],        256u   );
 	add("iLenCmdMSearchPas",      mMaxCmdLen[NMDC_TYPE_MSEARCH_PAS],    256u   );
@@ -247,13 +243,11 @@ void DcConfig::addVars(Server * server) {
 	add("iFloodCountPing2",       mFloodCount2[NMDC_TYPE_PING],         20u    );
 	add("iFloodCountUnknown",     mFloodCount [NMDC_TYPE_UNKNOWN],      1u     );
 	add("iFloodCountUnknown2",    mFloodCount2[NMDC_TYPE_UNKNOWN],      10u    );
-
 }
 
 
 
 int DcConfig::load() {
-
 	const string curDir(STR_LEN("./"));
 
 	int res = mConfigLoader->load(this, mConfigStore);
@@ -268,7 +262,6 @@ int DcConfig::load() {
 
 
 int DcConfig::save() {
-
 	const string curDir(STR_LEN("./"));
 
 	// Replace in start of the string only
@@ -303,12 +296,9 @@ int DcConfig::reload() {
 
 
 
-
-
 DcLang::DcLang(ConfigLoader * configLoader, ConfigListBase * configListBase) :
 	mConfigLoader(configLoader)
 {
-
 	ConfigItem * langConfig = configListBase->operator[] ("sLang");
 	ConfigItem * langPathConfig = configListBase->operator[] ("sLangPath");
 	if (langConfig && langPathConfig) {
@@ -338,7 +328,6 @@ DcLang::~DcLang() {
 
 
 void DcLang::addVars() {
-
 	add("sFirstMsg", mFirstMsg);
 	add("sBadChatNick", mBadChatNick);
 	add("sBadLoginSequence", mBadLoginSequence);
@@ -387,12 +376,17 @@ void DcLang::addVars() {
 	for (int i = 0; i < 7; ++i) {
 		add(string(STR_LEN("sUnit")).append(units[i]), mUnits[i]);
 	}
+
+	if (!mConfigStore.mName.compare(0, 7, "Russian")) {
+		setRussianLang(); // set russian defaults
+	} else {
+		setEnglishLang(); // set english defaults
+	}
 }
 
 
 
 void DcLang::setRussianLang() {
-
 	mFirstMsg.assign(STR_LEN("Этот хаб работает под управлением %[HUB] (Время работы: %[uptime] / Юзеров: %[users] / Шара: %[share])."));
 	mBadChatNick.assign(STR_LEN("Неверный ник: %[nick]."));
 	mBadLoginSequence.assign(STR_LEN("Не правильная последовательность отосланных команд при входе."));
@@ -446,7 +440,6 @@ void DcLang::setRussianLang() {
 
 
 void DcLang::setEnglishLang() {
-
 	mFirstMsg.assign(STR_LEN("This hub is running on %[HUB] (UpTime: %[uptime] / Users: %[users] / Share: %[share])."));
 	mBadChatNick.assign(STR_LEN("Invalid nick: %[nick]."));
 	mBadLoginSequence.assign(STR_LEN("Invalid sequence of commands."));
@@ -512,13 +505,6 @@ int DcLang::save() {
 
 
 int DcLang::reload() {
-
-	if (!mConfigStore.mName.compare(0, 7, "Russian")) {
-		setRussianLang(); // set russian defaults
-	} else {
-		setEnglishLang(); // set english defaults
-	}
-
 	int ret = load();
 
 	if (ret >= 0) { // ok
