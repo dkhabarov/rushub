@@ -48,6 +48,9 @@ public:
 
 	~TigerHash();
 
+	/** Get result */
+	uint8_t * getResult() const;
+
 	/** Calculates the Tiger hash of the data */
 	void update(const void * data, size_t len);
 
@@ -70,7 +73,7 @@ private:
 
 private:
 
-	void tigerCompress(const uint64_t * data, uint64_t state[3]);
+	void tigerCompress(const uint64_t * data, uint64_t state[3]) const;
 
 };
 

@@ -66,6 +66,12 @@ TigerHash::~TigerHash() {
 
 
 
+uint8_t * TigerHash::getResult() const {
+	return (uint8_t*) res;
+}
+
+
+
 /** Calculates the Tiger hash of the data */
 void TigerHash::update(const void * data, size_t length) {
 	size_t _pos = (size_t) (pos & (BLOCK_SIZE - 1));
@@ -123,7 +129,7 @@ uint8_t * TigerHash::finalize() {
 
 
 /** The compress function is a function. Requires smaller cache? */
-void TigerHash::tigerCompress(const uint64_t * str, uint64_t state[3]) {
+void TigerHash::tigerCompress(const uint64_t * str, uint64_t state[3]) const {
 	register uint64_t a = state[0], b = state[1], c = state[2], _a;
 	register uint64_t x0 = str[0], x1 = str[1], x2 = str[2], x3 = str[3];
 	register uint64_t x4 = str[4], x5 = str[5], x6 = str[6], x7 = str[7];
