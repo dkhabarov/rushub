@@ -88,6 +88,18 @@ const string & DcProtocol::getFirstMsg(bool & useCache) {
 }
 
 
+bool DcProtocol::checkState(DcConn * dcConn, const char * cmd, unsigned int state) {
+	if (dcConn->isState(state)) {
+		if (dcConn->log(LEVEL_DEBUG)) {
+			dcConn->logStream() << "Bad state in " << cmd << endl;
+		}
+		dcConn->closeNow(CLOSE_REASON_CMD_STATE);
+		return false;
+	}
+	return true;
+}
+
+
 }; // namespace protocol
 
 }; // namespace dcserver

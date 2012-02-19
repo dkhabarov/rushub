@@ -41,7 +41,7 @@ DcConn::DcConn(tSocket sock, Server * server) :
 	mDcUser(NULL),
 	mPingServer(true),
 	mSrCounter(0),
-	mLoginStatus(0)
+	mState(0)
 {
 	setClassName("DcConn");
 }
@@ -109,23 +109,16 @@ size_t DcConn::send(const char * data, size_t len, bool addSep, bool flush) {
 
 
 /// Set timeout for this connection
-void DcConn::setTimeOut(HubTimeOut to, double Sec, Time &now) {
-	mTimeOut[to].setMaxDelay(Sec);
-	mTimeOut[to].reset(now);
+void DcConn::setLoginTimeOut(double sec, Time & now) {
+	mLoginTimeOut.setMaxDelay(sec);
+	mLoginTimeOut.reset(now);
 }
 
 
 
 /// Clear timeout
-void DcConn::clearTimeOut(HubTimeOut to) {
-	mTimeOut[to].disable();
-}
-
-
-
-/// Check timeout
-int DcConn::checkTimeOut(HubTimeOut to, Time &now) {
-	return 0 == mTimeOut[to].check(now);
+void DcConn::clearLoginTimeOut() {
+	mLoginTimeOut.disable();
 }
 
 
@@ -136,17 +129,13 @@ int DcConn::onTimer(Time & now) {
 
 	// Check timeouts. For entering only
 	if (!mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) { // Optimisation
-		for (int i = 0; i < HUB_TIME_OUT_MAX; ++i) {
-			if (!checkTimeOut(HubTimeOut(i), now)) {
-				if (log(LEVEL_DEBUG)) {
-					logStream() << "Operation timeout (" << HubTimeOut(i) << ")" << endl;
-				}
-				string msg;
-				stringReplace(dcServer->mDcLang.mTimeout, string(STR_LEN("reason")), msg, dcServer->mDcLang.mTimeoutCmd[i]);
-				dcServer->sendToUser(mDcUser, msg, dcServer->mDcConfig.mHubBot.c_str());
-				closeNice(9000, CLOSE_REASON_TIMEOUT);
-				return 1;
+		if (mLoginTimeOut.check(now) != 0) {
+			if (log(LEVEL_DEBUG)) {
+				logStream() << "Timeout login" << endl;
 			}
+			dcServer->sendToUser(mDcUser, dcServer->mDcLang.mTimeoutLogin, dcServer->mDcConfig.mHubBot.c_str());
+			closeNice(9000, CLOSE_REASON_TIMEOUT_LOGIN);
+			return 1;
 		}
 	}
 
@@ -182,14 +171,14 @@ int DcConn::onTimer(Time & now) {
 
 
 
-void DcConn::closeNice(int msec, int iReason) {
-	Conn::closeNice(msec, iReason);
+void DcConn::closeNice(int msec, int reason) {
+	Conn::closeNice(msec, reason);
 }
 
 
 
-void DcConn::closeNow(int iReason) {
-	Conn::closeNow(iReason);
+void DcConn::closeNow(int reason) {
+	Conn::closeNow(reason);
 }
 
 
@@ -202,6 +191,12 @@ bool DcConn::setUser(DcUser * dcUser) {
 
 
 
+unsigned int DcConn::getSrCounter() const {
+	return mSrCounter;
+}
+
+
+
 void DcConn::increaseSrCounter() {
 	++mSrCounter;
 }
@@ -210,6 +205,34 @@ void DcConn::increaseSrCounter() {
 
 void DcConn::emptySrCounter() {
 	mSrCounter = 0;
+}
+
+
+
+/// Is state
+bool DcConn::isState(unsigned int state) const {
+	return (mState & state) == state;
+}
+
+
+
+/// Get state
+unsigned int DcConn::getState() const {
+	return mState;
+}
+
+
+
+/// Set state
+void DcConn::setState(unsigned int state) {
+	mState |= state;
+}
+
+
+
+/// Reset state
+void DcConn::resetState(unsigned int state) {
+	mState = state;
 }
 
 
@@ -279,7 +302,7 @@ Conn * DcConnFactory::createConn(tSocket sock) {
 	DcUser * dcUser = new DcUser(CLIENT_TYPE_DC, dcConn);
 	dcConn->setUser(dcUser);
 
-	return static_cast<Conn *> (dcConn);
+	return dcConn;
 }
 
 
@@ -304,7 +327,7 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 			}
 
 			if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-				dcServer->removeFromDcUserList(static_cast<DcUser *> (dcConn->mDcUser));
+				dcServer->removeFromDcUserList(dcConn->mDcUser);
 			} else { // remove from enter list, if user was already added in it, but user was not added in user list
 				dcServer->mEnterList.remove(dcConn->mDcUser->getUidHash());
 			}

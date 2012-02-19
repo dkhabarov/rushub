@@ -37,6 +37,18 @@ class UserBase;
 namespace protocol {
 
 
+/// ADC Protocol states
+enum {
+
+	STATE_PROTOCOL = 1 << 0, ///< Feature support discovery (SUP was recv)
+	STATE_IDENTIFY = 1 << 1, ///< User identification, static checks (INF was recv)
+	STATE_VERIFY   = 1 << 2, ///< Password check (PAS was recv)
+	STATE_NORMAL   = STATE_PROTOCOL | STATE_IDENTIFY | STATE_VERIFY, ///< Normal state - action is valid
+	STATE_DATA     = 1 << 3, ///< For binary transfers
+
+};
+
+
 /// ADC protocol
 class AdcProtocol : public DcProtocol {
 

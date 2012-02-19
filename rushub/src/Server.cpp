@@ -516,7 +516,7 @@ int Server::addConnection(Conn * conn) {
 		#if USE_SELECT
 			(mConnChooser.size() == (FD_SETSIZE - 1)) || 
 		#endif
-		!mConnChooser.ConnChoose::optIn(static_cast<ConnBase *> (conn),
+		!mConnChooser.ConnChoose::optIn(conn,
 		ConnChoose::tEventFlag(ConnChoose::eEF_INPUT | ConnChoose::eEF_ERROR)))
 	{
 		if (conn->log(LEVEL_FATAL)) {

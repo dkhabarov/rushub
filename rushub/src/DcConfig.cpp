@@ -72,28 +72,28 @@ DcConfig::~DcConfig() {
 
 
 void DcConfig::addVars(Server * server) {
-	add("sMainPath",   mMainPath,   string(STR_LEN("./")));
-	add("sPluginPath", mPluginPath, string(STR_LEN("./plugins/")));
-	add("sLogPath",    mLogPath,    string(STR_LEN("./logs/")));
-	add("sLangPath",   mLangPath,   string(STR_LEN("./lang/")));
-	add("sLang",       mLang,       string(STR_LEN("Russian"))); // TODO: auto detect lang
+	add("sMainPath",              mMainPath,                            string(STR_LEN("./")));
+	add("sPluginPath",            mPluginPath,                          string(STR_LEN("./plugins/")));
+	add("sLogPath",               mLogPath,                             string(STR_LEN("./logs/")));
+	add("sLangPath",              mLangPath,                            string(STR_LEN("./lang/")));
+	add("sLang",                  mLang,                                string(STR_LEN("Russian"))); // TODO: auto detect lang
 
-	add("bAdcOn",      mAdcOn,      false);
-	add("sAddresses",  mAddresses,
+	add("bAdcOn",                 mAdcOn,                               false);
+	add("sAddresses",             mAddresses,
 		#ifdef _WIN32
 			string(STR_LEN("0.0.0.0:411"))
 		#else
 			string(STR_LEN("0.0.0.0:4111"))
 		#endif
 	);
-	add("bUDPServer",             mUdpServer,                           false);
+	add("bUDPServer",             mUdpServer,                           false  );
 	add("sUDPAddresses",          mUdpAddresses,                        string(STR_LEN("0.0.0.0:1209")));
 
 	add("sHubName",               mHubName,                             string(STR_LEN("RusHub")));
 	add("sTopic",                 mTopic,                               string(STR_LEN("Russian hub software")));
-	add("bRegMainBot",            mRegMainBot,                          true);
+	add("bRegMainBot",            mRegMainBot,                          true   );
 	add("sHubBot",                mHubBot,                              string(STR_LEN("RusHub")));
-	add("bMainBotKey",            mMainBotKey,                          true);
+	add("bMainBotKey",            mMainBotKey,                          true   );
 	add("sMainBotMyINFO",         mMainBotMyinfo,                       string(STR_LEN("RusHub bot<Bot V:1.0,M:A,H:0/0/1,S:0>$ $$$0$")));
 	add("sMainBotIP",             mMainBotIp,                           string(STR_LEN("127.0.0.1")));
 	add("sLocale",                mLocale,                              string(setlocale(LC_ALL, "")));
@@ -104,41 +104,35 @@ void DcConfig::addVars(Server * server) {
 	#endif
 
 	add("iMaxLevel",              mMaxLevel,                            mMaxLevel); // set this default value for log
-	add("iUsersLimit",            mUsersLimit,                          -1);
-	add("iMinNickLen",            mMinNickLen,                          2u);
-	add("iMaxNickLen",            mMaxNickLen,                          32u);
-	add("iMaxPassiveRes",         mMaxPassiveRes,                       25);
-	add("bMAC",                   server->mMac,                         false);
-	add("bSendUserIp",            mSendUserIp,                          true);
-	add("bCheckCTMIp",            mCheckCtmIp,                          true);
-	add("bCheckRctmNick",         mCheckRctmNick,                       true);
-	add("bCheckSRNick",           mCheckSrNick,                         true);
-	add("bCheckSearchIp",         mCheckSearchIp,                       true);
-	add("bDisableNoDCCmd",        mDisableNoDCCmd,                      true);
-	mDelayedMyinfo = false;//add("bDelayedMyINFO",    mDelayedMyinfo,   false);
-	add("bDelayedLogin",          mDelayedLogin,                        true);
-	add("bNicklistOnLogin",       mNicklistOnLogin,                     true);
-	add("iPingInterval",          mPingInterval,                        60.);
-	add("iStartPing",             mStartPing,                           300);
-	add("iSysLoading",            mSysLoading,                          1.);
-	
+	add("iUsersLimit",            mUsersLimit,                          -1     );
+	add("iMinNickLen",            mMinNickLen,                          2u     );
+	add("iMaxNickLen",            mMaxNickLen,                          32u    );
+	add("iMaxPassiveRes",         mMaxPassiveRes,                       25     );
+	add("bMAC",                   server->mMac,                         false  );
+	add("bSendUserIp",            mSendUserIp,                          true   );
+	add("bCheckCTMIp",            mCheckCtmIp,                          true   );
+	add("bCheckRctmNick",         mCheckRctmNick,                       true   );
+	add("bCheckSRNick",           mCheckSrNick,                         true   );
+	add("bCheckSearchIp",         mCheckSearchIp,                       true   );
+	add("bDisableNoDCCmd",        mDisableNoDCCmd,                      true   );
+	mDelayedMyinfo = false;//add("bDelayedMyINFO",    mDelayedMyinfo,   false  );
+	add("bDelayedLogin",          mDelayedLogin,                        true   );
+	add("bNicklistOnLogin",       mNicklistOnLogin,                     true   );
+	add("iPingInterval",          mPingInterval,                        60.    );
+	add("iStartPing",             mStartPing,                           300    );
+	add("iSysLoading",            mSysLoading,                          1.     );
+
 	unsigned long maxSendSize(MAX_SEND_SIZE); // posix
 
 	add("iMaxSendSize",           server->mMaxSendSize,                 maxSendSize);
 	add("iStrSizeMax",            mMaxNmdcCommandLength,                10240ul);
-	add("iStepDelay",             server->mStepDelay,                   0);
-	add("iTimerConnPeriod",       server->mTimerConnPeriod,             4000u);
-	add("iTimerServPeriod",       server->mTimerServPeriod,             2000u);
-	add("iTimeoutAny",            mTimeoutAny,                          600.);
+	add("iStepDelay",             server->mStepDelay,                   0      );
+	add("iTimerConnPeriod",       server->mTimerConnPeriod,             4000u  );
+	add("iTimerServPeriod",       server->mTimerServPeriod,             2000u  );
+	add("iTimeoutLogin",          mTimeoutLogin,                        120.   );
+	add("iTimeoutAny",            mTimeoutAny,                          600.   );
 
-	/* Timeouts of the protocol commands */
-	const char * timeoutName[] = { "Key", "Nick", "Login", "Myinfo", "Getpass" };
-	double timeoutDefault[] = { 60.0, 30.0, 600.0, 40.0, 300.0 };
-	for (int i = 0; i < 5; ++i) {
-		add(string(STR_LEN("iTimeout")).append(timeoutName[i]), mTimeout[i], timeoutDefault[i]);
-	}
-
-	add("bWebServer",             mWebServer,                           false);
+	add("bWebServer",             mWebServer,                           false  );
 	add("sWebAddresses",          mWebAddresses,
 		#ifdef _WIN32
 			string(STR_LEN("0.0.0.0:80"))
@@ -147,7 +141,7 @@ void DcConfig::addVars(Server * server) {
 		#endif
 	);
 	add("iWebStrSizeMax",         mMaxWebCommandLength,                 10240ul);
-	add("iWebTimeout",            mWebTimeout,                          30.);
+	add("iWebTimeout",            mWebTimeout,                          30.    );
 
 	add("iLenCmdMSearch",         mMaxCmdLen[NMDC_TYPE_MSEARCH],        256u   );
 	add("iLenCmdMSearchPas",      mMaxCmdLen[NMDC_TYPE_MSEARCH_PAS],    256u   );
@@ -176,39 +170,39 @@ void DcConfig::addVars(Server * server) {
 	add("iLenCmdUnknown",         mMaxCmdLen[NMDC_TYPE_UNKNOWN],        128u   );
 	mMaxCmdLen[NMDC_TYPE_PING] = 0; // ping length
 
-	add("iFloodTimeReconnIp",     mFloodTimeReconnIp,                   5.    );
-	add("iFloodTimeMyINFO",       mFloodTime [NMDC_TYPE_MYNIFO],        60.   );
-	add("iFloodTimeMyINFO2",      mFloodTime2[NMDC_TYPE_MYNIFO],        900.  );
-	add("iFloodTimeSearch",       mFloodTime [NMDC_TYPE_SEARCH],        10.   );
-	add("iFloodTimeSearch2",      mFloodTime2[NMDC_TYPE_SEARCH],        60.   );
-	add("iFloodTimeSearchPas",    mFloodTime [NMDC_TYPE_SEARCH_PAS],    10.   );
-	add("iFloodTimeSearchPas2",   mFloodTime2[NMDC_TYPE_SEARCH_PAS],    60.   );
-	add("iFloodTimeMSearch",      mFloodTime [NMDC_TYPE_MSEARCH],       10.   );
-	add("iFloodTimeMSearch2",     mFloodTime2[NMDC_TYPE_MSEARCH],       60.   );
-	add("iFloodTimeMSearchPas",   mFloodTime [NMDC_TYPE_MSEARCH_PAS],   10.   );
-	add("iFloodTimeMSearchPas2",  mFloodTime2[NMDC_TYPE_MSEARCH_PAS],   60.   );
-	add("iFloodTimeSR",           mFloodTime [NMDC_TYPE_SR],            60.   );
-	add("iFloodTimeSR2",          mFloodTime2[NMDC_TYPE_SR],            600.  );
-	add("iFloodTimeSRUDP",        mFloodTime [NMDC_TYPE_SR_UDP],        60.   );
-	add("iFloodTimeSRUDP2",       mFloodTime2[NMDC_TYPE_SR_UDP],        600.  );
-	add("iFloodTimeChat",         mFloodTime [NMDC_TYPE_CHAT],          5.    );
-	add("iFloodTimeChat2",        mFloodTime2[NMDC_TYPE_CHAT],          20.   );
-	add("iFloodTimePm",           mFloodTime [NMDC_TYPE_TO],            10.   );
-	add("iFloodTimePm2",          mFloodTime2[NMDC_TYPE_TO],            30.   );
-	add("iFloodTimeNickList",     mFloodTime [NMDC_TYPE_GETNICKLIST],   60.   );
-	add("iFloodTimeNickList2",    mFloodTime2[NMDC_TYPE_GETNICKLIST],   1800. );
-	add("iFloodTimeCTM",          mFloodTime [NMDC_TYPE_CONNECTTOME],   60.   );
-	add("iFloodTimeCTM2",         mFloodTime2[NMDC_TYPE_CONNECTTOME],   600.  );
-	add("iFloodTimeRCTM",         mFloodTime [NMDC_TYPE_RCONNECTTOME],  60.   );
-	add("iFloodTimeRCTM2",        mFloodTime2[NMDC_TYPE_RCONNECTTOME],  600.  );
-	add("iFloodTimeMCTo",         mFloodTime [NMDC_TYPE_MCTO],          10.   );
-	add("iFloodTimeMCTo2",        mFloodTime2[NMDC_TYPE_MCTO],          30.   );
-	add("iFloodTimeUserIp",       mFloodTime [NMDC_TYPE_USERIP],        10.   );
-	add("iFloodTimeUserIp2",      mFloodTime2[NMDC_TYPE_USERIP],        30.   );
-	add("iFloodTimePing",         mFloodTime [NMDC_TYPE_PING],          1.    );
-	add("iFloodTimePing2",        mFloodTime2[NMDC_TYPE_PING],          30.   );
-	add("iFloodTimeUnknown",      mFloodTime [NMDC_TYPE_UNKNOWN],       3.    );
-	add("iFloodTimeUnknown2",     mFloodTime2[NMDC_TYPE_UNKNOWN],       60.   );
+	add("iFloodTimeReconnIp",     mFloodTimeReconnIp,                   5.     );
+	add("iFloodTimeMyINFO",       mFloodTime [NMDC_TYPE_MYNIFO],        60.    );
+	add("iFloodTimeMyINFO2",      mFloodTime2[NMDC_TYPE_MYNIFO],        900.   );
+	add("iFloodTimeSearch",       mFloodTime [NMDC_TYPE_SEARCH],        10.    );
+	add("iFloodTimeSearch2",      mFloodTime2[NMDC_TYPE_SEARCH],        60.    );
+	add("iFloodTimeSearchPas",    mFloodTime [NMDC_TYPE_SEARCH_PAS],    10.    );
+	add("iFloodTimeSearchPas2",   mFloodTime2[NMDC_TYPE_SEARCH_PAS],    60.    );
+	add("iFloodTimeMSearch",      mFloodTime [NMDC_TYPE_MSEARCH],       10.    );
+	add("iFloodTimeMSearch2",     mFloodTime2[NMDC_TYPE_MSEARCH],       60.    );
+	add("iFloodTimeMSearchPas",   mFloodTime [NMDC_TYPE_MSEARCH_PAS],   10.    );
+	add("iFloodTimeMSearchPas2",  mFloodTime2[NMDC_TYPE_MSEARCH_PAS],   60.    );
+	add("iFloodTimeSR",           mFloodTime [NMDC_TYPE_SR],            60.    );
+	add("iFloodTimeSR2",          mFloodTime2[NMDC_TYPE_SR],            600.   );
+	add("iFloodTimeSRUDP",        mFloodTime [NMDC_TYPE_SR_UDP],        60.    );
+	add("iFloodTimeSRUDP2",       mFloodTime2[NMDC_TYPE_SR_UDP],        600.   );
+	add("iFloodTimeChat",         mFloodTime [NMDC_TYPE_CHAT],          5.     );
+	add("iFloodTimeChat2",        mFloodTime2[NMDC_TYPE_CHAT],          20.    );
+	add("iFloodTimePm",           mFloodTime [NMDC_TYPE_TO],            10.    );
+	add("iFloodTimePm2",          mFloodTime2[NMDC_TYPE_TO],            30.    );
+	add("iFloodTimeNickList",     mFloodTime [NMDC_TYPE_GETNICKLIST],   60.    );
+	add("iFloodTimeNickList2",    mFloodTime2[NMDC_TYPE_GETNICKLIST],   1800.  );
+	add("iFloodTimeCTM",          mFloodTime [NMDC_TYPE_CONNECTTOME],   60.    );
+	add("iFloodTimeCTM2",         mFloodTime2[NMDC_TYPE_CONNECTTOME],   600.   );
+	add("iFloodTimeRCTM",         mFloodTime [NMDC_TYPE_RCONNECTTOME],  60.    );
+	add("iFloodTimeRCTM2",        mFloodTime2[NMDC_TYPE_RCONNECTTOME],  600.   );
+	add("iFloodTimeMCTo",         mFloodTime [NMDC_TYPE_MCTO],          10.    );
+	add("iFloodTimeMCTo2",        mFloodTime2[NMDC_TYPE_MCTO],          30.    );
+	add("iFloodTimeUserIp",       mFloodTime [NMDC_TYPE_USERIP],        10.    );
+	add("iFloodTimeUserIp2",      mFloodTime2[NMDC_TYPE_USERIP],        30.    );
+	add("iFloodTimePing",         mFloodTime [NMDC_TYPE_PING],          1.     );
+	add("iFloodTimePing2",        mFloodTime2[NMDC_TYPE_PING],          30.    );
+	add("iFloodTimeUnknown",      mFloodTime [NMDC_TYPE_UNKNOWN],       3.     );
+	add("iFloodTimeUnknown2",     mFloodTime2[NMDC_TYPE_UNKNOWN],       60.    );
 
 	add("iFloodCountReconnIp",    mFloodCountReconnIp,                  1u     );
 	add("iFloodCountMyINFO",      mFloodCount [NMDC_TYPE_MYNIFO],       6u     );
@@ -333,7 +327,7 @@ void DcLang::addVars() {
 	add("sBadLoginSequence", mBadLoginSequence);
 	add("sBadMyinfoNick", mBadMyinfoNick);
 	add("sBadRevConNick", mBadRevConNick);
-	add("sTimeout", mTimeout);
+	add("sTimeoutLogin", mTimeoutLogin);
 	add("sTimeoutAny", mTimeoutAny);
 	add("sBadCTMIp", mBadCtmIp);
 	add("sBadSRNick", mBadSrNick);
@@ -362,11 +356,6 @@ void DcLang::addVars() {
 	add("sFloodPing", mFlood[NMDC_TYPE_PING]);
 	add("sFloodUnknown", mFlood[NMDC_TYPE_UNKNOWN]);
 
-	const char * name[] = { "Key", "Nick", "Login", "Myinfo", "Getpass" };
-	for (int i = 0; i < 5; ++i) {
-		add(string(STR_LEN("sTimeout")).append(name[i]), mTimeoutCmd[i]);
-	}
-
 	const char * times[] = { "Weeks", "Days", "Hours", "Min", "Sec" };
 	for (int i = 0; i < 5; ++i) {
 		add(string(STR_LEN("sTimes")).append(times[i]), mTimes[i]);
@@ -392,7 +381,7 @@ void DcLang::setRussianLang() {
 	mBadLoginSequence.assign(STR_LEN("Не правильная последовательность отосланных команд при входе."));
 	mBadMyinfoNick.assign(STR_LEN("Неверный ник в MyINFO команде."));
 	mBadRevConNick.assign(STR_LEN("Неверный ник при соединении: %[nick]. Ваш реальный ник: %[real_nick]."));
-	mTimeout.assign(STR_LEN("Тайм-аут %[reason]."));
+	mTimeoutLogin.assign(STR_LEN("Тайм-аут входа."));
 	mTimeoutAny.assign(STR_LEN("Тайм-аут соединения."));
 	mBadCtmIp.assign(STR_LEN("В запросе на подключение вы отсылаете неверный IP адрес: %[ip], ваш реальный IP: %[real_ip]."));
 	mBadSrNick.assign(STR_LEN("Неверный ник в результатах поиска: %[nick]. Ваш реальный ник: %[real_nick]."));
@@ -421,11 +410,6 @@ void DcLang::setRussianLang() {
 	mFlood[NMDC_TYPE_PING].assign(STR_LEN("Ваш клиент слишком часто пингует хаб."));
 	mFlood[NMDC_TYPE_UNKNOWN].assign(STR_LEN("Не флудите неизвестными командами."));
 
-	const char * reason[] = { "получения ключа", "валидации ника", "входа", "получения MyINFO", "получения пароля" };
-	for (int i = 0; i < 5; ++i) {
-		mTimeoutCmd[i].assign(reason[i]);
-	}
-
 	const char * times[] = { "нед.", "дн.", "ч.", "мин.", "сек." };
 	for (int i = 0; i < 5; ++i) {
 		mTimes[i].assign(times[i]);
@@ -445,7 +429,7 @@ void DcLang::setEnglishLang() {
 	mBadLoginSequence.assign(STR_LEN("Invalid sequence of commands."));
 	mBadMyinfoNick.assign(STR_LEN("Invalid nick in MyINFO command."));
 	mBadRevConNick.assign(STR_LEN("Invalid nick for connection: %[nick]. Your real nick is: %[real_nick]."));
-	mTimeout.assign(STR_LEN("Timeout %[reason]."));
+	mTimeoutLogin.assign(STR_LEN("Timeout login."));
 	mTimeoutAny.assign(STR_LEN("Connection timeout."));
 	mBadCtmIp.assign(STR_LEN("In request of the connection you are sending wrong IP address: %[ip], your real IP is: %[real_ip]."));
 	mBadSrNick.assign(STR_LEN("Invalid nick in search results: %[nick]. Your real nick is: %[real_nick]."));
@@ -473,11 +457,6 @@ void DcLang::setEnglishLang() {
 	mFlood[NMDC_TYPE_USERIP].assign(STR_LEN("Please don't flood with UserIP!"));
 	mFlood[NMDC_TYPE_PING].assign(STR_LEN("Your client is often ping hub."));
 	mFlood[NMDC_TYPE_UNKNOWN].assign(STR_LEN("Please don't flood with unknown commands."));
-
-	const char * reason[] = { "getting key", "getting nick", "join", "getting MyINFO", "getting password" };
-	for (int i = 0; i < 5; ++i) {
-		mTimeoutCmd[i].assign(reason[i]);
-	}
 
 	const char * times[] = { "weeks", "days", "hours", "min.", "sec." };
 	for (int i = 0; i < 5; ++i) {

@@ -36,39 +36,10 @@ using namespace ::utils;
 namespace dcserver {
 
 
-/// Time outs during entering on hub only (HubTimeOut)
-typedef enum {
-
-	HUB_TIME_OUT_KEY = 0, ///< Waiting $Key after $Lock
-	HUB_TIME_OUT_VALNICK, ///< Waiting $ValidateNick after $Lock
-	HUB_TIME_OUT_LOGIN,   ///< Life time of the connection object before full entry (doUserEnter)
-	HUB_TIME_OUT_MYINFO,  ///< After $ValidateNick and before $MyINFO timeout
-	HUB_TIME_OUT_PASS,    ///< Waiting pass
-	HUB_TIME_OUT_MAX      ///< Max timeout type
-
-} HubTimeOut;
-
-
-
-/// Login steps (LoginStatus)
-enum LoginStatus {
-
-	LOGIN_STATUS_KEY        = 1 << 0, ///< Key was checked (once)
-	LOGIN_STATUS_VALNICK    = 1 << 1, ///< Nick was checked (once)
-	LOGIN_STATUS_PASSWD     = 1 << 2, ///< Password was right or password was not need
-	LOGIN_STATUS_VERSION    = 1 << 3, ///< Version was checked
-	LOGIN_STATUS_MYINFO     = 1 << 4, ///< MyINFO string was received
-	LOGIN_STATUS_NICKLST    = 1 << 5, ///< GetNickList flag
-	LOGIN_STATUS_LOGIN_DONE = LOGIN_STATUS_KEY|LOGIN_STATUS_VALNICK|LOGIN_STATUS_PASSWD|LOGIN_STATUS_VERSION|LOGIN_STATUS_MYINFO|LOGIN_STATUS_NICKLST
-
-}; // enum LoginStatus
-
-
-
 /// Supports features (SupportFeature)
 enum SupportFeature {
 
-	SUPPORT_FEATUER_USERCOMMAND = 1     , ///< UserCommand feature
+	SUPPORT_FEATUER_USERCOMMAND = 1 << 0, ///< UserCommand feature
 	SUPPORT_FEATUER_NOGETINFO   = 1 << 1, ///< NoGetINFO feature
 	SUPPORT_FEATURE_NOHELLO     = 1 << 2, ///< NoHello feature
 	SUPPORT_FEATUER_USERIP2     = 1 << 3, ///< UserIP2 feature
@@ -84,7 +55,7 @@ enum SupportFeature {
 /// Enumeration of reasons to closing connection (CloseReason)
 enum CloseReason {
 
-	CLOSE_REASON_CMD_REPEAT = CLOSE_REASON_MAX,
+	CLOSE_REASON_CMD_STATE = CLOSE_REASON_MAX,
 	CLOSE_REASON_CMD_LENGTH,
 	CLOSE_REASON_CMD_NULL,
 	CLOSE_REASON_CMD_QUIT,
@@ -113,7 +84,7 @@ enum CloseReason {
 	CLOSE_REASON_USERS_LIMIT,
 	CLOSE_REASON_FLOOD,
 	CLOSE_REASON_FLOOD_IP_ENTRY,
-	CLOSE_REASON_TIMEOUT,
+	CLOSE_REASON_TIMEOUT_LOGIN,
 	CLOSE_REASON_TIMEOUT_ANYACTION,
 	CLOSE_REASON_LOGIN_NOT_DONE,
 	CLOSE_REASON_PLUGIN,
@@ -194,9 +165,9 @@ public:
 
 	// =====================
 
-	virtual void closeNow(int iReason = 0);
+	virtual void closeNow(int reason = 0);
 
-	virtual void closeNice(int msec, int iReason = 0);
+	virtual void closeNice(int msec, int reason = 0);
 
 
 	/// Pointer to the server
@@ -208,34 +179,28 @@ public:
 	/// Set user object for current connection
 	bool setUser(DcUser * dcUser);
 
-	unsigned int getSrCounter() {
-		return mSrCounter;
-	}
+	unsigned int getSrCounter() const;
 
 	void increaseSrCounter();
 	void emptySrCounter();
 
+	/// Is state
+	bool isState(unsigned int state) const;
 
-	/// Setting entry status flag
-	void setLoginStatusFlag(unsigned int s) {
-		mLoginStatus |= s;
-	}
+	/// Get state
+	unsigned int getState() const;
 
-	/// Reset flag
-	void resetLoginStatusFlag(unsigned int s) {
-		mLoginStatus = s;
-	}
+	/// Set state
+	void setState(unsigned int state);
 
-	/// Get flag
-	unsigned int getLoginStatusFlag(unsigned int s) {
-		return mLoginStatus & s;
-	}
+	/// Reset state
+	void resetState(unsigned int state);
 
-	/// Set timeout
-	void setTimeOut(HubTimeOut, double Sec, Time & now);
+	/// Set login timeout
+	void setLoginTimeOut(double sec, Time & now);
 
-	/// Clear timeout
-	void clearTimeOut(HubTimeOut);
+	/// Clear login timeout
+	void clearLoginTimeOut();
 
 protected:
 
@@ -247,21 +212,18 @@ private:
 	Time mPingServer;
 
 	/// Timeouts
-	TimeOut mTimeOut[HUB_TIME_OUT_MAX];
+	TimeOut mLoginTimeOut;
 
 	/// Counter search results
 	unsigned int mSrCounter;
 
-	/// Login status
-	unsigned int mLoginStatus;
+	/// Protocol state
+	unsigned int mState;
 
 private:
 
 	/// Timer for current connection
 	virtual int onTimer(Time & now);
-
-	/// Check timeout
-	int checkTimeOut(HubTimeOut t, Time & now);
 
 }; // class DcConn
 

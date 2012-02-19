@@ -60,6 +60,7 @@ protected:
 protected:
 
 	const string & getFirstMsg(bool & useCache);
+	bool checkState(DcConn *, const char * cmd, unsigned int state);
 
 }; // DcProtocol
 

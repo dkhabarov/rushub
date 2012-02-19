@@ -75,7 +75,7 @@ public:
 	double mFloodTime2[NMDC_TYPE_UNKNOWN + 1];
 
 	double mPingInterval;       ///< User's ping interval
-	double mTimeout[5];         ///< Timeouts of the protocol entering commands
+	double mTimeoutLogin;       ///< Timeout of the protocol entering commands
 	double mTimeoutAny;         ///< Timeout connection (If hub will often drop clients, you need increase this setting)
 	double mWebTimeout;         ///< Timeout connection with web-client (in sec)
 	double mSysLoading;         ///< Factor of the system loading
@@ -150,8 +150,7 @@ public:
 	string mBadLoginSequence;  ///< Message about bad login sequence
 	string mBadMyinfoNick;     ///< Message about bad nick in MyINFO command
 	string mUnits[7];          ///< Units: B, KB, MB, GB, TB, PB, EB
-	string mTimeout;           ///< Message about timeout with the reason
-	string mTimeoutCmd[5];     ///< Timeouts names
+	string mTimeoutLogin;      ///< Message about timeout login
 	string mTimeoutAny;        ///< Message about connection timeout
 	string mForceMove;         ///< Redirection message
 	string mUsersLimit;

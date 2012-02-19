@@ -47,6 +47,19 @@ class UserBase;
 namespace protocol {
 
 
+/// NMDC Protocol states
+enum {
+
+	STATE_KEY        = 1 << 0, ///< Key was checked (once)
+	STATE_VALNICK    = 1 << 1, ///< Nick was checked (once)
+	STATE_PASSWD     = 1 << 2, ///< Password was right or password was not need (once)
+	STATE_VERSION    = 1 << 3, ///< Version was checked (once)
+	STATE_MYINFO     = 1 << 4, ///< MyINFO string was received
+	STATE_NICKLST    = 1 << 5, ///< GetNickList flag
+	STATE_LOGIN_DONE = STATE_KEY | STATE_VALNICK | STATE_PASSWD | STATE_VERSION | STATE_MYINFO | STATE_NICKLST
+
+};
+
 
 /// NMDC protocol
 class NmdcProtocol : public DcProtocol {
@@ -145,7 +158,6 @@ private:
 	/// Check validate nick (user)
 	bool validateUser(DcConn *, const string & nick);
 	bool checkNickLength(DcConn *, size_t len);
-	bool badFlag(DcConn *, const char * cmd, unsigned int flag);
 
 }; // NmdcProtocol
 

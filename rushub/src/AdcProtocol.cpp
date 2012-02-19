@@ -104,8 +104,12 @@ static void escaper(char c, string & dst) {
 			dst += 's';
 			break;
 
-		case '\\': // Fallthrough
 		case '\n':
+			dst += '\\';
+			dst += 'n';
+			break;
+
+		case '\\': // Fallthrough
 			dst += '\\';
 
 		default:
@@ -204,8 +208,7 @@ int AdcProtocol::onNewConn(Conn * conn) {
 		mDcServer->mCalls.mOnUserConnected.callAll(dcConn->mDcUser);
 	#endif
 
-	dcConn->setTimeOut(HUB_TIME_OUT_LOGIN, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_LOGIN], mDcServer->mTime); /** Timeout for enter */
-	dcConn->flush();
+	dcConn->setLoginTimeOut(mDcServer->mDcConfig.mTimeoutLogin, mDcServer->mTime); // Timeout for enter
 	return 0;
 }
 
@@ -214,6 +217,15 @@ int AdcProtocol::onNewConn(Conn * conn) {
 
 
 int AdcProtocol::eventSup(AdcParser *, DcConn * dcConn) {
+
+	if (dcConn->isState(STATE_NORMAL)) {
+
+		// TODO: save features
+		return 0;
+
+	} else if (!checkState(dcConn, "SUP", STATE_PROTOCOL)) {
+		return -1;
+	}
 
 	// TODO: check existing BASE feature!
 
@@ -254,6 +266,9 @@ int AdcProtocol::eventSup(AdcParser *, DcConn * dcConn) {
 	// Send First Message
 	dcConn->send(STR_LEN("IMSG "), false, false);
 	dcConn->send(cache, true, true);
+
+
+	dcConn->setState(STATE_PROTOCOL); // set protocol state
 	return 0;
 }
 
@@ -266,6 +281,12 @@ int AdcProtocol::eventSta(AdcParser *, DcConn *) {
 
 
 int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
+
+	if (!dcConn->isState(STATE_NORMAL)) {
+		if (!checkState(dcConn, "INF", STATE_IDENTIFY)) {
+			return -1;
+		}
+	}
 
 	string & inf = adcParser->mCommand;
 
@@ -286,14 +307,33 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 		mDcServer->mCalls.mOnMyINFO.callAll(dcConn->mDcUser);
 	#endif
 
+	// TODO: change to normal state
 	if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 			dcConn->send(dcConn->mDcUser->getInfo(), true); // Send to self only
 		} else {
 			// TODO sendMode
-			mDcServer->sendToAll(dcConn->mDcUser->getInfo(), true, true);
+
+			// How send changed params?
+
+			//mDcServer->sendToAll(dcConn->mDcUser->getInfo(), true, true);
+			return 0; // Don't use getInfo in normal state!
 		}
 	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
+
+		dcConn->setState(STATE_IDENTIFY);
+
+		// Validation (for request pass)
+		#ifndef WITHOUT_PLUGINS
+			if (mDcServer->mCalls.mOnValidateNick.callAll(dcConn->mDcUser)) {
+
+				// TODO: GPA random CID
+				dcConn->send("IGPA QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ", 44, true, true); // We are sending the query for reception of the password
+				return -4;
+			}
+		#endif
+
+		dcConn->setState(STATE_VERIFY);
 		dcConn->mSendNickList = true;
 		mDcServer->beforeUserEnter(dcConn);
 	}
@@ -402,11 +442,18 @@ int AdcProtocol::eventGpa(AdcParser *, DcConn *) {
 
 int AdcProtocol::eventPas(AdcParser *, DcConn * dcConn) {
 
+	if (!checkState(dcConn, "PAS", STATE_VERIFY)) {
+		return -1;
+	}
+
 	#ifndef WITHOUT_PLUGINS
 		mDcServer->mCalls.mOnMyPass.callAll(dcConn->mDcUser);
 	#endif
 
-	return 0;
+	dcConn->setState(STATE_VERIFY);
+	dcConn->mSendNickList = true;
+	mDcServer->beforeUserEnter(dcConn);
+	return 1;
 }
 
 

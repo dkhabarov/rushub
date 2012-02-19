@@ -115,8 +115,7 @@ int NmdcProtocol::onNewConn(Conn * conn) {
 		bool useCache = true;
 		mDcServer->sendToUser(dcConn->mDcUser, getFirstMsg(useCache), mDcServer->mDcConfig.mHubBot.c_str());
 	}
-	dcConn->setTimeOut(HUB_TIME_OUT_LOGIN, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_LOGIN], mDcServer->mTime); /** Timeout for enter */
-	dcConn->setTimeOut(HUB_TIME_OUT_KEY, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_KEY], mDcServer->mTime);
+	dcConn->setLoginTimeOut(mDcServer->mDcConfig.mTimeoutLogin, mDcServer->mTime); // Timeout for enter
 	dcConn->flush();
 	return 0;
 }
@@ -163,7 +162,7 @@ void NmdcProtocol::onFlush(Conn * conn) {
 			dcConn->logStream() << "Enter after nicklist" << endl;
 		}
 		dcConn->mNickListInProgress = false;
-		dcConn->setLoginStatusFlag(LOGIN_STATUS_NICKLST);
+		dcConn->setState(STATE_NICKLST);
 		mDcServer->doUserEnter(dcConn);
 	}
 }
@@ -259,7 +258,7 @@ int NmdcProtocol::eventSupports(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventKey(NmdcParser *, DcConn * dcConn) {
 
-	if (badFlag(dcConn, "Key", LOGIN_STATUS_KEY)) {
+	if (!checkState(dcConn, "Key", STATE_KEY)) {
 		return -1;
 	}
 
@@ -271,9 +270,7 @@ int NmdcProtocol::eventKey(NmdcParser *, DcConn * dcConn) {
 		}
 	#endif
 
-	dcConn->setLoginStatusFlag(LOGIN_STATUS_KEY); /** User has sent key */
-	dcConn->clearTimeOut(HUB_TIME_OUT_KEY);
-	dcConn->setTimeOut(HUB_TIME_OUT_VALNICK, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_VALNICK], mDcServer->mTime);
+	dcConn->setState(STATE_KEY); // User has sent key
 	return 0;
 }
 
@@ -281,7 +278,7 @@ int NmdcProtocol::eventKey(NmdcParser *, DcConn * dcConn) {
 
 int NmdcProtocol::eventValidateNick(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (badFlag(dcConn, "ValidateNick", LOGIN_STATUS_VALNICK)) {
+	if (!checkState(dcConn, "ValidateNick", STATE_VALNICK)) {
 		return -1;
 	}
 
@@ -321,15 +318,13 @@ int NmdcProtocol::eventValidateNick(NmdcParser * dcparser, DcConn * dcConn) {
 		return -3;
 	}
 
-	dcConn->setLoginStatusFlag(LOGIN_STATUS_VALNICK | LOGIN_STATUS_NICKLST); /** We Install NICKLST because user can not call user list */
-	dcConn->clearTimeOut(HUB_TIME_OUT_VALNICK);
+	dcConn->setState(STATE_VALNICK | STATE_NICKLST); /** We Install NICKLST because user can not call user list */
 
 	string msg;
 
 	#ifndef WITHOUT_PLUGINS
 		if (mDcServer->mCalls.mOnValidateNick.callAll(dcConn->mDcUser)) {
 			dcConn->send(appendGetPass(msg)); /** We are sending the query for reception of the password */
-			dcConn->setTimeOut(HUB_TIME_OUT_PASS, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_PASS], mDcServer->mTime);
 			return -4;
 		}
 	#endif
@@ -337,8 +332,7 @@ int NmdcProtocol::eventValidateNick(NmdcParser * dcparser, DcConn * dcConn) {
 	if (!iNickLen || !checkNickLength(dcConn, iNickLen)) {
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_LEN);
 	}
-	dcConn->setTimeOut(HUB_TIME_OUT_MYINFO, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_MYINFO], mDcServer->mTime);
-	dcConn->setLoginStatusFlag(LOGIN_STATUS_PASSWD); /** Does not need password */
+	dcConn->setState(STATE_PASSWD); /** Does not need password */
 
 	dcConn->send(appendHello(msg, dcConn->mDcUser->getUid())); /** Protection from change the command */
 	return 0;
@@ -356,7 +350,7 @@ int NmdcProtocol::eventMyPass(NmdcParser *, DcConn * dcConn) {
 		dcConn->closeNice(9000, CLOSE_REASON_CMD_PASSWORD_ERR);
 		return -1;
 	}
-	if (badFlag(dcConn, "MyPass", LOGIN_STATUS_PASSWD)) {
+	if (!checkState(dcConn, "MyPass", STATE_PASSWD)) {
 		return -1;
 	}
 
@@ -368,7 +362,7 @@ int NmdcProtocol::eventMyPass(NmdcParser *, DcConn * dcConn) {
 	#endif
 
 	string msg;
-	dcConn->setLoginStatusFlag(LOGIN_STATUS_PASSWD); /** Password is accepted */
+	dcConn->setState(STATE_PASSWD); /** Password is accepted */
 	appendHello(msg, dcConn->mDcUser->getUid());
 	if (bOp) { /** If entered operator, that sends command LoggedIn ($LogedIn !) */
 		msg.append(STR_LEN("$LogedIn "));
@@ -376,8 +370,6 @@ int NmdcProtocol::eventMyPass(NmdcParser *, DcConn * dcConn) {
 		msg.append(STR_LEN(NMDC_SEPARATOR));
 	}
 	dcConn->send(msg);
-	dcConn->clearTimeOut(HUB_TIME_OUT_PASS);
-	dcConn->setTimeOut(HUB_TIME_OUT_MYINFO, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_MYINFO], mDcServer->mTime);
 	return 0;
 }
 
@@ -385,7 +377,7 @@ int NmdcProtocol::eventMyPass(NmdcParser *, DcConn * dcConn) {
 
 int NmdcProtocol::eventVersion(NmdcParser * dcparser, DcConn * dcConn) {
 
-	if (badFlag(dcConn, "Version", LOGIN_STATUS_VERSION)) {
+	if (!checkState(dcConn, "Version", STATE_VERSION)) {
 		return -1;
 	}
 
@@ -400,7 +392,7 @@ int NmdcProtocol::eventVersion(NmdcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	dcConn->setLoginStatusFlag(LOGIN_STATUS_VERSION); /** Version was checked */
+	dcConn->setState(STATE_VERSION); /** Version was checked */
 	dcConn->mDcUser->getParamForce(USER_PARAM_VERSION)->setString(version);
 	return 0;
 }
@@ -415,13 +407,13 @@ int NmdcProtocol::eventGetNickList(NmdcParser *, DcConn * dcConn) {
 		}
 	#endif
 
-	if (!dcConn->getLoginStatusFlag(LOGIN_STATUS_MYINFO) && mDcServer->mDcConfig.mNicklistOnLogin) {
+	if (!dcConn->isState(STATE_MYINFO) && mDcServer->mDcConfig.mNicklistOnLogin) {
 		if (mDcServer->mDcConfig.mDelayedLogin) {
-			int LSFlag = dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE);
-			if (LSFlag & LOGIN_STATUS_NICKLST) {
-				LSFlag -= LOGIN_STATUS_NICKLST;
+			int LSFlag = dcConn->getState();
+			if (LSFlag & STATE_NICKLST) {
+				LSFlag -= STATE_NICKLST;
 			}
-			dcConn->resetLoginStatusFlag(LSFlag);
+			dcConn->resetState(LSFlag);
 		}
 		dcConn->mSendNickList = true;
 		return 0;
@@ -474,17 +466,16 @@ int NmdcProtocol::eventMyInfo(NmdcParser * dcparser, DcConn * dcConn) {
 			}
 		}
 	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-		dcConn->setLoginStatusFlag(LOGIN_STATUS_MYINFO);
+		dcConn->setState(STATE_MYINFO);
 
-		unsigned iWantedMask = LOGIN_STATUS_LOGIN_DONE;
+		unsigned iWantedMask = STATE_LOGIN_DONE;
 		if (mDcServer->mDcConfig.mDelayedLogin && dcConn->mSendNickList) {
-			iWantedMask = LOGIN_STATUS_LOGIN_DONE - LOGIN_STATUS_NICKLST;
+			iWantedMask = STATE_LOGIN_DONE - STATE_NICKLST;
 		}
-		if (iWantedMask != dcConn->getLoginStatusFlag(iWantedMask)) {
+		if (!dcConn->isState(iWantedMask)) {
 			if (dcConn->log(LEVEL_DEBUG)) {
 				dcConn->logStream() << "Invalid sequence of the sent commands (" 
-					<< dcConn->getLoginStatusFlag(iWantedMask) << "), wanted: " 
-					<< iWantedMask << endl;
+					<< dcConn->getState() << "), wanted: " << iWantedMask << endl;
 			}
 			dcConn->closeNow(CLOSE_REASON_CMD_SEQUENCE);
 			return -1;
@@ -493,7 +484,6 @@ int NmdcProtocol::eventMyInfo(NmdcParser * dcparser, DcConn * dcConn) {
 		if (!mDcServer->beforeUserEnter(dcConn)) {
 			return -1;
 		}
-		dcConn->clearTimeOut(HUB_TIME_OUT_MYINFO);
 	}
 	return 0;
 }
@@ -1145,7 +1135,7 @@ void NmdcProtocol::forceMove(DcConn * dcConn, const char * address, const char *
 
 /// Sending the user-list and op-list
 int NmdcProtocol::sendNickList(DcConn * dcConn) {
-	if ((dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE) != LOGIN_STATUS_LOGIN_DONE) && mDcServer->mDcConfig.mNicklistOnLogin) {
+	if (!dcConn->isState(STATE_LOGIN_DONE) && mDcServer->mDcConfig.mNicklistOnLogin) {
 		dcConn->mNickListInProgress = true;
 	}
 
@@ -1451,19 +1441,6 @@ void NmdcProtocol::delFromHide(DcUser * dcUser) {
 		mDcServer->mOpList.remake();
 		mDcServer->mDcUserList.remake();
 	}
-}
-
-
-
-bool NmdcProtocol::badFlag(DcConn * dcConn, const char * cmd, unsigned int flag) {
-	if (dcConn->getLoginStatusFlag(flag)) {
-		if (dcConn->log(LEVEL_DEBUG)) {
-			dcConn->logStream() << "Attempt to attack in " << cmd << " (repeated sending)" << endl;
-		}
-		dcConn->closeNow(CLOSE_REASON_CMD_REPEAT);
-		return true;
-	}
-	return false;
 }
 
 

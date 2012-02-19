@@ -671,10 +671,10 @@ void DcServer::doUserEnter(DcConn * dcConn) {
 
 	// Protocol dependence
 	if (!mDcConfig.mAdcOn) { // NMDC
-		if (LOGIN_STATUS_LOGIN_DONE != dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE)) {
+		if (!dcConn->isState(STATE_LOGIN_DONE)) {
 			if (dcConn->log(LEVEL_DEBUG)) {
 				dcConn->logStream() << "User Login when not all done (" 
-					<< dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE) << ")" <<endl;
+					<< dcConn->getState() << ")" <<endl;
 			}
 			dcConn->closeNow(CLOSE_REASON_LOGIN_NOT_DONE);
 			return;
@@ -697,7 +697,7 @@ void DcServer::doUserEnter(DcConn * dcConn) {
 	}
 
 	// Adding user to the user list
-	if (!addToUserList(static_cast<DcUser *> (dcConn->mDcUser))) {
+	if (!addToUserList(dcConn->mDcUser)) {
 		dcConn->closeNow(CLOSE_REASON_USER_ADD);
 		return;
 	}
@@ -707,8 +707,8 @@ void DcServer::doUserEnter(DcConn * dcConn) {
 
 	afterUserEnter(dcConn);
 
-	dcConn->clearTimeOut(HUB_TIME_OUT_LOGIN);
-	(static_cast<DcUser *> (dcConn->mDcUser))->mTimeEnter.get();
+	dcConn->clearLoginTimeOut();
+	dcConn->mDcUser->mTimeEnter.get();
 }
 
 
@@ -981,7 +981,7 @@ DcUser * DcServer::getDcUser(const char * uid) {
 			if (dcConn && dcConn->mDcUser->mType == CLIENT_TYPE_DC && 
 				dcConn->mDcUser && dcConn->mDcUser->getUid() == uidStr
 			) {
-				return static_cast<DcUser *> (dcConn->mDcUser);
+				return dcConn->mDcUser;
 			}
 		}
 	}
