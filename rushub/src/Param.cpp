@@ -147,19 +147,19 @@ int Param::setLong(long * value) {
 
 
 
-const __int64 & Param::getInt64() const {
+const int64_t & Param::getInt64() const {
 	return mValue;
 }
 
 
 
-int Param::setInt64(__int64 value) {
+int Param::setInt64(int64_t value) {
 	return set(value, TYPE_INT64);
 }
 
 
 
-int Param::setInt64(__int64 * value) {
+int Param::setInt64(int64_t * value) {
 	return set(value, TYPE_INT64);
 }
 

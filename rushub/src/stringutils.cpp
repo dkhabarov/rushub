@@ -105,14 +105,14 @@ string & stringReplace(const string & str, const string & varname, string & dest
 
 
 /** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & stringReplace(const string & str, const string & varname, string & dest, __int64 by, bool b, bool first) {
+string & stringReplace(const string & str, const string & varname, string & dest, int64_t by, bool b, bool first) {
 	return stringReplace(str, varname, dest, int64ToString(by), b, first);
 }
 
 
 
-/** Typecasting __int64 to string */
-string int64ToString(__int64 const & value) {
+/** Typecasting int64_t to string */
+string int64ToString(int64_t const & value) {
 	char buf[32] = { '\0' };
 #ifdef _WIN32
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
@@ -128,10 +128,10 @@ string int64ToString(__int64 const & value) {
 
 
 
-/** Typecasting string to __int64 */
-__int64 stringToInt64(const string & str) {
+/** Typecasting string to int64_t */
+int64_t stringToInt64(const string & str) {
 #ifdef _WIN32
-	__int64 result = 0;
+	int64_t result = 0;
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
 		sscanf_s(str.c_str(), "%I64d", &result);
 	#else

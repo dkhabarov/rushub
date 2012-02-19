@@ -25,14 +25,13 @@
 #ifndef OBJ_H
 #define OBJ_H
 
+#include "stdint.h"
+
 #include <iostream>
 #include <fstream>
 #include <sstream> // operation << for string
 #include <vector>
 #ifndef _WIN32
-	#ifndef __int64
-		#define __int64 long long
-	#endif
 	#include <memory.h>
 	#include <syslog.h> 
 #endif

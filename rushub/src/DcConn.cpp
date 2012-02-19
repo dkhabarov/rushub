@@ -28,9 +28,6 @@
 
 namespace dcserver {
 
-#if (!defined _WIN32) && (!defined __int64)
-	#define __int64 long long
-#endif
 
 DcConn::DcConn(tSocket sock, Server * server) : 
 	Conn(sock, server, CONN_TYPE_INCOMING_TCP),
@@ -322,7 +319,7 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 
 			Param * share = (Param *) dcConn->mDcUser->getParam(USER_PARAM_SHARE);
 			if (share != NULL) {
-				__int64 n = 0;
+				int64_t n = 0;
 				share->setInt64(n); // for remove from total share
 			}
 

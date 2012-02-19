@@ -155,7 +155,7 @@ public:
 	UserList mChatList; ///< Chat list
 
 	int miTotalUserCount; ///< Total number of the users
-	__int64 miTotalShare; ///< Total hub share size
+	int64_t miTotalShare; ///< Total hub share size
 
 	PluginList mPluginList;
 
@@ -183,14 +183,14 @@ public:
 
 	virtual const string & getSystemVersion() const;
 
-	virtual __int64 getMsec() const;
+	virtual int64_t getMsec() const;
 
 	/// Work time (sec)
 	virtual int getUpTime() const;
 
 	virtual int getUsersCount() const;
 
-	virtual __int64 getTotalShare() const;
+	virtual int64_t getTotalShare() const;
 	
 	virtual DcListIteratorBase * getDcListIterator();
 
@@ -229,7 +229,7 @@ public:
 
 
 
-	static void getNormalShare(__int64, string &); ///< Get normal share size
+	static void getNormalShare(int64_t, string &); ///< Get normal share size
 	static void getAddresses(const char * addresses, vector<pair<string, string> > &, const char * defaultPort);
 
 	/// Pointer on the user (or NULL)

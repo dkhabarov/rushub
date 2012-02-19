@@ -132,8 +132,8 @@ protected:
 
 	/// Time of server & connection periods
 	struct Times {
-		__int64 mServ; ///< Timer Serv Period
-		__int64 mConn; ///< Timer Conn Period
+		int64_t mServ; ///< Timer Serv Period
+		int64_t mConn; ///< Timer Conn Period
 	} mTimes;
 
 protected:

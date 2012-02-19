@@ -23,16 +23,13 @@
 #include "Plugin.h"
 #include "stringutils.h"
 #include "Any.h"
+#include "stdint.h"
 
 #include <string>
 #include <set>
 
 using namespace ::std;
 using namespace ::utils;
-
-#if (!defined _WIN32) && (!defined __int64)
-	#define __int64 long long
-#endif
 
 namespace dcserver {
 
@@ -82,9 +79,9 @@ public:
 	virtual int setLong(long value);
 	int setLong(long * value);
 
-	virtual const __int64 & getInt64() const;
-	virtual int setInt64(__int64 value);
-	int setInt64(__int64 * value);
+	virtual const int64_t & getInt64() const;
+	virtual int setInt64(int64_t value);
+	int setInt64(int64_t * value);
 
 	virtual const string & toString();
 

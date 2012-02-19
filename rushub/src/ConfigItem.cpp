@@ -111,7 +111,7 @@ CCONVERTFROM(int, Int, atoi(str.c_str()));
 CCONVERTFROM(long, Long, atol(str.c_str()));
 CCONVERTFROM(unsigned int, UInt, atol(str.c_str()));
 CCONVERTFROM(unsigned long, ULong, strtoul(str.c_str(), NULL, 10));
-CCONVERTFROM(__int64, Int64, stringToInt64(str));
+CCONVERTFROM(int64_t, Int64, stringToInt64(str));
 CCONVERTFROM(string, String, str);
 
 

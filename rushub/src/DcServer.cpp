@@ -239,7 +239,7 @@ const string & DcServer::getSystemVersion() const {
 
 
 
-__int64 DcServer::getMsec() const {
+int64_t DcServer::getMsec() const {
 	Time tm(true);
 	return tm.msec();
 }
@@ -261,7 +261,7 @@ int DcServer::getUsersCount() const {
 
 
 
-__int64 DcServer::getTotalShare() const {
+int64_t DcServer::getTotalShare() const {
 	return miTotalShare;
 }
 
@@ -396,7 +396,7 @@ int DcServer::listening() {
 int DcServer::onTimer(Time & now) {
 
 	// Execute each second
-	if ((__int64) (now - mChecker) >= mTimerServPeriod) {
+	if ((int64_t) (now - mChecker) >= mTimerServPeriod) {
 
 		mChecker = now;
 
@@ -1350,7 +1350,7 @@ int DcServer::unregBot(const string & uid) {
 
 
 /** Get normal share size */
-void DcServer::getNormalShare(__int64 share, string & normalShare) {
+void DcServer::getNormalShare(int64_t share, string & normalShare) {
 	ostringstream os;
 	float s(static_cast<float>(share));
 	int i(0);

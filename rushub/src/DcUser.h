@@ -27,6 +27,7 @@
 #include "NmdcParser.h"
 #include "Param.h"
 #include "HashMap.h"
+#include "stdint.h"
 
 #include <string>
 
@@ -39,10 +40,6 @@ using namespace ::dcserver::protocol;
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
 		#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
 	#endif
-#endif
-
-#if (!defined _WIN32) && (!defined __int64)
-	#define __int64 long long
 #endif
 
 namespace dcserver {

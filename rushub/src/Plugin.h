@@ -24,8 +24,21 @@
 #include <iostream>
 #include <vector>
 
-#if (!defined _WIN32) && (!defined __int64)
-	#define __int64 long long
+#ifdef _WIN32
+	#ifndef STD_TYPES
+		#define STD_TYPES
+		typedef unsigned __int64 uint64_t;
+		typedef unsigned __int32 uint32_t;
+		typedef unsigned __int16 uint16_t;
+		typedef unsigned __int8 uint8_t;
+		typedef __int64 int64_t;
+		typedef __int32 int32_t;
+		typedef __int16 int16_t;
+		typedef __int8 int8_t;
+	#endif // STD_TYPES
+#else
+	#include <sys/types.h>
+	#include <stdint.h>
 #endif
 
 namespace plugin {
@@ -176,8 +189,8 @@ public:
 	virtual int setDouble(double) = 0;
 	virtual const long & getLong() const = 0;
 	virtual int setLong(long) = 0;
-	virtual const __int64 & getInt64() const = 0;
-	virtual int setInt64(__int64) = 0;
+	virtual const int64_t & getInt64() const = 0;
+	virtual int setInt64(int64_t) = 0;
 
 }; // class ParamBase
 
@@ -282,7 +295,7 @@ public:
 	virtual const string & getSystemVersion() const = 0;
 
 	/// Get time in milliseconds (now)
-	virtual __int64 getMsec() const = 0;
+	virtual int64_t getMsec() const = 0;
 
 	/// Get hub work time in sec
 	virtual int getUpTime() const = 0;
@@ -291,7 +304,7 @@ public:
 	virtual int getUsersCount() const = 0;
 
 	/// Get total hub share size
-	virtual __int64 getTotalShare() const = 0;
+	virtual int64_t getTotalShare() const = 0;
 
 	/// Get iterator of conn base
 	virtual DcListIteratorBase * getDcListIterator() = 0;

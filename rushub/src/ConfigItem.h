@@ -25,17 +25,14 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "stdint.h"
+
 #include <string>
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h> // atoi unix
 
 using namespace ::std;
-
-#if (!defined _WIN32) && (!defined __int64)
-	#define __int64 long long
-#endif
-
 
 
 namespace configuration {
@@ -50,7 +47,7 @@ typedef enum {
 	ITEM_TYPE_LONG,     // long
 	ITEM_TYPE_UINT,     // unsigned int
 	ITEM_TYPE_ULONG,    // unsigned long
-	ITEM_TYPE_LLONG,    // __int64
+	ITEM_TYPE_LLONG,    // int64_t
 	ITEM_TYPE_CHAR,     // char
 	ITEM_TYPE_STRING,   // string
 	ITEM_TYPE_PCHAR,    // char*
@@ -60,7 +57,7 @@ typedef enum {
 	ITEM_TYPE_PLONG,    // long*
 	ITEM_TYPE_PUINT,    // unsigned int*
 	ITEM_TYPE_PULONG,   // unsigned long*
-	ITEM_TYPE_PLLONG,   // __int64*
+	ITEM_TYPE_PLLONG,   // int64_t*
 	ITEM_TYPE_PSTRING,  // string*
 } ItemType;
 
@@ -160,7 +157,7 @@ CONFIGBASEITEM(int, ITEM_TYPE_INT, Int);                  /** ConfigItemInt */
 CONFIGBASEITEM(long, ITEM_TYPE_LONG, Long);               /** ConfigItemLong */
 CONFIGBASEITEM(unsigned, ITEM_TYPE_UINT, UInt);           /** ConfigItemUInt */
 CONFIGBASEITEM(unsigned long, ITEM_TYPE_ULONG, ULong);    /** ConfigItemULong */
-CONFIGBASEITEM(__int64, ITEM_TYPE_LLONG, Int64);          /** ConfigItemInt64 */
+CONFIGBASEITEM(int64_t, ITEM_TYPE_LLONG, Int64);          /** ConfigItemInt64 */
 CONFIGBASEITEM(char, ITEM_TYPE_CHAR, Char);               /** ConfigItemChar */
 CONFIGBASEITEM(string, ITEM_TYPE_STRING, String);         /** ConfigItemString */
 CONFIGBASEITEM(char *, ITEM_TYPE_PCHAR, PChar);           /** ConfigItemPChar */
@@ -170,7 +167,7 @@ CONFIGBASEITEM(int *, ITEM_TYPE_PINT, PInt);              /** ConfigItemPInt */
 CONFIGBASEITEM(long *, ITEM_TYPE_PLONG, PLong);           /** ConfigItemPLong */
 CONFIGBASEITEM(unsigned int *, ITEM_TYPE_PUINT, PUInt);   /** ConfigItemPUInt */
 CONFIGBASEITEM(unsigned long *, ITEM_TYPE_PULONG, PULong);/** ConfigItemPULong */
-CONFIGBASEITEM(__int64 *, ITEM_TYPE_PLLONG, PInt64);      /** ConfigItemPLLong */
+CONFIGBASEITEM(int64_t *, ITEM_TYPE_PLLONG, PInt64);      /** ConfigItemPLLong */
 CONFIGBASEITEM(string *, ITEM_TYPE_PSTRING, PString);     /** ConfigItemPString */
 
 }; // namespace configuration

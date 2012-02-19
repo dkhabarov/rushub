@@ -42,7 +42,7 @@ DcProtocol::~DcProtocol() {
 // return true if use cache
 const string & DcProtocol::getFirstMsg(bool & useCache) {
 
-	static __int64 shareVal = -1;
+	static int64_t shareVal = -1;
 	static int usersVal = -1;
 	static long timeVal = -1;
 	static string timeCache, shareCache, cache;

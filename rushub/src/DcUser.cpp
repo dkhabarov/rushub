@@ -136,7 +136,7 @@ Param * DcUser::getParamForce(const char * name, bool setRules) {
 			} else if (strcmp(name, USER_PARAM_IN_OP_LIST) == 0) {
 				param->set(false, Param::TYPE_BOOL, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInOpList);
 			} else if (strcmp(name, USER_PARAM_SHARE) == 0) {
-				__int64 n = 0;
+				int64_t n = 0;
 				param->set(n, Param::TYPE_INT64, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetShare);
 			} else if (strcmp(name, USER_PARAM_EMAIL) == 0) {
 				param->set(emptyStr, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
@@ -186,7 +186,7 @@ bool DcUser::removeParam(const char * name) {
 
 	// TODO remove it!
 	if (strcmp(name, USER_PARAM_SHARE) == 0) {
-		__int64 n = 0;
+		int64_t n = 0;
 		param->setInt64(n); // for remove from total share
 	}
 
