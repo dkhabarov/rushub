@@ -228,6 +228,7 @@ int AdcProtocol::eventSup(AdcParser *, DcConn * dcConn) {
 	}
 
 	// TODO: check existing BASE feature!
+	// "Failed to negotiate base protocol"
 
 	dcConn->reserve(29); // 18 + 1 + 5 + 4 + 1
 	dcConn->send(STR_LEN("ISUP ADBASE ADTIGR"), true, false);
