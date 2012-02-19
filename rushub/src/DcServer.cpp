@@ -669,17 +669,17 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 /// User entry
 void DcServer::doUserEnter(DcConn * dcConn) {
 
+	if (!dcConn->isState(STATE_NORMAL)) {
+		if (dcConn->log(LEVEL_DEBUG)) {
+			dcConn->logStream() << "User Login when not all done (" 
+				<< dcConn->getState() << ")" <<endl;
+		}
+		dcConn->closeNow(CLOSE_REASON_NOT_LOGIN);
+		return;
+	}
+
 	// Protocol dependence
 	if (!mDcConfig.mAdcOn) { // NMDC
-		if (!dcConn->isState(STATE_LOGIN_DONE)) {
-			if (dcConn->log(LEVEL_DEBUG)) {
-				dcConn->logStream() << "User Login when not all done (" 
-					<< dcConn->getState() << ")" <<endl;
-			}
-			dcConn->closeNow(CLOSE_REASON_LOGIN_NOT_DONE);
-			return;
-		}
-
 		// check empty nick!
 		if (!checkNick(dcConn)) {
 			dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);

@@ -258,7 +258,7 @@ int NmdcProtocol::eventSupports(NmdcParser * dcparser, DcConn * dcConn) {
 
 int NmdcProtocol::eventKey(NmdcParser *, DcConn * dcConn) {
 
-	if (!checkState(dcConn, "Key", STATE_KEY)) {
+	if (!checkState(dcConn, "Key", STATE_PROTOCOL)) {
 		return -1;
 	}
 
@@ -270,7 +270,7 @@ int NmdcProtocol::eventKey(NmdcParser *, DcConn * dcConn) {
 		}
 	#endif
 
-	dcConn->setState(STATE_KEY); // User has sent key
+	dcConn->setState(STATE_PROTOCOL);
 	return 0;
 }
 
@@ -285,7 +285,7 @@ int NmdcProtocol::eventValidateNick(NmdcParser * dcparser, DcConn * dcConn) {
 	const string & nick = dcparser->chunkString(CHUNK_1_PARAM);
 	size_t iNickLen = nick.size();
 
-	/** Additional checking the nick length */
+	// Additional checking the nick length
 	if (iNickLen > 0xFF) {
 		if (dcConn->log(LEVEL_WARN)) {
 			dcConn->logStream() << "Attempt to attack by long nick" << endl;
@@ -302,13 +302,13 @@ int NmdcProtocol::eventValidateNick(NmdcParser * dcparser, DcConn * dcConn) {
 	dcConn->mDcUser->setUid(nick);
 	
 
-	/** Checking validate user */
+	// Checking validate user
 	if (!validateUser(dcConn, nick)) {
 		dcConn->closeNice(9000, CLOSE_REASON_USER_INVALID);
 		return -2;
 	}
 
-	/** Global user's limit */
+	// Global user's limit
 	if (mDcServer->mDcConfig.mUsersLimit >= 0 && mDcServer->getUsersCount() >= mDcServer->mDcConfig.mUsersLimit) {
 		if (dcConn->log(LEVEL_DEBUG)) {
 			dcConn->logStream() << "User " << nick << " was disconnected (user's limit: " << mDcServer->mDcConfig.mUsersLimit << ")" << endl;
@@ -318,13 +318,13 @@ int NmdcProtocol::eventValidateNick(NmdcParser * dcparser, DcConn * dcConn) {
 		return -3;
 	}
 
-	dcConn->setState(STATE_VALNICK | STATE_NICKLST); /** We Install NICKLST because user can not call user list */
+	dcConn->setState(STATE_VALNICK | STATE_NICKLST); // We Install NICKLST because user can not call user list
 
 	string msg;
 
 	#ifndef WITHOUT_PLUGINS
 		if (mDcServer->mCalls.mOnValidateNick.callAll(dcConn->mDcUser)) {
-			dcConn->send(appendGetPass(msg)); /** We are sending the query for reception of the password */
+			dcConn->send(appendGetPass(msg)); // We are sending the query for reception of the password
 			return -4;
 		}
 	#endif
@@ -332,9 +332,9 @@ int NmdcProtocol::eventValidateNick(NmdcParser * dcparser, DcConn * dcConn) {
 	if (!iNickLen || !checkNickLength(dcConn, iNickLen)) {
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_LEN);
 	}
-	dcConn->setState(STATE_PASSWD); /** Does not need password */
+	dcConn->setState(STATE_VERIFY); // Does not need password
 
-	dcConn->send(appendHello(msg, dcConn->mDcUser->getUid())); /** Protection from change the command */
+	dcConn->send(appendHello(msg, dcConn->mDcUser->getUid())); // Protection from change the command
 	return 0;
 }
 
@@ -350,7 +350,7 @@ int NmdcProtocol::eventMyPass(NmdcParser *, DcConn * dcConn) {
 		dcConn->closeNice(9000, CLOSE_REASON_CMD_PASSWORD_ERR);
 		return -1;
 	}
-	if (!checkState(dcConn, "MyPass", STATE_PASSWD)) {
+	if (!checkState(dcConn, "MyPass", STATE_VERIFY)) {
 		return -1;
 	}
 
@@ -362,7 +362,7 @@ int NmdcProtocol::eventMyPass(NmdcParser *, DcConn * dcConn) {
 	#endif
 
 	string msg;
-	dcConn->setState(STATE_PASSWD); /** Password is accepted */
+	dcConn->setState(STATE_VERIFY); // Password is accepted
 	appendHello(msg, dcConn->mDcUser->getUid());
 	if (bOp) { /** If entered operator, that sends command LoggedIn ($LogedIn !) */
 		msg.append(STR_LEN("$LogedIn "));
@@ -407,7 +407,7 @@ int NmdcProtocol::eventGetNickList(NmdcParser *, DcConn * dcConn) {
 		}
 	#endif
 
-	if (!dcConn->isState(STATE_MYINFO) && mDcServer->mDcConfig.mNicklistOnLogin) {
+	if (!dcConn->isState(STATE_INFO) && mDcServer->mDcConfig.mNicklistOnLogin) {
 		if (mDcServer->mDcConfig.mDelayedLogin) {
 			int LSFlag = dcConn->getState();
 			if (LSFlag & STATE_NICKLST) {
@@ -466,11 +466,11 @@ int NmdcProtocol::eventMyInfo(NmdcParser * dcparser, DcConn * dcConn) {
 			}
 		}
 	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-		dcConn->setState(STATE_MYINFO);
+		dcConn->setState(STATE_INFO);
 
-		unsigned iWantedMask = STATE_LOGIN_DONE;
+		unsigned iWantedMask = STATE_NORMAL;
 		if (mDcServer->mDcConfig.mDelayedLogin && dcConn->mSendNickList) {
-			iWantedMask = STATE_LOGIN_DONE - STATE_NICKLST;
+			iWantedMask = STATE_NORMAL - STATE_NICKLST;
 		}
 		if (!dcConn->isState(iWantedMask)) {
 			if (dcConn->log(LEVEL_DEBUG)) {
@@ -1135,7 +1135,7 @@ void NmdcProtocol::forceMove(DcConn * dcConn, const char * address, const char *
 
 /// Sending the user-list and op-list
 int NmdcProtocol::sendNickList(DcConn * dcConn) {
-	if (!dcConn->isState(STATE_LOGIN_DONE) && mDcServer->mDcConfig.mNicklistOnLogin) {
+	if (!dcConn->isState(STATE_NORMAL) && mDcServer->mDcConfig.mNicklistOnLogin) {
 		dcConn->mNickListInProgress = true;
 	}
 

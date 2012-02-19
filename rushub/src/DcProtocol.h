@@ -35,6 +35,22 @@ class DcServer;
 namespace protocol {
 
 
+/// DC Protocol states
+enum {
+
+	STATE_PROTOCOL = 1 << 0, ///< Protocol state (NMDC $Key, ADC SUP)
+	STATE_VALNICK  = 1 << 1, ///< Validation Nick (NMDC)
+	STATE_VERSION  = 1 << 2, ///< $Version was received (NMDC)
+	STATE_INFO     = 1 << 3, ///< $MyINFO string was received (NMDC)
+	STATE_NICKLST  = 1 << 4, ///< $GetNickList (NMDC)
+	STATE_IDENTIFY = STATE_VALNICK | STATE_VERSION | STATE_INFO | STATE_NICKLST, ///< Identify user state
+	STATE_VERIFY   = 1 << 5, ///< Password was right or password was not need (NMDC $MyPass, ADC PAS)
+	STATE_NORMAL   = STATE_PROTOCOL | STATE_IDENTIFY | STATE_VERIFY, ///< Normal state - action is valid
+	STATE_DATA     = 1 << 6, ///< For binary transfers (ADC)
+
+};
+
+
 /// DC protocol
 class DcProtocol : public Protocol {
 
