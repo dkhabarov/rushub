@@ -68,7 +68,7 @@ if test "$enable_caps" = "yes"; then
 fi
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h dlfcn.h fcntl.h memory.h netdb.h netinet/in.h stddef.h stdlib.h string.h sys/socket.h sys/time.h syslog.h unistd.h],, exit)
+AC_CHECK_HEADERS([arpa/inet.h dlfcn.h fcntl.h memory.h netdb.h netinet/in.h stddef.h stdlib.h string.h sys/socket.h sys/time.h syslog.h unistd.h stdint.h],, exit)
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
