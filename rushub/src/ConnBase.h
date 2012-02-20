@@ -70,7 +70,6 @@
 	#define SOCK_ERROR(SOCK) (SOCK) == SOCKET_ERROR
 	typedef SOCKET tSocket;
 #else
-	#include <stdint.h>
 	#include <arpa/inet.h>
 	#include <netinet/in.h> ///< for sockaddr_in
 	#include <sys/socket.h> ///< for AF_INET

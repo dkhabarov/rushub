@@ -23,7 +23,7 @@
 #include "Plugin.h"
 #include "stringutils.h"
 #include "Any.h"
-#include "stdint.h"
+#include "stdinc.h"
 
 #include <string>
 #include <set>

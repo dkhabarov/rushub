@@ -17,8 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _MSC_STDINT_H_ // [
-#define _MSC_STDINT_H_
+#ifndef STDINC_H // [
+#define STDINC_H
 
 #ifdef _WIN32 // [
 
@@ -246,7 +246,7 @@ typedef uint64_t  uintmax_t;
 
 #endif // _WIN32 ]
 
-#endif // _MSC_STDINT_H_ ]
+#endif // STDINC_H ]
 
 /**
  * $Id$

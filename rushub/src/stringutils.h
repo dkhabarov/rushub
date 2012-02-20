@@ -25,7 +25,7 @@
 #ifndef STRING_UTILS_H
 #define STRING_UTILS_H
 
-#include "stdint.h"
+#include "stdinc.h"
 
 #include <string>
 #include <iostream>

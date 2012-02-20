@@ -25,7 +25,7 @@
 #ifndef OBJ_H
 #define OBJ_H
 
-#include "stdint.h"
+#include "stdinc.h"
 
 #include <iostream>
 #include <fstream>

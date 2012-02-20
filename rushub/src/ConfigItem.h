@@ -25,7 +25,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "stdint.h"
+#include "stdinc.h"
 
 #include <string>
 #include <iostream>

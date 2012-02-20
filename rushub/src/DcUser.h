@@ -27,7 +27,7 @@
 #include "NmdcParser.h"
 #include "Param.h"
 #include "HashMap.h"
-#include "stdint.h"
+#include "stdinc.h"
 
 #include <string>
 

@@ -20,7 +20,7 @@
 #ifndef TIGER_HASH_H
 #define TIGER_HASH_H
 
-#include "stdint.h"
+#include "stdinc.h"
 
 #include <string.h>
 #include <iostream>

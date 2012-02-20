@@ -21,7 +21,7 @@
 #ifndef ENCODER_H
 #define ENCODER_H
 
-#include "stdint.h"
+#include "stdinc.h"
 
 #include <string.h>
 #include <iostream>
