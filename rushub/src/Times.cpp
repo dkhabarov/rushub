@@ -34,7 +34,7 @@
 	void gettimeofday(struct timeval * tv, struct timezone *) {
 		union {
 			FILETIME ft;
-			unsigned __int64 ns100;
+			uint64_t ns100;
 		} now;
 		GetSystemTimeAsFileTime(&now.ft);
 		//116444736000000000 = (24 * 3600) * ((1970 - 1601) * 365 + 89) * (1000000000 / 100)
@@ -240,18 +240,18 @@ Time::operator double() const {
 
 
 
-Time::operator __int64() const {
+Time::operator int64_t() const {
 	if (tv_sec > 0) {
 		if (tv_usec > 0) {
-			return (__int64)(tv_sec) * 1000 + (__int64)(tv_usec) / 1000;
+			return (int64_t)(tv_sec) * 1000 + (int64_t)(tv_usec) / 1000;
 		} else {
-			return (__int64)(tv_sec) * 1000 + (__int64)(-tv_usec) / 1000;
+			return (int64_t)(tv_sec) * 1000 + (int64_t)(-tv_usec) / 1000;
 		}
 	} else {
 		if (tv_usec > 0) {
-			return (__int64)(-tv_sec) * 1000 + (__int64)(tv_usec) / 1000;
+			return (int64_t)(-tv_sec) * 1000 + (int64_t)(tv_usec) / 1000;
 		} else {
-			return (__int64)(-tv_sec) * 1000 + (__int64)(-tv_usec) / 1000;
+			return (int64_t)(-tv_sec) * 1000 + (int64_t)(-tv_usec) / 1000;
 		}
 	}
 }
