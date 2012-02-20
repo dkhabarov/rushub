@@ -221,7 +221,7 @@ int Uid::setValue(lua_State * L, DcUserBase * dcUserBase, const char * name, int
 			break;
 
 		case ParamBase::TYPE_INT64 :
-			paramBase->setInt64(static_cast<__int64> (lua_tonumber(L, 3)));
+			paramBase->setInt64(static_cast<int64_t> (lua_tonumber(L, 3)));
 			break;
 
 		case ParamBase::TYPE_LONG :

@@ -20,13 +20,10 @@
 #ifndef TIMER_LIST_H
 #define TIMER_LIST_H
 
+#include "Plugin.h"
 #include "List.h"
 
 #include <string>
-
-#if (!defined _WIN32) && (!defined __int64)
-	#define __int64 long long
-#endif
 
 using namespace ::std;
 
@@ -51,11 +48,11 @@ public:
 
 	~Timer();
 
-	void check(__int64 time);
+	void check(int64_t time);
 
 private:
 
-	__int64 mTime;
+	int64_t mTime;
 	int mInterval;
 	string mFunc;
 
