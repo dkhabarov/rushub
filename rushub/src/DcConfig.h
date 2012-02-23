@@ -149,7 +149,7 @@ public:
 	string mBadChatNick;       ///< Message about bad nick in the chat
 	string mBadLoginSequence;  ///< Message about bad login sequence
 	string mBadMyinfoNick;     ///< Message about bad nick in MyINFO command
-	string mUnits[7];          ///< Units: B, KB, MB, GB, TB, PB, EB
+	string mUnits[7];          ///< Units: EB, PB, TB, GB, MB, KB, B
 	string mTimeoutLogin;      ///< Message about timeout login
 	string mTimeoutAny;        ///< Message about connection timeout
 	string mForceMove;         ///< Redirection message

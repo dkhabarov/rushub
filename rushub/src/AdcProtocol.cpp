@@ -20,6 +20,8 @@
 #include "AdcProtocol.h"
 #include "DcServer.h" // for mDcServer
 #include "DcConn.h" // for DcConn
+#include "TigerHash.h"
+#include "Encoder.h"
 
 namespace dcserver {
 
@@ -289,22 +291,18 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 		}
 	}
 
-	string & inf = adcParser->mCommand;
+	dcConn->mDcUser->setInfo(adcParser->mCommand);
 
-	// Remove PID
-	size_t pos = inf.find(" PD");
-	if (pos != inf.npos) {
-		size_t pos_s = inf.find(" ", pos + 3);
-		if (pos_s != inf.npos) {
-			inf.erase(pos, pos_s - pos);
-		}
+	if (!dcConn->isState(STATE_NORMAL) && !verifyCid(dcConn->mDcUser)) {
+		dcConn->closeNow(CLOSE_REASON_USER_INVALID); // TODO reason
+		return -2;
 	}
 
-	// TODO: verify PID by CID
-
-	dcConn->mDcUser->setInfo(inf);
+	
+	
 
 	#ifndef WITHOUT_PLUGINS
+		// TODO: PD param in scripts!
 		mDcServer->mCalls.mOnMyINFO.callAll(dcConn->mDcUser);
 	#endif
 
@@ -727,6 +725,32 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 
 	// TODO: Check flood
 	return 0;
+}
+
+bool AdcProtocol::verifyCid(DcUser * dcUser) {
+	ParamBase * paramPd = dcUser->getParam("PD");
+	if (paramPd == NULL) {
+		return false;
+	}
+
+	ParamBase * paramId = dcUser->getParam("ID");
+	if (paramId == NULL) {
+		return false;
+	}
+
+	uint8_t pid[TigerHash::BYTES];
+	Encoder::fromBase32(paramPd->getString().c_str(), pid, sizeof(pid));
+
+	TigerHash th;
+	th.update((uint8_t *) pid, sizeof(pid));
+
+	string cid;
+	Encoder::toBase32(th.finalize(), TigerHash::BYTES, cid);
+
+	// Removing PID
+	dcUser->removeParam("PD");
+
+	return paramId->getString() == cid;
 }
 
 

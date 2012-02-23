@@ -1359,7 +1359,7 @@ void DcServer::getNormalShare(int64_t share, string & normalShare) {
 	for (; ((s >= 1024) && (i < 7)); ++i) {
 		s /= 1024;
 	}
-	os << ::std::floor(s * 1000 + 0.5) / 1000 << " " << DcServer::currentDcServer->mDcLang.mUnits[i];
+	os << ::std::floor(s * 1000 + 0.5) / 1000 << " " << DcServer::currentDcServer->mDcLang.mUnits[6 - i];
 	normalShare = os.str();
 }
 

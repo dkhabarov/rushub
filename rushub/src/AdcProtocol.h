@@ -105,6 +105,7 @@ private:
 	int eventUnknown(AdcParser *, DcConn *); ///< Unknown cmd
 
 	int checkCommand(AdcParser *, DcConn *);
+	bool verifyCid(DcUser *);
 
 }; // AdcProtocol
 

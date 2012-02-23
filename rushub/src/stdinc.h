@@ -20,15 +20,20 @@
 #ifndef STDINC_H // [
 #define STDINC_H
 
-#ifdef _WIN32 // [
+#include <limits.h>
+
+#ifndef _WIN32 // [
+
+#include <sys/types.h>
+#include <stdint.h>
+
+#else // _WIN32 ][
 
 #ifdef _MSC_VER // [
 
 #if _MSC_VER > 1000
 #pragma once
 #endif
-
-#include <limits.h>
 
 // For Visual Studio 6 in C++ mode and for many Visual Studio versions when
 // compiling for ARM we should wrap <wchar.h> include with 'extern "C++" {}'
@@ -239,12 +244,30 @@ typedef uint64_t  uintmax_t;
 
 #endif // _MSC_VER ]
 
-#else // _WIN32 ][
-
-#include <sys/types.h>
-#include <stdint.h>
-
 #endif // _WIN32 ]
+
+
+
+#if CHAR_BIT != 8
+#error "unsupported char size"
+#endif
+
+enum {
+	O32_LITTLE_ENDIAN = 0x03020100ul,
+	O32_BIG_ENDIAN = 0x00010203ul,
+	O32_PDP_ENDIAN = 0x01000302ul
+};
+
+static const union {
+	unsigned char bytes[4];
+	uint32_t value;
+} o32_host_order = {
+	{ 0, 1, 2, 3 }
+};
+
+static const bool _LITTLE_ENDIAN = (o32_host_order.value == O32_LITTLE_ENDIAN);
+static const bool _BIG_ENDIAN = (o32_host_order.value == O32_BIG_ENDIAN);
+
 
 #endif // STDINC_H ]
 

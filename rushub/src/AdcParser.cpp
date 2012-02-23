@@ -32,21 +32,28 @@ namespace dcserver {
 
 namespace protocol {
 
-#define CMD(a, b, c) (int) ((a << 16) | (b << 8) | c)
-#define FOURCC(a, b, c, d) (int) ((a << 24) | (b << 16) | (c << 8) | d)
+#define FOURCC(c) (*(uint32_t *)c)
+#define CMD(c) (_LITTLE_ENDIAN ? (FOURCC(c) >> 8) : (FOURCC(c) << 8))
 
 /// ADC command
 class AdcCommand {
 
 public:
 
-	AdcCommand(int command, AdcType adcType) : mCommand(command), mAdcType(adcType) {
+	static const int mLen = 3;
+
+public:
+
+	AdcCommand(uint32_t command, AdcType adcType) :
+		mCommand(command),
+		mAdcType(adcType)
+	{
 	}
 
 	virtual ~AdcCommand() {
 	}
 
-	bool check(int command) const {
+	bool check(uint32_t command) const {
 		return mCommand == command;
 	}
 
@@ -57,7 +64,7 @@ public:
 private:
 
 	//hash = *reinterpret_cast<const unsigned int*>(cmd);
-	const int mCommand;
+	const uint32_t mCommand;
 	const AdcType mAdcType;
 
 	const AdcCommand & operator = (const AdcCommand &); // for gcc
@@ -68,26 +75,26 @@ private:
 
 /// Main ADC commands
 AdcCommand AdcCommands[] = {
-	AdcCommand(CMD('S', 'C', 'H'), ADC_TYPE_SCH), // SCH
-	AdcCommand(CMD('R', 'E', 'S'), ADC_TYPE_RES), // RES
-	AdcCommand(CMD('C', 'T', 'M'), ADC_TYPE_CTM), // CTM
-	AdcCommand(CMD('R', 'C', 'M'), ADC_TYPE_RCM), // RCM
-	AdcCommand(CMD('S', 'U', 'P'), ADC_TYPE_SUP), // SUP
-	AdcCommand(CMD('S', 'T', 'A'), ADC_TYPE_STA), // STA
-	AdcCommand(CMD('I', 'N', 'F'), ADC_TYPE_INF), // INF
-	AdcCommand(CMD('M', 'S', 'G'), ADC_TYPE_MSG), // MSG
-	AdcCommand(CMD('G', 'P', 'A'), ADC_TYPE_GPA), // GPA
-	AdcCommand(CMD('P', 'A', 'S'), ADC_TYPE_PAS), // PAS
-	AdcCommand(CMD('Q', 'U', 'I'), ADC_TYPE_QUI), // QUI
-	AdcCommand(CMD('S', 'I', 'D'), ADC_TYPE_SID), // SID
-	AdcCommand(CMD('C', 'M', 'D'), ADC_TYPE_CMD), // CMD
-	AdcCommand(CMD('G', 'F', 'I'), ADC_TYPE_GFI), // GFI
-	AdcCommand(CMD('N', 'A', 'T'), ADC_TYPE_NAT), // NAT
-	AdcCommand(CMD('R', 'N', 'T'), ADC_TYPE_RNT), // RNT
-	AdcCommand(CMD('P', 'S', 'R'), ADC_TYPE_PSR), // PSR
-	AdcCommand(CMD('P', 'U', 'B'), ADC_TYPE_PUB), // PUB
-	AdcCommand(CMD('G', 'E', 'T'), ADC_TYPE_GET), // GET
-	AdcCommand(CMD('S', 'N', 'D'), ADC_TYPE_SND), // SND
+	AdcCommand(FOURCC("SCH"), ADC_TYPE_SCH), // SCH
+	AdcCommand(FOURCC("RES"), ADC_TYPE_RES), // RES
+	AdcCommand(FOURCC("CTM"), ADC_TYPE_CTM), // CTM
+	AdcCommand(FOURCC("RCM"), ADC_TYPE_RCM), // RCM
+	AdcCommand(FOURCC("SUP"), ADC_TYPE_SUP), // SUP
+	AdcCommand(FOURCC("STA"), ADC_TYPE_STA), // STA
+	AdcCommand(FOURCC("INF"), ADC_TYPE_INF), // INF
+	AdcCommand(FOURCC("MSG"), ADC_TYPE_MSG), // MSG
+	AdcCommand(FOURCC("GPA"), ADC_TYPE_GPA), // GPA
+	AdcCommand(FOURCC("PAS"), ADC_TYPE_PAS), // PAS
+	AdcCommand(FOURCC("QUI"), ADC_TYPE_QUI), // QUI
+	AdcCommand(FOURCC("SID"), ADC_TYPE_SID), // SID
+	AdcCommand(FOURCC("CMD"), ADC_TYPE_CMD), // CMD
+	AdcCommand(FOURCC("GFI"), ADC_TYPE_GFI), // GFI
+	AdcCommand(FOURCC("NAT"), ADC_TYPE_NAT), // NAT
+	AdcCommand(FOURCC("RNT"), ADC_TYPE_RNT), // RNT
+	AdcCommand(FOURCC("PSR"), ADC_TYPE_PSR), // PSR
+	AdcCommand(FOURCC("PUB"), ADC_TYPE_PUB), // PUB
+	AdcCommand(FOURCC("GET"), ADC_TYPE_GET), // GET
+	AdcCommand(FOURCC("SND"), ADC_TYPE_SND), // SND
 };
 
 
@@ -171,7 +178,7 @@ int AdcParser::parse() {
 	if (mLength >= 4) { // ADC cmd key must contain 4 symbols, else it's invalid cmd
 
 		if (parseHeader()) {
-			int cmd = CMD(mCommand[1], mCommand[2], mCommand[3]);
+			uint32_t cmd = CMD(mCommand.c_str());
 			for (unsigned int i = 0; i < ADC_TYPE_INVALID; ++i) {
 				AdcCommand & adcCommand = AdcCommands[i];
 				if (adcCommand.check(cmd)) { // Check command from mCommand
@@ -332,9 +339,9 @@ bool AdcParser::parseFeatures() {
 				return false;
 		}
 		if (mCommand[pos] == '+') {
-			mPositiveFeature.push_back(FOURCC(mCommand[pos + 1], mCommand[pos + 2], mCommand[pos + 3], mCommand[pos + 4]));
+			mPositiveFeature.push_back(FOURCC(&mCommand[pos + 1]));
 		} else {
-			mNegativeFeature.push_back(FOURCC(mCommand[pos + 1], mCommand[pos + 2], mCommand[pos + 3], mCommand[pos + 4]));
+			mNegativeFeature.push_back(FOURCC(&mCommand[pos + 1]));
 		}
 		pos += 5;
 	}
@@ -534,7 +541,7 @@ void AdcParser::parseFeatures(DcUser * dcUser) {
 				if (isUpperAlpha(value[j]) && isUpperAlphaNum(value[j + 1]) && 
 					isUpperAlphaNum(value[j + 2]) && isUpperAlphaNum(value[j + 3]))
 				{
-					features.insert(FOURCC(value[j], value[j + 1], value[j + 2], value[j + 3]));
+					features.insert(FOURCC(&value[j]));
 				}
 			}
 			j = i + 1;
@@ -543,7 +550,7 @@ void AdcParser::parseFeatures(DcUser * dcUser) {
 			if (isUpperAlpha(value[j]) && isUpperAlphaNum(value[j + 1]) && 
 				isUpperAlphaNum(value[j + 2]) && isUpperAlphaNum(value[j + 3]))
 			{
-				features.insert(FOURCC(value[j], value[j + 1], value[j + 2], value[j + 3]));
+				features.insert(FOURCC(&value[j]));
 			}
 		}
 	}
