@@ -608,7 +608,9 @@ bool DcServer::checkNick(DcConn *dcConn) {
 		if (mDcUserList.contain(uidHash)) {
 			DcUser * us = static_cast<DcUser *> (mDcUserList.find(uidHash));
 
-			if (!us->mDcConn || (us->getParamForce(USER_PARAM_PROFILE)->getInt() != -1 && us->getIp() != dcConn->getIp())) {
+			// Checking nick only for profile -1 (unreg) and bots
+			// All other profiles is a reg users and they are not checked
+			if (!us->mDcConn || us->getParamForce(USER_PARAM_PROFILE)->getInt() != -1) {
 				if (dcConn->log(LEVEL_DEBUG)) {
 					dcConn->logStream() << "Bad nick (used): '" 
 						<< dcConn->mDcUser->getUid() << "'["
