@@ -129,7 +129,7 @@ void DcConfig::addVars(Server * server) {
 	add("iStepDelay",             server->mStepDelay,                   0      );
 	add("iTimerConnPeriod",       server->mTimerConnPeriod,             4000u  );
 	add("iTimerServPeriod",       server->mTimerServPeriod,             2000u  );
-	add("iTimeoutLogin",          mTimeoutLogin,                        120.   );
+	add("iTimeoutLogon",          mTimeoutLogon,                        120.   );
 	add("iTimeoutAny",            mTimeoutAny,                          600.   );
 
 	add("bWebServer",             mWebServer,                           false  );
@@ -327,7 +327,7 @@ void DcLang::addVars() {
 	add("sBadLoginSequence", mBadLoginSequence);
 	add("sBadMyinfoNick", mBadMyinfoNick);
 	add("sBadRevConNick", mBadRevConNick);
-	add("sTimeoutLogon", mTimeoutLogin);
+	add("sTimeoutLogon", mTimeoutLogon);
 	add("sTimeoutAny", mTimeoutAny);
 	add("sBadCTMIp", mBadCtmIp);
 	add("sBadSRNick", mBadSrNick);
@@ -381,7 +381,7 @@ void DcLang::setRussianLang() {
 	mBadLoginSequence.assign(STR_LEN("Не правильная последовательность отосланных команд при входе."));
 	mBadMyinfoNick.assign(STR_LEN("Неверный ник в MyINFO команде."));
 	mBadRevConNick.assign(STR_LEN("Неверный ник при соединении: %[nick]. Ваш реальный ник: %[real_nick]."));
-	mTimeoutLogin.assign(STR_LEN("Тайм-аут входа."));
+	mTimeoutLogon.assign(STR_LEN("Тайм-аут входа."));
 	mTimeoutAny.assign(STR_LEN("Тайм-аут соединения."));
 	mBadCtmIp.assign(STR_LEN("В запросе на подключение вы отсылаете неверный IP адрес: %[ip], ваш реальный IP: %[real_ip]."));
 	mBadSrNick.assign(STR_LEN("Неверный ник в результатах поиска: %[nick]. Ваш реальный ник: %[real_nick]."));
@@ -429,7 +429,7 @@ void DcLang::setEnglishLang() {
 	mBadLoginSequence.assign(STR_LEN("Invalid sequence of commands."));
 	mBadMyinfoNick.assign(STR_LEN("Invalid nick in MyINFO command."));
 	mBadRevConNick.assign(STR_LEN("Invalid nick for connection: %[nick]. Your real nick is: %[real_nick]."));
-	mTimeoutLogin.assign(STR_LEN("Timeout login."));
+	mTimeoutLogon.assign(STR_LEN("Timeout login."));
 	mTimeoutAny.assign(STR_LEN("Connection timeout."));
 	mBadCtmIp.assign(STR_LEN("In request of the connection you are sending wrong IP address: %[ip], your real IP is: %[real_ip]."));
 	mBadSrNick.assign(STR_LEN("Invalid nick in search results: %[nick]. Your real nick is: %[real_nick]."));

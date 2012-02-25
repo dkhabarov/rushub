@@ -115,7 +115,7 @@ int NmdcProtocol::onNewConn(Conn * conn) {
 		bool useCache = true;
 		mDcServer->sendToUser(dcConn->mDcUser, getFirstMsg(useCache), mDcServer->mDcConfig.mHubBot.c_str());
 	}
-	dcConn->setLoginTimeOut(mDcServer->mDcConfig.mTimeoutLogin, mDcServer->mTime); // Timeout for enter
+	dcConn->setLoginTimeOut(mDcServer->mDcConfig.mTimeoutLogon, mDcServer->mTime); // Timeout for enter
 	dcConn->flush();
 	return 0;
 }

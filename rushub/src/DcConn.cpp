@@ -130,7 +130,7 @@ int DcConn::onTimer(Time & now) {
 			if (log(LEVEL_DEBUG)) {
 				logStream() << "Timeout login" << endl;
 			}
-			dcServer->sendToUser(mDcUser, dcServer->mDcLang.mTimeoutLogin, dcServer->mDcConfig.mHubBot.c_str());
+			dcServer->sendToUser(mDcUser, dcServer->mDcLang.mTimeoutLogon, dcServer->mDcConfig.mHubBot.c_str());
 			closeNice(9000, CLOSE_REASON_TIMEOUT_LOGIN);
 			return 1;
 		}

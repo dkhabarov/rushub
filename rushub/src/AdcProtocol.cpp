@@ -210,7 +210,7 @@ int AdcProtocol::onNewConn(Conn * conn) {
 		mDcServer->mCalls.mOnUserConnected.callAll(dcConn->mDcUser);
 	#endif
 
-	dcConn->setLoginTimeOut(mDcServer->mDcConfig.mTimeoutLogin, mDcServer->mTime); // Timeout for enter
+	dcConn->setLoginTimeOut(mDcServer->mDcConfig.mTimeoutLogon, mDcServer->mTime); // Timeout for enter
 	return 0;
 }
 
