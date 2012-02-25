@@ -42,9 +42,9 @@ Parser::Parser(int max) :
 	mType(TYPE_UNPARSED),
 	mChunks(max),
 	mLength(0),
+	mIsParsed(false),
 	mStrings(new string[max]),
 	mStrMap(0l),
-	mIsParsed(false),
 	mMaxChunks(max)
 {
 	for(int i = 0; i < mMaxChunks; ++i) {

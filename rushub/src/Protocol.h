@@ -97,10 +97,7 @@ public:
 protected:
 
 	size_t mLength; ///< Command len
-
-	string * mStrings; ///< String array for chunks
-	unsigned long mStrMap; ///< Chunk already existed
-	bool mIsParsed;
+	bool mIsParsed;	
 
 protected:
 
@@ -118,6 +115,8 @@ protected:
 
 private:
 
+	string * mStrings; ///< String array for chunks
+	unsigned long mStrMap; ///< Chunk already existed
 	int mMaxChunks; ///< Common (max) number of chunks
 
 }; // Parser
