@@ -606,13 +606,14 @@ bool DcServer::checkNick(DcConn *dcConn) {
 	if (!mDcConfig.mAdcOn) { // NMDC
 
 		if (mDcUserList.contain(uidHash)) {
+			// User on a hub
 			DcUser * us = static_cast<DcUser *> (mDcUserList.find(uidHash));
 
 			// Checking nick only for profile -1 (unreg) and bots
 			// All other profiles is a reg users and they are not checked
-			if (!us->mDcConn || us->getParamForce(USER_PARAM_PROFILE)->getInt() != -1) {
-				if (dcConn->log(LEVEL_DEBUG)) {
-					dcConn->logStream() << "Bad nick (used): '" 
+			if (!us->mDcConn || dcConn->mDcUser->getParamForce(USER_PARAM_PROFILE)->getInt() == -1) {
+				if (log(LEVEL_DEBUG)) {
+					logStream() << "Bad nick (used): '" 
 						<< dcConn->mDcUser->getUid() << "'["
 						<< dcConn->getIp() << "] vs '" << us->getUid() 
 						<< "'[" << us->getIp() << "]" << endl;
@@ -623,8 +624,8 @@ bool DcServer::checkNick(DcConn *dcConn) {
 				dcConn->send(mNmdcProtocol.appendValidateDenied(msg.erase(), dcConn->mDcUser->getUid())); // refactoring to DcProtocol pointer
 				return false;
 			}
-			if (us->mDcConn->log(LEVEL_DEBUG)) {
-				us->mDcConn->logStream() << "removed old user" << endl;
+			if (log(LEVEL_DEBUG)) {
+				logStream() << "removed old user" << endl;
 			}
 			removeFromDcUserList(us);
 			us->mDcConn->closeNow(CLOSE_REASON_USER_OLD);
