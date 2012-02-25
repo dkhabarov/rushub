@@ -327,7 +327,7 @@ void DcLang::addVars() {
 	add("sBadLoginSequence", mBadLoginSequence);
 	add("sBadMyinfoNick", mBadMyinfoNick);
 	add("sBadRevConNick", mBadRevConNick);
-	add("sTimeoutLogin", mTimeoutLogin);
+	add("sTimeoutLogon", mTimeoutLogin);
 	add("sTimeoutAny", mTimeoutAny);
 	add("sBadCTMIp", mBadCtmIp);
 	add("sBadSRNick", mBadSrNick);
