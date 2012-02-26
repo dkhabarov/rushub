@@ -24,6 +24,10 @@
 
 #include "Protocol.h"
 
+#ifdef _WIN32
+	#pragma warning(disable:4127) // Disable "conditional expression is constant"
+#endif
+
 namespace server {
 
 
@@ -162,6 +166,41 @@ string & Parser::chunkString(unsigned int n) {
 		}
 	}
 	return mStrings[n];
+}
+
+
+
+void Parser::splitAll(size_t start, const char lim, size_t len, bool left) {
+	size_t i = 0;
+	if (len == 0) {
+		len = mLength;
+	}
+	while (true) {
+		if (left) {
+			i = mCommand.find_first_of(lim, start); 
+			if (i == mCommand.npos || i - start >= len) {
+				break;
+			}
+			pushChunk(start, i - start);
+			start = i + 1;
+		} else { 
+			i = mCommand.find_last_of(lim, len - 1);
+			if (i == mCommand.npos || i < start) {
+				break;
+			}
+			pushChunk(i + 1, len - i);
+			len = i - 1;
+		}
+	}
+	if (left) {
+		pushChunk(start, len - start);
+	} else {
+		if (i == mCommand.npos || i < start) {
+			pushChunk(start, len - start + 1);
+		} else {
+			pushChunk(start, len - i);
+		}
+	}
 }
 
 

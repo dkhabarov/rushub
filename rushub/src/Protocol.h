@@ -103,6 +103,7 @@ protected:
 	void setChunk(unsigned int n, size_t start, size_t len);
 	int pushChunk(size_t start, size_t len);
 
+	void splitAll(size_t start, const char lim, size_t len = 0, bool left = true);
 	bool splitOnTwo(size_t start, const string & lim, unsigned int cn1, unsigned int cn2, size_t len = 0, bool left = true);
 	bool splitOnTwo(size_t start, const char lim, unsigned int cn1, unsigned int cn2, size_t len = 0, bool left = true);
 

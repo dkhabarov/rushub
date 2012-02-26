@@ -211,7 +211,7 @@ bool AdcParser::parseHeader() {
 	switch (mCommand[0]) {
 
 		case HEADER_SYMBOL_BROADCAST: // Broadcast
-			// 'B' command_name ' ' base32_character{4}
+			// 'B' command_name ' ' base32_character{4} ...
 			mHeader = HEADER_BROADCAST;
 			if (mLength < 9 || mCommand[4] != ' ') {
 				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid source SID length"));
@@ -225,30 +225,30 @@ bool AdcParser::parseHeader() {
 			break;
 
 		case HEADER_SYMBOL_HUB: // Hub message
-			// 'H' command_name
+			// 'H' command_name ...
 			mHeader = HEADER_HUB;
 			mBodyPos = 4;
 			break;
 
 		case HEADER_SYMBOL_INFO: // Info message
-			// 'I' command_name
+			// 'I' command_name ...
 			mHeader = HEADER_INFO;
 			mBodyPos = 4;
 			break;
 
 		case HEADER_SYMBOL_CLIENT: // Client message
-			// 'C' command_name
+			// 'C' command_name ...
 			mHeader =  HEADER_CLIENT;
 			mBodyPos = 4;
 			break;
 
 		case HEADER_SYMBOL_DIRECT: // Direct message
-			// 'D' command_name ' ' base32_character{4} ' ' base32_character{4}
+			// 'D' command_name ' ' base32_character{4} ' ' base32_character{4} ...
 			mHeader = HEADER_DIRECT;
 			// Fallthrough
 
 		case HEADER_SYMBOL_ECHO: // Echo message
-			// 'E' command_name ' ' base32_character{4} ' ' base32_character{4}
+			// 'E' command_name ' ' base32_character{4} ' ' base32_character{4} ...
 			if (mHeader == HEADER_UNKNOWN) {
 				mHeader = HEADER_ECHO;
 			}
@@ -268,7 +268,7 @@ bool AdcParser::parseHeader() {
 			break;
 
 		case HEADER_SYMBOL_FEATURE: // Feature broadcast
-			// 'F' command_name ' ' base32_character{4} ' ' (('+'|'-') [A-Z] [A-Z0-9]{3})+
+			// 'F' command_name ' ' base32_character{4} ' ' (('+'|'-') [A-Z] [A-Z0-9]{3})+ ...
 			// example: FSCH AA7V +TCP4-NAT0 TOauto TRZSIJM5OH6FCOIC6Y6LR5FUA2TXG5N3ZS7P6M5DQ
 			mHeader = HEADER_FEATURE;
 			if (mLength < 15 || mCommand[4] != ' ' || mCommand[9] != ' ') {
@@ -287,7 +287,7 @@ bool AdcParser::parseHeader() {
 			break;
 
 		case HEADER_SYMBOL_UDP: // UDP message
-			// 'U' command_name ' ' base32_character+
+			// 'U' command_name ' ' base32_character+ ...
 			mHeader = HEADER_UDP;
 			if (mLength < 6 || mCommand[4] != ' ' || !isBase32(mCommand[5])) {
 				setError(ERROR_CODE_PROTOCOL_ERROR, STR_LEN("Invalid source CID length"));
@@ -378,76 +378,8 @@ bool AdcParser::splitChunks() {
 	mIsParsed = true;
 
 	pushChunk(0, mCommand.size()); // Zero part - always whole command
+	splitAll(mBodyPos + 1, ' ');
 
-	switch (mType) {
-
-		case ADC_TYPE_SUP : // This command has a different number parameters
-			break;
-
-		case ADC_TYPE_STA : // STA code [desc]
-			break;
-
-		case ADC_TYPE_INF : // INF sid params
-			break;
-			
-		case ADC_TYPE_MSG : // MSG sid [to_sid] text [me] [pm]
-			break;
-
-		case ADC_TYPE_SCH : // SCH sid params
-			break;
-
-		case ADC_TYPE_RES : // RES sid params
-			break;
-
-		case ADC_TYPE_CTM : // CTM sid params
-			break;
-
-		case ADC_TYPE_RCM : // RCM sid params
-			break;
-
-		case ADC_TYPE_GPA : // GPA data
-			break;
-
-		case ADC_TYPE_PAS : // PAS password
-			break;
-
-		case ADC_TYPE_QUI : // QUI sid
-			break;
-
-		case ADC_TYPE_GET : //
-			break;
-
-		case ADC_TYPE_GFI : //
-			break;
-
-		case ADC_TYPE_SND : //
-			break;
-
-		case ADC_TYPE_SID : //
-			break;
-
-		case ADC_TYPE_CMD : //
-			break;
-
-		case ADC_TYPE_NAT : //
-			break;
-
-		case ADC_TYPE_RNT : //
-			break;
-
-		case ADC_TYPE_PSR : //
-			break;
-
-		case ADC_TYPE_PUB : //
-			break;
-
-		case ADC_TYPE_UNKNOWN : //
-			break;
-
-		default :
-			break;
-
-	}
 	return mError;
 }
 

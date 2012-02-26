@@ -709,19 +709,8 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 		return -2;
 	}
 
-	// Check Syntax
-/*
-	if (adcParser->splitChunks()) {
-		// Protection from commands, not belonging to DC protocol
-		if (adcParser->mType != ADC_TYPE_UNKNOWN || mDcServer->mDcConfig.mDisableNoDCCmd) {
-			if (dcConn->log(LEVEL_DEBUG)) {
-				dcConn->logStream() << "Unknown cmd: " << adcParser->mType << endl;
-			}
-			dcConn->closeNice(9000, CLOSE_REASON_CMD_SYNTAX);
-			return -3;
-		}
-	}
-*/
+	// Split
+	adcParser->splitChunks();
 
 	// TODO: Check flood
 	return 0;
