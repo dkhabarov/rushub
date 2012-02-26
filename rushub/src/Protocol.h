@@ -77,12 +77,9 @@ public:
 	string mCommand; ///< Main string with cmd
 	int mType; ///< Type of cmd
 
-	typedef pair<size_t, size_t> tChunk; ///< Pair for chunk (begin, end)
-	vector<tChunk> mChunks; ///< List
-
 public:
 
-	Parser(int max);
+	Parser(unsigned int max = 0);
 	virtual ~Parser();
 
 	virtual int parse() = 0; ///< Parse
@@ -93,6 +90,8 @@ public:
 	string & chunkString(unsigned int n);
 
 	size_t getCommandLen();
+	size_t getChunks() const;
+	size_t getStartChunk(unsigned int n) const;
 
 protected:
 
@@ -101,23 +100,26 @@ protected:
 
 protected:
 
-	void setChunk(int n, size_t start, size_t len);
+	void setChunk(unsigned int n, size_t start, size_t len);
+	int pushChunk(size_t start, size_t len);
 
-	bool splitOnTwo(size_t start, const string & lim, int cn1, int cn2, size_t len = 0, bool left = true);
-	bool splitOnTwo(size_t start, const char lim, int cn1, int cn2, size_t len = 0, bool left = true);
+	bool splitOnTwo(size_t start, const string & lim, unsigned int cn1, unsigned int cn2, size_t len = 0, bool left = true);
+	bool splitOnTwo(size_t start, const char lim, unsigned int cn1, unsigned int cn2, size_t len = 0, bool left = true);
 
-	bool splitOnTwo(const string & lim, int chunk, int cn1, int cn2, bool left = true);
-	bool splitOnTwo(const char lim, int chunk, int cn1, int cn2, bool left = true);
+	bool splitOnTwo(const string & lim, unsigned int chunk, unsigned int cn1, unsigned int cn2, bool left = true);
+	bool splitOnTwo(const char lim, unsigned int chunk, unsigned int cn1, unsigned int cn2, bool left = true);
 
-	bool chunkRedRight(int chunk, size_t amount);
-
-	bool chunkRedLeft(int chunk, size_t amount);
+	bool chunkRedRight(unsigned int cn, size_t amount);
+	bool chunkRedLeft(unsigned int cn, size_t amount);
 
 private:
 
-	string * mStrings; ///< String array for chunks
+	typedef pair<size_t, size_t> tChunk; ///< Pair for chunk (begin, end)
+	vector<tChunk> mChunks; ///< List
+
+	vector<string> mStrings; ///< String array for chunks
+	unsigned int mMaxChunks; ///< Common (max) number of chunks (0 - resizeing)
 	unsigned long mStrMap; ///< Chunk already existed
-	int mMaxChunks; ///< Common (max) number of chunks
 
 }; // Parser
 

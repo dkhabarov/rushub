@@ -100,12 +100,12 @@ AdcCommand AdcCommands[] = {
 
 
 AdcParser::AdcParser() :
-	Parser(9), // Max number of chunks - 9 !!!
+	Parser(), // Parser with free number of chunks
 	mHeader(HEADER_UNKNOWN),
 	mErrorCode(ERROR_CODE_GENERIC),
 	mBodyPos(0),
 	mError(false)
-{ 
+{
 	setClassName("AdcParser");
 }
 
@@ -377,7 +377,7 @@ bool AdcParser::splitChunks() {
 	}
 	mIsParsed = true;
 
-	//setChunk(0, 0, mCommand.size()); // Zero part - always whole command
+	pushChunk(0, mCommand.size()); // Zero part - always whole command
 
 	switch (mType) {
 
@@ -385,37 +385,12 @@ bool AdcParser::splitChunks() {
 			break;
 
 		case ADC_TYPE_STA : // STA code [desc]
-			if (!splitOnTwo(mBodyPos, ' ', CHUNK_ADC_STA_CMD, CHUNK_ADC_STA_CODE)) {
-				mError = true;
-			}
-			if (splitOnTwo(' ', CHUNK_ADC_STA_CODE, CHUNK_ADC_STA_CODE, CHUNK_ADC_STA_DESC)) {
-				splitOnTwo(' ', CHUNK_ADC_STA_DESC, CHUNK_ADC_STA_DESC, CHUNK_ADC_STA_OTHER);
-			}
 			break;
 
 		case ADC_TYPE_INF : // INF sid params
-			if (!splitOnTwo(mBodyPos, ' ', CHUNK_ADC_INF_CMD, CHUNK_ADC_INF_OTHER)) {
-				mError = true;
-			}
 			break;
 			
 		case ADC_TYPE_MSG : // MSG sid [to_sid] text [me] [pm]
-			if (!splitOnTwo(mBodyPos, ' ', CHUNK_ADC_MSG_CMD, CHUNK_ADC_MSG_TEXT)) {
-				mError = true;
-			}
-			if (!splitOnTwo(" ME", CHUNK_ADC_MSG_TEXT, CHUNK_ADC_MSG_TEXT, CHUNK_ADC_MSG_ME)) {
-				if (!splitOnTwo(" PM", CHUNK_ADC_MSG_TEXT, CHUNK_ADC_MSG_TEXT, CHUNK_ADC_MSG_PM)) {
-					splitOnTwo(' ', CHUNK_ADC_MSG_TEXT, CHUNK_ADC_MSG_TEXT, CHUNK_ADC_MSG_OTHER);
-				} else {
-					splitOnTwo(' ', CHUNK_ADC_MSG_PM, CHUNK_ADC_MSG_PM, CHUNK_ADC_MSG_OTHER);
-				}
-			} else {
-				if (!splitOnTwo(" PM", CHUNK_ADC_MSG_ME, CHUNK_ADC_MSG_ME, CHUNK_ADC_MSG_PM)) {
-					splitOnTwo(' ', CHUNK_ADC_MSG_ME, CHUNK_ADC_MSG_ME, CHUNK_ADC_MSG_OTHER);
-				} else {
-					splitOnTwo(' ', CHUNK_ADC_MSG_PM, CHUNK_ADC_MSG_PM, CHUNK_ADC_MSG_OTHER);
-				}
-			}
 			break;
 
 		case ADC_TYPE_SCH : // SCH sid params

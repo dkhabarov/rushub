@@ -766,7 +766,7 @@ int NmdcProtocol::eventSr(NmdcParser * dcparser, DcConn * dcConn) {
 		(dcUser->mDcConn->getSrCounter() <= unsigned(mDcServer->mDcConfig.mMaxPassiveRes))
 	)) {
 		dcUser->mDcConn->increaseSrCounter();
-		string str(dcparser->mCommand, 0, dcparser->mChunks[CHUNK_SR_TO].first - 1); /** Remove nick on the end of cmd */
+		string str(dcparser->mCommand, 0, dcparser->getStartChunk(CHUNK_SR_TO) - 1); /** Remove nick on the end of cmd */
 		dcUser->mDcConn->send(str, true, false);
 	}
 	return 0;

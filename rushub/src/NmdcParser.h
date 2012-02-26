@@ -75,11 +75,6 @@ typedef enum { /** Types of the commands */
 	Now max number of chunks = 9 !
 */
 
-/** A number of the chunks for simple commands (without parameter) */
-enum {
-	CHUNK_0_ALL,
-};
-
 /** A number of the chunks for commands with one parameter.
 		$Key [key],
 		$ValidateNick [nick],
@@ -89,16 +84,14 @@ enum {
 		$Kick [nick]
 */
 enum {
-	CHUNK_1_ALL,
-	CHUNK_1_PARAM,
+	CHUNK_1_PARAM = 1
 };
 
 /** A number of the chunks for partition chat message
 		<[nick]> [msg]
 */
 enum {
-	CHUNK_CH_ALL,
-	CHUNK_CH_NICK,
+	CHUNK_CH_NICK = 1,
 	CHUNK_CH_MSG,
 };
 
@@ -106,8 +99,7 @@ enum {
 		$GetINFO [remote_nick] [nick]
 */
 enum {
-	CHUNK_GI_ALL,
-	CHUNK_GI_OTHER,
+	CHUNK_GI_OTHER = 1,
 	CHUNK_GI_NICK,
 };
 
@@ -115,8 +107,7 @@ enum {
 		$RevConnectToMe [nick] [remote_nick]
 */
 enum {
-	CHUNK_RC_ALL,
-	CHUNK_RC_NICK,
+	CHUNK_RC_NICK = 1,
 	CHUNK_RC_OTHER,
 };
 
@@ -124,8 +115,7 @@ enum {
 		$To: [remote_nick] From: [nick] $<[[nick]> [msg]]
 */
 enum {
-	CHUNK_PM_ALL,
-	CHUNK_PM_TO,
+	CHUNK_PM_TO = 1,
 	CHUNK_PM_FROM,
 	CHUNK_PM_CHMSG,
 	CHUNK_PM_NICK,
@@ -136,8 +126,7 @@ enum {
 		$MyINFO $ALL [nick] [[desc]$ $[speed]$[email]$[share]$]
 */
 enum {
-	CHUNK_MI_ALL,
-	CHUNK_MI_DEST,
+	CHUNK_MI_DEST = 1,
 	CHUNK_MI_NICK,
 	CHUNK_MI_INFO,
 	CHUNK_MI_DESC,
@@ -150,8 +139,7 @@ enum {
 		$ConnectToMe [remote_nick] [ip]:[port]
 */
 enum {
-	CHUNK_CM_ALL,
-	CHUNK_CM_NICK,
+	CHUNK_CM_NICK = 1,
 	CHUNK_CM_ACTIVE,
 	CHUNK_CM_IP,
 	CHUNK_CM_PORT,
@@ -161,8 +149,7 @@ enum {
 		$OpForceMove $Who:[remote_nick]$Where:[address]$Msg:[reason]
 */
 enum {
-	CHUNK_FM_ALL,
-	CHUNK_FM_NICK,
+	CHUNK_FM_NICK = 1,
 	CHUNK_FM_DEST,
 	CHUNK_FM_REASON,
 };
@@ -171,8 +158,7 @@ enum {
 		$Search [[ip]:[port]] [[sizerestricted?isminimumsize?size?datatype]?[searchpattern]]
 */
 enum {
-	CHUNK_AS_ALL,
-	CHUNK_AS_ADDR,
+	CHUNK_AS_ADDR = 1,
 	CHUNK_AS_IP,
 	CHUNK_AS_PORT,
 	CHUNK_AS_QUERY,
@@ -184,8 +170,7 @@ enum {
 		$Search Hub:[nick] [[sizerestricted?isminimumsize?size?datatype]?[searchpattern]]
 */
 enum {
-	CHUNK_PS_ALL,
-	CHUNK_PS_NICK,
+	CHUNK_PS_NICK = 1,
 	CHUNK_PS_QUERY,
 	CHUNK_PS_SEARCHLIMITS,
 	CHUNK_PS_SEARCHPATTERN,
@@ -195,8 +180,7 @@ enum {
 		$SR [nick] [file/path][0x05][filesize] [freeslots]/[totalslots][0x05][hubname] ([hubhost][:[hubport]])[0x05][searching_nick]
 */
 enum {
-	CHUNK_SR_ALL,
-	CHUNK_SR_FROM,
+	CHUNK_SR_FROM = 1,
 	CHUNK_SR_PATH,
 	CHUNK_SR_SIZE,
 	CHUNK_SR_SLOTS,
@@ -210,8 +194,7 @@ enum {
 		$MCTo: [remote_nick] $[nick] [msg]
 */
 enum {
-	CHUNK_MC_ALL,
-	CHUNK_MC_TO,
+	CHUNK_MC_TO = 1,
 	CHUNK_MC_FROM,
 	CHUNK_MC_MSG,
 };
