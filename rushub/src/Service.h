@@ -81,13 +81,17 @@ public:
 	static void WINAPI ctrlHandler(DWORD dwCtrl);
 	static void WINAPI serviceMain(DWORD dwArgc, LPTSTR * lpszArgv);
 
+	static int cli(int argc, char * argv[], string & configFile);
+	static int start();
+	static int stop();
+
+private:
+
 	static int installService(char * name = NULL, const char * configFile = NULL);
 	static int uninstallService(char * name = NULL);
 	static int serviceStop(char * name = NULL);
 	static int serviceStart(char * name = NULL);
-	static int cli(int argc, char * argv[], string & configFile);
-	static int start();
-	static int stop();
+	static void printHelp();
 
 }; // Service
 
