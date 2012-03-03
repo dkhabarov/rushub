@@ -33,26 +33,26 @@ TEST(TestTigerHash_1) {
 
 	string pid("BZUJ2ZJWXMYHCCCYB5OGRLWPAUQRWTTTBSSGTKY"); // end with: A, I, Q, Y (other equal these)
 
-	uint8_t buf[24];
+	uint8_t buf[TigerHash::BYTES];
 	Encoder::fromBase32(pid.c_str(), buf, sizeof(buf));
 
 	TigerHash th;
 	th.update((uint8_t *) buf, sizeof(buf));
 
-	CHECK_EQUAL("QEVJTDTMHUVWRZWWAD7YNVYK2C2SNHLWFRJMHGY", Encoder::toBase32(th.finalize(), 24));
+	CHECK_EQUAL("QEVJTDTMHUVWRZWWAD7YNVYK2C2SNHLWFRJMHGY", Encoder::toBase32(th.finalize(), TigerHash::BYTES));
 }
 
 TEST(TestTigerHash_2) {
 
 	string pid("BZUJ2ZJWXMYHCCCYB5OGRLWPAUQRWTTTBSSGTKZ");
 
-	uint8_t buf[24];
+	uint8_t buf[TigerHash::BYTES];
 	Encoder::fromBase32(pid.c_str(), buf, sizeof(buf));
 
 	TigerHash th;
 	th.update((uint8_t *) buf, sizeof(buf));
 
-	CHECK_EQUAL("QEVJTDTMHUVWRZWWAD7YNVYK2C2SNHLWFRJMHGY", Encoder::toBase32(th.finalize(), 24));
+	CHECK_EQUAL("QEVJTDTMHUVWRZWWAD7YNVYK2C2SNHLWFRJMHGY", Encoder::toBase32(th.finalize(), TigerHash::BYTES));
 }
 
 }; // SUITE(TestTigerHash)
