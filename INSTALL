@@ -137,13 +137,13 @@ Step 2
 	Download source codes from SVN:
 
 		cd ~
-		svn co https://rushub.svn.sourceforge.net/svnroot/rushub/trunk/ rushub
+		svn co https://rushub.svn.sourceforge.net/svnroot/rushub/tags/last rushub
 
 Step 3
 
 	Go into the folder with tinyxml
 
-		cd ~/rushub/trunk/rushub/src/tinyxml
+		cd ~/rushub/tags/last/rushub/src/tinyxml
 
 	Build:
 
@@ -159,7 +159,7 @@ Step 4
 
 	Go into the folder with source codes of the Lua plugin:
 
-		cd ~/rushub/trunk/lua_plugin/src/
+		cd ~/rushub/tags/last/lua_plugin/src/
 
 	Build:
 
@@ -169,7 +169,7 @@ Step 5
 
 	Go into the folder with source codes of a hub
 
-		cd ~/rushub/trunk/rushub/src
+		cd ~/rushub/tags/last/rushub/src
 	
 	Build:
 
@@ -177,11 +177,11 @@ Step 5
 
 Step 6, completion! 
 
-	Go into the folder /rushub/trunk/rushub/src
+	Go into the folder /rushub/tags/last/rushub/src
 
 	Copy binary file "RusHub" into the folder ~/rushub/.
 
-	Go into the folder /rushub/trunk/lua_plugin/src and find file "lua.so"
+	Go into the folder /rushub/tags/last/lua_plugin/src and find file "lua.so"
 	and then it copy into the folder ~/rushub/plugins. 
 
 	Restart hub - it is ready.

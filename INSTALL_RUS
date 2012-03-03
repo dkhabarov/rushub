@@ -143,7 +143,7 @@ sudo service rushub start
 
 	Идём в дерикторию с tinyxml
 
-		cd ~/rushub/trunk/rushub/src/tinyxml
+		cd ~/rushub/tags/last/rushub/src/tinyxml
 
 	Собираем:
 
@@ -159,7 +159,7 @@ sudo service rushub start
 
 	Идём в дерикторию с исходниками Lua плагина:
 
-		cd ~/rushub/trunk/lua_plugin/src/
+		cd ~/rushub/tags/last/lua_plugin/src/
 
 	Собираем:
 
@@ -169,7 +169,7 @@ sudo service rushub start
 
 	Переходим в дерикторию с исходниками хаба
 
-		cd ~/rushub/trunk/rushub/src
+		cd ~/rushub/tags/last/rushub/src
 
 	Собираем:
 
@@ -177,11 +177,11 @@ sudo service rushub start
 
 Шаг 6, завершение!
 
-	Идём в дерикторию ~/rushub/trunk/rushub/src
+	Идём в дерикторию ~/rushub/tags/last/rushub/src
 
 	В ней должен появится бинарник RusHub, переносим его в ~/rushub/.
 
-	Идём в дерикторию ~/rushub/trunk/lua_plugin/src и находим файл 'lua.so' 
+	Идём в дерикторию ~/rushub/tags/last/lua_plugin/src и находим файл 'lua.so' 
 	и после чего копируем его в дерикторию ~/rushub/plugins.
 
 	Перезапускаем хаб - готово.
