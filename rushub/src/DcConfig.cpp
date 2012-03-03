@@ -38,6 +38,14 @@ namespace dcserver {
 DcConfig::DcConfig(ConfigLoader * configLoader, Server * server, const string & cfgFile) : 
 	mConfigLoader(configLoader)
 {
+	// for antiflood check!
+	for (int i = 0; i <= NMDC_TYPE_UNKNOWN; ++i) { // PROTOCOL NMDC !
+		mFloodCount[i] = 0;
+		mFloodCount2[i] = 0;
+		mFloodTime[i] = 0;
+		mFloodTime2[i] = 0;
+	}
+
 	mConfigStore.mPath = cfgFile;
 	mConfigStore.mName.clear();
 
