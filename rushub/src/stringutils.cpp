@@ -49,68 +49,6 @@ static const int cp1251ToUtf8Table[128] = {
 
 
 
-/** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & stringReplace(const string & str, const string & varname, string & dest, const string & by, bool b, bool first) {
-	dest = str;
-	if (!b) {
-		string search(STR_LEN("%["));
-		search.append(varname);
-		search.append(STR_LEN("]"));
-		size_t pos = dest.find(search);
-		if (first != true || pos == 0) {
-			while (pos != dest.npos) {
-				dest.replace(pos, search.size(), by);
-				pos = dest.find(search, pos + by.size());
-			}
-		}
-	} else {
-		size_t pos = dest.find(varname);
-		if (first != true || pos == 0) {
-			while (pos != dest.npos) {
-				dest.replace(pos, varname.size(), by);
-				pos = dest.find(varname, pos + by.size());
-			}
-		}
-	}
-	return dest;
-}
-
-
-
-/** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & stringReplace(const string & str, const string & varname, string & dest, int by, bool b, bool first) {
-	ostringstream os;
-	os << by;
-	return stringReplace(str, varname, dest, os.str(), b, first);
-}
-
-
-
-/** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & stringReplace(const string & str, const string & varname, string & dest, double by, bool b, bool first) {
-	ostringstream os;
-	os << by;
-	return stringReplace(str, varname, dest, os.str(), b, first);
-}
-
-
-
-/** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & stringReplace(const string & str, const string & varname, string & dest, long by, bool b, bool first) {
-	ostringstream os;
-	os << by;
-	return stringReplace(str, varname, dest, os.str(), b, first);
-}
-
-
-
-/** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & stringReplace(const string & str, const string & varname, string & dest, int64_t by, bool b, bool first) {
-	return stringReplace(str, varname, dest, int64ToString(by), b, first);
-}
-
-
-
 /** Typecasting int64_t to string */
 string int64ToString(int64_t const & value) {
 	char buf[32] = { '\0' };
