@@ -59,6 +59,37 @@ public:
 	PythonPlugin();
 	virtual ~PythonPlugin();
 
+	virtual void onLoad(DcServerBase *); ///< Actions when loading plugin
+	bool regAll(DcServerBase *); ///< Registration all events for this plugin
+
+	// events
+	virtual int onUserConnected(DcUserBase *);
+	virtual int onUserDisconnected(DcUserBase *);
+	virtual int onUserEnter(DcUserBase *);
+	virtual int onUserExit(DcUserBase *);
+	virtual int onSupports(DcUserBase *);
+	virtual int onKey(DcUserBase *);
+	virtual int onValidateNick(DcUserBase *);
+	virtual int onMyPass(DcUserBase *);
+	virtual int onVersion(DcUserBase *);
+	virtual int onGetNickList(DcUserBase *);
+	virtual int onMyINFO(DcUserBase *);
+	virtual int onChat(DcUserBase *);
+	virtual int onTo(DcUserBase *);
+	virtual int onConnectToMe(DcUserBase *);
+	virtual int onRevConnectToMe(DcUserBase *);
+	virtual int onSearch(DcUserBase *);
+	virtual int onSR(DcUserBase *);
+	virtual int onKick(DcUserBase *);
+	virtual int onOpForceMove(DcUserBase *);
+	virtual int onGetINFO(DcUserBase *);
+	virtual int onMCTo(DcUserBase *);
+	virtual int onTimer();
+	virtual int onAny(DcUserBase *, int type);
+	virtual int onUnknown(DcUserBase *);
+	virtual int onFlood(DcUserBase *, int type1, int type2);
+	virtual int onWebData(WebUserBase *);
+
 }; // class PythonPlugin
 
 #endif // PYTHON_PLUGIN_H
