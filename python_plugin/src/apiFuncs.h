@@ -22,6 +22,15 @@
 
 #include "Plugin.h" // ::dcserver
 
+extern "C" {
+	#include <stdio.h>
+	#include <stdlib.h>
+	#ifdef _WIN32
+		#include "include/Python.h"
+	#else
+		#include <Python.h>
+	#endif
+}
 
 using namespace ::dcserver;
 

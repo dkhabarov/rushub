@@ -33,6 +33,7 @@
 
 #ifdef _WIN32
 	#pragma comment(lib, "tinyxml.lib")
+	#pragma comment(lib, "python3.lib")
 #endif // _WIN32
 
 using namespace ::utils;
