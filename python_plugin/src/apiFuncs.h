@@ -26,7 +26,7 @@ extern "C" {
 	#include <stdio.h>
 	#include <stdlib.h>
 	#ifdef _WIN32
-		#include "include/Python.h"
+		#include "python/Python.h"
 	#else
 		#include <Python.h>
 	#endif
