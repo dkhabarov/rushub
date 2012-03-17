@@ -416,7 +416,7 @@ void NmdcParser::parseDesc(DcUser * dcUser, const string & description) {
 
 	dcUser->getParamForce(USER_PARAM_DESC)->setString(desc);
 
-	// TODO: optimization check old tag
+	// TODO optimization check old tag
 	parseTag(dcUser, tag);
 }
 

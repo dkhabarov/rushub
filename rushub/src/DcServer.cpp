@@ -479,7 +479,7 @@ int DcServer::onNewConn(Conn * conn) {
 	int ret = mIpEnterFlood.check(dcConn->getIp(), mTime);
 	if (ret) {
 		if (ret == 1 && !mDcConfig.mAdcOn) {
-			// TODO ADC
+			// TODO ADC (FLOOD_IP_ENTRY)
 			sendToUser(dcConn->mDcUser, mDcLang.mFloodReEnter, mDcConfig.mHubBot.c_str());
 			dcConn->closeNice(9000, CLOSE_REASON_FLOOD_IP_ENTRY);
 		} else {
@@ -573,19 +573,18 @@ bool DcServer::minDelay(Time & time, double sec) {
 
 /// Antiflood function
 bool DcServer::antiFlood(unsigned & count, Time & time, const unsigned & countLimit, const double & timeLimit) {
-	if (!timeLimit) {
-		return false;
-	}
 	bool ret = false;
-	if (::fabs(double(mTime - time)) < timeLimit) {
-		if (countLimit < ++count) {
-			ret = true;
-		} else {
-			return false;
+	if (timeLimit) {
+		if (::fabs(double(mTime - time)) < timeLimit) {
+			if (countLimit < ++count) {
+				ret = true;
+			} else {
+				return false;
+			}
 		}
+		time = mTime;
+		count = 0;
 	}
-	time = mTime;
-	count = 0;
 	return ret;
 }
 
@@ -993,7 +992,7 @@ DcUser * DcServer::getDcUser(const char * uid) {
 
 
 
-// TODO: return user with conn only?
+// TODO return user with conn only?
 DcUserBase * DcServer::getDcUserBase(const char * uid) {
 	DcUser * dcUser = getDcUser(uid);
 	return (dcUser != NULL && dcUser->mDcConn != NULL) ? static_cast<DcUserBase *> (dcUser) : NULL;
@@ -1002,7 +1001,7 @@ DcUserBase * DcServer::getDcUserBase(const char * uid) {
 
 
 const vector<DcUserBase *> & DcServer::getDcUserBaseByIp(const char * ip) {
-	// TODO: add bots in list
+	// TODO add bots in list (getDcUserBaseByIp)
 	mIpUserList.clear();
 	for (DcIpList::iterator it = mIpListConn->begin(ip); it != mIpListConn->end(); ++it) {
 		DcConn * dcConn = static_cast<DcConn *> (*it);
@@ -1231,7 +1230,7 @@ bool DcServer::setConfig(const string & name, const string & value) {
 		// Protocol dependence
 		if (mDcConfig.mAdcOn) { // ADC
 
-			// TODO
+			// TODO for ADC
 
 		} else { // NMDC
 			string msg;

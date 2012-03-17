@@ -840,11 +840,11 @@ string * Conn::getParserCommandPtr() {
 
 Parser * Conn::createParser() {
 	if (!mProtocol) {
-		// ToDo remove!
+		// TODO remove!
 		if (!mCreatorConnFactory) {
 			return NULL;
 		}
-		// ToDo remove!
+		// TODO remove!
 		mProtocol = mCreatorConnFactory->getProtocol();
 	}
 	return mProtocol->createParser();
@@ -1211,7 +1211,7 @@ int ConnFactory::onNewConn(Conn * conn) {
 	return mServer->onNewConn(conn);
 }
 
-// ToDo remove!
+// TODO remove!
 Protocol * ConnFactory::getProtocol() {
 	return mProtocol;
 }

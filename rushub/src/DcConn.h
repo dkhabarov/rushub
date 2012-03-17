@@ -132,20 +132,19 @@ public:
 	bool mNickListInProgress;  ///< True while sending first nicklist
 	DcUser * mDcUser;          ///< User object
 
-	/// Timers struct
-	struct Timers {
-
+	/// Atniflood struct
+	struct Atniflood {
 		Time mTime[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !
+		Time mTime2[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !
 		unsigned mCount[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !
+		unsigned mCount2[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !
 
-		Timers() {
+		Atniflood() {
 			for (int i = 0; i <= NMDC_TYPE_UNKNOWN; ++i) { // PROTOCOL NMDC !
-				mCount[i] = 0;
+				mCount[i] = mCount2[i] = 0;
 			}
 		}
-
-	} mTimes1, mTimes2;
-
+	} mAtniflood;
 
 public:
 

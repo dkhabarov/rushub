@@ -39,6 +39,42 @@ DcProtocol::~DcProtocol() {
 
 
 
+void DcProtocol::addToOps(DcUser *) {
+	// Not implemented
+}
+
+
+
+void DcProtocol::delFromOps(DcUser *) {
+	// Not implemented
+}
+
+
+
+void DcProtocol::addToIpList(DcUser *) {
+	// Not implemented
+}
+
+
+
+void DcProtocol::delFromIpList(DcUser *) {
+	// Not implemented
+}
+
+
+
+void DcProtocol::addToHide(DcUser *) {
+	// Not implemented
+}
+
+
+
+void DcProtocol::delFromHide(DcUser *) {
+	// Not implemented
+}
+
+
+
 // return true if use cache
 const string & DcProtocol::getFirstMsg(bool & useCache) {
 

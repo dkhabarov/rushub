@@ -1122,7 +1122,7 @@ int moveDownScript(lua_State * L) {
 
 
 /// SetCmd(sData)
-// TODO: SetCmd(UID, sData)
+// TODO deprecated? SetCmd(UID, sData)
 int setCmd(lua_State * L) {
 	if (!LuaUtils::checkCount(L, 1)) {
 		return 0;

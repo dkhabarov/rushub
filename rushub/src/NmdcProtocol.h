@@ -100,12 +100,15 @@ public:
 	static void myInfoList(string & list, UserBase * userBase);
 	static void ipList(string & list, UserBase * userBase);
 
-	void addToOps(DcUser *);
-	void delFromOps(DcUser *);
-	void addToIpList(DcUser *);
-	void delFromIpList(DcUser *);
-	void addToHide(DcUser *);
-	void delFromHide(DcUser *);
+	virtual void parseInfo(DcUser *, const string & info);
+	virtual void formingInfo(DcUser *, string & info);
+
+	virtual void addToOps(DcUser *);
+	virtual void delFromOps(DcUser *);
+	virtual void addToIpList(DcUser *);
+	virtual void delFromIpList(DcUser *);
+	virtual void addToHide(DcUser *);
+	virtual void delFromHide(DcUser *);
 
 protected:
 

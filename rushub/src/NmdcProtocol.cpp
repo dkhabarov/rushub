@@ -1225,11 +1225,11 @@ int NmdcProtocol::checkCommand(NmdcParser * dcParser, DcConn * dcConn) {
 
 
 bool NmdcProtocol::antiflood(DcConn * dcConn, unsigned int type) {
-	if (mDcServer->antiFlood(dcConn->mTimes1.mCount[type], dcConn->mTimes1.mTime[type],
+	if (mDcServer->antiFlood(dcConn->mAtniflood.mCount[type], dcConn->mAtniflood.mTime[type],
 		mDcServer->mDcConfig.mFloodCount[type], mDcServer->mDcConfig.mFloodTime[type])
 	) {
 		#ifndef WITHOUT_PLUGINS
-		if (!mDcServer->mCalls.mOnFlood.callAll(dcConn->mDcUser, (int) type, 1))
+		if (!mDcServer->mCalls.mOnFlood.callAll(dcConn->mDcUser, static_cast<int> (type), 1))
 		#endif
 		{
 			mDcServer->sendToUser(dcConn->mDcUser, mDcServer->mDcLang.mFlood[type], mDcServer->mDcConfig.mHubBot.c_str());
@@ -1237,11 +1237,11 @@ bool NmdcProtocol::antiflood(DcConn * dcConn, unsigned int type) {
 			return true;
 		}
 	}
-	if (mDcServer->antiFlood(dcConn->mTimes2.mCount[type], dcConn->mTimes2.mTime[type],
+	if (mDcServer->antiFlood(dcConn->mAtniflood.mCount2[type], dcConn->mAtniflood.mTime2[type],
 		mDcServer->mDcConfig.mFloodCount2[type], mDcServer->mDcConfig.mFloodTime2[type])
 	) {
 		#ifndef WITHOUT_PLUGINS
-		if (!mDcServer->mCalls.mOnFlood.callAll(dcConn->mDcUser, (int) type, 2))
+		if (!mDcServer->mCalls.mOnFlood.callAll(dcConn->mDcUser, static_cast<int> (type), 2))
 		#endif
 		{
 			mDcServer->sendToUser(dcConn->mDcUser, mDcServer->mDcLang.mFlood[type], mDcServer->mDcConfig.mHubBot.c_str());
@@ -1251,6 +1251,7 @@ bool NmdcProtocol::antiflood(DcConn * dcConn, unsigned int type) {
 	}
 	return false;
 }
+
 
 
 bool NmdcProtocol::validateUser(DcConn * dcConn, const string & nick) {
@@ -1332,6 +1333,18 @@ void NmdcProtocol::ipList(string & list, UserBase * userBase) {
 		list.append(userBase->getIp());
 		list.append(STR_LEN("$$"));
 	}
+}
+
+
+
+void NmdcProtocol::parseInfo(DcUser * dcUser, const string & info) {
+	NmdcParser::parseInfo(dcUser, info);
+}
+
+
+
+void NmdcProtocol::formingInfo(DcUser * dcUser, string & info) {
+	NmdcParser::formingInfo(dcUser, info);
 }
 
 

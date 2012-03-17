@@ -255,7 +255,7 @@ protected:
 	void onNewUdpData(Conn *, Parser *);
 
 	/// Antiflood function
-	bool antiFlood(unsigned & iCount, Time &, const unsigned & countLimit, const double & timeLimit);
+	bool antiFlood(unsigned & count, Time &, const unsigned & countLimit, const double & timeLimit);
 
 	/// Check nick used
 	bool checkNick(DcConn *);

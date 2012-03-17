@@ -222,14 +222,14 @@ int AdcProtocol::eventSup(AdcParser *, DcConn * dcConn) {
 
 	if (dcConn->isState(STATE_NORMAL)) {
 
-		// TODO: save features
+		// TODO save features
 		return 0;
 
 	} else if (!checkState(dcConn, "SUP", STATE_PROTOCOL)) {
 		return -1;
 	}
 
-	// TODO: check existing BASE feature!
+	// TODO check existing BASE feature!
 	// "Failed to negotiate base protocol"
 
 	dcConn->reserve(29); // 18 + 1 + 5 + 4 + 1
@@ -253,7 +253,7 @@ int AdcProtocol::eventSup(AdcParser *, DcConn * dcConn) {
 		cp1251ToUtf8(buff, cache, escaper);
 	}
 
-	// TODO: optimization of transformation
+	// TODO optimization of transformation
 	string hubName, topic;
 	cp1251ToUtf8(mDcServer->mDcConfig.mHubName, hubName, escaper);
 	cp1251ToUtf8(mDcServer->mDcConfig.mTopic, topic, escaper);
@@ -302,11 +302,11 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 	
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO: PD param in scripts!
+		// TODO PD param in scripts!
 		mDcServer->mCalls.mOnMyINFO.callAll(dcConn->mDcUser);
 	#endif
 
-	// TODO: change to normal state
+	// TODO change to normal state
 	if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 			dcConn->send(dcConn->mDcUser->getInfo(), true); // Send to self only
@@ -326,7 +326,7 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 		#ifndef WITHOUT_PLUGINS
 			if (mDcServer->mCalls.mOnValidateNick.callAll(dcConn->mDcUser)) {
 
-				// TODO: GPA random CID
+				// TODO GPA random CID
 				dcConn->send("IGPA QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ", 44, true, true); // We are sending the query for reception of the password
 				return -4;
 			}
@@ -365,7 +365,7 @@ int AdcProtocol::eventMsg(AdcParser * adcParser, DcConn * dcConn) {
 		}
 	#endif
 
-	/** Sending message */
+	// Sending message
 	if (adcParser->getHeader() == HEADER_BROADCAST) {
 		// TODO sendMode
 		mDcServer->mChatList.sendToAllAdc(adcParser->mCommand, false);
@@ -431,7 +431,7 @@ int AdcProtocol::eventRcm(AdcParser *, DcConn * dcConn) {
 int AdcProtocol::eventGpa(AdcParser *, DcConn *) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		// TODO call plugins for ADC event GPA
 	#endif
 
 	return 0;
@@ -460,7 +460,7 @@ int AdcProtocol::eventPas(AdcParser *, DcConn * dcConn) {
 int AdcProtocol::eventQui(AdcParser *, DcConn *) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		// TODO call plugins for ADC event QUI
 	#endif
 
 	return 0;
@@ -471,7 +471,7 @@ int AdcProtocol::eventQui(AdcParser *, DcConn *) {
 int AdcProtocol::eventGet(AdcParser *, DcConn *) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		// TODO call plugins for ADC event GET
 	#endif
 
 	return 0;
@@ -482,7 +482,7 @@ int AdcProtocol::eventGet(AdcParser *, DcConn *) {
 int AdcProtocol::eventGfi(AdcParser *, DcConn *) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		// TODO call plugins for ADC event GFI
 	#endif
 
 	return 0;
@@ -493,7 +493,7 @@ int AdcProtocol::eventGfi(AdcParser *, DcConn *) {
 int AdcProtocol::eventSnd(AdcParser *, DcConn *) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		// TODO call plugins for ADC event SND
 	#endif
 
 	return 0;
@@ -504,7 +504,7 @@ int AdcProtocol::eventSnd(AdcParser *, DcConn *) {
 int AdcProtocol::eventSid(AdcParser *, DcConn *) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		// TODO call plugins for ADC event SID
 	#endif
 
 	return 0;
@@ -515,7 +515,7 @@ int AdcProtocol::eventSid(AdcParser *, DcConn *) {
 int AdcProtocol::eventCmd(AdcParser *, DcConn *) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		// TODO call plugins for ADC event CMD
 	#endif
 
 	return 0;
@@ -526,7 +526,7 @@ int AdcProtocol::eventCmd(AdcParser *, DcConn *) {
 int AdcProtocol::eventNat(AdcParser *, DcConn *) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		// TODO call plugins for ADC event NAT
 	#endif
 
 	return 0;
@@ -537,7 +537,7 @@ int AdcProtocol::eventNat(AdcParser *, DcConn *) {
 int AdcProtocol::eventRnt(AdcParser *, DcConn *) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		// TODO call plugins for ADC event RNT
 	#endif
 
 	return 0;
@@ -548,7 +548,7 @@ int AdcProtocol::eventRnt(AdcParser *, DcConn *) {
 int AdcProtocol::eventPsr(AdcParser *, DcConn *) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		// TODO call plugins for ADC event PSR
 	#endif
 
 	return 0;
@@ -559,7 +559,7 @@ int AdcProtocol::eventPsr(AdcParser *, DcConn *) {
 int AdcProtocol::eventPub(AdcParser *, DcConn *) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		// TODO call plugins for ADC event PUB
 	#endif
 
 	return 0;
@@ -651,7 +651,7 @@ void AdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string & 
 
 void AdcProtocol::forceMove(DcConn * /*dcConn*/, const char * /*address*/, const char * /*reason*/ /*= NULL*/) {
 
-	// TODO
+	// TODO impl
 
 }
 
@@ -712,7 +712,7 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 	// Split
 	adcParser->splitChunks();
 
-	// TODO: Check flood
+	// TODO Check flood
 	return 0;
 }
 
@@ -740,6 +740,18 @@ bool AdcProtocol::verifyCid(DcUser * dcUser) {
 	dcUser->removeParam("PD");
 
 	return paramId->getString() == cid;
+}
+
+
+
+void AdcProtocol::parseInfo(DcUser * dcUser, const string & info) {
+	AdcParser::parseInfo(dcUser, info);
+}
+
+
+
+void AdcProtocol::formingInfo(DcUser * dcUser, string & info) {
+	AdcParser::formingInfo(dcUser, info);
 }
 
 

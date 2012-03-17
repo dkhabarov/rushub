@@ -244,7 +244,7 @@ void DcConn::onOk(bool ok) {
 
 bool DcConn::parseCommand(const char * cmd) {
 
-	// TODO: set command pointer
+	// TODO deprecated? Set command pointer
 	if (getCommandPtr() == NULL || mParser == NULL) {
 		return false;
 	}

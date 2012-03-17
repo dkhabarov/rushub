@@ -30,6 +30,7 @@ using namespace ::std;
 namespace dcserver {
 
 class DcConn;
+class DcUser;
 class DcServer;
 
 namespace protocol {
@@ -68,6 +69,16 @@ public:
 
 	virtual void forceMove(DcConn * dcConn, const char * address, const char * reason = NULL) = 0;
 	virtual int sendNickList(DcConn *) = 0;
+
+	virtual void parseInfo(DcUser *, const string & info) = 0;
+	virtual void formingInfo(DcUser *, string & info) = 0;
+
+	virtual void addToOps(DcUser *);
+	virtual void delFromOps(DcUser *);
+	virtual void addToIpList(DcUser *);
+	virtual void delFromIpList(DcUser *);
+	virtual void addToHide(DcUser *);
+	virtual void delFromHide(DcUser *);
 
 protected:
 
