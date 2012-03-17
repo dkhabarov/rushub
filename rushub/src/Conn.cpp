@@ -866,7 +866,6 @@ void Conn::deleteParser(Parser * parser) {
 
 /// Remaining (for web-server)
 size_t Conn::remaining() {
-
 	char * buf = mRecvBuf + mRecvBufRead;
 	size_t len = mRecvBufEnd - mRecvBufRead;
 	size_t size = mCommand->size() + len;
@@ -1027,17 +1026,8 @@ void Conn::flush() {
 
 /// Send len byte from buf
 int Conn::send(const char * buf, size_t & len) {
-#ifdef QUICK_SEND // Quick send
-	if (mConnType != CONN_TYPE_INCOMING_UDP) {
-		len = ::send(mSocket, buf, len, 0);
-	} else {
-		len = ::sendto(mSocket, buf, len, 0, (struct sockaddr *) &mSockAddrIn, mSockAddrInSize);
-	}
-	return SOCK_ERROR(len) ? -1 : 0; /* return -1 - fail, 0 - ok */
-#else
 	int n = -1;
 	size_t total = 0, bytesleft = len;
-
 	bool tcp = (mConnType != CONN_TYPE_INCOMING_UDP);
 
 	while (total < len) { // EMSGSIZE (WSAEMSGSIZE)
@@ -1047,7 +1037,7 @@ int Conn::send(const char * buf, size_t & len) {
 			n = ::send(
 				mSocket,
 				buf + total,
-				static_cast<int> (bytesleft), // fix me: protection to very long msg
+				static_cast<int> (bytesleft), // Attention! Max len: 2147483647 (0x7FFFFFFF)
 				#ifndef _WIN32
 					MSG_NOSIGNAL | MSG_DONTWAIT
 				#else
@@ -1060,21 +1050,13 @@ int Conn::send(const char * buf, size_t & len) {
 			n = ::sendto(
 				mSocket,
 				buf + total,
-				static_cast<int> (bytesleft), // fix me: protection to very long msg
+				static_cast<int> (bytesleft), // Attention! Max len: 2147483647 (0x7FFFFFFF)
 				0,
 				(struct sockaddr *) &mSockAddrIn,
 				mSockAddrInSize
 			);
 
 		}
-
-/*		if (log(LEVEL_TRACE)) {
-				logStream() << "len = " << len
-					<< " total=" << total
-					<< " left=" << bytesleft
-					<< " n=" << n << endl;
-			}
-*/
 		if (SOCK_ERROR(n)) {
 			break;
 		}
@@ -1083,7 +1065,6 @@ int Conn::send(const char * buf, size_t & len) {
 	}
 	len = total; // Number sent bytes
 	return SOCK_ERROR(n) ? -1 : 0; // return -1 - fail, 0 - ok
-#endif
 }
 
 
