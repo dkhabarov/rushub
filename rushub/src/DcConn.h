@@ -133,18 +133,12 @@ public:
 	DcUser * mDcUser;          ///< User object
 
 	/// Atniflood struct
-	struct Atniflood {
-		Time mTime[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !
-		Time mTime2[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !
-		unsigned mCount[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !
-		unsigned mCount2[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !
-
-		Atniflood() {
-			for (int i = 0; i <= NMDC_TYPE_UNKNOWN; ++i) { // PROTOCOL NMDC !
-				mCount[i] = mCount2[i] = 0;
-			}
+	struct Antiflood {
+		Time mTime, mTime2;
+		unsigned mCount, mCount2;
+		Antiflood() : mCount(0), mCount2(0) {
 		}
-	} mAtniflood;
+	} mAntiflood[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !
 
 public:
 

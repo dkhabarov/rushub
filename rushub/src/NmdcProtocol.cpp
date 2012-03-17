@@ -1225,7 +1225,8 @@ int NmdcProtocol::checkCommand(NmdcParser * dcParser, DcConn * dcConn) {
 
 
 bool NmdcProtocol::antiflood(DcConn * dcConn, unsigned int type) {
-	if (mDcServer->antiFlood(dcConn->mAtniflood.mCount[type], dcConn->mAtniflood.mTime[type],
+	DcConn::Antiflood & antiflood = dcConn->mAntiflood[type];
+	if (mDcServer->antiFlood(antiflood.mCount, antiflood.mTime,
 		mDcServer->mDcConfig.mFloodCount[type], mDcServer->mDcConfig.mFloodTime[type])
 	) {
 		#ifndef WITHOUT_PLUGINS
@@ -1237,7 +1238,7 @@ bool NmdcProtocol::antiflood(DcConn * dcConn, unsigned int type) {
 			return true;
 		}
 	}
-	if (mDcServer->antiFlood(dcConn->mAtniflood.mCount2[type], dcConn->mAtniflood.mTime2[type],
+	if (mDcServer->antiFlood(antiflood.mCount2, antiflood.mTime2,
 		mDcServer->mDcConfig.mFloodCount2[type], mDcServer->mDcConfig.mFloodTime2[type])
 	) {
 		#ifndef WITHOUT_PLUGINS
