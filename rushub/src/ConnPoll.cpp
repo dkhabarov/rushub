@@ -72,23 +72,23 @@ int ConnPoll::choose(Time & timeout) {
 
 
 
-bool ConnPoll::optIn(tSocket sock, tEventFlag mask) {
+bool ConnPoll::optIn(tSocket sock, EventFlag mask) {
 	PollFd & pollFd = mvFD[sock];
  	unsigned events = pollFd.events;
 	if (!events && mask) {
 		pollFd.fd = sock;
 	}
 
-	if (mask & eEF_CLOSE) {
+	if (mask & EF_CLOSE) {
 		pollFd.events = 0;
 	} else {
-		if (mask & eEF_INPUT) {
+		if (mask & EF_INPUT) {
 			events = unsigned(POLLIN | POLLPRI);
 		}
-		if (mask & eEF_OUTPUT) {
+		if (mask & EF_OUTPUT) {
 			events |= unsigned(POLLOUT);
 		}
-		if (mask & eEF_ERROR) {
+		if (mask & EF_ERROR) {
 			events |= unsigned(POLLERR | POLLHUP | POLLNVAL);
 		}
 		pollFd.events |= events;
@@ -98,16 +98,16 @@ bool ConnPoll::optIn(tSocket sock, tEventFlag mask) {
 
 
 
-void ConnPoll::optOut(tSocket sock, tEventFlag mask) {
+void ConnPoll::optOut(tSocket sock, EventFlag mask) {
 	PollFd & pollFd = mvFD[sock];
  	unsigned events = ~(0u);
-	if (mask & eEF_INPUT) {
+	if (mask & EF_INPUT) {
 		events = ~unsigned(POLLIN | POLLPRI);
 	}
-	if (mask & eEF_OUTPUT) {
+	if (mask & EF_OUTPUT) {
 		events &= ~unsigned(POLLOUT);
 	}
-	if (mask & eEF_ERROR) {
+	if (mask & EF_ERROR) {
 		events &= ~unsigned(POLLERR | POLLHUP | POLLNVAL);
 	}
 	if (!(pollFd.events &= events)) {
@@ -122,16 +122,16 @@ int ConnPoll::optGet(tSocket sock) {
 	unsigned events = pollFd.events;
 	int mask = 0;
 	if (!events && (pollFd.fd == sock)) {
-		mask = eEF_CLOSE;
+		mask = EF_CLOSE;
 	} else {
 		if (events & (POLLIN | POLLPRI)) {
-			mask |= eEF_INPUT;
+			mask |= EF_INPUT;
 		}
 		if (events & POLLOUT) {
-			mask |= eEF_OUTPUT;
+			mask |= EF_OUTPUT;
 		}
 		if (events & (POLLERR | POLLHUP | POLLNVAL)) {
-			mask |= eEF_ERROR;
+			mask |= EF_ERROR;
 		}
 	}
 	return mask;
@@ -144,16 +144,16 @@ int ConnPoll::revGet(tSocket sock) {
 	unsigned events = pollFd.revents;
 	int mask = 0;
 	if (!pollFd.events && (pollFd.fd == sock)) {
-		mask = eEF_CLOSE;
+		mask = EF_CLOSE;
 	}
 	if (events & (POLLIN | POLLPRI)) {
-		mask |= eEF_INPUT;
+		mask |= EF_INPUT;
 	}
 	if (events & POLLOUT) {
-		mask |= eEF_OUTPUT;
+		mask |= EF_OUTPUT;
 	}
 	if (events & (POLLERR | POLLHUP | POLLNVAL)) {
-		mask |= eEF_ERROR;
+		mask |= EF_ERROR;
 	}
 	return mask;
 }

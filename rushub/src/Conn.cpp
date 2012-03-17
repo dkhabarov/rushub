@@ -412,8 +412,8 @@ void Conn::closeNow(int reason /* = 0 */) {
 	mWritable = false;
 	setOk(false);
 	if (mServer) {
-		if (!(mServer->mConnChooser.ConnChoose::optGet(this) & ConnChoose::eEF_CLOSE)) {
-			++ mServer->miNumCloseConn;
+		if (!(mServer->mConnChooser.ConnChoose::optGet(this) & ConnChoose::EF_CLOSE)) {
+			++ mServer->mNumCloseConn;
 			mClosed = true; // poll conflict
 
 			if (reason) {
@@ -424,12 +424,12 @@ void Conn::closeNow(int reason /* = 0 */) {
 			}
 
 #if USE_SELECT
-			mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::eEF_CLOSE);
-			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::eEF_ALL);
+			mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::EF_CLOSE);
+			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::EF_ALL);
 #else
 			// this sequence of flags for poll!
-			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::eEF_ALL);
-			mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::eEF_CLOSE);
+			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::EF_ALL);
+			mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::EF_CLOSE);
 #endif
 			
 		} else {
@@ -840,12 +840,11 @@ string * Conn::getParserCommandPtr() {
 
 Parser * Conn::createParser() {
 	if (!mProtocol) {
-		// TODO remove!
 		if (!mCreatorConnFactory) {
 			return NULL;
 		}
-		// TODO remove!
-		mProtocol = mCreatorConnFactory->getProtocol();
+		// For UDP connection
+		mProtocol = mCreatorConnFactory->mProtocol;
 	}
 	return mProtocol->createParser();
 }
@@ -956,7 +955,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 		if (mServer && mOk) {
 			if (mBlockOutput) {
 				mBlockOutput = false;
-				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::eEF_OUTPUT);
+				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::EF_OUTPUT);
 				if (log(LEVEL_DEBUG)) {
 					logStream() << "Unblock output channel" << endl;
 				}
@@ -964,12 +963,12 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 
 			bufLen = mSendBuf.size();
 			if (mBlockInput && bufLen < MAX_SEND_UNBLOCK_SIZE) { // Unset block of input
-				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::eEF_INPUT);
+				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::EF_INPUT);
 				if (log(LEVEL_DEBUG)) {
 					logStream() << "Unblock input channel" << endl;
 				}
 			} else if (!mBlockInput && bufLen >= MAX_SEND_BLOCK_SIZE) { // Set block of input
-				mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::eEF_INPUT);
+				mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::EF_INPUT);
 				if (log(LEVEL_DEBUG)) {
 					logStream() << "Block input channel" << endl;
 				}
@@ -987,7 +986,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 
 		if (mServer && mOk && !mBlockOutput) {
 			mBlockOutput = true;
-			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::eEF_OUTPUT);
+			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::EF_OUTPUT);
 			if (log(LEVEL_DEBUG)) {
 				logStream() << "Block output channel" << endl;
 			}
@@ -1209,11 +1208,6 @@ int ConnFactory::onNewConn(Conn * conn) {
 		conn->mProtocol = mProtocol; // Set protocol
 	}
 	return mServer->onNewConn(conn);
-}
-
-// TODO remove!
-Protocol * ConnFactory::getProtocol() {
-	return mProtocol;
 }
 
 

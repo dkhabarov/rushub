@@ -61,7 +61,7 @@ class ConnFactory;
 /// Server realization
 class Server : public Obj {
 
-friend class Conn; // for closeNow and miNumCloseConn
+friend class Conn; // for closeNow and mNumCloseConn
 friend class ConnFactory; // onNewData
 
 public:
@@ -122,7 +122,7 @@ protected:
 	int mMainLoopCode;
 
 	/// Strong close conn flag
-	int miNumCloseConn;
+	int mNumCloseConn;
 
 	/// Mean frequency
 	MeanFrequency<unsigned, 21> mMeanFrequency;

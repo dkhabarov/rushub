@@ -151,7 +151,7 @@ public:
 	UserList mIpList; ///< ip list
 	UserList mActiveList; ///< Active user list
 	UserList mHelloList; ///< Hello user list (NMDC)
-	UserList mEnterList; ///< Enter list (NMDC)
+	UserList mEnterList; ///< Enter list
 	UserList mChatList; ///< Chat list
 
 	int miTotalUserCount; ///< Total number of the users

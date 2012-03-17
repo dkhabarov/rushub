@@ -620,7 +620,7 @@ bool DcServer::checkNick(DcConn *dcConn) {
 				string msg;
 				stringReplace(mDcLang.mUsedNick, string(STR_LEN("nick")), msg, dcConn->mDcUser->getUid());
 				sendToUser(dcConn->mDcUser, msg, mDcConfig.mHubBot.c_str());
-				dcConn->send(mNmdcProtocol.appendValidateDenied(msg.erase(), dcConn->mDcUser->getUid())); // refactoring to DcProtocol pointer
+				dcConn->send(mNmdcProtocol.appendValidateDenied(msg.erase(), dcConn->mDcUser->getUid())); // FIXME
 				return false;
 			}
 			if (log(LEVEL_DEBUG)) {
@@ -848,7 +848,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 			if (mDcConfig.mAdcOn) { // ADC
 				msg.append(STR_LEN("IQUI ")).append(dcUser->getUid()).append(STR_LEN(ADC_SEPARATOR));
 			} else { // NMDC
-				mNmdcProtocol.appendQuit(msg, dcUser->getUid());
+				mNmdcProtocol.appendQuit(msg, dcUser->getUid()); // FIXME
 			}
 			sendToAll(msg, false, true/*mDcConfig.mDelayedMyinfo*/); // Delay in sending MyINFO (and Quit)
 		}
@@ -861,10 +861,10 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 /// Show user to all
 bool DcServer::showUserToAll(DcUser * dcUser) {
 
+	bool canSend = dcUser->isCanSend();
+
 	// Protocol dependence
 	if (mDcConfig.mAdcOn) { // ADC
-
-		bool canSend = dcUser->isCanSend();
 
 		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 
@@ -884,8 +884,6 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 			dcUser->setCanSend(canSend);
 		}
 
-		dcUser->send("", 0, false, true);
-
 	} else { // NMDC
 
 		string hello;
@@ -893,20 +891,20 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 			if (dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
 				dcUser->mDcConn->send(dcUser->getInfo(), true, false);
 			} else if (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
-				dcUser->mDcConn->send(mNmdcProtocol.appendHello(hello, dcUser->getUid()), false, false); // refactoring to DcProtocol pointer
+				dcUser->mDcConn->send(mNmdcProtocol.appendHello(hello, dcUser->getUid()), false, false); // NMDC only
 				dcUser->mDcConn->send(dcUser->getInfo(), true, false);
 			} else {
-				dcUser->mDcConn->send(mNmdcProtocol.appendHello(hello, dcUser->getUid()), false, false); // refactoring to DcProtocol pointer
+				dcUser->mDcConn->send(mNmdcProtocol.appendHello(hello, dcUser->getUid()), false, false); // NMDC only
 			}
 
 			if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
 				string opList;
-				dcUser->mDcConn->send(mNmdcProtocol.appendOpList(opList, dcUser->getUid()), false, false); // refactoring to DcProtocol pointer
+				dcUser->mDcConn->send(mNmdcProtocol.appendOpList(opList, dcUser->getUid()), false, false); // FIXME
 			}
 		} else {
 
 			// Sending the greeting for all users, not supporting feature NoHello (except enterring users)
-			mHelloList.sendToAll(mNmdcProtocol.appendHello(hello, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false); // refactoring to DcProtocol pointer
+			mHelloList.sendToAll(mNmdcProtocol.appendHello(hello, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false); // NMDC only
 
 			// Show MyINFO string to all users
 			sendToAll(dcUser->getInfo(), true, true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
@@ -917,12 +915,10 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 			// Op entry
 			if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
 				string opList;
-				mDcUserList.sendToAll(mNmdcProtocol.appendOpList(opList, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false); // refactoring to DcProtocol pointer
+				mDcUserList.sendToAll(mNmdcProtocol.appendOpList(opList, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false); // FIXME
 				mEnterList.sendToAll(opList, true/*mDcConfig.mDelayedMyinfo*/, false);
 			}
 		}
-
-		bool canSend = dcUser->isCanSend();
 
 		// Prevention of the double sending
 		if (!mDcConfig.mDelayedLogin) {
@@ -934,7 +930,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 
 		if (mDcConfig.mSendUserIp) {
 			string ipList;
-			mNmdcProtocol.appendUserIp(ipList, dcUser->getUid(), dcUser->getIp()); // refactoring to DcProtocol pointer
+			mNmdcProtocol.appendUserIp(ipList, dcUser->getUid(), dcUser->getIp()); // FIXME
 			if (ipList.size()) {
 				mIpList.sendToAll(ipList, true, false);
 			}
@@ -945,9 +941,9 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 				dcUser->send(ipList, false, false);
 			}
 		}
-
-		dcUser->send("", 0, false, true);
 	}
+
+	dcUser->send("", 0, false, true);
 	return true;
 }
 
@@ -1234,11 +1230,9 @@ bool DcServer::setConfig(const string & name, const string & value) {
 
 		} else { // NMDC
 			string msg;
-			sendToAll(mNmdcProtocol.appendHubName(msg, mDcConfig.mHubName, mDcConfig.mTopic)); // use cache ?
+			sendToAll(mNmdcProtocol.appendHubName(msg, mDcConfig.mHubName, mDcConfig.mTopic)); // FIXME
 		}
-
 	}
-
 	mDcConfig.save();
 	return true;
 }

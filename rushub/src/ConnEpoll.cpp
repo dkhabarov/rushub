@@ -52,9 +52,9 @@ int ConnEpoll::choose(Time & timeout) {
 
 
 
-bool ConnEpoll::optIn(tSocket sock, tEventFlag mask) {
+bool ConnEpoll::optIn(tSocket sock, EventFlag mask) {
 
-	if (mask & eEF_CLOSE) {
+	if (mask & EF_CLOSE) {
 		int res = epoll_ctl(epfd, EPOLL_CTL_DEL, sock, &ev);
 		if (res != 0) {
 			// error
@@ -65,13 +65,13 @@ bool ConnEpoll::optIn(tSocket sock, tEventFlag mask) {
 	struct epoll_event ev;
 	ev.data.fd = sock;
 
-	if (mask & eEF_INPUT) {
+	if (mask & EF_INPUT) {
 		ev.events = EPOLLIN | POLLPRI;
 	}
-	if (mask & eEF_OUTPUT) {
+	if (mask & EF_OUTPUT) {
 		ev.events |= EPOLLOUT;
 	}
-	if (mask & eEF_ERROR) {
+	if (mask & EF_ERROR) {
 		ev.events |= (EPOLLERR | EPOLLHUP);
 	}
 
@@ -85,9 +85,9 @@ bool ConnEpoll::optIn(tSocket sock, tEventFlag mask) {
 
 
 
-void ConnEpoll::optOut(tSocket sock, tEventFlag mask) {
+void ConnEpoll::optOut(tSocket sock, EventFlag mask) {
 
-	if (mask & eEF_CLOSE) {
+	if (mask & EF_CLOSE) {
 		int res = epoll_ctl(epfd, EPOLL_CTL_DEL, sock, &ev);
 		if (res != 0) {
 			// error
@@ -99,13 +99,13 @@ void ConnEpoll::optOut(tSocket sock, tEventFlag mask) {
 	struct epoll_event ev;
 	ev.data.fd = sock;
 
-	if (mask & eEF_INPUT) {
+	if (mask & EF_INPUT) {
 		ev.events = EPOLLIN | POLLPRI;
 	}
-	if (mask & eEF_OUTPUT) {
+	if (mask & EF_OUTPUT) {
 		ev.events |= EPOLLOUT;
 	}
-	if (mask & eEF_ERROR) {
+	if (mask & EF_ERROR) {
 		ev.events |= (EPOLLERR | EPOLLHUP);
 	}
 
@@ -120,7 +120,7 @@ void ConnEpoll::optOut(tSocket sock, tEventFlag mask) {
 
 
 int ConnEpoll::optGet(tSocket sock) {
-	return eEF_INPUT | eEF_OUTPUT | eEF_ERROR | eEF_CLOSE;
+	return EF_INPUT | EF_OUTPUT | EF_ERROR | EF_CLOSE;
 }
 
 

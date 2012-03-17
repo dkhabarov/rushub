@@ -312,7 +312,7 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 		#ifndef WITHOUT_PLUGINS
 			dcServer->mCalls.mOnUserDisconnected.callAll(dcConn->mDcUser);
 		#endif
-		
+
 		dcServer->mIpListConn->remove(dcConn);
 
 		if (dcConn->mDcUser != NULL) {

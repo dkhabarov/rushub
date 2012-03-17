@@ -131,7 +131,7 @@ Conn * NmdcProtocol::getConnForUdpData(Conn * conn, Parser * parser) {
 		NmdcParser * dcParser = static_cast<NmdcParser *> (parser);
 		if (!dcParser->splitChunks()) {
 
-			// NMDC
+			// UDP SR PROTOCOL NMDC SPEC
 			DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcParser->chunkString(CHUNK_SR_FROM)));
 			if (dcUser && dcUser->mDcConn && conn->getIpUdp() == dcUser->getIp()) {
 				return dcUser->mDcConn;
@@ -449,20 +449,20 @@ int NmdcProtocol::eventMyInfo(NmdcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	string sOldMyINFO = dcConn->mDcUser->getInfo();
+	string oldMyInfo = dcConn->mDcUser->getInfo();
 	dcConn->mDcUser->setInfo(dcparser->mCommand);
 
-	int iMode = 0;
+	int mode = 0;
 	#ifndef WITHOUT_PLUGINS
-		iMode = mDcServer->mCalls.mOnMyINFO.callAll(dcConn->mDcUser);
+		mode = mDcServer->mCalls.mOnMyINFO.callAll(dcConn->mDcUser);
 	#endif
 
-	if (iMode != 1 && dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-		if (sOldMyINFO != dcConn->mDcUser->getInfo()) {
+	if (mode != 1 && dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
+		if (oldMyInfo != dcConn->mDcUser->getInfo()) {
 			if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 				dcConn->send(dcConn->mDcUser->getInfo(), true); // Send to self only
 			} else {
-				sendMode(dcConn, dcConn->mDcUser->getInfo(), iMode, mDcServer->mDcUserList, true); // Use cache for send to all
+				sendMode(dcConn, dcConn->mDcUser->getInfo(), mode, mDcServer->mDcUserList, true); // Use cache for send to all
 			}
 		}
 	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
@@ -547,7 +547,7 @@ int NmdcProtocol::eventTo(NmdcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	// Search user (PROTOCOL NMDC)
+	// Check TO user (PROTOCOL NMDC SPEC)
 	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(nick));
 	if (!dcUser) {
 		return -2;
@@ -582,7 +582,7 @@ int NmdcProtocol::eventMcTo(NmdcParser * dcparser, DcConn * dcConn) {
 		}
 	#endif
 
-	// Search user (PROTOCOL NMDC)
+	// Check MCTO user (PROTOCOL NMDC SPEC)
 	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(nick));
 	if (!dcUser) {
 		return -2;
@@ -616,7 +616,7 @@ int NmdcProtocol::eventUserIp(NmdcParser * dcParser, DcConn * dcConn) {
 	while (pos != param.npos) {
 		nick.assign(param, cur, pos - cur);
 		if (nick.size()) {
-			// PROTOCOL NMDC
+			// UserIP PROTOCOL NMDC SPEC
 			UserBase * userBase = mDcServer->mDcUserList.getUserBaseByUid(nick);
 			if (userBase != NULL) {
 				result.append(nick).append(STR_LEN(" ")).append(userBase->getIp()).append(STR_LEN("$$"));
@@ -629,13 +629,12 @@ int NmdcProtocol::eventUserIp(NmdcParser * dcParser, DcConn * dcConn) {
 	// last param
 	nick.assign(param, cur, param.size() - cur);
 	if (nick.size()) {
-		// PROTOCOL NMDC
+		// UserIP PROTOCOL NMDC SPEC
 		UserBase * userBase = mDcServer->mDcUserList.getUserBaseByUid(nick);
 		if (userBase != NULL) {
 			result.append(nick).append(STR_LEN(" ")).append(userBase->getIp());
 		}
 	}
-
 
 	dcConn->send(result, true);
 	return 0;
@@ -662,9 +661,9 @@ int NmdcProtocol::eventSearch(NmdcParser * dcparser, DcConn * dcConn) {
 		return -2;
 	}
 
-	int iMode = 0;
+	int mode = 0;
 	#ifndef WITHOUT_PLUGINS
-		iMode = mDcServer->mCalls.mOnSearch.callAll(dcConn->mDcUser);
+		mode = mDcServer->mCalls.mOnSearch.callAll(dcConn->mDcUser);
 	#endif
 
 	// Sending cmd
@@ -683,12 +682,12 @@ int NmdcProtocol::eventSearch(NmdcParser * dcparser, DcConn * dcConn) {
 				dcConn->closeNice(9000, CLOSE_REASON_NICK_SEARCH);
 				return -1;
 			}
-			sendMode(dcConn, dcparser->mCommand, iMode, mDcServer->mDcUserList, true); // Use cache for send to all
+			sendMode(dcConn, dcparser->mCommand, mode, mDcServer->mDcUserList, true); // Use cache for send to all
 			break;
 
 		case NMDC_TYPE_SEARCH_PAS :
 			dcConn->emptySrCounter(); /** Zeroizing result counter of the passive search */
-			sendMode(dcConn, dcparser->mCommand, iMode, mDcServer->mActiveList, true); // Use cache for send to all
+			sendMode(dcConn, dcparser->mCommand, mode, mDcServer->mActiveList, true); // Use cache for send to all
 			break;
 
 		case NMDC_TYPE_MSEARCH :
@@ -707,12 +706,12 @@ int NmdcProtocol::eventSearch(NmdcParser * dcparser, DcConn * dcConn) {
 			msg.append(dcparser->chunkString(CHUNK_AS_ADDR));
 			msg.append(STR_LEN(" "));
 			msg.append(dcparser->chunkString(CHUNK_AS_QUERY));
-			sendMode(dcConn, msg, iMode, mDcServer->mDcUserList, true); // Use cache for send to all
+			sendMode(dcConn, msg, mode, mDcServer->mDcUserList, true); // Use cache for send to all
 			break;
 
 		case NMDC_TYPE_MSEARCH_PAS :
 			dcConn->emptySrCounter(); /** Zeroizing result counter of the passive search */
-			sendMode(dcConn, dcparser->mCommand, iMode, mDcServer->mActiveList, true); // Use cache for send to all
+			sendMode(dcConn, dcparser->mCommand, mode, mDcServer->mActiveList, true); // Use cache for send to all
 			break;
 
 		default :
@@ -730,7 +729,7 @@ int NmdcProtocol::eventSr(NmdcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	// Check same nick in cmd (PROTOCOL NMDC)
+	// Check same nick in cmd (PROTOCOL NMDC SPEC)
 	if (mDcServer->mDcConfig.mCheckSrNick && (dcConn->mDcUser->getUid() != dcparser->chunkString(CHUNK_SR_FROM))) {
 		if (dcConn->log(LEVEL_DEBUG)) {
 			dcConn->logStream() << "Bad nick in search response, closing" << endl;
@@ -789,7 +788,7 @@ int NmdcProtocol::eventConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	// PROTOCOL NMDC
+	// Check CTM user PROTOCOL NMDC SPEC
 	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcparser->chunkString(CHUNK_CM_NICK)));
 	if (!dcUser) {
 		return -1;
@@ -813,7 +812,7 @@ int NmdcProtocol::eventRevConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	// Checking the nick (PROTOCOL NMDC)
+	// Check RCTM nick (PROTOCOL NMDC SPEC)
 	if (mDcServer->mDcConfig.mCheckRctmNick && (dcparser->chunkString(CHUNK_RC_NICK) != dcConn->mDcUser->getUid())) {
 		string msg;
 		stringReplace(mDcServer->mDcLang.mBadRevConNick, string(STR_LEN("nick")), msg, dcparser->chunkString(CHUNK_RC_NICK));
@@ -823,7 +822,7 @@ int NmdcProtocol::eventRevConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	// Searching the user (PROTOCOL NMDC)
+	// Check RCTM user (PROTOCOL NMDC)
 	DcUser * other = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcparser->chunkString(CHUNK_RC_OTHER)));
 	if (!other) {
 		return -2;
@@ -868,7 +867,7 @@ int NmdcProtocol::eventKick(NmdcParser * dcparser, DcConn * dcConn) {
 		return -2;
 	}
 
-	// PROTOCOL NMDC
+	// Check kick user PROTOCOL NMDC SPEC
 	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcparser->chunkString(CHUNK_1_PARAM)));
 
 	// Is user exist?
@@ -898,7 +897,7 @@ int NmdcProtocol::eventOpForceMove(NmdcParser * dcparser, DcConn * dcConn) {
 		return -2;
 	}
 
-	// PROTOCOL NMDC
+	// Check redirect user PROTOCOL NMDC SPEC
 	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcparser->chunkString(CHUNK_FM_NICK)));
 
 	// Is user exist?
@@ -918,7 +917,7 @@ int NmdcProtocol::eventGetInfo(NmdcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	// PROTOCOL NMDC
+	// Check GetINFO user PROTOCOL NMDC SPEC
 	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcparser->chunkString(CHUNK_GI_OTHER)));
 	if (!dcUser) {
 		return -2;
