@@ -46,6 +46,9 @@ AC_ARG_ENABLE(caps,
 AC_ARG_ENABLE(sharedtinyxml,
              [AC_HELP_STRING([--disable-sharedtinyxml],
                              [Enable posix capabilities for RusHub])],, enable_sharedtinyxml=yes)
+AC_ARG_ENABLE(sharedzlib,
+             [AC_HELP_STRING([--disable-sharedzlib],
+                             [Enable zlib for RusHub])],, enable_sharedzlib=yes)
 # Checks for libraries.
 
 AC_CHECK_LIB([dl], [dlopen],[AC_SUBST(DLOPEN_LIBS,"-ldl")
@@ -61,6 +64,10 @@ AC_CHECK_LIB([rt], [main],AC_SUBST(RT_LIBS,"-lrt"), exit)
 if test "$enable_sharedtinyxml" = "yes"; then
 	AC_CHECK_LIB([tinyxml], [main],[AC_SUBST(TINYXML_LIBS,"-ltinyxml")
 			AC_DEFINE(HAVE_LIBTINYXML, 1,  Compile with shared tinyxml)], exit)
+fi
+if test "$enable_sharedzlib" = "yes"; then
+	AC_CHECK_LIB([tinyxml], [main],[AC_SUBST(ZLIB_LIBS,"-lz")
+			AC_DEFINE(HAVE_LIBZLIB, 1,  Compile with shared zlib)], exit)
 fi
 if test "$enable_caps" = "yes"; then
    AC_CHECK_LIB([cap], [main],[AC_SUBST(CAPS_LIBS,"-lcap")
@@ -83,7 +90,7 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 #AC_CHECK_FUNCS([floor gettimeofday inet_ntoa memmove memset mkdir select setlocale socket strchr strdup strerror strrchr strstr strtoul uname dlerror dlopen dlclose dlsym],, exit)
 
-RUSHUB_LIBS="$CAPS_LIBS $RT_LIBS $TINYXML_LIBS $DLOPEN_LIBS"
+RUSHUB_LIBS="$CAPS_LIBS $RT_LIBS $TINYXML_LIBS $DLOPEN_LIBS $HAVE_LIBZLIB"
 AC_SUBST(RUSHUB_LIBS)
 
 AM_CONDITIONAL([COND_OPT], [test "$enable_sharedtinyxml" = no])
