@@ -66,7 +66,7 @@ if test "$enable_sharedtinyxml" = "yes"; then
 			AC_DEFINE(HAVE_LIBTINYXML, 1,  Compile with shared tinyxml)], exit)
 fi
 if test "$enable_sharedzlib" = "yes"; then
-	AC_CHECK_LIB([tinyxml], [main],[AC_SUBST(ZLIB_LIBS,"-lz")
+	AC_CHECK_LIB([zlib], [main],[AC_SUBST(ZLIB_LIBS,"-lz")
 			AC_DEFINE(HAVE_LIBZLIB, 1,  Compile with shared zlib)], exit)
 fi
 if test "$enable_caps" = "yes"; then
