@@ -1148,6 +1148,8 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 
 		if (mDcServer->mDcConfig.mCompressionType == 1) {
 			dcConn->sendZpipe(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false);
+		} else {
+			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false, false);
 		}
 	} else if (dcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
 		if (dcConn->log(LEVEL_DEBUG)) {
