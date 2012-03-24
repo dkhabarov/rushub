@@ -45,7 +45,7 @@ AC_ARG_ENABLE(caps,
                              [Enable posix capabilities for RusHub])],, enable_caps=no)
 AC_ARG_ENABLE(sharedtinyxml,
              [AC_HELP_STRING([--disable-sharedtinyxml],
-                             [Enable posix capabilities for RusHub])],, enable_sharedtinyxml=yes)
+                             [Enable shared tinyxml for RusHub])],, enable_sharedtinyxml=yes)
 AC_ARG_ENABLE(sharedzlib,
              [AC_HELP_STRING([--disable-sharedzlib],
                              [Enable zlib for RusHub])],, enable_sharedzlib=yes)
