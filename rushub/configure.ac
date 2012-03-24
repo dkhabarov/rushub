@@ -90,7 +90,7 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 #AC_CHECK_FUNCS([floor gettimeofday inet_ntoa memmove memset mkdir select setlocale socket strchr strdup strerror strrchr strstr strtoul uname dlerror dlopen dlclose dlsym],, exit)
 
-RUSHUB_LIBS="$CAPS_LIBS $RT_LIBS $TINYXML_LIBS $DLOPEN_LIBS $HAVE_LIBZLIB"
+RUSHUB_LIBS="$CAPS_LIBS $RT_LIBS $TINYXML_LIBS $DLOPEN_LIBS $ZLIB_LIBS"
 AC_SUBST(RUSHUB_LIBS)
 
 AM_CONDITIONAL([COND_OPT], [test "$enable_sharedtinyxml" = no])
