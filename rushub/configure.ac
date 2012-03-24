@@ -44,11 +44,11 @@ AC_ARG_ENABLE(caps,
              [AC_HELP_STRING([--enable-caps],
                              [Enable posix capabilities for RusHub])],, enable_caps=no)
 AC_ARG_ENABLE(sharedtinyxml,
-             [AC_HELP_STRING([--disable-sharedtinyxml],
+             [AC_HELP_STRING([--enable-sharedtinyxml],
                              [Enable shared tinyxml for RusHub])],, enable_sharedtinyxml=yes)
 AC_ARG_ENABLE(sharedzlib,
-             [AC_HELP_STRING([--disable-sharedzlib],
-                             [Enable zlib for RusHub])],, enable_sharedzlib=yes)
+             [AC_HELP_STRING([--enable-sharedzlib],
+                             [Enable shared zlib for RusHub])],, enable_sharedzlib=yes)
 # Checks for libraries.
 
 AC_CHECK_LIB([dl], [dlopen],[AC_SUBST(DLOPEN_LIBS,"-ldl")
