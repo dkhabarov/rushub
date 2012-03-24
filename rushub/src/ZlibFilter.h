@@ -28,6 +28,10 @@
 # include <zlib.h>
 #endif
 
+#include <string>
+
+using namespace ::std;
+
 namespace utils {
 
 class ZlibFilter {
@@ -41,6 +45,7 @@ public:
 	bool compress(const char * in, size_t & inSize, char * out, size_t & outSize);
 
 	static bool compressFull(const char * in, size_t & inSize, char * out, size_t & outSize);
+	static bool compressFull(const char * in, size_t inSize, string & out);
 
 private:
 

@@ -23,6 +23,8 @@
 
 namespace utils {
 
+#define BUF_SIZE 1024
+
 ZlibFilter::ZlibFilter() {
 	init();
 }
@@ -81,7 +83,7 @@ bool ZlibFilter::compress(const char * in, size_t & inSize, char * out, size_t &
 	mTotalIn += inSize;
 	outSize -= mStream.avail_out;
 	mTotalOut += outSize;
-	return err == Z_OK;
+	return true;
 }
 
 
@@ -108,6 +110,30 @@ bool ZlibFilter::compressFull(const char * in, size_t & inSize, char * out, size
 	inSize -= stream.avail_in;
 	outSize -= stream.avail_out;
 	deflateEnd(&stream);
+	return true;
+}
+
+
+
+bool ZlibFilter::compressFull(const char * in, size_t inSize, string & out) {
+	if (inSize == 0) {
+		return false;
+	}
+
+	char outBuf[BUF_SIZE] = { 0 };
+	size_t i = 0;
+	ZlibFilter filter;
+
+	while (i <= inSize) {
+		size_t outSize = BUF_SIZE, j = inSize - i;
+		if (!filter.compress(in + i, j, outBuf, outSize)) {
+			filter.finish();
+			return false;
+		}
+		out.append(outBuf, outSize);
+		i += (j != 0 ? j : 1);
+	}
+	filter.finish();
 	return true;
 }
 

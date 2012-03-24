@@ -28,6 +28,8 @@
 
 #include <string.h>
 
+using namespace ::utils;
+
 namespace dcserver {
 
 namespace protocol {
@@ -227,8 +229,8 @@ int NmdcProtocol::eventSupports(NmdcParser * dcparser, DcConn * dcConn) {
 			dcConn->mFeatures |= SUPPORT_FEATUER_USERIP2;
 		} else if (feature == "UserIP") {
 			dcConn->mFeatures |= SUPPORT_FEATUER_USERIP;
-		} else if (feature == "TTHSearch") {
-			dcConn->mFeatures |= SUPPORT_FEATUER_TTHSEARCH;
+		} else if (feature == "ZPipe0" || feature == "ZPipe") {
+			dcConn->mFeatures |= SUPPORT_FEATUER_ZPIPE;
 		} else if (feature == "QuickList") {
 			dcConn->mFeatures |= SUPPORT_FEATUER_QUICKLIST;
 		}
@@ -1143,7 +1145,10 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 			dcConn->logStream() << "Sending MyINFO list" << endl;
 		}
 		// seperator "|" was added in getInfoList function
-		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false, false);
+
+		if (mDcServer->mDcConfig.mCompressionType == 1) {
+			dcConn->sendZpipe(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false);
+		}
 	} else if (dcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
 		if (dcConn->log(LEVEL_DEBUG)) {
 			dcConn->logStream() << "Sending MyINFO list and Nicklist" << endl;

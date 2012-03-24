@@ -43,7 +43,7 @@ enum SupportFeature {
 	SUPPORT_FEATUER_NOGETINFO   = 1 << 1, ///< NoGetINFO feature
 	SUPPORT_FEATURE_NOHELLO     = 1 << 2, ///< NoHello feature
 	SUPPORT_FEATUER_USERIP2     = 1 << 3, ///< UserIP2 feature
-	SUPPORT_FEATUER_TTHSEARCH   = 1 << 4, ///< TTHSearch feature
+	SUPPORT_FEATUER_ZPIPE       = 1 << 4, ///< ZPipe0 or ZPipe feature
 	SUPPORT_FEATUER_QUICKLIST   = 1 << 5, ///< Quicklist feature
 	SUPPORT_FEATUER_PASSIVE     = 1 << 6, ///< Passive mode feature
 	SUPPORT_FEATUER_USERIP      = 1 << 7, ///< UserIP feature
@@ -151,6 +151,12 @@ public:
 		return send(data.c_str(), data.size(), addSep, flush);
 	}
 	virtual size_t send(const char * data, size_t len, bool addSep = false, bool flush = true);
+
+	/// Sending command with zlib compression
+	inline void sendZpipe(const string & data, bool flush = true) {
+		sendZpipe(data.c_str(), data.size(), flush);
+	}
+	void sendZpipe(const char * data, size_t len, bool flush);
 
 	virtual bool parseCommand(const char * cmd);
 

@@ -112,6 +112,7 @@ void DcConfig::addVars(Server * server) {
 	#endif
 
 	add("iMaxLevel",              mMaxLevel,                            mMaxLevel); // set this default value for log
+	add("iCompressionType",       mCompressionType,                     0);
 	add("iUsersLimit",            mUsersLimit,                          -1     );
 	add("iMinNickLen",            mMinNickLen,                          2u     );
 	add("iMaxNickLen",            mMaxNickLen,                          32u    );
