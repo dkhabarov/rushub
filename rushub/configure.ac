@@ -2,8 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.50])
-AC_INIT(RusHub, 2.3.9[beta], [setuper@gmail.com])
-AM_INIT_AUTOMAKE(RusHub, 2.3.9[beta])
+AC_INIT(RusHub, 2.3.10[beta], [setuper@gmail.com])
+AM_INIT_AUTOMAKE(RusHub, 2.3.10[beta])
 AC_CONFIG_SRCDIR([src/config.h.in])
 AC_CONFIG_HEADERS([src/config.h])
 
