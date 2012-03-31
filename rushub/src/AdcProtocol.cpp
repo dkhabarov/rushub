@@ -623,8 +623,35 @@ const char * AdcProtocol::genNewSid() {
 
 
 
-// BMSG <my_sid> <msg>
+// IMSG <msg>
+void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, bool flush /*= true*/) {
+	dcConn->reserve(6 + data.size()); // 5 + data.size() + 1
+	dcConn->send(STR_LEN("IMSG "), false, false);
+	dcConn->send(data, true, flush);
+}
+
+
+
+// DMSG <my_sid> <msg>
 void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string & uid, bool flush /*= true*/) {
+	dcConn->reserve(11 + data.size()); // 5 + 4 + 1 + data.size() + 1
+	dcConn->send(STR_LEN("DMSG "), false, false);
+	dcConn->send(uid, false, false);
+	dcConn->send(STR_LEN(" "), false, false);
+	dcConn->send(data, true, flush);
+}
+
+
+
+// IMSG <msg>
+void AdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, bool flush /*= true*/) {
+	sendToChat(dcConn, data, flush);
+}
+
+
+
+// BMSG <my_sid> <msg>
+void AdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, const string & uid, bool flush /*= true*/) {
 	dcConn->reserve(11 + data.size()); // 5 + 4 + 1 + data.size() + 1
 	dcConn->send(STR_LEN("BMSG "), false, false);
 	dcConn->send(uid, false, false);

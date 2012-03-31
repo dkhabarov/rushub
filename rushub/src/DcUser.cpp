@@ -77,6 +77,16 @@ void DcUser::send(const char * data, size_t len, bool addSep /*= false*/, bool f
 
 
 
+/// Chat Direct
+void DcUser::sendToChat(const string & data, bool flush /*= true*/) {
+	if (mDcConn) {
+		mDcConn->dcProtocol()->sendToChat(mDcConn, data, flush);
+	}
+}
+
+
+
+/// Chat Direct
 void DcUser::sendToChat(const string & data, const string & uid, bool flush /*= true*/) {
 	if (mDcConn) {
 		mDcConn->dcProtocol()->sendToChat(mDcConn, data, uid, flush);
@@ -85,6 +95,25 @@ void DcUser::sendToChat(const string & data, const string & uid, bool flush /*= 
 
 
 
+/// Chat Broadcast
+void DcUser::sendToChatAll(const string & data, bool flush /*= true*/) {
+	if (mDcConn) {
+		mDcConn->dcProtocol()->sendToChatAll(mDcConn, data, flush);
+	}
+}
+
+
+
+/// Chat Broadcast
+void DcUser::sendToChatAll(const string & data, const string & uid, bool flush /*= true*/) {
+	if (mDcConn) {
+		mDcConn->dcProtocol()->sendToChatAll(mDcConn, data, uid, flush);
+	}
+}
+
+
+
+/// Private Message
 void DcUser::sendToPm(const string & data, const string & uid, const string & from, bool flush /*= true*/) {
 	if (mDcConn) {
 		mDcConn->dcProtocol()->sendToPm(mDcConn, data, uid, from, flush);

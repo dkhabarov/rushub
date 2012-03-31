@@ -85,12 +85,21 @@ public:
 	string & appendValidateDenied(string & str, const string & nick);
 	string & appendHubName(string & str, const string & hubName, const string & topic);
 	string & appendHubTopic(string & str, const string & hubTopic);
-	virtual void sendToChat(DcConn *, const string & data, const string & uid, bool flush = true);
-	virtual void sendToPm(DcConn *, const string & data, const string & uid, const string & from, bool flush = true);
 	string & appendQuit(string & str, const string & nick);
 	string & appendOpList(string & str, const string & nick);
 	string & appendUserIp(string & str, const string & nick, const string & ip);
 	string & appendForceMove(string & str, const string & address);
+
+	/// Chat Direct
+	virtual void sendToChat(DcConn *, const string & data, bool flush = true);
+	virtual void sendToChat(DcConn *, const string & data, const string & uid, bool flush = true);
+
+	/// Chat Broadcast
+	virtual void sendToChatAll(DcConn *, const string & data, bool flush = true);
+	virtual void sendToChatAll(DcConn *, const string & data, const string & uid, bool flush = true);
+
+	/// Private Message
+	virtual void sendToPm(DcConn *, const string & data, const string & uid, const string & from, bool flush = true);
 
 
 	virtual void forceMove(DcConn *, const char * address, const char * reason = NULL);

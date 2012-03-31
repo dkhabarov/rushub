@@ -51,14 +51,14 @@ enum Header {
 }; // enum Header
 
 
-const char HEADER_SYMBOL_BROADCAST = 'B';
-const char HEADER_SYMBOL_CLIENT = 'C';
-const char HEADER_SYMBOL_DIRECT = 'D';
-const char HEADER_SYMBOL_ECHO = 'E';
-const char HEADER_SYMBOL_FEATURE = 'F';
-const char HEADER_SYMBOL_HUB = 'H';
-const char HEADER_SYMBOL_INFO = 'I';
-const char HEADER_SYMBOL_UDP = 'U';
+const char HEADER_SYMBOL_BROADCAST = 'B'; ///< Broadcast. Hub must send message to all connected clients, including the sender of the message.
+const char HEADER_SYMBOL_CLIENT = 'C'; ///< Client message. Clients must use this message type when communicating directly over TCP.
+const char HEADER_SYMBOL_DIRECT = 'D'; ///< Direct message. The hub must send the message to the target_sid user.
+const char HEADER_SYMBOL_ECHO = 'E'; ///< Echo message. The hub must send the message to the target_sid user and the my_sid user.
+const char HEADER_SYMBOL_FEATURE = 'F'; ///< Feature broadcast. The hub must send message to all clients that support both all required (+) and no excluded (-) features named. The feature name is matched against the corresponding SU field in INF sent by each client.
+const char HEADER_SYMBOL_HUB = 'H'; ///< Hub message. Clients must use this message type when a message is intended for the hub only.
+const char HEADER_SYMBOL_INFO = 'I'; ///< Info message. Hubs must use this message type when sending a message to a client that didn't come from another client.
+const char HEADER_SYMBOL_UDP = 'U'; ///< UDP message. Clients must use this message type when communicating directly over UDP.
 
 
 typedef enum { // Types of the commands

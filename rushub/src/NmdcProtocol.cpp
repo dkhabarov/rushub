@@ -970,22 +970,13 @@ int NmdcProtocol::eventUnknown(NmdcParser *, DcConn * dcConn) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 // $Lock ...|
 string & NmdcProtocol::appendLock(string & str) {
 	str.append(STR_LEN("$Lock EXTENDEDPROTOCOL_" INTERNALNAME "_by_setuper_" INTERNALVERSION " Pk=" INTERNALNAME));
 	return str.append(STR_LEN(NMDC_SEPARATOR));
 }
+
+
 
 // $Hello nick|
 string & NmdcProtocol::appendHello(string & str, const string & nick) {
@@ -993,21 +984,29 @@ string & NmdcProtocol::appendHello(string & str, const string & nick) {
 	return str.append(STR_LEN("$Hello ")).append(nick).append(STR_LEN(NMDC_SEPARATOR));
 }
 
+
+
 // $HubIsFull|
 string & NmdcProtocol::appendHubIsFull(string & str) {
 	return str.append(STR_LEN("$HubIsFull")).append(STR_LEN(NMDC_SEPARATOR));
 }
+
+
 
 // $GetPass|
 string & NmdcProtocol::appendGetPass(string & str) {
 	return str.append(STR_LEN("$GetPass")).append(STR_LEN(NMDC_SEPARATOR));
 }
 
+
+
 // $ValidateDenide nick|
 string & NmdcProtocol::appendValidateDenied(string & str, const string & nick) {
 	str.reserve(str.size() + nick.size() + 17);
 	return str.append(STR_LEN("$ValidateDenide ")).append(nick).append(STR_LEN(NMDC_SEPARATOR));
 }
+
+
 
 // $HubName hubName - topic|
 string & NmdcProtocol::appendHubName(string & str, const string & hubName, const string & topic) {
@@ -1020,11 +1019,23 @@ string & NmdcProtocol::appendHubName(string & str, const string & hubName, const
 	}
 }
 
+
+
 // $HubTopic hubTopic|
 string & NmdcProtocol::appendHubTopic(string & str, const string & hubTopic) {
 	str.reserve(str.size() + hubTopic.size() + 11);
 	return str.append(STR_LEN("$HubTopic ")).append(hubTopic).append(STR_LEN(NMDC_SEPARATOR));
 }
+
+
+
+// msg|
+void NmdcProtocol::sendToChat(DcConn * dcConn, const string & data, bool flush /*= true*/) {
+	dcConn->reserve(data.size() + 1); // data.size() + 1
+	dcConn->send(data, true, flush);
+}
+
+
 
 // <nick> msg|
 void NmdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string & uid, bool flush /*= true*/) {
@@ -1034,6 +1045,22 @@ void NmdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string
 	dcConn->send(STR_LEN("> "), false, false);
 	dcConn->send(data, true, flush);
 }
+
+
+
+// msg|
+void NmdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, bool flush /*= true*/) {
+	sendToChat(dcConn, data, flush);
+}
+
+
+
+// <nick> msg|
+void NmdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, const string & uid, bool flush /*= true*/) {
+	sendToChat(dcConn, data, uid, flush);
+}
+
+
 
 // $To: to From: from $<nick> msg|
 void NmdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string & uid, const string & from, bool flush /*= true*/) {
@@ -1063,11 +1090,15 @@ string & NmdcProtocol::appendQuit(string & str, const string & nick) {
 	return str.append(STR_LEN("$Quit ")).append(nick).append(STR_LEN(NMDC_SEPARATOR));
 }
 
+
+
 // $OpList nick$$|
 string & NmdcProtocol::appendOpList(string & str, const string & nick) {
 	str.reserve(str.size() + nick.size() + 11);
 	return str.append(STR_LEN("$OpList ")).append(nick).append(STR_LEN("$$")).append(STR_LEN(NMDC_SEPARATOR));
 }
+
+
 
 // $UserIP nick ip$$|
 string & NmdcProtocol::appendUserIp(string & str, const string & nick, const string & ip) {
@@ -1077,6 +1108,8 @@ string & NmdcProtocol::appendUserIp(string & str, const string & nick, const str
 	}
 	return str;
 }
+
+
 
 // $ForceMove address|
 string & NmdcProtocol::appendForceMove(string & str, const string & address) {

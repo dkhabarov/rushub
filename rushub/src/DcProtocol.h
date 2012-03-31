@@ -64,7 +64,15 @@ public:
 		mDcServer = dcServer;
 	}
 
+	/// Chat Direct
+	virtual void sendToChat(DcConn *, const string & data, bool flush = true) = 0;
 	virtual void sendToChat(DcConn *, const string & data, const string & uid, bool flush = true) = 0;
+
+	/// Chat Broadcast
+	virtual void sendToChatAll(DcConn *, const string & data, bool flush = true) = 0;
+	virtual void sendToChatAll(DcConn *, const string & data, const string & uid, bool flush = true) = 0;
+
+	/// Private Message
 	virtual void sendToPm(DcConn *, const string & data, const string & uid, const string & from, bool flush = true) = 0;
 
 	virtual void forceMove(DcConn * dcConn, const char * address, const char * reason = NULL) = 0;

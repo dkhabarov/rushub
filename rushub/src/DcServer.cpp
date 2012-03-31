@@ -1020,9 +1020,9 @@ bool DcServer::sendToUser(DcUserBase * dcUserBase, const string & data, const ch
 	if (from && uid) {
 		dcConn->mDcUser->sendToPm(data, uid, from, true); // PM
 	} else if (uid) {
-		dcConn->mDcUser->sendToChat(data, uid, true); // Chat
+		dcConn->mDcUser->sendToChat(data, uid, true); // Chat from user
 	} else {
-		dcConn->send(data, dcConn->mDcUser->mType == CLIENT_TYPE_DC); // Simple Msg
+		dcConn->mDcUser->sendToChat(data, true); // Chat
 	}
 	return true;
 }
@@ -1089,7 +1089,7 @@ bool DcServer::sendToIp(const string & ip, const string & data, unsigned long pr
 	} else if (uid) {
 		mIpListConn->sendToIpChat(ip, data, uid, profile, true); // Chat
 	} else {
-		mIpListConn->sendToIp(ip, data, profile, true, true); // Simple Msg
+		mIpListConn->sendToIp(ip, data, profile, true); // Simple Msg
 	}
 	return true;
 }
@@ -1289,7 +1289,7 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 		string inf(STR_LEN("IINF "));
 		inf.reserve(79);
 		inf.append(dcUser->getUid()).append(STR_LEN(" CT")).append(ct, 1).append(STR_LEN(" NI")).append(uid);
-		inf.append(STR_LEN(" SS0 HN0 HR0 HO1 VEBot\\sV:1.0 SL0 DERusHub\\sbot"));
+		inf.append(STR_LEN(" IDAONWQSVCXNJKW7L4HLB5O24TYW55555KAEK7WRY SS0 HN0 HR0 HO1 VEBot\\sV:1.0 SL0 DERusHub\\sbot"));
 		dcUser->setInfo(inf);
 	} else { // NMDC
 		if (!uid.size() || uid.size() > 0x40 || uid.find_first_of(" |$") != uid.npos) {

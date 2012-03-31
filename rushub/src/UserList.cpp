@@ -147,7 +147,7 @@ struct ufSendChat : public unary_function<void, UserList::iterator> {
 
 	void operator() (UserBase * userBase) {
 		if (userBase && userBase->isCanSend() && !userBase->getUid().empty()) {
-			userBase->sendToChat(mData, mUid, true);
+			userBase->sendToChatAll(mData, mUid, true);
 		}
 	}
 
@@ -270,7 +270,7 @@ UserList::UserList(const string & name) :
 
 
 UserList::~UserList() {
-	for (unsigned int i = 0; i < mListItems.size(); ++i) {
+	for (size_t i = 0; i < mListItems.size(); ++i) {
 		delete mListItems[i];
 	}
 }
