@@ -850,7 +850,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 			} else { // NMDC
 				mNmdcProtocol.appendQuit(msg, dcUser->getUid()); // FIXME
 			}
-			sendToAll(msg, false, true/*mDcConfig.mDelayedMyinfo*/); // Delay in sending MyINFO (and Quit)
+			sendToAllRaw(msg, false, false/*mDcConfig.mDelayedMyinfo*/); // Delay in sending MyINFO (and Quit)
 		}
 	}
 	return true;
@@ -869,10 +869,10 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 
 			// Show INF string to all users
-			sendToAll(dcUser->getInfo(), true, true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
+			sendToAllRaw(dcUser->getInfo(), true, false/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
 
 			// Show INF string of the current user to all enterring users
-			mEnterList.sendToAllAdc(dcUser->getInfo(), true/*mDcConfig.mDelayedMyinfo*/);
+			mEnterList.sendToAllAdc(dcUser->getInfo(), true, false/*mDcConfig.mDelayedMyinfo*/);
 
 		}
 
@@ -904,19 +904,19 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 		} else {
 
 			// Sending the greeting for all users, not supporting feature NoHello (except enterring users)
-			mHelloList.sendToAll(mNmdcProtocol.appendHello(hello, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false); // NMDC only
+			mHelloList.sendToAll(mNmdcProtocol.appendHello(hello, dcUser->getUid()), false, false/*mDcConfig.mDelayedMyinfo*/); // NMDC only
 
 			// Show MyINFO string to all users
-			sendToAll(dcUser->getInfo(), true, true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
+			sendToAllRaw(dcUser->getInfo(), true, false/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
 
 			// Show MyINFO string of the current user to all enterring users
-			mEnterList.sendToAll(dcUser->getInfo(), true/*mDcConfig.mDelayedMyinfo*/);
+			mEnterList.sendToAll(dcUser->getInfo(), true, false/*mDcConfig.mDelayedMyinfo*/);
 
 			// Op entry
 			if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
 				string opList;
-				mDcUserList.sendToAll(mNmdcProtocol.appendOpList(opList, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false); // FIXME
-				mEnterList.sendToAll(opList, true/*mDcConfig.mDelayedMyinfo*/, false);
+				mDcUserList.sendToAll(mNmdcProtocol.appendOpList(opList, dcUser->getUid()), false, false/*mDcConfig.mDelayedMyinfo*/); // FIXME
+				mEnterList.sendToAll(opList, false, false/*mDcConfig.mDelayedMyinfo*/);
 			}
 		}
 
@@ -932,7 +932,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 			string ipList;
 			mNmdcProtocol.appendUserIp(ipList, dcUser->getUid(), dcUser->getIp()); // FIXME
 			if (ipList.size()) {
-				mIpList.sendToAll(ipList, true, false);
+				mIpList.sendToAll(ipList, false, false);
 			}
 
 			if (dcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
@@ -1058,9 +1058,20 @@ bool DcServer::sendToNickRaw(const char * to, const string & data) {
 void DcServer::sendToAll(const string & data, bool addSep, bool flush) {
 	// Protocol dependence
 	if (mDcConfig.mAdcOn) { // ADC
-		mDcUserList.sendToAllAdc(data, flush, addSep);
+		mChatList.sendToAllAdc(data, addSep, flush);
 	} else { // NMDC
-		mDcUserList.sendToAll(data, flush, addSep);
+		mChatList.sendToAll(data, addSep, flush);
+	}
+}
+
+
+
+void DcServer::sendToAllRaw(const string & data, bool addSep, bool flush) {
+	// Protocol dependence
+	if (mDcConfig.mAdcOn) { // ADC
+		mDcUserList.sendToAllAdc(data, addSep, flush);
+	} else { // NMDC
+		mDcUserList.sendToAll(data, addSep, flush);
 	}
 }
 
@@ -1074,7 +1085,7 @@ bool DcServer::sendToAll(const string & data, const char * uid, const char * fro
 		mDcUserList.sendToAllChat(data, uid); // Chat from user
 	} else {
 		// TODO send to chat
-		sendToAll(data, true, false); // Simple Chat
+		sendToAll(data, true, true); // Simple Chat
 	}
 	return true;
 }
@@ -1084,7 +1095,7 @@ bool DcServer::sendToAll(const string & data, const char * uid, const char * fro
 /// Send raw data to all
 bool DcServer::sendToAllRaw(const string & data) {
 	// TODO
-	sendToAll(data, true, false);
+	sendToAllRaw(data, true, false);
 	return true;
 }
 
@@ -1159,14 +1170,7 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & nickList, const strin
 		}
 	}
 
-	if (from && uid) {
-		mDcUserList.sendToAllPm(data, uid, from); // PM
-	} else if (uid) {
-		mDcUserList.sendToAllChat(data, uid);  // Chat from user
-	} else {
-		// TODO
-		sendToAll(data, true, false); // Simple Chat
-	}
+	sendToAll(data, uid, from);
 
 	for (vector<DcUser *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
 		(*ul_it)->setCanSend(true);
@@ -1189,8 +1193,7 @@ bool DcServer::sendToAllExceptNicksRaw(const vector<string> & nickList, const st
 		}
 	}
 
-	// TODO
-	sendToAll(data, true, false);
+	sendToAllRaw(data);
 
 	for (vector<DcUser *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
 		(*ul_it)->setCanSend(true);
@@ -1217,14 +1220,7 @@ bool DcServer::sendToAllExceptIps(const vector<string> & ipList, const string & 
 		}
 	}
 
-	if (from && uid) {
-		mDcUserList.sendToAllPm(data, uid, from); // PM
-	} else if (uid) {
-		mDcUserList.sendToAllChat(data, uid); // Chat from user
-	} else {
-		// TODO
-		sendToAll(data, true, false); // Simple Chat
-	}
+	sendToAll(data, uid, from);
 
 	for (vector<DcConn*>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
 		(*ul_it)->mDcUser->setCanSend(true);
@@ -1251,8 +1247,7 @@ bool DcServer::sendToAllExceptIpsRaw(const vector<string> & ipList, const string
 		}
 	}
 
-	// TODO
-	sendToAll(data, true, false);
+	sendToAllRaw(data);
 
 	for (vector<DcConn*>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
 		(*ul_it)->mDcUser->setCanSend(true);
@@ -1335,7 +1330,7 @@ bool DcServer::setConfig(const string & name, const string & value) {
 
 		} else { // NMDC
 			string msg;
-			sendToAll(mNmdcProtocol.appendHubName(msg, mDcConfig.mHubName, mDcConfig.mTopic)); // FIXME
+			sendToAllRaw(mNmdcProtocol.appendHubName(msg, mDcConfig.mHubName, mDcConfig.mTopic)); // FIXME
 		}
 	}
 	mDcConfig.save();

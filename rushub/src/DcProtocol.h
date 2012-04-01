@@ -94,7 +94,7 @@ protected:
 
 protected:
 
-	const string & getFirstMsg(bool & useCache);
+	const string & getFirstMsg(bool & flush);
 	bool checkState(DcConn *, const char * cmd, unsigned int state);
 
 }; // DcProtocol

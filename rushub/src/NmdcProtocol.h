@@ -151,7 +151,7 @@ private:
 
 	int checkCommand(NmdcParser *, DcConn *);
 	bool antiflood(DcConn *, unsigned int type);
-	void sendMode(DcConn *, const string & str, int mode, UserList &, bool useCache = false);
+	void sendMode(DcConn *, const string & str, int mode, UserList &, bool flush = true);
 
 	/// Check validate nick (user)
 	bool validateUser(DcConn *, const string & nick);

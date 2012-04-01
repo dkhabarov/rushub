@@ -157,7 +157,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 		switch(adcParser->getHeader()) {
 
 			case HEADER_BROADCAST:
-				mDcServer->sendToAll(adcParser->mCommand, true, true);
+				mDcServer->sendToAllRaw(adcParser->mCommand, true, false);
 				break;
 
 			case HEADER_DIRECT:
@@ -247,9 +247,9 @@ int AdcProtocol::eventSup(AdcParser *, DcConn * dcConn) {
 
 	// Get First Message
 	static string cache;
-	bool useCache = true;
-	const string & buff = getFirstMsg(useCache);
-	if (!useCache) {
+	bool flush = false;
+	const string & buff = getFirstMsg(flush);
+	if (flush) {
 		cp1251ToUtf8(buff, cache, escaper);
 	}
 
@@ -315,7 +315,7 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 
 			// How send changed params?
 
-			//mDcServer->sendToAll(dcConn->mDcUser->getInfo(), true, true);
+			//mDcServer->sendToAllRaw(dcConn->mDcUser->getInfo(), true, false);
 			return 0; // Don't use getInfo in normal state!
 		}
 	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
@@ -368,7 +368,7 @@ int AdcProtocol::eventMsg(AdcParser * adcParser, DcConn * dcConn) {
 	// Sending message
 	if (adcParser->getHeader() == HEADER_BROADCAST) {
 		// TODO sendMode
-		mDcServer->mChatList.sendToAllAdc(adcParser->mCommand, false);
+		mDcServer->mChatList.sendToAllAdc(adcParser->mCommand, true, true);
 		return 1;
 	}
 	return 0;

@@ -326,6 +326,7 @@ private:
 	void afterUserEnter(DcConn *);
 
 	void sendToAll(const string & data, bool addSep, bool flush);
+	void sendToAllRaw(const string & data, bool addSep, bool flush);
 
 	/// Call list struct for registration actions into the plugins
 	struct PluginCallList {

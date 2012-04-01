@@ -76,7 +76,7 @@ void DcProtocol::delFromHide(DcUser *) {
 
 
 // return true if use cache
-const string & DcProtocol::getFirstMsg(bool & useCache) {
+const string & DcProtocol::getFirstMsg(bool & flush) {
 
 	static int64_t shareVal = -1;
 	static int usersVal = -1;
@@ -87,7 +87,7 @@ const string & DcProtocol::getFirstMsg(bool & useCache) {
 	long min = Uptime.sec() / 60;
 	if (timeVal != min) {
 		timeVal = min;
-		useCache = false;
+		flush = true;
 		stringstream oss;
 		int w, d, h, m;
 		Uptime.asTimeVals(w, d, h, m);
@@ -105,15 +105,15 @@ const string & DcProtocol::getFirstMsg(bool & useCache) {
 	}
 	if (shareVal != mDcServer->miTotalShare) {
 		shareVal = mDcServer->miTotalShare;
-		useCache = false;
+		flush = true;
 		DcServer::getNormalShare(shareVal, shareCache);
 	}
 	if (usersVal != mDcServer->getUsersCount()) {
 		usersVal = mDcServer->getUsersCount();
-		useCache = false;
+		flush = true;
 	}	
 
-	if (!useCache) {
+	if (flush) {
 		stringReplace(mDcServer->mDcLang.mFirstMsg, string(STR_LEN("HUB")), cache, string(STR_LEN(INTERNALNAME " " INTERNALVERSION)));
 		stringReplace(cache, string(STR_LEN("uptime")), cache, timeCache);
 		stringReplace(cache, string(STR_LEN("users")), cache, usersVal);

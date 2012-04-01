@@ -138,10 +138,10 @@ public:
 	}
 
 	/** Sending data to all from the list */
-	void sendToAll(const string & data, bool useCache = false, bool addSep = true);
+	void sendToAll(const string & data, bool addSep = true, bool flush = true);
 
 	/** Sending data to all from the list */
-	void sendToAllAdc(const string & data, bool useCache = false, bool addSep = true);
+	void sendToAllAdc(const string & data, bool addSep = true, bool flush = true);
 
 	void sendToFeature(const string & data, const vector<int> & positive, 
 		const vector<int> & negative, bool addSep = true);

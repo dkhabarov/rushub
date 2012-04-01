@@ -307,11 +307,11 @@ const string & UserList::getList(int number) {
 /**
  Sendind data to all users from the list
  data - sending data
- useCache - true - not send and save to cache, false - send data and send cache
+ flush - false - not send and save to cache, true - send data and send cache
  addSep - add sep to end of list
  */
-void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
-	if (!useCache) {
+void UserList::sendToAll(const string & data, bool addSep, bool flush) {
+	if (flush) {
 		if (log(LEVEL_TRACE)) {
 			logStream() << "sendToAll begin" << endl;
 		}
@@ -334,8 +334,8 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 
 
 
-void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
-	if (!useCache) {
+void UserList::sendToAllAdc(const string & data, bool addSep, bool flush) {
+	if (flush) {
 		if (log(LEVEL_TRACE)) {
 			logStream() << "sendToAll begin" << endl;
 		}
@@ -431,11 +431,11 @@ void UserList::flushForUser(UserBase * userBase) {
 void UserList::flushCache() {
 	if (mCacheNmdc.size()) {
 		string str;
-		sendToAll(str, false, false);
+		sendToAll(str, false, true);
 	}
 	if (mCacheAdc.size()) {
 		string str;
-		sendToAllAdc(str, false, false);
+		sendToAllAdc(str, false, true);
 	}
 }
 
