@@ -86,7 +86,7 @@ using namespace ::std;
 
 // Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10039
+	#define INTERNAL_PLUGIN_VERSION 10040
 #endif
 
 // NMDC protocol separator
@@ -315,7 +315,7 @@ public:
 	/// Get user base by uid
 	virtual DcUserBase * getDcUserBase(const char * uid) = 0;
 
-	/// Send comand to user
+	/// Send command to user
 	virtual bool sendToUser(
 		DcUserBase *,
 		const string & data,
@@ -323,7 +323,13 @@ public:
 		const char * from = NULL
 	) = 0;
 
-	/// Send comand to nick
+	/// Send raw command to user
+	virtual bool sendToUserRaw(
+		DcUserBase *,
+		const string & data
+	) = 0;
+
+	/// Send command to nick
 	virtual bool sendToNick(
 		const char * to,
 		const string & data,
@@ -331,14 +337,25 @@ public:
 		const char * from = NULL
 	) = 0;
 
-	/// Send comand to all
+	/// Send raw command to nick
+	virtual bool sendToNickRaw(
+		const char * to,
+		const string & data
+	) = 0;
+
+	/// Send command to all
 	virtual bool sendToAll(
 		const string & data,
 		const char * uid = NULL,
 		const char * from = NULL
 	) = 0;
 
-	/// Send comand to profiles
+	/// Send raw command to all
+	virtual bool sendToAllRaw(
+		const string & data
+	) = 0;
+
+	/// Send command to profiles
 	virtual bool sendToProfiles(
 		unsigned long profile,
 		const string & data,
@@ -346,7 +363,13 @@ public:
 		const char * from = NULL
 	) = 0;
 
-	/// Send comand to ip
+	/// Send raw command to profiles
+	virtual bool sendToProfilesRaw(
+		unsigned long profile,
+		const string & data
+	) = 0;
+
+	/// Send command to ip
 	virtual bool sendToIp(
 		const string & ip,
 		const string & data,
@@ -355,7 +378,14 @@ public:
 		const char * from = NULL
 	) = 0;
 
-	/// Send comand to all except nicks
+	/// Send raw command to ip
+	virtual bool sendToIpRaw(
+		const string & ip,
+		const string & data,
+		unsigned long profile = 0
+	) = 0;
+
+	/// Send command to all except nicks
 	virtual bool sendToAllExceptNicks(
 		const vector<string> & nickList,
 		const string & data,
@@ -363,12 +393,24 @@ public:
 		const char * from = NULL
 	) = 0;
 
-	/// Send comand to all except ips
+	/// Send raw command to all except nicks
+	virtual bool sendToAllExceptNicksRaw(
+		const vector<string> & nickList,
+		const string & data
+	) = 0;
+
+	/// Send command to all except ips
 	virtual bool sendToAllExceptIps(
 		const vector<string> & ipList,
 		const string & data,
 		const char * uid = NULL,
 		const char * from = NULL
+	) = 0;
+
+	/// Send raw command to all except ips
+	virtual bool sendToAllExceptIpsRaw(
+		const vector<string> & ipList,
+		const string & data
 	) = 0;
 
 

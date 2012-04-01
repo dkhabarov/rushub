@@ -36,7 +36,7 @@
 #endif
 
 #define PLUGIN_NAME "LuaPlugin"
-#define PLUGIN_VERSION "2.8"
+#define PLUGIN_VERSION "2.9[beta]"
 
 
 #ifndef STR_LEN

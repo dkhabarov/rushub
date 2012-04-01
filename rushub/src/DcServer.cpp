@@ -1013,7 +1013,7 @@ const vector<DcUserBase *> & DcServer::getDcUserBaseByIp(const char * ip) {
 /// Send data to user
 bool DcServer::sendToUser(DcUserBase * dcUserBase, const string & data, const char * uid, const char * from) {
 	DcUser * dcUser = static_cast<DcUser *> (dcUserBase);
-	if (!dcUser || !dcUser->mDcConn) {
+	if (!dcUser || !dcUser->mDcConn) { // Check exist and not bot
 		return false;
 	}
 	DcConn * dcConn = dcUser->mDcConn;
@@ -1022,8 +1022,20 @@ bool DcServer::sendToUser(DcUserBase * dcUserBase, const string & data, const ch
 	} else if (uid) {
 		dcConn->mDcUser->sendToChat(data, uid, true); // Chat from user
 	} else {
-		dcConn->mDcUser->sendToChat(data, true); // Chat
+		dcConn->mDcUser->sendToChat(data, true); // Simple Chat
 	}
+	return true;
+}
+
+
+
+/// Send raw data to user
+bool DcServer::sendToUserRaw(DcUserBase * dcUserBase, const string & data) {
+	DcUser * dcUser = static_cast<DcUser *> (dcUserBase);
+	if (!dcUser || !dcUser->mDcConn) { // Check exist and not bot
+		return false;
+	}
+	dcUser->mDcConn->send(data, true, false);
 	return true;
 }
 
@@ -1031,11 +1043,14 @@ bool DcServer::sendToUser(DcUserBase * dcUserBase, const string & data, const ch
 
 /// Send data to nick
 bool DcServer::sendToNick(const char * to, const string & data, const char * uid, const char * from) {
-	DcUser * dcUser = getDcUser(to);
-	if (!dcUser || !dcUser->mDcConn) { // Check exist and not bot
-		return false;
-	}
-	return sendToUser(dcUser, data, uid, from);
+	return sendToUser(getDcUser(to), data, uid, from);
+}
+
+
+
+/// Send raw data to nick
+bool DcServer::sendToNickRaw(const char * to, const string & data) {
+	return sendToUserRaw(getDcUser(to), data);
 }
 
 
@@ -1056,10 +1071,20 @@ bool DcServer::sendToAll(const string & data, const char * uid, const char * fro
 	if (from && uid) {
 		mDcUserList.sendToAllPm(data, uid, from); // PM
 	} else if (uid) {
-		mDcUserList.sendToAllChat(data, uid); // Chat
+		mDcUserList.sendToAllChat(data, uid); // Chat from user
 	} else {
-		sendToAll(data, true, false); // Simple Msg
+		// TODO send to chat
+		sendToAll(data, true, false); // Simple Chat
 	}
+	return true;
+}
+
+
+
+/// Send raw data to all
+bool DcServer::sendToAllRaw(const string & data) {
+	// TODO
+	sendToAll(data, true, false);
 	return true;
 }
 
@@ -1070,15 +1095,26 @@ bool DcServer::sendToProfiles(unsigned long profile, const string & data, const 
 	if (from && uid) {
 		mDcUserList.sendToAllPm(data, uid, from, profile); // PM
 	} else if (uid) {
-		mDcUserList.sendToAllChat(data, uid, profile); // Chat
+		mDcUserList.sendToAllChat(data, uid, profile); // Chat from user
 	} else {
-		mDcUserList.sendToProfiles(profile, data, true); // Simple Msg
+		// TODO
+		mDcUserList.sendToProfiles(profile, data, true); // Simple Chat
 	}
 	return true;
 }
 
 
 
+/// Send raw data to profiles
+bool DcServer::sendToProfilesRaw(unsigned long profile, const string & data) {
+	// TODO
+	mDcUserList.sendToProfiles(profile, data, true);
+	return true;
+}
+
+
+
+/// Send data to ip
 bool DcServer::sendToIp(const string & ip, const string & data, unsigned long profile, const char * uid, const char * from) {
 	if (!Conn::checkIp(ip)) {
 		return false;
@@ -1087,10 +1123,24 @@ bool DcServer::sendToIp(const string & ip, const string & data, unsigned long pr
 	if (from && uid) {
 		mIpListConn->sendToIpPm(ip, data, uid, from, profile, true); // PM
 	} else if (uid) {
-		mIpListConn->sendToIpChat(ip, data, uid, profile, true); // Chat
+		mIpListConn->sendToIpChat(ip, data, uid, profile, true); // Chat from user
 	} else {
-		mIpListConn->sendToIp(ip, data, profile, true); // Simple Msg
+		// TODO
+		mIpListConn->sendToIp(ip, data, profile, true); // Simple Chat
 	}
+	return true;
+}
+
+
+
+/// Send raw data to ip
+bool DcServer::sendToIpRaw(const string & ip, const string & data, unsigned long profile) {
+	if (!Conn::checkIp(ip)) {
+		return false;
+	}
+
+	// TODO
+	mIpListConn->sendToIp(ip, data, profile, true);
 	return true;
 }
 
@@ -1112,9 +1162,10 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & nickList, const strin
 	if (from && uid) {
 		mDcUserList.sendToAllPm(data, uid, from); // PM
 	} else if (uid) {
-		mDcUserList.sendToAllChat(data, uid);  // Chat
+		mDcUserList.sendToAllChat(data, uid);  // Chat from user
 	} else {
-		sendToAll(data, true, false); // Simple Msg
+		// TODO
+		sendToAll(data, true, false); // Simple Chat
 	}
 
 	for (vector<DcUser *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
@@ -1125,6 +1176,31 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & nickList, const strin
 
 
 
+/// Send raw data to all except nick list
+bool DcServer::sendToAllExceptNicksRaw(const vector<string> & nickList, const string & data) {
+
+	DcUser * dcUser = NULL;
+	vector<DcUser *> ul;
+	for (List_t::const_iterator it = nickList.begin(); it != nickList.end(); ++it) {
+		dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByUid(*it));
+		if (dcUser && dcUser->isCanSend()) {
+			dcUser->setCanSend(false);
+			ul.push_back(dcUser);
+		}
+	}
+
+	// TODO
+	sendToAll(data, true, false);
+
+	for (vector<DcUser *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
+		(*ul_it)->setCanSend(true);
+	}
+	return true;
+}
+
+
+
+/// Send data to all except ip list
 bool DcServer::sendToAllExceptIps(const vector<string> & ipList, const string & data, const char * uid, const char * from) {
 
 	DcConn * dcConn = NULL;
@@ -1141,13 +1217,42 @@ bool DcServer::sendToAllExceptIps(const vector<string> & ipList, const string & 
 		}
 	}
 
-	if (from && uid) { // PM
-		mDcUserList.sendToAllPm(data, uid, from);
-	} else if (uid) { // Chat
-		mDcUserList.sendToAllChat(data, uid);
+	if (from && uid) {
+		mDcUserList.sendToAllPm(data, uid, from); // PM
+	} else if (uid) {
+		mDcUserList.sendToAllChat(data, uid); // Chat from user
 	} else {
-		sendToAll(data, true, false); // Simple Msg
+		// TODO
+		sendToAll(data, true, false); // Simple Chat
 	}
+
+	for (vector<DcConn*>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
+		(*ul_it)->mDcUser->setCanSend(true);
+	}
+	return true;
+}
+
+
+
+/// Send raw data to all except ip list
+bool DcServer::sendToAllExceptIpsRaw(const vector<string> & ipList, const string & data) {
+
+	DcConn * dcConn = NULL;
+	vector<DcConn*> ul;
+	for (List_t::const_iterator it = ipList.begin(); it != ipList.end(); ++it) {
+		if (DcConn::checkIp(*it)) {
+			for (DcIpList::iterator mit = mIpListConn->begin((*it).c_str()); mit != mIpListConn->end(); ++mit) {
+				dcConn = static_cast<DcConn *> (*mit);
+				if (dcConn->mDcUser && dcConn->mDcUser->isCanSend() && dcConn->getIp() == (*it)) {
+					dcConn->mDcUser->setCanSend(false);
+					ul.push_back(dcConn);
+				}
+			}
+		}
+	}
+
+	// TODO
+	sendToAll(data, true, false);
 
 	for (vector<DcConn*>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
 		(*ul_it)->mDcUser->setCanSend(true);
