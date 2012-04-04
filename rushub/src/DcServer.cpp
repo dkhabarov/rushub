@@ -476,6 +476,7 @@ int DcServer::onNewConn(Conn * conn) {
 	if (ret) {
 		if (ret == 1 && !mDcConfig.mAdcOn) {
 			// TODO ADC (FLOOD_IP_ENTRY)
+			// TODO mDcConfig.mHubBot for ADC uid ?
 			sendToUser(dcConn->mDcUser, mDcLang.mFloodReEnter, mDcConfig.mHubBot.c_str());
 			dcConn->closeNice(9000, CLOSE_REASON_FLOOD_IP_ENTRY);
 		} else {
@@ -596,7 +597,7 @@ bool DcServer::checkNick(DcConn *dcConn) {
 
 	unsigned long uidHash = dcConn->mDcUser->getUidHash();
 
-
+	// TODO check nick for ADC (here we have uid!?)
 	// Protocol dependence
 	if (!mDcConfig.mAdcOn) { // NMDC
 
@@ -636,13 +637,10 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 		dcConn->logStream() << "Begin login" << endl;
 	}
 
-	// Protocol dependence
-	if (!mDcConfig.mAdcOn) { // NMDC
-		// check empty nick!
-		if (!checkNick(dcConn)) {
-			dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
-			return false;
-		}
+	// check empty nick!
+	if (!checkNick(dcConn)) {
+		dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
+		return false;
 	}
 
 	if (dcConn->mSendNickList) {
@@ -676,13 +674,10 @@ void DcServer::doUserEnter(DcConn * dcConn) {
 		return;
 	}
 
-	// Protocol dependence
-	if (!mDcConfig.mAdcOn) { // NMDC
-		// check empty nick!
-		if (!checkNick(dcConn)) {
-			dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
-			return;
-		}
+	// check empty nick!
+	if (!checkNick(dcConn)) {
+		dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
+		return;
 	}
 
 	unsigned long uidHash = dcConn->mDcUser->getUidHash();
@@ -844,7 +839,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 			if (mDcConfig.mAdcOn) { // ADC
 				msg.append(STR_LEN("IQUI ")).append(dcUser->getUid()).append(STR_LEN(ADC_SEPARATOR));
 			} else { // NMDC
-				mNmdcProtocol.appendQuit(msg, dcUser->getUid()); // FIXME
+				mNmdcProtocol.appendQuit(msg, dcUser->getUid()); // FIXME (for bot?)
 			}
 			sendToAllRaw(msg, false, false/*mDcConfig.mDelayedMyinfo*/); // Delay in sending MyINFO (and Quit)
 		}

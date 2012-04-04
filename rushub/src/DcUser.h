@@ -69,7 +69,7 @@ public:
 
 	virtual void disconnect();
 
-	virtual const string & getUid() const;
+	virtual const string & getUid() const; // User ID
 	void setUid(const string & uid);
 	unsigned long getUidHash() const;
 
