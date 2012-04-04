@@ -69,6 +69,7 @@ typedef enum {
 
 
 enum {
+	USER_LIST_ADC_INFO,
 	USER_LIST_NICK,
 	USER_LIST_MYINFO,
 	USER_LIST_IP

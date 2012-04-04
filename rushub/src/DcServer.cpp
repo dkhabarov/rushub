@@ -116,16 +116,12 @@ DcServer::DcServer(const string & configFile, const string &) :
 	mPluginList.setServer(this);
 	mPluginList.loadAll(); // Load plugins
 
-
-	// Protocol dependence
-	if (mDcConfig.mAdcOn) { // ADC
-		mDcUserList.addUserListItem(AdcProtocol::infList, "");
-	} else { // NMDC
-		mDcUserList.addUserListItem(NmdcProtocol::nickList, "$NickList ");
-		mDcUserList.addUserListItem(NmdcProtocol::myInfoList, "");
-		mDcUserList.addUserListItem(NmdcProtocol::ipList, "$UserIP ");
-		mOpList.addUserListItem(NmdcProtocol::nickList, "$OpList ");
-	}
+	// Preparing all lists
+	mDcUserList.addUserListItem(AdcProtocol::infList, ""); // USER_LIST_ADC_INFO
+	mDcUserList.addUserListItem(NmdcProtocol::nickList, "$NickList "); // USER_LIST_NICK
+	mDcUserList.addUserListItem(NmdcProtocol::myInfoList, ""); // USER_LIST_MYINFO
+	mDcUserList.addUserListItem(NmdcProtocol::ipList, "$UserIP "); // USER_LIST_IP
+	mOpList.addUserListItem(NmdcProtocol::nickList, "$OpList "); // 0
 
 	if (mDcConfig.mRegMainBot) { // Main bot registration
 		if (log(LEVEL_DEBUG)) {

@@ -1204,7 +1204,7 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 			dcConn->logStream() << "Sending Oplist" << endl;
 		}
 		// seperator "|" was not added in getNickList function, because seperator was "$$"
-		dcConn->send(mDcServer->mOpList.getList(), true, false);
+		dcConn->send(mDcServer->mOpList.getList(0), true, false);
 	}
 
 	if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST) && dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
