@@ -51,43 +51,25 @@ int getGVal(lua_State * L);
 // SetGVal(sScriptName, sParam, Value)
 int setGVal(lua_State * L);
 
-// SendToUser(UID/sToNick/tNicks, sData, sNick, sFrom)
+// SendToUser(UID/sToNick, sData, sNick, sFrom)
 int sendToUser(lua_State * L);
-
-// SendToUserRaw(UID/sToNick/tNicks, sData)
-int sendToUserRaw(lua_State * L);
 
 // SendToAll(sData, sNick, sFrom)
 int sendToAll(lua_State * L);
 
-// SendToAllRaw(sData)
-int sendToAllRaw(lua_State * L);
+// SendToAllExceptNicks(tExcept, sData, sNick, sFrom)
+int sendToAllExceptNicks(lua_State * L);
+
+// SendToAllExceptIps(tExcept, sData, sNick, sFrom)
+int sendToAllExceptIps(lua_State * L);
 
 // SendToProfile(iProfile/tProfiles, sData, sNick, sFrom)
 int sendToProfile(lua_State * L);
 
-// SendToProfileRaw(iProfile/tProfiles, sData)
-int sendToProfileRaw(lua_State * L);
-
-// SendToIP(sIP, sData, sNick, sFrom, iProfile/tProfiles)
+// SendToIp(sIP, sData, sNick, sFrom, iProfile/tProfiles)
 int sendToIp(lua_State * L);
 
-// SendToIPRaw(sIP, sData, iProfile/tProfiles)
-int sendToIpRaw(lua_State * L);
-
-// SendToAllExceptNicks(tExcept, sData, sNick, sFrom)
-int sendToAllExceptNicks(lua_State * L);
-
-// SendToAllExceptNicksRaw(tExcept, sData)
-int sendToAllExceptNicksRaw(lua_State * L);
-
-// SendToAllExceptIPs(tExcept, sData, sNick, sFrom)
-int sendToAllExceptIps(lua_State * L);
-
-// SendToAllExceptIPsRaw(tExcept, sData)
-int sendToAllExceptIpsRaw(lua_State * L);
-
-//! deprecated  SendToNicks(tNicks, sData, sNick, sFrom)
+// SendToNicks(tNicks, sData, sNick, sFrom)
 int sendToNicks(lua_State * L);
 
 // GetUser(UID/sNick, iByte)

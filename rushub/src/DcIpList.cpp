@@ -81,14 +81,14 @@ bool DcIpList::remove(DcConn * dcConn) {
 
 
 
-void DcIpList::sendToIp(const string & ip, const string & data, unsigned long profile, bool flush /*= true*/) {
+void DcIpList::sendToIp(const string & ip, const string & data, unsigned long profile, bool addSep /*= false*/, bool flush /*= true*/) {
 	unsigned long ipHash = mHash(ip);
 	IpList * ipList = IpTable::find(ipHash);
 	while (ipList != NULL) {
 		DcConn * dcConn = ipList->mData;
 		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv) {
 			if (!profile || checkProfile(dcConn, profile)) {
-				dcConn->send(data, true, flush);
+				dcConn->send(data, addSep, flush);
 			}
 		}
 		ipList = ipList->mNext;

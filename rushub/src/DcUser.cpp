@@ -77,16 +77,6 @@ void DcUser::send(const char * data, size_t len, bool addSep /*= false*/, bool f
 
 
 
-/// Chat Direct
-void DcUser::sendToChat(const string & data, bool flush /*= true*/) {
-	if (mDcConn) {
-		mDcConn->dcProtocol()->sendToChat(mDcConn, data, flush);
-	}
-}
-
-
-
-/// Chat Direct
 void DcUser::sendToChat(const string & data, const string & uid, bool flush /*= true*/) {
 	if (mDcConn) {
 		mDcConn->dcProtocol()->sendToChat(mDcConn, data, uid, flush);
@@ -95,25 +85,6 @@ void DcUser::sendToChat(const string & data, const string & uid, bool flush /*= 
 
 
 
-/// Chat Broadcast
-void DcUser::sendToChatAll(const string & data, bool flush /*= true*/) {
-	if (mDcConn) {
-		mDcConn->dcProtocol()->sendToChatAll(mDcConn, data, flush);
-	}
-}
-
-
-
-/// Chat Broadcast
-void DcUser::sendToChatAll(const string & data, const string & uid, bool flush /*= true*/) {
-	if (mDcConn) {
-		mDcConn->dcProtocol()->sendToChatAll(mDcConn, data, uid, flush);
-	}
-}
-
-
-
-/// Private Message
 void DcUser::sendToPm(const string & data, const string & uid, const string & from, bool flush /*= true*/) {
 	if (mDcConn) {
 		mDcConn->dcProtocol()->sendToPm(mDcConn, data, uid, from, flush);
@@ -249,15 +220,11 @@ unsigned long DcUser::getUidHash() const {
 
 const string & DcUser::getInfo() {
 	if (mInfoChanged) {
-
-		// Protocol dependence
-		// TODO replace to mDcConn->dcProtocol()->formingInfo(this, mInfo) for bot???
 		if (mDcServer->mDcConfig.mAdcOn) {
 			AdcParser::formingInfo(this, mInfo); // ADC
 		} else {
 			NmdcParser::formingInfo(this, mInfo); // NMDC
 		}
-
 		mInfoChanged = false;
 	}	
 	return mInfo;
@@ -269,13 +236,11 @@ const string & DcUser::getInfo() {
 bool DcUser::setInfo(const string & info) {
 
 	// Protocol dependence
-	// TODO replace to mDcConn->dcProtocol()->parseInfo(this, info) for bot???
 	if (mDcServer->mDcConfig.mAdcOn) { // ADC
 		AdcParser::parseInfo(this, info);
 	} else { // NMDC
 		NmdcParser::parseInfo(this, info);
 	}
-
 	return true;
 }
 
@@ -309,7 +274,7 @@ const string & DcUser::getNmdcTag() {
 
 // NMDC protocol only
 bool DcUser::isPassive() const {
-	// TODO refactoring!
+	// TODO: refactoring!
 	ParamBase * mode = getParam(USER_PARAM_MODE);
 	unsigned int passive = (mode != NULL && mode->getType() == Param::TYPE_STRING && mode->getString().size()) ? mode->getString()[0] : 0;
 	return passive == 80 || passive == 53 || passive == 83;
@@ -383,15 +348,15 @@ int DcUser::onSetShare(const string & old, const string & now) {
 
 /** Set/unset user in OpList (for plugins) */
 int DcUser::onSetInOpList(const string & old, const string & now) {
-	if (mDcConn) {
-		if (now != "0") {
-			if (old == "0") {
-				mDcConn->dcProtocol()->addToOps(this);
-			}
-		} else {
-			if (old != "0") {
-				mDcConn->dcProtocol()->delFromOps(this);
-			}
+	if (now != "0") {
+		if (old == "0") {
+			// TODO NMDC protocol
+			mDcServer->mNmdcProtocol.addToOps(this);
+		}
+	} else {
+		if (old != "0") {
+			// TODO NMDC protocol
+			mDcServer->mNmdcProtocol.delFromOps(this);
 		}
 	}
 	return 0;
@@ -400,15 +365,15 @@ int DcUser::onSetInOpList(const string & old, const string & now) {
 
 
 int DcUser::onSetInIpList(const string & old, const string & now) {
-	if (mDcConn) {
-		if (now != "0") {
-			if (old == "0") {
-				mDcConn->dcProtocol()->addToIpList(this);
-			}
-		} else {
-			if (old != "0") {
-				mDcConn->dcProtocol()->delFromIpList(this);
-			}
+	if (now != "0") {
+		if (old == "0") {
+			// TODO NMDC protocol
+			mDcServer->mNmdcProtocol.addToIpList(this);
+		}
+	} else {
+		if (old != "0") {
+			// TODO NMDC protocol
+			mDcServer->mNmdcProtocol.delFromIpList(this);
 		}
 	}
 	return 0;
@@ -417,15 +382,15 @@ int DcUser::onSetInIpList(const string & old, const string & now) {
 
 
 int DcUser::onSetHide(const string & old, const string & now) {
-	if (mDcConn) {
-		if (now != "0") {
-			if (old == "0") {
-				mDcConn->dcProtocol()->addToHide(this);
-			}
-		} else {
-			if (old != "0") {
-				mDcConn->dcProtocol()->delFromHide(this);
-			}
+	if (now != "0") {
+		if (old == "0") {
+			// TODO NMDC protocol
+			mDcServer->mNmdcProtocol.addToHide(this);
+		}
+	} else {
+		if (old != "0") {
+			// TODO NMDC protocol
+			mDcServer->mNmdcProtocol.delFromHide(this);
 		}
 	}
 	return 0;

@@ -54,12 +54,12 @@ ConnSelect::~ConnSelect() {
 
 
 
-bool ConnSelect::optIn(tSocket sock, EventFlag mask) {
+bool ConnSelect::optIn(tSocket sock, tEventFlag mask) {
 	if (
-		(mask & EF_INPUT && !mReadFS.set(sock)) ||
-		(mask & EF_OUTPUT && !mWriteFS.set(sock)) ||
-		(mask & EF_ERROR && !mExceptFS.set(sock)) ||
-		(mask & EF_CLOSE && !mCloseFS.set(sock))
+		(mask & eEF_INPUT && !mReadFS.set(sock)) ||
+		(mask & eEF_OUTPUT && !mWriteFS.set(sock)) ||
+		(mask & eEF_ERROR && !mExceptFS.set(sock)) ||
+		(mask & eEF_CLOSE && !mCloseFS.set(sock))
 	) {
 		return false;
 	}
@@ -74,17 +74,17 @@ bool ConnSelect::optIn(tSocket sock, EventFlag mask) {
 
 
 
-void ConnSelect::optOut(tSocket sock, EventFlag mask) {
-	if (mask & EF_INPUT ) {
+void ConnSelect::optOut(tSocket sock, tEventFlag mask) {
+	if (mask & eEF_INPUT ) {
 		mReadFS.clr(sock);
 	}
-	if (mask & EF_OUTPUT) {
+	if (mask & eEF_OUTPUT) {
 		mWriteFS.clr(sock);
 	}
-	if (mask & EF_ERROR ) {
+	if (mask & eEF_ERROR ) {
 		mExceptFS.clr(sock);
 	}
-	if (mask & EF_CLOSE ) {
+	if (mask & eEF_CLOSE ) {
 		mCloseFS.clr(sock);
 	}
 
@@ -103,16 +103,16 @@ void ConnSelect::optOut(tSocket sock, EventFlag mask) {
 int ConnSelect::optGet(tSocket sock) {
 	int mask = 0;
 	if (mReadFS.isSet(sock)) {
-		mask |= EF_INPUT;
+		mask |= eEF_INPUT;
 	}
 	if (mWriteFS.isSet(sock)) {
-		mask |= EF_OUTPUT;
+		mask |= eEF_OUTPUT;
 	}
 	if (mExceptFS.isSet(sock)) {
-		mask |= EF_ERROR;
+		mask |= eEF_ERROR;
 	}
 	if (mCloseFS.isSet(sock)) {
-		mask |= EF_CLOSE;
+		mask |= eEF_CLOSE;
 	}
 	return mask;
 }
@@ -122,16 +122,16 @@ int ConnSelect::optGet(tSocket sock) {
 int ConnSelect::revGet(tSocket sock) {
 	int mask = 0;
 	if (mResReadFS.isSet(sock)) {
-		mask |= EF_INPUT;
+		mask |= eEF_INPUT;
 	}
 	if (mResWriteFS.isSet(sock)) {
-		mask |= EF_OUTPUT;
+		mask |= eEF_OUTPUT;
 	}
 	if (mResExceptFS.isSet(sock)) {
-		mask |= EF_ERROR;
+		mask |= eEF_ERROR;
 	}
 	if (mCloseFS.isSet(sock)) {
-		mask |= EF_CLOSE;
+		mask |= eEF_CLOSE;
 	}
 	return mask;
 }
@@ -160,10 +160,10 @@ int ConnSelect::choose(Time & timeout) {
 	}
 
 	clearRevents();
-	setRevents(mResReadFS, EF_INPUT);
-	setRevents(mResWriteFS, EF_OUTPUT);
-	setRevents(mResExceptFS, EF_ERROR);
-	setRevents(mCloseFS, EF_CLOSE);
+	setRevents(mResReadFS, eEF_INPUT);
+	setRevents(mResWriteFS, eEF_OUTPUT);
+	setRevents(mResExceptFS, eEF_ERROR);
+	setRevents(mCloseFS, eEF_CLOSE);
 	return ret;
 }
 

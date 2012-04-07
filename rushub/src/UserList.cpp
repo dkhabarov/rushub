@@ -147,7 +147,7 @@ struct ufSendChat : public unary_function<void, UserList::iterator> {
 
 	void operator() (UserBase * userBase) {
 		if (userBase && userBase->isCanSend() && !userBase->getUid().empty()) {
-			userBase->sendToChatAll(mData, mUid, true);
+			userBase->sendToChat(mData, mUid, true);
 		}
 	}
 
@@ -270,7 +270,7 @@ UserList::UserList(const string & name) :
 
 
 UserList::~UserList() {
-	for (size_t i = 0; i < mListItems.size(); ++i) {
+	for (unsigned int i = 0; i < mListItems.size(); ++i) {
 		delete mListItems[i];
 	}
 }
@@ -307,11 +307,11 @@ const string & UserList::getList(int number) {
 /**
  Sendind data to all users from the list
  data - sending data
- flush - false - not send and save to cache, true - send data and send cache
+ useCache - true - not send and save to cache, false - send data and send cache
  addSep - add sep to end of list
  */
-void UserList::sendToAll(const string & data, bool addSep, bool flush) {
-	if (flush) {
+void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
+	if (!useCache) {
 		if (log(LEVEL_TRACE)) {
 			logStream() << "sendToAll begin" << endl;
 		}
@@ -334,8 +334,8 @@ void UserList::sendToAll(const string & data, bool addSep, bool flush) {
 
 
 
-void UserList::sendToAllAdc(const string & data, bool addSep, bool flush) {
-	if (flush) {
+void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
+	if (!useCache) {
 		if (log(LEVEL_TRACE)) {
 			logStream() << "sendToAll begin" << endl;
 		}
@@ -431,11 +431,11 @@ void UserList::flushForUser(UserBase * userBase) {
 void UserList::flushCache() {
 	if (mCacheNmdc.size()) {
 		string str;
-		sendToAll(str, false, true);
+		sendToAll(str, false, false);
 	}
 	if (mCacheAdc.size()) {
 		string str;
-		sendToAllAdc(str, false, true);
+		sendToAllAdc(str, false, false);
 	}
 }
 

@@ -50,16 +50,19 @@ protected:
 public:
 
 	/// Hash-table for connections
-	HashTable<ConnBase *> mConnBaseList;
+	typedef HashTable<ConnBase *> tConnBaseList;
+
+	/// Hash-table
+	tConnBaseList mConnBaseList;
 
 	/// Events flags
-	enum EventFlag {
-		EF_INPUT = 1 << 0, ///< For read (1)
-		EF_OUTPUT= 1 << 1, ///< For write (2)
-		EF_ERROR = 1 << 2, ///< Socket contains errors (4)
-		EF_CLOSE = 1 << 3, ///< Closed socket (8)
-		EF_ALL   = EF_INPUT | EF_OUTPUT | EF_ERROR,
-		EF_ALL_AND_CLOSE = EF_ALL | EF_CLOSE
+	enum tEventFlag {
+		eEF_INPUT = 1 << 0, ///< For read (1)
+		eEF_OUTPUT= 1 << 1, ///< For write (2)
+		eEF_ERROR = 1 << 2, ///< Socket contains errors (4)
+		eEF_CLOSE = 1 << 3, ///< Closed socket (8)
+		eEF_ALL   = eEF_INPUT | eEF_OUTPUT | eEF_ERROR,
+		eEF_ALL_AND_CLOSE = eEF_ALL | eEF_CLOSE
 	};
 
 public:
@@ -81,14 +84,14 @@ public:
 
 	virtual int choose(Time &) = 0;
 
-	virtual bool optIn(tSocket, EventFlag) = 0;
-	virtual void optOut(tSocket, EventFlag) = 0;
+	virtual bool optIn(tSocket, tEventFlag) = 0;
+	virtual void optOut(tSocket, tEventFlag) = 0;
 	virtual int optGet(tSocket) = 0;
 	virtual int revGet(tSocket) = 0;
 	virtual bool revTest(tSocket) = 0;
 
-	inline bool optIn(ConnBase *, EventFlag);
-	inline void optOut(ConnBase *, EventFlag);
+	inline bool optIn(ConnBase *, tEventFlag);
+	inline void optOut(ConnBase *, tEventFlag);
 	inline int optGet(ConnBase *);
 	inline int revGet(ConnBase *);
 	inline bool revTest(ConnBase *);
@@ -183,11 +186,11 @@ public:
 
 }; // class ConnChoose
 
-bool ConnChoose::optIn(ConnBase * connBase, ConnChoose::EventFlag eMask) {
+bool ConnChoose::optIn(ConnBase * connBase, ConnChoose::tEventFlag eMask) {
 	return connBase != NULL ? this->optIn(tSocket(*connBase), eMask) : false;
 }
 
-void ConnChoose::optOut(ConnBase * connBase, ConnChoose::EventFlag eMask) {
+void ConnChoose::optOut(ConnBase * connBase, ConnChoose::tEventFlag eMask) {
 	if (!connBase) {
 		return;
 	}

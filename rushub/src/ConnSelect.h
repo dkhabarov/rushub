@@ -62,8 +62,8 @@ public:
 
 	int choose(Time &);
 
-	bool optIn(tSocket, EventFlag);
-	void optOut(tSocket, EventFlag);
+	bool optIn(tSocket, tEventFlag);
+	void optOut(tSocket, tEventFlag);
 	int optGet(tSocket);
 	int revGet(tSocket);
 	bool revTest(tSocket);
@@ -134,7 +134,7 @@ public:
 			while (
 				!(++mIt).isEnd() &&
 				!(*mIt)->mRevents &&
-				!((*mIt)->mEvents & EF_CLOSE)
+				!((*mIt)->mEvents & eEF_CLOSE)
 			) {
 			}
 			return *this;
@@ -147,7 +147,7 @@ public:
 		if (
 			!begin_it.mIt.isEnd() &&
 			!(*begin_it.mIt)->mRevents &&
-			!((*begin_it.mIt)->mEvents & EF_CLOSE)
+			!((*begin_it.mIt)->mEvents & eEF_CLOSE)
 		) {
 			++begin_it;
 		}

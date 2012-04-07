@@ -1,4 +1,6 @@
-if STATIC_TINYXML
-  TINYXML_PATH = src/tinyxml
-endif
-SUBDIRS = $(TINYXML_PATH) src
+#if COND_OPT
+#	TINYXML = src/tinyxml
+#endif
+#SUBDIRS = $(TINYXML) src
+SUBDIRS = src
+

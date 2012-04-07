@@ -47,7 +47,7 @@ public:
 	bool add(DcConn *);
 	bool remove(DcConn *);
 
-	void sendToIp(const string & ip, const string & data, unsigned long profile = 0, bool flush = true);
+	void sendToIp(const string & ip, const string & data, unsigned long profile = 0, bool addSep = false, bool flush = true);
 	void sendToIpChat(const string & ip, const string & data, const string & uid, unsigned long profile = 0, bool flush = true);
 	void sendToIpPm(const string & ip, const string & data, const string & uid, const string & from, unsigned long profile = 0, bool flush = true);
 

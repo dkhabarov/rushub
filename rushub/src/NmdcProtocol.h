@@ -85,21 +85,12 @@ public:
 	string & appendValidateDenied(string & str, const string & nick);
 	string & appendHubName(string & str, const string & hubName, const string & topic);
 	string & appendHubTopic(string & str, const string & hubTopic);
+	virtual void sendToChat(DcConn *, const string & data, const string & uid, bool flush = true);
+	virtual void sendToPm(DcConn *, const string & data, const string & uid, const string & from, bool flush = true);
 	string & appendQuit(string & str, const string & nick);
 	string & appendOpList(string & str, const string & nick);
 	string & appendUserIp(string & str, const string & nick, const string & ip);
 	string & appendForceMove(string & str, const string & address);
-
-	/// Chat Direct
-	virtual void sendToChat(DcConn *, const string & data, bool flush = true);
-	virtual void sendToChat(DcConn *, const string & data, const string & uid, bool flush = true);
-
-	/// Chat Broadcast
-	virtual void sendToChatAll(DcConn *, const string & data, bool flush = true);
-	virtual void sendToChatAll(DcConn *, const string & data, const string & uid, bool flush = true);
-
-	/// Private Message
-	virtual void sendToPm(DcConn *, const string & data, const string & uid, const string & from, bool flush = true);
 
 
 	virtual void forceMove(DcConn *, const char * address, const char * reason = NULL);
@@ -109,15 +100,12 @@ public:
 	static void myInfoList(string & list, UserBase * userBase);
 	static void ipList(string & list, UserBase * userBase);
 
-	virtual void parseInfo(DcUser *, const string & info);
-	virtual void formingInfo(DcUser *, string & info);
-
-	virtual void addToOps(DcUser *);
-	virtual void delFromOps(DcUser *);
-	virtual void addToIpList(DcUser *);
-	virtual void delFromIpList(DcUser *);
-	virtual void addToHide(DcUser *);
-	virtual void delFromHide(DcUser *);
+	void addToOps(DcUser *);
+	void delFromOps(DcUser *);
+	void addToIpList(DcUser *);
+	void delFromIpList(DcUser *);
+	void addToHide(DcUser *);
+	void delFromHide(DcUser *);
 
 protected:
 
@@ -151,7 +139,7 @@ private:
 
 	int checkCommand(NmdcParser *, DcConn *);
 	bool antiflood(DcConn *, unsigned int type);
-	void sendMode(DcConn *, const string & str, int mode, UserList &, bool flush = true);
+	void sendMode(DcConn *, const string & str, int mode, UserList &, bool useCache = false);
 
 	/// Check validate nick (user)
 	bool validateUser(DcConn *, const string & nick);

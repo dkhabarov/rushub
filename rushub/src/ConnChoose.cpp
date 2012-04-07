@@ -46,7 +46,7 @@ bool ConnChoose::addConn(ConnBase * connBase) {
 
 /** Del from mConnBaseList */
 bool ConnChoose::deleteConn(ConnBase * connBase) {
-	optOut(connBase, EF_ALL_AND_CLOSE);
+	optOut(connBase, eEF_ALL_AND_CLOSE);
 	return mConnBaseList.remove((tSocket) (*connBase));
 }
 

@@ -30,7 +30,6 @@ using namespace ::std;
 namespace dcserver {
 
 class DcConn;
-class DcUser;
 class DcServer;
 
 namespace protocol {
@@ -64,29 +63,11 @@ public:
 		mDcServer = dcServer;
 	}
 
-	/// Chat Direct
-	virtual void sendToChat(DcConn *, const string & data, bool flush = true) = 0;
 	virtual void sendToChat(DcConn *, const string & data, const string & uid, bool flush = true) = 0;
-
-	/// Chat Broadcast
-	virtual void sendToChatAll(DcConn *, const string & data, bool flush = true) = 0;
-	virtual void sendToChatAll(DcConn *, const string & data, const string & uid, bool flush = true) = 0;
-
-	/// Private Message
 	virtual void sendToPm(DcConn *, const string & data, const string & uid, const string & from, bool flush = true) = 0;
 
 	virtual void forceMove(DcConn * dcConn, const char * address, const char * reason = NULL) = 0;
 	virtual int sendNickList(DcConn *) = 0;
-
-	virtual void parseInfo(DcUser *, const string & info) = 0;
-	virtual void formingInfo(DcUser *, string & info) = 0;
-
-	virtual void addToOps(DcUser *);
-	virtual void delFromOps(DcUser *);
-	virtual void addToIpList(DcUser *);
-	virtual void delFromIpList(DcUser *);
-	virtual void addToHide(DcUser *);
-	virtual void delFromHide(DcUser *);
 
 protected:
 
@@ -94,7 +75,7 @@ protected:
 
 protected:
 
-	const string & getFirstMsg(bool & flush);
+	const string & getFirstMsg(bool & useCache);
 	bool checkState(DcConn *, const char * cmd, unsigned int state);
 
 }; // DcProtocol

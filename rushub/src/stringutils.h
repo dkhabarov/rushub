@@ -50,6 +50,12 @@ namespace utils {
 
 static const string emptyStr("");
 
+string & stringReplace(const string &, const string &, string &, const string &, bool b = false, bool first = false);
+string & stringReplace(const string &, const string &, string &, double, bool b = false, bool first = false);
+string & stringReplace(const string &, const string &, string &, int, bool b = false, bool first = false);
+string & stringReplace(const string &, const string &, string &, long, bool b = false, bool first = false);
+string & stringReplace(const string &, const string &, string &, int64_t, bool b = false, bool first = false);
+
 string int64ToString(int64_t const &);
 int64_t stringToInt64(const string &);
 
@@ -70,35 +76,6 @@ string & toString(const T & value, string & str) {
 	oss << value;
 	str = oss.str();
 	return str;
-}
-
-/** Searching for in string str substrings %[varname] and change all found substrings on pattern with putting the got string in dest */
-template <class T>
-string & stringReplace(const string & str, const string & varname, string & dest, const T & pattern, bool b = false, bool first = false) {
-	string by;
-	toString(pattern, by);
-	dest = str;
-	if (!b) {
-		string search(STR_LEN("%["));
-		search.append(varname);
-		search.append(STR_LEN("]"));
-		size_t pos = dest.find(search);
-		if (first != true || pos == 0) {
-			while (pos != dest.npos) {
-				dest.replace(pos, search.size(), by);
-				pos = dest.find(search, pos + by.size());
-			}
-		}
-	} else {
-		size_t pos = dest.find(varname);
-		if (first != true || pos == 0) {
-			while (pos != dest.npos) {
-				dest.replace(pos, varname.size(), by);
-				pos = dest.find(varname, pos + by.size());
-			}
-		}
-	}
-	return dest;
 }
 
 

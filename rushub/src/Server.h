@@ -26,7 +26,7 @@
 #define SERVER_H
 
 #define INTERNALNAME "RusHub"
-#define INTERNALVERSION "2.3.10[beta]" // without space!
+#define INTERNALVERSION "2.3.9" // without space!
 
 #include "ConnChoose.h" // first (def winsock2.h)
 #include "Obj.h"
@@ -61,7 +61,7 @@ class ConnFactory;
 /// Server realization
 class Server : public Obj {
 
-friend class Conn; // for closeNow and mNumCloseConn
+friend class Conn; // for closeNow and miNumCloseConn
 friend class ConnFactory; // onNewData
 
 public:
@@ -122,7 +122,7 @@ protected:
 	int mMainLoopCode;
 
 	/// Strong close conn flag
-	int mNumCloseConn;
+	int miNumCloseConn;
 
 	/// Mean frequency
 	MeanFrequency<unsigned, 21> mMeanFrequency;

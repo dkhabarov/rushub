@@ -69,7 +69,7 @@ public:
 
 	virtual void disconnect();
 
-	virtual const string & getUid() const; // User ID
+	virtual const string & getUid() const;
 	void setUid(const string & uid);
 	unsigned long getUidHash() const;
 
@@ -94,16 +94,7 @@ public:
 
 	void send(const char * data, size_t len, bool addSep = false, bool flush = true);
 	virtual void send(const string & data, bool addSep = false, bool flush = true);
-
-	/// Chat Direct
-	virtual void sendToChat(const string & data, bool flush = true);
 	virtual void sendToChat(const string & data, const string & uid, bool flush = true);
-
-	/// Chat Broadcast
-	virtual void sendToChatAll(const string & data, bool flush = true);
-	virtual void sendToChatAll(const string & data, const string & uid, bool flush = true);
-
-	/// Private Message
 	virtual void sendToPm(const string & data, const string & uid, const string & from, bool flush = true);
 
 

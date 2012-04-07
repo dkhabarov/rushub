@@ -25,7 +25,6 @@
 #include "DcConn.h"
 #include "DcServer.h" // server() and UserList
 #include "DcUser.h" // for mDcUser
-#include "ZlibFilter.h"
 
 namespace dcserver {
 
@@ -102,18 +101,6 @@ size_t DcConn::send(const char * data, size_t len, bool addSep, bool flush) {
 		}
 	}
 	return writeData(data, len, flush);
-}
-
-
-
-void DcConn::sendZpipe(const char * data, size_t len, bool flush) {
-	string out;
-	if ((mFeatures & SUPPORT_FEATUER_ZPIPE) && ZlibFilter::compressFull(data, len, out)) {
-		send(STR_LEN("$ZOn"), true, false);
-		send(out, true, flush);
-	} else {
-		send(data, len, false, flush);
-	}
 }
 
 
@@ -257,7 +244,7 @@ void DcConn::onOk(bool ok) {
 
 bool DcConn::parseCommand(const char * cmd) {
 
-	// TODO deprecated? Set command pointer
+	// TODO: set command pointer
 	if (getCommandPtr() == NULL || mParser == NULL) {
 		return false;
 	}
@@ -325,7 +312,7 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 		#ifndef WITHOUT_PLUGINS
 			dcServer->mCalls.mOnUserDisconnected.callAll(dcConn->mDcUser);
 		#endif
-
+		
 		dcServer->mIpListConn->remove(dcConn);
 
 		if (dcConn->mDcUser != NULL) {

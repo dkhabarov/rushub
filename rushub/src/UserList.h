@@ -131,17 +131,17 @@ public:
 	UserBase * getUserBaseByUid(const string & uid);
 
 	void addUserListItem(UserListItem::Func func, const char * start = "");
-	const string & getList(int number);
+	const string & getList(int number = 0);
 
 	inline void remake() {
 		onRemove(NULL);
 	}
 
 	/** Sending data to all from the list */
-	void sendToAll(const string & data, bool addSep = true, bool flush = true);
+	void sendToAll(const string & data, bool useCache = false, bool addSep = true);
 
 	/** Sending data to all from the list */
-	void sendToAllAdc(const string & data, bool addSep = true, bool flush = true);
+	void sendToAllAdc(const string & data, bool useCache = false, bool addSep = true);
 
 	void sendToFeature(const string & data, const vector<int> & positive, 
 		const vector<int> & negative, bool addSep = true);

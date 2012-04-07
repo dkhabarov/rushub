@@ -55,13 +55,12 @@ public:
 	int mStartPing;       ///< Time interval in sec, after which begins ping user
 	int mMaxPassiveRes;   ///< Max results in the passive search
 
-	int mUsersLimit;	    ///< User's limit
-	int mCompressionType; ///< Compression type
+	int mUsersLimit;	///< User's limit
 
 	unsigned long mMaxNmdcCommandLength;
 	unsigned long mMaxWebCommandLength; ///< Max size of web cmd
 	unsigned mMaxCmdLen[NMDC_TYPE_UNKNOWN + 1];
-	unsigned mMaxNickLen; ///< Max length of nick
+	unsigned mMaxNickLen;	///< Max length of nick
 	unsigned mMinNickLen; ///< Min length of nick
 
 	/** Allowed number reconnection during miTimeReconnIp sec */

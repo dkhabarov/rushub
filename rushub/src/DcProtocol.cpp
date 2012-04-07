@@ -39,44 +39,8 @@ DcProtocol::~DcProtocol() {
 
 
 
-void DcProtocol::addToOps(DcUser *) {
-	// Not implemented
-}
-
-
-
-void DcProtocol::delFromOps(DcUser *) {
-	// Not implemented
-}
-
-
-
-void DcProtocol::addToIpList(DcUser *) {
-	// Not implemented
-}
-
-
-
-void DcProtocol::delFromIpList(DcUser *) {
-	// Not implemented
-}
-
-
-
-void DcProtocol::addToHide(DcUser *) {
-	// Not implemented
-}
-
-
-
-void DcProtocol::delFromHide(DcUser *) {
-	// Not implemented
-}
-
-
-
 // return true if use cache
-const string & DcProtocol::getFirstMsg(bool & flush) {
+const string & DcProtocol::getFirstMsg(bool & useCache) {
 
 	static int64_t shareVal = -1;
 	static int usersVal = -1;
@@ -87,7 +51,7 @@ const string & DcProtocol::getFirstMsg(bool & flush) {
 	long min = Uptime.sec() / 60;
 	if (timeVal != min) {
 		timeVal = min;
-		flush = true;
+		useCache = false;
 		stringstream oss;
 		int w, d, h, m;
 		Uptime.asTimeVals(w, d, h, m);
@@ -105,15 +69,15 @@ const string & DcProtocol::getFirstMsg(bool & flush) {
 	}
 	if (shareVal != mDcServer->miTotalShare) {
 		shareVal = mDcServer->miTotalShare;
-		flush = true;
+		useCache = false;
 		DcServer::getNormalShare(shareVal, shareCache);
 	}
 	if (usersVal != mDcServer->getUsersCount()) {
 		usersVal = mDcServer->getUsersCount();
-		flush = true;
+		useCache = false;
 	}	
 
-	if (flush) {
+	if (!useCache) {
 		stringReplace(mDcServer->mDcLang.mFirstMsg, string(STR_LEN("HUB")), cache, string(STR_LEN(INTERNALNAME " " INTERNALVERSION)));
 		stringReplace(cache, string(STR_LEN("uptime")), cache, timeCache);
 		stringReplace(cache, string(STR_LEN("users")), cache, usersVal);

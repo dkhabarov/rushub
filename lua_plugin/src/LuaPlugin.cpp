@@ -422,7 +422,7 @@ int LuaPlugin::moveDown(LuaInterpreter * script) {
 
 
 
-// TODO add cmd param
+// TODO: add cmd param
 /** 1 - blocked */
 int LuaPlugin::callAll(const char * funcName, unsigned int listFlag, vectorLuaInterpreter & vli, DcUserBase * dcUserBase, bool param /*= true*/) {
 

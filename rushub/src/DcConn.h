@@ -43,7 +43,7 @@ enum SupportFeature {
 	SUPPORT_FEATUER_NOGETINFO   = 1 << 1, ///< NoGetINFO feature
 	SUPPORT_FEATURE_NOHELLO     = 1 << 2, ///< NoHello feature
 	SUPPORT_FEATUER_USERIP2     = 1 << 3, ///< UserIP2 feature
-	SUPPORT_FEATUER_ZPIPE       = 1 << 4, ///< ZPipe0 or ZPipe feature
+	SUPPORT_FEATUER_TTHSEARCH   = 1 << 4, ///< TTHSearch feature
 	SUPPORT_FEATUER_QUICKLIST   = 1 << 5, ///< Quicklist feature
 	SUPPORT_FEATUER_PASSIVE     = 1 << 6, ///< Passive mode feature
 	SUPPORT_FEATUER_USERIP      = 1 << 7, ///< UserIP feature
@@ -132,13 +132,20 @@ public:
 	bool mNickListInProgress;  ///< True while sending first nicklist
 	DcUser * mDcUser;          ///< User object
 
-	/// Atniflood struct
-	struct Antiflood {
-		Time mTime, mTime2;
-		unsigned mCount, mCount2;
-		Antiflood() : mCount(0), mCount2(0) {
+	/// Timers struct
+	struct Timers {
+
+		Time mTime[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !
+		unsigned mCount[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !
+
+		Timers() {
+			for (int i = 0; i <= NMDC_TYPE_UNKNOWN; ++i) { // PROTOCOL NMDC !
+				mCount[i] = 0;
+			}
 		}
-	} mAntiflood[NMDC_TYPE_UNKNOWN + 1]; // PROTOCOL NMDC !
+
+	} mTimes1, mTimes2;
+
 
 public:
 
@@ -151,12 +158,6 @@ public:
 		return send(data.c_str(), data.size(), addSep, flush);
 	}
 	virtual size_t send(const char * data, size_t len, bool addSep = false, bool flush = true);
-
-	/// Sending command with zlib compression
-	inline void sendZpipe(const string & data, bool flush = true) {
-		sendZpipe(data.c_str(), data.size(), flush);
-	}
-	void sendZpipe(const char * data, size_t len, bool flush);
 
 	virtual bool parseCommand(const char * cmd);
 

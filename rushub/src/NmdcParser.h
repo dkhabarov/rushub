@@ -236,7 +236,6 @@ public:
 	static void setParam(DcUser *, const char * name, const string & value, bool remove = false);
 	static void setParam(DcUser *, const char * name, int value, bool remove = false);
 	static void getTag(DcUser *, string & tag);
-
 	static void parseInfo(DcUser *, const string & info);
 	static void formingInfo(DcUser *, string & info);
 

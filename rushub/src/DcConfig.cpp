@@ -84,7 +84,7 @@ void DcConfig::addVars(Server * server) {
 	add("sPluginPath",            mPluginPath,                          string(STR_LEN("./plugins/")));
 	add("sLogPath",               mLogPath,                             string(STR_LEN("./logs/")));
 	add("sLangPath",              mLangPath,                            string(STR_LEN("./lang/")));
-	add("sLang",                  mLang,                                string(STR_LEN("Russian"))); // TODO auto detect lang
+	add("sLang",                  mLang,                                string(STR_LEN("Russian"))); // TODO: auto detect lang
 
 	add("bAdcOn",                 mAdcOn,                               false);
 	add("sAddresses",             mAddresses,
@@ -112,7 +112,6 @@ void DcConfig::addVars(Server * server) {
 	#endif
 
 	add("iMaxLevel",              mMaxLevel,                            mMaxLevel); // set this default value for log
-	add("iCompressionType",       mCompressionType,                     0);
 	add("iUsersLimit",            mUsersLimit,                          -1     );
 	add("iMinNickLen",            mMinNickLen,                          2u     );
 	add("iMaxNickLen",            mMaxNickLen,                          32u    );
