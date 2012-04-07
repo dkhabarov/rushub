@@ -1267,7 +1267,7 @@ bool NmdcProtocol::antiflood(DcConn * dcConn, unsigned int type) {
 	DcConn::Antiflood & antiflood = dcConn->mAntiflood[type];
 
 	if (log(LEVEL_TRACE)) {
-		logStream() << antiflood.mCount << ", " << antiflood.mTime.msec() << 
+		logStream() << antiflood.mCount << ", " << antiflood.mTime.msec() << ", " << mDcServer->mTime.msec() << 
 			", " << mDcServer->mDcConfig.mFloodCount[type] << ", " << mDcServer->mDcConfig.mFloodTime[type] << endl;
 	}
 
@@ -1285,7 +1285,7 @@ bool NmdcProtocol::antiflood(DcConn * dcConn, unsigned int type) {
 	}
 
 	if (log(LEVEL_TRACE)) {
-		logStream() << antiflood.mCount2 << ", " << antiflood.mTime2.msec() << 
+		logStream() << antiflood.mCount2 << ", " << antiflood.mTime2.msec() << ", " << mDcServer->mTime.msec() << 
 			", " << mDcServer->mDcConfig.mFloodCount2[type] << ", " << mDcServer->mDcConfig.mFloodTime2[type] << endl;
 	}
 
