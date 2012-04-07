@@ -138,7 +138,7 @@ public:
 		unsigned mCount, mCount2;
 		Antiflood() : mCount(0), mCount2(0) {
 		}
-	} mAntiflood[NMDC_TYPE_UNKNOWN]; // PROTOCOL NMDC !
+	} mAntiflood[NMDC_TYPE_UNKNOWN + 1]; // PROTOCOL NMDC !
 
 public:
 
