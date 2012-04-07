@@ -25,7 +25,7 @@
 #ifndef NMDC_PROTOCOL_H
 #define NMDC_PROTOCOL_H
 
-#include "Protocol.h"
+#include "DcProtocol.h"
 #include "NmdcParser.h"
 
 #include <string>
@@ -47,9 +47,8 @@ class UserBase;
 namespace protocol {
 
 
-
 /// NMDC protocol
-class NmdcProtocol : public Protocol {
+class NmdcProtocol : public DcProtocol {
 
 public:
 
@@ -78,10 +77,6 @@ public:
 	virtual int onNewConn(Conn *);
 	virtual void onFlush(Conn *);
 
-	void setServer(DcServer * dcServer) {
-		mDcServer = dcServer;
-	}
-
 
 	string & appendLock(string & str);
 	string & appendHello(string & str, const string & nick);
@@ -90,16 +85,16 @@ public:
 	string & appendValidateDenied(string & str, const string & nick);
 	string & appendHubName(string & str, const string & hubName, const string & topic);
 	string & appendHubTopic(string & str, const string & hubTopic);
-	string & appendChat(string & str, const string & nick, const string & msg);
-	string & appendPm(string & str, const string & to, const string & from, const string & nick, const string & msg);
+	virtual void sendToChat(DcConn *, const string & data, const string & uid, bool flush = true);
+	virtual void sendToPm(DcConn *, const string & data, const string & uid, const string & from, bool flush = true);
 	string & appendQuit(string & str, const string & nick);
 	string & appendOpList(string & str, const string & nick);
 	string & appendUserIp(string & str, const string & nick, const string & ip);
 	string & appendForceMove(string & str, const string & address);
-	void appendPmToAll(string & start, string & end, const string & from, const string & nick, const string & msg);
 
 
-	int sendNickList(DcConn *); ///< Sending user-list and op-list
+	virtual void forceMove(DcConn *, const char * address, const char * reason = NULL);
+	virtual int sendNickList(DcConn *); ///< Sending user-list and op-list
 
 	static void nickList(string & list, UserBase * userBase);
 	static void myInfoList(string & list, UserBase * userBase);
@@ -113,8 +108,6 @@ public:
 	void delFromHide(DcUser *);
 
 protected:
-
-	DcServer * mDcServer;
 
 	typedef int (NmdcProtocol::*Event) (NmdcParser *, DcConn *);
 	Event events[NMDC_TYPE_UNKNOWN + 1];
@@ -151,7 +144,6 @@ private:
 	/// Check validate nick (user)
 	bool validateUser(DcConn *, const string & nick);
 	bool checkNickLength(DcConn *, size_t len);
-	bool badFlag(DcConn *, const char * cmd, unsigned int flag);
 
 }; // NmdcProtocol
 

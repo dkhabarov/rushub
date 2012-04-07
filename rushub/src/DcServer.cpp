@@ -85,7 +85,6 @@ DcServer::DcServer(const string & configFile, const string &) :
 	mHelloList("HelloList"),
 	mEnterList("EnterList"),
 	mChatList("ChatList"),
-	mAdcUserList("AdcUserList"),
 	miTotalUserCount(0),
 	miTotalShare(0),
 	mPluginList(mDcConfig.mPluginPath),
@@ -110,23 +109,26 @@ DcServer::DcServer(const string & configFile, const string &) :
 	// DcIpList
 	mIpListConn = new DcIpList();
 
-	mAdcProtocol.setServer(this);
-	mNmdcProtocol.setServer(this);
-	mPluginList.setServer(this);
+	// Protocol dependence
+	mAdcProtocol.setServer(this); // ADC
+	mNmdcProtocol.setServer(this); // NMDC
 
+	mPluginList.setServer(this);
 	mPluginList.loadAll(); // Load plugins
 
 
-	mDcUserList.addUserListItem(NmdcProtocol::nickList, "$NickList ");
-	mDcUserList.addUserListItem(NmdcProtocol::myInfoList, "");
-	mDcUserList.addUserListItem(NmdcProtocol::ipList, "$UserIP ");
-	mOpList.addUserListItem(NmdcProtocol::nickList, "$OpList ");
-
-	mAdcUserList.addUserListItem(AdcProtocol::infList, "");
-
+	// Protocol dependence
+	if (mDcConfig.mAdcOn) { // ADC
+		mDcUserList.addUserListItem(AdcProtocol::infList, "");
+	} else { // NMDC
+		mDcUserList.addUserListItem(NmdcProtocol::nickList, "$NickList ");
+		mDcUserList.addUserListItem(NmdcProtocol::myInfoList, "");
+		mDcUserList.addUserListItem(NmdcProtocol::ipList, "$UserIP ");
+		mOpList.addUserListItem(NmdcProtocol::nickList, "$OpList ");
+	}
 
 	if (mDcConfig.mRegMainBot) { // Main bot registration
-		if (log(DEBUG)) {
+		if (log(LEVEL_DEBUG)) {
 			logStream() << "Reg main bot '" << mDcConfig.mHubBot << "'" << endl;
 		}
 		regBot(mDcConfig.mHubBot, mDcConfig.mMainBotMyinfo,
@@ -137,14 +139,14 @@ DcServer::DcServer(const string & configFile, const string &) :
 
 
 DcServer::~DcServer() {
-	if (log(INFO)) {
+	if (log(LEVEL_INFO)) {
 		logStream() << "Destruct DcServer" << endl;
 	}
 
 	mPluginList.unloadAll(); // Unload all plugins
 
 	if (mDcConfig.mRegMainBot) { // Main bot unreg
-		if (log(DEBUG)) {
+		if (log(LEVEL_DEBUG)) {
 			logStream() << "Unreg main bot '" << mDcConfig.mHubBot << "'" << endl;
 		}
 		unregBot(mDcConfig.mHubBot);
@@ -153,20 +155,6 @@ DcServer::~DcServer() {
 	DcUser * Us = NULL;
 	UserList::iterator it = mDcUserList.begin();
 	UserList::iterator it_e = mDcUserList.end();
-	while (it != it_e) {
-		Us = static_cast<DcUser *> (*it++);
-		if (Us->mDcConn) {
-			delConnection(Us->mDcConn);
-		} else {
-			if (Us->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-				removeFromDcUserList(Us);
-			}
-			delete Us;
-		}
-	}
-
-	it = mAdcUserList.begin();
-	it_e = mAdcUserList.end();
 	while (it != it_e) {
 		Us = static_cast<DcUser *> (*it++);
 		if (Us->mDcConn) {
@@ -202,6 +190,97 @@ DcServer::~DcServer() {
 		delete mWebProtocol;
 		mWebProtocol = NULL;
 	}
+}
+
+
+
+const string & DcServer::getMainDir() const {
+	return mDcConfig.mMainPath;
+}
+
+
+
+const string & DcServer::getLogDir() const {
+	return mDcConfig.mLogPath;
+}
+
+
+
+const string & DcServer::getPluginDir() const {
+	return mPluginList.getPluginDir();
+}
+
+
+
+const string & DcServer::getTime() {
+	stringstream oss;
+	oss << mTime.asDate();
+	mTimeBuf = oss.str();
+	return mTimeBuf;
+}
+
+
+
+const string & DcServer::getHubInfo() const {
+	return mHubName;
+}
+
+
+
+const string & DcServer::getLocale() const {
+	return mDcConfig.mLocale;
+}
+
+
+
+const string & DcServer::getSystemVersion() const {
+	return mSysVersion;
+}
+
+
+
+int64_t DcServer::getMsec() const {
+	Time tm(true);
+	return tm.msec();
+}
+
+
+
+/// Work time (sec)
+int DcServer::getUpTime() const {
+	Time tm(true);
+	tm -= mStartTime;
+	return tm.sec();
+}
+
+
+
+int DcServer::getUsersCount() const {
+	return miTotalUserCount;
+}
+
+
+
+int64_t DcServer::getTotalShare() const {
+	return miTotalShare;
+}
+
+
+
+DcListIteratorBase * DcServer::getDcListIterator() {
+	return new DcListIterator(this);
+}
+
+
+
+bool DcServer::regCallList(const char * id, Plugin * plugin) {
+	return mPluginList.regCallList(id, plugin);
+}
+
+
+
+bool DcServer::unregCallList(const char * id, Plugin * plugin) {
+	return mPluginList.unregCallList(id, plugin);
 }
 
 
@@ -242,7 +321,7 @@ bool DcServer::listeningServer(const char * name, const char * addresses, const 
 	getAddresses(addresses, vAddresses, defaultPort);
 
 	if (vAddresses.size() == 0) {
-		if (log(FATAL)) {
+		if (log(LEVEL_FATAL)) {
 			logStream() << "Incorrect address of the " << name << endl;
 		}
 	}
@@ -251,7 +330,7 @@ bool DcServer::listeningServer(const char * name, const char * addresses, const 
 	for (vector<pair<string, string> >::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
 		if (Server::listening(connFactory, ((*it).first).c_str(), ((*it).second).c_str(), udp) != NULL) {
 			ret = true;
-			if (log(INFO)) {
+			if (log(LEVEL_INFO)) {
 				logStream() << name << " is running on [" 
 					<< ((*it).first) << "]:" << ((*it).second) 
 					<< (udp ? " UDP" : " TCP") << endl;
@@ -269,7 +348,8 @@ bool DcServer::listeningServer(const char * name, const char * addresses, const 
 /// Listening all servers
 int DcServer::listening() {
 
-	if (mDcConfig.mAdcOn) {
+	// Protocol dependence
+	if (mDcConfig.mAdcOn) { // ADC
 
 		ConnFactory * adcConnFactory = new DcConnFactory(&mAdcProtocol, this); // ADC PROTOCOL
 		mConnFactories.push_back(adcConnFactory);
@@ -279,7 +359,7 @@ int DcServer::listening() {
 			return -1;
 		}
 
-	} else {
+	} else { // NMDC
 
 		ConnFactory * nmdcConnFactory = new DcConnFactory(&mNmdcProtocol, this); // NMDC PROTOCOL
 		mConnFactories.push_back(nmdcConnFactory);
@@ -316,29 +396,18 @@ int DcServer::listening() {
 int DcServer::onTimer(Time & now) {
 
 	// Execute each second
-	if ((__int64) (now - mChecker) >= mTimerServPeriod) {
+	if ((int64_t) (now - mChecker) >= mTimerServPeriod) {
 
 		mChecker = now;
 
-		if (!mDcConfig.mAdcOn) {
-			mHelloList.flushCache(); // NMDC
-			mDcUserList.flushCache(); // NMDC
-			mBotList.flushCache();
-			mEnterList.flushCache();
-			mOpList.flushCache();
-			mIpList.flushCache();
-			mChatList.flushCache();
-			mActiveList.flushCache();
-		} else {
-			mAdcUserList.flushCacheAdc(); // ADC
-			mBotList.flushCacheAdc();
-			mEnterList.flushCacheAdc();
-			mOpList.flushCacheAdc();
-			mIpList.flushCacheAdc();
-			mChatList.flushCacheAdc();
-			mActiveList.flushCacheAdc();
-		}
-
+		mHelloList.flushCache(); // NMDC
+		mDcUserList.flushCache();
+		mBotList.flushCache();
+		mEnterList.flushCache();
+		mOpList.flushCache();
+		mIpList.flushCache();
+		mChatList.flushCache();
+		mActiveList.flushCache();
 
 		int SysLoading = mSystemLoad;
 
@@ -363,7 +432,7 @@ int DcServer::onTimer(Time & now) {
 		}
 
 		if (mSystemLoad != SysLoading) {
-			if (log(WARN)) {
+			if (log(LEVEL_WARN)) {
 				logStream() << "System loading: " 
 					<< mSystemLoad << " level (was " 
 					<< SysLoading << " level)" << endl;
@@ -372,8 +441,7 @@ int DcServer::onTimer(Time & now) {
 
 		mIpEnterFlood.del(now); // Removing ip addresses, which already long ago entered
 
-		mDcUserList.autoResize(); // NMDC
-		mAdcUserList.autoResize(); // ADC
+		mDcUserList.autoResize();
 		mHelloList.autoResize(); // NMDC
 		mBotList.autoResize();
 		mEnterList.autoResize();
@@ -400,7 +468,7 @@ int DcServer::onNewConn(Conn * conn) {
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 
 	if (mSystemLoad == SYSTEM_LOAD_SYSTEM_DOWN) {
-		if (dcConn->log(WARN)) {
+		if (dcConn->log(LEVEL_WARN)) {
 			dcConn->logStream() << "System down, close" << endl;
 		}
 		dcConn->closeNow(CLOSE_REASON_HUB_LOAD);
@@ -408,8 +476,15 @@ int DcServer::onNewConn(Conn * conn) {
 	}
 
 	// Checking flood-entry (by ip)
-	if (mIpEnterFlood.check(dcConn->getIp(), mTime)) {
-		dcConn->closeNow(CLOSE_REASON_FLOOD_IP_ENTRY);
+	int ret = mIpEnterFlood.check(dcConn->getIp(), mTime);
+	if (ret) {
+		if (ret == 1 && !mDcConfig.mAdcOn) {
+			// TODO ADC
+			sendToUser(dcConn->mDcUser, mDcLang.mFloodReEnter, mDcConfig.mHubBot.c_str());
+			dcConn->closeNice(9000, CLOSE_REASON_FLOOD_IP_ENTRY);
+		} else {
+			dcConn->closeNow(CLOSE_REASON_FLOOD_IP_ENTRY);
+		}
 		return -2;
 	}
 
@@ -417,7 +492,7 @@ int DcServer::onNewConn(Conn * conn) {
 	mIpListConn->add(dcConn); // Adding connection in IP-list
 	dcConn->mDcUser->setIp(dcConn->getIp());
 
-	if (dcConn->log(TRACE)) {
+	if (dcConn->log(LEVEL_TRACE)) {
 		dcConn->logStream() << "[S]Stage onNewConn" << endl;
 	}
 
@@ -425,7 +500,7 @@ int DcServer::onNewConn(Conn * conn) {
 		dcConn->mProtocol->onNewConn(dcConn);
 	}
 
-	if (dcConn->log(TRACE)) {
+	if (dcConn->log(LEVEL_TRACE)) {
 		dcConn->logStream() << "[E]Stage onNewConn" << endl;
 	}
 	return 0;
@@ -443,7 +518,7 @@ string * DcServer::createCommandPtr(Conn * conn) {
 /// Function of the processing enterring data
 void DcServer::onNewData(Conn * conn, string * data) {
 
-	if (conn->log(TRACE)) {
+	if (conn->log(LEVEL_TRACE)) {
 		conn->logStream() << "IN: " << (*data) << endl;
 	}
 
@@ -525,27 +600,36 @@ bool DcServer::checkNick(DcConn *dcConn) {
 	}
 
 	unsigned long uidHash = dcConn->mDcUser->getUidHash();
-	if (mDcUserList.contain(uidHash)) {
-		DcUser * us = static_cast<DcUser *> (mDcUserList.find(uidHash));
 
-		if (!us->mDcConn || (us->getParamForce(USER_PARAM_PROFILE)->getInt() != -1 && us->getIp() != dcConn->getIp())) {
-			if (dcConn->log(DEBUG)) {
-				dcConn->logStream() << "Bad nick (used): '" 
-					<< dcConn->mDcUser->getUid() << "'["
-					<< dcConn->getIp() << "] vs '" << us->getUid() 
-					<< "'[" << us->getIp() << "]" << endl;
+
+	// Protocol dependence
+	if (!mDcConfig.mAdcOn) { // NMDC
+
+		if (mDcUserList.contain(uidHash)) {
+			// User on a hub
+			DcUser * us = static_cast<DcUser *> (mDcUserList.find(uidHash));
+
+			// Checking nick only for profile -1 (unreg) and bots
+			// All other profiles is a reg users and they are not checked
+			if (!us->mDcConn || dcConn->mDcUser->getParamForce(USER_PARAM_PROFILE)->getInt() == -1) {
+				if (log(LEVEL_DEBUG)) {
+					logStream() << "Bad nick (used): '" 
+						<< dcConn->mDcUser->getUid() << "'["
+						<< dcConn->getIp() << "] vs '" << us->getUid() 
+						<< "'[" << us->getIp() << "]" << endl;
+				}
+				string msg;
+				stringReplace(mDcLang.mUsedNick, string(STR_LEN("nick")), msg, dcConn->mDcUser->getUid());
+				sendToUser(dcConn->mDcUser, msg, mDcConfig.mHubBot.c_str());
+				dcConn->send(mNmdcProtocol.appendValidateDenied(msg.erase(), dcConn->mDcUser->getUid())); // refactoring to DcProtocol pointer
+				return false;
 			}
-			string msg;
-			stringReplace(mDcLang.mUsedNick, "nick", msg, dcConn->mDcUser->getUid());
-			sendToUser(dcConn->mDcUser, msg.c_str(), mDcConfig.mHubBot.c_str());
-			dcConn->send(mNmdcProtocol.appendValidateDenied(msg.erase(), dcConn->mDcUser->getUid())); // refactoring to DcProtocol pointer
-			return false;
+			if (log(LEVEL_DEBUG)) {
+				logStream() << "removed old user" << endl;
+			}
+			removeFromDcUserList(us);
+			us->mDcConn->closeNow(CLOSE_REASON_USER_OLD);
 		}
-		if (us->mDcConn->log(DEBUG)) {
-			us->mDcConn->logStream() << "removed old user" << endl;
-		}
-		removeFromDcUserList(us);
-		us->mDcConn->closeNow(CLOSE_REASON_USER_OLD);
 	}
 	return true;
 }
@@ -553,11 +637,12 @@ bool DcServer::checkNick(DcConn *dcConn) {
 
 
 bool DcServer::beforeUserEnter(DcConn * dcConn) {
-	if (dcConn->log(DEBUG)) {
+	if (dcConn->log(LEVEL_DEBUG)) {
 		dcConn->logStream() << "Begin login" << endl;
 	}
 
-	if (!mDcConfig.mAdcOn) {
+	// Protocol dependence
+	if (!mDcConfig.mAdcOn) { // NMDC
 		// check empty nick!
 		if (!checkNick(dcConn)) {
 			dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
@@ -573,11 +658,7 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 		}
 
 		// Can happen so that list not to send at a time
-		if (!mDcConfig.mAdcOn) {
-			mNmdcProtocol.sendNickList(dcConn);
-		} else {
-			mAdcProtocol.sendNickList(dcConn);
-		}
+		dcConn->dcProtocol()->sendNickList(dcConn);
 
 		dcConn->mSendNickList = false;
 	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
@@ -591,17 +672,17 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 /// User entry
 void DcServer::doUserEnter(DcConn * dcConn) {
 
-	// Check entry stages
-	if (!mDcConfig.mAdcOn) {
-		if (LOGIN_STATUS_LOGIN_DONE != dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE)) {
-			if (dcConn->log(DEBUG)) {
-				dcConn->logStream() << "User Login when not all done (" 
-					<< dcConn->getLoginStatusFlag(LOGIN_STATUS_LOGIN_DONE) << ")" <<endl;
-			}
-			dcConn->closeNow(CLOSE_REASON_LOGIN_NOT_DONE);
-			return;
+	if (!dcConn->isState(STATE_NORMAL)) {
+		if (dcConn->log(LEVEL_DEBUG)) {
+			dcConn->logStream() << "User Login when not all done (" 
+				<< dcConn->getState() << ")" <<endl;
 		}
+		dcConn->closeNow(CLOSE_REASON_NOT_LOGIN);
+		return;
+	}
 
+	// Protocol dependence
+	if (!mDcConfig.mAdcOn) { // NMDC
 		// check empty nick!
 		if (!checkNick(dcConn)) {
 			dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
@@ -619,7 +700,7 @@ void DcServer::doUserEnter(DcConn * dcConn) {
 	}
 
 	// Adding user to the user list
-	if (!addToUserList(static_cast<DcUser *> (dcConn->mDcUser))) {
+	if (!addToUserList(dcConn->mDcUser)) {
 		dcConn->closeNow(CLOSE_REASON_USER_ADD);
 		return;
 	}
@@ -629,10 +710,8 @@ void DcServer::doUserEnter(DcConn * dcConn) {
 
 	afterUserEnter(dcConn);
 
-	if (!mDcConfig.mAdcOn) {
-		dcConn->clearTimeOut(HUB_TIME_OUT_LOGIN);
-		(static_cast<DcUser *> (dcConn->mDcUser))->mTimeEnter.get();
-	}
+	dcConn->clearLoginTimeOut();
+	dcConn->mDcUser->mTimeEnter.get();
 }
 
 
@@ -640,13 +719,13 @@ void DcServer::doUserEnter(DcConn * dcConn) {
 /// Adding user in the user list
 bool DcServer::addToUserList(DcUser * dcUser) {
 	if (!dcUser) {
-		if (log(ERR)) {
+		if (log(LEVEL_ERROR)) {
 			logStream() << "Adding a NULL user to userlist" << endl;
 		}
 		return false;
 	}
 	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-		if (log(ERR)) {
+		if (log(LEVEL_ERROR)) {
 			logStream() << "User is already in the user list" << endl;
 		}
 		return false;
@@ -654,31 +733,25 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 
 	unsigned long uidHash = dcUser->getUidHash();
 
-	UserList * mainUserList = NULL;
-	if (!mDcConfig.mAdcOn) {
-		mainUserList = &mDcUserList;
-	} else {
-		mainUserList = &mAdcUserList;
+	if (mDcUserList.log(LEVEL_TRACE)) {
+		mDcUserList.logStream() << "Before add: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
 	}
 
-	if (mainUserList->log(TRACE)) {
-		mainUserList->logStream() << "Before add: " << dcUser->getUid() << " Size: " << mainUserList->size() << endl;
-	}
-
-	if (!mainUserList->add(uidHash, dcUser)) {
-		if (log(DEBUG)) {
-			logStream() << "Adding twice user with same nick " << dcUser->getUid() << " (" << mainUserList->find(uidHash)->getUid() << ")" << endl;
+	if (!mDcUserList.add(uidHash, dcUser)) {
+		if (log(LEVEL_DEBUG)) {
+			logStream() << "Adding twice user with same nick " << dcUser->getUid() << " (" << mDcUserList.find(uidHash)->getUid() << ")" << endl;
 		}
 		dcUser->setInUserList(false);
 		return false;
 	}
 
-	if (mainUserList->log(TRACE)) {
-		mainUserList->logStream() << "After add: " << dcUser->getUid() << " Size: " << mainUserList->size() << endl;
+	if (mDcUserList.log(LEVEL_TRACE)) {
+		mDcUserList.logStream() << "After add: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
 	}
 
 
-	if (!mDcConfig.mAdcOn) {
+	// Protocol dependence
+	if (!mDcConfig.mAdcOn) { // NMDC
 		if (!dcUser->isPassive()) {
 			mActiveList.add(uidHash, dcUser);
 		}
@@ -700,13 +773,14 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 		dcUser->mDcConn->mIpRecv = true; // Installing the permit on reception of the messages on ip
 		mChatList.add(uidHash, dcUser);
 
-		if (!mDcConfig.mAdcOn) {
+		// Protocol dependence
+		if (!mDcConfig.mAdcOn) { // NMDC
 			if (!(dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO)) {
 				mHelloList.add(uidHash, dcUser);
 			}
 		}
 
-		if (dcUser->mDcConn->log(DEBUG)) {
+		if (dcUser->mDcConn->log(LEVEL_DEBUG)) {
 			dcUser->mDcConn->logStream() << "Adding at the end of Nicklist" << endl;
 		}
 	}
@@ -719,42 +793,33 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 	unsigned long uidHash = dcUser->getUidHash();
 
-	UserList * mainUserList = NULL;
-	if (!mDcConfig.mAdcOn) {
-		mainUserList = &mDcUserList;
-	} else {
-		mainUserList = &mAdcUserList;
+	if (mDcUserList.log(LEVEL_TRACE)) {
+		mDcUserList.logStream() << "Before leave: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
 	}
+	if (mDcUserList.contain(uidHash)) {
 
-	if (mainUserList->log(TRACE)) {
-		mainUserList->logStream() << "Before leave: " << dcUser->getUid() << " Size: " << mainUserList->size() << endl;
-	}
-	if (mainUserList->contain(uidHash)) {
-
-		if (!mDcConfig.mAdcOn) {
-			#ifndef WITHOUT_PLUGINS
-				if (dcUser->mDcConn) {
-					mCalls.mOnUserExit.callAll(dcUser);
-				}
-			#endif
-		}
+		#ifndef WITHOUT_PLUGINS
+			if (dcUser->mDcConn) {
+				mCalls.mOnUserExit.callAll(dcUser);
+			}
+		#endif
 
 		if (dcUser->mDcConn != NULL) {
 			-- miTotalUserCount;
 		}
 
 		// We make sure that user with such nick one!
-		DcUser * other = static_cast<DcUser *> (mainUserList->find(dcUser->getUidHash()));
+		DcUser * other = static_cast<DcUser *> (mDcUserList.find(dcUser->getUidHash()));
 		if (!dcUser->mDcConn) { // Removing the bot
-			mainUserList->remove(uidHash);
+			mDcUserList.remove(uidHash);
 		} else if (other && other->mDcConn && dcUser->mDcConn && other->mDcConn == dcUser->mDcConn) {
-			mainUserList->remove(uidHash);
-			if (mainUserList->log(TRACE)) {
-				mainUserList->logStream() << "After leave: " << dcUser->getUid() << " Size: " << mainUserList->size() << endl;
+			mDcUserList.remove(uidHash);
+			if (mDcUserList.log(LEVEL_TRACE)) {
+				mDcUserList.logStream() << "After leave: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
 			}
 		} else {
 			// Such can happen only for users without connection or with different connection
-			if (dcUser->log(ERR)) {
+			if (dcUser->log(LEVEL_ERROR)) {
 				dcUser->logStream() << "Not found the correct user for nick: " << dcUser->getUid() << endl;
 			}
 			return false;
@@ -768,8 +833,10 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 	mActiveList.remove(uidHash);
 	mChatList.remove(uidHash);
 	mBotList.remove(uidHash);
-	if (!mDcConfig.mAdcOn) {
-		mHelloList.remove(uidHash); // NMDC
+
+	// Protocol dependence
+	if (!mDcConfig.mAdcOn) { // NMDC
+		mHelloList.remove(uidHash);
 	}
 
 	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
@@ -778,13 +845,13 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 			string msg;
 
-			if (!mDcConfig.mAdcOn) {
+			// Protocol dependence
+			if (mDcConfig.mAdcOn) { // ADC
+				msg.append(STR_LEN("IQUI ")).append(dcUser->getUid()).append(STR_LEN(ADC_SEPARATOR));
+			} else { // NMDC
 				mNmdcProtocol.appendQuit(msg, dcUser->getUid());
-				mDcUserList.sendToAll(msg, true/*mDcConfig.mDelayedMyinfo*/, false); // Delay in sending MyINFO (and Quit)
-			} else {
-				msg.append("IQUI ").append(dcUser->getUid()).append(ADC_SEPARATOR);
-				mAdcUserList.sendToAllAdc(msg, true/*mDcConfig.mDelayedMyinfo*/, false);
 			}
+			sendToAll(msg, false, true/*mDcConfig.mDelayedMyinfo*/); // Delay in sending MyINFO (and Quit)
 		}
 	}
 	return true;
@@ -795,7 +862,33 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 /// Show user to all
 bool DcServer::showUserToAll(DcUser * dcUser) {
 
-	if (!mDcConfig.mAdcOn) {
+	// Protocol dependence
+	if (mDcConfig.mAdcOn) { // ADC
+
+		bool canSend = dcUser->isCanSend();
+
+		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
+
+			// Show INF string to all users
+			sendToAll(dcUser->getInfo(), true, true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
+
+			// Show INF string of the current user to all enterring users
+			mEnterList.sendToAllAdc(dcUser->getInfo(), true/*mDcConfig.mDelayedMyinfo*/);
+
+		}
+
+		// Prevention of the double sending
+		if (!mDcConfig.mDelayedLogin) {
+			dcUser->setCanSend(false);
+			mDcUserList.flushCache();
+			mEnterList.flushCache();
+			dcUser->setCanSend(canSend);
+		}
+
+		dcUser->send("", 0, false, true);
+
+	} else { // NMDC
+
 		string hello;
 		if (dcUser->mDcConn && dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 			if (dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
@@ -817,7 +910,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 			mHelloList.sendToAll(mNmdcProtocol.appendHello(hello, dcUser->getUid()), true/*mDcConfig.mDelayedMyinfo*/, false); // refactoring to DcProtocol pointer
 
 			// Show MyINFO string to all users
-			mDcUserList.sendToAll(dcUser->getInfo(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
+			sendToAll(dcUser->getInfo(), true, true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
 
 			// Show MyINFO string of the current user to all enterring users
 			mEnterList.sendToAll(dcUser->getInfo(), true/*mDcConfig.mDelayedMyinfo*/);
@@ -855,29 +948,6 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 		}
 
 		dcUser->send("", 0, false, true);
-	} else {
-
-		bool canSend = dcUser->isCanSend();
-
-		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
-
-			// Show MyINFO string to all users
-			mAdcUserList.sendToAllAdc(dcUser->getInfo(), true/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
-
-			// Show INF string of the current user to all enterring users
-			mEnterList.sendToAllAdc(dcUser->getInfo(), true/*mDcConfig.mDelayedMyinfo*/);
-
-		}
-
-		// Prevention of the double sending
-		if (!mDcConfig.mDelayedLogin) {
-			dcUser->setCanSend(false);
-			mAdcUserList.flushCacheAdc();
-			mEnterList.flushCacheAdc();
-			dcUser->setCanSend(canSend);
-		}
-
-		dcUser->send("", 0, false, true);
 	}
 	return true;
 }
@@ -885,37 +955,36 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 
 
 void DcServer::afterUserEnter(DcConn *dcConn) {
-	if (dcConn->log(DEBUG)) {
+	if (dcConn->log(LEVEL_DEBUG)) {
 		dcConn->logStream() << "Entered on the hub" << endl;
 	}
-	if (!mDcConfig.mAdcOn) {
-		#ifndef WITHOUT_PLUGINS
-			mCalls.mOnUserEnter.callAll(dcConn->mDcUser);
-		#endif
-	}
+
+	#ifndef WITHOUT_PLUGINS
+		mCalls.mOnUserEnter.callAll(dcConn->mDcUser);
+	#endif
 }
 
 
 
-/// Get user by nick (or NULL)
-DcUser * DcServer::getDcUser(const char * nick) {
-	if (nick == NULL) {
+/// Get user by uid (or NULL)
+DcUser * DcServer::getDcUser(const char * uid) {
+	if (uid == NULL) {
 		return NULL;
 	}
-	string nickStr(nick);
-	if (nickStr.size()) {
-		// NMDC
-		UserBase * userBase = mDcUserList.getUserBaseByUid(nickStr);
+
+	string uidStr(uid);
+	if (uidStr.size()) {
+		UserBase * userBase = mDcUserList.getUserBaseByUid(uidStr);
 		if (userBase) {
 			return static_cast<DcUser *> (userBase);
 		}
 		DcConn * dcConn = NULL;
 		for (tCLIt it = mClientList.begin(); it != mClientList.end(); ++it) {
 			dcConn = static_cast<DcConn *> (*it);
-			if (dcConn && dcConn->mType == CLIENT_TYPE_NMDC && 
-				dcConn->mDcUser && dcConn->mDcUser->getUid() == nickStr
+			if (dcConn && dcConn->mDcUser->mType == CLIENT_TYPE_DC && 
+				dcConn->mDcUser && dcConn->mDcUser->getUid() == uidStr
 			) {
-				return static_cast<DcUser *> (dcConn->mDcUser);
+				return dcConn->mDcUser;
 			}
 		}
 	}
@@ -925,160 +994,119 @@ DcUser * DcServer::getDcUser(const char * nick) {
 
 
 // TODO: return user with conn only?
-DcUserBase * DcServer::getDcUserBase(const char * nick) {
-	DcUser * dcUser = getDcUser(nick);
+DcUserBase * DcServer::getDcUserBase(const char * uid) {
+	DcUser * dcUser = getDcUser(uid);
 	return (dcUser != NULL && dcUser->mDcConn != NULL) ? static_cast<DcUserBase *> (dcUser) : NULL;
 }
 
 
 
-const vector<DcConnBase *> & DcServer::getDcConnBase(const char * ip) {
-	mIpConnList.clear();
+const vector<DcUserBase *> & DcServer::getDcUserBaseByIp(const char * ip) {
+	// TODO: add bots in list
+	mIpUserList.clear();
 	for (DcIpList::iterator it = mIpListConn->begin(ip); it != mIpListConn->end(); ++it) {
 		DcConn * dcConn = static_cast<DcConn *> (*it);
-		if (dcConn->mType == CLIENT_TYPE_NMDC && dcConn->getIp() == ip) {
-			mIpConnList.push_back(dcConn);
+		if (dcConn->mDcUser->mType == CLIENT_TYPE_DC && dcConn->getIp() == ip) {
+			mIpUserList.push_back(dcConn->mDcUser);
 		}
 	}
-	return mIpConnList;
+	return mIpUserList;
 }
 
 
 
 /// Send data to user
-bool DcServer::sendToUser(DcUserBase * dcUserBase, const char * data, const char * nick, const char * from) {
-	if (!dcUserBase || !dcUserBase->mDcConnBase || !data) {
+bool DcServer::sendToUser(DcUserBase * dcUserBase, const string & data, const char * uid, const char * from) {
+	DcUser * dcUser = static_cast<DcUser *> (dcUserBase);
+	if (!dcUser || !dcUser->mDcConn) {
 		return false;
 	}
-	DcConn * dcConn = static_cast<DcConn *> (dcUserBase->mDcConnBase);
-
-	// PM
-	if (from && nick) {
-		string to("<unknown>"), str;
-		if (dcConn->mDcUser && !dcConn->mDcUser->getUid().empty()) {
-			to = dcConn->mDcUser->getUid();
-		}
-		dcConn->send(mNmdcProtocol.appendPm(str, to, from, nick, data)); // refactoring to DcProtocol pointer
-		return true;
+	DcConn * dcConn = dcUser->mDcConn;
+	if (from && uid) {
+		dcConn->mDcUser->sendToPm(data, uid, from, true); // PM
+	} else if (uid) {
+		dcConn->mDcUser->sendToChat(data, uid, true); // Chat
+	} else {
+		dcConn->send(data, dcConn->mDcUser->mType == CLIENT_TYPE_DC); // Simple Msg
 	}
-
-	// Chat
-	if (nick) {
-		string str;
-		dcConn->send(mNmdcProtocol.appendChat(str, nick, data)); // refactoring to DcProtocol pointer
-		return true;
-	}
-
-	// Simple Msg
-	dcConn->send(data, strlen(data), dcConn->mType == CLIENT_TYPE_NMDC); // TODO refactoring len
 	return true;
 }
 
 
 
 /// Send data to nick
-bool DcServer::sendToNick(const char * to, const char * data, const char * nick, const char * from) {
+bool DcServer::sendToNick(const char * to, const string & data, const char * uid, const char * from) {
 	DcUser * dcUser = getDcUser(to);
 	if (!dcUser || !dcUser->mDcConn) { // Check exist and not bot
 		return false;
 	}
-	return sendToUser(dcUser, data, nick, from);
+	return sendToUser(dcUser, data, uid, from);
+}
+
+
+
+void DcServer::sendToAll(const string & data, bool addSep, bool flush) {
+	// Protocol dependence
+	if (mDcConfig.mAdcOn) { // ADC
+		mDcUserList.sendToAllAdc(data, flush, addSep);
+	} else { // NMDC
+		mDcUserList.sendToAll(data, flush, addSep);
+	}
 }
 
 
 
 /// Send data to all
-bool DcServer::sendToAll(const char * data, const char * nick, const char * from) {
-	if (!data) {
-		return false;
+bool DcServer::sendToAll(const string & data, const char * uid, const char * from) {
+	if (from && uid) {
+		mDcUserList.sendToAllPm(data, uid, from); // PM
+	} else if (uid) {
+		mDcUserList.sendToAllChat(data, uid); // Chat
+	} else {
+		sendToAll(data, true, false); // Simple Msg
 	}
-
-	// PM
-	if (from && nick) {
-		string start, end;
-		mNmdcProtocol.appendPmToAll(start, end, from, nick, data); // refactoring to DcProtocol pointer
-		mDcUserList.sendWithNick(start, end);
-		return true;
-	}
-
-	// Chat
-	if (nick) {
-		string str;
-		mDcUserList.sendToAll(mNmdcProtocol.appendChat(str, nick, data), false, false); // refactoring to DcProtocol pointer
-		return true;
-	}
-
-	mDcUserList.sendToAll(data, false, true);
 	return true;
 }
 
 
 
 /// Send data to profiles
-bool DcServer::sendToProfiles(unsigned long profile, const char * data, const char * nick, const char * from) {
-	if (!data) {
-		return false;
+bool DcServer::sendToProfiles(unsigned long profile, const string & data, const char * uid, const char * from) {
+	if (from && uid) {
+		mDcUserList.sendToAllPm(data, uid, from, profile); // PM
+	} else if (uid) {
+		mDcUserList.sendToAllChat(data, uid, profile); // Chat
+	} else {
+		mDcUserList.sendToProfiles(profile, data, true); // Simple Msg
 	}
-
-	// PM
-	if (from && nick) {
-		string start, end;
-		mNmdcProtocol.appendPmToAll(start, end, from, nick, data); // refactoring to DcProtocol pointer
-		mDcUserList.sendWithNick(start, end, profile);
-		return true;
-	}
-
-	// Chat
-	if (nick) {
-		string str;
-		mDcUserList.sendToProfiles(profile, mNmdcProtocol.appendChat(str, nick, data), false); // refactoring to DcProtocol pointer
-		return true;
-	}
-
-	// Simple Msg
-	mDcUserList.sendToProfiles(profile, data, true);
 	return true;
 }
 
 
 
-bool DcServer::sendToIp(const char * ip, const char * data, unsigned long profile, const char * nick, const char * from) {
-	if (!ip || !data || !Conn::checkIp(ip)) {
+bool DcServer::sendToIp(const string & ip, const string & data, unsigned long profile, const char * uid, const char * from) {
+	if (!Conn::checkIp(ip)) {
 		return false;
 	}
 
-	// PM
-	if (from && nick) {
-		string start, end;
-		mNmdcProtocol.appendPmToAll(start, end, from, nick, data); // refactoring to DcProtocol pointer
-		mIpListConn->sendToIpWithNick(ip, start.c_str(), end.c_str(), profile);
-		return true;
+	if (from && uid) {
+		mIpListConn->sendToIpPm(ip, data, uid, from, profile, true); // PM
+	} else if (uid) {
+		mIpListConn->sendToIpChat(ip, data, uid, profile, true); // Chat
+	} else {
+		mIpListConn->sendToIp(ip, data, profile, true, true); // Simple Msg
 	}
-
-	// Chat
-	if (nick) {
-		string str;
-		mIpListConn->sendToIp(ip, mNmdcProtocol.appendChat(str, nick, data).c_str(), profile); // refactoring to DcProtocol pointer
-		return true;
-	}
-
-	// Simple Msg
-	mIpListConn->sendToIp(ip, data, profile);
 	return true;
 }
 
 
 
 /// Send data to all except nick list
-bool DcServer::sendToAllExceptNicks(const vector<string> & nickList, const char * data, const char * nick, const char * from) {
-	if (!data) {
-		return false;
-	}
+bool DcServer::sendToAllExceptNicks(const vector<string> & nickList, const string & data, const char * uid, const char * from) {
 
 	DcUser * dcUser = NULL;
 	vector<DcUser *> ul;
 	for (List_t::const_iterator it = nickList.begin(); it != nickList.end(); ++it) {
-		// NMDC
 		dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByUid(*it));
 		if (dcUser && dcUser->isCanSend()) {
 			dcUser->setCanSend(false);
@@ -1086,86 +1114,60 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & nickList, const char 
 		}
 	}
 
-	if (from && nick) { // PM
-		string start, end;
-		mNmdcProtocol.appendPmToAll(start, end, from, nick, data); // refactoring to DcProtocol pointer
-		mDcUserList.sendWithNick(start, end);
-	} else if (nick) { // Chat
-		string str;
-		mDcUserList.sendToAll(mNmdcProtocol.appendChat(str, nick, data), false, false); // refactoring to DcProtocol pointer
-	} else { // Simple Msg
-		mDcUserList.sendToAll(data, false, true);
+	if (from && uid) {
+		mDcUserList.sendToAllPm(data, uid, from); // PM
+	} else if (uid) {
+		mDcUserList.sendToAllChat(data, uid);  // Chat
+	} else {
+		sendToAll(data, true, false); // Simple Msg
 	}
 
 	for (vector<DcUser *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
 		(*ul_it)->setCanSend(true);
 	}
-
 	return true;
 }
 
 
 
-bool DcServer::sendToAllExceptIps(const vector<string> & ipList, const char * data, const char * nick, const char * from) {
-	if (!data) {
-		return false;
-	}
+bool DcServer::sendToAllExceptIps(const vector<string> & ipList, const string & data, const char * uid, const char * from) {
 
 	DcConn * dcConn = NULL;
 	vector<DcConn*> ul;
-	bool badIp = false;
 	for (List_t::const_iterator it = ipList.begin(); it != ipList.end(); ++it) {
-		if (!DcConn::checkIp(*it)) {
-			badIp = true;
-		}
-		for (DcIpList::iterator mit = mIpListConn->begin((*it).c_str()); mit != mIpListConn->end(); ++mit) {
-			dcConn = static_cast<DcConn *> (*mit);
-			if (dcConn->mDcUser && dcConn->mDcUser->isCanSend() && dcConn->getIp() == (*it)) {
-				dcConn->mDcUser->setCanSend(false);
-				ul.push_back(dcConn);
+		if (DcConn::checkIp(*it)) {
+			for (DcIpList::iterator mit = mIpListConn->begin((*it).c_str()); mit != mIpListConn->end(); ++mit) {
+				dcConn = static_cast<DcConn *> (*mit);
+				if (dcConn->mDcUser && dcConn->mDcUser->isCanSend() && dcConn->getIp() == (*it)) {
+					dcConn->mDcUser->setCanSend(false);
+					ul.push_back(dcConn);
+				}
 			}
 		}
 	}
 
-	if (!badIp) {
-		if (from && nick) { // PM
-			string start, end;
-			mNmdcProtocol.appendPmToAll(start, end, from, nick, data); // refactoring to DcProtocol pointer
-			mDcUserList.sendWithNick(start, end);
-		} else if (nick) { // Chat
-			string str;
-			mDcUserList.sendToAll(mNmdcProtocol.appendChat(str, nick, data), false, false); // refactoring to DcProtocol pointer
-		} else { // Simple Msg
-			mDcUserList.sendToAll(data, false, true);
-		}
+	if (from && uid) { // PM
+		mDcUserList.sendToAllPm(data, uid, from);
+	} else if (uid) { // Chat
+		mDcUserList.sendToAllChat(data, uid);
+	} else {
+		sendToAll(data, true, false); // Simple Msg
 	}
 
 	for (vector<DcConn*>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
 		(*ul_it)->mDcUser->setCanSend(true);
 	}
-
-	return (badIp == true) ? false : true;
+	return true;
 }
 
 
 
 void DcServer::forceMove(DcUserBase * dcUserBase, const char * address, const char * reason /* = NULL */) {
-	if (!address) {
+	DcUser * dcUser = static_cast<DcUser *> (dcUserBase);
+	if (!address || !dcUser || !dcUser->mDcConn) {
 		return;
 	}
-	DcConn * dcConn = static_cast<DcConn *> (dcUserBase->mDcConnBase);
-
-	string msg, force, nick("<unknown>");
-	if (dcConn->mDcUser && !dcConn->mDcUser->getUid().empty()) {
-		nick = dcConn->mDcUser->getUid();
-	}
-
-	stringReplace(mDcLang.mForceMove, "address", force, address);
-	stringReplace(force, "reason", force, reason != NULL ? reason : "");
-	mNmdcProtocol.appendPm(msg, nick, mDcConfig.mHubBot, mDcConfig.mHubBot, force); // refactoring to DcProtocol pointer
-	mNmdcProtocol.appendChat(msg, mDcConfig.mHubBot, force); // refactoring to DcProtocol pointer
-	dcConn->send(mNmdcProtocol.appendForceMove(msg, address)); // refactoring to DcProtocol pointer
-	dcConn->closeNice(9000, CLOSE_REASON_CMD_FORCE_MOVE);
+	dcUser->mDcConn->dcProtocol()->forceMove(dcUser->mDcConn, address, reason);
 }
 
 
@@ -1186,8 +1188,8 @@ const char * DcServer::getConfig(const string & name) {
 	if (configItem == NULL) {
 		return NULL;
 	}
-	configItem->convertTo(sBuf);
-	return sBuf.c_str();
+	configItem->convertTo(mBuf);
+	return mBuf.c_str();
 }
 
 
@@ -1225,9 +1227,17 @@ bool DcServer::setConfig(const string & name, const string & value) {
 				mDcConfig.mMainBotIp, mDcConfig.mMainBotKey);
 		}
 	} else if (name == "sHubName" || name == "sTopic") {
-		// NMDC
-		string msg;
-		sendToAll(mNmdcProtocol.appendHubName(msg, mDcConfig.mHubName, mDcConfig.mTopic).c_str()); // use cache ?
+
+		// Protocol dependence
+		if (mDcConfig.mAdcOn) { // ADC
+
+			// TODO
+
+		} else { // NMDC
+			string msg;
+			sendToAll(mNmdcProtocol.appendHubName(msg, mDcConfig.mHubName, mDcConfig.mTopic)); // use cache ?
+		}
+
 	}
 
 	mDcConfig.save();
@@ -1241,8 +1251,8 @@ const char * DcServer::getLang(const string & name) {
 	if (configItem == NULL) {
 		return NULL;
 	}
-	configItem->convertTo(sBuf);
-	return sBuf.c_str();
+	configItem->convertTo(mBuf);
+	return mBuf.c_str();
 }
 
 
@@ -1260,15 +1270,16 @@ bool DcServer::setLang(const string & name, const string & value) {
 
 
 int DcServer::regBot(const string & uid, const string & info, const string & ip, bool key) {
-	DcUser * dcUser = new DcUser(NULL);
+	DcUser * dcUser = new DcUser(CLIENT_TYPE_DC, NULL);
 	dcUser->mDcServer = this;
-	string sid;
-	if (!mDcConfig.mAdcOn) {
+
+	// Protocol dependence
+	if (mDcConfig.mAdcOn) { // ADC
+		dcUser->setUid(string(mAdcProtocol.genNewSid()));
+	} else { // NMDC
 		dcUser->setUid(uid);
-	} else {
-		sid = mAdcProtocol.getSid(1); // TODO: set bot SID!
-		dcUser->setUid(sid);
 	}
+
 	dcUser->getParamForce(USER_PARAM_PROFILE)->setInt(30);
 	dcUser->getParamForce(USER_PARAM_IN_OP_LIST)->setBool(key);
 
@@ -1277,32 +1288,32 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 	}
 
 	// Protocol dependence
-	if (!mDcConfig.mAdcOn) {
-		if (!uid.size() || uid.size() > 0x40 || uid.find_first_of(" |$") != uid.npos) {
-			delete dcUser;
-			return -1;
-		}
-		string myInfo("$MyINFO $ALL ");
-		if (!dcUser->setInfo(myInfo.append(uid).append(" ", 1).append(info))) {
-			myInfo = "$MyINFO $ALL ";
-			if (!dcUser->setInfo(myInfo.append(uid).append(" $ $$$0$", 9))) {
-				delete dcUser;
-				return -2;
-			}
-		}
-	} else {
+	if (mDcConfig.mAdcOn) { // ADC
 		const char * ct = "1";
 		if (key) {
 			ct = "5";
 		}
-		string inf("IINF ");
+		string inf(STR_LEN("IINF "));
 		inf.reserve(79);
-		inf.append(sid).append(" CT").append(ct).append(" NI").append(uid);
-		inf.append(" SS0 HN0 HR0 HO1 VEBot\\sV:1.0 SL0 DERusHub\\sbot");
+		inf.append(dcUser->getUid()).append(STR_LEN(" CT")).append(ct, 1).append(STR_LEN(" NI")).append(uid);
+		inf.append(STR_LEN(" SS0 HN0 HR0 HO1 VEBot\\sV:1.0 SL0 DERusHub\\sbot"));
 		dcUser->setInfo(inf);
+	} else { // NMDC
+		if (!uid.size() || uid.size() > 0x40 || uid.find_first_of(" |$") != uid.npos) {
+			delete dcUser;
+			return -1;
+		}
+		string myInfo(STR_LEN("$MyINFO $ALL "));
+		if (!dcUser->setInfo(myInfo.append(uid).append(STR_LEN(" ")).append(info))) {
+			myInfo.assign(STR_LEN("$MyINFO $ALL "));
+			if (!dcUser->setInfo(myInfo.append(uid).append(STR_LEN(" $ $$$0$")))) {
+				delete dcUser;
+				return -2;
+			}
+		}
 	}
 
-	if (log(DEBUG)) {
+	if (log(LEVEL_DEBUG)) {
 		logStream() << "Reg bot: " << uid << endl;
 	}
 
@@ -1319,21 +1330,17 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 
 int DcServer::unregBot(const string & uid) {
 
-	if (log(DEBUG)) {
+	if (log(LEVEL_DEBUG)) {
 		logStream() << "Unreg bot: " << uid << endl;
 	}
 
-	DcUser * dcUser = NULL;
-	if (!mDcConfig.mAdcOn) {
-		dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByUid(uid));
-	} else {
-		dcUser = static_cast<DcUser *> (mAdcUserList.getUserBaseByUid(uid));
-	}
-	if (!dcUser) {
+	DcUser * dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByUid(uid));
+	if (!dcUser) { // Not found
 		return -1;
 	}
-	if (dcUser->mDcConn) {
-		if (log(DEBUG)) {
+
+	if (dcUser->mDcConn) { // It's not bot!
+		if (log(LEVEL_DEBUG)) {
 			logStream() << "Attempt delete user" << endl;
 		}
 		return -2;
@@ -1346,14 +1353,14 @@ int DcServer::unregBot(const string & uid) {
 
 
 /** Get normal share size */
-void DcServer::getNormalShare(__int64 share, string & normalShare) {
+void DcServer::getNormalShare(int64_t share, string & normalShare) {
 	ostringstream os;
 	float s(static_cast<float>(share));
 	int i(0);
 	for (; ((s >= 1024) && (i < 7)); ++i) {
 		s /= 1024;
 	}
-	os << ::std::floor(s * 1000 + 0.5) / 1000 << " " << DcServer::currentDcServer->mDcLang.mUnits[i];
+	os << ::std::floor(s * 1000 + 0.5) / 1000 << " " << DcServer::currentDcServer->mDcLang.mUnits[6 - i];
 	normalShare = os.str();
 }
 
@@ -1385,10 +1392,10 @@ string DcServer::getSysVersion() {
 		case VER_PLATFORM_WIN32_NT : // Windows NT
 
 			if (osvi.dwMajorVersion <= 4) {
-				version.append("Microsoft Windows NT ");
+				version.append(STR_LEN("Microsoft Windows NT "));
 			}
 			if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0) {
-				version.append("Microsoft Windows 2000 ");
+				version.append(STR_LEN("Microsoft Windows 2000 "));
 			}
 
 			if (osVersionInfoEx) {
@@ -1397,46 +1404,46 @@ string DcServer::getSysVersion() {
 				if (osvi.wProductType == VER_NT_WORKSTATION) {
 
 					if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1) {
-						version.append("Microsoft Windows XP ");
+						version.append(STR_LEN("Microsoft Windows XP "));
 					} else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0) {
-						version.append("Microsoft Windows Vista ");
+						version.append(STR_LEN("Microsoft Windows Vista "));
 					} else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 1) {
-						version.append("Microsoft Windows 7 ");
+						version.append(STR_LEN("Microsoft Windows 7 "));
 					} else {
-						version.append("Microsoft Windows (unknown version) ");
+						version.append(STR_LEN("Microsoft Windows (unknown version) "));
 					}
 
 
 					if (osvi.wSuiteMask & VER_SUITE_PERSONAL) {
-						version.append("Home Edition ");
+						version.append(STR_LEN("Home Edition "));
 					} else {
-						version.append("Professional ");
+						version.append(STR_LEN("Professional "));
 					}
 
 				} else if (osvi.wProductType == VER_NT_SERVER) { // Check server type
 
 					if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2) {
-						version.append("Microsoft Windows 2003 ");
+						version.append(STR_LEN("Microsoft Windows 2003 "));
 					} else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0) {
-						version.append("Microsoft Windows Server 2008 ");
+						version.append(STR_LEN("Microsoft Windows Server 2008 "));
 					} else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 1) {
-						version.append("Microsoft Windows Server 2008 R2 ");
+						version.append(STR_LEN("Microsoft Windows Server 2008 R2 "));
 					} else {
-						version.append("Microsoft Windows (unknown version) ");
+						version.append(STR_LEN("Microsoft Windows (unknown version) "));
 					}
 
 					if (osvi.wSuiteMask & VER_SUITE_DATACENTER) {
-						version.append("DataCenter Server ");
+						version.append(STR_LEN("DataCenter Server "));
 					} else if (osvi.wSuiteMask & VER_SUITE_ENTERPRISE) {
 						if (osvi.dwMajorVersion == 4) {
-							version.append("Advanced Server ");
+							version.append(STR_LEN("Advanced Server "));
 						} else {
-							version.append("Enterprise Server ");
+							version.append(STR_LEN("Enterprise Server "));
 						}
 					} else if (osvi.wSuiteMask == VER_SUITE_BLADE) {
-						version.append("Web Server ");
+						version.append(STR_LEN("Web Server "));
 					} else {
-						version.append("Server ");
+						version.append(STR_LEN("Server "));
 					}
 
 				}
@@ -1451,7 +1458,7 @@ string DcServer::getSysVersion() {
 					return "unknown";
 				}
 
-				lRet = RegQueryValueExA( hKey, "ProductType", NULL, NULL, (LPBYTE) szProductType, &dwBufLen);
+				lRet = RegQueryValueExA(hKey, "ProductType", NULL, NULL, (LPBYTE) szProductType, &dwBufLen);
 
 				if ((lRet != ERROR_SUCCESS) || (dwBufLen > 80)) {
 					return "unknown";
@@ -1460,13 +1467,13 @@ string DcServer::getSysVersion() {
 				RegCloseKey(hKey);
 
 				if (lstrcmpiA("WINNT", szProductType) == 0) {
-					version.append("Professional ");
+					version.append(STR_LEN("Professional "));
 				}
 				if (lstrcmpiA("LANMANNT", szProductType) == 0) {
-					version.append("Server ");
+					version.append(STR_LEN("Server "));
 				}
-				if (lstrcmpiA( "SERVERNT", szProductType) == 0) {
-					version.append("Advanced Server ");
+				if (lstrcmpiA("SERVERNT", szProductType) == 0) {
+					version.append(STR_LEN("Advanced Server "));
 				}
 			}
 
@@ -1485,26 +1492,26 @@ string DcServer::getSysVersion() {
 		case VER_PLATFORM_WIN32_WINDOWS : // Windows 95
 
 			if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 0) {
-				version.append("Microsoft Windows 95 ");
+				version.append(STR_LEN("Microsoft Windows 95 "));
 				if (osvi.szCSDVersion[1] == 'C' || osvi.szCSDVersion[1] == 'B') {
-					version.append("OSR2 ");
+					version.append(STR_LEN("OSR2 "));
 				}
 			}
 
 			if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 10) {
-				version.append("Microsoft Windows 98 ");
+				version.append(STR_LEN("Microsoft Windows 98 "));
 				if (osvi.szCSDVersion[1] == 'A') {
-					version.append("SE ");
+					version.append(STR_LEN("SE "));
 				}
 			}
 
 			if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 90) {
-				version.append("Microsoft Windows Millennium Edition ");
+				version.append(STR_LEN("Microsoft Windows Millennium Edition "));
 			}
 			break;
 
 		case VER_PLATFORM_WIN32s : // Windows
-			version.append("Microsoft Win32s ");
+			version.append(STR_LEN("Microsoft Win32s "));
 			break;
 
 		default :
@@ -1514,17 +1521,21 @@ string DcServer::getSysVersion() {
 
 #else
 
-	utsname osname;
+#if defined(SOLARIS) || defined(_SOLARIS)
+	return "Solaris";
+#else
+	struct utsname osname;
 	if (uname(&osname) == 0) {
 		string version(osname.sysname);
-		version.append(" ", 1);
+		version.append(STR_LEN(" "));
 		version.append(osname.release);
-		version.append(" (", 2);
+		version.append(STR_LEN(" ("));
 		version.append(osname.machine);
-		version.append(")", 1);
+		version.append(STR_LEN(")"));
 		return version;
 	}
 	return "unknown";
+#endif
 
 #endif
 
@@ -1537,7 +1548,7 @@ bool DcServer::setCapabilities() {
 #if (!defined _WIN32) && HAVE_LIBCAP
 
 	if (getuid()) {
-		if (log(WARN)) {
+		if (log(LEVEL_WARN)) {
 			logStream() << "Cannot set capabilities. Hub started from common user, not root." << endl;
 		}
 		return false;
@@ -1549,7 +1560,7 @@ bool DcServer::setCapabilities() {
 	if(user && grp) {
 		// Keep capabilities across UID change
 		if(prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0) != 0) {
-			if (log(WARN)) {
+			if (log(LEVEL_WARN)) {
 				logStream() << "prctl(PR_SET_KEEPCAPS) failed" << endl;
 			}
 			return false;
@@ -1557,7 +1568,7 @@ bool DcServer::setCapabilities() {
 
 		// Change supplementary groups
 		if(initgroups(user->pw_name, user->pw_gid) != 0) {
-			if (log(WARN)) {
+			if (log(LEVEL_WARN)) {
 				logStream() << "initgroups() for user " << user->pw_name << " failed"<< endl;
 			}
 			return false;
@@ -1565,7 +1576,7 @@ bool DcServer::setCapabilities() {
 
 		// Change GID
 		if(setgid(grp->gr_gid) != 0) {
-			if (log(WARN)) {
+			if (log(LEVEL_WARN)) {
 				logStream() << "Cannot set GID to " << grp->gr_gid << endl;
 			}
 			return false;
@@ -1573,13 +1584,13 @@ bool DcServer::setCapabilities() {
 
 		// Change UID
 		if(setuid(user->pw_uid) != 0) {
-			if (log(WARN)) {
+			if (log(LEVEL_WARN)) {
 				logStream() << "Cannot set UID to " << user->pw_uid << endl;
 			}
 			return false;
 		}
 	} else {
-		if (log(WARN)) {
+		if (log(LEVEL_WARN)) {
 			logStream() << "Bad user name. Cannot get pam structs. Check user and group name." << endl;
 		}
 		return false;
@@ -1588,7 +1599,7 @@ bool DcServer::setCapabilities() {
 	// Check capability to bind privileged ports
 	cap_t caps = cap_get_proc();
 	if(!caps) {
-		if (log(WARN)) {
+		if (log(LEVEL_WARN)) {
 			logStream() << "cap_get_proc() failed to get capabilities" << endl;
 		}
 		return false;
@@ -1596,7 +1607,7 @@ bool DcServer::setCapabilities() {
 
 	cap_flag_value_t nbs_flag;
 	if(cap_get_flag(caps, CAP_NET_BIND_SERVICE, CAP_PERMITTED, &nbs_flag) != 0) {
-		if (log(WARN)) {
+		if (log(LEVEL_WARN)) {
 			logStream() << "cap_get_flag() failed to get CAP_NET_BIND_SERVICE state" << endl;
 		}
 		cap_free(caps);
@@ -1606,14 +1617,14 @@ bool DcServer::setCapabilities() {
 	// Drop all capabilities except privileged ports binding
 	caps = cap_from_text(nbs_flag == CAP_SET ? "cap_net_bind_service=ep" : "=");
 	if(!caps) {
-		if (log(WARN)) {
+		if (log(LEVEL_WARN)) {
 			logStream() << "cap_from_text() failed to parse capabilities string" << endl;
 		}
 		return false;
 	}
 
 	if(cap_set_proc(caps) != 0) {
-		if (log(WARN)) {
+		if (log(LEVEL_WARN)) {
 			logStream() << "cap_set_proc() failed to set capabilities" << endl;
 		}
 		cap_free(caps);

@@ -370,7 +370,7 @@ public:
 		mData = new tData(capacity);
 	}
 
-	~HashTable() {
+	virtual ~HashTable() {
 		clear();
 		delete mData;
 		mData = NULL;

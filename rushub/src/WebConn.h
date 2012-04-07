@@ -104,13 +104,14 @@ public:
 	WebConn(tSocket sock = 0, Server * server = NULL);
 	virtual ~WebConn();
 
-	/** Timer of the connection */
-	virtual int onTimer(Time & now);
-
 	virtual size_t send(const string & data, bool flush = true);
 
 	DcServer * server();
 
+private:
+
+	/// Timer of the connection
+	virtual int onTimer(Time & now);
 
 }; // class WebConn
 

@@ -25,6 +25,8 @@
 #ifndef STRING_UTILS_H
 #define STRING_UTILS_H
 
+#include "stdinc.h"
+
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -34,10 +36,11 @@
 #include <stdlib.h>
 
 #ifndef _WIN32
-	#ifndef __int64
-		#define __int64 long long
-	#endif
 	#include <stdlib.h> // for strtoll
+#endif
+
+#ifndef STR_LEN
+# define STR_LEN(S) S , sizeof(S) / sizeof(S[0]) - 1
 #endif
 
 using namespace ::std;
@@ -45,21 +48,17 @@ using namespace ::std;
 /// Utils namespace
 namespace utils {
 
-bool loadFileInString(const string &, string &);
+static const string emptyStr("");
 
 string & stringReplace(const string &, const string &, string &, const string &, bool b = false, bool first = false);
 string & stringReplace(const string &, const string &, string &, double, bool b = false, bool first = false);
 string & stringReplace(const string &, const string &, string &, int, bool b = false, bool first = false);
 string & stringReplace(const string &, const string &, string &, long, bool b = false, bool first = false);
-string & stringReplace(const string &, const string &, string &, __int64, bool b = false, bool first = false);
+string & stringReplace(const string &, const string &, string &, int64_t, bool b = false, bool first = false);
 
-string int64ToString(__int64 const &);
-__int64 stringToInt64(const string &);
+string int64ToString(int64_t const &);
+int64_t stringToInt64(const string &);
 
-string toString(int value);
-
-int countLines(const string &);
-bool limitLines(const string &, int);
 
 void stringSplit(const string &, const char * sDelim, vector<string> &);
 

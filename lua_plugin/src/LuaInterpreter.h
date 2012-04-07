@@ -58,7 +58,7 @@ public:
 	bool onError(const char * funcName, const char * errMsg, bool stop = false);
 	void timer(int id, const char * funcName);
 
-	static void logError(const char * msg);
+	static void logError(const string & msg);
 
 	void newCallParam(void * data, int type = 0);
 	void newCallParam(lua_Number data, int type = 0);

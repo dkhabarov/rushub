@@ -17,40 +17,64 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef USER_BASE_H
-#define USER_BASE_H
+#ifndef TIGER_HASH_H
+#define TIGER_HASH_H
 
-#include <string>
+#include "stdinc.h"
 
-using namespace ::std;
+#include <string.h>
+#include <iostream>
+
+using namespace std;
 
 namespace dcserver {
 
-/** Base user class for quick list */
-class UserBase {
+class TigerHash {
 
 public:
 
-	virtual ~UserBase() {
-	}
+	/** Hash size */
+	static const size_t BITS = 192;
+	static const size_t BYTES = BITS / 8;
 
-	virtual const string & getUid() const = 0;
-	virtual const string & getInfo() = 0;
-	virtual const string & getIp() const = 0;
-	virtual int getProfile() const = 0;
-	virtual bool isHide() const = 0;
-	virtual bool isCanSend() const = 0;
-	virtual bool hasFeature(int feature) const = 0;
+public:
 
-	virtual void send(const string & msg, bool sep = false, bool flush = true) = 0;
-	virtual void sendToChat(const string & data, const string & uid, bool flush = true) = 0;
-	virtual void sendToPm(const string & data, const string & uid, const string & from, bool flush = true) = 0;
+	TigerHash();
 
-}; // UserBase
+	~TigerHash();
+
+	/** Get result */
+	uint8_t * getResult() const;
+
+	/** Calculates the Tiger hash of the data */
+	void update(const void * data, size_t len);
+
+	/** Call once all data has been processed */
+	uint8_t * finalize();
+
+private:
+
+	/** 64 byte blocks for the compress function */
+	uint8_t tmp[64];
+
+	/** State / final hash value */
+	uint64_t res[3];
+
+	/** Total number of bytes compressed */
+	uint64_t pos;
+
+	/** S boxes */
+	static uint64_t table[];
+
+private:
+
+	void tigerCompress(const uint64_t * data, uint64_t state[3]) const;
+
+};
 
 }; // namespace dcserver
 
-#endif // USER_BASE_H
+#endif // TIGER_HASH_H
 
 /**
  * $Id$

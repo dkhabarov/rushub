@@ -26,7 +26,7 @@
 #define SERVER_H
 
 #define INTERNALNAME "RusHub"
-#define INTERNALVERSION "2.3.8" // without space!
+#define INTERNALVERSION "2.3.9" // without space!
 
 #include "ConnChoose.h" // first (def winsock2.h)
 #include "Obj.h"
@@ -79,15 +79,6 @@ public:
 	Server();
 	virtual ~Server();
 
-	/// Set and Listen port
-	virtual Conn * listening(ConnFactory *, const char * ip, const char * port = 0, bool udp = false);
-
-	/// Set and Connect to port
-	virtual Conn * connecting(ConnFactory *, const char * ip, const char * port = 0, bool udp = false);
-
-	/// Add simple connection
-	virtual Conn * addSimpleConn(int connType, const char * ip, const char * port);
-
 	/// Main cycle
 	int run();
 
@@ -129,10 +120,10 @@ protected:
 
 	/// MainLoopCode (0) If 1 then restart hub!
 	int mMainLoopCode;
-	
+
 	/// Strong close conn flag
 	int miNumCloseConn;
-	
+
 	/// Mean frequency
 	MeanFrequency<unsigned, 21> mMeanFrequency;
 
@@ -141,29 +132,26 @@ protected:
 
 	/// Time of server & connection periods
 	struct Times {
-		__int64 mServ; ///< Timer Serv Period
-		__int64 mConn; ///< Timer Conn Period
+		int64_t mServ; ///< Timer Serv Period
+		int64_t mConn; ///< Timer Conn Period
 	} mTimes;
 
 protected:
+
+	/// Set and Listen port
+	virtual Conn * listening(ConnFactory *, const char * ip, const char * port = 0, bool udp = false);
+
+	/// Set and Connect to port
+	virtual Conn * connecting(ConnFactory *, const char * ip, const char * port = 0, bool udp = false);
 
 	/// addConnection
 	int addConnection(Conn *);
 
 	/// delConnection
 	int delConnection(Conn *);
-
-	/// Main timer
-	virtual int onTimer(Time & now);
 	
 	/// createCommandPtr
 	virtual string * createCommandPtr(Conn *);
-
-	/// onNewData
-	virtual void onNewData(Conn *, string *);
-	
-	/// onClose conn
-	virtual void onClose(Conn *);
 
 	void deleteAll();
 
@@ -179,6 +167,12 @@ private:
 	
 private:
 
+	/// onNewData
+	virtual void onNewData(Conn *, string *);
+
+	/// Main timer
+	virtual int onTimer(Time & now);
+
 	/// Main step in the cycle
 	void step();
 
@@ -188,6 +182,9 @@ private:
 	size_t onRecv(Conn *);
 
 	int newAccept();
+
+	/// Add simple connection
+	Conn * addSimpleConn(int connType, const char * ip, const char * port);
 
 }; // Server
 

@@ -48,38 +48,14 @@ static const int cp1251ToUtf8Table[128] = {
 };
 
 
-/** Record from the file to the string */
-bool loadFileInString(const string & fileName, string & str) {
-	string buf;
-	bool addLine = false;
-	ifstream ifs(fileName.c_str());
-
-	if (!ifs.is_open()) {
-		return false;
-	}
-
-	while (!ifs.eof()) {
-		getline(ifs, buf);
-		if (addLine) {
-			str.append("\r\n", 2);
-		} else {
-			addLine = true;
-		}
-		str.append(buf);
-	}
-	ifs.close();
-	return true;
-}
-
-
 
 /** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
 string & stringReplace(const string & str, const string & varname, string & dest, const string & by, bool b, bool first) {
 	dest = str;
 	if (!b) {
-		string search("%[");
+		string search(STR_LEN("%["));
 		search.append(varname);
-		search.append("]", 1);
+		search.append(STR_LEN("]"));
 		size_t pos = dest.find(search);
 		if (first != true || pos == 0) {
 			while (pos != dest.npos) {
@@ -129,14 +105,14 @@ string & stringReplace(const string & str, const string & varname, string & dest
 
 
 /** Searching for in string str substrings %[varname] and change all found substrings on sBy with putting the got string in sDest */
-string & stringReplace(const string & str, const string & varname, string & dest, __int64 by, bool b, bool first) {
+string & stringReplace(const string & str, const string & varname, string & dest, int64_t by, bool b, bool first) {
 	return stringReplace(str, varname, dest, int64ToString(by), b, first);
 }
 
 
 
-/** Typecasting __int64 to string */
-string int64ToString(__int64 const & value) {
+/** Typecasting int64_t to string */
+string int64ToString(int64_t const & value) {
 	char buf[32] = { '\0' };
 #ifdef _WIN32
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
@@ -152,10 +128,10 @@ string int64ToString(__int64 const & value) {
 
 
 
-/** Typecasting string to __int64 */
-__int64 stringToInt64(const string & str) {
+/** Typecasting string to int64_t */
+int64_t stringToInt64(const string & str) {
 #ifdef _WIN32
-	__int64 result = 0;
+	int64_t result = 0;
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
 		sscanf_s(str.c_str(), "%I64d", &result);
 	#else
@@ -165,43 +141,6 @@ __int64 stringToInt64(const string & str) {
 #else
 	return strtoll(str.c_str(), NULL, 10);
 #endif
-}
-
-
-
-string toString(int value) {
-	char buf[16] = { '\0' };
-	#if defined(_WIN32) && defined(_MSC_VER) && (_MSC_VER >= 1400)
-		sprintf_s(buf, 16, "%d", value);
-	#else
-		sprintf(buf, "%d", value);
-	#endif
-	return buf;
-}
-
-
-
-int countLines(const string & str) {
-	int lines = 1;
-	size_t pos = 0;
-	while (str.npos != (pos = str.find_first_of("\n", pos ? pos + 1 : 0))) {
-		++lines;
-	}
-	return lines;
-}
-
-
-
-/** Function will return true, if number of the strings less than max */
-bool limitLines(const string & str, int max) {
-	int lines = 1;
-	size_t pos = 0;
-	while (str.npos != (pos = str.find_first_of("\n", pos ? pos + 1 : 0))) {
-		if (++lines > max) {
-			return false;
-		}
-	}
-	return true;
 }
 
 

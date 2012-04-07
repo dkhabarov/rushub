@@ -24,6 +24,10 @@
 
 #include "Protocol.h"
 
+#ifdef _WIN32
+	#pragma warning(disable:4127) // Disable "conditional expression is constant"
+#endif
+
 namespace server {
 
 
@@ -37,26 +41,31 @@ Protocol::~Protocol(){
 
 
 
-Parser::Parser(int max) : 
+Parser::Parser(unsigned int max) : 
 	Obj("Parser"),
 	mType(TYPE_UNPARSED),
-	mChunks(max),
 	mLength(0),
-	mStrings(new string[max]),
-	mStrMap(0l),
 	mIsParsed(false),
-	mMaxChunks(max)
+	mChunks(max),
+	mMaxChunks(max),
+	mStrMap(0l)
 {
-	for(int i = 0; i < mMaxChunks; ++i) {
-		tChunk & p = mChunks[i];
-		p.first = p.second = 0;
+	if (mMaxChunks) {
+		if (mMaxChunks > 31) {
+			if (log(LEVEL_WARN)) {
+				logStream() << "Max number of chunks more than 31" << endl;
+			}
+		}
+		for(unsigned int i = 0; i < mMaxChunks; ++i) {
+			tChunk & p = mChunks[i];
+			p.first = p.second = 0;
+		}
 	}
 }
 
 
 
 Parser::~Parser() {
-	delete[] mStrings;
 }
 
 
@@ -65,12 +74,17 @@ Parser::~Parser() {
 void Parser::reInit() {
 	mType = TYPE_UNPARSED;
 	mLength = 0;
-	mStrMap = 0l;
 	mIsParsed = false;
+	mStrMap = 0l;
 	string().swap(mCommand); // erase & free memory
-	for(int i = 0; i < mMaxChunks; ++i) {
-		tChunk & p = mChunks[i];
-		p.first = p.second = 0;
+	vector<string>().swap(mStrings); // erase & free memory
+	if (mMaxChunks) {
+		for(unsigned int i = 0; i < mMaxChunks; ++i) {
+			tChunk & p = mChunks[i];
+			p.first = p.second = 0;
+		}
+	} else {
+		mChunks.clear();
 	}
 }
 
@@ -82,10 +96,42 @@ size_t Parser::getCommandLen() {
 
 
 
-void Parser::setChunk(int n, size_t start, size_t len) {
-	tChunk & chunk = mChunks[n];
-	chunk.first = start;
-	chunk.second = len;
+size_t Parser::getChunks() const {
+	return mChunks.size();
+}
+
+
+
+size_t Parser::getStartChunk(unsigned int n) const {
+	if (n < mChunks.size()) {
+		return mChunks[n].first;
+	}
+	return 0;
+}
+
+
+
+void Parser::setChunk(unsigned int n, size_t start, size_t len) {
+	if (mMaxChunks) {
+		if (n <= mMaxChunks) {
+			tChunk & chunk = mChunks[n];
+			chunk.first = start;
+			chunk.second = len;
+		} else if (log(LEVEL_ERROR)) {
+			logStream() << "Error number of chunks" << endl;
+		}
+	}
+}
+
+
+
+int Parser::pushChunk(size_t start, size_t len) {
+	if (!mMaxChunks) {
+		mChunks.push_back(tChunk(start, len));
+	} else if (log(LEVEL_ERROR)) {
+		logStream() << "mMaxChunks not equal 0" << endl;
+	}
+	return mChunks.size() - 1;
 }
 
 
@@ -94,23 +140,29 @@ void Parser::setChunk(int n, size_t start, size_t len) {
 string & Parser::chunkString(unsigned int n) {
 	if (!n) {
 		return mCommand; // Empty line always full, and this pointer for empty line
-	}
-	if (n > mChunks.size()) { // This must not never happen, but if this happens, we are prepared
-		if (log(FATAL)) {
+	} else if (n > mChunks.size()) { // This must not never happen, but if this happens, we are prepared
+		if (log(LEVEL_ERROR)) {
 			logStream() << "Error number of chunks" << endl;
 		}
-		return mStrings[0];
+		return mCommand;
 	}
 
 	unsigned long flag = 1 << n;
-	if (!(mStrMap & flag)) {
-		mStrMap |= flag;
+	if (n > 31 || !(mStrMap & flag)) {
 		tChunk & c = mChunks[n];
 		size_t size = mCommand.size();
+		if (mStrMap == 0l) {
+			mStrings.resize(mChunks.size());
+		}
+		if (n > 31) {
+			n = 0; // Big number of chunks (using mStrings[0])
+		} else {
+			mStrMap |= flag;
+		}
 		if (c.first < size && c.second < size) {
 			mStrings[n].assign(mCommand, c.first, c.second); // Record n part in n element of the array of the lines
-		} else if (log(ERR)) {
-			logStream() << "Badly parsed message : " << mCommand << endl;
+		} else if (log(LEVEL_ERROR)) {
+			logStream() << "Badly parsed message : " << mCommand.substr(0, 25) << endl;
 		}
 	}
 	return mStrings[n];
@@ -118,7 +170,42 @@ string & Parser::chunkString(unsigned int n) {
 
 
 
-bool Parser::splitOnTwo(size_t start, const string & lim, int cn1, int cn2, size_t len, bool left) {
+void Parser::splitAll(size_t start, const char lim, size_t len, bool left) {
+	size_t i = 0;
+	if (len == 0) {
+		len = mLength;
+	}
+	while (true) {
+		if (left) {
+			i = mCommand.find_first_of(lim, start); 
+			if (i == mCommand.npos || i - start >= len) {
+				break;
+			}
+			pushChunk(start, i - start);
+			start = i + 1;
+		} else { 
+			i = mCommand.find_last_of(lim, len - 1);
+			if (i == mCommand.npos || i < start) {
+				break;
+			}
+			pushChunk(i + 1, len - i);
+			len = i - 1;
+		}
+	}
+	if (left) {
+		pushChunk(start, len - start);
+	} else {
+		if (i == mCommand.npos || i < start) {
+			pushChunk(start, len - start + 1);
+		} else {
+			pushChunk(start, len - i);
+		}
+	}
+}
+
+
+
+bool Parser::splitOnTwo(size_t start, const string & lim, unsigned int cn1, unsigned int cn2, size_t len, bool left) {
 	size_t i = 0;
 	size_t lim_len = lim.size();
 	if (len == 0) {
@@ -143,7 +230,7 @@ bool Parser::splitOnTwo(size_t start, const string & lim, int cn1, int cn2, size
 
 
 
-bool Parser::splitOnTwo(size_t start, const char lim, int cn1, int cn2, size_t len, bool left) {
+bool Parser::splitOnTwo(size_t start, const char lim, unsigned int cn1, unsigned int cn2, size_t len, bool left) {
 	size_t i = 0;
 	if (len == 0) {
 		len = mLength;
@@ -166,33 +253,44 @@ bool Parser::splitOnTwo(size_t start, const char lim, int cn1, int cn2, size_t l
 
 
 
-bool Parser::splitOnTwo(const string &lim, int ch, int cn1, int cn2, bool left) {
-	tChunk & chunk = mChunks[ch];
-	return splitOnTwo(chunk.first, lim, cn1, cn2, chunk.second, left);
+bool Parser::splitOnTwo(const string & lim, unsigned int ch, unsigned int cn1, unsigned int cn2, bool left) {
+	if (mMaxChunks) {
+		tChunk & chunk = mChunks[ch];
+		return splitOnTwo(chunk.first, lim, cn1, cn2, chunk.second, left);
+	}
+	return false;
 }
 
 
 
-bool Parser::splitOnTwo(const char lim, int ch, int cn1, int cn2, bool left) {
-	tChunk & chunk = mChunks[ch];
-	return splitOnTwo(chunk.first, lim, cn1, cn2, chunk.second, left);
+bool Parser::splitOnTwo(const char lim, unsigned int ch, unsigned int cn1, unsigned int cn2, bool left) {
+	if (mMaxChunks) {
+		tChunk & chunk = mChunks[ch];
+		return splitOnTwo(chunk.first, lim, cn1, cn2, chunk.second, left);
+	}
+	return false;
 }
 
 
 
-bool Parser::chunkRedRight(int cn, size_t amount) {
-	mChunks[cn].second -= amount;
-	return true;
-}
-
-
-
-bool Parser::chunkRedLeft(int cn, size_t amount) {
-	tChunk & chunk = mChunks[cn];
-	if (chunk.first + amount < mLength) {
-		chunk.first += amount;
-		chunk.second -= amount;
+bool Parser::chunkRedRight(unsigned int cn, size_t amount) {
+	if (mMaxChunks) {
+		mChunks[cn].second -= amount;
 		return true;
+	}
+	return false;
+}
+
+
+
+bool Parser::chunkRedLeft(unsigned int cn, size_t amount) {
+	if (mMaxChunks) {
+		tChunk & chunk = mChunks[cn];
+		if (chunk.first + amount < mLength) {
+			chunk.first += amount;
+			chunk.second -= amount;
+			return true;
+		}
 	}
 	return false;
 }

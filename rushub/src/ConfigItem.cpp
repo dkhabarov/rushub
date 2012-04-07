@@ -111,36 +111,51 @@ CCONVERTFROM(int, Int, atoi(str.c_str()));
 CCONVERTFROM(long, Long, atol(str.c_str()));
 CCONVERTFROM(unsigned int, UInt, atol(str.c_str()));
 CCONVERTFROM(unsigned long, ULong, strtoul(str.c_str(), NULL, 10));
-CCONVERTFROM(__int64, Int64, stringToInt64(str));
+CCONVERTFROM(int64_t, Int64, stringToInt64(str));
 CCONVERTFROM(string, String, str);
 
 
 /** Convert to string */
-#define CCONVERTTO(SUFFIX, SUB) \
-void ConfigItem##SUFFIX::convertTo(string & str) { \
-	SUB; \
+void ConfigItemDouble::convertTo(string & str) {
+	toString(this->data(), str);
+	if (str.find('.') == str.npos) {
+		str.append(STR_LEN(".0")); // double mark
+	}
 }
 
+void ConfigItemPDouble::convertTo(string & str) {
+	toString(*(this->data()), str);
+	if (str.find('.') == str.npos) {
+		str.append(STR_LEN(".0")); // double mark
+	}
+}
 
+#define CCONVERTTO(SUFFIX) \
+void ConfigItem##SUFFIX::convertTo(string & str) { \
+	toString(this->data(), str); \
+}
 
-CCONVERTTO(Bool,    str = ((this->data()) ? "1" : "0"))
-CCONVERTTO(String,  str = this->data())
-CCONVERTTO(PChar,   str = this->data())
-CCONVERTTO(PBool,   str = (*(this->data()) ? "1" : "0"))
-CCONVERTTO(PString, str = *(this->data()))
-CCONVERTTO(Char,    sprintf(mBuffer, "%c",    this->data());  str = mBuffer)
-CCONVERTTO(Double,  sprintf(mBuffer, "%f",    this->data());  str = mBuffer)
-CCONVERTTO(Int,     sprintf(mBuffer, "%d",    this->data());  str = mBuffer)
-CCONVERTTO(Long,    sprintf(mBuffer, "%ld",   this->data());  str = mBuffer)
-CCONVERTTO(UInt,    sprintf(mBuffer, "%u",    this->data());  str = mBuffer)
-CCONVERTTO(ULong,   sprintf(mBuffer, "%lu",   this->data());  str = mBuffer)
-CCONVERTTO(Int64,   sprintf(mBuffer, "%lld",  this->data());  str = mBuffer)
-CCONVERTTO(PDouble, sprintf(mBuffer, "%f",  *(this->data())); str = mBuffer)
-CCONVERTTO(PInt,    sprintf(mBuffer, "%d",  *(this->data())); str = mBuffer)
-CCONVERTTO(PLong,   sprintf(mBuffer, "%ld", *(this->data())); str = mBuffer)
-CCONVERTTO(PUInt,   sprintf(mBuffer, "%u",  *(this->data())); str = mBuffer)
-CCONVERTTO(PULong,  sprintf(mBuffer, "%lu", *(this->data())); str = mBuffer)
-CCONVERTTO(PInt64,  sprintf(mBuffer, "%lld",*(this->data())); str = mBuffer)
+#define CCONVERTPTO(SUFFIX) \
+void ConfigItem##SUFFIX::convertTo(string & str) { \
+	toString(*(this->data()), str); \
+}
+
+CCONVERTTO(Bool)
+CCONVERTTO(String)
+CCONVERTTO(Char)
+CCONVERTTO(Int)
+CCONVERTTO(Long)
+CCONVERTTO(UInt)
+CCONVERTTO(ULong)
+CCONVERTTO(Int64)
+CCONVERTPTO(PBool)
+CCONVERTPTO(PString)
+CCONVERTPTO(PChar)
+CCONVERTPTO(PInt)
+CCONVERTPTO(PLong)
+CCONVERTPTO(PUInt)
+CCONVERTPTO(PULong)
+CCONVERTPTO(PInt64)
 
 
 

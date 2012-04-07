@@ -79,9 +79,6 @@ public:
 	/** loadSym from dll(so) */
 	void * loadSym(const char *);
 
-	/** log */
-	bool strLog();
-
 protected:
 
 	typedef Plugin *(*tGetPluginFunc) ();
@@ -101,6 +98,11 @@ protected:
 
 	/** Pointer on remove-function from lib */
 	tDelPluginFunc mDelPluginFunc;
+
+protected:
+
+	/** log */
+	bool strLog();
 
 }; // PluginLoader
 

@@ -20,6 +20,8 @@
 #include "AdcProtocol.h"
 #include "DcServer.h" // for mDcServer
 #include "DcConn.h" // for DcConn
+#include "TigerHash.h"
+#include "Encoder.h"
 
 namespace dcserver {
 
@@ -27,7 +29,7 @@ namespace protocol {
 
 
 AdcProtocol::AdcProtocol() :
-	mDcServer(NULL),
+	DcProtocol(),
 	mSidNum(0)
 {
 	setClassName("AdcProtocol");
@@ -104,8 +106,12 @@ static void escaper(char c, string & dst) {
 			dst += 's';
 			break;
 
-		case '\\': // Fallthrough
 		case '\n':
+			dst += '\\';
+			dst += 'n';
+			break;
+
+		case '\\': // Fallthrough
 			dst += '\\';
 
 		default:
@@ -122,12 +128,18 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 	AdcParser * adcParser = static_cast<AdcParser *> (parser);
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 
+	if (log(LEVEL_TRACE)) {
+		logStream() << "doCommand" << endl;
+	}
+
 	if (checkCommand(adcParser, dcConn) < 0) {
 		return -1;
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins (OnAny)
+		if (mDcServer->mCalls.mOnAny.callAll(dcConn->mDcUser, adcParser->mType)) {
+			return 1;
+		}
 	#endif
 
 	#ifdef _DEBUG
@@ -136,7 +148,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 		}
 	#endif
 
-	if (dcConn->log(TRACE)) {
+	if (dcConn->log(LEVEL_TRACE)) {
 		dcConn->logStream() << "[S]Stage " << adcParser->mType << endl;
 	}
 
@@ -145,18 +157,18 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 		switch(adcParser->getHeader()) {
 
 			case HEADER_BROADCAST:
-				mDcServer->mAdcUserList.sendToAllAdc(adcParser->mCommand, true);
+				mDcServer->sendToAll(adcParser->mCommand, true, true);
 				break;
 
 			case HEADER_DIRECT:
-				dcUser = static_cast<DcUser *> (mDcServer->mAdcUserList.getUserBaseByUid(adcParser->getSidTarget()));
+				dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(adcParser->getSidTarget()));
 				if (dcUser) { // User was found
 					dcUser->send(adcParser->mCommand, true);
 				}
 				break;
 
 			case HEADER_ECHO:
-				dcUser = static_cast<DcUser *> (mDcServer->mAdcUserList.getUserBaseByUid(adcParser->getSidTarget()));
+				dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(adcParser->getSidTarget()));
 				if (dcUser) { // User was found
 					dcUser->send(adcParser->mCommand, true);
 					dcConn->mDcUser->send(adcParser->mCommand, true);
@@ -164,7 +176,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 				break;
 
 			case HEADER_FEATURE:
-				mDcServer->mAdcUserList.sendToFeature(adcParser->mCommand, 
+				mDcServer->mDcUserList.sendToFeature(adcParser->mCommand, 
 					adcParser->getPositiveFeatures(), 
 					adcParser->getNegativeFeatures(),
 					true);
@@ -175,7 +187,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 		}
 	}
 
-	if (dcConn->log(TRACE)) {
+	if (dcConn->log(LEVEL_TRACE)) {
 		dcConn->logStream() << "[E]Stage " << adcParser->mType << endl;
 	}
 	return 0;
@@ -192,75 +204,13 @@ Conn * AdcProtocol::getConnForUdpData(Conn *, Parser *) {
 int AdcProtocol::onNewConn(Conn * conn) {
 
 	DcConn * dcConn = static_cast<DcConn *> (conn);
+	dcConn->mDcUser->setUid(string(genNewSid()));
 
-	const char * sid = NULL;
-	UserBase * userBase = NULL;
-	do {
-		sid = getSid(++mSidNum);
-		userBase = mDcServer->mAdcUserList.getUserBaseByUid(sid);
-	} while (userBase != NULL || strcmp(sid, "AAAA") == 0); // "AAAA" is a hub
+	#ifndef WITHOUT_PLUGINS
+		mDcServer->mCalls.mOnUserConnected.callAll(dcConn->mDcUser);
+	#endif
 
-	dcConn->mDcUser->setUid(string(sid));
-
-	string cmds;
-	cmds.reserve(70 + mDcServer->mDcConfig.mTopic.size());
-	cmds.append("ISUP ADBASE ADTIGR");
-	cmds.append(ADC_SEPARATOR);
-	cmds.append("ISID ").append(sid);
-	cmds.append(ADC_SEPARATOR);
-	cmds.append("IINF CT32 VE" INTERNALVERSION " NIADC" INTERNALNAME);
-	cmds.append(" DE").append(mDcServer->mDcConfig.mTopic);
-
-	dcConn->send(cmds, true, false);
-
-
-	static __int64 iShareVal = -1;
-	static int iUsersVal = -1;
-	static long iTimeVal = -1;
-	static string sTimeCache, sShareCache, sCache;
-	bool useCache = true;
-	Time Uptime(mDcServer->mTime);
-	Uptime -= mDcServer->mStartTime;
-	long min = Uptime.sec() / 60;
-	if (iTimeVal != min) {
-		iTimeVal = min;
-		useCache = false;
-		stringstream oss;
-		int w, d, h, m;
-		Uptime.asTimeVals(w, d, h, m);
-		if (w) {
-			oss << w << " " << mDcServer->mDcLang.mTimes[0] << " ";
-		}
-		if (d) {
-			oss << d << " " << mDcServer->mDcLang.mTimes[1] << " ";
-		}
-		if (h) {
-			oss << h << " " << mDcServer->mDcLang.mTimes[2] << " ";
-		}
-		oss << m << " " << mDcServer->mDcLang.mTimes[3];
-		sTimeCache = oss.str();
-	}
-	if (iShareVal != mDcServer->miTotalShare) {
-		iShareVal = mDcServer->miTotalShare;
-		useCache = false;
-		DcServer::getNormalShare(iShareVal, sShareCache);
-	}
-	if (iUsersVal != mDcServer->getUsersCount()) {
-		iUsersVal = mDcServer->getUsersCount();
-		useCache = false;
-	}
-	if (!useCache) {
-		string buff;
-		stringReplace(mDcServer->mDcLang.mFirstMsg, "HUB", buff, INTERNALNAME " " INTERNALVERSION);
-		stringReplace(buff, "uptime", buff, sTimeCache);
-		stringReplace(buff, "users", buff, iUsersVal);
-		stringReplace(buff, "share", buff, sShareCache);
-		cp1251ToUtf8(buff, sCache, escaper);
-	}
-
-	dcConn->send(string("IMSG ").append(sCache), true);
-
-	dcConn->setTimeOut(HUB_TIME_OUT_LOGIN, mDcServer->mDcConfig.mTimeout[HUB_TIME_OUT_LOGIN], mDcServer->mTime); /** Timeout for enter */
+	dcConn->setLoginTimeOut(mDcServer->mDcConfig.mTimeoutLogon, mDcServer->mTime); // Timeout for enter
 	return 0;
 }
 
@@ -268,7 +218,60 @@ int AdcProtocol::onNewConn(Conn * conn) {
 
 
 
-int AdcProtocol::eventSup(AdcParser *, DcConn *) {
+int AdcProtocol::eventSup(AdcParser *, DcConn * dcConn) {
+
+	if (dcConn->isState(STATE_NORMAL)) {
+
+		// TODO: save features
+		return 0;
+
+	} else if (!checkState(dcConn, "SUP", STATE_PROTOCOL)) {
+		return -1;
+	}
+
+	// TODO: check existing BASE feature!
+	// "Failed to negotiate base protocol"
+
+	dcConn->reserve(29); // 18 + 1 + 5 + 4 + 1
+	dcConn->send(STR_LEN("ISUP ADBASE ADTIGR"), true, false);
+	dcConn->send(STR_LEN("ISID "), false, false);
+	dcConn->send(dcConn->mDcUser->getUid(), true, false);
+
+	#ifndef WITHOUT_PLUGINS
+		if (mDcServer->mCalls.mOnSupports.callAll(dcConn->mDcUser)) {
+			// Don't send first msg and hubinfo
+			dcConn->flush();
+			return -1;
+		}
+	#endif
+
+	// Get First Message
+	static string cache;
+	bool useCache = true;
+	const string & buff = getFirstMsg(useCache);
+	if (!useCache) {
+		cp1251ToUtf8(buff, cache, escaper);
+	}
+
+	// TODO: optimization of transformation
+	string hubName, topic;
+	cp1251ToUtf8(mDcServer->mDcConfig.mHubName, hubName, escaper);
+	cp1251ToUtf8(mDcServer->mDcConfig.mTopic, topic, escaper);
+
+	// Send Hub Info
+	static const string hubInf(STR_LEN("IINF CT32 VE" INTERNALVERSION " NI"));
+	dcConn->reserve(9 + hubInf.size() + hubName.size() + topic.size() + cache.size()); // hubInf.size() + hubName.size() + 3 + topic.size() + 1 + 4 + cache.size() + 1
+	dcConn->send(hubInf, false, false);
+	dcConn->send(hubName, false, false);
+	dcConn->send(STR_LEN(" DE"), false, false);
+	dcConn->send(topic, true, false);
+
+	// Send First Message
+	dcConn->send(STR_LEN("IMSG "), false, false);
+	dcConn->send(cache, true, true);
+
+
+	dcConn->setState(STATE_PROTOCOL); // set protocol state
 	return 0;
 }
 
@@ -282,32 +285,57 @@ int AdcProtocol::eventSta(AdcParser *, DcConn *) {
 
 int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 
-	string & inf = adcParser->mCommand;
-
-	// Remove PID
-	size_t pos = inf.find(" PD");
-	if (pos != inf.npos) {
-		size_t pos_s = inf.find(" ", pos + 3);
-		if (pos_s != inf.npos) {
-			inf.erase(pos, pos_s - pos);
+	if (!dcConn->isState(STATE_NORMAL)) {
+		if (!checkState(dcConn, "INF", STATE_IDENTIFY)) {
+			return -1;
 		}
 	}
 
-	dcConn->mDcUser->setInfo(inf);
+	dcConn->mDcUser->setInfo(adcParser->mCommand);
 
+	if (!dcConn->isState(STATE_NORMAL) && !verifyCid(dcConn->mDcUser)) {
+		dcConn->closeNow(CLOSE_REASON_USER_INVALID); // TODO reason
+		return -2;
+	}
+
+	
+	
+
+	#ifndef WITHOUT_PLUGINS
+		// TODO: PD param in scripts!
+		mDcServer->mCalls.mOnMyINFO.callAll(dcConn->mDcUser);
+	#endif
+
+	// TODO: change to normal state
 	if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
-			dcConn->send(inf, true); // Send to self only
+			dcConn->send(dcConn->mDcUser->getInfo(), true); // Send to self only
 		} else {
 			// TODO sendMode
-			mDcServer->mAdcUserList.sendToAllAdc(inf, true);
+
+			// How send changed params?
+
+			//mDcServer->sendToAll(dcConn->mDcUser->getInfo(), true, true);
+			return 0; // Don't use getInfo in normal state!
 		}
 	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
+
+		dcConn->setState(STATE_IDENTIFY);
+
+		// Validation (for request pass)
+		#ifndef WITHOUT_PLUGINS
+			if (mDcServer->mCalls.mOnValidateNick.callAll(dcConn->mDcUser)) {
+
+				// TODO: GPA random CID
+				dcConn->send("IGPA QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ", 44, true, true); // We are sending the query for reception of the password
+				return -4;
+			}
+		#endif
+
+		dcConn->setState(STATE_VERIFY);
 		dcConn->mSendNickList = true;
-		dcConn->clearTimeOut(HUB_TIME_OUT_LOGIN);
 		mDcServer->beforeUserEnter(dcConn);
 	}
-
 	return 1;
 }
 
@@ -326,7 +354,15 @@ int AdcProtocol::eventMsg(AdcParser * adcParser, DcConn * dcConn) {
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		if (adcParser->mCommand.find(" PM") != adcParser->mCommand.npos) { // TODO refactoring
+			if (mDcServer->mCalls.mOnTo.callAll(dcConn->mDcUser)) {
+				return -2;
+			}
+		} else{
+			if (mDcServer->mCalls.mOnChat.callAll(dcConn->mDcUser)) {
+				return -2;
+			}
+		}
 	#endif
 
 	/** Sending message */
@@ -340,10 +376,12 @@ int AdcProtocol::eventMsg(AdcParser * adcParser, DcConn * dcConn) {
 
 
 
-int AdcProtocol::eventSch(AdcParser *, DcConn *) {
+int AdcProtocol::eventSch(AdcParser *, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		if (mDcServer->mCalls.mOnSearch.callAll(dcConn->mDcUser)) {
+			return -1;
+		}
 	#endif
 
 	return 0;
@@ -351,10 +389,12 @@ int AdcProtocol::eventSch(AdcParser *, DcConn *) {
 
 
 
-int AdcProtocol::eventRes(AdcParser *, DcConn *) {
+int AdcProtocol::eventRes(AdcParser *, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		if (mDcServer->mCalls.mOnSR.callAll(dcConn->mDcUser)) {
+			return -1;
+		}
 	#endif
 
 	return 0;
@@ -362,10 +402,12 @@ int AdcProtocol::eventRes(AdcParser *, DcConn *) {
 
 
 
-int AdcProtocol::eventCtm(AdcParser *, DcConn *) {
+int AdcProtocol::eventCtm(AdcParser *, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		if (mDcServer->mCalls.mOnConnectToMe.callAll(dcConn->mDcUser)) {
+			return -1;
+		}
 	#endif
 
 	return 0;
@@ -373,10 +415,12 @@ int AdcProtocol::eventCtm(AdcParser *, DcConn *) {
 
 
 
-int AdcProtocol::eventRcm(AdcParser *, DcConn *) {
+int AdcProtocol::eventRcm(AdcParser *, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		if (mDcServer->mCalls.mOnRevConnectToMe.callAll(dcConn->mDcUser)) {
+			return -1;
+		}
 	#endif
 
 	return 0;
@@ -395,13 +439,20 @@ int AdcProtocol::eventGpa(AdcParser *, DcConn *) {
 
 
 
-int AdcProtocol::eventPas(AdcParser *, DcConn *) {
+int AdcProtocol::eventPas(AdcParser *, DcConn * dcConn) {
+
+	if (!checkState(dcConn, "PAS", STATE_VERIFY)) {
+		return -1;
+	}
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		mDcServer->mCalls.mOnMyPass.callAll(dcConn->mDcUser);
 	#endif
 
-	return 0;
+	dcConn->setState(STATE_VERIFY);
+	dcConn->mSendNickList = true;
+	mDcServer->beforeUserEnter(dcConn);
+	return 1;
 }
 
 
@@ -517,20 +568,18 @@ int AdcProtocol::eventPub(AdcParser *, DcConn *) {
 
 
 int AdcProtocol::eventVoid(AdcParser *, DcConn *) {
-
-	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
-	#endif
-
 	return 0;
 }
 
 
 
-int AdcProtocol::eventUnknown(AdcParser *, DcConn *) {
+int AdcProtocol::eventUnknown(AdcParser *, DcConn * dcConn) {
 
 	#ifndef WITHOUT_PLUGINS
-		// TODO call plugins
+		if (!mDcServer->mCalls.mOnUnknown.callAll(dcConn->mDcUser)) {
+			dcConn->closeNice(9000, CLOSE_REASON_CMD_UNKNOWN);
+			return -1;
+		}
 	#endif
 
 	return 0;
@@ -543,7 +592,7 @@ void AdcProtocol::infList(string & list, UserBase * userBase) {
 	if (!userBase->isHide()) {
 		list.reserve(userBase->getInfo().size() + ADC_SEPARATOR_LEN);
 		list.append(userBase->getInfo());
-		list.append(ADC_SEPARATOR);
+		list.append(STR_LEN(ADC_SEPARATOR));
 	}
 }
 
@@ -562,22 +611,58 @@ const char * AdcProtocol::getSid(unsigned int num) {
 
 
 
+const char * AdcProtocol::genNewSid() {
+	const char * sid = NULL;
+	UserBase * userBase = NULL;
+	do {
+		sid = getSid(++mSidNum);
+		userBase = mDcServer->mDcUserList.getUserBaseByUid(sid);
+	} while (userBase != NULL || strcmp(sid, "AAAA") == 0); // "AAAA" is a hub
+	return sid;
+}
+
+
+
+// BMSG <my_sid> <msg>
+void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string & uid, bool flush /*= true*/) {
+	dcConn->reserve(11 + data.size()); // 5 + 4 + 1 + data.size() + 1
+	dcConn->send(STR_LEN("BMSG "), false, false);
+	dcConn->send(uid, false, false);
+	dcConn->send(STR_LEN(" "), false, false);
+	dcConn->send(data, true, flush);
+}
+
+
+
+// EMSG <my_sid> <target_sid> <msg> PM<group_sid>
+void AdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string & uid, const string & from, bool flush /*= true*/) {
+	dcConn->reserve(23 + data.size()); // 5 + 4 + 1 + 4 + 1 + data.size() + 3 + 4 + 1
+	dcConn->send(STR_LEN("EMSG "), false, false);
+	dcConn->send(uid, false, false);
+	dcConn->send(STR_LEN(" "), false, false);
+	dcConn->send(dcConn->mDcUser->getUid(), false, false);
+	dcConn->send(STR_LEN(" "), false, false);
+	dcConn->send(data, false, false);
+	dcConn->send(STR_LEN(" PM"), false, false);
+	dcConn->send(from, true, flush);
+}
+
+
+
+void AdcProtocol::forceMove(DcConn * /*dcConn*/, const char * /*address*/, const char * /*reason*/ /*= NULL*/) {
+
+	// TODO
+
+}
+
+
+
 /// Sending the user-list
 int AdcProtocol::sendNickList(DcConn * dcConn) {
-	try {
-
-		if (mDcServer->mEnterList.find(dcConn->mDcUser->getUidHash())) {
-			dcConn->mNickListInProgress = true;
-		}
-
-		dcConn->send(mDcServer->mAdcUserList.getList(), true);
-
-	} catch(...) {
-		if (dcConn->log(FATAL)) {
-			dcConn->logStream() << "exception in sendNickList" << endl;
-		}
-		return -1;
+	if (mDcServer->mEnterList.find(dcConn->mDcUser->getUidHash())) {
+		dcConn->mNickListInProgress = true;
 	}
+	dcConn->send(mDcServer->mDcUserList.getList(), true);
 	return 0;
 }
 
@@ -586,17 +671,11 @@ int AdcProtocol::sendNickList(DcConn * dcConn) {
 void AdcProtocol::onFlush(Conn * conn) {
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 	if (dcConn->mNickListInProgress) {
-		dcConn->mNickListInProgress = false;
-		if (!dcConn->isOk() || !dcConn->isWritable()) {
-			if (dcConn->log(DEBUG)) {
-				dcConn->logStream() << "Connection closed during nicklist" << endl;
-			}
-		} else {
-			if (dcConn->log(DEBUG)) {
-				dcConn->logStream() << "Enter after nicklist" << endl;
-			}
-			mDcServer->doUserEnter(dcConn);
+		if (dcConn->log(LEVEL_DEBUG)) {
+			dcConn->logStream() << "Enter after nicklist" << endl;
 		}
+		dcConn->mNickListInProgress = false;
+		mDcServer->doUserEnter(dcConn);
 	}
 }
 
@@ -607,14 +686,14 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 	// TODO Checking length of command
 
 	if (adcParser->mType == ADC_TYPE_INVALID) {
-		if (dcConn->log(DEBUG)) {
+		if (dcConn->log(LEVEL_DEBUG)) {
 			dcConn->logStream() << "Wrong syntax cmd" << endl;
 		}
-		string msg("ISTA "), buff;
+		string msg(STR_LEN("ISTA ")), buff;
 		msg.reserve(10 + adcParser->getErrorText().size());
-		msg.append(toString(SEVERITY_LEVEL_FATAL)); // Disconnect
-		msg.append(toString(adcParser->getErrorCode())); // Error code
-		msg.append(" ");
+		msg.append(toString(SEVERITY_LEVEL_FATAL, buff)); // Disconnect
+		msg.append(toString(adcParser->getErrorCode(), buff)); // Error code
+		msg.append(STR_LEN(" "));
 		msg.append(cp1251ToUtf8(adcParser->getErrorText(), buff, escaper)); // Error text
 		dcConn->send(msg, true);
 		dcConn->closeNice(9000, CLOSE_REASON_CMD_SYNTAX);
@@ -623,29 +702,44 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 
 	// Checking null chars
 	if (strlen(adcParser->mCommand.data()) < adcParser->mCommand.size()) {
-		if (dcConn->log(WARN)) {
+		if (dcConn->log(LEVEL_WARN)) {
 			dcConn->logStream() << "Sending null chars, probably attempt an attack" << endl;
 		}
 		dcConn->closeNow(CLOSE_REASON_CMD_NULL);
 		return -2;
 	}
 
-	// Check Syntax
-/*
-	if (adcParser->splitChunks()) {
-		// Protection from commands, not belonging to DC protocol
-		if (adcParser->mType != ADC_TYPE_UNKNOWN || mDcServer->mDcConfig.mDisableNoDCCmd) {
-			if (dcConn->log(DEBUG)) {
-				dcConn->logStream() << "Unknown cmd: " << adcParser->mType << endl;
-			}
-			dcConn->closeNice(9000, CLOSE_REASON_CMD_SYNTAX);
-			return -3;
-		}
-	}
-*/
+	// Split
+	adcParser->splitChunks();
 
 	// TODO: Check flood
 	return 0;
+}
+
+bool AdcProtocol::verifyCid(DcUser * dcUser) {
+	ParamBase * paramPd = dcUser->getParam("PD");
+	if (paramPd == NULL) {
+		return false;
+	}
+
+	ParamBase * paramId = dcUser->getParam("ID");
+	if (paramId == NULL) {
+		return false;
+	}
+
+	uint8_t pid[TigerHash::BYTES];
+	Encoder::fromBase32(paramPd->getString().c_str(), pid, sizeof(pid));
+
+	TigerHash th;
+	th.update((uint8_t *) pid, sizeof(pid));
+
+	string cid;
+	Encoder::toBase32(th.finalize(), TigerHash::BYTES, cid);
+
+	// Removing PID
+	dcUser->removeParam("PD");
+
+	return paramId->getString() == cid;
 }
 
 

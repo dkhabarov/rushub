@@ -21,10 +21,19 @@
 #include "LuaPlugin.h"
 #include "Dir.h"
 
-#include "tinyxml/tinyxml.h"
+#ifdef HAVE_CONFIG_H
+  #include <config.h>
+#endif // HAVE_CONFIG_H
+
+#if HAVE_TINYXML_H
+  #include <tinyxml.h>
+#else
+  #include "tinyxml/tinyxml.h"
+#endif // HAVE_TINYXML_H
+
 #ifdef _WIN32
 	#pragma comment(lib, "tinyxml.lib")
-#endif
+#endif // _WIN32
 
 using namespace ::utils;
 
@@ -36,7 +45,7 @@ bool LuaPlugin::mSetLuaPath = false;
 
 LuaPlugin::LuaPlugin() : 
 	mCurScript(NULL),
-	mCurDCConn(NULL),
+	mCurUser(NULL),
 	mListFlags(0)
 {
 	mCurLua = this;
@@ -56,20 +65,25 @@ void LuaPlugin::onLoad(DcServerBase * dcServerBase) {
 	//setlocale(LC_ALL, dcServerBase->getLocale().c_str());
 	mCurServer = dcServerBase;
 
+	regAll(dcServerBase); // Registration all events for this plugin
+
 	string mainDir(dcServerBase->getMainDir());
 
-	mScriptsDir = mainDir + "scripts/";
-	string libs = mainDir + "libs/";
+	mScriptsDir = mainDir;
+	mScriptsDir.append(STR_LEN("scripts/"));
 	Dir::checkPath(mScriptsDir);
+
+	string libs = mainDir;
+	libs.append(STR_LEN("libs/"));
 	Dir::checkPath(libs);
 
 	#ifdef _WIN32
 
 		// replace slashes
-		size_t pos = mainDir.find("/");
+		size_t pos = mainDir.find('/');
 		while (pos != mainDir.npos) {
 			mainDir.replace(pos, 1, LUA_DIRSEP);
-			pos = mainDir.find("/", pos);
+			pos = mainDir.find('/', pos);
 		}
 
 		mLuaCPath = mainDir + "libs" LUA_DIRSEP "?.dll;" +
@@ -102,33 +116,33 @@ void LuaPlugin::onLoad(DcServerBase * dcServerBase) {
 }
 
 /** Registration all events */
-bool LuaPlugin::regAll(PluginListBase * pluginListBase) {
-	pluginListBase->regCallList("Timer",       this);
-	pluginListBase->regCallList("Conn",        this);
-	pluginListBase->regCallList("Disconn",     this);
-	pluginListBase->regCallList("Enter",       this);
-	pluginListBase->regCallList("Exit",        this);
-	pluginListBase->regCallList("Supports",    this);
-	pluginListBase->regCallList("Key",         this);
-	pluginListBase->regCallList("Validate",    this);
-	pluginListBase->regCallList("MyPass",      this);
-	pluginListBase->regCallList("Version",     this);
-	pluginListBase->regCallList("GetNickList", this);
-	pluginListBase->regCallList("MyINFO",      this);
-	pluginListBase->regCallList("Chat",        this);
-	pluginListBase->regCallList("To",          this);
-	pluginListBase->regCallList("CTM",         this);
-	pluginListBase->regCallList("RCTM",        this);
-	pluginListBase->regCallList("Search",      this);
-	pluginListBase->regCallList("SR",          this);
-	pluginListBase->regCallList("Kick",        this);
-	pluginListBase->regCallList("OpForce",     this);
-	pluginListBase->regCallList("GetINFO",     this);
-	pluginListBase->regCallList("MCTo",        this);
-	pluginListBase->regCallList("Any",         this);
-	pluginListBase->regCallList("Unknown",     this);
-	pluginListBase->regCallList("Flood",       this);
-	pluginListBase->regCallList("WebData",     this);
+bool LuaPlugin::regAll(DcServerBase * dcServerBase) {
+	dcServerBase->regCallList("Timer",       this);
+	dcServerBase->regCallList("Conn",        this);
+	dcServerBase->regCallList("Disconn",     this);
+	dcServerBase->regCallList("Enter",       this);
+	dcServerBase->regCallList("Exit",        this);
+	dcServerBase->regCallList("Supports",    this);
+	dcServerBase->regCallList("Key",         this);
+	dcServerBase->regCallList("Validate",    this);
+	dcServerBase->regCallList("MyPass",      this);
+	dcServerBase->regCallList("Version",     this);
+	dcServerBase->regCallList("GetNickList", this);
+	dcServerBase->regCallList("MyINFO",      this);
+	dcServerBase->regCallList("Chat",        this);
+	dcServerBase->regCallList("To",          this);
+	dcServerBase->regCallList("CTM",         this);
+	dcServerBase->regCallList("RCTM",        this);
+	dcServerBase->regCallList("Search",      this);
+	dcServerBase->regCallList("SR",          this);
+	dcServerBase->regCallList("Kick",        this);
+	dcServerBase->regCallList("OpForce",     this);
+	dcServerBase->regCallList("GetINFO",     this);
+	dcServerBase->regCallList("MCTo",        this);
+	dcServerBase->regCallList("Any",         this);
+	dcServerBase->regCallList("Unknown",     this);
+	dcServerBase->regCallList("Flood",       this);
+	dcServerBase->regCallList("WebData",     this);
 	return true;
 }
 
@@ -289,7 +303,7 @@ int LuaPlugin::restartScripts(LuaInterpreter * curScript, int type) {
 
 /** Loading all scripts */
 int LuaPlugin::loadScripts() {
-	TiXmlDocument file((this->getPluginDir() + "scripts.xml").c_str());
+	TiXmlDocument file((mCurServer->getPluginDir() + "scripts.xml").c_str());
 	if (file.LoadFile()) {
 		TiXmlHandle mainHandle(&file);
 		TiXmlElement * mainItem = mainHandle.FirstChild("Scripts").Element();
@@ -305,7 +319,7 @@ int LuaPlugin::loadScripts() {
 				}
 				string file(name);
 				if ((file.size() <= 4) || (0 != file.compare(file.size() - 4, 4, ".lua"))) {
-					file.append(".lua", 4);
+					file.append(STR_LEN(".lua"));
 				}
 				LuaInterpreter * script = addScript(file, true);
 				if (strcmp(enabled, "false") != 0 && strcmp(enabled, "0") != 0) {
@@ -355,7 +369,7 @@ int LuaPlugin::clear() {
 }
 
 void LuaPlugin::save() {
-	TiXmlDocument file((this->getPluginDir() + "scripts.xml").c_str());
+	TiXmlDocument file((mCurServer->getPluginDir() + "scripts.xml").c_str());
 	file.InsertEndChild(TiXmlDeclaration("1.0", "windows-1251", "yes"));
 	TiXmlElement mainItem("Scripts");
 	mainItem.SetAttribute("Version", PLUGIN_VERSION);
@@ -412,10 +426,9 @@ int LuaPlugin::moveDown(LuaInterpreter * script) {
 /** 1 - blocked */
 int LuaPlugin::callAll(const char * funcName, unsigned int listFlag, vectorLuaInterpreter & vli, DcUserBase * dcUserBase, bool param /*= true*/) {
 
-	DcConnBase * dcConnBase = dcUserBase->mDcConnBase; // TODO refactoring
 	int ret = 0;
 	int block = 0; // On defaults don't block
-	mCurDCConn = dcConnBase; // TODO refactoring
+	mCurUser = dcUserBase;
 	LuaInterpreter * script = NULL;
 
 	if (!getListFlag(listFlag)) {
@@ -434,16 +447,14 @@ int LuaPlugin::callAll(const char * funcName, unsigned int listFlag, vectorLuaIn
 	for (size_t i = 0; i < vli.size(); ++i) {
 		script = vli[i];
 		if (script && script->mL) {
-			script->newCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA); // TODO refactoring
-
-			// TODO
+			script->newCallParam((void *) dcUserBase, LUA_TLIGHTUSERDATA);
 			if (param) {
-				script->newCallParam((void *) dcConnBase->getCommand(), LUA_TSTRING); // TODO refactoring
+				script->newCallParam((void *) dcUserBase->getCommand(), LUA_TSTRING);
 			}
 
 			ret = script->callFunc(funcName);
 			if (ret == 1) { // 1 - blocked
-				mCurDCConn = NULL; // TODO refactoring
+				mCurUser = NULL;
 				return 1;
 			} else if (ret && (!block || block > ret)) {
 				block = ret;
@@ -451,7 +462,7 @@ int LuaPlugin::callAll(const char * funcName, unsigned int listFlag, vectorLuaIn
 		}
 	}
 
-	mCurDCConn = NULL; // TODO refactoring
+	mCurUser = NULL;
 	return block;
 }
 
@@ -540,10 +551,8 @@ int LuaPlugin::onConfigChange(const char * name, const char * value) {
 
 /** onFlood event */
 int LuaPlugin::onFlood(DcUserBase * dcUserBase, int type1, int type2) {
-	DcConnBase * dcConnBase = dcUserBase->mDcConnBase; // TODO refactoring
 	int ret = 0, block = 0; // On defaults don't block
 	LuaInterpreter * script = NULL;
-
 	if (!getListFlag(LIST_FLOOD)) {
 		mFlood.clear();
 		listLuaInterpreter::iterator it, it_e = mLua.end();
@@ -560,7 +569,7 @@ int LuaPlugin::onFlood(DcUserBase * dcUserBase, int type1, int type2) {
 	for (size_t i = 0; i < mFlood.size(); ++i) {
 		script = mFlood[i];
 		if (script && script->mL) {
-			script->newCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA); // TODO refactoring
+			script->newCallParam((void *) dcUserBase, LUA_TLIGHTUSERDATA);
 			script->newCallParam(lua_Number(type1), LUA_TNUMBER);
 			script->newCallParam(lua_Number(type2), LUA_TNUMBER);
 			ret = script->callFunc("OnFlood");
@@ -650,7 +659,6 @@ int LuaPlugin::onScriptError(LuaInterpreter * current, const char * scriptName, 
 /** onAny event */
 int LuaPlugin::onAny(DcUserBase * dcUserBase, int type) {
 
-	DcConnBase * dcConnBase = dcUserBase->mDcConnBase; // TODO refactoring
 	int ret = 0, block = 0; // On defaults don't block
 	LuaInterpreter * script = NULL;
 	if (!getListFlag(LIST_ANY)) {
@@ -669,8 +677,8 @@ int LuaPlugin::onAny(DcUserBase * dcUserBase, int type) {
 	for (size_t i = 0; i < mAny.size(); ++i) {
 		script = mAny[i];
 		if (script && script->mL) {
-			script->newCallParam((void *) dcConnBase, LUA_TLIGHTUSERDATA); // TODO refactoring
-			script->newCallParam((void *) dcConnBase->getCommand(), LUA_TSTRING); // TODO refactoring
+			script->newCallParam((void *) dcUserBase, LUA_TLIGHTUSERDATA);
+			script->newCallParam((void *) dcUserBase->getCommand(), LUA_TSTRING);
 			script->newCallParam(lua_Number(type), LUA_TNUMBER);
 			ret = script->callFunc("OnAny");
 			if (ret == 1) {

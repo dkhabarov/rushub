@@ -65,8 +65,8 @@ int Uid::uidToString(lua_State * L) {
 
 int Uid::userIndex(lua_State * L) {
 
-	DcConnBase * dcConnBase = getDcConnBase(L, 1); // TODO refactoring
-	if (!dcConnBase) {
+	DcUserBase * dcUserBase = getDcUserBase(L, 1);
+	if (!dcUserBase) {
 		ERR_TYPEMETA(1, "UID", "userdata");
 	}
 
@@ -74,8 +74,6 @@ int Uid::userIndex(lua_State * L) {
 	if (!str) {
 		ERR_TYPEMETA(2, "UID", "string");
 	}
-
-	DcUserBase * dcUserBase = dcConnBase->mDcUserBase; // TODO refactoring
 
 	void ** userdata = NULL;
 	switch(getHash(str)) {
@@ -94,7 +92,7 @@ int Uid::userIndex(lua_State * L) {
 
 		case PARAM_HASH_UID :
 			userdata = (void **) lua_newuserdata(L, sizeof(void *));
-			*userdata = (void *) dcConnBase; // TODO refactoring
+			*userdata = (void *) dcUserBase;
 			luaL_getmetatable(L, MT_USER_CONN);
 			lua_setmetatable(L, -2);
 			break;
@@ -111,8 +109,8 @@ int Uid::userIndex(lua_State * L) {
 
 int Uid::userNewIndex(lua_State * L) {
 
-	DcConnBase * dcConnBase = getDcConnBase(L, 1); // TODO refactoring
-	if (!dcConnBase) {
+	DcUserBase * dcUserBase = getDcUserBase(L, 1);
+	if (!dcUserBase) {
 		ERR_TYPEMETA(1, "UID", "userdata");
 	}
 
@@ -121,7 +119,6 @@ int Uid::userNewIndex(lua_State * L) {
 		ERR_TYPEMETA(2, "UID", "string");
 	}
 
-	DcUserBase * dcUserBase = dcConnBase->mDcUserBase; // TODO refactoring
 	int type = lua_type(L, 3);
 
 	switch(getHash(str)) {
@@ -201,13 +198,14 @@ void Uid::pushValue(lua_State * L, DcUserBase * dcUserBase, const char * name) {
 int Uid::setValue(lua_State * L, DcUserBase * dcUserBase, const char * name, int type) {
 	ParamBase * paramBase = dcUserBase->getParamForce(name);
 	const char * str = NULL;
+	size_t len;
 	switch (type) {
 		case ParamBase::TYPE_STRING :
-			str = lua_tostring(L, 3);
+			str = lua_tolstring(L, 3, &len);
 			if (!str) {
 				ERR_TYPEMETA(3, "UID", "string");
 			}
-			paramBase->setString(string(str));
+			paramBase->setString(string(str, len));
 			break;
 
 		case ParamBase::TYPE_BOOL :
@@ -223,7 +221,7 @@ int Uid::setValue(lua_State * L, DcUserBase * dcUserBase, const char * name, int
 			break;
 
 		case ParamBase::TYPE_INT64 :
-			paramBase->setInt64(static_cast<__int64> (lua_tonumber(L, 3)));
+			paramBase->setInt64(static_cast<int64_t> (lua_tonumber(L, 3)));
 			break;
 
 		case ParamBase::TYPE_LONG :

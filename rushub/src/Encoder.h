@@ -17,52 +17,41 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ANTIFLOOD_H
-#define ANTIFLOOD_H
 
-#include "Times.h"
-#include "HashTable.h"
+#ifndef ENCODER_H
+#define ENCODER_H
+
+#include "stdinc.h"
+
+#include <string.h>
+#include <iostream>
+
+using namespace std;
 
 namespace utils {
 
-/// Main antiflood class
-class AntiFlood {
+class Encoder {
 
 public:
 
-	AntiFlood(unsigned & iCount, double & time);
-	~AntiFlood();
-
-	int check(const string & ip, const Time & now);
-	void del(Time & now);
+	static string & toBase32(const uint8_t * src, size_t len, string & tgt);
+	static string toBase32(const uint8_t * src, size_t len) {
+		string tmp;
+		return toBase32(src, len, tmp);
+	}
+	static void fromBase32(const char * src, uint8_t * dst, size_t len);
+	static bool isBase32(const char * src);
 
 private:
 
-	/// Main antiflood item
-	struct Item {
-		Time mTime;
-		unsigned miCount;
-		bool mMoreOne;
-		Item() : mTime(true), miCount(0), mMoreOne(false) {
-		}
-	};
+	static const int8_t base32Table[];
+	static const signed char base32Alphabet[];
 
-	typedef unsigned long HashType_t;
-	typedef List<HashType_t, Item *> List_t;
-	List_t * mList;
-
-
-	Hash<HashType_t> mHash;
-	unsigned & miCount;
-	double & mTime;
-
-	AntiFlood & operator = (const AntiFlood &);
-
-}; // AntiFlood
+}; // class Encoder
 
 }; // namespace utils
 
-#endif // ANTIFLOOD_H
+#endif // ENCODER_H
 
 /**
  * $Id$

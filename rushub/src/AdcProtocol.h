@@ -20,7 +20,7 @@
 #ifndef ADC_PROTOCOL_H
 #define ADC_PROTOCOL_H
 
-#include "Protocol.h"
+#include "DcProtocol.h"
 #include "AdcParser.h"
 
 #include <string>
@@ -38,7 +38,7 @@ namespace protocol {
 
 
 /// ADC protocol
-class AdcProtocol : public Protocol {
+class AdcProtocol : public DcProtocol {
 
 public:
 
@@ -58,18 +58,19 @@ public:
 	virtual int onNewConn(Conn *);
 	virtual void onFlush(Conn *);
 
-	void setServer(DcServer * dcServer) {
-		mDcServer = dcServer;
-	}
 
 	static void infList(string & list, UserBase *);
 	static const char * getSid(unsigned int num);
 
-	int sendNickList(DcConn *);
+	virtual void sendToChat(DcConn *, const string & data, const string & uid, bool flush = true);
+	virtual void sendToPm(DcConn *, const string & data, const string & uid, const string & from, bool flush = true);
+
+	virtual void forceMove(DcConn *, const char * address, const char * reason = NULL);
+	virtual int sendNickList(DcConn *);
+
+	const char * genNewSid();
 
 protected:
-
-	DcServer * mDcServer;
 
 	typedef int (AdcProtocol::*Event) (AdcParser *, DcConn *);
 	Event events[ADC_TYPE_INVALID + 1];
@@ -104,6 +105,7 @@ private:
 	int eventUnknown(AdcParser *, DcConn *); ///< Unknown cmd
 
 	int checkCommand(AdcParser *, DcConn *);
+	bool verifyCid(DcUser *);
 
 }; // AdcProtocol
 

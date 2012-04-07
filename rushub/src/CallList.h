@@ -43,7 +43,6 @@ namespace plugin {
 
 class Plugin;
 class PluginList;
-class PluginListBase;
 struct ufCallOne;
 
 /// Subclass for call list

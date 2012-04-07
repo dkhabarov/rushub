@@ -1,9 +1,9 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.68])
-AC_INIT(RusHub, 2.3.7[beta], [setuper@gmail.com])
-AM_INIT_AUTOMAKE(RusHub, 2.3.7[beta])
+AC_PREREQ([2.50])
+AC_INIT(RusHub, 2.3.9[beta], [setuper@gmail.com])
+AM_INIT_AUTOMAKE(RusHub, 2.3.9[beta])
 AC_CONFIG_SRCDIR([src/config.h.in])
 AC_CONFIG_HEADERS([src/config.h])
 
@@ -68,7 +68,7 @@ if test "$enable_caps" = "yes"; then
 fi
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h dlfcn.h fcntl.h memory.h netdb.h netinet/in.h stddef.h stdlib.h string.h sys/socket.h sys/time.h syslog.h unistd.h],, exit)
+AC_CHECK_HEADERS([arpa/inet.h dlfcn.h fcntl.h memory.h netdb.h netinet/in.h stddef.h stdlib.h string.h sys/socket.h sys/time.h syslog.h unistd.h stdint.h],, exit)
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

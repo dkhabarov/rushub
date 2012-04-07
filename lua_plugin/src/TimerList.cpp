@@ -41,7 +41,7 @@ Timer::~Timer() {
 
 
 
-void Timer::check(__int64 time) {
+void Timer::check(int64_t time) {
 	int msec = static_cast<int> (time - mTime);
 	if (msec >= mInterval) {
 		mScript->timer(mId, mFunc.c_str());

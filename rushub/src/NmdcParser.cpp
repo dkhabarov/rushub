@@ -50,8 +50,8 @@ public:
 	ProtocolCommand() {
 	}
 
-	ProtocolCommand(const string & key) : mKey(key) {
-		mLength = mKey.size();
+	ProtocolCommand(const char * key, size_t len) : mKey(key, len) {
+		mLength = len;
 	}
 
 	virtual ~ProtocolCommand() {
@@ -68,31 +68,31 @@ public:
 
 /// Main NMDC commands keywords
 ProtocolCommand aDC_Commands[] = {
-	ProtocolCommand("$MultiSearch "),      // check: ip, delay
-	ProtocolCommand("$MultiSearch Hub:"),  // check: nick, delay
-	ProtocolCommand("$Search Hub:"),       // check: nick, delay //this must be first!! before the next one
-	ProtocolCommand("$Search "),           // check: ip, delay
-	ProtocolCommand("$SR "),               // check: nick
-	ProtocolCommand("$SR "),               // check: nick (UDP SR)
-	ProtocolCommand("$MyINFO "),           // check: after_nick, nick, share_min_max
-	ProtocolCommand("$Supports "),
-	ProtocolCommand("$Key "),
-	ProtocolCommand("$ValidateNick "),
-	ProtocolCommand("$Version "),
-	ProtocolCommand("$GetNickList"),
-	ProtocolCommand("<"),                  // check: nick, delay, size, line_count
-	ProtocolCommand("$To: "),              // check: nick, other_nick
-	ProtocolCommand("$Quit "),             // no check necessary
-	ProtocolCommand("$MyPass "),
-	ProtocolCommand("$ConnectToMe "),      // check: ip, nick
-	ProtocolCommand("$RevConnectToMe "),   // check: nick, other_nick
-	ProtocolCommand("$MultiConnectToMe "), // not implemented
-	ProtocolCommand("$Kick "),             // check: op, nick, conn
-	ProtocolCommand("$OpForceMove $Who:"), // check: op, nick
-	ProtocolCommand("$GetINFO "),          // check: logged_in(FI), nick
-	ProtocolCommand("$MCTo: "),            // check: nick, other_nick
-	ProtocolCommand("$UserIP "),
-	ProtocolCommand("|")                   // ping cmd (cap)
+	ProtocolCommand(STR_LEN("$MultiSearch ")),      // check: ip, delay
+	ProtocolCommand(STR_LEN("$MultiSearch Hub:")),  // check: nick, delay
+	ProtocolCommand(STR_LEN("$Search Hub:")),       // check: nick, delay //this must be first!! before the next one
+	ProtocolCommand(STR_LEN("$Search ")),           // check: ip, delay
+	ProtocolCommand(STR_LEN("$SR ")),               // check: nick
+	ProtocolCommand(STR_LEN("$SR ")),               // check: nick (UDP SR)
+	ProtocolCommand(STR_LEN("$MyINFO ")),           // check: after_nick, nick, share_min_max
+	ProtocolCommand(STR_LEN("$Supports ")),
+	ProtocolCommand(STR_LEN("$Key ")),
+	ProtocolCommand(STR_LEN("$ValidateNick ")),
+	ProtocolCommand(STR_LEN("$Version ")),
+	ProtocolCommand(STR_LEN("$GetNickList")),
+	ProtocolCommand(STR_LEN("<")),                  // check: nick, delay, size, line_count
+	ProtocolCommand(STR_LEN("$To: ")),              // check: nick, other_nick
+	ProtocolCommand(STR_LEN("$Quit ")),             // no check necessary
+	ProtocolCommand(STR_LEN("$MyPass ")),
+	ProtocolCommand(STR_LEN("$ConnectToMe ")),      // check: ip, nick
+	ProtocolCommand(STR_LEN("$RevConnectToMe ")),   // check: nick, other_nick
+	ProtocolCommand(STR_LEN("$MultiConnectToMe ")), // not implemented
+	ProtocolCommand(STR_LEN("$Kick ")),             // check: op, nick, conn
+	ProtocolCommand(STR_LEN("$OpForceMove $Who:")), // check: op, nick
+	ProtocolCommand(STR_LEN("$GetINFO ")),          // check: logged_in(FI), nick
+	ProtocolCommand(STR_LEN("$MCTo: ")),            // check: nick, other_nick
+	ProtocolCommand(STR_LEN("$UserIP ")),
+	ProtocolCommand(STR_LEN("|"))                   // ping cmd (cap)
 };
 
 
@@ -365,49 +365,39 @@ bool NmdcParser::splitChunks() {
 	return mError;
 }
 
-int NmdcParser::checkCmd(NmdcParser & dcParser, const string & data, DcUser * dcUser /*= NULL*/) {
-	dcParser.reInit();
-	dcParser.mCommand = data;
-	dcParser.parse();
-	if (dcParser.splitChunks()) {
-		return -1;
+
+
+void NmdcParser::parseInfo(DcUser * dcUser, const string & info) {
+
+	if (dcUser->getInfo() == info) {
+		return;
 	}
 
-	if (dcParser.mType == NMDC_TYPE_MYNIFO && (dcUser == NULL ||
-			dcUser->getUid().empty() ||
-			dcUser->getUid() != dcParser.chunkString(CHUNK_MI_NICK))
-	) {
-		return -2;
+	NmdcParser nmdcParser;
+	nmdcParser.mCommand = info;
+	nmdcParser.parse();
+
+	if (!nmdcParser.splitChunks() && nmdcParser.mType == NMDC_TYPE_MYNIFO) {
+
+		// Share
+		dcUser->getParamForce(USER_PARAM_SHARE)->setInt64(stringToInt64(nmdcParser.chunkString(CHUNK_MI_SIZE)));
+
+		// Email
+		dcUser->getParamForce(USER_PARAM_EMAIL)->setString(nmdcParser.chunkString(CHUNK_MI_MAIL));
+
+		string speed = nmdcParser.chunkString(CHUNK_MI_SPEED);
+		string magicByte;
+		size_t size = speed.size();
+		if (size != 0) {
+			magicByte = speed[--size];
+			speed.assign(speed, 0, size);
+		}
+
+		dcUser->getParamForce(USER_PARAM_BYTE)->setString(magicByte);
+		dcUser->getParamForce(USER_PARAM_CONNECTION)->setString(speed);
+
+		parseDesc(dcUser, nmdcParser.chunkString(CHUNK_MI_DESC));
 	}
-
-	if (dcParser.mType > 0 && dcParser.mType < 3) {
-		return 3;
-	}
-	return dcParser.mType;
-}
-
-
-
-void NmdcParser::parseInfo(DcUser * dcUser, NmdcParser * parser) {
-	// Share
-	dcUser->getParamForce(USER_PARAM_SHARE)->setInt64(stringToInt64(parser->chunkString(CHUNK_MI_SIZE)));
-
-	// Email
-	dcUser->getParamForce(USER_PARAM_EMAIL)->setString(parser->chunkString(CHUNK_MI_MAIL));
-
-
-	string speed = parser->chunkString(CHUNK_MI_SPEED);
-	string magicByte;
-	size_t size = speed.size();
-	if (size != 0) {
-		magicByte = speed[--size];
-		speed.assign(speed, 0, size);
-	}
-
-	dcUser->getParamForce(USER_PARAM_BYTE)->setString(magicByte);
-	dcUser->getParamForce(USER_PARAM_CONNECTION)->setString(speed);
-
-	parseDesc(dcUser, parser->chunkString(CHUNK_MI_DESC));
 }
 
 
@@ -564,79 +554,81 @@ void NmdcParser::getTag(DcUser * dcUser, string & tag) {
 	param = dcUser->getParam(USER_PARAM_CLIENT_VERSION);
 	if (param) {
 		if (tag.size()) {
-			tag.append(" ");
+			tag += ' ';
 		}
-		tag.append("V:").append(param->toString());
+		tag.append(STR_LEN("V:")).append(param->toString());
 	}
 	param = dcUser->getParam(USER_PARAM_MODE);
 	if (param) {
 		if (tag.size()) {
-			tag.append(",");
+			tag += ',';
 		}
-		tag.append("M:").append(param->toString());
+		tag.append(STR_LEN("M:")).append(param->toString());
 	}
 	param = dcUser->getParam(USER_PARAM_UNREG_HUBS);
 	if (param) {
 		if (tag.size()) {
-			tag.append(",");
+			tag += ',';
 		}
-		tag.append("H:").append(param->toString());
+		tag.append(STR_LEN("H:")).append(param->toString());
 
 		param = dcUser->getParam(USER_PARAM_REG_HUBS);
 		if (param) {
-			tag.append("/").append(param->toString());
+			tag += '/';
+			tag.append(param->toString());
 		}
 
 		param = dcUser->getParam(USER_PARAM_OP_HUBS);
 		if (param) {
-			tag.append("/").append(param->toString());
+			tag += '/';
+			tag.append(param->toString());
 		}
 	}
 	param = dcUser->getParam(USER_PARAM_SLOTS);
 	if (param) {
 		if (tag.size()) {
-			tag.append(",");
+			tag += ',';
 		}
-		tag.append("S:").append(param->toString());
+		tag.append(STR_LEN("S:")).append(param->toString());
 	}
 	param = dcUser->getParam(USER_PARAM_OPEN);
 	if (param) {
 		if (tag.size()) {
-			tag.append(",");
+			tag += ',';
 		}
-		tag.append("O:").append(param->toString());
+		tag.append(STR_LEN("O:")).append(param->toString());
 	}
 	param = dcUser->getParam(USER_PARAM_LIMIT);
 	if (param) {
 		if (tag.size()) {
-			tag.append(",");
+			tag += ',';
 		}
-		tag.append("L:").append(param->toString());
+		tag.append(STR_LEN("L:")).append(param->toString());
 	}
 	param = dcUser->getParam(USER_PARAM_BANDWIDTH);
 	if (param) {
 		if (tag.size()) {
-			tag.append(",");
+			tag += ',';
 		}
-		tag.append("B:").append(param->toString());
+		tag.append(STR_LEN("B:")).append(param->toString());
 	}
 	param = dcUser->getParam(USER_PARAM_DOWNLOAD);
 	if (param) {
 		if (tag.size()) {
-			tag.append(",");
+			tag += ',';
 		}
-		tag.append("D:").append(param->toString());
+		tag.append(STR_LEN("D:")).append(param->toString());
 	}
 	param = dcUser->getParam(USER_PARAM_FRACTION);
 	if (param) {
 		if (tag.size()) {
-			tag.append(",");
+			tag += ',';
 		}
-		tag.append("F:").append(param->toString());
+		tag.append(STR_LEN("F:")).append(param->toString());
 	}
 	if (tag.size()) {
 		tag = "<" + tag;
-		tag += ">";
+		tag += '>';
 	}
 }
 
@@ -645,15 +637,15 @@ void NmdcParser::getTag(DcUser * dcUser, string & tag) {
 void NmdcParser::formingInfo(DcUser * dcUser, string & info) {
 	ParamBase * param = NULL;
 	info.reserve(0x7F); // usual length of command
-	info = "$MyINFO $ALL ";
+	info.assign(STR_LEN("$MyINFO $ALL "));
 	info.append(dcUser->getUid());
-	info.append(" ");
+	info += ' ';
 	param = dcUser->getParam(USER_PARAM_DESC);
 	if (param != NULL) {
 		info.append(param->toString());
 	}
 	info.append(dcUser->getNmdcTag());
-	info.append("$ $");
+	info.append(STR_LEN("$ $"));
 	param = dcUser->getParam(USER_PARAM_CONNECTION);
 	if (param != NULL) {
 		info.append(param->toString());
@@ -662,17 +654,17 @@ void NmdcParser::formingInfo(DcUser * dcUser, string & info) {
 	if (param != NULL) {
 		info.append(param->toString());
 	}
-	info.append("$");
+	info += '$';
 	param = dcUser->getParam(USER_PARAM_EMAIL);
 	if (param != NULL) {
 		info.append(param->toString());
 	}
-	info.append("$");
+	info += '$';
 	param = dcUser->getParam(USER_PARAM_SHARE);
 	if (param != NULL) {
 		info.append(param->toString());
 	}
-	info.append("$");
+	info += '$';
 }
 
 

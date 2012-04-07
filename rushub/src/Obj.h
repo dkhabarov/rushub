@@ -25,14 +25,13 @@
 #ifndef OBJ_H
 #define OBJ_H
 
+#include "stdinc.h"
+
 #include <iostream>
 #include <fstream>
 #include <sstream> // operation << for string
 #include <vector>
 #ifndef _WIN32
-	#ifndef __int64
-		#define __int64 long long
-	#endif
 	#include <memory.h>
 	#include <syslog.h> 
 #endif
@@ -42,33 +41,48 @@ using namespace ::std;
 namespace utils {
 
 enum {
-	FATAL, // falat error
-	ERR,   // simple error
-	WARN,  // warning
-	INFO,  // information
-	DEBUG, // debug
-	TRACE  // tracing
+	LEVEL_FATAL, // fatal error
+	LEVEL_ERROR, // simple error
+	LEVEL_WARN,  // warning
+	LEVEL_INFO,  // information
+	LEVEL_DEBUG, // debug
+	LEVEL_TRACE  // tracing
 };
 
 /** Main stream of log system */
 #define logStream() logStreamLine(__LINE__)
 
 
-/** NonCopyable class */
+#ifndef STR_LEN
+# define STR_LEN(S) S , sizeof(S) / sizeof(S[0]) - 1
+#endif
+
+
+/**
+ * NonCopyable class
+ */
 class NonCopyable {
-	protected:
-		NonCopyable() {}
-		~NonCopyable() {}
-	private:
-		NonCopyable(const NonCopyable &);
-		const NonCopyable & operator = (const NonCopyable &);
+
+protected:
+
+	NonCopyable() {}
+	~NonCopyable() {}
+
+private:
+
+	NonCopyable(const NonCopyable &);
+	const NonCopyable & operator = (const NonCopyable &);
+
 }; // class NonCopyable
 
 
-/** Main object class (logger class) */
+/**
+ * Main object class (logger class)
+ */
 class Obj {
 
 public:
+
 	static bool mSysLogOn;
 
 public:
@@ -78,53 +92,50 @@ public:
 	Obj(const char * name, bool); // Without Count Control (use only if you control this object)
 	virtual ~Obj();
 
-	/** Get counts of objects */
+	///< Get counts of objects
 	static int getCount();
 
-	/** Return log straem */
+	///< Return log straem
 	int log(int level);
 
-	/** Return current log stream with line */
+	///< Return current log stream with line
 	ostream & logStreamLine(const int line);
 
-	/** Return class name */
+	///< Return class name
 	const char * getClassName();
 
 protected:
 
-	/** Class name */
-	const char * mClassName;
-
-	/** Max log level of events */
+	///< Max log level of events
 	static int mMaxLevel;
-
-	/** Max log level of errors */
-	static int mMaxErrLevel;
 
 	static ofstream mOfs;
 	static string * mLogsPath;
 
 protected:
 
-	/** Set class name */
+	///< Set class name
 	void setClassName(const char * name);
 
-	/** Main function putting log in stream */
+	///< Main function putting log in stream
 	virtual bool strLog();
 
-	/** Return a simple log stream */
+	///< Return a simple log stream
 	ostream & simpleLogStream();
 
 private:
 
-	/** Objects counter */
+	///< Class name
+	const char * mClassName;
+
+	///< output log stream
+	ostream * mToLog;
+
+	///< Objects counter
 	static int mCounterObj;
 	static int mLevel;
 	static bool mCout;
 	static const char * mLevelNames[];
-
-	/** output log stream */
-	ostream * mToLog;
 
 	static ostringstream mSysLogOss;
 	static ostringstream mBufOss;
@@ -135,15 +146,15 @@ private:
 
 private:
 
-	/** log function */
-	ostream & log();
+	///< log function
+	static ostream & log();
 
-	ostream & openLog();
-	bool saveInBuf();
-	void loadFromBuf(ostream &);
+	static ostream & openLog();
+	static bool saveInBuf();
+	static void loadFromBuf(ostream &);
 
-	/** Return level for syslog */
-	int sysLogLevel(int level);
+	///< Return level for syslog
+	static int sysLogLevel(int level);
 
 }; // class Obj
 

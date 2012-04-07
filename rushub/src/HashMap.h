@@ -35,7 +35,7 @@ using namespace ::std;
 
 namespace utils {
 
-/** Hash map with list */
+/// Hash map with list
 template <class V, class K = unsigned long>
 class HashMap {
 
@@ -44,41 +44,42 @@ public:
 	/// Iterator for the data-list
 	typedef typename list<V, allocator<V> >::iterator iterator;
 
-	Hash<K> mHash; ///< Hash function
+	/// Hash function
+	Hash<K> mHash;
 
 public:
 
 	HashMap() {
 	}
 
-	~HashMap() {
+	virtual ~HashMap() {
 	}
 
-	/** Number element in container HashMap */
+	/// Number element in container HashMap
 	inline size_t size() const {
 		return mHashMap.size();
 	}
 
-	/** Befin iterator of data list */
+	/// Befin iterator of data list
 	inline iterator begin() {
 		return mList.begin();
 	}
 
-	/** End iterator of data list */
+	/// End iterator of data list
 	inline iterator end() {
 		return mList.end();
 	}
 
-	/** Adding data and hash-key (true - ok, false - fail) */
+	/// Adding data and hash-key (true - ok, false - fail)
 	bool add(const K & hash, V Data);
 
-	/** Removing data by hash-key (true - ok, false - fail) */
+	/// Removing data by hash-key (true - ok, false - fail)
 	bool remove(const K & hash);
 
-	/** Check existed this hash-key (true - yes, false - no) */
+	/// Check existed this hash-key (true - yes, false - no)
 	bool contain(const K & hash) const;
 
-	/** Return data by hash-key. Return val else NULL */
+	/// Return data by hash-key. Return val else NULL
 	V find(const K & hash) const;
 
 	virtual void onAdd(V) {
@@ -99,6 +100,7 @@ private:
 }; // HashMap
 
 
+
 /** Adding data and hash-key (true - ok, false - fail) */
 template <class V, class K>
 bool HashMap<V, K>::add(const K & hash, V data) {
@@ -109,7 +111,7 @@ bool HashMap<V, K>::add(const K & hash, V data) {
 	}
 
 	// Insert data
-	iterator it = mList.insert(mList.begin(), data);
+	iterator it = mList.insert(mList.end(), data);
 	if (it == mList.end()) {
 		return false;
 	}
@@ -125,6 +127,8 @@ bool HashMap<V, K>::add(const K & hash, V data) {
 	return true;
 }
 
+
+
 /** Removing data by hash-key (true - ok, false - fail) */
 template <class V, class K>
 bool HashMap<V, K>::remove(const K & hash) {
@@ -138,11 +142,15 @@ bool HashMap<V, K>::remove(const K & hash) {
 	return false;
 }
 
+
+
 /** Check existed this hash-key (true - yes, false - no) */
 template <class V, class K>
 bool HashMap<V, K>::contain(const K & hash) const {
 	return mHashMap.find(hash) != mHashMap.end();
 }
+
+
 
 /** Return data by hash-key. Return val else NULL */
 template <class V, class K>
@@ -153,6 +161,7 @@ V HashMap<V, K>::find(const K & hash) const {
 	}
 	return NULL;
 }
+
 
 }; // namespace utils
 

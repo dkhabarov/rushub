@@ -134,40 +134,40 @@ struct ufSendProfile : public unary_function<void, UserList::iterator> {
 
 
 
-/** Unary function for sending data dataS + nick + dataE to each user */
-struct ufSendWithNick : public unary_function<void, UserList::iterator> {
-	const string &mDataStart, &mDataEnd; /** Data for sending */
+/** Unary function for sending chat data to each user */
+struct ufSendChat : public unary_function<void, UserList::iterator> {
+	const string & mData;
+	const string & mUid;
 
-	ufSendWithNick(const string & dataStart, const string & dataEnd) : 
-		mDataStart(dataStart),
-		mDataEnd(dataEnd)
+	ufSendChat(const string & data, const string & uid) : 
+		mData(data),
+		mUid(uid)
 	{
 	}
 
 	void operator() (UserBase * userBase) {
 		if (userBase && userBase->isCanSend() && !userBase->getUid().empty()) {
-			userBase->send(mDataStart, false, false);
-			userBase->send(userBase->getUid(), false, false);
-			userBase->send(mDataEnd, true);
+			userBase->sendToChat(mData, mUid, true);
 		}
 	}
 
-	const ufSendWithNick & operator = (const ufSendWithNick &) { // for_each
+	const ufSendChat & operator = (const ufSendChat &) { // for_each
 		return *this;
 	}
 
-}; // struct ufSendWithNick
+}; // struct ufSendChat
 
 
 
-/** Unary function for sending data dataS + nick + dataE to each user with profile */
-struct ufSendWithNickProfile : public unary_function<void, UserList::iterator> {
-	const string &mDataStart, &mDataEnd; /** Data for sending */
+/** Unary function for sending chat data to each user with profile */
+struct ufSendChatProfile : public unary_function<void, UserList::iterator> {
+	const string & mData;
+	const string & mUid;
 	unsigned long mProfile;
 
-	ufSendWithNickProfile(const string & dataStart, const string & dataEnd, unsigned long profile) : 
-		mDataStart(dataStart),
-		mDataEnd(dataEnd),
+	ufSendChatProfile(const string & data, const string & uid, unsigned long profile) : 
+		mData(data),
+		mUid(uid),
 		mProfile(profile)
 	{
 	}
@@ -182,18 +182,81 @@ struct ufSendWithNickProfile : public unary_function<void, UserList::iterator> {
 				profile = (profile % 32) - 1;
 			}
 			if (mProfile & (1 << profile) && !userBase->getUid().empty()) {
-				userBase->send(mDataStart, false, false);
-				userBase->send(userBase->getUid(), false, false);
-				userBase->send(mDataEnd, true);
+				userBase->sendToChat(mData, mUid, true);
 			}
 		}
 	}
 
-	const ufSendWithNickProfile & operator = (const ufSendWithNickProfile &) { // for_each
+	const ufSendChatProfile & operator = (const ufSendChatProfile &) { // for_each
 		return *this;
 	}
 
-}; // struct ufSendWithNickProfile
+}; // struct ufSendChatProfile
+
+
+
+/** Unary function for sending pm data to each user */
+struct ufSendPm : public unary_function<void, UserList::iterator> {
+	const string & mData;
+	const string & mUid;
+	const string & mFrom;
+
+	ufSendPm(const string & data, const string & uid, const string & from) : 
+		mData(data),
+		mUid(uid),
+		mFrom(from)
+	{
+	}
+
+	void operator() (UserBase * userBase) {
+		if (userBase && userBase->isCanSend() && !userBase->getUid().empty()) {
+			userBase->sendToPm(mData, mUid, mFrom, true);
+		}
+	}
+
+	const ufSendPm & operator = (const ufSendPm &) { // for_each
+		return *this;
+	}
+
+}; // struct ufSendPm
+
+
+
+/** Unary function for sending pm data to each user with profile */
+struct ufSendPmProfile : public unary_function<void, UserList::iterator> {
+	const string & mData;
+	const string & mUid;
+	const string & mFrom;
+	unsigned long mProfile;
+
+	ufSendPmProfile(const string & data, const string & uid, const string & from, unsigned long profile) : 
+		mData(data),
+		mUid(uid),
+		mFrom(from),
+		mProfile(profile)
+	{
+	}
+
+	void operator() (UserBase * userBase) {
+		if (userBase && userBase->isCanSend()) { 
+			int profile = userBase->getProfile() + 1;
+			if (profile < 0) {
+				profile = -profile;
+			}
+			if (profile > 31) {
+				profile = (profile % 32) - 1;
+			}
+			if (mProfile & (1 << profile) && !userBase->getUid().empty()) {
+				userBase->sendToPm(mData, mUid, mFrom, true);
+			}
+		}
+	}
+
+	const ufSendPmProfile & operator = (const ufSendPmProfile &) { // for_each
+		return *this;
+	}
+
+}; // struct ufSendPmProfile
 
 
 
@@ -249,35 +312,23 @@ const string & UserList::getList(int number) {
  */
 void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 	if (!useCache) {
-		if (log(TRACE)) {
+		if (log(LEVEL_TRACE)) {
 			logStream() << "sendToAll begin" << endl;
 		}
 
-		if (mCache.size()) {
-			mCache.reserve(mCache.size() + data.size() + NMDC_SEPARATOR_LEN);
-			mCache.append(data);
-			if (addSep) {
-				if (mCache.find(NMDC_SEPARATOR, mCache.size() - NMDC_SEPARATOR_LEN, NMDC_SEPARATOR_LEN)) {
-					mCache.append(NMDC_SEPARATOR);
-				}
-			}
-			for_each(begin(), end(), ufSend(mCache, false));
-			string().swap(mCache); // erase & free memory
+		if (mCacheNmdc.size()) {
+			addInCache(mCacheNmdc, data, STR_LEN(NMDC_SEPARATOR), addSep);
+			for_each(begin(), end(), ufSend(mCacheNmdc, false));
+			string().swap(mCacheNmdc); // erase & free memory
 		} else {
 			for_each(begin(), end(), ufSend(data, addSep));
 		}
 
-		if (log(TRACE)) {
+		if (log(LEVEL_TRACE)) {
 			logStream() << "sendToAll end" << endl;
 		}
 	} else {
-		mCache.reserve(mCache.size() + data.size() + NMDC_SEPARATOR_LEN);
-		mCache.append(data);
-		if (addSep) {
-			if (mCache.find(NMDC_SEPARATOR, mCache.size() - NMDC_SEPARATOR_LEN, NMDC_SEPARATOR_LEN)) {
-				mCache.append(NMDC_SEPARATOR);
-			}
-		}
+		addInCache(mCacheNmdc, data, STR_LEN(NMDC_SEPARATOR), addSep);
 	}
 }
 
@@ -285,35 +336,23 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 
 void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 	if (!useCache) {
-		if (log(TRACE)) {
+		if (log(LEVEL_TRACE)) {
 			logStream() << "sendToAll begin" << endl;
 		}
 
-		if (mCache.size()) {
-			mCache.reserve(mCache.size() + data.size() + ADC_SEPARATOR_LEN);
-			mCache.append(data);
-			if (addSep) {
-				if (mCache.find(ADC_SEPARATOR, mCache.size() - ADC_SEPARATOR_LEN, ADC_SEPARATOR_LEN)) {
-					mCache.append(ADC_SEPARATOR);
-				}
-			}
-			for_each(begin(), end(), ufSend(mCache, false));
-			string().swap(mCache); // erase & free memory
+		if (mCacheAdc.size()) {
+			addInCache(mCacheAdc, data, STR_LEN(ADC_SEPARATOR), addSep);
+			for_each(begin(), end(), ufSend(mCacheAdc, false));
+			string().swap(mCacheAdc); // erase & free memory
 		} else {
 			for_each(begin(), end(), ufSend(data, addSep));
 		}
 
-		if (log(TRACE)) {
+		if (log(LEVEL_TRACE)) {
 			logStream() << "sendToAll end" << endl;
 		}
 	} else {
-		mCache.reserve(mCache.size() + data.size() + ADC_SEPARATOR_LEN);
-		mCache.append(data);
-		if (addSep) {
-			if (mCache.find(ADC_SEPARATOR, mCache.size() - ADC_SEPARATOR_LEN, ADC_SEPARATOR_LEN)) {
-				mCache.append(ADC_SEPARATOR);
-			}
-		}
+		addInCache(mCacheAdc, data, STR_LEN(ADC_SEPARATOR), addSep);
 	}
 }
 
@@ -322,13 +361,13 @@ void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 void UserList::sendToFeature(const string & data, const vector<int> & positive, 
 		const vector<int> & negative, bool addSep) {
 
-	if (log(TRACE)) {
+	if (log(LEVEL_TRACE)) {
 		logStream() << "sendToFeature begin" << endl;
 	}
 
 	for_each(begin(), end(), ufSendFeature(data, addSep, positive, negative));
 
-	if (log(TRACE)) {
+	if (log(LEVEL_TRACE)) {
 		logStream() << "sendToFeature end" << endl;
 	}
 }
@@ -337,38 +376,52 @@ void UserList::sendToFeature(const string & data, const vector<int> & positive,
 
 /** Sending data to profiles */
 void UserList::sendToProfiles(unsigned long profile, const string & data, bool addSep) {
-	if (log(TRACE)) {
+	if (log(LEVEL_TRACE)) {
 		logStream() << "sendToProfiles begin" << endl;
 	}
 
 	for_each(begin(), end(), ufSendProfile(data, profile, addSep));
 
-	if (log(TRACE)) {
+	if (log(LEVEL_TRACE)) {
 		logStream() << "sendToProfiles end" << endl;
 	}
 }
 
 
 
-/** Sending data start+Nick+end to all
-    Nick - user's nick
-    Use for private send to all */
-void UserList::sendWithNick(const string & dataStart, const string & dataEnd) {
-	for_each(begin(), end(), ufSendWithNick(dataStart, dataEnd));
+/** Use for chat send to all */
+void UserList::sendToAllChat(const string & data, const string & uid) {
+	for_each(begin(), end(), ufSendChat(data, uid));
 }
 
 
 
-void UserList::sendWithNick(const string & dataStart, const string & dataEnd, unsigned long profile) {
-	for_each(begin(), end(), ufSendWithNickProfile(dataStart, dataEnd, profile));
+void UserList::sendToAllChat(const string & data, const string & uid, unsigned long profile) {
+	for_each(begin(), end(), ufSendChatProfile(data, uid, profile));
+}
+
+
+
+/** Use for private send to all */
+void UserList::sendToAllPm(const string & data, const string & uid, const string & from) {
+	for_each(begin(), end(), ufSendPm(data, uid, from));
+}
+
+
+
+void UserList::sendToAllPm(const string & data, const string & uid, const string & from, unsigned long profile) {
+	for_each(begin(), end(), ufSendPmProfile(data, uid, from, profile));
 }
 
 
 
 /** Flush user cache */
 void UserList::flushForUser(UserBase * userBase) {
-	if (mCache.size()) {
-		ufSend(mCache, false).operator() (userBase);
+	if (mCacheNmdc.size()) {
+		ufSend(mCacheNmdc, false).operator() (userBase);
+	}
+	if (mCacheAdc.size()) {
+		ufSend(mCacheAdc, false).operator() (userBase);
 	}
 }
 
@@ -376,16 +429,11 @@ void UserList::flushForUser(UserBase * userBase) {
 
 /** Flush common cache */
 void UserList::flushCache() {
-	if (mCache.size()) {
+	if (mCacheNmdc.size()) {
 		string str;
 		sendToAll(str, false, false);
 	}
-}
-
-
-
-void UserList::flushCacheAdc() {
-	if (mCache.size()) {
+	if (mCacheAdc.size()) {
 		string str;
 		sendToAllAdc(str, false, false);
 	}
@@ -419,9 +467,21 @@ void UserList::onRemove(UserBase *) {
 
 
 void UserList::onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
-	if (log(DEBUG)) {
+	if (log(LEVEL_DEBUG)) {
 		logStream() << "Autoresizing: size = " << currentSize << 
 		", capacity = " << oldCapacity << " -> " << newCapacity << endl;
+	}
+}
+
+
+
+void UserList::addInCache(string & cache, const string & data, const char * sep, size_t sepLen, bool addSep /*= true*/) {
+	cache.reserve(cache.size() + data.size() + sepLen);
+	cache.append(data);
+	if (addSep) {
+		if (cache.find(sep, cache.size() - sepLen, sepLen)) {
+			cache.append(sep, sepLen);
+		}
 	}
 }
 

@@ -53,12 +53,12 @@ long __stdcall Exception::exceptionFilter(LPEXCEPTION_POINTERS e) {
 	}
 
 	string path;
-	char sBuf[MAX_PATH+1] = { '\0' };
-	::GetModuleFileName(NULL, sBuf, MAX_PATH);
-	char * sExPath = sBuf;
-	char * sSlash = strrchr(sExPath, '\\');
-	if (sSlash) {
-		path = string(sExPath, sSlash - sExPath);
+	char buf[MAX_PATH+1] = { '\0' };
+	::GetModuleFileName(NULL, buf, MAX_PATH);
+	char * exPath = buf;
+	char * slash = strrchr(exPath, '\\');
+	if (slash) {
+		path = string(exPath, slash - exPath);
 	}
 
 	// Loads dll and pdb
@@ -73,12 +73,12 @@ long __stdcall Exception::exceptionFilter(LPEXCEPTION_POINTERS e) {
 		first = false;
 	}
 
-	char tm[BUFFERSIZE] = { '\0' };
+	char buffer[BUFFERSIZE] = { '\0' };
 	time_t now;
 	time(&now);
-	struct tm Tm;
-	localtime_s(&Tm, &now);
-	strftime(tm, BUFFERSIZE, "%Y-%m-%d %H:%M:%S", &Tm);
+	struct tm t;
+	localtime_s(&t, &now);
+	strftime(buffer, BUFFERSIZE, "%Y-%m-%d %H:%M:%S", &t);
 
 	char code[BUFFERSIZE] = { '\0' };
 	
@@ -95,10 +95,10 @@ long __stdcall Exception::exceptionFilter(LPEXCEPTION_POINTERS e) {
 	f << "Code: " << code << endl
 		<< "Version: " << INTERNALVERSION << endl
 		<< "OS: " << DcServer::currentDcServer->mSysVersion << endl
-		<< "Time: " << tm << endl << endl;
+		<< "Time: " << buffer << endl << endl;
 
 	WIN32_FIND_DATA fd;
-	if (FindFirstFile(path.append("\\rushub.pdb", 11).c_str(), &fd) == INVALID_HANDLE_VALUE) {
+	if (FindFirstFile(path.append(STR_LEN("\\rushub.pdb")).c_str(), &fd) == INVALID_HANDLE_VALUE) {
 		#ifndef _DEBUG
 			f << "Debug symbols was not found" << endl;
 			f.close();
@@ -127,24 +127,24 @@ int Exception::init(const char * path) {
 	SymSetOptions(SYMOPT_DEFERRED_LOADS | SYMOPT_FAIL_CRITICAL_ERRORS | SYMOPT_LOAD_LINES );
 
 	char buf[BUFFERSIZE] = { '\0' };
-	string symbolPath(".");
+	string symbolPath(STR_LEN("."));
 	if (GetEnvironmentVariableA("_NT_SYMBOL_PATH", buf, BUFFERSIZE)) {
-		symbolPath.append(";", 1);
+		symbolPath.append(STR_LEN(";"));
 		symbolPath.append(buf);
 	}
 	if (GetEnvironmentVariableA("_NT_ALTERNATE_SYMBOL_PATH", buf, BUFFERSIZE)) {
-		symbolPath.append(";", 1);
+		symbolPath.append(STR_LEN(";"));
 		symbolPath.append(buf);
 	}
 	if (GetEnvironmentVariableA("SYSTEMROOT", buf, BUFFERSIZE)) {
-		symbolPath.append(";", 1);
+		symbolPath.append(STR_LEN(";"));
 		symbolPath.append(buf);
-		symbolPath.append(";", 1);
+		symbolPath.append(STR_LEN(";"));
 		symbolPath.append(buf);
-		symbolPath.append("\\System32", 9);
+		symbolPath.append(STR_LEN("\\System32"));
 	}
 	if (path != NULL && path[0] != '\0') {
-		symbolPath.append(";", 1);
+		symbolPath.append(STR_LEN(";"));
 		symbolPath.append(path);
 	}
 	return SymInitialize(GetCurrentProcess(), symbolPath.c_str(), 1);

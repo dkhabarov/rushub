@@ -36,7 +36,12 @@
 #endif
 
 #define PLUGIN_NAME "LuaPlugin"
-#define PLUGIN_VERSION "2.7"
+#define PLUGIN_VERSION "2.8"
+
+
+#ifndef STR_LEN
+# define STR_LEN(S) S , sizeof(S) / sizeof(S[0]) - 1
+#endif
 
 namespace dcserver {
 
@@ -107,7 +112,7 @@ public:
 	TasksList mTasksList;
 	TimerList * mTimerList;
 
-	DcConnBase * mCurDCConn; /** Current connection (only for events) */
+	DcUserBase * mCurUser; /** Current user (only for events) */
 
 public:
 
@@ -119,7 +124,7 @@ public:
 	}
 
 	virtual void onLoad(DcServerBase *); /** Actions when loading plugin */
-	virtual bool regAll(PluginListBase *); /** Registration all events for this plugin */
+	bool regAll(DcServerBase *); /** Registration all events for this plugin */
 
 	// events
 	virtual int onUserConnected(DcUserBase *);

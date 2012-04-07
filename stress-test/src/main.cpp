@@ -1,4 +1,23 @@
+/*
+ * RusHub - hub server for Direct Connect peer to peer network.
+ *
+ * Copyright (C) 2009-2012 by Setuper
+ * E-Mail: setuper at gmail dot com (setuper@gmail.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
+#include "stdinc.h"
 #include "Server.h"
 #include "Conn.h"
 
@@ -6,7 +25,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
-
 #include <signal.h>
 
 using namespace ::std;
@@ -83,13 +101,13 @@ public:
 	virtual void deleteParser(Parser * parser) {
 		delete parser;
 	}
-	virtual const char * getSeparator() {
+	virtual const char * getSeparator() const {
 		return "|";
 	}
-	virtual size_t getSeparatorLen() {
+	virtual size_t getSeparatorLen() const {
 		return 1;
 	}
-	virtual unsigned long getMaxCommandLength() {
+	virtual unsigned long getMaxCommandLength() const {
 		return 102400;
 	}
 	virtual Conn * getConnForUdpData(Conn *, Parser *) {
@@ -106,33 +124,39 @@ public:
 class NmdcClient : public Server {
 
 public:
-	ConnFactory * mConnFactory;
-	int mConnCount;
-	Time mChecker;
 
-	const char * mIp;
-	const char * mPort;
-	int mMaxConn;
-	int mBatch;
+	ConnFactory * mConnFactory;
 
 public:
-	NmdcClient(const char * ip, const char * port, int maxConn, int batch, const char * logPath, int logLevel, int errLevel) : 
+
+	NmdcClient(const char * ip, const char * port, int maxConn, int batch, const char * logPath, int logLevel) : 
 		Server(),
 		mConnFactory(NULL),
-		mConnCount(0),
 		mIp(ip),
 		mPort(port),
+		mConnCount(0),
 		mMaxConn(maxConn),
 		mBatch(batch)
 	{
 		mLogsPath = new string(logPath);
 		mMaxLevel = logLevel;
-		mMaxErrLevel = errLevel;
 	}
 
 	~NmdcClient() {
 		deleteAll();
 	}
+
+private:
+
+	const char * mIp;
+	const char * mPort;
+	int mConnCount;
+	int mMaxConn;
+	int mBatch;
+	
+	Time mChecker;
+
+private:
 
 	void onNewData(Conn * conn, string * str) {
 		const string & cmd(*str);
@@ -140,21 +164,25 @@ public:
 		//cout << cmd << endl;
 
 		if (cmd.find("$Lock ", 0, 6) != cmd.npos) {
-			string data("$Supports NoGetINFO NoHello UserIP2|$Key key|$ValidateNick ");
-			data.append(static_cast<NmdcParser*> (conn->mParser)->mNick).append("|");
-			size_t len = data.size();
-			conn->writeData(data.c_str(), len, true);
+			string data;
+			data.reserve(150);
+			data.append(STR_LEN("$Supports NoGetINFO NoHello UserIP2|$Key key|$ValidateNick "));
+			data.append(static_cast<NmdcParser*> (conn->mParser)->mNick);
+			data.append(STR_LEN("|"));
+			conn->writeData(data.c_str(), data.size(), true);
 		} else if (cmd.find("$Hello ", 0, 7) != cmd.npos) {
-			string data("$Version 1,0091|$GetNickList|$MyINFO $ALL ");
-			data.append(static_cast<NmdcParser*> (conn->mParser)->mNick).append(" any description<TestDC++ 1.00,M:A,H:1/0/0,S:32>$ $1000$some@email.ru$1234554321$|");
-			size_t len = data.size();
-			conn->writeData(data.c_str(), len, true);
+			string data;
+			data.reserve(150);
+			data.append(STR_LEN("$Version 1,0091|$GetNickList|$MyINFO $ALL "));
+			data.append(static_cast<NmdcParser*> (conn->mParser)->mNick);
+			data.append(STR_LEN(" any description<TestDC++ 1.00,M:A,H:1/0/0,S:32>$ $1000$some@email.ru$1234554321$|"));
+			conn->writeData(data.c_str(), data.size(), true);
 		}
 		str->clear();
 	}
 
 	int onTimer(Time & now) {
-		__int64 diff = now.msec() - mChecker.msec();
+		int64_t diff = now.msec() - mChecker.msec();
 		if (diff >= 0 ? diff >= mTimerServPeriod : -diff >= mTimerServPeriod) {
 			mChecker = now;
 			if (mConnCount < mMaxConn) {
@@ -164,7 +192,7 @@ public:
 					if (conn != NULL) {
 						ostringstream nick;
 						nick << "test" << mConnCount;
-						conn->mParser = conn->createParser();
+						conn->getParserCommandPtr();
 						static_cast<NmdcParser*> (conn->mParser)->mNick = nick.str();
 					} else {
 						--mConnCount;
@@ -175,6 +203,7 @@ public:
 		}
 		return 0;
 	}
+
 }; // class NmdcClient
 
 
@@ -188,7 +217,6 @@ void printHelp() {
 		"  -batch <batch>\tset entering batch" << endl <<
 		"  -logPath <path>\tset log path" << endl <<
 		"  -logLevel <level>\tset log level" << endl <<
-		"  -errLevel <level>\tset error level" << endl <<
 		"  -help\t\t\tshow this help" << endl;
 }
 
@@ -203,8 +231,7 @@ int main(int argc, char ** argv) {
 	const char * logPath = "";
 	int maxConn = 50;
 	int batch = 25;
-	int logLevel = 0;
-	int errLevel = 2;
+	int logLevel = LEVEL_INFO;
 
 	if (argc == 1) {
 		printHelp();
@@ -228,8 +255,6 @@ int main(int argc, char ** argv) {
 			logPath = argv[i];
 		} else if(!strcmp(last, "-logLevel")) {
 			logLevel = atoi(argv[i]);
-		} else if(!strcmp(last, "-errLevel")) {
-			errLevel = atoi(argv[i]);
 		}
 		last = argv[i];
 		++i;
@@ -238,16 +263,15 @@ int main(int argc, char ** argv) {
 	if (batch > maxConn) {
 		batch = maxConn;
 	}
-	if (batch > 100) {
+	if (batch > 100) { // max 100
 		batch = 100;
 	}
 
-	NmdcClient client(ip, port, maxConn, batch, logPath, logLevel, errLevel);
+	NmdcClient client(ip, port, maxConn, batch, logPath, logLevel);
 	curServer = &client;
 
 	NmdcProtocol nmdcProtocol;
 	client.mConnFactory = new ConnFactory(&nmdcProtocol, &client);
-
 	client.run();
 
 	return 0;

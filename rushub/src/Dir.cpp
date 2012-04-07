@@ -21,12 +21,15 @@
 
 #include <string.h>
 
+#ifndef STR_LEN
+# define STR_LEN(S) S , sizeof(S) / sizeof(S[0]) - 1
+#endif
+
 #ifdef _WIN32
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1400)
 	#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
 #endif
-
 
 
 DIR * opendir(const char * name) {
@@ -152,30 +155,16 @@ bool Dir::isFileExist(const char * name) {
 
 
 void Dir::execPath(string & path) {
-
 	#ifdef _WIN32
-
-		char * exPath = NULL;
 		char buf[MAX_PATH + 1] = { '\0' };
-
 		::GetModuleFileName(NULL, buf, MAX_PATH);
-		exPath = buf;
-
-		char * slash = strrchr(exPath, '\\');
-		if (slash) {
-			path = string(exPath, slash - exPath + 1);
-		} else {
-			path = exPath;
-		}
-
+		const char * exPath = buf;
+		const char * slash = strrchr(exPath, '\\');
+		path = slash ? string(exPath, slash - exPath + 1) : exPath;
 	#else
-
-		path = "./";
-
+		path.assign(STR_LEN("./"));
 	#endif
-
 	checkPath(path);
-
 }
 
 
@@ -184,21 +173,25 @@ void Dir::pathForFile(const char * file, string & path) {
 	if (!slash) {
 		slash = strrchr(file, '\\');
 	}
-	path = slash ? string(file, slash - file + 1) : ".";
+	if (slash) {
+		path = string(file, slash - file + 1);
+	} else {
+		path = '.';
+	}
 }
 
 
 
 void Dir::checkEndSlash(string & path) {
 
-	size_t pos = path.find("\\");
+	size_t pos = path.find('\\');
 	while (pos != path.npos) {
-		path.replace(pos, 1, "/");
-		pos = path.find("\\", pos);
+		path.replace(pos, 1, 1, '/');
+		pos = path.find('\\', pos);
 	}
 
 	if (path.size() == 0 || path.find('/', path.size() - 1) == path.npos) {
-		path.append("/", 1);
+		path += '/';
 	}
 
 }

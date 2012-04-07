@@ -73,11 +73,11 @@ void WebConnFactory::deleteConn(Conn * &conn) {
 
 void WebConnFactory::onNewData(Conn * conn, string * str) {
 
-	if (conn->log(DEBUG)) {
+	if (conn->log(LEVEL_DEBUG)) {
 		conn->logStream() << "WEB IN: " << (*str) << endl;
 	}
 
-	(*str).append(WEB_SEPARATOR);
+	(*str).append(STR_LEN(WEB_SEPARATOR));
 	conn->remaining();
 	if (!conn->isOk()) {
 		return;
@@ -145,7 +145,7 @@ int WebConn::onTimer(Time &) {
 	DcServer * dcServer = server();
 	Time lastRecv(mLastRecv);
 	if (dcServer->minDelay(lastRecv, dcServer->mDcConfig.mWebTimeout)) {
-		if (log(DEBUG)) {
+		if (log(LEVEL_DEBUG)) {
 			logStream() << "Any action timeout..." << endl;
 		}
 		closeNice(9000, CLOSE_REASON_WEB);
@@ -192,7 +192,7 @@ int WebUser::getPortConn() {
 
 
 size_t WebConn::send(const string & data, bool flush /* = true */) {
-	if (!mWritable) {
+	if (!isWritable()) {
 		return 0;
 	}
 	return writeData(data.c_str(), data.size(), flush);

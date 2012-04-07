@@ -63,6 +63,7 @@
 	#define EWOULDBLOCK WSAEWOULDBLOCK
 	#define SOCK_ERR WSAGetLastError()
 	#define SOCK_ERR_MSG ""
+	#define SOCK_ERR_GAI_MSG(e) "getnameinfo error"
 	#define SOCK_EAGAIN WSAEWOULDBLOCK
 	#define SOCK_EINTR WSAEINTR
 	#define SOCK_INVALID(SOCK) (SOCK) == INVALID_SOCKET
@@ -74,9 +75,13 @@
 	#include <sys/socket.h> ///< for AF_INET
 	#include <netdb.h>      ///< for gethostbyaddr
 	#include <fcntl.h>      ///< for nonblock flags F_GETFL & etc
+	#ifndef MSG_NOSIGNAL
+		#define MSG_NOSIGNAL 0 ///< OpenSolaris
+	#endif
 	#define sockoptval_t int
 	#define SOCK_ERR errno
 	#define SOCK_ERR_MSG strerror(errno)
+	#define SOCK_ERR_GAI_MSG(e) gai_strerror(e)
 	#define SOCK_EAGAIN EAGAIN
 	#define SOCK_EINTR EINTR
 	#define SOCK_INVALID(SOCK) (SOCK) < 0
@@ -141,6 +146,9 @@ namespace server {
 class ConnBase {
 
 public:
+
+	virtual ~ConnBase() {
+	}
 
 	/** Get socket */
 	virtual operator tSocket() const = 0;

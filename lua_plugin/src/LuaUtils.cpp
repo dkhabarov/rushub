@@ -68,7 +68,7 @@ int LuaUtils::deprecatedFunc(lua_State * L, const char * instead) {
 	oss << "warning: function '" << ar2.name << 
 		"' was deprecated. Use '" << instead << "' instead";
 
-	LuaInterpreter::logError(oss.str().c_str());
+	LuaInterpreter::logError(oss.str());
 	return 1;
 }
 
@@ -76,9 +76,9 @@ int LuaUtils::deprecatedFunc(lua_State * L, const char * instead) {
 
 bool LuaUtils::checkCount(lua_State * L, int argNumber) {
 	if (lua_gettop(L) != argNumber) {
-		char sBuf[32] = { '\0' };
-		sprintf(sBuf, "%d", argNumber);
-		LuaUtils::errCount(L, sBuf);
+		char buf[32] = { '\0' };
+		sprintf(buf, "%d", argNumber);
+		LuaUtils::errCount(L, buf);
 		return false;
 	}
 	return true;
@@ -131,7 +131,7 @@ bool LuaUtils::checkScriptName(lua_State * L, string & name) {
 		return false;
 	}
 	if (fileSize <= 4 || (0 != name.compare(fileSize - 4, 4, ".lua"))) {
-		name.append(".lua", 4);
+		name.append(STR_LEN(".lua"));
 	}
 	return true;
 }

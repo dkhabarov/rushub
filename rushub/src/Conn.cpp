@@ -56,19 +56,18 @@ char Conn::mRecvBuf[MAX_RECV_SIZE + 1];
 
 Conn::Conn(tSocket socket, Server * server, int connType) :
 	Obj("Conn"),
-	mLastRecv(true),
 	mSelfConnFactory(NULL),
 	mCreatorConnFactory(NULL),
 	mServer(server),
 	mProtocol(NULL),
 	mParser(NULL),
-	mConnType(connType),
-	mOk(socket > 0),
-	mWritable(true),
 	mPort(0),
 	mPortConn(0),
+	mLastRecv(true),
 	mSendBufMax(server->mMaxSendSize),
-	mConnect(true),
+	mOk(socket > 0),
+	mWritable(true),
+	mConnType(connType),
 	mSocket(socket),
 	mRecvBufEnd(0),
 	mRecvBufRead(0),
@@ -86,15 +85,38 @@ Conn::Conn(tSocket socket, Server * server, int connType) :
 
 
 Conn::~Conn() {
+
+	if (mSocket > 0) {
+	#ifndef _WIN32
+		SOCK_CLOSE(mSocket);
+		if (SOCK_ERR != SOCK_EINTR || (mServer && !mServer->mRun)) { // Interrupted system call on exit
+	#else
+		int err = SOCK_CLOSE(mSocket);
+		if (!(SOCK_ERROR(err))) {
+	#endif
+			--mConnCounter;
+			if (log(LEVEL_DEBUG)) {
+				logStream() << "Closing socket: " << mSocket << endl;
+			}
+		} else if (log(LEVEL_ERROR)) {
+			logStream() << "Socket not closed: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
+		}
+		mSocket = 0;
+	}
+
 	if (mParser) {
 		deleteParser(mParser);
 		mParser = NULL;
 	}
+
+	if (mAddrInfo != NULL) {
+		freeaddrinfo(mAddrInfo);
+	}
+
 	mSelfConnFactory = NULL;
 	mCreatorConnFactory = NULL;
 	mServer = NULL;
 	mProtocol = NULL;
-	close();
 }
 
 
@@ -257,7 +279,7 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 	// getaddrinfo
 	int ret = getaddrinfo(address, port, &hints, &mAddrInfo);
 	if (ret != 0) {
-		if (log(FATAL)) {
+		if (log(LEVEL_FATAL)) {
 			logStream() << "Error in getaddrinfo: " << 
 			#ifdef _WIN32
 				SOCK_ERR
@@ -269,13 +291,13 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 		return INVALID_SOCKET;
 	}
 
-	if (log(DEBUG)) {
+	if (log(LEVEL_DEBUG)) {
 		logStream() << "Using " << (mAddrInfo->ai_family == AF_INET6 ? "IPv6" : "IPv4") << " socket" << endl;
 	}
 
 	// socket
 	if (SOCK_INVALID(sock = socket(mAddrInfo->ai_family, mAddrInfo->ai_socktype, 0))) {
-		if (log(FATAL)) {
+		if (log(LEVEL_FATAL)) {
 			logStream() << "Error in socket: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 		}
 		return INVALID_SOCKET;
@@ -286,25 +308,15 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 
 		// TIME_WAIT after close conn. Reuse address after disconn
 		if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &so_reuseaddr, sizeof(sockoptval_t)))) {
-			if (log(FATAL)) {
+			if (log(LEVEL_FATAL)) {
 				logStream() << "Error in setsockopt: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 			}
 			return INVALID_SOCKET;
 		}
-
-		#ifdef _WIN32
-		sockoptval_t tcp_nodelay = 1;
-		if (SOCK_ERROR(setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &tcp_nodelay, sizeof(sockoptval_t)))) {
-			if (log(FATAL)) {
-				logStream() << "Error in setsockopt: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
-			}
-			return INVALID_SOCKET;
-		}
-		#endif
 	}
 
 	++mConnCounter;
-	if (log(DEBUG)) {
+	if (log(LEVEL_DEBUG)) {
 		logStream() << "Created new socket: " << sock << endl;
 	}
 	return sock;
@@ -320,7 +332,7 @@ tSocket Conn::socketBind(tSocket sock) {
 
 	// Bind
 	if (SOCK_ERROR(bind(sock, mAddrInfo->ai_addr, static_cast<int> (mAddrInfo->ai_addrlen)))) {
-		if (log(FATAL)) {
+		if (log(LEVEL_FATAL)) {
 			logStream() << "Error bind: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 		}
 		return INVALID_SOCKET;
@@ -338,7 +350,7 @@ tSocket Conn::socketListen(tSocket sock) {
 	}
 	if (SOCK_ERROR(listen(sock, SOCK_BACKLOG))) {
 		SOCK_CLOSE(sock);
-		if (log(ERR)) {
+		if (log(LEVEL_ERROR)) {
 			logStream() << "Error listening: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 		}
 		return INVALID_SOCKET;
@@ -355,7 +367,7 @@ tSocket Conn::socketConnect(tSocket sock) {
 	}
 	if (SOCK_ERROR(connect(sock, mAddrInfo->ai_addr, static_cast<int> (mAddrInfo->ai_addrlen)))) {
 		SOCK_CLOSE(sock);
-		if (log(ERR)) {
+		if (log(LEVEL_ERROR)) {
 			logStream() << "Error connecting: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 		}
 		return INVALID_SOCKET;
@@ -379,42 +391,6 @@ tSocket Conn::socketNonBlock(tSocket sock) {
 
 
 ////////////////////////////////////////////////////////
-/// Close socket
-void Conn::close() {
-	if (mSocket <= 0) {
-		return;
-	}
-	mWritable = false;
-	setOk(false);
-
-	// onClose
-	if (mServer) {
-		mServer->onClose(this);
-	}
-
-#ifndef _WIN32
-	SOCK_CLOSE(mSocket);
-	if (SOCK_ERR != SOCK_EINTR || (mServer && !mServer->mRun)) { // Interrupted system call on exit
-#else
-	int err = SOCK_CLOSE(mSocket);
-	if (!(SOCK_ERROR(err))) {
-#endif
-		--mConnCounter;
-		if (log(DEBUG)) {
-			logStream() << "Closing socket: " << mSocket << endl;
-		}
-	} else if (log(ERR)) {
-		logStream() << "Socket not closed: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
-	}
-
-	if (mAddrInfo != NULL) {
-		freeaddrinfo(mAddrInfo);
-	}
-	mSocket = 0;
-}
-
-
-
 /// closeNice
 void Conn::closeNice(int msec /* = 0 */, int reason /* = 0 */) {
 	mWritable = false;
@@ -436,45 +412,36 @@ void Conn::closeNow(int reason /* = 0 */) {
 	mWritable = false;
 	setOk(false);
 	if (mServer) {
-		if (!(mServer->mConnChooser.ConnChoose::optGet(static_cast<ConnBase *> (this)) & ConnChoose::eEF_CLOSE)) {
+		if (!(mServer->mConnChooser.ConnChoose::optGet(this) & ConnChoose::eEF_CLOSE)) {
 			++ mServer->miNumCloseConn;
 			mClosed = true; // poll conflict
 
 			if (reason) {
 				mCloseReason = reason;
 			}
-			if (log(DEBUG)) {
+			if (log(LEVEL_DEBUG)) {
 				logStream() << "closeNow (reason " << mCloseReason << ")" << endl;
 			}
 
 #if USE_SELECT
-			mServer->mConnChooser.ConnChoose::optIn(static_cast<ConnBase *> (this), ConnChoose::eEF_CLOSE);
-			mServer->mConnChooser.ConnChoose::optOut(static_cast<ConnBase *> (this), ConnChoose::eEF_ALL);
+			mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::eEF_CLOSE);
+			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::eEF_ALL);
 #else
 			// this sequence of flags for poll!
-			mServer->mConnChooser.ConnChoose::optOut(static_cast<ConnBase *> (this), ConnChoose::eEF_ALL);
-			mServer->mConnChooser.ConnChoose::optIn(static_cast<ConnBase *> (this), ConnChoose::eEF_CLOSE);
+			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::eEF_ALL);
+			mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::eEF_CLOSE);
 #endif
 			
 		} else {
-			if (log(DEBUG)) {
+			if (log(LEVEL_DEBUG)) {
 				logStream() << "Re-closure (reason " << reason << ")" << endl;
 			}
 		}
 	} else {
-		if (log(FATAL)) {
+		if (log(LEVEL_FATAL)) {
 			logStream() << "Close conn without Server" << endl;
 		}
 	}
-}
-
-
-
-void Conn::closeSelf() {
-	if (log(DEBUG)) {
-		logStream() << "User itself was disconnected" << endl;
-	}
-	closeNow(CLOSE_REASON_CLIENT_DISCONNECT);
 }
 
 
@@ -494,13 +461,13 @@ Conn * Conn::createNewConn() {
 	if (mCreatorConnFactory != NULL) {
 		newConn = mCreatorConnFactory->createConn(sock); // Create connection object by factory
 	} else {
-		if (log(DEBUG)) {
+		if (log(LEVEL_DEBUG)) {
 			logStream() << "Create simple connection object for socket: " << sock << endl;
 		}
 		newConn = new Conn(sock, mServer, CONN_TYPE_INCOMING_TCP); // Create simple connection object
 	}
 	if (!newConn) {
-		if (log(FATAL)) {
+		if (log(LEVEL_FATAL)) {
 			logStream() << "Fatal error: Can't create new connection object" << endl;
 		}
 		throw "Fatal error: Can't create new connection object";
@@ -540,7 +507,7 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 
 	sockoptval_t yes = 1;
 	if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(int)))) {
-		if (log(ERR)) {
+		if (log(LEVEL_ERROR)) {
 			logStream() << "Socket not SO_KEEPALIVE: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 		}
 #ifdef _WIN32
@@ -551,10 +518,10 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 		if (SOCK_ERR != SOCK_EINTR)
 #endif
 		{
-			if (log(WARN)) {
+			if (log(LEVEL_WARN)) {
 				logStream() << "Couldn't set keepalive flag for accepted socket" << endl;
 			}
-		} else if (log(ERR)) {
+		} else if (log(LEVEL_ERROR)) {
 			logStream() << "Socket not closed" << endl;
 		}
 		return INVALID_SOCKET;
@@ -562,14 +529,14 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 
 	// Non-block socket
 	if (socketNonBlock(sock) == INVALID_SOCKET) {
-		if (log(ERR)) {
+		if (log(LEVEL_ERROR)) {
 			logStream() << "Couldn't set non-block flag for accepted socket" << endl;
 		}
 		return INVALID_SOCKET;
 	}
 
 	// Accept new socket
-	if (log(DEBUG)) {
+	if (log(LEVEL_DEBUG)) {
 		logStream() << "Accept new socket: " << sock << endl;
 	}
 
@@ -583,9 +550,10 @@ int Conn::defineConnInfo(sockaddr_storage & storage) {
 	if (mSocket) {
 		char host[NI_MAXHOST] = { 0 };
 		char port[NI_MAXSERV] = { 0 };
-		if (getnameinfo((struct sockaddr *) &storage, sizeof(struct sockaddr), host, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV) != 0) {
-			if (log(WARN)) {
-				logStream() << "Error in getnameinfo: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
+		int ret = getnameinfo((struct sockaddr *) &storage, sizeof(struct sockaddr_storage), host, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+		if (ret != 0) {
+			if (log(LEVEL_WARN)) {
+				logStream() << "Error in getnameinfo: " << SOCK_ERR_GAI_MSG(ret) << " [" << ret << "]" << endl;
 			}
 			closeNow(CLOSE_REASON_GETPEERNAME);
 			return -1;
@@ -594,7 +562,7 @@ int Conn::defineConnInfo(sockaddr_storage & storage) {
 		mPort = atoi(port);
 
 		if (mServer->mMac) {
-			calcMacAddress(mIp, mMacAddress);
+			calcMacAddress();
 		}
 		return 0;
 	}
@@ -626,7 +594,7 @@ int Conn::recv() {
 		}
 
 	} else { // UDP
-		if (log(TRACE)) {
+		if (log(LEVEL_TRACE)) {
 			logStream() << "Start read (UDP)" << endl;
 		}
 		while (
@@ -643,7 +611,7 @@ int Conn::recv() {
 				usleep(100);
 			#endif
 		}
-		if (log(TRACE)) {
+		if (log(LEVEL_TRACE)) {
 			logStream() << "End read (UDP). Read bytes: " << iBufLen << endl;
 		}
 	}
@@ -653,14 +621,18 @@ int Conn::recv() {
 	if (iBufLen <= 0) {
 		if (!udp) {
 			if (iBufLen == 0) {
+				if (log(LEVEL_DEBUG)) {
+					logStream() << "Other side has closed connection" << endl;
+				}
+				closeNow(CLOSE_REASON_OTHER_SIDE);
 				return -1;
 			} else if (SOCK_ERR == EWOULDBLOCK) {
-				if (log(DEBUG)) {
+				if (log(LEVEL_DEBUG)) {
 					logStream() << "Operation would block" << endl;
 				}
 				return -2;
 			} else {
-				if (log(DEBUG)) {
+				if (log(LEVEL_DEBUG)) {
 					logStream() << "Error in receive: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 				}
 				closeNow(CLOSE_REASON_ERROR_RECV);
@@ -711,9 +683,16 @@ bool Conn::checkIp(const string & ip) {
 }
 
 
+
+unsigned long Conn::getCount() {
+	return mConnCounter;
+}
+
+
+
 /// Calculate mac-address
 #ifdef _WIN32
-void Conn::calcMacAddress(const string & ip, string & mac) {
+void Conn::calcMacAddress() {
 	DWORD size;
 	DWORD ret = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, NULL, NULL, &size);
 	if (ret != ERROR_BUFFER_OVERFLOW) {
@@ -743,13 +722,13 @@ void Conn::calcMacAddress(const string & ip, string & mac) {
 					) {
 						continue;
 					}
-					if (strcmp(ip.c_str(), address) == 0) {
+					if (strcmp(mIp.c_str(), address) == 0) {
 						char buf[18] = { '\0' };
 						sprintf(buf, "%02x-%02x-%02x-%02x-%02x-%02x",
 							curr->PhysicalAddress[0], curr->PhysicalAddress[1],
 							curr->PhysicalAddress[2], curr->PhysicalAddress[3],
 							curr->PhysicalAddress[4], curr->PhysicalAddress[5]);
-						mac = buf;
+						mMacAddress = buf;
 						free(addr);
 						return;
 					}
@@ -761,7 +740,7 @@ void Conn::calcMacAddress(const string & ip, string & mac) {
 	free(addr);
 }
 #else
-void Conn::calcMacAddress(const string &, string &) {
+void Conn::calcMacAddress() {
 }
 #endif
 
@@ -787,13 +766,13 @@ string * Conn::getCommandPtr() {
 	and installation main parameter */
 void Conn::setCommandPtr(string * pStr) {
 	if (mStatus != STRING_STATUS_NO_STR) {
-		if (log(FATAL)) {
+		if (log(LEVEL_FATAL)) {
 			logStream() << "Fatal error: Bad setCommandPtr" << endl;
 		}
 		throw "Fatal error: Bad setCommandPtr";
 	}
 	if (!pStr) {
-		if (log(FATAL)) {
+		if (log(LEVEL_FATAL)) {
 			logStream() << "Fatal error: Bad setCommandPtr. Null string pointer" << endl;
 		}
 		throw "Fatal error: Bad setCommandPtr. Null string pointer";
@@ -807,49 +786,47 @@ void Conn::setCommandPtr(string * pStr) {
 /// Reading data from buffer and record in line of the protocol
 size_t Conn::readFromRecvBuf() {
 	if (!mCommand) {
-		if (log(FATAL)) {
+		if (log(LEVEL_FATAL)) {
 			logStream() << "Fatal error: ReadFromBuf with null string pointer" << endl;
 		}
 		throw "Fatal error: ReadFromBuf with null string pointer";
 	}
 
 	char * buf = mRecvBuf + mRecvBufRead;
-	const char * sep = "\0";
-	size_t sep_len = 1, len = (mRecvBufEnd - mRecvBufRead);
-	unsigned long maxCommandLength = 10240;
-	
-	if (mProtocol != NULL) {
-		sep = mProtocol->getSeparator();
-		sep_len = mProtocol->getSeparatorLen();
-		maxCommandLength = mProtocol->getMaxCommandLength();
+	const char * pos_sep = strstr(buf, getSeparator());
+	size_t len = 0;
+
+	if (pos_sep) { // separator was found
+		len = pos_sep - buf;
+		mRecvBufRead += (len + getSeparatorLen());
+		mStatus = STRING_STATUS_STR_DONE;
+	} else { // separator was not found
+		len = mRecvBufEnd - mRecvBufRead;
+		mRecvBufRead = mRecvBufEnd = 0;
 	}
 
-	const char * pos_sep = NULL;
-	if ((pos_sep = strstr(buf, sep)) == NULL) {
-		size_t size = mCommand->size() + len;
-		if (size > maxCommandLength) {
-			closeNow(CLOSE_REASON_MAXSIZE_RECV);
-			return 0;
-		}
-		mCommand->reserve(size);
-		mCommand->append(buf, len);
-		mRecvBufRead = mRecvBufEnd = 0;
-		return len;
+	size_t size = mCommand->size() + len;
+	if (size > (mProtocol ? mProtocol->getMaxCommandLength() : 10240)) {
+		closeNow(CLOSE_REASON_MAXSIZE_RECV);
+		return 0;
 	}
-	size_t pos = pos_sep - buf;
-	len = pos + sep_len;
-	mCommand->reserve(mCommand->size() + len);
-	mCommand->append(buf, pos);
-	mRecvBufRead += len;
-	mStatus = STRING_STATUS_STR_DONE;
-	return len;
+	mCommand->reserve(size);
+	mCommand->append(buf, len);
+	return pos_sep ? len + getSeparatorLen() : len; // fix read len
+}
+
+
+
+/// Check empty recv buf
+bool Conn::recvBufIsEmpty() const {
+	return mRecvBufEnd == mRecvBufRead;
 }
 
 
 
 /// Get pointer for string
 string * Conn::getParserCommandPtr() {
-	if (mParser == NULL) {
+	if (!mParser) {
 		if ((mParser = createParser()) == NULL) {
 			return NULL;
 		}
@@ -862,9 +839,9 @@ string * Conn::getParserCommandPtr() {
 
 
 Parser * Conn::createParser() {
-	if (mProtocol == NULL) {
+	if (!mProtocol) {
 		// ToDo remove!
-		if (mCreatorConnFactory == NULL) {
+		if (!mCreatorConnFactory) {
 			return NULL;
 		}
 		// ToDo remove!
@@ -876,8 +853,8 @@ Parser * Conn::createParser() {
 
 
 void Conn::deleteParser(Parser * parser) {
-	if (parser != NULL) {
-		if (mProtocol != NULL) {
+	if (parser) {
+		if (mProtocol) {
 			mProtocol->deleteParser(parser);
 		} else {
 			delete parser;
@@ -890,12 +867,10 @@ void Conn::deleteParser(Parser * parser) {
 /// Remaining (for web-server)
 size_t Conn::remaining() {
 
-	unsigned long maxCommandLength = (mProtocol != NULL ? mProtocol->getMaxCommandLength() : 10240);
-
 	char * buf = mRecvBuf + mRecvBufRead;
 	size_t len = mRecvBufEnd - mRecvBufRead;
 	size_t size = mCommand->size() + len;
-	if (size > maxCommandLength) {
+	if (size > (mProtocol ? mProtocol->getMaxCommandLength() : 10240)) {
 		closeNow(CLOSE_REASON_MAXSIZE_REMAINING);
 		return 0;
 	}
@@ -908,13 +883,13 @@ size_t Conn::remaining() {
 
 
 const char * Conn::getSeparator() {
-	return mProtocol != NULL ? mProtocol->getSeparator() : "\0";
+	return mProtocol ? mProtocol->getSeparator() : "\0";
 }
 
 
 
 size_t Conn::getSeparatorLen() {
-	return mProtocol != NULL ? mProtocol->getSeparatorLen() : 1;
+	return mProtocol ? mProtocol->getSeparatorLen() : 1;
 }
 
 
@@ -923,7 +898,7 @@ size_t Conn::getSeparatorLen() {
 size_t Conn::writeData(const char * data, size_t len, bool flush) {
 	size_t bufLen = mSendBuf.size();
 	if (bufLen + len >= mSendBufMax) {
-		if (log(WARN)) {
+		if (log(LEVEL_WARN)) {
 			logStream() << "Sending buffer has big size, closing" << endl;
 		}
 		closeNow(CLOSE_REASON_MAXSIZE_SEND);
@@ -956,14 +931,14 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 	if (send(send_buf, size) < 0) {
 
 		if (SOCK_ERR != SOCK_EAGAIN) {
-			if (log(DEBUG)) {
+			if (log(LEVEL_DEBUG)) {
 				logStream() << "Error in sending: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << "(not EAGAIN), closing" << endl;
 			}
 			closeNow(CLOSE_REASON_ERROR_SEND);
 			return 0;
 		}
 
-		if (log(DEBUG)) {
+		if (log(LEVEL_DEBUG)) {
 			logStream() << "Block sent. Was sent " << size << " bytes" << endl;
 		}
 		if (bufLen == 0) {
@@ -983,7 +958,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 			if (mBlockOutput) {
 				mBlockOutput = false;
 				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::eEF_OUTPUT);
-				if (log(DEBUG)) {
+				if (log(LEVEL_DEBUG)) {
 					logStream() << "Unblock output channel" << endl;
 				}
 			}
@@ -991,12 +966,12 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 			bufLen = mSendBuf.size();
 			if (mBlockInput && bufLen < MAX_SEND_UNBLOCK_SIZE) { // Unset block of input
 				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::eEF_INPUT);
-				if (log(DEBUG)) {
+				if (log(LEVEL_DEBUG)) {
 					logStream() << "Unblock input channel" << endl;
 				}
 			} else if (!mBlockInput && bufLen >= MAX_SEND_BLOCK_SIZE) { // Set block of input
 				mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::eEF_INPUT);
-				if (log(DEBUG)) {
+				if (log(LEVEL_DEBUG)) {
 					logStream() << "Block input channel" << endl;
 				}
 			}
@@ -1014,7 +989,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 		if (mServer && mOk && !mBlockOutput) {
 			mBlockOutput = true;
 			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::eEF_OUTPUT);
-			if (log(DEBUG)) {
+			if (log(LEVEL_DEBUG)) {
 				logStream() << "Block output channel" << endl;
 			}
 		}
@@ -1025,9 +1000,16 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 
 
 
+/// Reserve space in send buffer
+void Conn::reserve(size_t len) {
+	mSendBuf.reserve(mSendBuf.size() + len);
+}
+
+
+
 /// onFlush
 void Conn::onFlush() {
-	if (mProtocol != NULL) {
+	if (mProtocol && mOk && mWritable) {
 		mProtocol->onFlush(this);
 	}
 }
@@ -1086,7 +1068,7 @@ int Conn::send(const char * buf, size_t & len) {
 
 		}
 
-/*		if (log(TRACE)) {
+/*		if (log(LEVEL_TRACE)) {
 				logStream() << "len = " << len
 					<< " total=" << total
 					<< " left=" << bytesleft
@@ -1132,7 +1114,7 @@ bool Conn::strLog() {
 }
 
 
-
+/* // It is not using now
 const char * Conn::inetNtop(int af, const void * src, char * dst, socklen_t cnt) {
 	#ifndef _WIN32
 	if (inet_ntop(af, src, dst, cnt)) {
@@ -1202,7 +1184,7 @@ int Conn::inetPton(int af, const char * src, void * dst) {
 		return 1;
 	#endif // _WIN32
 }
-
+*/
 
 
 
@@ -1229,7 +1211,6 @@ Conn * ConnFactory::createConn(tSocket sock) {
 
 
 void ConnFactory::deleteConn(Conn * & conn) {
-	conn->close(); // close socket
 	delete conn;
 	conn = NULL;
 }

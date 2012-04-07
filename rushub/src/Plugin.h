@@ -24,8 +24,21 @@
 #include <iostream>
 #include <vector>
 
-#if (!defined _WIN32) && (!defined __int64)
-	#define __int64 long long
+#ifdef _WIN32
+	#ifndef STD_TYPES
+		#define STD_TYPES
+		typedef unsigned __int64 uint64_t;
+		typedef unsigned __int32 uint32_t;
+		typedef unsigned __int16 uint16_t;
+		typedef unsigned __int8 uint8_t;
+		typedef __int64 int64_t;
+		typedef __int32 int32_t;
+		typedef __int16 int16_t;
+		typedef __int8 int8_t;
+	#endif // STD_TYPES
+#else
+	#include <sys/types.h>
+	#include <stdint.h>
 #endif
 
 namespace plugin {
@@ -73,7 +86,7 @@ using namespace ::std;
 
 // Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10032
+	#define INTERNAL_PLUGIN_VERSION 10039
 #endif
 
 // NMDC protocol separator
@@ -100,7 +113,7 @@ using namespace ::std;
 namespace dcserver {
 
 enum ClientType {
-	CLIENT_TYPE_NMDC = 1000,
+	CLIENT_TYPE_DC = 1000,
 	CLIENT_TYPE_WEB = 1001,
 }; // enum ClientType
 
@@ -159,6 +172,9 @@ public:
 
 public:
 
+	virtual ~ParamBase() {
+	}
+
 	virtual const string & getName() const = 0;
 	virtual int getType() const = 0;
 	virtual const string & toString() = 0;
@@ -173,14 +189,10 @@ public:
 	virtual int setDouble(double) = 0;
 	virtual const long & getLong() const = 0;
 	virtual int setLong(long) = 0;
-	virtual const __int64 & getInt64() const = 0;
-	virtual int setInt64(__int64) = 0;
+	virtual const int64_t & getInt64() const = 0;
+	virtual int setInt64(int64_t) = 0;
 
 }; // class ParamBase
-
-
-
-class DcConnBase;
 
 
 
@@ -191,9 +203,14 @@ class DcUserBase {
 
 public:
 
-	DcConnBase * mDcConnBase; /// Connection
+	const int mType; ///< Type (for protection and compatibility)
 
 public:
+
+	DcUserBase(int type) :
+		mType(type)
+	{
+	}
 
 	virtual ~DcUserBase() {
 	}
@@ -216,65 +233,33 @@ public:
 	/// Set user's MyINFO cmd
 	virtual bool setInfo(const string & info) = 0;
 
-}; // class DcUserBase
-
-
-
-/** Base DC connection */
-class DcConnBase {
-
-public:
-
-	/// User
-	DcUserBase * mDcUserBase;
-
-	/// Connection type (for protection and compatibility)
-	const int mType;
-
-public:
-
-	DcConnBase(int type) :
-		mDcUserBase(NULL),
-		mType(type)
-	{
-	}
-
-	virtual ~DcConnBase() {
-	}
-
-	/// Disconnect this client
-	virtual void disconnect() {
-		if (mDcUserBase != NULL) {
-			mDcUserBase->disconnect();
-		}
-	}
-
-
+	/// Check cmd syntax
 	virtual bool parseCommand(const char * cmd) = 0;
 
+	/// Get command
 	virtual const char * getCommand() = 0;
 
 private:
 
-	DcConnBase & operator = (const DcConnBase &);
+	DcUserBase & operator = (const DcUserBase &);
 
-}; // class DcConnBase
+}; // class DcUserBase
 
 
 
-// ================ DcConnListIterator ================
+// ================ DcListIteratorBase ================
 
 /** Iterator for list of base connections */
-class DcConnListIterator {
+class DcListIteratorBase {
 
 public:
 
-	virtual ~DcConnListIterator() {
+	virtual ~DcListIteratorBase() {
 	}
 
-	virtual DcConnBase * operator() (void) = 0;
+	virtual DcUserBase * operator() (void) = 0;
 
-}; // class DcConnListIterator
+}; // class DcListIteratorBase
 
 
 
@@ -285,11 +270,17 @@ class DcServerBase {
 
 public:
 
+	virtual ~DcServerBase() {
+	}
+
 	/// Get main hub path
 	virtual const string & getMainDir() const = 0;
 
 	/// Get logs path
 	virtual const string & getLogDir() const = 0;
+
+	/// Get plugins path
+	virtual const string & getPluginDir() const = 0;
 
 	/// Get system date-time string (now)
 	virtual const string & getTime() = 0;
@@ -304,7 +295,7 @@ public:
 	virtual const string & getSystemVersion() const = 0;
 
 	/// Get time in milliseconds (now)
-	virtual __int64 getMsec() const = 0;
+	virtual int64_t getMsec() const = 0;
 
 	/// Get hub work time in sec
 	virtual int getUpTime() const = 0;
@@ -313,61 +304,70 @@ public:
 	virtual int getUsersCount() const = 0;
 
 	/// Get total hub share size
-	virtual __int64 getTotalShare() const = 0;
+	virtual int64_t getTotalShare() const = 0;
+
+	/// Get iterator of conn base
+	virtual DcListIteratorBase * getDcListIterator() = 0;
+
+	/// Get conn base by ip
+	virtual const vector<DcUserBase *> & getDcUserBaseByIp(const char * ip) = 0;
+
+	/// Get user base by uid
+	virtual DcUserBase * getDcUserBase(const char * uid) = 0;
 
 	/// Send comand to user
 	virtual bool sendToUser(
 		DcUserBase *,
-		const char * data,
-		const char * nick = NULL,
+		const string & data,
+		const char * uid = NULL,
 		const char * from = NULL
 	) = 0;
 
 	/// Send comand to nick
 	virtual bool sendToNick(
 		const char * to,
-		const char * data,
-		const char * nick = NULL,
+		const string & data,
+		const char * uid = NULL,
 		const char * from = NULL
 	) = 0;
 
 	/// Send comand to all
 	virtual bool sendToAll(
-		const char * data,
-		const char * nick = NULL,
+		const string & data,
+		const char * uid = NULL,
 		const char * from = NULL
 	) = 0;
 
 	/// Send comand to profiles
 	virtual bool sendToProfiles(
 		unsigned long profile,
-		const char * data,
-		const char * nick = NULL,
+		const string & data,
+		const char * uid = NULL,
 		const char * from = NULL
 	) = 0;
 
 	/// Send comand to ip
 	virtual bool sendToIp(
-		const char * ip,
-		const char * data,
+		const string & ip,
+		const string & data,
 		unsigned long profile = 0,
-		const char * nick = NULL,
+		const char * uid = NULL,
 		const char * from = NULL
 	) = 0;
 
 	/// Send comand to all except nicks
 	virtual bool sendToAllExceptNicks(
 		const vector<string> & nickList,
-		const char * data,
-		const char * nick = NULL,
+		const string & data,
+		const char * uid = NULL,
 		const char * from = NULL
 	) = 0;
 
 	/// Send comand to all except ips
 	virtual bool sendToAllExceptIps(
 		const vector<string> & ipList,
-		const char * data,
-		const char * nick = NULL,
+		const string & data,
+		const char * uid = NULL,
 		const char * from = NULL
 	) = 0;
 
@@ -378,17 +378,6 @@ public:
 		const char * address,
 		const char * reason = NULL
 	) = 0;
-
-
-	/// Get conn base by ip
-	virtual const vector<DcConnBase*> & getDcConnBase(const char * ip) = 0;
-
-	/// Get user base by nick
-	virtual DcUserBase * getDcUserBase(const char * nick) = 0;
-
-	/// Get iterator of conn base
-	virtual DcConnListIterator * getDcConnListIterator() = 0;
-
 
 	/// Get all configs names
 	virtual const vector<string> & getConfig() = 0;
@@ -408,14 +397,14 @@ public:
 
 	/// Registration bot
 	virtual int regBot(
-		const string & nick,
+		const string & uid,
 		const string & info,
 		const string & ip,
 		bool key = true
 	) = 0;
 
 	/// Unreg bot
-	virtual int unregBot(const string & nick) = 0;
+	virtual int unregBot(const string & uid) = 0;
 
 
 	/// Stop hub
@@ -424,6 +413,12 @@ public:
 	/// Restarting hub
 	virtual void restartHub() = 0;
 
+
+	/// Reg plugin in list with id
+	virtual bool regCallList(const char * id, Plugin *) = 0;
+
+	/// Unreg plugin from list with id
+	virtual bool unregCallList(const char * id, Plugin *) = 0;
 
 }; // class DcServerBase
 
@@ -478,27 +473,6 @@ namespace plugin {
 using namespace ::dcserver;
 using namespace ::webserver;
 
-class Plugin;
-
-
-// ================ PluginListBase ================
-
-/** Base plugin list */
-class PluginListBase {
-
-public:
-
-	/// Get plugins path
-	virtual const string & getPluginDir() const = 0;
-
-	/// Reg plugin in list with id
-	virtual bool regCallList(const char * id, Plugin *) = 0;
-
-	/// Unreg plugin from list with id
-	virtual bool unregCallList(const char * id, Plugin *) = 0;
-
-}; // class PluginListBase
-
 
 // ================ Plugin ================
 
@@ -514,16 +488,12 @@ public:
 
 	Plugin() : 
 		mInternalPluginVersion(INTERNAL_PLUGIN_VERSION),
-		mIsAlive(true),
-		mPluginListBase(NULL)
+		mIsAlive(true)
 	{
 	}
 
 	virtual ~Plugin() {
 	}
-
-	/// Reg function in all call lists
-	virtual bool regAll(PluginListBase *) = 0;
 
 	/// OnLoad plugin function
 	virtual void onLoad(DcServerBase *) {
@@ -657,16 +627,6 @@ public:
 		return mIsAlive;
 	}
 
-	/// Set plugin-list for plugin
-	void setPluginList(PluginListBase * pluginListBase) {
-		mPluginListBase = pluginListBase;
-	}
-
-	/// Get plugins path
-	virtual const string & getPluginDir() const {
-		return mPluginListBase->getPluginDir();
-	}
-
 protected:
 
 	/// Name of the plugin
@@ -679,9 +639,6 @@ private:
 
 	/// State of plugin (loaded or not loaded)
 	bool mIsAlive;
-
-	/// Pointer to list of all plugins
-	PluginListBase * mPluginListBase;
 
 	Plugin & operator = (const Plugin &);
 

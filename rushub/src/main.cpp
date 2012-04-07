@@ -63,7 +63,7 @@ static void sigHandler(int sig) {
 			// Fallthrough
 
 		case SIGHUP :
-			if (DcServer::currentDcServer->log(INFO)) {
+			if (DcServer::currentDcServer->log(LEVEL_INFO)) {
 				DcServer::currentDcServer->logStream() << "Received a " << sig << " signal, quiting" << endl;
 			}
 			cout << "Received a " << sig << " signal, quiting" << endl;
@@ -72,7 +72,7 @@ static void sigHandler(int sig) {
 			break;
 
 		default :
-			if (DcServer::currentDcServer->log(INFO)) {
+			if (DcServer::currentDcServer->log(LEVEL_INFO)) {
 				DcServer::currentDcServer->logStream() << "Received a " << sig << " signal, ignoring it" << endl;
 			}
 			signal(sig, sigHandler);
@@ -97,7 +97,7 @@ int runHub(int argc, char ** argv, bool isService /*= false*/) {
 		#ifndef _WIN32
 			if (cli.getConfigFile().empty()) {
 				Dir::pathForFile(argv[0], configFile);
-				configFile.append("RusHub.xml", 10);
+				configFile.append(STR_LEN("RusHub.xml"));
 			} else {
 				configFile = cli.getConfigFile();
 			}
@@ -107,7 +107,7 @@ int runHub(int argc, char ** argv, bool isService /*= false*/) {
 		#else
 			Service service;
 			Dir::execPath(configFile);
-			configFile.append("RusHub.xml", 10);
+			configFile.append(STR_LEN("RusHub.xml"));
 			if (service.cli(argc, argv, configFile) <= 0) {
 				return -1;
 			}
@@ -118,7 +118,7 @@ int runHub(int argc, char ** argv, bool isService /*= false*/) {
 
 		/** Listening all ports */
 		if (server.listening() != 0) {
-			if (server.log(FATAL)) {
+			if (server.log(LEVEL_FATAL)) {
 				server.logStream() << "Listening failed" << endl;
 			}
 			return -2;

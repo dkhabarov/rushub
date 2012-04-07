@@ -46,8 +46,6 @@ DcConfigLoader::~DcConfigLoader() {
 
 /** Loading configs */
 int DcConfigLoader::load(ConfigListBase * configListBase, const ConfigStore & configStore) {
-
-	// TODO: choose loader
 	return loadFromXml(configListBase, string(configStore.mPath).append(configStore.mName).c_str());
 }
 
@@ -55,8 +53,6 @@ int DcConfigLoader::load(ConfigListBase * configListBase, const ConfigStore & co
 
 /** Saving configs */
 int DcConfigLoader::save(ConfigListBase * configListBase, const ConfigStore & configStore) {
-
-	// TODO: choose loader
 	return saveToXml(configListBase, string(configStore.mPath).append(configStore.mName).c_str());
 }
 
@@ -65,9 +61,8 @@ int DcConfigLoader::save(ConfigListBase * configListBase, const ConfigStore & co
 int DcConfigLoader::loadFromXml(ConfigListBase * configListBase, const string & fileName) {
 	TiXmlDocument file(fileName.c_str());
 	if (!file.LoadFile()) {
-		if (log(WARN)) {
-			logStream() << "Can't open file '" << fileName <<
-			"' for reading." << endl;
+		if (log(LEVEL_WARN)) {
+			logStream() << "Can't open file '" << fileName << "' for reading." << endl;
 		}
 		return -1;
 	}
@@ -78,7 +73,7 @@ int DcConfigLoader::loadFromXml(ConfigListBase * configListBase, const string & 
 		return -2;
 	}
 
-	/** Check version */
+	// Check version
 	const char * version = NULL;
 	if (mainItem->ToElement() == NULL || (version = mainItem->ToElement()->Attribute("Version")) == NULL) {
 		return -3;
@@ -101,7 +96,7 @@ int DcConfigLoader::loadFromXml(ConfigListBase * configListBase, const string & 
 			delete iss;
 			iss = NULL;
 		} else {
-			if (log(TRACE)) {
+			if (log(LEVEL_TRACE)) {
 				logStream() << "Uknown variable '" << name <<
 				"' in file '" << fileName << "', ignoring it" << endl;
 			}

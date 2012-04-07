@@ -25,8 +25,6 @@
 #ifndef DC_SERVER_H
 #define DC_SERVER_H
 
-//#define WITHOUT_PLUGINS 1
-
 #include "Server.h" // first (def winsock2.h)
 #include "DcConn.h"
 #include "NmdcProtocol.h"
@@ -84,7 +82,7 @@ class DcConfigLoader;
 
 
 /// List for get users into plugins
-class DcListIterator : public DcConnListIterator {
+class DcListIterator : public DcListIteratorBase {
 
 public:
 
@@ -93,7 +91,7 @@ public:
 	~DcListIterator() {
 	}
 
-	virtual DcConnBase * operator() (void) {
+	virtual DcUserBase * operator() (void) {
 		if (mIt == mEnd) {
 			return NULL;
 		}
@@ -103,7 +101,7 @@ public:
 			return this->operator() ();
 		}
 		++mIt;
-		return dcConn;
+		return dcConn->mDcUser;
 	}
 
 private:
@@ -118,7 +116,7 @@ private:
 class DcServer : public Server, public DcServerBase, private NonCopyable {
 
 	friend class ::dcserver::DcListIterator; // for mClientList
-	friend class ::dcserver::DcConn; // for doUserEnter in DcConn::onFlush and minDelay in DcConn::onTimer
+	friend class ::dcserver::DcConn; // for minDelay in DcConn::onTimer
 	friend class ::dcserver::DcConnFactory; // for removeFromDcUserList in DcConnFactory::deleteConn
 	friend class ::dcserver::protocol::NmdcProtocol; // for beforeUserEnter
 	friend class ::dcserver::protocol::AdcProtocol; // for beforeUserEnter
@@ -156,10 +154,8 @@ public:
 	UserList mEnterList; ///< Enter list (NMDC)
 	UserList mChatList; ///< Chat list
 
-	UserList mAdcUserList; ///< ADC User list
-
 	int miTotalUserCount; ///< Total number of the users
-	__int64 miTotalShare; ///< Total hub share size
+	int64_t miTotalShare; ///< Total hub share size
 
 	PluginList mPluginList;
 
@@ -173,100 +169,77 @@ public:
 
 	virtual ~DcServer();
 
-	const string & getMainDir() const {
-		return mDcConfig.mMainPath;
-	}
+	virtual const string & getMainDir() const;
 
-	const string & getLogDir() const {
-		return mDcConfig.mLogPath;
-	}
+	virtual const string & getLogDir() const;
 
-	const string & getTime() {
-		stringstream oss;
-		oss << mTime.asDate();
-		mTimeBuf = oss.str();
-		return mTimeBuf;
-	}
+	virtual const string & getPluginDir() const;
 
-	const string & getHubInfo() const {
-		return mHubName;
-	}
+	virtual const string & getTime();
 
-	const string & getLocale() const {
-		return mDcConfig.mLocale;
-	}
+	virtual const string & getHubInfo() const;
 
-	const string & getSystemVersion() const {
-		return mSysVersion;
-	}
+	virtual const string & getLocale() const;
 
-	__int64 getMsec() const {
-		Time tm(true);
-		return tm.msec();
-	}
+	virtual const string & getSystemVersion() const;
+
+	virtual int64_t getMsec() const;
 
 	/// Work time (sec)
-	int getUpTime() const {
-		Time tm(true);
-		tm -= mStartTime;
-		return tm.sec();
+	virtual int getUpTime() const;
+
+	virtual int getUsersCount() const;
+
+	virtual int64_t getTotalShare() const;
+	
+	virtual DcListIteratorBase * getDcListIterator();
+
+	virtual const vector<DcUserBase *> & getDcUserBaseByIp(const char * ip);
+	virtual DcUserBase * getDcUserBase(const char * nick);
+
+	virtual bool sendToUser(DcUserBase *, const string & data, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToNick(const char * to, const string & data, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToAll(const string & data, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToProfiles(unsigned long profile, const string & data, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToIp(const string & ip, const string & data, unsigned long profile = 0, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToAllExceptNicks(const vector<string> & nickList, const string & data, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToAllExceptIps(const vector<string> & ipList, const string & data, const char * uid = NULL, const char * from = NULL);
+
+	virtual void forceMove(DcUserBase *, const char * address, const char * reason = NULL); ///< Redirection client
+
+	virtual const vector<string> & getConfig();
+	virtual const char * getConfig(const string & name);
+	virtual const char * getLang(const string & name);
+	virtual bool setConfig(const string & name, const string & value);
+	virtual bool setLang(const string & name, const string & value);
+
+	virtual int regBot(const string & nick, const string & info, const string & ip, bool key = true);
+	virtual int unregBot(const string & nick);
+
+	virtual void stopHub() {
+		stop(0);
 	}
 
-	int getUsersCount() const {
-		return miTotalUserCount;
+	virtual void restartHub() {
+		stop(1);
 	}
 
-	__int64 getTotalShare() const {
-		return miTotalShare;
-	}
+	virtual bool regCallList(const char * id, Plugin *);
+	virtual bool unregCallList(const char * id, Plugin *);
+
+
+
+	static void getNormalShare(int64_t, string &); ///< Get normal share size
+	static void getAddresses(const char * addresses, vector<pair<string, string> > &, const char * defaultPort);
+
+	/// Pointer on the user (or NULL)
+	DcUser * getDcUser(const char * nick);
 
 	/// Listebing of ports
 	int listening();
 
-	/// Main timer
-	int onTimer(Time &);
-
 	/// Function checks min interval
 	bool minDelay(Time &, double sec);
-
-	/// Pointer on the user (or NULL)
-	DcUser * getDcUser(const char * nick);
-	const vector<DcConnBase*> & getDcConnBase(const char * ip);
-	DcUserBase * getDcUserBase(const char * nick);
-
-	DcConnListIterator * getDcConnListIterator() {
-		return new DcListIterator(this);
-	}
-
-	bool sendToUser(DcUserBase *, const char * data, const char * nick = NULL, const char * from = NULL);
-	bool sendToNick(const char * to, const char * data, const char * nick = NULL, const char * from = NULL);
-	bool sendToAll(const char * data, const char * nick = NULL, const char * from = NULL);
-	bool sendToProfiles(unsigned long profile, const char * data, const char * nick = NULL, const char * from = NULL);
-	bool sendToIp(const char * ip, const char * data, unsigned long profile = 0, const char * nick = NULL, const char * from = NULL);
-	bool sendToAllExceptNicks(const vector<string> & nickList, const char * data, const char * nick = NULL, const char * from = NULL);
-	bool sendToAllExceptIps(const vector<string> & ipList, const char * data, const char * nick = NULL, const char * from = NULL);
-
-	void forceMove(DcUserBase *, const char * address, const char * reason = NULL); ///< Redirection client
-
-	const vector<string> & getConfig();
-	const char * getConfig(const string & name);
-	const char * getLang(const string & name);
-	bool setConfig(const string & name, const string & value);
-	bool setLang(const string & name, const string & value);
-
-	int regBot(const string & nick, const string & info, const string & ip, bool key = true);
-	int unregBot(const string & nick);
-
-	void stopHub() {
-		stop(0);
-	}
-
-	void restartHub() {
-		stop(1);
-	}
-
-	static void getNormalShare(__int64, string &); ///< Get normal share size
-	static void getAddresses(const char * addresses, vector<pair<string, string> > &, const char * defaultPort);
 
 	/// Function action when joining the client
 	int onNewConn(Conn *);
@@ -299,19 +272,12 @@ protected:
 	/// Removing user from the user list
 	bool removeFromDcUserList(DcUser *);
 
-	/// Show user to all
-	bool showUserToAll(DcUser *);
-
-	/// Actions after user entry
-	void afterUserEnter(DcConn *);
-
 private:
 
 	Time mChecker; ///< Checking time
-	tCLIt conn_it; ///< Iterator for optimum
 	string mHubName; ///< Hub name for plugins
-	string sBuf; ///< Temp buffer
-	vector<DcConnBase *> mIpConnList; ///< Conn with same ip for plugins
+	string mBuf; ///< Temp buffer
+	vector<DcUserBase *> mIpUserList; ///< Users with same ip for plugins
 	vector<string> mConfigNameList; ///< Config names for plugins
 
 	vector<ConnFactory *> mConnFactories; ///< Server Conn Factories
@@ -343,6 +309,16 @@ private:
 
 	bool setCapabilities();
 
+	/// Main timer
+	int onTimer(Time & now);
+
+	/// Show user to all
+	bool showUserToAll(DcUser *);
+
+	/// Actions after user entry
+	void afterUserEnter(DcConn *);
+
+	void sendToAll(const string & data, bool addSep, bool flush);
 
 	/// Call list struct for registration actions into the plugins
 	struct PluginCallList {

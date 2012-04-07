@@ -36,12 +36,11 @@
 		#endif
 	#endif /* FD_SETSIZE */
 
+	#include "stdinc.h"
 	#include <winsock2.h> // for class timeval
 	void gettimeofday(struct timeval *, struct timezone *);
 #else
-	#ifndef __int64
-		#define __int64 long long
-	#endif
+	#include <stdint.h>
 	#include <sys/time.h> // for gettimeofday
 #endif
 
@@ -82,7 +81,7 @@ public:
 	int operator ! () const;
 	operator bool() const;
 	operator double() const;
-	operator __int64() const;
+	operator int64_t() const;
 
 	/// Get seconds
 	inline long sec() const {
@@ -90,8 +89,8 @@ public:
 	}
 
 	/// Get milisec
-	inline __int64 msec() const {
-		return static_cast<__int64> (*this);
+	inline int64_t msec() const {
+		return static_cast<int64_t> (*this);
 	}
 
 	Time & get();

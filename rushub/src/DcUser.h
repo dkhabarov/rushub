@@ -27,6 +27,7 @@
 #include "NmdcParser.h"
 #include "Param.h"
 #include "HashMap.h"
+#include "stdinc.h"
 
 #include <string>
 
@@ -39,10 +40,6 @@ using namespace ::dcserver::protocol;
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
 		#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
 	#endif
-#endif
-
-#if (!defined _WIN32) && (!defined __int64)
-	#define __int64 long long
 #endif
 
 namespace dcserver {
@@ -63,19 +60,14 @@ public:
 
 public:
 
-	DcUser(DcConn *);
+	DcUser(int type, DcConn *);
 	virtual ~DcUser();
-
-	virtual void send(const string & data, bool addSep = false, bool flush = true);
-	virtual void send(const char * data, size_t len, bool addSep = false, bool flush = true);
-	virtual void disconnect();
-
-	virtual bool hasFeature(int feature) const;
-
 
 	virtual ParamBase * getParam(const char * name) const;
 	virtual ParamBase * getParamForce(const char * name);
 	virtual bool removeParam(const char * name);
+
+	virtual void disconnect();
 
 	virtual const string & getUid() const;
 	void setUid(const string & uid);
@@ -85,21 +77,40 @@ public:
 
 	virtual const string & getInfo();
 	virtual bool setInfo(const string & info);
-	bool setInfo(NmdcParser * parser);
+
+	virtual bool parseCommand(const char * cmd);
+
+	virtual const char * getCommand();
 
 	virtual const string & getIp() const;
 	void setIp(const string & ip);
-
 
 	virtual int getProfile() const;
 
 	virtual bool isHide() const;
 	virtual bool isCanSend() const;
+
+	virtual bool hasFeature(int feature) const;
+
+	void send(const char * data, size_t len, bool addSep = false, bool flush = true);
+	virtual void send(const string & data, bool addSep = false, bool flush = true);
+	virtual void sendToChat(const string & data, const string & uid, bool flush = true);
+	virtual void sendToPm(const string & data, const string & uid, const string & from, bool flush = true);
+
+
 	void setCanSend(bool canSend);
 	void setInUserList(bool);
 
 	bool isPassive() const;
 	bool isTrueBoolParam(const char * name) const;
+
+	set<string> & getInfoNames() { // ADC
+		return mInfoNames;
+	}
+
+	set<int> & getFeatures() { // ADC
+		return mFeatures;
+	}
 
 private:
 

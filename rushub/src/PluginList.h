@@ -56,7 +56,7 @@ class PluginLoader;
 
 
 /// List with all plugins
-class PluginList : public Obj, public PluginListBase, private NonCopyable {
+class PluginList : public Obj, private NonCopyable {
 
 	/** For LoadAll */
 	friend class ::dcserver::DcServer;
@@ -76,7 +76,7 @@ public:
 
 	void setServer(DcServerBase *);
 
-	virtual const string & getPluginDir() const {
+	const string & getPluginDir() const {
 		return mPluginDir;
 	}
 
@@ -99,9 +99,9 @@ public:
 	bool setCallList(const string & id, CallList *);
 
 
-	virtual bool regCallList(const char * id, Plugin *);
+	bool regCallList(const char * id, Plugin *);
 
-	virtual bool unregCallList(const char * id, Plugin *);
+	bool unregCallList(const char * id, Plugin *);
 
 
 	Plugin * getPlugin(const string & name);
