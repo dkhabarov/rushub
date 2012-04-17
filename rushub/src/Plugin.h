@@ -465,6 +465,19 @@ public:
 }; // class DcServerBase
 
 
+
+template<class F, class T> T & convert(const F & from, T & to, const T & def) {
+    ostringstream oss;
+    if (!(oss << from)) {
+        return to = def;
+    }
+    istringstream iss(oss.str());
+    if (!(iss >> to)) {
+        return to = def;
+    }
+    return to;
+}
+
 }; // namespace dcserver
 
 
