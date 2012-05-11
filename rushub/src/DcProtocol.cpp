@@ -41,7 +41,7 @@ DcProtocol::~DcProtocol() {
 
 bool DcProtocol::parseInfo(int protocolType, DcUser * dcUser, const string & info) {
 	if (protocolType == DC_PROTOCOL_TYPE_ANY) {
-		if (info[0] == '$') {
+		if (info[0] == '$') { // autodetect protocol
 			NmdcParser::parseInfo(dcUser, info);
 		} else {
 			AdcParser::parseInfo(dcUser, info);
