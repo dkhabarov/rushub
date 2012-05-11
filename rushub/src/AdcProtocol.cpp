@@ -770,18 +770,6 @@ bool AdcProtocol::verifyCid(DcUser * dcUser) {
 }
 
 
-
-void AdcProtocol::parseInfo(DcUser * dcUser, const string & info) {
-	AdcParser::parseInfo(dcUser, info);
-}
-
-
-
-void AdcProtocol::formingInfo(DcUser * dcUser, string & info) {
-	AdcParser::formingInfo(dcUser, info);
-}
-
-
 }; // namespace protocol
 
 }; // namespace dcserver

@@ -78,9 +78,6 @@ public:
 
 	const char * genNewSid();
 
-	virtual void parseInfo(DcUser *, const string & info);
-	virtual void formingInfo(DcUser *, string & info);
-
 protected:
 
 	typedef int (AdcProtocol::*Event) (AdcParser *, DcConn *);

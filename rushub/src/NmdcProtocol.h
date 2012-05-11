@@ -109,9 +109,6 @@ public:
 	static void myInfoList(string & list, UserBase * userBase);
 	static void ipList(string & list, UserBase * userBase);
 
-	virtual void parseInfo(DcUser *, const string & info);
-	virtual void formingInfo(DcUser *, string & info);
-
 	virtual void addToOps(DcUser *);
 	virtual void delFromOps(DcUser *);
 	virtual void addToIpList(DcUser *);

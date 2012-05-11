@@ -86,7 +86,7 @@ using namespace ::std;
 
 // Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10040
+	#define INTERNAL_PLUGIN_VERSION 10041
 #endif
 
 // NMDC protocol separator
@@ -106,6 +106,12 @@ using namespace ::std;
 	#define WEB_SEPARATOR "\r\n\r\n"
 	#define WEB_SEPARATOR_LEN 4
 #endif
+
+enum DcProtocolType {
+	DC_PROTOCOL_TYPE_ANY = 0,
+	DC_PROTOCOL_TYPE_NMDC,
+	DC_PROTOCOL_TYPE_ADC
+};
 
 
 

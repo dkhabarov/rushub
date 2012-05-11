@@ -1379,18 +1379,6 @@ void NmdcProtocol::ipList(string & list, UserBase * userBase) {
 
 
 
-void NmdcProtocol::parseInfo(DcUser * dcUser, const string & info) {
-	NmdcParser::parseInfo(dcUser, info);
-}
-
-
-
-void NmdcProtocol::formingInfo(DcUser * dcUser, string & info) {
-	NmdcParser::formingInfo(dcUser, info);
-}
-
-
-
 void NmdcProtocol::addToOps(DcUser * dcUser) {
 	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		string msg;

@@ -107,11 +107,14 @@ size_t DcConn::send(const char * data, size_t len, bool addSep, bool flush) {
 
 
 void DcConn::sendZpipe(const char * data, size_t len, bool flush) {
+#ifndef WITHOUT_ZLIB
 	string out;
 	if ((mFeatures & SUPPORT_FEATUER_ZPIPE) && ZlibFilter::compressFull(data, len, out)) {
 		send(STR_LEN("$ZOn"), true, false);
 		send(out, true, flush);
-	} else {
+	} else 
+#endif
+	{
 		send(data, len, false, flush);
 	}
 }

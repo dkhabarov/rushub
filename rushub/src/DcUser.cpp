@@ -249,16 +249,10 @@ unsigned long DcUser::getUidHash() const {
 
 const string & DcUser::getInfo() {
 	if (mInfoChanged) {
-
-		// Protocol dependence
-		// TODO replace to mDcConn->dcProtocol()->formingInfo(this, mInfo) for bot???
-		if (mDcServer->mDcConfig.mAdcOn) {
-			AdcParser::formingInfo(this, mInfo); // ADC
-		} else {
-			NmdcParser::formingInfo(this, mInfo); // NMDC
+		// TODO refactoring
+		if (DcProtocol::formingInfo(mDcServer->mDcConfig.mAdcOn ? DC_PROTOCOL_TYPE_ADC : DC_PROTOCOL_TYPE_NMDC, this, mInfo)) {
+			mInfoChanged = false;
 		}
-
-		mInfoChanged = false;
 	}	
 	return mInfo;
 }
@@ -267,15 +261,8 @@ const string & DcUser::getInfo() {
 
 /// Set Info string
 bool DcUser::setInfo(const string & info) {
-
-	// Protocol dependence
-	// TODO replace to mDcConn->dcProtocol()->parseInfo(this, info) for bot???
-	if (mDcServer->mDcConfig.mAdcOn) { // ADC
-		AdcParser::parseInfo(this, info);
-	} else { // NMDC
-		NmdcParser::parseInfo(this, info);
-	}
-
+	// TODO refactoring
+	DcProtocol::parseInfo(mDcServer->mDcConfig.mAdcOn ? DC_PROTOCOL_TYPE_ADC : DC_PROTOCOL_TYPE_NMDC, this, info);
 	return true;
 }
 
