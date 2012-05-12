@@ -112,6 +112,12 @@ NmdcParser::~NmdcParser() {
 
 
 
+int NmdcParser::getCommandType() const {
+	return mType;
+}
+
+
+
 /// Do parse for command and return type of this command
 int NmdcParser::parse() {
 	mLength = mCommand.size(); // Set cmd len

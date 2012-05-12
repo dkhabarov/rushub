@@ -217,15 +217,13 @@ public:
 	NmdcParser();
 	virtual ~NmdcParser();
 
-	int getCommandType() const {
-		return mType;
-	}
-	
+	int getCommandType() const;
+
 	/** Do parse for command and return type of this command */
 	virtual int parse();
-	
+
 	virtual void reInit();
-	
+
 	bool splitChunks();
 	static bool isPassive(const string & description);
 
