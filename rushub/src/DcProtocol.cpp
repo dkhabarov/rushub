@@ -41,7 +41,7 @@ DcProtocol::~DcProtocol() {
 
 bool DcProtocol::parseInfo(int protocolType, DcUser * dcUser, const string & info) {
 	if (protocolType == DC_PROTOCOL_TYPE_ANY) {
-		if (info[0] == '$') { // autodetect protocol
+		if (info[0] == '$') { // auto detect protocol
 			NmdcParser::parseInfo(dcUser, info);
 		} else {
 			AdcParser::parseInfo(dcUser, info);
@@ -51,7 +51,7 @@ bool DcProtocol::parseInfo(int protocolType, DcUser * dcUser, const string & inf
 	} else if (protocolType == DC_PROTOCOL_TYPE_ADC) {
 		AdcParser::parseInfo(dcUser, info);
 	} else {
-		throw "unsupport protocol type";
+		throw "unsupported protocol type";
 	}
 	return true;
 }
@@ -64,7 +64,7 @@ bool DcProtocol::formingInfo(int protocolType, DcUser * dcUser, string & info) {
 	} else if (protocolType == DC_PROTOCOL_TYPE_ADC) {
 		AdcParser::formingInfo(dcUser, info);
 	} else {
-		throw "unsupport protocol type";
+		throw "unsupported protocol type";
 	}
 	return true;
 }
