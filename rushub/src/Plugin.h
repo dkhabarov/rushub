@@ -23,6 +23,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <sstream>
 
 #ifdef _WIN32
 	#ifndef STD_TYPES
