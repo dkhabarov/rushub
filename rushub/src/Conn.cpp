@@ -38,6 +38,8 @@
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
 		#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
 	#endif
+#else
+	#include <unistd.h> // for usleep function
 #endif
 
 #define NS_INADDRSZ 4
