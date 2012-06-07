@@ -128,7 +128,7 @@
 		}
 #else
 	#define SOCK_CLOSE(SOCK) \
-		TEMP_FAILURE_RETRY(::close(SOCK));
+		TEMP_FAILURE_RETRY(close(SOCK));
 	#define SOCK_NON_BLOCK(SOCK) \
 		static int flags; \
 		if ((flags = fcntl(SOCK, F_GETFL, 0)) < 0) { \
