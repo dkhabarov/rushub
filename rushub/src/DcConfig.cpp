@@ -27,6 +27,7 @@
 #include "Dir.h"
 
 #include <string>
+#include <unistd.h>
 
 using ::std::string;
 using ::server::Server;
