@@ -27,7 +27,10 @@
 #include "Dir.h"
 
 #include <string>
+
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 using ::std::string;
 using ::server::Server;
