@@ -39,9 +39,24 @@ DcProtocol::~DcProtocol() {
 
 
 
+Parser * DcProtocol::parse(int protocolType, const string & cmd) {
+	if (protocolType == DC_PROTOCOL_TYPE_ANY) { // Auto detect protocol
+		// TODO
+	} else if (protocolType == DC_PROTOCOL_TYPE_NMDC) { // NMDC only
+		// TODO
+	} else if (protocolType == DC_PROTOCOL_TYPE_ADC) { // ADC only
+		// TODO
+	} else {
+		throw "unsupported protocol type";
+	}
+	return NULL;
+}
+
+
+
 bool DcProtocol::parseInfo(int protocolType, DcUser * dcUser, const string & info) {
 	if (protocolType == DC_PROTOCOL_TYPE_ANY) {
-		if (info[0] == '$') { // auto detect protocol
+		if (info.size() > 0 && info[0] == '$') { // Auto detect protocol
 			NmdcParser::parseInfo(dcUser, info);
 		} else {
 			AdcParser::parseInfo(dcUser, info);
