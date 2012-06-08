@@ -44,9 +44,7 @@ typedef enum {
 	ITEM_TYPE_BOOL,     // bool
 	ITEM_TYPE_DOUBLE,   // double
 	ITEM_TYPE_INT,      // int
-	ITEM_TYPE_LONG,     // long
 	ITEM_TYPE_UINT,     // unsigned int
-	ITEM_TYPE_ULONG,    // unsigned long
 	ITEM_TYPE_LLONG,    // int64_t
 	ITEM_TYPE_CHAR,     // char
 	ITEM_TYPE_STRING,   // string
@@ -54,9 +52,7 @@ typedef enum {
 	ITEM_TYPE_PBOOL,    // bool*
 	ITEM_TYPE_PDOUBLE,  // double*
 	ITEM_TYPE_PINT,     // int*
-	ITEM_TYPE_PLONG,    // long*
 	ITEM_TYPE_PUINT,    // unsigned int*
-	ITEM_TYPE_PULONG,   // unsigned long*
 	ITEM_TYPE_PLLONG,   // int64_t*
 	ITEM_TYPE_PSTRING,  // string*
 } ItemType;
@@ -154,9 +150,7 @@ public: \
 CONFIGBASEITEM(bool, ITEM_TYPE_BOOL, Bool);               /** ConfigItemBool */
 CONFIGBASEITEM(double, ITEM_TYPE_DOUBLE, Double);         /** ConfigItemDouble */
 CONFIGBASEITEM(int, ITEM_TYPE_INT, Int);                  /** ConfigItemInt */
-CONFIGBASEITEM(long, ITEM_TYPE_LONG, Long);               /** ConfigItemLong */
 CONFIGBASEITEM(unsigned, ITEM_TYPE_UINT, UInt);           /** ConfigItemUInt */
-CONFIGBASEITEM(unsigned long, ITEM_TYPE_ULONG, ULong);    /** ConfigItemULong */
 CONFIGBASEITEM(int64_t, ITEM_TYPE_LLONG, Int64);          /** ConfigItemInt64 */
 CONFIGBASEITEM(char, ITEM_TYPE_CHAR, Char);               /** ConfigItemChar */
 CONFIGBASEITEM(string, ITEM_TYPE_STRING, String);         /** ConfigItemString */
@@ -164,9 +158,7 @@ CONFIGBASEITEM(char *, ITEM_TYPE_PCHAR, PChar);           /** ConfigItemPChar */
 CONFIGBASEITEM(bool *, ITEM_TYPE_PBOOL, PBool);           /** ConfigItemPBool */
 CONFIGBASEITEM(double *, ITEM_TYPE_PDOUBLE, PDouble);     /** ConfigItemPDouble */
 CONFIGBASEITEM(int *, ITEM_TYPE_PINT, PInt);              /** ConfigItemPInt */
-CONFIGBASEITEM(long *, ITEM_TYPE_PLONG, PLong);           /** ConfigItemPLong */
 CONFIGBASEITEM(unsigned int *, ITEM_TYPE_PUINT, PUInt);   /** ConfigItemPUInt */
-CONFIGBASEITEM(unsigned long *, ITEM_TYPE_PULONG, PULong);/** ConfigItemPULong */
 CONFIGBASEITEM(int64_t *, ITEM_TYPE_PLLONG, PInt64);      /** ConfigItemPLLong */
 CONFIGBASEITEM(string *, ITEM_TYPE_PSTRING, PString);     /** ConfigItemPString */
 

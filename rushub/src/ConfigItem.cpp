@@ -108,12 +108,9 @@ CCONVERTFROMPCHAR();
 CCONVERTFROM(bool, Bool, ((str == "true") ? true : (0 != atoi(str.c_str()))));
 CCONVERTFROM(double, Double, atof(str.c_str()));
 CCONVERTFROM(int, Int, atoi(str.c_str()));
-CCONVERTFROM(long, Long, atol(str.c_str()));
 CCONVERTFROM(unsigned int, UInt, atol(str.c_str()));
-CCONVERTFROM(unsigned long, ULong, strtoul(str.c_str(), NULL, 10));
 CCONVERTFROM(int64_t, Int64, stringToInt64(str));
 CCONVERTFROM(string, String, str);
-
 
 /** Convert to string */
 void ConfigItemDouble::convertTo(string & str) {
@@ -144,17 +141,13 @@ CCONVERTTO(Bool)
 CCONVERTTO(String)
 CCONVERTTO(Char)
 CCONVERTTO(Int)
-CCONVERTTO(Long)
 CCONVERTTO(UInt)
-CCONVERTTO(ULong)
 CCONVERTTO(Int64)
 CCONVERTPTO(PBool)
 CCONVERTPTO(PString)
 CCONVERTPTO(PChar)
 CCONVERTPTO(PInt)
-CCONVERTPTO(PLong)
 CCONVERTPTO(PUInt)
-CCONVERTPTO(PULong)
 CCONVERTPTO(PInt64)
 
 
@@ -193,17 +186,13 @@ READFROMSTREAMTOSTR(PString);
 READFROMSTREAM(Bool);
 READFROMSTREAM(Double);
 READFROMSTREAM(Int);
-READFROMSTREAM(Long);
 READFROMSTREAM(UInt);
-READFROMSTREAM(ULong);
 READFROMSTREAM(Int64);
 READFROMSTREAM(Char);
 READFROMSTREAM(PBool);
 READFROMSTREAM(PDouble);
 READFROMSTREAM(PInt);
-READFROMSTREAM(PLong);
 READFROMSTREAM(PUInt);
-READFROMSTREAM(PULong);
 READFROMSTREAM(PInt64);
 
 
@@ -222,9 +211,7 @@ ostream & ConfigItem##SUFFIX::writeToStream(ostream & os) { \
 WRITETOSTREAM(Bool);
 WRITETOSTREAM(Double);
 WRITETOSTREAM(Int);
-WRITETOSTREAM(Long);
 WRITETOSTREAM(UInt);
-WRITETOSTREAM(ULong);
 WRITETOSTREAM(Int64);
 WRITETOSTREAM(Char);
 WRITETOSTREAM(String);
@@ -232,11 +219,11 @@ WRITETOSTREAM(PChar);
 WRITETOSTREAM(PBool);
 WRITETOSTREAM(PDouble);
 WRITETOSTREAM(PInt);
-WRITETOSTREAM(PLong);
 WRITETOSTREAM(PUInt);
-WRITETOSTREAM(PULong);
 WRITETOSTREAM(PInt64);
 WRITETOSTREAM(PString);
+
+
 
 /** NULL values */
 #define ISNULL(SUFFIX)  bool ConfigItem##SUFFIX::isNull()  { return !this->data(); } // 0, false, \0
@@ -250,9 +237,7 @@ WRITETOSTREAM(PString);
 ISNULL(Bool);
 ISNULL(Int);
 ISNULL(UInt);
-ISNULL(Long);
 ISNULL(Int64);
-ISNULL(ULong);
 ISNULL(Char);
 ISNULLPCHAR();
 ISNULLDOUBLE();
@@ -260,11 +245,10 @@ ISNULLSTRING();
 ISNULLP(Bool);
 ISNULLP(Int);
 ISNULLP(UInt);
-ISNULLP(Long);
 ISNULLP(Int64);
-ISNULLP(ULong);
 ISNULLPDOUBLE();
 ISNULLPSTRING();
+
 
 }; // namespace configuration
 

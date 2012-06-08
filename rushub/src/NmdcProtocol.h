@@ -57,7 +57,7 @@ public:
 	
 	virtual const char * getSeparator() const;
 	virtual size_t getSeparatorLen() const;
-	virtual unsigned long getMaxCommandLength() const;
+	virtual unsigned int getMaxCommandLength() const;
 
 	/// Creating protocol parser
 	virtual Parser * createParser() {

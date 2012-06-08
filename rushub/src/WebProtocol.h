@@ -47,7 +47,7 @@ class WebProtocol : public Protocol {
 
 public:
 
-	WebProtocol(unsigned long & maxCommandLength);
+	WebProtocol(unsigned int & maxCommandLength);
 	virtual ~WebProtocol();
 
 	void setServer(Server *);
@@ -76,14 +76,14 @@ public:
 		return 4;
 	}
 
-	virtual unsigned long getMaxCommandLength() const {
+	virtual unsigned int getMaxCommandLength() const {
 		return mMaxCommandLength;
 	}
 
 protected:
 
 	Server * mServer;
-	unsigned long & mMaxCommandLength;
+	unsigned int & mMaxCommandLength;
 
 private:
 

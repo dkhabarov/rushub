@@ -135,10 +135,10 @@ void DcConfig::addVars(Server * server) {
 	add("iStartPing",             mStartPing,                           300    );
 	add("iSysLoading",            mSysLoading,                          1.     );
 
-	unsigned long maxSendSize(MAX_SEND_SIZE); // posix
+	unsigned int maxSendSize(MAX_SEND_SIZE); // posix
 
 	add("iMaxSendSize",           server->mMaxSendSize,                 maxSendSize);
-	add("iStrSizeMax",            mMaxNmdcCommandLength,                10240ul);
+	add("iStrSizeMax",            mMaxNmdcCommandLength,                10240u );
 	add("iStepDelay",             server->mStepDelay,                   0      );
 	add("iTimerConnPeriod",       server->mTimerConnPeriod,             4000u  );
 	add("iTimerServPeriod",       server->mTimerServPeriod,             2000u  );
@@ -153,7 +153,7 @@ void DcConfig::addVars(Server * server) {
 			string(STR_LEN("0.0.0.0:8080"))
 		#endif
 	);
-	add("iWebStrSizeMax",         mMaxWebCommandLength,                 10240ul);
+	add("iWebStrSizeMax",         mMaxWebCommandLength,                 10240u );
 	add("iWebTimeout",            mWebTimeout,                          30.    );
 
 	add("iLenCmdMSearch",         mMaxCmdLen[NMDC_TYPE_MSEARCH],        256u   );
@@ -222,7 +222,7 @@ void DcConfig::addVars(Server * server) {
 	add("iFloodCountMyINFO2",     mFloodCount2[NMDC_TYPE_MYNIFO],       30u    );
 	add("iFloodCountSearch",      mFloodCount [NMDC_TYPE_SEARCH],       3u     );
 	add("iFloodCountSearch2",     mFloodCount2[NMDC_TYPE_SEARCH],       10u    );
-	add("iFloodCountSearchPas",  	mFloodCount [NMDC_TYPE_SEARCH_PAS],   3u     );
+	add("iFloodCountSearchPas",   mFloodCount [NMDC_TYPE_SEARCH_PAS],   3u     );
 	add("iFloodCountSearchPas2",  mFloodCount2[NMDC_TYPE_SEARCH_PAS],   10u    );
 	add("iFloodCountMSearch",     mFloodCount [NMDC_TYPE_MSEARCH],      3u     );
 	add("iFloodCountMSearch2",    mFloodCount2[NMDC_TYPE_MSEARCH],      10u    );

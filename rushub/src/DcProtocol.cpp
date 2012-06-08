@@ -39,7 +39,7 @@ DcProtocol::~DcProtocol() {
 
 
 
-Parser * DcProtocol::parse(int protocolType, const string & cmd) {
+Parser * DcProtocol::parse(int protocolType, const string &) {
 	if (protocolType == DC_PROTOCOL_TYPE_ANY) { // Auto detect protocol
 		// TODO
 	} else if (protocolType == DC_PROTOCOL_TYPE_NMDC) { // NMDC only

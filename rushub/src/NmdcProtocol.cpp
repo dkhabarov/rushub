@@ -88,7 +88,7 @@ size_t NmdcProtocol::getSeparatorLen() const {
 
 
 
-unsigned long NmdcProtocol::getMaxCommandLength() const {
+unsigned int NmdcProtocol::getMaxCommandLength() const {
 	return mDcServer->mDcConfig.mMaxNmdcCommandLength;
 }
 

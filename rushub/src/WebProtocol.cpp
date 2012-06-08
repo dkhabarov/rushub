@@ -27,7 +27,7 @@ namespace protocol {
 
 
 
-WebProtocol::WebProtocol(unsigned long & maxCommandLength) :
+WebProtocol::WebProtocol(unsigned int & maxCommandLength) :
 	mServer(NULL),
 	mMaxCommandLength(maxCommandLength)
 {

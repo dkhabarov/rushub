@@ -235,7 +235,7 @@ protected:
 
 	Time mLastRecv; ///< Time of the last recv action from the client
 
-	unsigned long & mSendBufMax; ///< Max size sending buf
+	unsigned int & mSendBufMax; ///< Max size sending buf
 
 	list<Conn *>::iterator mIterator; ///< Optimisation
 

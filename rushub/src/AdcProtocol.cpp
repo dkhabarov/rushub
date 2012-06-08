@@ -77,8 +77,8 @@ size_t AdcProtocol::getSeparatorLen() const {
 
 
 
-unsigned long AdcProtocol::getMaxCommandLength() const {
-	return 10240;
+unsigned int AdcProtocol::getMaxCommandLength() const {
+	return 10240u;
 }
 
 

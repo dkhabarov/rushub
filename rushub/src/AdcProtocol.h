@@ -47,7 +47,7 @@ public:
 	
 	virtual const char * getSeparator() const;
 	virtual size_t getSeparatorLen() const;
-	virtual unsigned long getMaxCommandLength() const;
+	virtual unsigned int getMaxCommandLength() const;
 
 	virtual Parser * createParser();
 	virtual void deleteParser(Parser *);
