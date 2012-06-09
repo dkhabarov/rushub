@@ -179,7 +179,7 @@ int AdcParser::parse() {
 
 		if (parseHeader()) {
 			uint32_t cmd = CMD(mCommand.c_str());
-			for (unsigned int i = 0; i < ADC_TYPE_INVALID; ++i) {
+			for (unsigned int i = 0; i < sizeof(AdcCommands) / sizeof(AdcCommands[0]); ++i) {
 				AdcCommand & adcCommand = AdcCommands[i];
 				if (adcCommand.check(cmd)) { // Check command from mCommand
 					return mType = adcCommand.getAdcType(); // Set cmd type

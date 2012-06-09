@@ -160,7 +160,7 @@ int Exception::getFunctionInfo(unsigned long functionAddress, unsigned long stac
 	unsigned long size = 1024 * 16;
 	PSYMBOL_INFO pSym = (PSYMBOL_INFO) GlobalAlloc(GMEM_FIXED, size);
 
-	::ZeroMemory(pSym, size);
+	::ZeroMemory(pSym, size * sizeof(PSYMBOL_INFO));
 	pSym->SizeOfStruct = size;
 	pSym->MaxNameLen = size - sizeof(IMAGEHLP_SYMBOL);
 
@@ -249,7 +249,7 @@ int Exception::getSourceInfo(unsigned address, char * buff) {
 
 	if (SymGetLineFromAddr(GetCurrentProcess(), address, &disp, &lineInfo)) {
 		strcpy(fileName, lineInfo.FileName);
-		sprintf(buff, "%s(%d)", fileName, lineInfo.LineNumber);
+		sprintf(buff, "%s(%u)", fileName, lineInfo.LineNumber);
 		return 1;
 	}
 

@@ -359,7 +359,7 @@ bool NmdcParser::splitChunks() {
 			break;
 
 		case NMDC_TYPE_UNKNOWN : // Cmd without $ in begining position
-			if (mCommand.compare(0, 1, "$")) {
+			if (mCommand.compare(0, 1, "$") != 0) {
 				mError = true;
 			}
 			break;

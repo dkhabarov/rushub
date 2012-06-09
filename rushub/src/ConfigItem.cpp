@@ -168,9 +168,8 @@ istream & ConfigItem##SUFFIX::readFromStream(istream & is) { \
 	string str; \
 	stringstream ss; \
 	getline(is, str); \
-	ss << str; str.empty(); \
+	ss << str; \
 	while (is.good()) { \
-		str.empty(); \
 		getline(is, str); \
 		ss << endl << str; \
 	} \

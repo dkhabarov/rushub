@@ -102,7 +102,7 @@ void DcIpList::sendToIpChat(const string & ip, const string & data, const string
 	IpList * ipList = IpTable::find(ipHash);
 	while (ipList != NULL) {
 		DcConn * dcConn = ipList->mData;
-		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv && dcConn->mIpRecv && !dcConn->mDcUser->getUid().empty()) {
+		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv && !dcConn->mDcUser->getUid().empty()) {
 			if (!profile || checkProfile(dcConn, profile)) {
 				dcConn->mDcUser->sendToChat(data, uid, flush);
 			}
@@ -118,7 +118,7 @@ void DcIpList::sendToIpPm(const string & ip, const string & data, const string &
 	IpList * ipList = IpTable::find(ipHash);
 	while (ipList != NULL) {
 		DcConn * dcConn = ipList->mData;
-		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv && dcConn->mIpRecv && !dcConn->mDcUser->getUid().empty()) {
+		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv && !dcConn->mDcUser->getUid().empty()) {
 			if (!profile || checkProfile(dcConn, profile)) {
 				dcConn->mDcUser->sendToPm(data, uid, from, flush);
 			}
