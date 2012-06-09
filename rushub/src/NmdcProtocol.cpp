@@ -1221,19 +1221,19 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 
 
 
-int NmdcProtocol::checkCommand(NmdcParser * dcParser, DcConn * dcConn) {
+int NmdcProtocol::checkCommand(NmdcParser * nmdcParser, DcConn * dcConn) {
 
 	// Checking length of command
-	if (dcParser->getCommandLen() > mDcServer->mDcConfig.mMaxCmdLen[dcParser->mType]) {
+	if (nmdcParser->getCommandLen() > mDcServer->mDcConfig.mMaxCmdLen[nmdcParser->mType]) {
 		if (dcConn->log(LEVEL_DEBUG)) {
-			dcConn->logStream() << "Bad CMD(" << dcParser->mType << ") length: " << dcParser->getCommandLen() << endl;
+			dcConn->logStream() << "Bad CMD(" << nmdcParser->mType << ") length: " << nmdcParser->getCommandLen() << endl;
 		}
 		dcConn->closeNow(CLOSE_REASON_CMD_LENGTH);
 		return -1;
 	}
 
 	// Checking null chars
-	if (strlen(dcParser->mCommand.data()) < dcParser->mCommand.size()) {
+	if (nmdcParser->mCommand.find('\0') != nmdcParser->mCommand.npos) {
 		if (dcConn->log(LEVEL_DEBUG)) {
 			dcConn->logStream() << "Sending null chars, probably attempt an attack" << endl;
 		}
@@ -1242,11 +1242,11 @@ int NmdcProtocol::checkCommand(NmdcParser * dcParser, DcConn * dcConn) {
 	}
 
 	// Check Syntax
-	if (dcParser->splitChunks()) {
+	if (nmdcParser->splitChunks()) {
 		// Protection from commands, not belonging to DC protocol
-		if (dcParser->mType != NMDC_TYPE_UNKNOWN || mDcServer->mDcConfig.mDisableNoDCCmd) {
+		if (nmdcParser->mType != NMDC_TYPE_UNKNOWN || mDcServer->mDcConfig.mDisableNoDCCmd) {
 			if (dcConn->log(LEVEL_DEBUG)) {
-				dcConn->logStream() << "Wrong syntax in cmd: " << dcParser->mType << endl;
+				dcConn->logStream() << "Wrong syntax in cmd: " << nmdcParser->mType << endl;
 			}
 			dcConn->closeNice(9000, CLOSE_REASON_CMD_SYNTAX);
 			return -3;
@@ -1254,7 +1254,7 @@ int NmdcProtocol::checkCommand(NmdcParser * dcParser, DcConn * dcConn) {
 	}
 
 	// Check flood
-	if (antiflood(dcConn, dcParser->mType)) {
+	if (antiflood(dcConn, nmdcParser->mType)) {
 		return -4;
 	}
 

@@ -31,15 +31,12 @@ SUITE(TestList) {
 
 
 TEST(TestList_add) {
-	int a = 5;
-	int b = 7;
-	int c = 5;
 
 	List<int> list;
 
-	list.add(a);
-	list.add(b);
-	list.add(c);
+	list.add(5);
+	list.add(7);
+	list.add(5);
 
 	CHECK_EQUAL(3, list.size());
 }
@@ -49,8 +46,7 @@ TEST(TestList_clear) {
 	
 	List<int> list;
 
-	int a = 1;
-	list.add(a);
+	list.add(1);
 
 	list.clear();
 
@@ -64,19 +60,16 @@ bool func(int i) {
 }
 
 void func1(int) {
-	//return false;
+
 }
 
 TEST(TestList_removeIf) {
 
 	List<int> list;
 
-	int a = 1;
-	int b = 2;
-	int c = 1;
-	list.add(a);
-	list.add(b);
-	list.add(c);
+	list.add(1);
+	list.add(2);
+	list.add(1);
 
 	list.removeIf(func);
 	list.loop(func1);

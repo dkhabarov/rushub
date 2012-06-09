@@ -571,8 +571,8 @@ bool DcServer::minDelay(Time & time, double sec) {
 /// Antiflood function
 bool DcServer::antiFlood(unsigned & count, Time & time, const unsigned & countLimit, const double & timeLimit) {
 	bool ret = false;
-	if (timeLimit) {
-		if (::fabs(double(mTime - time)) < timeLimit) {
+	if (timeLimit > 0.) {
+		if (fabs(double(mTime - time)) < timeLimit) {
 			if (countLimit < ++count) {
 				ret = true;
 			} else {
@@ -1563,11 +1563,11 @@ string DcServer::getSysVersion() {
 
 			// Version, service pack, number of the build
 			if (osvi.dwMajorVersion <= 4) {
-				sprintf(buf, "version %d.%d %s (Build %d)", 
+				sprintf(buf, "version %u.%u %s (Build %u)", 
 					osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
 				version.append(buf);
 			} else {
-				sprintf(buf, "%s (Build %d)", osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
+				sprintf(buf, "%s (Build %u)", osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
 				version.append(buf);
 			}
 

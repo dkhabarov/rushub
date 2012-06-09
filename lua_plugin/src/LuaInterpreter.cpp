@@ -269,7 +269,7 @@ int LuaInterpreter::callFunc(const char * funcName) {
 		}
 		delete (*it);
 	}
-	const int len = mCallParams.size();
+	const int len = static_cast<int> (mCallParams.size());
 	mCallParams.clear();
 
 	LuaInterpreter * oldScript = LuaPlugin::mCurLua->mCurScript;
@@ -304,7 +304,7 @@ bool LuaInterpreter::onError(const char * funcName, const char * errMsg, bool st
 	}
 	LuaPlugin::mCurLua->mLastError = errMsg;
 	logError(LuaPlugin::mCurLua->mLastError);
-	if (strcmp(funcName, "OnError")) {
+	if (strcmp(funcName, "OnError") != 0) {
 		newCallParam((void *) errMsg, LUA_TSTRING);
 		stoped = !callFunc("OnError");
 	}

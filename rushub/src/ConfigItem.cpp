@@ -97,7 +97,8 @@ void ConfigItemP##SUFFIX::convertFrom(const string & str) { \
 	if (data) { \
 		delete data; \
 	} \
-	data = new TYPE(SUB); \
+	data = new TYPE; \
+	*data = SUB; \
 	*this = data; \
 }
 
@@ -227,10 +228,10 @@ WRITETOSTREAM(PString);
 /** NULL values */
 #define ISNULL(SUFFIX)  bool ConfigItem##SUFFIX::isNull()  { return !this->data(); } // 0, false, \0
 #define ISNULLPCHAR()   bool ConfigItemPChar ::isNull()    { return !this->data() || !*(this->data()); } // 0 or \0
-#define ISNULLDOUBLE()  bool ConfigItemDouble::isNull()    { return this->data() == 0.; } // 0.
+#define ISNULLDOUBLE()  bool ConfigItemDouble::isNull()    { return fabs(this->data() - 0.) < 10e-7; } // 0.
 #define ISNULLSTRING()  bool ConfigItemString::isNull()    { return !this->data().size(); } // ""
 #define ISNULLP(SUFFIX) bool ConfigItemP##SUFFIX::isNull() { return !this->data() || !*(this->data()); }
-#define ISNULLPDOUBLE() bool ConfigItemPDouble::isNull()   { return !this->data() || *(this->data()) == 0.; }
+#define ISNULLPDOUBLE() bool ConfigItemPDouble::isNull()   { return !this->data() || fabs(*(this->data()) - 0.) < 10e-7; }
 #define ISNULLPSTRING() bool ConfigItemPString::isNull()   { return !this->data() || !((*(this->data())).size()); }
 
 ISNULL(Bool);

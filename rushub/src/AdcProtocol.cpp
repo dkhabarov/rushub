@@ -728,7 +728,7 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 	}
 
 	// Checking null chars
-	if (strlen(adcParser->mCommand.data()) < adcParser->mCommand.size()) {
+	if (adcParser->mCommand.find('\0') != adcParser->mCommand.npos) {
 		if (dcConn->log(LEVEL_WARN)) {
 			dcConn->logStream() << "Sending null chars, probably attempt an attack" << endl;
 		}

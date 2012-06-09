@@ -77,8 +77,8 @@ public:
 private:
 
 	struct Param {
-		void * data;
 		lua_Number num;
+		void * data;
 		int type;
 		Param(void * d, int t) : data(d), type(t) {
 		}

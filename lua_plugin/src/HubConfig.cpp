@@ -64,8 +64,9 @@ void HubConfig::createMetaTable(lua_State * L) {
 
 
 int HubConfig::configTostring(lua_State * L) {
-	char buf[9] = { '\0' };
-	sprintf(buf, "%p", lua_touserdata(L, 1));
+	void * p = lua_touserdata(L, 1);
+	char buf[sizeof(p) + 1] = { '\0' };
+	sprintf(buf, "%p", p);
 	lua_pushfstring(L, "%s (%s)", lua_tostring(L, lua_upvalueindex(1)), buf);
 	return 1;
 }
