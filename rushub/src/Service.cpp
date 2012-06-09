@@ -198,7 +198,7 @@ int Service::cli(int argc, char * argv[], string & configFile) {
 	char *startName = NULL, *config = NULL, *installName = NULL;
 	string path;
 
-	for (size_t i = 1; i < argc; ++i) {
+	for (int i = 1; i < argc; ++i) {
 
 		int j = -1, id = 0;
 
