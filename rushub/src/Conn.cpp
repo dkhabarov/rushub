@@ -302,6 +302,7 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 		if (log(LEVEL_FATAL)) {
 			logStream() << "Error in socket: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 		}
+		freeaddrinfo(mAddrInfo);
 		return INVALID_SOCKET;
 	}
 
