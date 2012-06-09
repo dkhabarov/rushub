@@ -324,7 +324,7 @@ int Service::cli(int argc, char * argv[], string & configFile) {
 
 
 /// installService
-int Service::installService(char * name, const char * configFile) {
+int Service::installService(const char * name, const char * configFile) {
 
 	// Open SC Manager
 	SC_HANDLE manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
@@ -340,13 +340,11 @@ int Service::installService(char * name, const char * configFile) {
 	}
 
 	// Service name
-	if (!name) {
-		strcpy(name, "rushub");
-	}
+	string serviceName(name ? name : "rushub");
 
 	// Service path + name
 	string cmd;
-	cmd.append(STR_LEN("\"")).append(buf).append(STR_LEN("\" -s \"")).append(name).append(STR_LEN("\""));
+	cmd.append(STR_LEN("\"")).append(buf).append(STR_LEN("\" -s \"")).append(serviceName).append(STR_LEN("\""));
 
 	// Service config path
 	if (configFile) {
@@ -356,8 +354,8 @@ int Service::installService(char * name, const char * configFile) {
 	// Create service
 	SC_HANDLE service = ::CreateService(
 		manager,
-		name,
-		name,
+		serviceName.c_str(),
+		serviceName.c_str(),
 		SERVICE_CHANGE_CONFIG,
 		SERVICE_WIN32_OWN_PROCESS,
 		SERVICE_AUTO_START,
@@ -380,7 +378,7 @@ int Service::installService(char * name, const char * configFile) {
 	serviceDescription.lpDescription = "DC Server";
 	::ChangeServiceConfig2(service, SERVICE_CONFIG_DESCRIPTION, &serviceDescription);
 
-	cout << "Service '" << name << "' installed successfully" << endl;
+	cout << "Service '" << serviceName << "' installed successfully" << endl;
 
 	::CloseServiceHandle(service);
 	::CloseServiceHandle(manager);
@@ -390,7 +388,7 @@ int Service::installService(char * name, const char * configFile) {
 
 
 /// uninstallService
-int Service::uninstallService(char * name) {
+int Service::uninstallService(const char * name) {
 
 	// Open SC Manager
 	SC_HANDLE manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
@@ -401,12 +399,10 @@ int Service::uninstallService(char * name) {
 	}
 
 	// Service name
-	if (!name) {
-		strcpy(name, "rushub");
-	}
+	string serviceName(name ? name : "rushub");
 
 	// Open service
-	SC_HANDLE service = ::OpenService(manager, name, SERVICE_QUERY_STATUS | SERVICE_STOP | DELETE);
+	SC_HANDLE service = ::OpenService(manager, serviceName.c_str(), SERVICE_QUERY_STATUS | SERVICE_STOP | DELETE);
 
 	if (!service) {
 		cout << "Open service failed (" << GetLastError() << ")" << endl;
@@ -432,7 +428,7 @@ int Service::uninstallService(char * name) {
 		return -3;
 	}
 
-	cout << "Service '" << name << "' was deleted successfully" << endl;
+	cout << "Service '" << serviceName << "' was deleted successfully" << endl;
 
 	::CloseServiceHandle(service);
 	::CloseServiceHandle(manager);
@@ -441,7 +437,7 @@ int Service::uninstallService(char * name) {
 
 
 
-int Service::serviceStart(char * name) {
+int Service::serviceStart(const char * name) {
 
 	SC_HANDLE manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
 	if (!manager) {
@@ -450,11 +446,9 @@ int Service::serviceStart(char * name) {
 	}
 
 	// Service name
-	if (!name) {
-		strcpy(name, "rushub");
-	}
+	string serviceName(name ? name : "rushub");
 
-	SC_HANDLE service = ::OpenService(manager, name, SERVICE_START);
+	SC_HANDLE service = ::OpenService(manager, serviceName.c_str(), SERVICE_START);
 	if (!service) {
 		cout << "Open service failed (" << GetLastError() << ")" << endl;
 		::CloseServiceHandle(manager);
@@ -464,7 +458,7 @@ int Service::serviceStart(char * name) {
 	if (!::StartService(service, 0, NULL)) {
 		cout << "Cannot start service (" << GetLastError() << ")" << endl;
 	} else {
-		cout << "Service '" << name << "' was started successfully" << endl;
+		cout << "Service '" << serviceName << "' was started successfully" << endl;
 	}
 
 	::CloseServiceHandle(service);
@@ -474,7 +468,7 @@ int Service::serviceStart(char * name) {
 
 
 
-int Service::serviceStop(char * name) {
+int Service::serviceStop(const char * name) {
 
 	SC_HANDLE manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
 	if (!manager) {
@@ -483,11 +477,9 @@ int Service::serviceStop(char * name) {
 	}
 
 	// Service name
-	if (!name) {
-		strcpy(name, "rushub");
-	}
+	string serviceName(name ? name : "rushub");
 
-	SC_HANDLE service = ::OpenService(manager, name, SERVICE_STOP);
+	SC_HANDLE service = ::OpenService(manager, serviceName.c_str(), SERVICE_STOP);
 	if (!service) {
 		cout << "Open service failed (" << GetLastError() << ")" << endl;
 		::CloseServiceHandle(manager);
@@ -498,7 +490,7 @@ int Service::serviceStop(char * name) {
 	if (!::ControlService(service, SERVICE_CONTROL_STOP, &ss)) {
 		cout << "Cannot stop service (" << GetLastError() << ")" << endl;
 	} else {
-		cout << "Service '" << name << "' was stoped successfully" << endl;
+		cout << "Service '" << serviceName << "' was stoped successfully" << endl;
 	}
 
 	::CloseServiceHandle(service);

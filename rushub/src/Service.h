@@ -87,10 +87,10 @@ public:
 
 private:
 
-	static int installService(char * name = NULL, const char * configFile = NULL);
-	static int uninstallService(char * name = NULL);
-	static int serviceStop(char * name = NULL);
-	static int serviceStart(char * name = NULL);
+	static int installService(const char * name, const char * configFile = NULL);
+	static int uninstallService(const char * name);
+	static int serviceStop(const char * name);
+	static int serviceStart(const char * name);
 	static void printHelp();
 
 }; // Service
