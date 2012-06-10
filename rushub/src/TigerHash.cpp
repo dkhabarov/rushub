@@ -54,6 +54,7 @@ namespace dcserver {
 
 
 TigerHash::TigerHash() : pos(0) {
+	memset(&tmp, 0, sizeof(tmp));
 	res[0] = 0x0123456789ABCDEFull;
 	res[1] = 0xFEDCBA9876543210ull;
 	res[2] = 0xF096A5B4C3B2E187ull;
