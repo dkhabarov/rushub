@@ -47,7 +47,7 @@ public:
 
 public:
 
-	ProtocolCommand() {
+	ProtocolCommand() : mLength(0) {
 	}
 
 	ProtocolCommand(const char * key, size_t len) : mKey(key, len) {

@@ -122,6 +122,7 @@ int Time::operator == (const Time & t) const {
 Time & Time::operator = (const Time & t) {
 	tv_usec = t.tv_usec;
 	tv_sec = t.tv_sec;
+	mPrintType = t.mPrintType;
 	return *this;
 }
 

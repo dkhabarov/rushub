@@ -25,6 +25,8 @@
 #include "ConfigItem.h"
 #include "stringutils.h" // for stringToInt64
 
+#include <math.h>
+
 #ifndef _WIN32
 	#include <memory.h>
 #else

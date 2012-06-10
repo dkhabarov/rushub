@@ -64,7 +64,7 @@ const string & CallList::getName() const {
 
 
 CallList::ufCallOne::ufCallOne() :
-	mCallReturn(0)
+	mCallReturn(0), mCallList(NULL)
 {
 }
 
@@ -145,7 +145,7 @@ int CallList::callAll() {
 	mCallOne.mCallReturn = for_each (mPlugins.begin(), mPlugins.end(), mCallOne).mCallReturn;
 
 	// Check removed
-	if (removedPlugins.size()) {
+	if (removedPlugins.empty()) {
 		for (
 			RemovedPlugins_t::const_iterator 
 				it = removedPlugins.begin(),

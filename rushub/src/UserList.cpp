@@ -46,6 +46,7 @@ struct ufSend : public unary_function<void, UserList::iterator> {
 	}
 
 	const ufSend & operator = (const ufSend &) { // for_each
+		mAddSep = false;
 		return *this;
 	}
 
@@ -93,6 +94,7 @@ struct ufSendFeature : public unary_function<void, UserList::iterator> {
 	}
 
 	const ufSendFeature & operator = (const ufSendFeature &) { // for_each
+		mAddSep = false;
 		return *this;
 	}
 
@@ -127,6 +129,8 @@ struct ufSendProfile : public unary_function<void, UserList::iterator> {
 	}
 
 	const ufSendProfile & operator = (const ufSendProfile &) { // for_each
+		mProfile = 0;
+		mAddSep = false;
 		return *this;
 	}
 
@@ -188,6 +192,7 @@ struct ufSendChatProfile : public unary_function<void, UserList::iterator> {
 	}
 
 	const ufSendChatProfile & operator = (const ufSendChatProfile &) { // for_each
+		mProfile = 0;
 		return *this;
 	}
 
@@ -253,6 +258,7 @@ struct ufSendPmProfile : public unary_function<void, UserList::iterator> {
 	}
 
 	const ufSendPmProfile & operator = (const ufSendPmProfile &) { // for_each
+		mProfile = 0;
 		return *this;
 	}
 

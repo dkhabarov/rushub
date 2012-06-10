@@ -65,7 +65,7 @@ public:
 
 public:
 
-	WebUser(int type) : WebUserBase(type) {}
+	WebUser(int type) : WebUserBase(type), mWebConn(NULL) {}
 	virtual ~WebUser() {}
 
 	virtual const char * getCommand();

@@ -333,7 +333,7 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 
 		if (dcConn->mDcUser != NULL) {
 
-			Param * share = (Param *) dcConn->mDcUser->getParam(USER_PARAM_SHARE);
+			Param * share = static_cast<Param *> (dcConn->mDcUser->getParam(USER_PARAM_SHARE));
 			if (share != NULL) {
 				int64_t n = 0;
 				share->setInt64(n); // for remove from total share

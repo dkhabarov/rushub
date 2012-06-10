@@ -78,7 +78,7 @@ public:
 	virtual void forceMove(DcConn * dcConn, const char * address, const char * reason = NULL) = 0;
 	virtual int sendNickList(DcConn *) = 0;
 
-	static Parser * DcProtocol::parse(int protocolType, const string & cmd);
+	static Parser * parse(int protocolType, const string & cmd);
 
 	static bool parseInfo(int protocolType, DcUser *, const string & info);
 	static bool formingInfo(int protocolType, DcUser *, string & info);

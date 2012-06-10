@@ -106,7 +106,7 @@ public:
 	struct iterator {
 		ConnSelect * mSel; /** for operator [] */
 		tResList::iterator mIt; /** iterator for list */
-		iterator() {
+		iterator() : mSel(NULL) {
 		}
 		iterator(ConnSelect * sel, tResList::iterator it) : mSel(sel), mIt(it) {
 		}

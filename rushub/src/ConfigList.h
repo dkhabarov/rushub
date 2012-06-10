@@ -82,7 +82,7 @@ public:
 		ConfigListBase * mConfigListBase;
 		tVIt mIterator;
 
-		iterator() {
+		iterator() : mConfigListBase(NULL) {
 		}
 
 		iterator(ConfigListBase * configListBase, const tVIt & it) : 

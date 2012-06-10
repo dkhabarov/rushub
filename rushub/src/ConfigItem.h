@@ -115,9 +115,6 @@ protected:
 
 	bool mEmpty;
 
-	/** Buffer for conversion in string */
-	char mBuffer[32];
-
 protected:
 
 	/** Function returns address */

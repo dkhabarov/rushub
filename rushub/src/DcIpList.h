@@ -70,7 +70,7 @@ public:
 			mIpList = it.mIpList;
 			return *this;
 		}
-		iterator(const iterator & it) {
+		iterator(const iterator & it) : mIpList(NULL) {
 			(*this) = it;
 		}
 		inline bool operator == (const iterator & it) {

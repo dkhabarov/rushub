@@ -73,7 +73,7 @@ int64_t stringToInt64(const string & str) {
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
 		sscanf_s(str.c_str(), "%I64d", &result);
 	#else
-		sscanf(str.c_str(), "%I64d", &result);
+		sscanf(str.c_str(), "%20I64d", &result);
 	#endif
 	return result;
 #else
