@@ -316,7 +316,7 @@ bool DcServer::listeningServer(const char * name, const char * addresses, const 
 	vector<pair<string, string> > vAddresses;
 	getAddresses(addresses, vAddresses, defaultPort);
 
-	if (vAddresses.empty() == 0) {
+	if (vAddresses.empty()) {
 		if (log(LEVEL_FATAL)) {
 			logStream() << "Incorrect address of the " << name << endl;
 		}

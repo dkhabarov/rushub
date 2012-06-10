@@ -145,7 +145,7 @@ int CallList::callAll() {
 	mCallOne.mCallReturn = for_each (mPlugins.begin(), mPlugins.end(), mCallOne).mCallReturn;
 
 	// Check removed
-	if (removedPlugins.empty()) {
+	if (!removedPlugins.empty()) {
 		for (
 			RemovedPlugins_t::const_iterator 
 				it = removedPlugins.begin(),
