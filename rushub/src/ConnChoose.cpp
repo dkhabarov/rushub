@@ -55,7 +55,7 @@ bool ConnChoose::hasConn(ConnBase * connBase) {
 	return mConnBaseList.contain((tSocket) (*connBase));
 }
 
-}; // server
+} // namespace server
 
 /**
  * $Id$

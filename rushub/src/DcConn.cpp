@@ -368,7 +368,7 @@ int DcConnFactory::onNewConn(Conn * conn) {
 }
 
 
-}; // namespace dcserver
+} // namespace dcserver
 
 /**
  * $Id$

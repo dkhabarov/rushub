@@ -201,9 +201,9 @@ private:
 
 }; // class AdcParser
 
-}; // namespace protocol
+} // namespace protocol
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // ADC_PARSER_H
 

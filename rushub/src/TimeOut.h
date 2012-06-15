@@ -98,7 +98,7 @@ private:
 
 }; // class TimeOut
 
-}; // namespace utils
+} // namespace utils
 
 #endif // TIMEOUT_H
 

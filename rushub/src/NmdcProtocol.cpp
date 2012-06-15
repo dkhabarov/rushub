@@ -1487,9 +1487,9 @@ void NmdcProtocol::delFromHide(DcUser * dcUser) {
 }
 
 
-}; // namespace protocol
+} // namespace protocol
 
-}; // namespace dcserver
+} // namespace dcserver
 
 /**
  * $Id$

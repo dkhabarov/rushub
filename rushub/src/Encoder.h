@@ -49,7 +49,7 @@ private:
 
 }; // class Encoder
 
-}; // namespace utils
+} // namespace utils
 
 #endif // ENCODER_H
 

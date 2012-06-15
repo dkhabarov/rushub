@@ -17,6 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef ANY_H
+#define ANY_H
+
 namespace utils {
 
 /// Class Any
@@ -99,4 +102,11 @@ private:
 
 }; // class Any
 
-}; // namespace utils
+} // namespace utils
+
+#endif // ANY_H
+
+/**
+ * $Id$
+ * $HeadURL$
+ */

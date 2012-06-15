@@ -158,7 +158,7 @@ private:
 
 }; // class Obj
 
-}; // namespace utils
+} // namespace utils
 
 #endif // OBJ_H
 

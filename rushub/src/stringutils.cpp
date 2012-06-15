@@ -145,7 +145,7 @@ bool isUpperAlphaNum(char c) {
 }
 
 
-}; // namespace utils
+} // namespace utils
 
 /**
  * $Id$

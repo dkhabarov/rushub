@@ -210,7 +210,7 @@ ConnBase * ConnChoose::operator [] (tSocket sock) {
 	return mConnBaseList.find(sock);
 }
 
-}; // namespace server
+} // namespace server
 
 #endif // CONN_CHOOSE_H
 

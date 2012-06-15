@@ -429,7 +429,7 @@ int DcUser::onSetInfo(const string & old, const string & now) {
 }
 
 
-}; // namespace dcserver
+} // namespace dcserver
 
 /**
  * $Id$

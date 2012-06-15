@@ -199,7 +199,7 @@ size_t WebConn::send(const string & data, bool flush /* = true */) {
 }
 
 
-}; // namespace webserver
+} // namespace webserver
 
 /**
  * $Id$

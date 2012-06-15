@@ -172,7 +172,7 @@ template <class V> Array<V>::~Array() {
 		delete [] mData;
 		mData = NULL;
 	}
-};
+}
 
 /** Inserts not zero data in array. Returns NULL in the event of successful charting, 
     otherwise returns data, which were already contributed earlier in cell with this number */
@@ -622,7 +622,7 @@ private:
 template <class V>
 Hash<UINT_PTR> HashTable<V>::mHash;
 
-}; // namespace utils
+} // namespace utils
 
 #endif // HASH_TABLE_H
 

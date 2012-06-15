@@ -115,11 +115,11 @@ private:
 	int checkCommand(AdcParser *, DcConn *);
 	bool verifyCid(DcUser *);
 
-}; // AdcProtocol
+}; // class AdcProtocol
 
-}; // namespace protocol
+} // namespace protocol
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // ADC_PROTOCOL_H
 

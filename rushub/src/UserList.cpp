@@ -492,7 +492,7 @@ void UserList::addInCache(string & cache, const string & data, const char * sep,
 }
 
 
-}; // namespace dcserver
+} // namespace dcserver
 
 /**
  * $Id$

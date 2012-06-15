@@ -50,9 +50,9 @@ bool WebParser::splitChunks() {
 	return false;
 }
 
-}; // namespace protocol
+} // namespace protocol
 
-}; // namespace webserver
+} // namespace webserver
 
 /**
  * $Id$

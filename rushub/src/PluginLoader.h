@@ -104,9 +104,9 @@ protected:
 	/** log */
 	bool strLog();
 
-}; // PluginLoader
+}; // class PluginLoader
 
-}; // namespace plugin
+} // namespace plugin
 
 #endif // PLUGIN_LOADER_H
 

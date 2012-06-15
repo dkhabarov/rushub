@@ -38,7 +38,7 @@ using namespace ::configuration;
 
 namespace server {
 	class Server;
-}; // namespace server
+} // namespace server
 
 namespace dcserver {
 
@@ -137,7 +137,7 @@ private:
 	ConfigStore mConfigStore;
 	string mConfigPath;
 
-}; // DcConfig
+}; // class DcConfig
 
 
 
@@ -185,9 +185,9 @@ private:
 	ConfigLoader * mConfigLoader;
 	ConfigStore mConfigStore;
 
-}; // DcLang
+}; // class DcLang
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // DC_CONFIG_H
 

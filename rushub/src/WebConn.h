@@ -29,7 +29,7 @@ using namespace ::dcserver;
 
 namespace dcserver {
 	class DcServer;
-};
+}
 
 namespace webserver {
 
@@ -115,7 +115,7 @@ private:
 
 }; // class WebConn
 
-}; // namespace webserver
+} // namespace webserver
 
 #endif // WEB_CONN_H
 

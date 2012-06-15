@@ -770,9 +770,9 @@ bool AdcProtocol::verifyCid(DcUser * dcUser) {
 }
 
 
-}; // namespace protocol
+} // namespace protocol
 
-}; // namespace dcserver
+} // namespace dcserver
 
 /**
  * $Id$

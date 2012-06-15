@@ -68,7 +68,7 @@ public:
 	void printUsage(FILE * stream, int exitStatus);
 	void printVersion(FILE * stream, int exitStatus);
 
-}; // Cli
+}; // class Cli
 
 #endif // _WIN32
 

@@ -102,7 +102,7 @@ string & stringReplace(const string & str, const string & varname, string & dest
 }
 
 
-}; // namespace utils
+} // namespace utils
 
 #endif // STRING_UTILS_H
 

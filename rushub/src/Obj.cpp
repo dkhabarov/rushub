@@ -278,7 +278,7 @@ int Obj::sysLogLevel(int) {
 
 #endif
 
-}; // namespace utils
+} // namespace utils
 
 /**
  * $Id$

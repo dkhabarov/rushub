@@ -30,7 +30,7 @@ using namespace ::std;
 
 namespace server {
 	class Server;
-}; // namespace server
+} // namespace server
 
 
 /// Web Server namespace
@@ -92,9 +92,9 @@ private:
 }; // class WebProtocol
 
 
-}; // namespace protocol
+} // namespace protocol
 
-}; // namespace webserver
+} // namespace webserver
 
 #endif // WEB_PROTOCOL_H
 

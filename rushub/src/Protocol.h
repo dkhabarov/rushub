@@ -122,9 +122,9 @@ private:
 	unsigned int mMaxChunks; ///< Common (max) number of chunks (0 - resizeing)
 	unsigned long mStrMap; ///< Chunk already existed
 
-}; // Parser
+}; // class Parser
 
-}; // server
+} // namespace server
 
 #endif // PROTOCOL_H
 

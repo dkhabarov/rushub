@@ -93,7 +93,7 @@ private:
 	static int serviceStart(const char * name);
 	static void printHelp();
 
-}; // Service
+}; // class Service
 
 #endif // _WIN32
 

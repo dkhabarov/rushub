@@ -55,9 +55,9 @@ private:
 
 	int mFd; ///< epoll fd
 
-}; // ConnEpoll
+}; // class ConnEpoll
 
-}; // server
+} // namespace server
 
 #endif // USE_EPOLL
 

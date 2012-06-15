@@ -56,7 +56,7 @@ public:
 	void del(ConfigItem * configItem) { /** Removing config item */
 		delete configItem;
 	}
-}; // ConfigFactory
+}; // class ConfigFactory
 
 /** Base configuration class */
 class ConfigListBase : public Obj {
@@ -176,7 +176,7 @@ public:
 
 }; // class ConfigList
 
-}; // namespace configuration
+} // namespace configuration
 
 #endif // CONFIG_LIST_H
 

@@ -138,4 +138,9 @@ bool ZlibFilter::compressFull(const char * in, size_t inSize, string & out) {
 }
 
 
-}; // namespace utils
+} // namespace utils
+
+/**
+ * $Id$
+ * $HeadURL$
+ */

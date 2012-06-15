@@ -106,14 +106,14 @@ void ConfigItemP##SUFFIX::convertFrom(const string & str) { \
 
 
 
-CCONVERTFROMCHAR();
-CCONVERTFROMPCHAR();
-CCONVERTFROM(bool, Bool, ((str == "true") ? true : (0 != atoi(str.c_str()))));
-CCONVERTFROM(double, Double, atof(str.c_str()));
-CCONVERTFROM(int, Int, atoi(str.c_str()));
-CCONVERTFROM(unsigned int, UInt, atol(str.c_str()));
-CCONVERTFROM(int64_t, Int64, stringToInt64(str));
-CCONVERTFROM(string, String, str);
+CCONVERTFROMCHAR()
+CCONVERTFROMPCHAR()
+CCONVERTFROM(bool, Bool, ((str == "true") ? true : (0 != atoi(str.c_str()))))
+CCONVERTFROM(double, Double, atof(str.c_str()))
+CCONVERTFROM(int, Int, atoi(str.c_str()))
+CCONVERTFROM(unsigned int, UInt, atol(str.c_str()))
+CCONVERTFROM(int64_t, Int64, stringToInt64(str))
+CCONVERTFROM(string, String, str)
 
 /** Convert to string */
 void ConfigItemDouble::convertTo(string & str) {
@@ -182,20 +182,20 @@ istream & ConfigItem##SUFFIX::readFromStream(istream & is) { \
 
 
 
-READFROMSTREAMTOSTR(String);
-READFROMSTREAMTOSTR(PChar);
-READFROMSTREAMTOSTR(PString);
-READFROMSTREAM(Bool);
-READFROMSTREAM(Double);
-READFROMSTREAM(Int);
-READFROMSTREAM(UInt);
-READFROMSTREAM(Int64);
-READFROMSTREAM(Char);
-READFROMSTREAM(PBool);
-READFROMSTREAM(PDouble);
-READFROMSTREAM(PInt);
-READFROMSTREAM(PUInt);
-READFROMSTREAM(PInt64);
+READFROMSTREAMTOSTR(String)
+READFROMSTREAMTOSTR(PChar)
+READFROMSTREAMTOSTR(PString)
+READFROMSTREAM(Bool)
+READFROMSTREAM(Double)
+READFROMSTREAM(Int)
+READFROMSTREAM(UInt)
+READFROMSTREAM(Int64)
+READFROMSTREAM(Char)
+READFROMSTREAM(PBool)
+READFROMSTREAM(PDouble)
+READFROMSTREAM(PInt)
+READFROMSTREAM(PUInt)
+READFROMSTREAM(PInt64)
 
 
 
@@ -210,20 +210,20 @@ ostream & ConfigItem##SUFFIX::writeToStream(ostream & os) { \
 
 
 
-WRITETOSTREAM(Bool);
-WRITETOSTREAM(Double);
-WRITETOSTREAM(Int);
-WRITETOSTREAM(UInt);
-WRITETOSTREAM(Int64);
-WRITETOSTREAM(Char);
-WRITETOSTREAM(String);
-WRITETOSTREAM(PChar);
-WRITETOSTREAM(PBool);
-WRITETOSTREAM(PDouble);
-WRITETOSTREAM(PInt);
-WRITETOSTREAM(PUInt);
-WRITETOSTREAM(PInt64);
-WRITETOSTREAM(PString);
+WRITETOSTREAM(Bool)
+WRITETOSTREAM(Double)
+WRITETOSTREAM(Int)
+WRITETOSTREAM(UInt)
+WRITETOSTREAM(Int64)
+WRITETOSTREAM(Char)
+WRITETOSTREAM(String)
+WRITETOSTREAM(PChar)
+WRITETOSTREAM(PBool)
+WRITETOSTREAM(PDouble)
+WRITETOSTREAM(PInt)
+WRITETOSTREAM(PUInt)
+WRITETOSTREAM(PInt64)
+WRITETOSTREAM(PString)
 
 
 
@@ -236,23 +236,23 @@ WRITETOSTREAM(PString);
 #define ISNULLPDOUBLE() bool ConfigItemPDouble::isNull()   { return !this->data() || fabs(*(this->data()) - 0.) < 10e-7; }
 #define ISNULLPSTRING() bool ConfigItemPString::isNull()   { return !this->data() || !((*(this->data())).size()); }
 
-ISNULL(Bool);
-ISNULL(Int);
-ISNULL(UInt);
-ISNULL(Int64);
-ISNULL(Char);
-ISNULLPCHAR();
-ISNULLDOUBLE();
-ISNULLSTRING();
-ISNULLP(Bool);
-ISNULLP(Int);
-ISNULLP(UInt);
-ISNULLP(Int64);
-ISNULLPDOUBLE();
-ISNULLPSTRING();
+ISNULL(Bool)
+ISNULL(Int)
+ISNULL(UInt)
+ISNULL(Int64)
+ISNULL(Char)
+ISNULLPCHAR()
+ISNULLDOUBLE()
+ISNULLSTRING()
+ISNULLP(Bool)
+ISNULLP(Int)
+ISNULLP(UInt)
+ISNULLP(Int64)
+ISNULLPDOUBLE()
+ISNULLPSTRING()
 
 
-}; // namespace configuration
+} // namespace configuration
 
 /**
  * $Id$

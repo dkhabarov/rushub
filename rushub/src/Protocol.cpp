@@ -296,7 +296,7 @@ bool Parser::chunkRedLeft(unsigned int cn, size_t amount) {
 }
 
 
-};
+} // namespace server
 
 /**
  * $Id$

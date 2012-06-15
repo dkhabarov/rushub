@@ -43,7 +43,7 @@ namespace dcserver {
 
 	class DcServer;
 
-}; // namespace dcserver
+} // namespace dcserver
 
 
 
@@ -134,7 +134,7 @@ private:
 }; // class PluginList
 
 
-}; // namespace plugin
+} // namespace plugin
 
 #endif // PLUGIN_LIST_H
 

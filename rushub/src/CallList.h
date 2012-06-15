@@ -287,7 +287,7 @@ typedef CallListType2<DcUserBase *, int> CallListUserInt;
 typedef CallListType3<DcUserBase *, int, int> CallListUserIntInt;
 
 
-}; // namespace plugin
+} // namespace plugin
 
 #endif // CALL_LIST_H
 

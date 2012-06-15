@@ -155,7 +155,7 @@ public:
 
 }; // class ConnBase
 
-}; // namespace server
+} // namespace server
 
 #endif // CONN_BASE_H
 

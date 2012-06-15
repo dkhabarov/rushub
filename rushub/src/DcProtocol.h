@@ -47,7 +47,7 @@ enum {
 	STATE_IDENTIFY = STATE_VALNICK | STATE_VERSION | STATE_INFO | STATE_NICKLST, ///< Identify user state
 	STATE_VERIFY   = 1 << 5, ///< Password was right or password was not need (NMDC $MyPass, ADC PAS)
 	STATE_NORMAL   = STATE_PROTOCOL | STATE_IDENTIFY | STATE_VERIFY, ///< Normal state - action is valid
-	STATE_DATA     = 1 << 6, ///< For binary transfers (ADC)
+	STATE_DATA     = 1 << 6  ///< For binary transfers (ADC)
 
 };
 
@@ -99,11 +99,11 @@ protected:
 	const string & getFirstMsg(bool & flush);
 	bool checkState(DcConn *, const char * cmd, unsigned int state);
 
-}; // DcProtocol
+}; // class DcProtocol
 
-}; // namespace protocol
+} // namespace protocol
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // DC_PROTOCOL_H
 

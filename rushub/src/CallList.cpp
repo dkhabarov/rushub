@@ -162,7 +162,7 @@ int CallList::callAll() {
 }
 
 
-}; // namespace plugin
+} // namespace plugin
 
 /**
  * $Id$

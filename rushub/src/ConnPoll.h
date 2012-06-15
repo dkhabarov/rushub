@@ -86,9 +86,9 @@ private:
 
 	tFDArray mvFD;
 
-}; // ConnPoll
+}; // class ConnPoll
 
-}; // server
+} // namespace server
 
 #endif // _WIN32
 

@@ -186,9 +186,9 @@ private:
 	/// Add simple connection
 	Conn * addSimpleConn(int connType, const char * ip, const char * port);
 
-}; // Server
+}; // class Server
 
-}; // server
+} // server namespace
 
 #endif // SERVER_H
 

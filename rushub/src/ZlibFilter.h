@@ -56,6 +56,11 @@ private:
 
 }; // class ZlibFilter
 
-}; // namespace utils
+} // namespace utils
 
 #endif // ZLIB_FILTER_H
+
+/**
+ * $Id$
+ * $HeadURL$
+ */

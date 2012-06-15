@@ -144,7 +144,7 @@ bool DcIpList::checkProfile(DcConn * dcConn, unsigned long profile) {
 }
 
 
-}; // namespace dcserver
+} // namespace dcserver
 
 /**
  * $Id$

@@ -136,7 +136,7 @@ bool ConnEpoll::revTest(tSocket sock) {
 }
 
 
-}; // server
+} // namespace server
 
 #endif // USE_EPOLL
 

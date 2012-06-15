@@ -209,7 +209,7 @@ void ConnSelect::setRevents(SelectFd & fdset, unsigned mask) {
 }
 
 
-}; // server
+} // namespace server
 
 #endif // USE_SELECT
 

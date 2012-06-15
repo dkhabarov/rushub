@@ -187,10 +187,10 @@ private:
 
 	static void addInCache(string & cache, const string & data, const char * sep, size_t sepLen, bool addSep = true);
 
-}; // UserList
+}; // class UserList
 
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // USER_LIST_H
 

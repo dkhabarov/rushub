@@ -92,7 +92,7 @@ void ConfigListBase::setBaseTo(void * new_base) {
 }
 
 
-}; // namespace configuration
+} // namespace configuration
 
 /**
  * $Id$

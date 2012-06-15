@@ -394,7 +394,7 @@ private:
 }; // class DcServer
 
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // DC_SERVER_H
 

@@ -688,7 +688,7 @@ uint64_t TigerHash::table[1024] = {
 }; // table
 
 
-}; // namespace dcserver
+} // namespace dcserver
 
 /**
  * $Id$

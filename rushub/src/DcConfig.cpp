@@ -522,7 +522,7 @@ int DcLang::reload() {
 }
 
 
-}; // namespace dcserver
+} // namespace dcserver
 
 /**
  * $Id$

@@ -148,10 +148,10 @@ private:
 	set<string> mInfoNames;
 	set<int> mFeatures;
 
-}; // DcUser
+}; // class DcUser
 
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // DC_USER_H
 

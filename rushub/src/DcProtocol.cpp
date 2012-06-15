@@ -183,9 +183,9 @@ bool DcProtocol::checkState(DcConn * dcConn, const char * cmd, unsigned int stat
 }
 
 
-}; // namespace protocol
+} // namespace protocol
 
-}; // namespace dcserver
+} // namespace dcserver
 
 /**
  * $Id$

@@ -110,7 +110,7 @@ private:
 
 }; // class DcIpList
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // DC_IP_LIST_H
 

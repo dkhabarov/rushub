@@ -293,7 +293,7 @@ void PluginList::onPluginLoad(Plugin * plugin) {
 }
 
 
-}; // namespace plugin
+} // namespace plugin
 
 /**
  * $Id$

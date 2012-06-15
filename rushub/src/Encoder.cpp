@@ -112,7 +112,7 @@ bool Encoder::isBase32(const char* src) {
 	return true;
 }
 
-}; // namespace utils
+} // namespace utils
 
 /**
  * $Id$

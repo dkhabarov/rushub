@@ -179,7 +179,7 @@ bool ConnPoll::revTest(tSocket sock) {
 }
 
 
-}; // server
+} // namespace server
 
 #endif // _WIN32
 

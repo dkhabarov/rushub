@@ -1214,7 +1214,7 @@ int ConnFactory::onNewConn(Conn * conn) {
 }
 
 
-}; // server
+} // namespace server
 
 /**
  * $Id$

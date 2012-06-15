@@ -44,7 +44,7 @@
 
 namespace plugin {
 	class Plugin;
-};
+}
 
 using ::plugin::Plugin;
 using namespace ::std;
@@ -121,7 +121,7 @@ namespace dcserver {
 
 enum ClientType {
 	CLIENT_TYPE_DC = 1000,
-	CLIENT_TYPE_WEB = 1001,
+	CLIENT_TYPE_WEB = 1001
 }; // enum ClientType
 
 
@@ -485,7 +485,7 @@ template<class F, class T> T & convert(const F & from, T & to, const T & def) {
     return to;
 }
 
-}; // namespace dcserver
+} // namespace dcserver
 
 
 
@@ -525,7 +525,7 @@ private:
 }; // class WebUserBase
 
 
-}; // namespace webserver
+} // namespace webserver
 
 
 
@@ -706,7 +706,7 @@ private:
 
 }; // class Plugin
 
-}; // namespace plugin
+} // namespace plugin
 
 #endif // PLUGIN_H
 

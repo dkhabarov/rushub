@@ -1723,7 +1723,7 @@ bool DcServer::setCapabilities() {
 }
 
 
-}; // namespace dcserver
+} // namespace dcserver
 
 /**
  * $Id$

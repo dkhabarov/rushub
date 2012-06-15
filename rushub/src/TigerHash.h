@@ -70,9 +70,9 @@ private:
 
 	void tigerCompress(const uint64_t * data, uint64_t state[3]) const;
 
-};
+}; // class TigerHash
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // TIGER_HASH_H
 

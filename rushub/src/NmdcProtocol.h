@@ -154,11 +154,11 @@ private:
 	bool validateUser(DcConn *, const string & nick);
 	bool checkNickLength(DcConn *, size_t len);
 
-}; // NmdcProtocol
+}; // class NmdcProtocol
 
-}; // namespace protocol
+} // namespace protocol
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // NMDC_PROTOCOL_H
 

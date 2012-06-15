@@ -217,7 +217,7 @@ bool Dir::checkPath(string & path) {
 	return true;
 }
 
-}; // namespace utils
+} // namespace utils
 
 /**
  * $Id$

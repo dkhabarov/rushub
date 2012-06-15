@@ -46,7 +46,7 @@ enum SupportFeature {
 	SUPPORT_FEATUER_ZPIPE       = 1 << 4, ///< ZPipe0 or ZPipe feature
 	SUPPORT_FEATUER_QUICKLIST   = 1 << 5, ///< Quicklist feature
 	SUPPORT_FEATUER_PASSIVE     = 1 << 6, ///< Passive mode feature
-	SUPPORT_FEATUER_USERIP      = 1 << 7, ///< UserIP feature
+	SUPPORT_FEATUER_USERIP      = 1 << 7  ///< UserIP feature
 
 }; // enum SupportFeature
 
@@ -99,7 +99,7 @@ class DcServer; // server()
 
 namespace protocol {
 	class DcProtocol;
-};
+}
 
 
 
@@ -226,7 +226,7 @@ private:
 
 }; // class DcConn
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // DC_CONN_H
 

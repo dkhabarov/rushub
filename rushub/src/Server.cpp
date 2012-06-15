@@ -677,7 +677,7 @@ int Server::onTimer(Time &) {
 }
 
 
-}; // server
+} // namespace server
 
 /**
  * $Id$

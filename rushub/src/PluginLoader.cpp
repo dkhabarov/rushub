@@ -42,6 +42,17 @@ namespace plugin {
 
 
 
+template <typename T, typename F> T nasty_cast(F f) {
+	union {
+		F f;
+		T t;
+	} u;
+	u.f = f;
+	return u.t;
+}
+
+
+
 PluginLoader::PluginLoader(const string & filePath) :
 	Obj("PluginLoader"),
 	mPlugin(NULL),
@@ -123,11 +134,11 @@ bool PluginLoader::close() {
 bool PluginLoader::loadSym() {
 
 	if (!mGetPluginFunc) {
-		mGetPluginFunc = tGetPluginFunc(loadSym("get_plugin"));
+		mGetPluginFunc = nasty_cast<tGetPluginFunc> (loadSym("get_plugin"));
 	}
 
 	if (!mDelPluginFunc) {
-		mDelPluginFunc = tDelPluginFunc(loadSym("del_plugin"));
+		mDelPluginFunc = nasty_cast<tDelPluginFunc> (loadSym("del_plugin"));
 	}
 
 	if (!mGetPluginFunc || !mDelPluginFunc || ((mPlugin = mGetPluginFunc()) == NULL)) {
@@ -168,7 +179,7 @@ bool PluginLoader::strLog() {
 }
 
 
-}; // namespace plugin
+} // namespace plugin
 
 /**
  * $Id$

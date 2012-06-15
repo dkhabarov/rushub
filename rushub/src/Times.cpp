@@ -411,7 +411,7 @@ Time & Time::normalize() {
 }
 
 
-}; // namespace utils
+} // namespace utils
 
 /**
  * $Id$

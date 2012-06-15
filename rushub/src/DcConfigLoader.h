@@ -53,7 +53,7 @@ public:
 }; // class DcConfigLoader
 
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // DC_CONFIG_LOADER_H
 

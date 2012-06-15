@@ -326,7 +326,7 @@ private:
 
 }; // class Conn
 
-}; // namespace server
+} // namespace server
 
 #endif // CONN_H
 

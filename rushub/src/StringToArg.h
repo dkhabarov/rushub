@@ -42,9 +42,9 @@ public:
 		return String2Arg(str.c_str(), argc, argv);
 	}
 
-}; // StringToArg
+}; // class StringToArg
 
-}; // namespace utils
+} // namespace utils
 
 #endif // _WIN32
 

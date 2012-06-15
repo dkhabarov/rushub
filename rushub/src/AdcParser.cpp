@@ -480,9 +480,9 @@ void AdcParser::formingInfo(DcUser * dcUser, string & info) {
 }
 
 
-}; // namespace protocol
+} // namespace protocol
 
-}; // namespace dcserver
+} // namespace dcserver
 
 /**
  * $Id$

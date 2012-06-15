@@ -55,9 +55,9 @@ public:
 	/// Private Message
 	virtual void sendToPm(const string & data, const string & uid, const string & from, bool flush = true) = 0;
 
-}; // UserBase
+}; // class UserBase
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // USER_BASE_H
 

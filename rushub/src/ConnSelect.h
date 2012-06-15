@@ -177,9 +177,9 @@ protected:
 	SelectFd mResWriteFS;
 	SelectFd mResExceptFS;
 
-}; // ConnSelect
+}; // class ConnSelect
 
-}; // server
+} // namespace server
 
 #endif // USE_SELECT
 

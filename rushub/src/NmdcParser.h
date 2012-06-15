@@ -63,7 +63,7 @@ typedef enum { /** Types of the commands */
 	NMDC_TYPE_MCTO,           ///< 22 = $MCTo
 	NMDC_TYPE_USERIP,         ///< 23 = $UserIP
 	NMDC_TYPE_PING,           ///< 24 = |
-	NMDC_TYPE_UNKNOWN,        ///< 25 = $Unknown
+	NMDC_TYPE_UNKNOWN         ///< 25 = $Unknown
 } NmdcType;
 
 
@@ -92,7 +92,7 @@ enum {
 */
 enum {
 	CHUNK_CH_NICK = 1,
-	CHUNK_CH_MSG,
+	CHUNK_CH_MSG
 };
 
 /** A number of the chunks for the $GetINFO command
@@ -100,7 +100,7 @@ enum {
 */
 enum {
 	CHUNK_GI_OTHER = 1,
-	CHUNK_GI_NICK,
+	CHUNK_GI_NICK
 };
 
 /** A number of the chunks for the $RevConnectToMe command
@@ -108,7 +108,7 @@ enum {
 */
 enum {
 	CHUNK_RC_NICK = 1,
-	CHUNK_RC_OTHER,
+	CHUNK_RC_OTHER
 };
 
 /** A number of the chunks for the private message
@@ -119,7 +119,7 @@ enum {
 	CHUNK_PM_FROM,
 	CHUNK_PM_CHMSG,
 	CHUNK_PM_NICK,
-	CHUNK_PM_MSG,
+	CHUNK_PM_MSG
 };
 
 /** A number of the chunks for the $MyINFO command
@@ -132,7 +132,7 @@ enum {
 	CHUNK_MI_DESC,
 	CHUNK_MI_SPEED,
 	CHUNK_MI_MAIL,
-	CHUNK_MI_SIZE,
+	CHUNK_MI_SIZE
 };
 
 /** A number of the chunks for the $ConnectToMe command
@@ -142,7 +142,7 @@ enum {
 	CHUNK_CM_NICK = 1,
 	CHUNK_CM_ACTIVE,
 	CHUNK_CM_IP,
-	CHUNK_CM_PORT,
+	CHUNK_CM_PORT
 };
 
 /** A number of the chunks for the $OpForceMove command
@@ -151,7 +151,7 @@ enum {
 enum {
 	CHUNK_FM_NICK = 1,
 	CHUNK_FM_DEST,
-	CHUNK_FM_REASON,
+	CHUNK_FM_REASON
 };
 
 /** A number of the chunks for the active search command
@@ -163,7 +163,7 @@ enum {
 	CHUNK_AS_PORT,
 	CHUNK_AS_QUERY,
 	CHUNK_AS_SEARCHLIMITS,
-	CHUNK_AS_SEARCHPATTERN,
+	CHUNK_AS_SEARCHPATTERN
 };
 
 /** A number of the chunks for the passive search command
@@ -173,7 +173,7 @@ enum {
 	CHUNK_PS_NICK = 1,
 	CHUNK_PS_QUERY,
 	CHUNK_PS_SEARCHLIMITS,
-	CHUNK_PS_SEARCHPATTERN,
+	CHUNK_PS_SEARCHPATTERN
 };
 
 /** A number of the chunks for the search results command
@@ -187,7 +187,7 @@ enum {
 	CHUNK_SR_SL_FR,
 	CHUNK_SR_SL_TO,
 	CHUNK_SR_HUBINFO,
-	CHUNK_SR_TO,
+	CHUNK_SR_TO
 };
 
 /** A number of the chunks for the private message
@@ -196,10 +196,10 @@ enum {
 enum {
 	CHUNK_MC_TO = 1,
 	CHUNK_MC_FROM,
-	CHUNK_MC_MSG,
+	CHUNK_MC_MSG
 };
 
-}; // namespace protoenums
+} // namespace protoenums
 
 class DcUser;
 
@@ -245,9 +245,9 @@ private:
 
 }; // class NmdcParser
 
-}; // namespace protocol
+} // namespace protocol
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // NMDC_PARSER_H
 
