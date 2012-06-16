@@ -392,7 +392,7 @@ int DcServer::listening() {
 int DcServer::onTimer(Time & now) {
 
 	// Execute each second
-	if ((int64_t) (now - mChecker) >= mTimerServPeriod) {
+	if (static_cast<int64_t> (now - mChecker) >= mTimerServPeriod) {
 
 		mChecker = now;
 

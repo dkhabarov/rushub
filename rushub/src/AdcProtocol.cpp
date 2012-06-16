@@ -758,7 +758,7 @@ bool AdcProtocol::verifyCid(DcUser * dcUser) {
 	Encoder::fromBase32(paramPd->getString().c_str(), pid, sizeof(pid));
 
 	TigerHash th;
-	th.update((uint8_t *) pid, sizeof(pid));
+	th.update(static_cast<uint8_t *> (pid), sizeof(pid));
 
 	string cid;
 	Encoder::toBase32(th.finalize(), TigerHash::BYTES, cid);

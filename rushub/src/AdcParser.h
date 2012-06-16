@@ -163,8 +163,8 @@ public:
 	const string & getSidSource() const;
 	const string & getSidTarget() const;
 	const string & getCidSource() const;
-	const vector<int> & getPositiveFeatures() const;
-	const vector<int> & getNegativeFeatures() const;
+	const vector<unsigned int> & getPositiveFeatures() const;
+	const vector<unsigned int> & getNegativeFeatures() const;
 	
 	/// Do parse for command and return type of this command
 	virtual int parse();
@@ -187,8 +187,8 @@ private:
 	size_t mBodyPos;
 	bool mError;
 
-	vector<int> mPositiveFeature;
-	vector<int> mNegativeFeature;
+	vector<unsigned int> mPositiveFeature;
+	vector<unsigned int> mNegativeFeature;
 
 private:
 

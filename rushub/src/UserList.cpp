@@ -58,11 +58,11 @@ struct ufSend : public unary_function<void, UserList::iterator> {
 struct ufSendFeature : public unary_function<void, UserList::iterator> {
 	const string & mData; /** Data for sending */
 	bool mAddSep;
-	const vector<int> & mPositive;
-	const vector<int> & mNegative;
+	const vector<unsigned int> & mPositive;
+	const vector<unsigned int> & mNegative;
 
 	ufSendFeature(const string & data, bool addSep,
-		const vector<int> & positive, const vector<int> & negative) : 
+		const vector<unsigned int> & positive, const vector<unsigned int> & negative) : 
 		mData(data),
 		mAddSep(addSep),
 		mPositive(positive),
@@ -364,8 +364,8 @@ void UserList::sendToAllAdc(const string & data, bool addSep, bool flush) {
 
 
 
-void UserList::sendToFeature(const string & data, const vector<int> & positive, 
-		const vector<int> & negative, bool addSep) {
+void UserList::sendToFeature(const string & data, const vector<unsigned int> & positive, 
+		const vector<unsigned int> & negative, bool addSep) {
 
 	if (log(LEVEL_TRACE)) {
 		logStream() << "sendToFeature begin" << endl;

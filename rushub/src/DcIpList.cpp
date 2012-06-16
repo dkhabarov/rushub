@@ -50,9 +50,9 @@ bool DcIpList::add(DcConn * dcConn) {
 	unsigned long hash = mHash(dcConn->getIp());
 	IpList * ipList = IpTable::find(hash);
 	if (ipList == NULL) {
-		IpTable::add(hash, new IpList((tSocket)(*dcConn), dcConn));
+		IpTable::add(hash, new IpList(static_cast<tSocket> (*dcConn), dcConn));
 	} else {
-		ipList->add((tSocket)(*dcConn), dcConn);
+		ipList->add(static_cast<tSocket> (*dcConn), dcConn);
 	}
 	return true;
 }
@@ -66,7 +66,7 @@ bool DcIpList::remove(DcConn * dcConn) {
 		return false;
 	}
 	ipList = ipLists;
-	Conn * conn = ipLists->remove((tSocket)(*dcConn), ipList);
+	Conn * conn = ipLists->remove(static_cast<tSocket> (*dcConn), ipList);
 	if (ipList != ipLists) {
 		if (ipList) {
 			IpTable::update(hash, ipList);

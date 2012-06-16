@@ -46,8 +46,8 @@ bool ZlibFilter::compress(const char * in, size_t & inSize, char * out, size_t &
 		return false;
 	}
 
-	mStream.next_in = (Bytef *) (in);
-	mStream.next_out = (Bytef *) (out);
+	mStream.next_in = const_cast<Bytef *> (reinterpret_cast<const Bytef *> (in));
+	mStream.next_out = reinterpret_cast<Bytef *> (out);
 
 	// Check if there's any use compressing; if not, save some cpu...
 	if (mCompressing &&
@@ -96,9 +96,9 @@ bool ZlibFilter::compressFull(const char * in, size_t & inSize, char * out, size
 	memset(&stream, 0 , sizeof (stream));
 	deflateInit(&stream, Z_BEST_COMPRESSION);
 
-	stream.next_in = (Bytef *) (in);
+	stream.next_in = const_cast<Bytef *> (reinterpret_cast<const Bytef *> (in));
 	stream.avail_in = inSize;
-	stream.next_out = (Bytef *) (out);
+	stream.next_out = reinterpret_cast<Bytef *> (out);
 	stream.avail_out = outSize;
 
 	int err = ::deflate(&stream, Z_FINISH);

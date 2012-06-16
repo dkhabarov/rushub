@@ -139,10 +139,10 @@ protected:
 protected:
 
 	/// Set and Listen port
-	virtual Conn * listening(ConnFactory *, const char * ip, const char * port = 0, bool udp = false);
+	Conn * listening(ConnFactory *, const char * ip, const char * port = 0, bool udp = false);
 
 	/// Set and Connect to port
-	virtual Conn * connecting(ConnFactory *, const char * ip, const char * port = 0, bool udp = false);
+	Conn * connecting(ConnFactory *, const char * ip, const char * port = 0, bool udp = false);
 
 	/// addConnection
 	int addConnection(Conn *);

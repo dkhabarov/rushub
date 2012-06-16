@@ -130,7 +130,7 @@ void DcUser::disconnect() {
 
 
 
-bool DcUser::hasFeature(int feature) const {
+bool DcUser::hasFeature(unsigned int feature) const {
 	return mFeatures.find(feature) != mFeatures.end();
 }
 

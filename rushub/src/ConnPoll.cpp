@@ -45,7 +45,7 @@ bool ConnPoll::addConn(ConnBase * connBase) {
 	if (!ConnChoose::addConn(connBase)) {
 		return false;
 	}
-	if (mMaxSocket >= (tSocket)mvFD.size()) {
+	if (mMaxSocket >= static_cast<tSocket> (mvFD.size())) {
 		mvFD.resize(mMaxSocket + (mMaxSocket >> 1));
 	}
 	return true;

@@ -44,7 +44,7 @@ public:
 	~TigerHash();
 
 	/** Get result */
-	uint8_t * getResult() const;
+	const uint8_t * getResult() const;
 
 	/** Calculates the Tiger hash of the data */
 	void update(const void * data, size_t len);

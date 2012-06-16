@@ -90,7 +90,7 @@ public:
 	bool unreg(Plugin *);
 
 	/** Call all plugins */
-	virtual int callAll();
+	int callAll();
 
 	/** Call one plugin */
 	virtual int callOne(Plugin *) = 0;

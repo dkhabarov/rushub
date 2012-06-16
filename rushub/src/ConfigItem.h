@@ -77,13 +77,13 @@ public:
 
 	/** Operator of the apropriation data */
 	template <class T> ConfigItem & operator = (const T & i) {
-		*(T *)address() = i;
+		*(static_cast<T *> (address())) = i;
 		return *this;
 	}
 
 	/** Operator of the transformation type */
 	template <class T> operator T() {
-		return *(T *)mAddress;
+		return *(static_cast<T *> (mAddress));
 	}
 
 	friend istream & operator >> (istream &, ConfigItem &);
@@ -130,11 +130,11 @@ protected:
 #define CONFIGBASEITEM(TYPE, TYPE_ID, SUFFIX) \
 class ConfigItem##SUFFIX : public ConfigItem { \
 public: \
-	ConfigItem##SUFFIX(TYPE & var) : ConfigItem((void *) & var) {} \
-	ConfigItem##SUFFIX(TYPE & var, string const & name) : ConfigItem((void *) & var) { this->mName = name; } \
+	ConfigItem##SUFFIX(TYPE & var) : ConfigItem(static_cast<void *> (& var)) {} \
+	ConfigItem##SUFFIX(TYPE & var, string const & name) : ConfigItem(static_cast<void *> (& var)) { this->mName = name; } \
 	virtual ~ConfigItem##SUFFIX() {} \
-	virtual ConfigItem##SUFFIX & operator = (TYPE const & i) { *(TYPE *)address() = i; return *this; } /** Operator of the apropriation */ \
-	virtual TYPE & data() { return *(TYPE *)mAddress; } /** Returns data */ \
+	virtual ConfigItem##SUFFIX & operator = (TYPE const & i) { *(static_cast<TYPE *> (address())) = i; return *this; } /** Operator of the apropriation */ \
+	virtual TYPE & data() { return *(static_cast<TYPE *> (mAddress)); } /** Returns data */ \
 	virtual istream & readFromStream(istream & is); /** Read from stream */ \
 	virtual ostream & writeToStream(ostream & os); /** Write to stream */ \
 	virtual ItemType getTypeId() { return TYPE_ID; } /** Function of the return the identifier */ \

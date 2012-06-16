@@ -67,16 +67,16 @@ TigerHash::~TigerHash() {
 
 
 
-uint8_t * TigerHash::getResult() const {
-	return (uint8_t*) res;
+const uint8_t * TigerHash::getResult() const {
+	return reinterpret_cast<const uint8_t *> (res);
 }
 
 
 
 /** Calculates the Tiger hash of the data */
 void TigerHash::update(const void * data, size_t length) {
-	size_t _pos = (size_t) (pos & (BLOCK_SIZE - 1));
-	const uint8_t * str = (const uint8_t *) data;
+	size_t _pos = static_cast<size_t> (pos & (BLOCK_SIZE - 1));
+	const uint8_t * str = static_cast<const uint8_t *> (data);
 	// First empty tmp buffer if possible
 	if (_pos > 0) {
 		size_t n = min(length, BLOCK_SIZE - _pos);
@@ -85,7 +85,7 @@ void TigerHash::update(const void * data, size_t length) {
 		pos += n;
 		length -= n;
 		if ((_pos + n) == BLOCK_SIZE) {
-			tigerCompress((uint64_t *) tmp, res);
+			tigerCompress(reinterpret_cast<const uint64_t *> (tmp), res);
 			_pos = 0;
 		}
 	}
@@ -95,7 +95,7 @@ void TigerHash::update(const void * data, size_t length) {
 
 	// Process the bulk of data
 	while (length >= BLOCK_SIZE) {
-		tigerCompress((uint64_t *) str, res);
+		tigerCompress(reinterpret_cast<const uint64_t *> (str), res);
 		str += BLOCK_SIZE;
 		pos += BLOCK_SIZE;
 		length -= BLOCK_SIZE;
@@ -110,21 +110,21 @@ void TigerHash::update(const void * data, size_t length) {
 
 /** Call once all data has been processed */
 uint8_t * TigerHash::finalize() {
-	size_t _pos = (size_t) (pos & (BLOCK_SIZE - 1));
+	size_t _pos = static_cast<size_t> (pos & (BLOCK_SIZE - 1));
 	// Tmp buffer always has at least one pos, otherwise it would have
 	// been processed in update()
 
 	tmp[_pos++] = 0x01;
 	if(_pos > (BLOCK_SIZE - sizeof(uint64_t))) {
 		memset(tmp + _pos, 0, BLOCK_SIZE - _pos);
-		tigerCompress((uint64_t *) tmp, res);
+		tigerCompress(reinterpret_cast<const uint64_t *> (tmp), res);
 		memset(tmp, 0, BLOCK_SIZE);
 	} else {
 		memset(tmp + _pos, 0, BLOCK_SIZE - _pos - sizeof(uint64_t));
 	}
-	((uint64_t *) (&(tmp[56])))[0] = pos << 3;
-	tigerCompress((uint64_t *) tmp, res);
-	return (uint8_t *) res;
+	(reinterpret_cast<uint64_t *> (&(tmp[56])))[0] = pos << 3;
+	tigerCompress(reinterpret_cast<const uint64_t *> (tmp), res);
+	return reinterpret_cast<uint8_t *> (res);
 }
 
 

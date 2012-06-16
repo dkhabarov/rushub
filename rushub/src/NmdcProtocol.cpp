@@ -1334,8 +1334,8 @@ bool NmdcProtocol::checkNickLength(DcConn * dcConn, size_t len) {
 				<< mDcServer->mDcConfig.mMaxNickLen << "]" << endl;
 		}
 
-		stringReplace(mDcServer->mDcLang.mBadNickLen, string(STR_LEN("min")), msg, (int) mDcServer->mDcConfig.mMinNickLen);
-		stringReplace(msg, string(STR_LEN("max")), msg, (int) mDcServer->mDcConfig.mMaxNickLen);
+		stringReplace(mDcServer->mDcLang.mBadNickLen, string(STR_LEN("min")), msg, static_cast<int> (mDcServer->mDcConfig.mMinNickLen));
+		stringReplace(msg, string(STR_LEN("max")), msg, static_cast<int> (mDcServer->mDcConfig.mMaxNickLen));
 
 		mDcServer->sendToUser(dcConn->mDcUser, msg, mDcServer->mDcConfig.mHubBot.c_str());
 

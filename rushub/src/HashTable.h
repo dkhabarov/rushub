@@ -102,7 +102,7 @@ public:
 		size_t i;
 		size_t end;
 
-		iterator() : mData((V *) NULL), i(0), end(0) {
+		iterator() : mData(static_cast<V *> (NULL)), i(0), end(0) {
 		}
 
 		iterator(V * Data, size_t _i, size_t _end) : mData(Data), i(_i), end(_end) {
@@ -128,7 +128,7 @@ public:
 		}
 
 		iterator & operator ++() {
-			while (++i != end && mData[i] == (V)NULL) {
+			while (++i != end && mData[i] == static_cast<V> (NULL)) {
 			}
 			return *this;
 		}
@@ -148,7 +148,7 @@ public:
 	/** Initial iterator */
 	iterator begin() {
 		iterator begin_it(mData, 0, mCapacity);
-		if (mData[0] == (V)NULL) {
+		if (mData[0] == static_cast<V> (NULL)) {
 			++begin_it;
 		}
 		return begin_it;
@@ -195,7 +195,7 @@ template <class V> V Array<V>::update(size_t num, const V data) {
 		mData[num] = data;
 		return oldData;
 	}
-	return (V) NULL;
+	return static_cast<V> (NULL);
 }
 
 /** Deletes not zero data from specified cells of the array. 
@@ -204,7 +204,7 @@ template <class V> V Array<V>::remove(size_t num) {
 	num %= mCapacity;
 	V oldData = mData[num];
 	if (oldData) {
-		mData[num] = (V)NULL;
+		mData[num] = static_cast<V> (NULL);
 		--mSize;
 	}
 	return oldData;
@@ -230,7 +230,7 @@ public:
 public:
 
 	/** Constructor */
-	List(K key = (K)NULL, V data = (V)NULL, List * next = NULL) :
+	List(K key = static_cast<K> (NULL), V data = static_cast<V> (NULL), List * next = NULL) :
 		mKey(key), mData(data), mNext(next)
 	{
 	}
@@ -302,7 +302,7 @@ public:
 			mNext = NULL;
 			return mData;
 		}
-		V data = (V)NULL;
+		V data = static_cast<V> (NULL);
 		List *it = mNext, *prev = this;
 
 		while ((it != NULL) && (it->mKey != key)) {
@@ -331,7 +331,7 @@ public:
 		if (it != NULL) {
 			return it->mData; /** Have found and return */
 		}
-		return (V)NULL; /** Nothing have not found */
+		return static_cast<V> (NULL); /** Nothing have not found */
 	}
 }; // List
 
@@ -397,7 +397,7 @@ public:
 	/** Adds not zero data and key.
 	Returns true if successful accompaniment data and key (key is unique) */
 	bool add(const Key & key, V data) {
-		if (data == (V)NULL) {
+		if (data == static_cast<V> (NULL)) {
 			return false; /** No data */
 		}
 		size_t hash = key % mData->capacity(); /** Get hash */
@@ -443,7 +443,7 @@ public:
 			delete items; /** Removing the old start element of the list */
 			items = NULL;
 		}
-		if (!mIsResizing && (V)NULL != data) { /** Removing has occurred */
+		if (!mIsResizing && static_cast<V> (NULL) != data) { /** Removing has occurred */
 			onRemove(data);
 			--mSize;
 			return true;
@@ -457,28 +457,28 @@ public:
 		if (items == NULL) { /** Check presence of the list in cell of the array */
 			return false;
 		}
-		return ((V)NULL != items->find(key)); /** Search key in list */
+		return (static_cast<V> (NULL) != items->find(key)); /** Search key in list */
 	}
 
 	/** Find by key */
 	V find(const Key & key) {
 		tItem * items = mData->find(key % mData->capacity()); /** Get cell data of the array */
 		if (items == NULL) { /** Check presence of the list in cell of the array */
-			return (V)NULL;
+			return static_cast<V> (NULL);
 		}
 		return items->find(key); /** Search data by key */
 	}
 
 	/** Update data (not NULL) to key. Returns true if successful */
 	bool update(const Key & key, const V & data) {
-		if (data == (V)NULL) {
+		if (data == static_cast<V> (NULL)) {
 			return false; /** No data */
 		}
 		tItem * items = mData->find(key % mData->capacity());
 		if (items == NULL) { /** Check presence of the list in cell of the array */
 			return false;
 		}
-		return (items->update(key, data) != (V)NULL); /** Update data in list */
+		return (items->update(key, data) != static_cast<V> (NULL)); /** Update data in list */
 	}
 
 

@@ -494,10 +494,10 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 	int i = 0;
 	socklen_t namelen = sizeof(storage);
 	memset(&storage, 0, namelen);
-	tSocket sock = ::accept(mSocket, (struct sockaddr *) &storage, (socklen_t*) &namelen);
+	tSocket sock = ::accept(mSocket, reinterpret_cast<struct sockaddr *> (&storage), static_cast<socklen_t*> (&namelen));
 	while (SOCK_INVALID(sock) && ((SOCK_ERR == SOCK_EAGAIN) || (SOCK_ERR == SOCK_EINTR)) && (++i <= 10)) {
 		// Try to accept connection not more than 10 once
-		sock = ::accept(mSocket, (struct sockaddr *) &storage, (socklen_t*) &namelen);
+		sock = ::accept(mSocket, reinterpret_cast<struct sockaddr *> (&storage), static_cast<socklen_t*> (&namelen));
 		#ifdef _WIN32
 			Sleep(1);
 		#else
@@ -553,7 +553,7 @@ int Conn::defineConnInfo(sockaddr_storage & storage) {
 	if (mSocket) {
 		char host[NI_MAXHOST] = { 0 };
 		char port[NI_MAXSERV] = { 0 };
-		int ret = getnameinfo((struct sockaddr *) &storage, sizeof(struct sockaddr_storage), host, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+		int ret = getnameinfo(reinterpret_cast<struct sockaddr *> (&storage), sizeof(struct sockaddr_storage), host, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
 		if (ret != 0) {
 			if (log(LEVEL_WARN)) {
 				logStream() << "Error in getnameinfo: " << SOCK_ERR_GAI_MSG(ret) << " [" << ret << "]" << endl;
@@ -580,14 +580,13 @@ int Conn::recv() {
 		return 0;
 	}
 
-	int iBufLen = 0, i = 0;
-
+	int bufLen = 0, i = 0;
 
 	bool udp = (this->mConnType == CONN_TYPE_INCOMING_UDP);
 	if (!udp) { // TCP
 
 		while (
-			(SOCK_ERROR(iBufLen = ::recv(mSocket, mRecvBuf, MAX_RECV_SIZE, 0))) &&
+			(SOCK_ERROR(bufLen = ::recv(mSocket, mRecvBuf, MAX_RECV_SIZE, 0))) &&
 			((SOCK_ERR == SOCK_EAGAIN) || (SOCK_ERR == SOCK_EINTR))
 			&& (++i <= 100)
 		) {
@@ -601,13 +600,13 @@ int Conn::recv() {
 			logStream() << "Start read (UDP)" << endl;
 		}
 		while (
-			(SOCK_ERROR(iBufLen = recvfrom(
+			(SOCK_ERROR(bufLen = recvfrom(
 				mSocket,
 				mRecvBuf,
 				MAX_RECV_SIZE,
 				0,
-				(struct sockaddr *) &mSockAddrIn,
-				(socklen_t *) &mSockAddrInSize
+				reinterpret_cast<struct sockaddr *> (&mSockAddrIn),
+				static_cast<socklen_t *> (&mSockAddrInSize)
 			))) && (++i <= 100)
 		) {
 			#ifndef _WIN32
@@ -615,15 +614,14 @@ int Conn::recv() {
 			#endif
 		}
 		if (log(LEVEL_TRACE)) {
-			logStream() << "End read (UDP). Read bytes: " << iBufLen << endl;
+			logStream() << "End read (UDP). Read bytes: " << bufLen << endl;
 		}
 	}
 
-
 	mRecvBufRead = mRecvBufEnd = 0;
-	if (iBufLen <= 0) {
+	if (bufLen <= 0) {
 		if (!udp) {
-			if (iBufLen == 0) {
+			if (bufLen == 0) {
 				if (log(LEVEL_DEBUG)) {
 					logStream() << "Other side has closed connection" << endl;
 				}
@@ -648,11 +646,11 @@ int Conn::recv() {
 	if (udp) {
 		mIpUdp = inet_ntoa(mSockAddrIn.sin_addr);
 	}
-	mRecvBufEnd = iBufLen; // End buf pos
+	mRecvBufEnd = bufLen; // End buf pos
 	mRecvBufRead = 0; // Pos for reading from buf
 	mRecvBuf[mRecvBufEnd] = '\0'; // Adding 0 symbol to end of str
 	mLastRecv.get(); // Write time last recv action
-	return iBufLen;
+	return bufLen;
 }
 
 
@@ -1054,7 +1052,7 @@ int Conn::send(const char * buf, size_t & len) {
 				buf + total,
 				static_cast<int> (bytesleft), // Attention! Max len: 2147483647 (0x7FFFFFFF)
 				0,
-				(struct sockaddr *) &mSockAddrIn,
+				reinterpret_cast<struct sockaddr *> (&mSockAddrIn),
 				mSockAddrInSize
 			);
 

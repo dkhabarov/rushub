@@ -32,7 +32,7 @@ namespace dcserver {
 
 namespace protocol {
 
-#define FOURCC(c) (*(uint32_t *)c)
+#define FOURCC(c) (*(reinterpret_cast<uint32_t *> (const_cast<char *> (c))))
 #define CMD(c) (_LITTLE_ENDIAN ? (FOURCC(c) >> 8) : (FOURCC(c) << 8))
 
 /// ADC command
@@ -158,13 +158,13 @@ const string & AdcParser::getErrorText() const {
 
 
 
-const vector<int> & AdcParser::getPositiveFeatures() const {
+const vector<unsigned int> & AdcParser::getPositiveFeatures() const {
 	return mPositiveFeature;
 }
 
 
 
-const vector<int> & AdcParser::getNegativeFeatures() const {
+const vector<unsigned int> & AdcParser::getNegativeFeatures() const {
 	return mNegativeFeature;
 }
 
@@ -439,7 +439,7 @@ void AdcParser::parseFeatures(DcUser * dcUser) {
 	ParamBase * param = dcUser->getParam("SU"); // TODO replace name to macros
 	if (param) {
 		const string & value = param->toString();
-		set<int> & features = dcUser->getFeatures();
+		set<unsigned int> & features = dcUser->getFeatures();
 
 		features.clear();
 		size_t i, j = 0;

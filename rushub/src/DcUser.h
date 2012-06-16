@@ -90,7 +90,7 @@ public:
 	virtual bool isHide() const;
 	virtual bool isCanSend() const;
 
-	virtual bool hasFeature(int feature) const;
+	virtual bool hasFeature(unsigned int feature) const;
 
 	void send(const char * data, size_t len, bool addSep = false, bool flush = true);
 	virtual void send(const string & data, bool addSep = false, bool flush = true);
@@ -117,7 +117,7 @@ public:
 		return mInfoNames;
 	}
 
-	set<int> & getFeatures() { // ADC
+	set<unsigned int> & getFeatures() { // ADC
 		return mFeatures;
 	}
 
@@ -146,7 +146,7 @@ private:
 
 	HashMap<Param *, string> mParamList;
 	set<string> mInfoNames;
-	set<int> mFeatures;
+	set<unsigned int> mFeatures;
 
 }; // class DcUser
 

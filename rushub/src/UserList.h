@@ -143,8 +143,8 @@ public:
 	/** Sending data to all from the list */
 	void sendToAllAdc(const string & data, bool addSep = true, bool flush = true);
 
-	void sendToFeature(const string & data, const vector<int> & positive, 
-		const vector<int> & negative, bool addSep = true);
+	void sendToFeature(const string & data, const vector<unsigned int> & positive, 
+		const vector<unsigned int> & negative, bool addSep = true);
 
 	/** Sending data to profiles */
 	void sendToProfiles(unsigned long profile, const string & data, bool addSep = true);

@@ -32,7 +32,7 @@ bool ConnChoose::addConn(ConnBase * connBase) {
 		return false;
 	}
 
-	tSocket sock = (tSocket) (*connBase);
+	tSocket sock = static_cast<tSocket> (*connBase);
 	if (mConnBaseList.contain(sock)) {
 		return false;
 	}
@@ -47,12 +47,12 @@ bool ConnChoose::addConn(ConnBase * connBase) {
 /** Del from mConnBaseList */
 bool ConnChoose::deleteConn(ConnBase * connBase) {
 	optOut(connBase, EF_ALL_AND_CLOSE);
-	return mConnBaseList.remove((tSocket) (*connBase));
+	return mConnBaseList.remove(static_cast<tSocket> (*connBase));
 }
 
 /** Has conn */
 bool ConnChoose::hasConn(ConnBase * connBase) {
-	return mConnBaseList.contain((tSocket) (*connBase));
+	return mConnBaseList.contain(static_cast<tSocket> (*connBase));
 }
 
 } // namespace server
