@@ -51,6 +51,7 @@ public:
 
 	/// Hash-table for connections
 	HashTable<ConnBase *> mConnBaseList;
+	typedef HashTable<ConnBase *>::Key Key;
 
 	/// Events flags
 	enum EventFlag {
@@ -207,7 +208,7 @@ bool ConnChoose::revTest(ConnBase * connBase) {
 }
 
 ConnBase * ConnChoose::operator [] (tSocket sock) {
-	return mConnBaseList.find(sock);
+	return mConnBaseList.find(static_cast<Key> (sock));
 }
 
 } // namespace server

@@ -493,7 +493,7 @@ Conn * Conn::createNewConn() {
 tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 	int i = 0;
 	socklen_t namelen = sizeof(storage);
-	memset(&storage, 0, namelen);
+	memset(&storage, 0, sizeof(storage));
 	tSocket sock = ::accept(mSocket, reinterpret_cast<struct sockaddr *> (&storage), static_cast<socklen_t*> (&namelen));
 	while (SOCK_INVALID(sock) && ((SOCK_ERR == SOCK_EAGAIN) || (SOCK_ERR == SOCK_EINTR)) && (++i <= 10)) {
 		// Try to accept connection not more than 10 once
@@ -501,7 +501,7 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 		#ifdef _WIN32
 			Sleep(1);
 		#else
-			usleep(1000);
+			usleep(1000u);
 		#endif
 	}
 	if (SOCK_INVALID(sock)) {
@@ -591,7 +591,7 @@ int Conn::recv() {
 			&& (++i <= 100)
 		) {
 			#ifndef _WIN32
-				usleep(100);
+				usleep(100u);
 			#endif
 		}
 
@@ -610,7 +610,7 @@ int Conn::recv() {
 			))) && (++i <= 100)
 		) {
 			#ifndef _WIN32
-				usleep(100);
+				usleep(100u);
 			#endif
 		}
 		if (log(LEVEL_TRACE)) {
@@ -646,7 +646,7 @@ int Conn::recv() {
 	if (udp) {
 		mIpUdp = inet_ntoa(mSockAddrIn.sin_addr);
 	}
-	mRecvBufEnd = bufLen; // End buf pos
+	mRecvBufEnd = static_cast<size_t> (bufLen); // End buf pos
 	mRecvBufRead = 0; // Pos for reading from buf
 	mRecvBuf[mRecvBufEnd] = '\0'; // Adding 0 symbol to end of str
 	mLastRecv.get(); // Write time last recv action
@@ -795,21 +795,21 @@ size_t Conn::readFromRecvBuf() {
 
 	char * buf = mRecvBuf + mRecvBufRead;
 	const char * pos_sep = strstr(buf, getSeparator());
-	size_t len = 0;
+	size_t len = 0u;
 
 	if (pos_sep) { // separator was found
-		len = pos_sep - buf;
+		len = static_cast<size_t> (pos_sep - buf);
 		mRecvBufRead += (len + getSeparatorLen());
 		mStatus = STRING_STATUS_STR_DONE;
 	} else { // separator was not found
 		len = mRecvBufEnd - mRecvBufRead;
-		mRecvBufRead = mRecvBufEnd = 0;
+		mRecvBufRead = mRecvBufEnd = 0u;
 	}
 
 	size_t size = mCommand->size() + len;
-	if (size > (mProtocol ? mProtocol->getMaxCommandLength() : 10240)) {
+	if (size > (mProtocol ? mProtocol->getMaxCommandLength() : 10240u)) {
 		closeNow(CLOSE_REASON_MAXSIZE_RECV);
-		return 0;
+		return 0u;
 	}
 	mCommand->reserve(size);
 	mCommand->append(buf, len);
@@ -1037,10 +1037,11 @@ int Conn::send(const char * buf, size_t & len) {
 			n = ::send(
 				mSocket,
 				buf + total,
-				static_cast<int> (bytesleft), // Attention! Max len: 2147483647 (0x7FFFFFFF)
 				#ifndef _WIN32
+					bytesleft,
 					MSG_NOSIGNAL | MSG_DONTWAIT
 				#else
+					static_cast<int> (bytesleft), // Attention! Max len: 2147483647 (0x7FFFFFFF)
 					0
 				#endif
 			);
@@ -1050,7 +1051,11 @@ int Conn::send(const char * buf, size_t & len) {
 			n = ::sendto(
 				mSocket,
 				buf + total,
-				static_cast<int> (bytesleft), // Attention! Max len: 2147483647 (0x7FFFFFFF)
+				#ifndef _WIN32
+					bytesleft,
+				#else
+					static_cast<int> (bytesleft), // Attention! Max len: 2147483647 (0x7FFFFFFF)
+				#endif
 				0,
 				reinterpret_cast<struct sockaddr *> (&mSockAddrIn),
 				mSockAddrInSize
@@ -1060,8 +1065,8 @@ int Conn::send(const char * buf, size_t & len) {
 		if (SOCK_ERROR(n)) {
 			break;
 		}
-		total += n;
-		bytesleft -= n;
+		total += static_cast<size_t> (n);
+		bytesleft -= static_cast<size_t> (n);
 	}
 	len = total; // Number sent bytes
 	return SOCK_ERROR(n) ? -1 : 0; // return -1 - fail, 0 - ok

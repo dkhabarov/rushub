@@ -411,7 +411,7 @@ int NmdcProtocol::eventGetNickList(NmdcParser *, DcConn * dcConn) {
 
 	if (!dcConn->isState(STATE_INFO) && mDcServer->mDcConfig.mNicklistOnLogin) {
 		if (mDcServer->mDcConfig.mDelayedLogin) {
-			int state = dcConn->getState();
+			unsigned int state = dcConn->getState();
 			if (state & STATE_NICKLST) {
 				state -= STATE_NICKLST;
 			}
@@ -1263,7 +1263,7 @@ int NmdcProtocol::checkCommand(NmdcParser * nmdcParser, DcConn * dcConn) {
 
 
 
-bool NmdcProtocol::antiflood(DcConn * dcConn, unsigned int type) {
+bool NmdcProtocol::antiflood(DcConn * dcConn, int type) {
 	DcConn::Antiflood & antiflood = dcConn->mAntiflood[type];
 
 	if (mDcServer->antiFlood(antiflood.mCount, antiflood.mTime,

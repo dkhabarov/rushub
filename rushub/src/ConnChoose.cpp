@@ -33,7 +33,7 @@ bool ConnChoose::addConn(ConnBase * connBase) {
 	}
 
 	tSocket sock = static_cast<tSocket> (*connBase);
-	if (mConnBaseList.contain(sock)) {
+	if (mConnBaseList.contain(static_cast<Key> (sock))) {
 		return false;
 	}
 
@@ -41,18 +41,18 @@ bool ConnChoose::addConn(ConnBase * connBase) {
 		mMaxSocket = sock + 1;
 	}
 
-	return mConnBaseList.add(sock, connBase);
+	return mConnBaseList.add(static_cast<Key> (sock), connBase);
 }
 
 /** Del from mConnBaseList */
 bool ConnChoose::deleteConn(ConnBase * connBase) {
 	optOut(connBase, EF_ALL_AND_CLOSE);
-	return mConnBaseList.remove(static_cast<tSocket> (*connBase));
+	return mConnBaseList.remove(static_cast<Key> (*connBase));
 }
 
 /** Has conn */
 bool ConnChoose::hasConn(ConnBase * connBase) {
-	return mConnBaseList.contain(static_cast<tSocket> (*connBase));
+	return mConnBaseList.contain(static_cast<Key> (*connBase));
 }
 
 } // namespace server

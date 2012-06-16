@@ -129,6 +129,11 @@ protected:
 
 private:
 
+	PluginList(const PluginList &);
+	PluginList & operator = (const PluginList &);
+
+private:
+
 	DcServerBase * mDcServerBase;
 
 }; // class PluginList

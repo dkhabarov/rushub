@@ -54,7 +54,7 @@ bool ZlibFilter::compress(const char * in, size_t & inSize, char * out, size_t &
 			inSize > 0 &&
 			outSize > 16 &&
 			mTotalIn > 64 * 1024 &&
-			(static_cast<double> (mTotalOut) / mTotalIn) > 0.97
+			(static_cast<double> (mTotalOut) / static_cast<double> (mTotalIn)) > 0.97
 	) {
 		mStream.avail_in = 0;
 		mStream.avail_out = outSize;

@@ -131,6 +131,9 @@ private:
 	int onSetHide(const string & old, const string & now);
 	int onSetInfo(const string & old, const string & now);
 
+	DcUser(const DcUser &);
+	DcUser & operator = (const DcUser &);
+
 private:
 
 	unsigned long mUidHash; ///< UserID Hash

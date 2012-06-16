@@ -94,7 +94,15 @@ private:
 	private:
 		T mObject;
 		T const * mRef;
+
+		Type(const Type<T> &);
+		Type<T> & operator = (const Type<T> &);
 	};
+
+	Any(const Any &);
+	Any & operator = (const Any &) {
+		return *this;
+	}
 
 private:
 

@@ -224,6 +224,9 @@ private:
 	/// Timer for current connection
 	virtual int onTimer(Time & now);
 
+	DcConn(const DcConn &);
+	DcConn & operator = (const DcConn &);
+
 }; // class DcConn
 
 } // namespace dcserver

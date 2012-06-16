@@ -66,7 +66,7 @@ class NonCopyable {
 protected:
 
 	NonCopyable() {}
-	~NonCopyable() {}
+	virtual ~NonCopyable() {}
 
 private:
 

@@ -135,6 +135,9 @@ private:
 		return -1;
 	}
 
+	Param(const Param &);
+	Param & operator = (const Param &);
+
 private:
 
 	string mBuf;

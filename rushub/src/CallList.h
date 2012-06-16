@@ -116,6 +116,8 @@ private:
 	/// Removed plugins
 	RemovedPlugins_t removedPlugins;
 
+	CallList(const CallList &);
+	CallList & operator = (const CallList &);
 
 }; // class CallList
 
@@ -200,6 +202,11 @@ protected:
 	tpFunc mFunc;
 	A mData;
 
+private:
+
+	CallListType1(const CallListType1<A> &);
+	CallListType1<A>	& operator = (const CallListType1<A> &);
+
 }; // class CallListType1
 
 
@@ -239,6 +246,11 @@ protected:
 	A mData1;
 	B mData2;
 
+private:
+
+	CallListType2(const CallListType2<A, B> &);
+	CallListType2<A, B>	& operator = (const CallListType2<A, B> &);
+
 }; // class CallListType2
 
 
@@ -277,6 +289,11 @@ protected:
 	A mData1;
 	B mData2;
 	C mData3;
+
+private:
+
+	CallListType3(const CallListType3<A, B, C> &);
+	CallListType3<A, B, C>	& operator = (const CallListType3<A, B, C> &);
 
 }; // class CallListType3
 

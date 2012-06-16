@@ -55,13 +55,13 @@ string & Encoder::toBase32(const uint8_t * src, size_t len, string & dst) {
 		if (index > 3) {
 			word = static_cast<uint8_t> (src[i] & (0xFF >> index));
 			index = (index + 5) % 8;
-			word <<= index;
+			word = static_cast<uint8_t> (word << index);
 			if ((i + 1) < len) {
-				word |= src[i + 1] >> (8 - index);
+				word = static_cast<uint8_t> (word | (src[i + 1] >> (8 - index)));
 			}
 			++i;
 		} else {
-			word = static_cast<uint8_t> (src[i] >> (8 - (index + 5))) & 0x1F;
+			word = static_cast<uint8_t> ((src[i] >> (8 - (index + 5))) & 0x1F);
 			index = (index + 5) % 8;
 			if (index == 0) {
 				++i;
@@ -82,22 +82,22 @@ void Encoder::fromBase32(const char * src, uint8_t * dst, size_t len) {
 			if (index <= 3) {
 				index = (index + 5) % 8;
 				if (index == 0) {
-					dst[offset] |= tmp;
+					dst[offset] = static_cast<uint8_t> (dst[offset] | tmp);
 					++offset;
 					if (offset == len) {
 						break;
 					}
 				} else {
-					dst[offset] |= tmp << (8 - index);
+					dst[offset] = static_cast<uint8_t> (dst[offset] | (tmp << (8 - index)));
 				}
 			} else {
 				index = (index + 5) % 8;
-				dst[offset] |= (tmp >> index);
+				dst[offset] = static_cast<uint8_t> (dst[offset] | (tmp >> index));
 				++offset;
 				if (offset == len) {
 					break;
 				}
-				dst[offset] |= tmp << (8 - index);
+				dst[offset] = static_cast<uint8_t> (dst[offset] | (tmp << (8 - index)));
 			}
 		}
 	}

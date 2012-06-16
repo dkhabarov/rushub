@@ -186,6 +186,9 @@ private:
 	/// Add simple connection
 	Conn * addSimpleConn(int connType, const char * ip, const char * port);
 
+	Server(const Server &);
+	Server & operator = (const Server &);
+
 }; // class Server
 
 } // server namespace

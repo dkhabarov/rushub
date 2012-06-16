@@ -145,6 +145,11 @@ public:
 		return mEnd.set(this, mKeyList.end());
 	}
 
+private:
+
+	ConfigListBase(const ConfigListBase &);
+	ConfigListBase & operator = (const ConfigListBase &);
+
 }; // class ConfigListBase
 
 

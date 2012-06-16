@@ -122,6 +122,11 @@ protected:
 		return mAddress;
 	}
 
+private:
+
+	ConfigItem(const ConfigItem &);
+	ConfigItem & operator = (const ConfigItem &);
+
 }; // class ConfigItem
 
 

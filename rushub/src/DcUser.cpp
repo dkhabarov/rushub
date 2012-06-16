@@ -298,8 +298,11 @@ const string & DcUser::getNmdcTag() {
 bool DcUser::isPassive() const {
 	// TODO refactoring!
 	ParamBase * mode = getParam(USER_PARAM_MODE);
-	unsigned int passive = (mode != NULL && mode->getType() == Param::TYPE_STRING && mode->getString().size()) ? mode->getString()[0] : 0;
-	return passive == 80 || passive == 53 || passive == 83;
+	unsigned int passive = 0u;
+	if (mode != NULL && mode->getType() == Param::TYPE_STRING && mode->getString().size()) {
+		passive = static_cast<unsigned int> (mode->getString()[0]);
+	}
+	return passive == 80u || passive == 53u || passive == 83u;
 }
 
 

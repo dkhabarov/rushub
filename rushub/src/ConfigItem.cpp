@@ -111,7 +111,7 @@ CCONVERTFROMPCHAR()
 CCONVERTFROM(bool, Bool, ((str == "true") ? true : (0 != atoi(str.c_str()))))
 CCONVERTFROM(double, Double, atof(str.c_str()))
 CCONVERTFROM(int, Int, atoi(str.c_str()))
-CCONVERTFROM(unsigned int, UInt, atol(str.c_str()))
+CCONVERTFROM(unsigned int, UInt, static_cast<unsigned int> (atol(str.c_str())))
 CCONVERTFROM(int64_t, Int64, stringToInt64(str))
 CCONVERTFROM(string, String, str)
 

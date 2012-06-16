@@ -99,6 +99,11 @@ protected:
 	const string & getFirstMsg(bool & flush);
 	bool checkState(DcConn *, const char * cmd, unsigned int state);
 
+private:
+
+	DcProtocol(const DcProtocol &);
+	DcProtocol & operator = (const DcProtocol &);
+
 }; // class DcProtocol
 
 } // namespace protocol

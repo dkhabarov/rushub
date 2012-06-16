@@ -245,9 +245,9 @@ int Server::run() {
 
 			if (mStepDelay) {
 				#ifdef _WIN32
-					Sleep(mStepDelay); // (mStepDelay msec)
+					Sleep(static_cast<DWORD> (mStepDelay)); // (mStepDelay msec)
 				#else
-					usleep(mStepDelay * 1000);
+					usleep(static_cast<useconds_t> (mStepDelay * 1000));
 				#endif
 			}
 			mMeanFrequency.insert(mTime); // MeanFrequency
@@ -290,7 +290,7 @@ void Server::step() {
 			#ifdef _WIN32
 				Sleep(1);
 			#else
-				usleep(1000);
+				usleep(1000u);
 			#endif
 			return;
 		}

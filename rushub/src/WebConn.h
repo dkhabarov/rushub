@@ -88,6 +88,11 @@ public:
 	/** Get conn port */
 	virtual int getPortConn();
 
+private:
+
+	WebUser(const WebUser &);
+	WebUser & operator = (const WebUser &);
+
 }; // class WebUser
 
 
@@ -112,6 +117,9 @@ private:
 
 	/// Timer of the connection
 	virtual int onTimer(Time & now);
+
+	WebConn(const WebConn &);
+	WebConn & operator = (const WebConn &);
 
 }; // class WebConn
 

@@ -122,7 +122,7 @@ struct ufSendProfile : public unary_function<void, UserList::iterator> {
 			if (profile > 31) {
 				profile = (profile % 32) - 1;
 			}
-			if (mProfile & (1 << profile)) {
+			if (mProfile & static_cast<unsigned long> (1 << profile)) {
 				userBase->send(mData, mAddSep);
 			}
 		}
@@ -185,7 +185,7 @@ struct ufSendChatProfile : public unary_function<void, UserList::iterator> {
 			if (profile > 31) {
 				profile = (profile % 32) - 1;
 			}
-			if (mProfile & (1 << profile) && !userBase->getUid().empty()) {
+			if (mProfile & static_cast<unsigned long> (1 << profile) && !userBase->getUid().empty()) {
 				userBase->sendToChat(mData, mUid, true);
 			}
 		}
@@ -251,7 +251,7 @@ struct ufSendPmProfile : public unary_function<void, UserList::iterator> {
 			if (profile > 31) {
 				profile = (profile % 32) - 1;
 			}
-			if (mProfile & (1 << profile) && !userBase->getUid().empty()) {
+			if (mProfile & static_cast<unsigned long> (1 << profile) && !userBase->getUid().empty()) {
 				userBase->sendToPm(mData, mUid, mFrom, true);
 			}
 		}
@@ -304,7 +304,7 @@ void UserList::addUserListItem(UserListItem::Func func, const char * start) {
 
 
 
-const string & UserList::getList(int number) {
+const string & UserList::getList(unsigned int number) {
 	return mListItems[number]->getList(begin(), end());
 }
 

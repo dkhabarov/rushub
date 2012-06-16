@@ -131,7 +131,7 @@ public:
 	UserBase * getUserBaseByUid(const string & uid);
 
 	void addUserListItem(UserListItem::Func func, const char * start = "");
-	const string & getList(int number);
+	const string & getList(unsigned int number);
 
 	inline void remake() {
 		onRemove(NULL);

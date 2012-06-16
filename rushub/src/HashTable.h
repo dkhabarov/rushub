@@ -44,7 +44,7 @@ template <class T = unsigned long> struct Hash {
 	T operator() (const char * s) const {
 		T h = 0;
 		for(; *s; ++s) {
-			h = 33 * h + *s;
+			h = 33 * h + static_cast<T> (*s);
 		}
 		return h;
 	}
@@ -158,6 +158,11 @@ public:
 	iterator end() {
 		return iterator(mData, mCapacity, mCapacity);
 	}
+
+private:
+
+	Array(const Array<V> &);
+	Array<V> & operator = (const Array<V> &);
 
 }; // Array
 
@@ -333,6 +338,12 @@ public:
 		}
 		return static_cast<V> (NULL); /** Nothing have not found */
 	}
+	
+private:
+
+	List(const List<K, V> &);
+	List<K, V> & operator = (const List<K, V> &);
+
 }; // List
 
 
@@ -616,6 +627,9 @@ private:
 		onResize(size, oldCapacity, newCapacity);
 		return 0;
 	}
+	
+	HashTable(const HashTable<V> &);
+	HashTable<V> & operator = (const HashTable<V> &);
 
 }; // HashTable
 

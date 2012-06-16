@@ -64,6 +64,11 @@ protected:
 	Protocol * mProtocol; ///< Protocal
 	Server * mServer; ///< Pointer on server
 
+private:
+
+	ConnFactory(const ConnFactory &);
+	ConnFactory & operator = (const ConnFactory &);
+
 }; // class ConnFactory
 
 
@@ -323,6 +328,9 @@ private:
 
 	/// Calculate mac-address
 	void calcMacAddress();
+
+	Conn(const Conn &);
+	Conn & operator = (const Conn &);
 
 }; // class Conn
 

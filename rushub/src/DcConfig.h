@@ -133,6 +133,11 @@ public:
 
 private:
 
+	DcConfig(const DcConfig &);
+	DcConfig & operator = (const DcConfig &);
+
+private:
+
 	ConfigLoader * mConfigLoader;
 	ConfigStore mConfigStore;
 	string mConfigPath;
@@ -179,6 +184,11 @@ public:
 	int load();
 	int save();
 	int reload();
+
+private:
+
+	DcLang(const DcLang &);
+	DcLang & operator = (const DcLang &);
 
 private:
 

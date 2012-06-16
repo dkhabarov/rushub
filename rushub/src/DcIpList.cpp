@@ -137,7 +137,7 @@ bool DcIpList::checkProfile(DcConn * dcConn, unsigned long profile) {
 	if (p > 31) {
 		p = (p % 32) - 1;
 	}
-	if (profile & (1 << p)) {
+	if (profile & static_cast<unsigned long> (1 << p)) {
 		return true;
 	}
 	return false;

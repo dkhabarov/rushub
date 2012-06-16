@@ -46,7 +46,7 @@ bool ConnPoll::addConn(ConnBase * connBase) {
 		return false;
 	}
 	if (mMaxSocket >= static_cast<tSocket> (mvFD.size())) {
-		mvFD.resize(mMaxSocket + (mMaxSocket >> 1));
+		mvFD.resize(static_cast<unsigned int> (mMaxSocket + (mMaxSocket >> 1)));
 	}
 	return true;
 }
@@ -54,11 +54,11 @@ bool ConnPoll::addConn(ConnBase * connBase) {
 
 
 int ConnPoll::choose(Time & timeout) {
-	int miliSec = static_cast<int> (timeout.msec());
-	int tmp, n = 0, ret = 0, done = 0, size = mvFD.size();
+	int ret = 0, n = 0, miliSec = static_cast<int> (timeout.msec());
+	unsigned int tmp, done = 0u, size = mvFD.size();
 	while (size) {
 		// poll 1024 socks max
-		tmp = size > 1024 ? 1024 : size;
+		tmp = size > 1024u ? 1024u : size;
 		ret = ::poll(&(mvFD[done]), tmp, miliSec);
 		if (ret < 0) {
 			return -1;
@@ -73,25 +73,25 @@ int ConnPoll::choose(Time & timeout) {
 
 
 bool ConnPoll::optIn(tSocket sock, EventFlag mask) {
-	PollFd & pollFd = mvFD[sock];
- 	unsigned events = pollFd.events;
+	PollFd & pollFd = mvFD[static_cast<unsigned int> (sock)];
+ 	short events = pollFd.events;
 	if (!events && mask) {
 		pollFd.fd = sock;
 	}
 
 	if (mask & EF_CLOSE) {
-		pollFd.events = 0;
+		pollFd.events = short(0);
 	} else {
 		if (mask & EF_INPUT) {
-			events = unsigned(POLLIN | POLLPRI);
+			events = short(POLLIN | POLLPRI);
 		}
 		if (mask & EF_OUTPUT) {
-			events |= unsigned(POLLOUT);
+			events |= short(POLLOUT);
 		}
 		if (mask & EF_ERROR) {
-			events |= unsigned(POLLERR | POLLHUP | POLLNVAL);
+			events |= short(POLLERR | POLLHUP | POLLNVAL);
 		}
-		pollFd.events |= events;
+		pollFd.events = short(pollFd.events | events);
 	}
 	return true;
 }
@@ -99,18 +99,19 @@ bool ConnPoll::optIn(tSocket sock, EventFlag mask) {
 
 
 void ConnPoll::optOut(tSocket sock, EventFlag mask) {
-	PollFd & pollFd = mvFD[sock];
- 	unsigned events = ~(0u);
+	PollFd & pollFd = mvFD[static_cast<unsigned int> (sock)];
+ 	short events = ~short(0);
 	if (mask & EF_INPUT) {
-		events = ~unsigned(POLLIN | POLLPRI);
+		events = ~short(POLLIN | POLLPRI);
 	}
 	if (mask & EF_OUTPUT) {
-		events &= ~unsigned(POLLOUT);
+		events &= ~short(POLLOUT);
 	}
 	if (mask & EF_ERROR) {
-		events &= ~unsigned(POLLERR | POLLHUP | POLLNVAL);
+		events &= ~short(POLLERR | POLLHUP | POLLNVAL);
 	}
-	if (!(pollFd.events &= events)) {
+	pollFd.events = short(pollFd.events & events);
+	if (!pollFd.events) {
 		pollFd.reset();
 	}
 }
@@ -118,8 +119,8 @@ void ConnPoll::optOut(tSocket sock, EventFlag mask) {
 
 
 int ConnPoll::optGet(tSocket sock) {
-	PollFd & pollFd = mvFD[sock];
-	unsigned events = pollFd.events;
+	PollFd & pollFd = mvFD[static_cast<unsigned int> (sock)];
+	short events = pollFd.events;
 	int mask = 0;
 	if (!events && (pollFd.fd == sock)) {
 		mask = EF_CLOSE;
@@ -140,8 +141,8 @@ int ConnPoll::optGet(tSocket sock) {
 
 
 int ConnPoll::revGet(tSocket sock) {
-	PollFd & pollFd = mvFD[sock];
-	unsigned events = pollFd.revents;
+	PollFd & pollFd = mvFD[static_cast<unsigned int> (sock)];
+	short events = pollFd.revents;
 	int mask = 0;
 	if (!pollFd.events && (pollFd.fd == sock)) {
 		mask = EF_CLOSE;
@@ -161,14 +162,14 @@ int ConnPoll::revGet(tSocket sock) {
 
 
 bool ConnPoll::revTest(tSocket sock) {
-	PollFd & pollFd = mvFD[sock];
+	PollFd & pollFd = mvFD[static_cast<unsigned int> (sock)];
  	if (SOCK_INVALID(pollFd.fd)) {
 		return false;
 	}
 	if (!pollFd.events) {
 		return true;
 	}
- 	unsigned events = pollFd.revents;
+ 	short events = pollFd.revents;
  	if (!events) {
 		return false;
 	}

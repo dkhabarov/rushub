@@ -103,6 +103,11 @@ protected:
 
 	/** log */
 	bool strLog();
+	
+private:
+
+	PluginLoader(const PluginLoader &);
+	PluginLoader & operator = (const PluginLoader &);
 
 }; // class PluginLoader
 
