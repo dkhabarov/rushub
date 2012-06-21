@@ -107,7 +107,7 @@ public:
 	virtual size_t getSeparatorLen() const {
 		return 1;
 	}
-	virtual unsigned long getMaxCommandLength() const {
+	virtual unsigned int getMaxCommandLength() const {
 		return 102400;
 	}
 	virtual Conn * getConnForUdpData(Conn *, Parser *) {
