@@ -42,9 +42,15 @@
 	#include <unistd.h> // for usleep function
 #endif
 
-#define NS_INADDRSZ 4
-#define NS_IN6ADDRSZ 16
-#define NS_INT16SZ 2
+#ifndef NS_INADDRSZ
+  #define NS_INADDRSZ 4
+#endif
+#ifndef NS_IN6ADDRSZ
+  #define NS_IN6ADDRSZ 16
+#endif
+#ifndef NS_INT16SZ
+  #define NS_INT16SZ 2
+#endif
 
 
 
