@@ -100,7 +100,7 @@ private:
 
 }; // class LuaInterpreter
 
-}; // namespace luaplugin
+} // namespace luaplugin
 
 #endif // LUA_INTERPRETER_H
 

@@ -47,7 +47,7 @@ namespace dcserver {
 
 	class DcServerBase;
 
-}; // namespace dcserver
+} // namespace dcserver
 
 
 using namespace ::std;
@@ -205,6 +205,7 @@ public:
 	void setListFlag(unsigned int flag) {
 		mListFlags = flag;
 	}
+
 private:
 
 	unsigned int mListFlags;

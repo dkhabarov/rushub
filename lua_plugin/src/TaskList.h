@@ -25,7 +25,7 @@
 namespace luaplugin {
 
 enum {
-	COMMONTASK_SAVE           = 1 << 1,
+	COMMONTASK_SAVE           = 1 << 1
 }; /** CommonTask */
 
 typedef enum {
@@ -85,7 +85,7 @@ private:
 
 }; // class TasksList
 
-}; // namespace luaplugin
+} // namespace luaplugin
 
 #endif // TASKS_LIST_H
 

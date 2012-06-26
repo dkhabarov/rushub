@@ -49,7 +49,7 @@ public:
 
 }; // LuaUtils
 
-}; // namespace luaplugin
+} // namespace luaplugin
 
 #endif // LUA_UTILS_H
 

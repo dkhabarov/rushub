@@ -7,6 +7,7 @@
 
 CXX = g++
 
+#CXXFLAGS = -O2 -Wall -Wextra -pipe -pedantic -Wno-long-long -Woverloaded-virtual -Wctor-dtor-privacy -Wnon-virtual-dtor -Wold-style-cast -Wconversion -Wsign-conversion -Winit-self
 CXXFLAGS = -O2 -Wall -Wextra -pipe
 #CXXFLAGS = -g -Wall -Wextra -pipe
 

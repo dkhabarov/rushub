@@ -70,7 +70,7 @@ TimerList::~TimerList() {
 
 
 static void Checker(void * value) {
-	((Timer *) value)->check(LuaPlugin::mCurServer->getMsec());
+	static_cast<Timer *> (value)->check(LuaPlugin::mCurServer->getMsec());
 }
 
 
@@ -109,7 +109,7 @@ void TimerList::onRemove(Timer * timer) {
 }
 
 
-}; // namespace luaplugin
+} // namespace luaplugin
 
 /**
  * $Id$

@@ -36,7 +36,7 @@ enum ParamHash { /** Param's hash */
 	PARAM_HASH_TAG     = 4321573,    ///< "sTag"
 	PARAM_HASH_NICK    = 136635514,  ///< "sNick"
 	PARAM_HASH_MYINFO  = 1652447804, ///< "sMyINFO"
-	PARAM_HASH_PROFILE = 970292741,  ///< "iProfile"
+	PARAM_HASH_PROFILE = 970292741   ///< "iProfile"
 
 };
 
@@ -59,7 +59,7 @@ private:
 
 }; // class Uid
 
-}; // namespace luaplugin
+} // namespace luaplugin
 
 #endif // UID_H
 

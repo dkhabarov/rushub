@@ -51,8 +51,8 @@ namespace luaplugin {
 
 
 DcUserBase * getDcUserBase(lua_State * L, int indx) {
-	void ** userdata = (void **) lua_touserdata(L, indx);
-	DcUserBase * dcUserBase = (DcUserBase *) *userdata;
+	void ** userdata = static_cast<void **> (lua_touserdata(L, indx));
+	DcUserBase * dcUserBase = static_cast<DcUserBase *> (*userdata);
 	return dcUserBase->mType == CLIENT_TYPE_DC ? dcUserBase : NULL;
 }
 
@@ -98,9 +98,9 @@ void copyValue(lua_State * from, lua_State * to, int idx) {
 			break;
 
 		case LUA_TUSERDATA :
-			udata = (void *) getDcUserBase(from, idx);
+			udata = static_cast<void *> (getDcUserBase(from, idx));
 			if (udata) {
-				userdata = (void**) lua_newuserdata(to, sizeof(void *));
+				userdata = static_cast<void**> (lua_newuserdata(to, sizeof(void *)));
 				*userdata = udata;
 				luaL_getmetatable(to, MT_USER_CONN);
 				lua_setmetatable(to, -2);
@@ -460,7 +460,7 @@ int sendToProfile(lua_State * L) {
 					if ((prof = luaL_checkint(L, -1) + 1) < 0) {
 						prof = -prof;
 					}
-					prf = 1 << (prof % 32);
+					prf = static_cast<unsigned long> (1 << (prof % 32));
 					if (!(profile & prf)) {
 						profile = profile | prf;
 					}
@@ -877,8 +877,8 @@ int getUser(lua_State * L) {
 		if (!dcUserBase) {
 			return LuaUtils::pushError(L, "user was not found");
 		}
-		void ** userdata = (void **) lua_newuserdata(L, sizeof(void *));
-		*userdata = (void *) dcUserBase;
+		void ** userdata = static_cast<void **> (lua_newuserdata(L, sizeof(void *)));
+		*userdata = static_cast<void *> (dcUserBase);
 		luaL_getmetatable(L, MT_USER_CONN);
 		lua_setmetatable(L, -2);
 	} else {
@@ -916,7 +916,7 @@ int setUser(lua_State * L) {
 		return LuaUtils::pushError(L, "user was not found");
 	}
 
-	unsigned num = (unsigned)luaL_checkinteger(L, 2);
+	unsigned num = static_cast<unsigned> (luaL_checkinteger(L, 2));
 	if (num == USERVALUE_PROFILE) {
 		Uid::setValue(L, dcUserBase, USER_PARAM_PROFILE, ParamBase::TYPE_INT);
 	} else if (num == USERVALUE_MYINFO) {
@@ -957,8 +957,8 @@ int getUsers(lua_State * L) {
 		for (vector<DcUserBase *>::const_iterator it = v.begin(); it != v.end(); ++it) {
 			if (all || (*it)->getParam(USER_PARAM_IN_USER_LIST)->getBool()) {
 				lua_pushnumber(L, i);
-				void ** userdata = (void **) lua_newuserdata(L, sizeof(void *));
-				*userdata = (void *) (*it);
+				void ** userdata = static_cast<void **> (lua_newuserdata(L, sizeof(void *)));
+				*userdata = static_cast<void *> (*it);
 				luaL_getmetatable(L, MT_USER_CONN);
 				lua_setmetatable(L, -2);
 				lua_rawset(L, topTab);
@@ -976,8 +976,8 @@ int getUsers(lua_State * L) {
 			if (dcUserBase->mType == CLIENT_TYPE_DC) {
 				if (all || (dcUserBase->getParam(USER_PARAM_IN_USER_LIST)->getBool())) {
 					lua_pushnumber(L, i);
-					void ** userdata = (void **) lua_newuserdata(L, sizeof(void *));
-					*userdata = (void *) dcUserBase;
+					void ** userdata = static_cast<void **> (lua_newuserdata(L, sizeof(void *)));
+					*userdata = static_cast<void *> (dcUserBase);
 					luaL_getmetatable(L, MT_USER_CONN);
 					lua_setmetatable(L, -2);
 					lua_rawset(L, topTab);
@@ -1002,7 +1002,7 @@ int getUsersCount(lua_State * L) {
 
 /// GetTotalShare()
 int getTotalShare(lua_State * L) {
-	lua_pushnumber(L, (lua_Number)LuaPlugin::mCurServer->getTotalShare());
+	lua_pushnumber(L, static_cast<lua_Number> (LuaPlugin::mCurServer->getTotalShare()));
 	return 1;
 }
 
@@ -1010,7 +1010,7 @@ int getTotalShare(lua_State * L) {
 
 /// GetUpTime()
 int getUpTime(lua_State * L) {
-	lua_pushnumber(L, (lua_Number)LuaPlugin::mCurServer->getUpTime());
+	lua_pushnumber(L, static_cast<lua_Number> (LuaPlugin::mCurServer->getUpTime()));
 	return 1;
 }
 
@@ -1332,12 +1332,12 @@ int moveUpScript(lua_State *L) {
 		}
 		LuaInterpreter * script = LuaPlugin::mCurLua->findScript(scriptName);
 		if (script) {
-			LuaPlugin::mCurLua->mTasksList.addTask((void *)script, TASKTYPE_MOVEUP);
+			LuaPlugin::mCurLua->mTasksList.addTask(static_cast<void *> (script), TASKTYPE_MOVEUP);
 		} else {
 			return LuaUtils::pushError(L, "script was not found");
 		}
 	} else {
-		LuaPlugin::mCurLua->mTasksList.addTask((void *)LuaPlugin::mCurLua->mCurScript, TASKTYPE_MOVEUP);
+		LuaPlugin::mCurLua->mTasksList.addTask(static_cast<void *> (LuaPlugin::mCurLua->mCurScript), TASKTYPE_MOVEUP);
 	}
 
 	LuaPlugin::mCurLua->mTasksList.addTask(NULL, TASKTYPE_SAVE);
@@ -1359,12 +1359,12 @@ int moveDownScript(lua_State * L) {
 		}
 		LuaInterpreter * script = LuaPlugin::mCurLua->findScript(scriptName);
 		if (script) {
-			LuaPlugin::mCurLua->mTasksList.addTask((void*)script, TASKTYPE_MOVEDOWN);
+			LuaPlugin::mCurLua->mTasksList.addTask(static_cast<void *> (script), TASKTYPE_MOVEDOWN);
 		} else {
 			return LuaUtils::pushError(L, "script was not found");
 		}
 	} else {
-		LuaPlugin::mCurLua->mTasksList.addTask((void*)LuaPlugin::mCurLua->mCurScript, TASKTYPE_MOVEDOWN);
+		LuaPlugin::mCurLua->mTasksList.addTask(static_cast<void *> (LuaPlugin::mCurLua->mCurScript), TASKTYPE_MOVEDOWN);
 	}
 
 	LuaPlugin::mCurLua->mTasksList.addTask(NULL, TASKTYPE_SAVE);
@@ -1739,7 +1739,7 @@ int setHubState(lua_State * L) {
 }
 
 
-}; // namespace luaplugin
+} // namespace luaplugin
 
 /**
  * $Id$

@@ -244,14 +244,14 @@ int LuaInterpreter::callFunc(const char * funcName) {
 	for (CallParams::iterator it = mCallParams.begin(); it != mCallParams.end(); ++it) {
 		switch ((*it)->type) {
 			case LUA_TLIGHTUSERDATA :
-				userdata = (void **) lua_newuserdata(mL, sizeof(void *));
+				userdata = static_cast<void **> (lua_newuserdata(mL, sizeof(void *)));
 				*userdata = (*it)->data;
 				luaL_getmetatable(mL, MT_USER_CONN);
 				lua_setmetatable(mL, -2);
 				break;
 
 			case LUA_TSTRING :
-				lua_pushstring(mL, (char*)(*it)->data);
+				lua_pushstring(mL, static_cast<char*> ((*it)->data));
 				break;
 
 			case LUA_TBOOLEAN :
@@ -287,7 +287,7 @@ int LuaInterpreter::callFunc(const char * funcName) {
 	if (lua_isboolean(mL, -1)) {
 		ret = ((lua_toboolean(mL, -1) == 0) ? 0 : 1);
 	} else if(lua_isnumber(mL, -1)) {
-		ret = (int)lua_tonumber(mL, -1);
+		ret = static_cast<int> (lua_tonumber(mL, -1));
 	}
 
 	lua_settop(mL, base); // clear stack
@@ -305,7 +305,7 @@ bool LuaInterpreter::onError(const char * funcName, const char * errMsg, bool st
 	LuaPlugin::mCurLua->mLastError = errMsg;
 	logError(LuaPlugin::mCurLua->mLastError);
 	if (strcmp(funcName, "OnError") != 0) {
-		newCallParam((void *) errMsg, LUA_TSTRING);
+		newCallParam(static_cast<void *> (const_cast<char *> (errMsg)), LUA_TSTRING);
 		stoped = !callFunc("OnError");
 	}
 	stoped = stoped || stop;
@@ -402,7 +402,7 @@ void LuaInterpreter::regStrField(const char * name, const char * value) {
 }
 
 
-}; // namespace luaplugin
+} // namespace luaplugin
 
 /**
  * $Id$

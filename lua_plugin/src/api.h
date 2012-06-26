@@ -175,7 +175,7 @@ int setHubState(lua_State * L);
 int redirect(lua_State * L);
 
 
-}; // namespace luaplugin
+} // namespace luaplugin
 
 #endif // FUNCS_H
 
