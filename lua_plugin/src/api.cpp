@@ -473,7 +473,7 @@ int sendToProfile(lua_State * L) {
 				if ((prof = luaL_checkint(L, 1) + 1) < 0) {
 					prof = -prof;
 				}
-				profile = 1 << (prof % 32);
+				profile = static_cast<unsigned long> (1 << (prof % 32));
 			} else {
 				return luaL_typeerror(L, 1, "number or table");
 			}
@@ -513,7 +513,7 @@ int sendToProfileRaw(lua_State * L) {
 			if ((prof = luaL_checkint(L, -1) + 1) < 0) {
 				prof = -prof;
 			}
-			unsigned long prf = 1 << (prof % 32);
+			unsigned long prf = static_cast<unsigned long> (1 << (prof % 32));
 			if (!(profile & prf)) {
 				profile = profile | prf;
 			}
@@ -526,7 +526,7 @@ int sendToProfileRaw(lua_State * L) {
 		if ((prof = luaL_checkint(L, 1) + 1) < 0) {
 			prof = -prof;
 		}
-		profile = 1 << (prof % 32);
+		profile = static_cast<unsigned long> (1 << (prof % 32));
 	} else {
 		return luaL_typeerror(L, 1, "number or table");
 	}
@@ -558,7 +558,7 @@ int sendToIp(lua_State * L) {
 					if ((prof = luaL_checkint(L, -1) + 1) < 0) {
 						prof = -prof;
 					}
-					prf = 1 << (prof % 32);
+					prf = static_cast<unsigned long> (1 << (prof % 32));
 					if (!(profile & prf)) {
 						profile = profile | prf;
 					}
@@ -571,7 +571,7 @@ int sendToIp(lua_State * L) {
 				if ((prof = luaL_checkint(L, 1) + 1) < 0) {
 					prof = -prof;
 				}
-				profile = 1 << (prof % 32);
+				profile = static_cast<unsigned long> (1 << (prof % 32));
 			} else if (type != LUA_TNIL) {
 				return luaL_typeerror(L, 1, "number or table");
 			}
@@ -631,7 +631,7 @@ int sendToIpRaw(lua_State * L) {
 					if ((prof = luaL_checkint(L, -1) + 1) < 0) {
 						prof = -prof;
 					}
-					prf = 1 << (prof % 32);
+					prf = static_cast<unsigned long> (1 << (prof % 32));
 					if (!(profile & prf)) {
 						profile = profile | prf;
 					}
@@ -644,7 +644,7 @@ int sendToIpRaw(lua_State * L) {
 				if ((prof = luaL_checkint(L, 1) + 1) < 0) {
 					prof = -prof;
 				}
-				profile = 1 << (prof % 32);
+				profile = static_cast<unsigned long> (1 << (prof % 32));
 			} else if (type != LUA_TNIL) {
 				return luaL_typeerror(L, 1, "number or table");
 			}
@@ -1073,7 +1073,7 @@ int disconnectIp(lua_State * L) {
 				if ((prof = luaL_checkint(L, -1) + 1) < 0) {
 					prof = -prof;
 				}
-				prf = 1 << (prof % 32);
+				prf = static_cast<unsigned long> (1 << (prof % 32));
 				if (!(profile & prf)) {
 					profile = profile | prf;
 				}
@@ -1086,7 +1086,7 @@ int disconnectIp(lua_State * L) {
 			if ((prof = luaL_checkint(L, 1) + 1) < 0) {
 				prof = -prof;
 			}
-			profile = 1 << (prof % 32);
+			profile = static_cast<unsigned long> (1 << (prof % 32));
 		} else if (type != LUA_TNIL) {
 			return luaL_typeerror(L, 1, "number or table");
 		}
@@ -1110,7 +1110,7 @@ int disconnectIp(lua_State * L) {
 				if (prf > 31) {
 					prf = (prf % 32) - 1;
 				}
-				if (profile & (1 << prf)) {
+				if (profile & static_cast<unsigned long> (1 << prf)) {
 					(*it)->disconnect();
 				}
 			}
