@@ -38,11 +38,19 @@
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400)
 		#pragma warning(disable:4996) // Disable "This function or variable may be unsafe."
 	#endif
+#else
+	#include <unistd.h> // for usleep function
 #endif
 
-#define NS_INADDRSZ 4
-#define NS_IN6ADDRSZ 16
-#define NS_INT16SZ 2
+#ifndef NS_INADDRSZ
+  #define NS_INADDRSZ 4
+#endif
+#ifndef NS_IN6ADDRSZ
+  #define NS_IN6ADDRSZ 16
+#endif
+#ifndef NS_INT16SZ
+  #define NS_INT16SZ 2
+#endif
 
 
 
@@ -300,6 +308,7 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 		if (log(LEVEL_FATAL)) {
 			logStream() << "Error in socket: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
 		}
+		freeaddrinfo(mAddrInfo);
 		return INVALID_SOCKET;
 	}
 
@@ -412,8 +421,8 @@ void Conn::closeNow(int reason /* = 0 */) {
 	mWritable = false;
 	setOk(false);
 	if (mServer) {
-		if (!(mServer->mConnChooser.ConnChoose::optGet(this) & ConnChoose::eEF_CLOSE)) {
-			++ mServer->miNumCloseConn;
+		if (!(mServer->mConnChooser.ConnChoose::optGet(this) & ConnChoose::EF_CLOSE)) {
+			++ mServer->mNumCloseConn;
 			mClosed = true; // poll conflict
 
 			if (reason) {
@@ -424,12 +433,12 @@ void Conn::closeNow(int reason /* = 0 */) {
 			}
 
 #if USE_SELECT
-			mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::eEF_CLOSE);
-			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::eEF_ALL);
+			mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::EF_CLOSE);
+			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::EF_ALL);
 #else
 			// this sequence of flags for poll!
-			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::eEF_ALL);
-			mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::eEF_CLOSE);
+			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::EF_ALL);
+			mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::EF_CLOSE);
 #endif
 			
 		} else {
@@ -490,15 +499,15 @@ Conn * Conn::createNewConn() {
 tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 	int i = 0;
 	socklen_t namelen = sizeof(storage);
-	memset(&storage, 0, namelen);
-	tSocket sock = ::accept(mSocket, (struct sockaddr *) &storage, (socklen_t*) &namelen);
+	memset(&storage, 0, sizeof(storage));
+	tSocket sock = ::accept(mSocket, reinterpret_cast<struct sockaddr *> (&storage), static_cast<socklen_t*> (&namelen));
 	while (SOCK_INVALID(sock) && ((SOCK_ERR == SOCK_EAGAIN) || (SOCK_ERR == SOCK_EINTR)) && (++i <= 10)) {
 		// Try to accept connection not more than 10 once
-		sock = ::accept(mSocket, (struct sockaddr *) &storage, (socklen_t*) &namelen);
+		sock = ::accept(mSocket, reinterpret_cast<struct sockaddr *> (&storage), static_cast<socklen_t*> (&namelen));
 		#ifdef _WIN32
 			Sleep(1);
 		#else
-			usleep(1000);
+			usleep(1000u);
 		#endif
 	}
 	if (SOCK_INVALID(sock)) {
@@ -550,7 +559,7 @@ int Conn::defineConnInfo(sockaddr_storage & storage) {
 	if (mSocket) {
 		char host[NI_MAXHOST] = { 0 };
 		char port[NI_MAXSERV] = { 0 };
-		int ret = getnameinfo((struct sockaddr *) &storage, sizeof(struct sockaddr_storage), host, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+		int ret = getnameinfo(reinterpret_cast<struct sockaddr *> (&storage), sizeof(struct sockaddr_storage), host, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
 		if (ret != 0) {
 			if (log(LEVEL_WARN)) {
 				logStream() << "Error in getnameinfo: " << SOCK_ERR_GAI_MSG(ret) << " [" << ret << "]" << endl;
@@ -577,19 +586,18 @@ int Conn::recv() {
 		return 0;
 	}
 
-	int iBufLen = 0, i = 0;
-
+	int bufLen = 0, i = 0;
 
 	bool udp = (this->mConnType == CONN_TYPE_INCOMING_UDP);
 	if (!udp) { // TCP
 
 		while (
-			(SOCK_ERROR(iBufLen = ::recv(mSocket, mRecvBuf, MAX_RECV_SIZE, 0))) &&
+			(SOCK_ERROR(bufLen = ::recv(mSocket, mRecvBuf, MAX_RECV_SIZE, 0))) &&
 			((SOCK_ERR == SOCK_EAGAIN) || (SOCK_ERR == SOCK_EINTR))
 			&& (++i <= 100)
 		) {
 			#ifndef _WIN32
-				usleep(100);
+				usleep(100u);
 			#endif
 		}
 
@@ -598,29 +606,28 @@ int Conn::recv() {
 			logStream() << "Start read (UDP)" << endl;
 		}
 		while (
-			(SOCK_ERROR(iBufLen = recvfrom(
+			(SOCK_ERROR(bufLen = recvfrom(
 				mSocket,
 				mRecvBuf,
 				MAX_RECV_SIZE,
 				0,
-				(struct sockaddr *) &mSockAddrIn,
-				(socklen_t *) &mSockAddrInSize
+				reinterpret_cast<struct sockaddr *> (&mSockAddrIn),
+				static_cast<socklen_t *> (&mSockAddrInSize)
 			))) && (++i <= 100)
 		) {
 			#ifndef _WIN32
-				usleep(100);
+				usleep(100u);
 			#endif
 		}
 		if (log(LEVEL_TRACE)) {
-			logStream() << "End read (UDP). Read bytes: " << iBufLen << endl;
+			logStream() << "End read (UDP). Read bytes: " << bufLen << endl;
 		}
 	}
 
-
 	mRecvBufRead = mRecvBufEnd = 0;
-	if (iBufLen <= 0) {
+	if (bufLen <= 0) {
 		if (!udp) {
-			if (iBufLen == 0) {
+			if (bufLen == 0) {
 				if (log(LEVEL_DEBUG)) {
 					logStream() << "Other side has closed connection" << endl;
 				}
@@ -645,11 +652,11 @@ int Conn::recv() {
 	if (udp) {
 		mIpUdp = inet_ntoa(mSockAddrIn.sin_addr);
 	}
-	mRecvBufEnd = iBufLen; // End buf pos
+	mRecvBufEnd = static_cast<size_t> (bufLen); // End buf pos
 	mRecvBufRead = 0; // Pos for reading from buf
 	mRecvBuf[mRecvBufEnd] = '\0'; // Adding 0 symbol to end of str
 	mLastRecv.get(); // Write time last recv action
-	return iBufLen;
+	return bufLen;
 }
 
 
@@ -794,21 +801,21 @@ size_t Conn::readFromRecvBuf() {
 
 	char * buf = mRecvBuf + mRecvBufRead;
 	const char * pos_sep = strstr(buf, getSeparator());
-	size_t len = 0;
+	size_t len = 0u;
 
 	if (pos_sep) { // separator was found
-		len = pos_sep - buf;
+		len = static_cast<size_t> (pos_sep - buf);
 		mRecvBufRead += (len + getSeparatorLen());
 		mStatus = STRING_STATUS_STR_DONE;
 	} else { // separator was not found
 		len = mRecvBufEnd - mRecvBufRead;
-		mRecvBufRead = mRecvBufEnd = 0;
+		mRecvBufRead = mRecvBufEnd = 0u;
 	}
 
 	size_t size = mCommand->size() + len;
-	if (size > (mProtocol ? mProtocol->getMaxCommandLength() : 10240)) {
+	if (size > (mProtocol ? mProtocol->getMaxCommandLength() : 10240u)) {
 		closeNow(CLOSE_REASON_MAXSIZE_RECV);
-		return 0;
+		return 0u;
 	}
 	mCommand->reserve(size);
 	mCommand->append(buf, len);
@@ -840,12 +847,11 @@ string * Conn::getParserCommandPtr() {
 
 Parser * Conn::createParser() {
 	if (!mProtocol) {
-		// ToDo remove!
 		if (!mCreatorConnFactory) {
 			return NULL;
 		}
-		// ToDo remove!
-		mProtocol = mCreatorConnFactory->getProtocol();
+		// For UDP connection
+		mProtocol = mCreatorConnFactory->mProtocol;
 	}
 	return mProtocol->createParser();
 }
@@ -866,7 +872,6 @@ void Conn::deleteParser(Parser * parser) {
 
 /// Remaining (for web-server)
 size_t Conn::remaining() {
-
 	char * buf = mRecvBuf + mRecvBufRead;
 	size_t len = mRecvBufEnd - mRecvBufRead;
 	size_t size = mCommand->size() + len;
@@ -957,7 +962,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 		if (mServer && mOk) {
 			if (mBlockOutput) {
 				mBlockOutput = false;
-				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::eEF_OUTPUT);
+				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::EF_OUTPUT);
 				if (log(LEVEL_DEBUG)) {
 					logStream() << "Unblock output channel" << endl;
 				}
@@ -965,12 +970,12 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 
 			bufLen = mSendBuf.size();
 			if (mBlockInput && bufLen < MAX_SEND_UNBLOCK_SIZE) { // Unset block of input
-				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::eEF_INPUT);
+				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::EF_INPUT);
 				if (log(LEVEL_DEBUG)) {
 					logStream() << "Unblock input channel" << endl;
 				}
 			} else if (!mBlockInput && bufLen >= MAX_SEND_BLOCK_SIZE) { // Set block of input
-				mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::eEF_INPUT);
+				mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::EF_INPUT);
 				if (log(LEVEL_DEBUG)) {
 					logStream() << "Block input channel" << endl;
 				}
@@ -988,7 +993,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 
 		if (mServer && mOk && !mBlockOutput) {
 			mBlockOutput = true;
-			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::eEF_OUTPUT);
+			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::EF_OUTPUT);
 			if (log(LEVEL_DEBUG)) {
 				logStream() << "Block output channel" << endl;
 			}
@@ -1027,17 +1032,8 @@ void Conn::flush() {
 
 /// Send len byte from buf
 int Conn::send(const char * buf, size_t & len) {
-#ifdef QUICK_SEND // Quick send
-	if (mConnType != CONN_TYPE_INCOMING_UDP) {
-		len = ::send(mSocket, buf, len, 0);
-	} else {
-		len = ::sendto(mSocket, buf, len, 0, (struct sockaddr *) &mSockAddrIn, mSockAddrInSize);
-	}
-	return SOCK_ERROR(len) ? -1 : 0; /* return -1 - fail, 0 - ok */
-#else
 	int n = -1;
 	size_t total = 0, bytesleft = len;
-
 	bool tcp = (mConnType != CONN_TYPE_INCOMING_UDP);
 
 	while (total < len) { // EMSGSIZE (WSAEMSGSIZE)
@@ -1047,10 +1043,11 @@ int Conn::send(const char * buf, size_t & len) {
 			n = ::send(
 				mSocket,
 				buf + total,
-				static_cast<int> (bytesleft), // fix me: protection to very long msg
 				#ifndef _WIN32
+					bytesleft,
 					MSG_NOSIGNAL | MSG_DONTWAIT
 				#else
+					static_cast<int> (bytesleft), // Attention! Max len: 2147483647 (0x7FFFFFFF)
 					0
 				#endif
 			);
@@ -1060,30 +1057,25 @@ int Conn::send(const char * buf, size_t & len) {
 			n = ::sendto(
 				mSocket,
 				buf + total,
-				static_cast<int> (bytesleft), // fix me: protection to very long msg
+				#ifndef _WIN32
+					bytesleft,
+				#else
+					static_cast<int> (bytesleft), // Attention! Max len: 2147483647 (0x7FFFFFFF)
+				#endif
 				0,
-				(struct sockaddr *) &mSockAddrIn,
+				reinterpret_cast<struct sockaddr *> (&mSockAddrIn),
 				mSockAddrInSize
 			);
 
 		}
-
-/*		if (log(LEVEL_TRACE)) {
-				logStream() << "len = " << len
-					<< " total=" << total
-					<< " left=" << bytesleft
-					<< " n=" << n << endl;
-			}
-*/
 		if (SOCK_ERROR(n)) {
 			break;
 		}
-		total += n;
-		bytesleft -= n;
+		total += static_cast<size_t> (n);
+		bytesleft -= static_cast<size_t> (n);
 	}
 	len = total; // Number sent bytes
 	return SOCK_ERROR(n) ? -1 : 0; // return -1 - fail, 0 - ok
-#endif
 }
 
 
@@ -1230,13 +1222,8 @@ int ConnFactory::onNewConn(Conn * conn) {
 	return mServer->onNewConn(conn);
 }
 
-// ToDo remove!
-Protocol * ConnFactory::getProtocol() {
-	return mProtocol;
-}
 
-
-}; // server
+} // namespace server
 
 /**
  * $Id$

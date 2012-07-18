@@ -53,15 +53,15 @@ string & Encoder::toBase32(const uint8_t * src, size_t len, string & dst) {
 	for (size_t i = 0, index = 0; i < len;) {
 		/* Is the current word going to span a byte boundary? */
 		if (index > 3) {
-			word = (uint8_t) (src[i] & (0xFF >> index));
+			word = static_cast<uint8_t> (src[i] & (0xFF >> index));
 			index = (index + 5) % 8;
-			word <<= index;
+			word = static_cast<uint8_t> (word << index);
 			if ((i + 1) < len) {
-				word |= src[i + 1] >> (8 - index);
+				word = static_cast<uint8_t> (word | (src[i + 1] >> (8 - index)));
 			}
 			++i;
 		} else {
-			word = (uint8_t) (src[i] >> (8 - (index + 5))) & 0x1F;
+			word = static_cast<uint8_t> ((src[i] >> (8 - (index + 5))) & 0x1F);
 			index = (index + 5) % 8;
 			if (index == 0) {
 				++i;
@@ -77,27 +77,27 @@ void Encoder::fromBase32(const char * src, uint8_t * dst, size_t len) {
 	memset(dst, 0, len);
 	for (size_t i = 0, index = 0, offset = 0; src[i]; ++i) {
 		// Skip what we don't recognise
-		int8_t tmp = base32Table[(unsigned char) src[i]];
+		int8_t tmp = base32Table[static_cast<unsigned char> (src[i])];
 		if (tmp != -1) {
 			if (index <= 3) {
 				index = (index + 5) % 8;
 				if (index == 0) {
-					dst[offset] |= tmp;
+					dst[offset] = static_cast<uint8_t> (dst[offset] | tmp);
 					++offset;
 					if (offset == len) {
 						break;
 					}
 				} else {
-					dst[offset] |= tmp << (8 - index);
+					dst[offset] = static_cast<uint8_t> (dst[offset] | (tmp << (8 - index)));
 				}
 			} else {
 				index = (index + 5) % 8;
-				dst[offset] |= (tmp >> index);
+				dst[offset] = static_cast<uint8_t> (dst[offset] | (tmp >> index));
 				++offset;
 				if (offset == len) {
 					break;
 				}
-				dst[offset] |= tmp << (8 - index);
+				dst[offset] = static_cast<uint8_t> (dst[offset] | (tmp << (8 - index)));
 			}
 		}
 	}
@@ -105,14 +105,14 @@ void Encoder::fromBase32(const char * src, uint8_t * dst, size_t len) {
 
 bool Encoder::isBase32(const char* src) {
 	for (size_t i = 0; src[i]; ++i) {
-		if (base32Table[(int8_t)src[i]] == -1) {
+		if (base32Table[static_cast<int8_t> (src[i])] == -1) {
 			return false;
 		}
 	}
 	return true;
 }
 
-}; // namespace utils
+} // namespace utils
 
 /**
  * $Id$

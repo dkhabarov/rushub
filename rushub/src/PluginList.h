@@ -43,7 +43,7 @@ namespace dcserver {
 
 	class DcServer;
 
-}; // namespace dcserver
+} // namespace dcserver
 
 
 
@@ -129,12 +129,17 @@ protected:
 
 private:
 
+	PluginList(const PluginList &);
+	PluginList & operator = (const PluginList &);
+
+private:
+
 	DcServerBase * mDcServerBase;
 
 }; // class PluginList
 
 
-}; // namespace plugin
+} // namespace plugin
 
 #endif // PLUGIN_LIST_H
 

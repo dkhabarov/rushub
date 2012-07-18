@@ -29,7 +29,7 @@ using namespace ::dcserver;
 
 namespace dcserver {
 	class DcServer;
-};
+}
 
 namespace webserver {
 
@@ -65,7 +65,7 @@ public:
 
 public:
 
-	WebUser(int type) : WebUserBase(type) {}
+	WebUser(int type) : WebUserBase(type), mWebConn(NULL) {}
 	virtual ~WebUser() {}
 
 	virtual const char * getCommand();
@@ -87,6 +87,11 @@ public:
 
 	/** Get conn port */
 	virtual int getPortConn();
+
+private:
+
+	WebUser(const WebUser &);
+	WebUser & operator = (const WebUser &);
 
 }; // class WebUser
 
@@ -113,9 +118,12 @@ private:
 	/// Timer of the connection
 	virtual int onTimer(Time & now);
 
+	WebConn(const WebConn &);
+	WebConn & operator = (const WebConn &);
+
 }; // class WebConn
 
-}; // namespace webserver
+} // namespace webserver
 
 #endif // WEB_CONN_H
 

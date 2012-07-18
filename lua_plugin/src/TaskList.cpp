@@ -26,8 +26,8 @@ namespace luaplugin {
 
 /** Do tasks */
 void Tasks(void * value) {
-	Task * task = (Task *) value;
-	LuaInterpreter * param = (LuaInterpreter *) (task->mParam);
+	Task * task = static_cast<Task *> (value);
+	LuaInterpreter * param = static_cast<LuaInterpreter *> (task->mParam);
 	switch (task->mType) {
 		case TASKTYPE_RESTARTSCRIPT :
 			LuaPlugin::mCurLua->restartScript(param);
@@ -92,7 +92,7 @@ void TasksList::onRemove(Task * task) {
 }
 
 
-}; // namespace luaplugin
+} // namespace luaplugin
 
 /**
  * $Id$

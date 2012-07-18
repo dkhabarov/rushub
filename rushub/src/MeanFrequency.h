@@ -151,9 +151,9 @@ public:
 		mPeriodPart = mOverPeriod / mResolution;
 	};
 
-}; // MeanFrequency
+}; // class MeanFrequency
 
-}; // namespace utils
+} // namespace utils
 
 #endif // MEAN_FREQUENCY_H
 

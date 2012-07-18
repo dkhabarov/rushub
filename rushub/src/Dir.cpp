@@ -174,7 +174,7 @@ void Dir::pathForFile(const char * file, string & path) {
 		slash = strrchr(file, '\\');
 	}
 	if (slash) {
-		path = string(file, slash - file + 1);
+		path = string(file, static_cast<size_t> (slash - file + 1));
 	} else {
 		path = '.';
 	}
@@ -217,7 +217,7 @@ bool Dir::checkPath(string & path) {
 	return true;
 }
 
-}; // namespace utils
+} // namespace utils
 
 /**
  * $Id$

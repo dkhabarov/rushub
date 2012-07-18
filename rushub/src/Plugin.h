@@ -23,6 +23,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <sstream>
 
 #ifdef _WIN32
 	#ifndef STD_TYPES
@@ -43,7 +44,7 @@
 
 namespace plugin {
 	class Plugin;
-};
+}
 
 using ::plugin::Plugin;
 using namespace ::std;
@@ -86,7 +87,7 @@ using namespace ::std;
 
 // Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10039
+	#define INTERNAL_PLUGIN_VERSION 10042
 #endif
 
 // NMDC protocol separator
@@ -107,6 +108,12 @@ using namespace ::std;
 	#define WEB_SEPARATOR_LEN 4
 #endif
 
+enum DcProtocolType {
+	DC_PROTOCOL_TYPE_ANY = 0,
+	DC_PROTOCOL_TYPE_NMDC,
+	DC_PROTOCOL_TYPE_ADC
+};
+
 
 
 /// DC Server namespace
@@ -114,7 +121,7 @@ namespace dcserver {
 
 enum ClientType {
 	CLIENT_TYPE_DC = 1000,
-	CLIENT_TYPE_WEB = 1001,
+	CLIENT_TYPE_WEB = 1001
 }; // enum ClientType
 
 
@@ -315,7 +322,7 @@ public:
 	/// Get user base by uid
 	virtual DcUserBase * getDcUserBase(const char * uid) = 0;
 
-	/// Send comand to user
+	/// Send command to user
 	virtual bool sendToUser(
 		DcUserBase *,
 		const string & data,
@@ -323,7 +330,13 @@ public:
 		const char * from = NULL
 	) = 0;
 
-	/// Send comand to nick
+	/// Send raw command to user
+	virtual bool sendToUserRaw(
+		DcUserBase *,
+		const string & data
+	) = 0;
+
+	/// Send command to nick
 	virtual bool sendToNick(
 		const char * to,
 		const string & data,
@@ -331,14 +344,25 @@ public:
 		const char * from = NULL
 	) = 0;
 
-	/// Send comand to all
+	/// Send raw command to nick
+	virtual bool sendToNickRaw(
+		const char * to,
+		const string & data
+	) = 0;
+
+	/// Send command to all
 	virtual bool sendToAll(
 		const string & data,
 		const char * uid = NULL,
 		const char * from = NULL
 	) = 0;
 
-	/// Send comand to profiles
+	/// Send raw command to all
+	virtual bool sendToAllRaw(
+		const string & data
+	) = 0;
+
+	/// Send command to profiles
 	virtual bool sendToProfiles(
 		unsigned long profile,
 		const string & data,
@@ -346,7 +370,13 @@ public:
 		const char * from = NULL
 	) = 0;
 
-	/// Send comand to ip
+	/// Send raw command to profiles
+	virtual bool sendToProfilesRaw(
+		unsigned long profile,
+		const string & data
+	) = 0;
+
+	/// Send command to ip
 	virtual bool sendToIp(
 		const string & ip,
 		const string & data,
@@ -355,7 +385,14 @@ public:
 		const char * from = NULL
 	) = 0;
 
-	/// Send comand to all except nicks
+	/// Send raw command to ip
+	virtual bool sendToIpRaw(
+		const string & ip,
+		const string & data,
+		unsigned long profile = 0
+	) = 0;
+
+	/// Send command to all except nicks
 	virtual bool sendToAllExceptNicks(
 		const vector<string> & nickList,
 		const string & data,
@@ -363,12 +400,24 @@ public:
 		const char * from = NULL
 	) = 0;
 
-	/// Send comand to all except ips
+	/// Send raw command to all except nicks
+	virtual bool sendToAllExceptNicksRaw(
+		const vector<string> & nickList,
+		const string & data
+	) = 0;
+
+	/// Send command to all except ips
 	virtual bool sendToAllExceptIps(
 		const vector<string> & ipList,
 		const string & data,
 		const char * uid = NULL,
 		const char * from = NULL
+	) = 0;
+
+	/// Send raw command to all except ips
+	virtual bool sendToAllExceptIpsRaw(
+		const vector<string> & ipList,
+		const string & data
 	) = 0;
 
 
@@ -423,7 +472,20 @@ public:
 }; // class DcServerBase
 
 
-}; // namespace dcserver
+
+template<class F, class T> T & convert(const F & from, T & to, const T & def) {
+    ostringstream oss;
+    if (!(oss << from)) {
+        return to = def;
+    }
+    istringstream iss(oss.str());
+    if (!(iss >> to)) {
+        return to = def;
+    }
+    return to;
+}
+
+} // namespace dcserver
 
 
 
@@ -463,7 +525,7 @@ private:
 }; // class WebUserBase
 
 
-}; // namespace webserver
+} // namespace webserver
 
 
 
@@ -644,7 +706,7 @@ private:
 
 }; // class Plugin
 
-}; // namespace plugin
+} // namespace plugin
 
 #endif // PLUGIN_H
 

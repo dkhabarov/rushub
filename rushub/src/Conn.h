@@ -47,6 +47,8 @@ class Parser; // *mParser
 /// Connection-factory for create and delete connection
 class ConnFactory {
 
+	friend class Conn; // for mProtocol
+
 public:
 
 	ConnFactory(Protocol *, Server *);
@@ -56,12 +58,16 @@ public:
 	virtual void deleteConn(Conn * &);
 	virtual void onNewData(Conn *, string *);
 	virtual int onNewConn(Conn *);
-	Protocol * getProtocol(); // ToDo remove!
 
 protected:
 
 	Protocol * mProtocol; ///< Protocal
 	Server * mServer; ///< Pointer on server
+
+private:
+
+	ConnFactory(const ConnFactory &);
+	ConnFactory & operator = (const ConnFactory &);
 
 }; // class ConnFactory
 
@@ -234,7 +240,7 @@ protected:
 
 	Time mLastRecv; ///< Time of the last recv action from the client
 
-	unsigned long & mSendBufMax; ///< Max size sending buf
+	unsigned int & mSendBufMax; ///< Max size sending buf
 
 	list<Conn *>::iterator mIterator; ///< Optimisation
 
@@ -323,9 +329,12 @@ private:
 	/// Calculate mac-address
 	void calcMacAddress();
 
+	Conn(const Conn &);
+	Conn & operator = (const Conn &);
+
 }; // class Conn
 
-}; // namespace server
+} // namespace server
 
 #endif // CONN_H
 

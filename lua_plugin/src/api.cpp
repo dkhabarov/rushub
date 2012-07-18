@@ -51,8 +51,8 @@ namespace luaplugin {
 
 
 DcUserBase * getDcUserBase(lua_State * L, int indx) {
-	void ** userdata = (void **) lua_touserdata(L, indx);
-	DcUserBase * dcUserBase = (DcUserBase *) *userdata;
+	void ** userdata = static_cast<void **> (lua_touserdata(L, indx));
+	DcUserBase * dcUserBase = static_cast<DcUserBase *> (*userdata);
 	return dcUserBase->mType == CLIENT_TYPE_DC ? dcUserBase : NULL;
 }
 
@@ -98,9 +98,9 @@ void copyValue(lua_State * from, lua_State * to, int idx) {
 			break;
 
 		case LUA_TUSERDATA :
-			udata = (void *) getDcUserBase(from, idx);
+			udata = static_cast<void *> (getDcUserBase(from, idx));
 			if (udata) {
-				userdata = (void**) lua_newuserdata(to, sizeof(void *));
+				userdata = static_cast<void**> (lua_newuserdata(to, sizeof(void *)));
 				*userdata = udata;
 				luaL_getmetatable(to, MT_USER_CONN);
 				lua_setmetatable(to, -2);
@@ -256,6 +256,58 @@ int sendToUser(lua_State * L) {
 
 
 
+/// SendToUserRaw(UID/sToNick/tNicks, sData)
+// TODO Web.Send
+int sendToUserRaw(lua_State * L) {
+	if (!LuaUtils::checkCount(L, 2)) {
+		return 0;
+	}
+	int type = lua_type(L, 1);
+
+	size_t dataLen = 0;
+	const char * data = luaL_checklstring(L, 2, &dataLen);
+	if (!LuaUtils::checkMsgLen(L, dataLen)) {
+		return 2;
+	}
+
+	if (type == LUA_TUSERDATA) {
+		DcUserBase * dcUserBase = getDcUserBase(L, 1);
+		if (!dcUserBase) {
+			return LuaUtils::pushError(L, "user was not found");
+		} else if (!LuaPlugin::mCurServer->sendToUserRaw(dcUserBase, string(data, dataLen))) {
+			return LuaUtils::pushError(L, "user was not found");
+		}
+	} else if (type == LUA_TSTRING) {
+		size_t toLen;
+		const char * to = lua_tolstring(L, 1, &toLen);
+		if (!LuaUtils::checkNickLen(L, toLen)) {
+			return 2;
+		}
+		if (!LuaPlugin::mCurServer->sendToNickRaw(to, string(data, dataLen))) {
+			return LuaUtils::pushError(L, "user was not found");
+		}
+	} else if (type == LUA_TTABLE) {
+		lua_pushnil(L);
+		const char * to = NULL;
+		size_t toLen;
+		while (lua_next(L, 1) != 0) {
+			to = luaL_checklstring(L, -1, &toLen);
+			if (!LuaUtils::checkNickLen(L, toLen)) {
+				return 2;
+			}
+			LuaPlugin::mCurServer->sendToNickRaw(to, string(data, dataLen));
+			lua_pop(L, 1);
+		}
+	} else {
+		return luaL_typeerror(L, 1, "userdata, string or table");
+	}
+	lua_settop(L, 0);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+
+
 //! deprecated
 /// SendToNicks(tNicks, sData, sNick, sFrom)
 int sendToNicks(lua_State * L) {
@@ -343,7 +395,28 @@ int sendToAll(lua_State * L) {
 
 	}
 	if (!LuaPlugin::mCurServer->sendToAll(string(data, dataLen), nick, from)) {
-		return LuaUtils::pushError(L, "data was not found");
+		return LuaUtils::pushError(L, "data was not send");
+	}
+	lua_settop(L, 0);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+
+
+/// SendToAllRaw(sData)
+int sendToAllRaw(lua_State * L) {
+	if (!LuaUtils::checkCount(L, 1)) {
+		return 0;
+	}
+	size_t dataLen = 0;
+	const char * data = luaL_checklstring(L, 1, &dataLen);
+	if (!LuaUtils::checkMsgLen(L, dataLen)) {
+		return 2;
+	}
+
+	if (!LuaPlugin::mCurServer->sendToAllRaw(string(data, dataLen))) {
+		return LuaUtils::pushError(L, "data was not send");
 	}
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
@@ -387,7 +460,7 @@ int sendToProfile(lua_State * L) {
 					if ((prof = luaL_checkint(L, -1) + 1) < 0) {
 						prof = -prof;
 					}
-					prf = 1 << (prof % 32);
+					prf = static_cast<unsigned long> (1 << (prof % 32));
 					if (!(profile & prf)) {
 						profile = profile | prf;
 					}
@@ -400,7 +473,7 @@ int sendToProfile(lua_State * L) {
 				if ((prof = luaL_checkint(L, 1) + 1) < 0) {
 					prof = -prof;
 				}
-				profile = 1 << (prof % 32);
+				profile = static_cast<unsigned long> (1 << (prof % 32));
 			} else {
 				return luaL_typeerror(L, 1, "number or table");
 			}
@@ -411,7 +484,55 @@ int sendToProfile(lua_State * L) {
 
 	}
 	if (!LuaPlugin::mCurServer->sendToProfiles(profile, string(data, dataLen), nick, from)) {
-		return LuaUtils::pushError(L, "data was not found");
+		return LuaUtils::pushError(L, "data was not send");
+	}
+	lua_settop(L, 0);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+
+
+/// SendToProfileRaw(iProfile/tProfiles, sData)
+int sendToProfileRaw(lua_State * L) {
+	if (!LuaUtils::checkCount(L, 2)) {
+		return 0;
+	}
+	size_t dataLen = 0;
+	const char * data = luaL_checklstring(L, 2, &dataLen);
+
+	if (!LuaUtils::checkMsgLen(L, dataLen)) {
+		return 2;
+	}
+	unsigned long profile = 0;
+	int prof;
+	int type = lua_type(L, 1);
+	if (type == LUA_TTABLE) {
+		lua_pushnil(L);
+		while (lua_next(L, 1) != 0) {
+			if ((prof = luaL_checkint(L, -1) + 1) < 0) {
+				prof = -prof;
+			}
+			unsigned long prf = static_cast<unsigned long> (1 << (prof % 32));
+			if (!(profile & prf)) {
+				profile = profile | prf;
+			}
+			lua_pop(L, 1);
+		}
+		if (!profile) {
+			return LuaUtils::pushError(L, "list turned out to be empty");
+		}
+	} else if (type == LUA_TNUMBER) {
+		if ((prof = luaL_checkint(L, 1) + 1) < 0) {
+			prof = -prof;
+		}
+		profile = static_cast<unsigned long> (1 << (prof % 32));
+	} else {
+		return luaL_typeerror(L, 1, "number or table");
+	}
+
+	if (!LuaPlugin::mCurServer->sendToProfilesRaw(profile, string(data, dataLen))) {
+		return LuaUtils::pushError(L, "data was not send");
 	}
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
@@ -437,7 +558,7 @@ int sendToIp(lua_State * L) {
 					if ((prof = luaL_checkint(L, -1) + 1) < 0) {
 						prof = -prof;
 					}
-					prf = 1 << (prof % 32);
+					prf = static_cast<unsigned long> (1 << (prof % 32));
 					if (!(profile & prf)) {
 						profile = profile | prf;
 					}
@@ -450,7 +571,7 @@ int sendToIp(lua_State * L) {
 				if ((prof = luaL_checkint(L, 1) + 1) < 0) {
 					prof = -prof;
 				}
-				profile = 1 << (prof % 32);
+				profile = static_cast<unsigned long> (1 << (prof % 32));
 			} else if (type != LUA_TNIL) {
 				return luaL_typeerror(L, 1, "number or table");
 			}
@@ -484,6 +605,63 @@ int sendToIp(lua_State * L) {
 	}
 	ip = luaL_checklstring(L, 1, &ipLen);
 	if (ip && !LuaPlugin::mCurServer->sendToIp(string(ip, ipLen), string(data, dataLen), profile, nick, from)) {
+		return LuaUtils::pushError(L, "wrong ip format");
+	}
+	lua_settop(L, 0);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+
+
+/// SendToIPRaw(sIP, sData, iProfile/tProfiles)
+int sendToIpRaw(lua_State * L) {
+	unsigned long profile = 0, prf;
+	int type, prof;
+
+	size_t dataLen = 0, ipLen = 0;
+	const char *data = NULL, *ip = NULL;
+
+	switch (lua_gettop(L)) {
+		case 3 :
+			type = lua_type(L, 1);
+			if (type == LUA_TTABLE) {
+				lua_pushnil(L);
+				while (lua_next(L, 1) != 0) {
+					if ((prof = luaL_checkint(L, -1) + 1) < 0) {
+						prof = -prof;
+					}
+					prf = static_cast<unsigned long> (1 << (prof % 32));
+					if (!(profile & prf)) {
+						profile = profile | prf;
+					}
+					lua_pop(L, 1);
+				}
+				if (!profile) {
+					return LuaUtils::pushError(L, "list turned out to be empty");
+				}
+			} else if (type == LUA_TNUMBER) {
+				if ((prof = luaL_checkint(L, 1) + 1) < 0) {
+					prof = -prof;
+				}
+				profile = static_cast<unsigned long> (1 << (prof % 32));
+			} else if (type != LUA_TNIL) {
+				return luaL_typeerror(L, 1, "number or table");
+			}
+
+		case 2 :
+			data = luaL_checklstring(L, 2, &dataLen);
+			if (!LuaUtils::checkMsgLen(L, dataLen)) {
+				return 2;
+			}
+			break;
+
+		default :
+			return LuaUtils::errCount(L, "2, or 3");
+
+	}
+	ip = luaL_checklstring(L, 1, &ipLen);
+	if (ip && !LuaPlugin::mCurServer->sendToIpRaw(string(ip, ipLen), string(data, dataLen), profile)) {
 		return LuaUtils::pushError(L, "wrong ip format");
 	}
 	lua_settop(L, 0);
@@ -541,7 +719,45 @@ int sendToAllExceptNicks(lua_State * L) {
 
 	}
 	if (!LuaPlugin::mCurServer->sendToAllExceptNicks(nickList, string(data, dataLen), nick, from)) {
-		return LuaUtils::pushError(L, "data was not found");
+		return LuaUtils::pushError(L, "data was not send");
+	}
+	lua_settop(L, 0);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+
+
+/// SendToAllExceptNicksRaw(tExcept, sData)
+int sendToAllExceptNicksRaw(lua_State * L) {
+	if (!LuaUtils::checkCount(L, 2)) {
+		return 0;
+	}
+
+	luaL_checktype(L, 1, LUA_TTABLE);
+
+	size_t dataLen = 0, exceptLen = 0;
+	const char * data = luaL_checklstring(L, 2, &dataLen);
+	if (!LuaUtils::checkMsgLen(L, dataLen)) {
+		return 2;
+	}
+
+	vector<string> nickList;
+	lua_pushnil(L);
+	while (lua_next(L, 1) != 0) {
+		const char * except = luaL_checklstring(L, -1, &exceptLen);
+		if (!LuaUtils::checkNickLen(L, exceptLen)) {
+			return 2;
+		}
+		nickList.push_back(string(except, exceptLen));
+		lua_pop(L, 1);
+	}
+	if (!nickList.size()) {
+		return LuaUtils::pushError(L, "list turned out to be empty");
+	}
+
+	if (!LuaPlugin::mCurServer->sendToAllExceptNicksRaw(nickList, string(data, dataLen))) {
+		return LuaUtils::pushError(L, "data was not send");
 	}
 	lua_settop(L, 0);
 	lua_pushboolean(L, 1);
@@ -607,6 +823,44 @@ int sendToAllExceptIps(lua_State * L) {
 
 
 
+/// SendToAllExceptIPsRaw(tExcept, sData)
+int sendToAllExceptIpsRaw(lua_State * L) {
+	if (!LuaUtils::checkCount(L, 2)) {
+		return 0;
+	}
+
+	luaL_checktype(L, 1, LUA_TTABLE);
+
+	size_t dataLen = 0, exceptLen = 0;
+	const char * data = luaL_checklstring(L, 2, &dataLen);
+	if (!LuaUtils::checkMsgLen(L, dataLen)) {
+		return 2;
+	}
+
+	vector<string> ipList;
+	lua_pushnil(L);
+	while (lua_next(L, 1) != 0) {
+		const char * except = luaL_checklstring(L, -1, &exceptLen);
+		if (!LuaUtils::checkNickLen(L, exceptLen)) {
+			return 2;
+		}
+		ipList.push_back(string(except, exceptLen));
+		lua_pop(L, 1);
+	}
+	if (!ipList.size()) {
+		return LuaUtils::pushError(L, "list turned out to be empty");
+	}
+
+	if (!LuaPlugin::mCurServer->sendToAllExceptIpsRaw(ipList, string(data, dataLen))) {
+		return LuaUtils::pushError(L, "wrong ip format");
+	}
+	lua_settop(L, 0);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+
+
 /// GetUser(UID/sNick, iByte)
 int getUser(lua_State * L) {
 	if (lua_type(L, 1) == LUA_TUSERDATA) {
@@ -623,8 +877,8 @@ int getUser(lua_State * L) {
 		if (!dcUserBase) {
 			return LuaUtils::pushError(L, "user was not found");
 		}
-		void ** userdata = (void **) lua_newuserdata(L, sizeof(void *));
-		*userdata = (void *) dcUserBase;
+		void ** userdata = static_cast<void **> (lua_newuserdata(L, sizeof(void *)));
+		*userdata = static_cast<void *> (dcUserBase);
 		luaL_getmetatable(L, MT_USER_CONN);
 		lua_setmetatable(L, -2);
 	} else {
@@ -662,7 +916,7 @@ int setUser(lua_State * L) {
 		return LuaUtils::pushError(L, "user was not found");
 	}
 
-	unsigned num = (unsigned)luaL_checkinteger(L, 2);
+	unsigned num = static_cast<unsigned> (luaL_checkinteger(L, 2));
 	if (num == USERVALUE_PROFILE) {
 		Uid::setValue(L, dcUserBase, USER_PARAM_PROFILE, ParamBase::TYPE_INT);
 	} else if (num == USERVALUE_MYINFO) {
@@ -703,8 +957,8 @@ int getUsers(lua_State * L) {
 		for (vector<DcUserBase *>::const_iterator it = v.begin(); it != v.end(); ++it) {
 			if (all || (*it)->getParam(USER_PARAM_IN_USER_LIST)->getBool()) {
 				lua_pushnumber(L, i);
-				void ** userdata = (void **) lua_newuserdata(L, sizeof(void *));
-				*userdata = (void *) (*it);
+				void ** userdata = static_cast<void **> (lua_newuserdata(L, sizeof(void *)));
+				*userdata = static_cast<void *> (*it);
 				luaL_getmetatable(L, MT_USER_CONN);
 				lua_setmetatable(L, -2);
 				lua_rawset(L, topTab);
@@ -722,8 +976,8 @@ int getUsers(lua_State * L) {
 			if (dcUserBase->mType == CLIENT_TYPE_DC) {
 				if (all || (dcUserBase->getParam(USER_PARAM_IN_USER_LIST)->getBool())) {
 					lua_pushnumber(L, i);
-					void ** userdata = (void **) lua_newuserdata(L, sizeof(void *));
-					*userdata = (void *) dcUserBase;
+					void ** userdata = static_cast<void **> (lua_newuserdata(L, sizeof(void *)));
+					*userdata = static_cast<void *> (dcUserBase);
 					luaL_getmetatable(L, MT_USER_CONN);
 					lua_setmetatable(L, -2);
 					lua_rawset(L, topTab);
@@ -748,7 +1002,7 @@ int getUsersCount(lua_State * L) {
 
 /// GetTotalShare()
 int getTotalShare(lua_State * L) {
-	lua_pushnumber(L, (lua_Number)LuaPlugin::mCurServer->getTotalShare());
+	lua_pushnumber(L, static_cast<lua_Number> (LuaPlugin::mCurServer->getTotalShare()));
 	return 1;
 }
 
@@ -756,7 +1010,7 @@ int getTotalShare(lua_State * L) {
 
 /// GetUpTime()
 int getUpTime(lua_State * L) {
-	lua_pushnumber(L, (lua_Number)LuaPlugin::mCurServer->getUpTime());
+	lua_pushnumber(L, static_cast<lua_Number> (LuaPlugin::mCurServer->getUpTime()));
 	return 1;
 }
 
@@ -819,7 +1073,7 @@ int disconnectIp(lua_State * L) {
 				if ((prof = luaL_checkint(L, -1) + 1) < 0) {
 					prof = -prof;
 				}
-				prf = 1 << (prof % 32);
+				prf = static_cast<unsigned long> (1 << (prof % 32));
 				if (!(profile & prf)) {
 					profile = profile | prf;
 				}
@@ -832,7 +1086,7 @@ int disconnectIp(lua_State * L) {
 			if ((prof = luaL_checkint(L, 1) + 1) < 0) {
 				prof = -prof;
 			}
-			profile = 1 << (prof % 32);
+			profile = static_cast<unsigned long> (1 << (prof % 32));
 		} else if (type != LUA_TNIL) {
 			return luaL_typeerror(L, 1, "number or table");
 		}
@@ -856,7 +1110,7 @@ int disconnectIp(lua_State * L) {
 				if (prf > 31) {
 					prf = (prf % 32) - 1;
 				}
-				if (profile & (1 << prf)) {
+				if (profile & static_cast<unsigned long> (1 << prf)) {
 					(*it)->disconnect();
 				}
 			}
@@ -1078,12 +1332,12 @@ int moveUpScript(lua_State *L) {
 		}
 		LuaInterpreter * script = LuaPlugin::mCurLua->findScript(scriptName);
 		if (script) {
-			LuaPlugin::mCurLua->mTasksList.addTask((void *)script, TASKTYPE_MOVEUP);
+			LuaPlugin::mCurLua->mTasksList.addTask(static_cast<void *> (script), TASKTYPE_MOVEUP);
 		} else {
 			return LuaUtils::pushError(L, "script was not found");
 		}
 	} else {
-		LuaPlugin::mCurLua->mTasksList.addTask((void *)LuaPlugin::mCurLua->mCurScript, TASKTYPE_MOVEUP);
+		LuaPlugin::mCurLua->mTasksList.addTask(static_cast<void *> (LuaPlugin::mCurLua->mCurScript), TASKTYPE_MOVEUP);
 	}
 
 	LuaPlugin::mCurLua->mTasksList.addTask(NULL, TASKTYPE_SAVE);
@@ -1105,12 +1359,12 @@ int moveDownScript(lua_State * L) {
 		}
 		LuaInterpreter * script = LuaPlugin::mCurLua->findScript(scriptName);
 		if (script) {
-			LuaPlugin::mCurLua->mTasksList.addTask((void*)script, TASKTYPE_MOVEDOWN);
+			LuaPlugin::mCurLua->mTasksList.addTask(static_cast<void *> (script), TASKTYPE_MOVEDOWN);
 		} else {
 			return LuaUtils::pushError(L, "script was not found");
 		}
 	} else {
-		LuaPlugin::mCurLua->mTasksList.addTask((void*)LuaPlugin::mCurLua->mCurScript, TASKTYPE_MOVEDOWN);
+		LuaPlugin::mCurLua->mTasksList.addTask(static_cast<void *> (LuaPlugin::mCurLua->mCurScript), TASKTYPE_MOVEDOWN);
 	}
 
 	LuaPlugin::mCurLua->mTasksList.addTask(NULL, TASKTYPE_SAVE);
@@ -1122,7 +1376,7 @@ int moveDownScript(lua_State * L) {
 
 
 /// SetCmd(sData)
-// TODO: SetCmd(UID, sData)
+// TODO deprecated? SetCmd(UID, sData)
 int setCmd(lua_State * L) {
 	if (!LuaUtils::checkCount(L, 1)) {
 		return 0;
@@ -1485,7 +1739,7 @@ int setHubState(lua_State * L) {
 }
 
 
-}; // namespace luaplugin
+} // namespace luaplugin
 
 /**
  * $Id$

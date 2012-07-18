@@ -106,43 +106,49 @@ int LuaInterpreter::start() {
 
 
 	lua_newtable(mL);
-	regFunc("GetGVal",              &getGVal);
-	regFunc("SetGVal",              &setGVal);
-	regFunc("SendToUser",           &sendToUser);
-	regFunc("SendToAll",            &sendToAll);
-	regFunc("SendToAllExceptNicks", &sendToAllExceptNicks);
-	regFunc("SendToAllExceptIPs",   &sendToAllExceptIps);
-	regFunc("SendToProfile",        &sendToProfile);
-	regFunc("SendToIP",             &sendToIp);
-	regFunc("SendToNicks",          &sendToNicks);
-	regFunc("GetUser",              &getUser);
-	regFunc("SetUser",              &setUser);
-	regFunc("GetUsersCount",        &getUsersCount);
-	regFunc("GetTotalShare",        &getTotalShare);
-	regFunc("GetUpTime",            &getUpTime);
-	regFunc("Disconnect",           &disconnect);
-	regFunc("DisconnectIP",         &disconnectIp);
-	regFunc("RestartScripts",       &restartScripts);
-	regFunc("RestartScript",        &restartScript);
-	regFunc("StopScript",           &stopScript);
-	regFunc("StartScript",          &startScript);
-	regFunc("GetScripts",           &getScripts);
-	regFunc("GetScript",            &getScript);
-	regFunc("MoveUpScript",         &moveUpScript);
-	regFunc("MoveDownScript",       &moveDownScript);
-	regFunc("SetCmd",               &setCmd);
-	regFunc("GetUsers",             &getUsers);
-	regFunc("AddTimer",             &addTimer);
-	regFunc("DelTimer",             &delTimer);
-	regFunc("GetConfig",            &getConfig);
-	regFunc("SetConfig",            &setConfig);
-	regFunc("GetLang",              &getLang);
-	regFunc("SetLang",              &setLang);
-	regFunc("Call",                 &call);
-	regFunc("RegBot",               &regBot);
-	regFunc("UnregBot",             &unregBot);
-	regFunc("SetHubState",          &setHubState);
-	regFunc("Redirect",             &redirect);
+	regFunc("GetGVal",                 &getGVal);
+	regFunc("SetGVal",                 &setGVal);
+	regFunc("SendToUser",              &sendToUser);
+	regFunc("SendToUserRaw",           &sendToUserRaw);
+	regFunc("SendToAll",               &sendToAll);
+	regFunc("SendToAllRaw",            &sendToAllRaw);
+	regFunc("SendToProfile",           &sendToProfile);
+	regFunc("SendToProfileRaw",        &sendToProfileRaw);
+	regFunc("SendToIP",                &sendToIp);
+	regFunc("SendToIPRaw",             &sendToIpRaw);
+	regFunc("SendToAllExceptNicks",    &sendToAllExceptNicks);
+	regFunc("SendToAllExceptNicksRaw", &sendToAllExceptNicksRaw);
+	regFunc("SendToAllExceptIPs",      &sendToAllExceptIps);
+	regFunc("SendToAllExceptIPsRaw",   &sendToAllExceptIpsRaw);
+	regFunc("SendToNicks",             &sendToNicks);
+	regFunc("GetUser",                 &getUser);
+	regFunc("SetUser",                 &setUser);
+	regFunc("GetUsersCount",           &getUsersCount);
+	regFunc("GetTotalShare",           &getTotalShare);
+	regFunc("GetUpTime",               &getUpTime);
+	regFunc("Disconnect",              &disconnect);
+	regFunc("DisconnectIP",            &disconnectIp);
+	regFunc("RestartScripts",          &restartScripts);
+	regFunc("RestartScript",           &restartScript);
+	regFunc("StopScript",              &stopScript);
+	regFunc("StartScript",             &startScript);
+	regFunc("GetScripts",              &getScripts);
+	regFunc("GetScript",               &getScript);
+	regFunc("MoveUpScript",            &moveUpScript);
+	regFunc("MoveDownScript",          &moveDownScript);
+	regFunc("SetCmd",                  &setCmd);
+	regFunc("GetUsers",                &getUsers);
+	regFunc("AddTimer",                &addTimer);
+	regFunc("DelTimer",                &delTimer);
+	regFunc("GetConfig",               &getConfig);
+	regFunc("SetConfig",               &setConfig);
+	regFunc("GetLang",                 &getLang);
+	regFunc("SetLang",                 &setLang);
+	regFunc("Call",                    &call);
+	regFunc("RegBot",                  &regBot);
+	regFunc("UnregBot",                &unregBot);
+	regFunc("SetHubState",             &setHubState);
+	regFunc("Redirect",                &redirect);
 
 	regStrField("sLuaPluginVersion", PLUGIN_NAME " " PLUGIN_VERSION);
 	regStrField("sHubVersion", LuaPlugin::mCurServer->getHubInfo().c_str());
@@ -238,14 +244,14 @@ int LuaInterpreter::callFunc(const char * funcName) {
 	for (CallParams::iterator it = mCallParams.begin(); it != mCallParams.end(); ++it) {
 		switch ((*it)->type) {
 			case LUA_TLIGHTUSERDATA :
-				userdata = (void **) lua_newuserdata(mL, sizeof(void *));
+				userdata = static_cast<void **> (lua_newuserdata(mL, sizeof(void *)));
 				*userdata = (*it)->data;
 				luaL_getmetatable(mL, MT_USER_CONN);
 				lua_setmetatable(mL, -2);
 				break;
 
 			case LUA_TSTRING :
-				lua_pushstring(mL, (char*)(*it)->data);
+				lua_pushstring(mL, static_cast<char*> ((*it)->data));
 				break;
 
 			case LUA_TBOOLEAN :
@@ -263,7 +269,7 @@ int LuaInterpreter::callFunc(const char * funcName) {
 		}
 		delete (*it);
 	}
-	const int len = mCallParams.size();
+	const int len = static_cast<int> (mCallParams.size());
 	mCallParams.clear();
 
 	LuaInterpreter * oldScript = LuaPlugin::mCurLua->mCurScript;
@@ -281,7 +287,7 @@ int LuaInterpreter::callFunc(const char * funcName) {
 	if (lua_isboolean(mL, -1)) {
 		ret = ((lua_toboolean(mL, -1) == 0) ? 0 : 1);
 	} else if(lua_isnumber(mL, -1)) {
-		ret = (int)lua_tonumber(mL, -1);
+		ret = static_cast<int> (lua_tonumber(mL, -1));
 	}
 
 	lua_settop(mL, base); // clear stack
@@ -298,8 +304,8 @@ bool LuaInterpreter::onError(const char * funcName, const char * errMsg, bool st
 	}
 	LuaPlugin::mCurLua->mLastError = errMsg;
 	logError(LuaPlugin::mCurLua->mLastError);
-	if (strcmp(funcName, "OnError")) {
-		newCallParam((void *) errMsg, LUA_TSTRING);
+	if (strcmp(funcName, "OnError") != 0) {
+		newCallParam(static_cast<void *> (const_cast<char *> (errMsg)), LUA_TSTRING);
 		stoped = !callFunc("OnError");
 	}
 	stoped = stoped || stop;
@@ -396,7 +402,7 @@ void LuaInterpreter::regStrField(const char * name, const char * value) {
 }
 
 
-}; // namespace luaplugin
+} // namespace luaplugin
 
 /**
  * $Id$

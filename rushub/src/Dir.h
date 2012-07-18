@@ -92,7 +92,7 @@ public:
 
 }; // class Dir
 
-}; // namespace utils
+} // namespace utils
 
 #endif // DIR_H
 

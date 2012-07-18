@@ -111,9 +111,9 @@ private:
 
 	Time & normalize();
 
-}; // Time
+}; // class Time
 
-}; // namespace utils
+} // namespace utils
 
 #endif // TIMES_H
 

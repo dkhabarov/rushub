@@ -47,7 +47,7 @@ public:
 		MODE_NONE = 0,
 		MODE_NOT_CHANGE_TYPE = 1 << 0,
 		MODE_NOT_MODIFY = 1 << 1,
-		MODE_NOT_REMOVE = 1 << 2,
+		MODE_NOT_REMOVE = 1 << 2
 	};
 
 public:
@@ -135,6 +135,9 @@ private:
 		return -1;
 	}
 
+	Param(const Param &);
+	Param & operator = (const Param &);
+
 private:
 
 	string mBuf;
@@ -148,10 +151,7 @@ private:
 
 }; // class Param
 
-
-
-
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // PARAM_H
 

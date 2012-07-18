@@ -52,7 +52,7 @@ public:
 
 	virtual const char * getSeparator() const = 0; ///< protocol separator
 	virtual size_t getSeparatorLen() const = 0; ///< protocol separator length
-	virtual unsigned long getMaxCommandLength() const = 0; ///< protocol max command length
+	virtual unsigned int getMaxCommandLength() const = 0; ///< protocol max command length
 
 	virtual int doCommand(Parser *, Conn *) = 0; ///< doCommand
 	virtual Parser * createParser() = 0; ///< createParser
@@ -101,7 +101,7 @@ protected:
 protected:
 
 	void setChunk(unsigned int n, size_t start, size_t len);
-	int pushChunk(size_t start, size_t len);
+	size_t pushChunk(size_t start, size_t len);
 
 	void splitAll(size_t start, const char lim, size_t len = 0, bool left = true);
 	bool splitOnTwo(size_t start, const string & lim, unsigned int cn1, unsigned int cn2, size_t len = 0, bool left = true);
@@ -120,11 +120,11 @@ private:
 
 	vector<string> mStrings; ///< String array for chunks
 	unsigned int mMaxChunks; ///< Common (max) number of chunks (0 - resizeing)
-	unsigned long mStrMap; ///< Chunk already existed
+	unsigned int mStrMap; ///< Chunk already existed
 
-}; // Parser
+}; // class Parser
 
-}; // server
+} // namespace server
 
 #endif // PROTOCOL_H
 

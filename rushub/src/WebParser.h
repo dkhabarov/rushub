@@ -46,9 +46,9 @@ public:
 }; // class WebParser
 
 
-}; // namespace protocol
+} // namespace protocol
 
-}; // namespace webserver
+} // namespace webserver
 
 #endif // WEB_PARSER_H
 

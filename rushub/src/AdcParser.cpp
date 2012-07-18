@@ -32,7 +32,7 @@ namespace dcserver {
 
 namespace protocol {
 
-#define FOURCC(c) (*(uint32_t *)c)
+#define FOURCC(c) (*(reinterpret_cast<uint32_t *> (const_cast<char *> (c))))
 #define CMD(c) (_LITTLE_ENDIAN ? (FOURCC(c) >> 8) : (FOURCC(c) << 8))
 
 /// ADC command
@@ -158,13 +158,13 @@ const string & AdcParser::getErrorText() const {
 
 
 
-const vector<int> & AdcParser::getPositiveFeatures() const {
+const vector<unsigned int> & AdcParser::getPositiveFeatures() const {
 	return mPositiveFeature;
 }
 
 
 
-const vector<int> & AdcParser::getNegativeFeatures() const {
+const vector<unsigned int> & AdcParser::getNegativeFeatures() const {
 	return mNegativeFeature;
 }
 
@@ -179,7 +179,7 @@ int AdcParser::parse() {
 
 		if (parseHeader()) {
 			uint32_t cmd = CMD(mCommand.c_str());
-			for (unsigned int i = 0; i < ADC_TYPE_INVALID; ++i) {
+			for (unsigned int i = 0; i < sizeof(AdcCommands) / sizeof(AdcCommands[0]); ++i) {
 				AdcCommand & adcCommand = AdcCommands[i];
 				if (adcCommand.check(cmd)) { // Check command from mCommand
 					return mType = adcCommand.getAdcType(); // Set cmd type
@@ -439,7 +439,7 @@ void AdcParser::parseFeatures(DcUser * dcUser) {
 	ParamBase * param = dcUser->getParam("SU"); // TODO replace name to macros
 	if (param) {
 		const string & value = param->toString();
-		set<int> & features = dcUser->getFeatures();
+		set<unsigned int> & features = dcUser->getFeatures();
 
 		features.clear();
 		size_t i, j = 0;
@@ -480,9 +480,9 @@ void AdcParser::formingInfo(DcUser * dcUser, string & info) {
 }
 
 
-}; // namespace protocol
+} // namespace protocol
 
-}; // namespace dcserver
+} // namespace dcserver
 
 /**
  * $Id$

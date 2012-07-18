@@ -44,7 +44,7 @@ template <class T = unsigned long> struct Hash {
 	T operator() (const char * s) const {
 		T h = 0;
 		for(; *s; ++s) {
-			h = 33 * h + *s;
+			h = 33 * h + static_cast<T> (*s);
 		}
 		return h;
 	}
@@ -102,7 +102,7 @@ public:
 		size_t i;
 		size_t end;
 
-		iterator() : mData((V *) NULL), i(0), end(0) {
+		iterator() : mData(static_cast<V *> (NULL)), i(0), end(0) {
 		}
 
 		iterator(V * Data, size_t _i, size_t _end) : mData(Data), i(_i), end(_end) {
@@ -128,7 +128,7 @@ public:
 		}
 
 		iterator & operator ++() {
-			while (++i != end && mData[i] == (V)NULL) {
+			while (++i != end && mData[i] == static_cast<V> (NULL)) {
 			}
 			return *this;
 		}
@@ -148,7 +148,7 @@ public:
 	/** Initial iterator */
 	iterator begin() {
 		iterator begin_it(mData, 0, mCapacity);
-		if (mData[0] == (V)NULL) {
+		if (mData[0] == static_cast<V> (NULL)) {
 			++begin_it;
 		}
 		return begin_it;
@@ -158,6 +158,11 @@ public:
 	iterator end() {
 		return iterator(mData, mCapacity, mCapacity);
 	}
+
+private:
+
+	Array(const Array<V> &);
+	Array<V> & operator = (const Array<V> &);
 
 }; // Array
 
@@ -172,7 +177,7 @@ template <class V> Array<V>::~Array() {
 		delete [] mData;
 		mData = NULL;
 	}
-};
+}
 
 /** Inserts not zero data in array. Returns NULL in the event of successful charting, 
     otherwise returns data, which were already contributed earlier in cell with this number */
@@ -195,7 +200,7 @@ template <class V> V Array<V>::update(size_t num, const V data) {
 		mData[num] = data;
 		return oldData;
 	}
-	return (V) NULL;
+	return static_cast<V> (NULL);
 }
 
 /** Deletes not zero data from specified cells of the array. 
@@ -204,7 +209,7 @@ template <class V> V Array<V>::remove(size_t num) {
 	num %= mCapacity;
 	V oldData = mData[num];
 	if (oldData) {
-		mData[num] = (V)NULL;
+		mData[num] = static_cast<V> (NULL);
 		--mSize;
 	}
 	return oldData;
@@ -230,7 +235,7 @@ public:
 public:
 
 	/** Constructor */
-	List(K key = (K)NULL, V data = (V)NULL, List * next = NULL) :
+	List(K key = static_cast<K> (NULL), V data = static_cast<V> (NULL), List * next = NULL) :
 		mKey(key), mData(data), mNext(next)
 	{
 	}
@@ -302,7 +307,7 @@ public:
 			mNext = NULL;
 			return mData;
 		}
-		V data = (V)NULL;
+		V data = static_cast<V> (NULL);
 		List *it = mNext, *prev = this;
 
 		while ((it != NULL) && (it->mKey != key)) {
@@ -331,8 +336,14 @@ public:
 		if (it != NULL) {
 			return it->mData; /** Have found and return */
 		}
-		return (V)NULL; /** Nothing have not found */
+		return static_cast<V> (NULL); /** Nothing have not found */
 	}
+	
+private:
+
+	List(const List<K, V> &);
+	List<K, V> & operator = (const List<K, V> &);
+
 }; // List
 
 
@@ -397,7 +408,7 @@ public:
 	/** Adds not zero data and key.
 	Returns true if successful accompaniment data and key (key is unique) */
 	bool add(const Key & key, V data) {
-		if (data == (V)NULL) {
+		if (data == static_cast<V> (NULL)) {
 			return false; /** No data */
 		}
 		size_t hash = key % mData->capacity(); /** Get hash */
@@ -443,7 +454,7 @@ public:
 			delete items; /** Removing the old start element of the list */
 			items = NULL;
 		}
-		if (!mIsResizing && (V)NULL != data) { /** Removing has occurred */
+		if (!mIsResizing && static_cast<V> (NULL) != data) { /** Removing has occurred */
 			onRemove(data);
 			--mSize;
 			return true;
@@ -457,28 +468,28 @@ public:
 		if (items == NULL) { /** Check presence of the list in cell of the array */
 			return false;
 		}
-		return ((V)NULL != items->find(key)); /** Search key in list */
+		return (static_cast<V> (NULL) != items->find(key)); /** Search key in list */
 	}
 
 	/** Find by key */
 	V find(const Key & key) {
 		tItem * items = mData->find(key % mData->capacity()); /** Get cell data of the array */
 		if (items == NULL) { /** Check presence of the list in cell of the array */
-			return (V)NULL;
+			return static_cast<V> (NULL);
 		}
 		return items->find(key); /** Search data by key */
 	}
 
 	/** Update data (not NULL) to key. Returns true if successful */
 	bool update(const Key & key, const V & data) {
-		if (data == (V)NULL) {
+		if (data == static_cast<V> (NULL)) {
 			return false; /** No data */
 		}
 		tItem * items = mData->find(key % mData->capacity());
 		if (items == NULL) { /** Check presence of the list in cell of the array */
 			return false;
 		}
-		return (items->update(key, data) != (V)NULL); /** Update data in list */
+		return (items->update(key, data) != static_cast<V> (NULL)); /** Update data in list */
 	}
 
 
@@ -616,13 +627,16 @@ private:
 		onResize(size, oldCapacity, newCapacity);
 		return 0;
 	}
+	
+	HashTable(const HashTable<V> &);
+	HashTable<V> & operator = (const HashTable<V> &);
 
 }; // HashTable
 
 template <class V>
 Hash<UINT_PTR> HashTable<V>::mHash;
 
-}; // namespace utils
+} // namespace utils
 
 #endif // HASH_TABLE_H
 

@@ -58,9 +58,9 @@ private:
 
 	AntiFlood & operator = (const AntiFlood &);
 
-}; // AntiFlood
+}; // class AntiFlood
 
-}; // namespace utils
+} // namespace utils
 
 #endif // ANTIFLOOD_H
 

@@ -47,7 +47,7 @@ public:
 	bool add(DcConn *);
 	bool remove(DcConn *);
 
-	void sendToIp(const string & ip, const string & data, unsigned long profile = 0, bool addSep = false, bool flush = true);
+	void sendToIp(const string & ip, const string & data, unsigned long profile = 0, bool flush = true);
 	void sendToIpChat(const string & ip, const string & data, const string & uid, unsigned long profile = 0, bool flush = true);
 	void sendToIpPm(const string & ip, const string & data, const string & uid, const string & from, unsigned long profile = 0, bool flush = true);
 
@@ -70,7 +70,7 @@ public:
 			mIpList = it.mIpList;
 			return *this;
 		}
-		iterator(const iterator & it) {
+		iterator(const iterator & it) : mIpList(NULL) {
 			(*this) = it;
 		}
 		inline bool operator == (const iterator & it) {
@@ -110,7 +110,7 @@ private:
 
 }; // class DcIpList
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // DC_IP_LIST_H
 

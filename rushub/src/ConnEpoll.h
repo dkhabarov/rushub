@@ -45,8 +45,8 @@ public:
 
 	int choose(Time &);
 
-	bool optIn(tSocket, tEventFlag);
-	void optOut(tSocket, tEventFlag);
+	bool optIn(tSocket, EventFlag);
+	void optOut(tSocket, EventFlag);
 	int optGet(tSocket);
 	int revGet(tSocket);
 	bool revTest(tSocket);
@@ -55,9 +55,9 @@ private:
 
 	int mFd; ///< epoll fd
 
-}; // ConnEpoll
+}; // class ConnEpoll
 
-}; // server
+} // namespace server
 
 #endif // USE_EPOLL
 

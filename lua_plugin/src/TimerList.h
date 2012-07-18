@@ -90,7 +90,7 @@ public:
 	}
 
 	bool operator() (void * value) {
-		if (((Timer *) value)->mId != mId) {
+		if (static_cast<Timer *> (value)->mId != mId) {
 			return false;
 		}
 		++ mCount;
@@ -103,7 +103,7 @@ private:
 
 }; // class TmrCnt
 
-}; // namespace luaplugin
+} // namespace luaplugin
 
 #endif // TIMER_LIST_H
 

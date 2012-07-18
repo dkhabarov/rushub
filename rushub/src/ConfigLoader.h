@@ -35,7 +35,7 @@ public:
 	string mName;
 	string mPath;
 
-};
+}; // class ConfigStore
 
 class ConfigListBase;
 
@@ -54,7 +54,7 @@ public:
 
 }; // class ConfigLoader
 
-}; // namespace configuration
+} // namespace configuration
 
 #endif // CONFIG_LOADER_H
 

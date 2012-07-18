@@ -47,7 +47,7 @@ public:
 	
 	virtual const char * getSeparator() const;
 	virtual size_t getSeparatorLen() const;
-	virtual unsigned long getMaxCommandLength() const;
+	virtual unsigned int getMaxCommandLength() const;
 
 	virtual Parser * createParser();
 	virtual void deleteParser(Parser *);
@@ -62,7 +62,15 @@ public:
 	static void infList(string & list, UserBase *);
 	static const char * getSid(unsigned int num);
 
+	/// Chat Direct
+	virtual void sendToChat(DcConn *, const string & data, bool flush = true);
 	virtual void sendToChat(DcConn *, const string & data, const string & uid, bool flush = true);
+
+	/// Chat Broadcast
+	virtual void sendToChatAll(DcConn *, const string & data, bool flush = true);
+	virtual void sendToChatAll(DcConn *, const string & data, const string & uid, bool flush = true);
+
+	/// Private Message
 	virtual void sendToPm(DcConn *, const string & data, const string & uid, const string & from, bool flush = true);
 
 	virtual void forceMove(DcConn *, const char * address, const char * reason = NULL);
@@ -107,11 +115,11 @@ private:
 	int checkCommand(AdcParser *, DcConn *);
 	bool verifyCid(DcUser *);
 
-}; // AdcProtocol
+}; // class AdcProtocol
 
-}; // namespace protocol
+} // namespace protocol
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // ADC_PROTOCOL_H
 

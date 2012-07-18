@@ -85,14 +85,14 @@ ConfigItem * ConfigListBase::operator[](const string & name) {
 void ConfigListBase::setBaseTo(void * new_base) {
 	if (mBase) {
 		for (tVIt it = mKeyList.begin(); it != mKeyList.end(); ++it) {
-			mList.find(*it)->mAddress = (void *)(long(mList.find(*it)->mAddress) + (long(new_base) - long(mBase)));
+			mList.find(*it)->mAddress = reinterpret_cast<void *> (long(mList.find(*it)->mAddress) + (long(new_base) - long(mBase)));
 		}
 	}
 	mBase = new_base;
 }
 
 
-}; // namespace configuration
+} // namespace configuration
 
 /**
  * $Id$

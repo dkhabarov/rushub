@@ -225,7 +225,7 @@ int LuaPlugin::stopScript(LuaInterpreter * script, bool current) {
 		mTasksList.addTask(NULL, TASKTYPE_SAVE);
 		if (current) {
 			script->mEnabled = false;
-			mTasksList.addTask((void *) script, TASKTYPE_STOPSCRIPT);
+			mTasksList.addTask(static_cast<void *> (script), TASKTYPE_STOPSCRIPT);
 			if (!checkExists(script)) { // Removing from list in the case of absence
 				mLua.remove(script);
 				ret = LUA_ERRFILE;
@@ -259,7 +259,7 @@ int LuaPlugin::restartScript(LuaInterpreter * script, bool current) {
 		if (current) {
 			int state = luaL_loadfile(script->mL, (mScriptsDir + script->mName).c_str());
 			if (!state) {
-				mTasksList.addTask((void *) script, TASKTYPE_RESTARTSCRIPT);
+				mTasksList.addTask(static_cast<void *> (script), TASKTYPE_RESTARTSCRIPT);
 			} else {
 				stopScript(script, true);
 			}
@@ -422,7 +422,7 @@ int LuaPlugin::moveDown(LuaInterpreter * script) {
 
 
 
-// TODO: add cmd param
+// TODO add cmd param
 /** 1 - blocked */
 int LuaPlugin::callAll(const char * funcName, unsigned int listFlag, vectorLuaInterpreter & vli, DcUserBase * dcUserBase, bool param /*= true*/) {
 
@@ -447,9 +447,9 @@ int LuaPlugin::callAll(const char * funcName, unsigned int listFlag, vectorLuaIn
 	for (size_t i = 0; i < vli.size(); ++i) {
 		script = vli[i];
 		if (script && script->mL) {
-			script->newCallParam((void *) dcUserBase, LUA_TLIGHTUSERDATA);
+			script->newCallParam(static_cast<void *> (dcUserBase), LUA_TLIGHTUSERDATA);
 			if (param) {
-				script->newCallParam((void *) dcUserBase->getCommand(), LUA_TSTRING);
+				script->newCallParam(static_cast<void *> (const_cast<char *> (dcUserBase->getCommand())), LUA_TSTRING);
 			}
 
 			ret = script->callFunc(funcName);
@@ -509,7 +509,7 @@ int LuaPlugin::onScriptAction(const char * scriptName, const char * action) {
 		if (!script || !script->mL) {
 			continue;
 		} else if (scriptName) {
-			script->newCallParam((void *) scriptName, LUA_TSTRING);
+			script->newCallParam(static_cast<void *> (const_cast<char *> (scriptName)), LUA_TSTRING);
 		}
 		if (script->callFunc(action)) {
 			return 0;
@@ -539,8 +539,8 @@ int LuaPlugin::onConfigChange(const char * name, const char * value) {
 	for (size_t i = 0; i < mConfigChange.size(); ++i) {
 		script = mConfigChange[i];
 		if (script && script->mL) {
-			script->newCallParam((void *) name, LUA_TSTRING);
-			script->newCallParam((void *) value, LUA_TSTRING);
+			script->newCallParam(static_cast<void *> (const_cast<char *> (name)), LUA_TSTRING);
+			script->newCallParam(static_cast<void *> (const_cast<char *> (value)), LUA_TSTRING);
 			script->callFunc("OnConfigChange");
 		}
 	}
@@ -569,7 +569,7 @@ int LuaPlugin::onFlood(DcUserBase * dcUserBase, int type1, int type2) {
 	for (size_t i = 0; i < mFlood.size(); ++i) {
 		script = mFlood[i];
 		if (script && script->mL) {
-			script->newCallParam((void *) dcUserBase, LUA_TLIGHTUSERDATA);
+			script->newCallParam(static_cast<void *> (dcUserBase), LUA_TLIGHTUSERDATA);
 			script->newCallParam(lua_Number(type1), LUA_TNUMBER);
 			script->newCallParam(lua_Number(type2), LUA_TNUMBER);
 			ret = script->callFunc("OnFlood");
@@ -607,8 +607,8 @@ int LuaPlugin::onWebData(WebUserBase * webUserBase) {
 	for (size_t i = 0; i < mWebData.size(); ++i) {
 		script = mWebData[i];
 		if (script && script->mL) {
-			script->newCallParam((void *) webUserBase, LUA_TLIGHTUSERDATA);
-			script->newCallParam((void *) webUserBase->getCommand(), LUA_TSTRING);
+			script->newCallParam(static_cast<void *> (webUserBase), LUA_TLIGHTUSERDATA);
+			script->newCallParam(static_cast<void *> (const_cast<char *> (webUserBase->getCommand())), LUA_TSTRING);
 			ret = script->callFunc("OnWebData");
 			if (ret == 1) {
 				return 1; // 1 - blocked
@@ -643,8 +643,8 @@ int LuaPlugin::onScriptError(LuaInterpreter * current, const char * scriptName, 
 	for (size_t i = 0; i < mScriptError.size(); ++i) {
 		script = mScriptError[i];
 		if (script && script->mL && script == current) {
-			script->newCallParam((void *)scriptName, LUA_TSTRING);
-			script->newCallParam((void *)errMsg, LUA_TSTRING);
+			script->newCallParam(static_cast<void *> (const_cast<char *> (scriptName)), LUA_TSTRING);
+			script->newCallParam(static_cast<void *> (const_cast<char *> (errMsg)), LUA_TSTRING);
 			script->newCallParam(lua_Number(stoped), LUA_TBOOLEAN);
 			if (script->callFunc("OnScriptError")) {
 				return 0;
@@ -677,8 +677,8 @@ int LuaPlugin::onAny(DcUserBase * dcUserBase, int type) {
 	for (size_t i = 0; i < mAny.size(); ++i) {
 		script = mAny[i];
 		if (script && script->mL) {
-			script->newCallParam((void *) dcUserBase, LUA_TLIGHTUSERDATA);
-			script->newCallParam((void *) dcUserBase->getCommand(), LUA_TSTRING);
+			script->newCallParam(static_cast<void *> (dcUserBase), LUA_TLIGHTUSERDATA);
+			script->newCallParam(static_cast<void *> (const_cast<char *> (dcUserBase->getCommand())), LUA_TSTRING);
 			script->newCallParam(lua_Number(type), LUA_TNUMBER);
 			ret = script->callFunc("OnAny");
 			if (ret == 1) {
@@ -805,7 +805,7 @@ int LuaPlugin::onMCTo(DcUserBase * dcUserBase) {
 }
 
 
-REG_PLUGIN(LuaPlugin);
+REG_PLUGIN(LuaPlugin)
 
 
 /**

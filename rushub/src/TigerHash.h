@@ -44,7 +44,7 @@ public:
 	~TigerHash();
 
 	/** Get result */
-	uint8_t * getResult() const;
+	const uint8_t * getResult() const;
 
 	/** Calculates the Tiger hash of the data */
 	void update(const void * data, size_t len);
@@ -70,9 +70,9 @@ private:
 
 	void tigerCompress(const uint64_t * data, uint64_t state[3]) const;
 
-};
+}; // class TigerHash
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // TIGER_HASH_H
 

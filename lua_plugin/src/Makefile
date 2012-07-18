@@ -7,6 +7,7 @@
 
 CXX = g++
 
+#CXXFLAGS = -O2 -Wall -Wextra -pipe -pedantic -Wno-long-long -Woverloaded-virtual -Wctor-dtor-privacy -Wnon-virtual-dtor -Wold-style-cast -Wconversion -Wsign-conversion -Winit-self
 CXXFLAGS = -O2 -Wall -Wextra -pipe
 #CXXFLAGS = -g -Wall -Wextra -pipe
 
@@ -19,13 +20,13 @@ all: debian
 linux-static: freebsd
 
 freebsd: $(OBJS)
-	$(CXX) -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/tinyxml.a /usr/local/lib/liblua.a
+	$(CXX) -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/libtinyxml.a /usr/local/lib/liblua.a
 
 debian: $(OBJS)
-	$(CXX) -llua5.1 -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/tinyxml.a
+	$(CXX) -llua5.1 -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/libtinyxml.a
 
 linux: $(OBJS)
-	$(CXX) -llua -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/tinyxml.a
+	$(CXX) -llua -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/libtinyxml.a
 
 $(CURDIR)/api.o: $(CURDIR)/api.cpp $(CURDIR)/api.h $(CURDIR)/List.h $(CURDIR)/TimerList.h $(CURDIR)/LuaInterpreter.h $(CURDIR)/TaskList.h $(CURDIR)/HubConfig.h $(CURDIR)/LuaPlugin.h $(CURDIR)/Uid.h $(CURDIR)/LuaUtils.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<

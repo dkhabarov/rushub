@@ -55,7 +55,7 @@ public:
 	static void stackTrace(std::ostream & f, unsigned long eip, unsigned long esp, unsigned long ebp);
 	static void stackTrace(void * hThread, char * lpszMessage, std::ostream & f, unsigned long eip, unsigned long esp, unsigned long ebp);
 
-}; // Exception
+}; // class Exception
 
 
 #endif // _WIN32

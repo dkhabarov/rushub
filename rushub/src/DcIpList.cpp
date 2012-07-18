@@ -50,9 +50,9 @@ bool DcIpList::add(DcConn * dcConn) {
 	unsigned long hash = mHash(dcConn->getIp());
 	IpList * ipList = IpTable::find(hash);
 	if (ipList == NULL) {
-		IpTable::add(hash, new IpList((tSocket)(*dcConn), dcConn));
+		IpTable::add(hash, new IpList(static_cast<tSocket> (*dcConn), dcConn));
 	} else {
-		ipList->add((tSocket)(*dcConn), dcConn);
+		ipList->add(static_cast<tSocket> (*dcConn), dcConn);
 	}
 	return true;
 }
@@ -66,7 +66,7 @@ bool DcIpList::remove(DcConn * dcConn) {
 		return false;
 	}
 	ipList = ipLists;
-	Conn * conn = ipLists->remove((tSocket)(*dcConn), ipList);
+	Conn * conn = ipLists->remove(static_cast<tSocket> (*dcConn), ipList);
 	if (ipList != ipLists) {
 		if (ipList) {
 			IpTable::update(hash, ipList);
@@ -81,14 +81,14 @@ bool DcIpList::remove(DcConn * dcConn) {
 
 
 
-void DcIpList::sendToIp(const string & ip, const string & data, unsigned long profile, bool addSep /*= false*/, bool flush /*= true*/) {
+void DcIpList::sendToIp(const string & ip, const string & data, unsigned long profile, bool flush /*= true*/) {
 	unsigned long ipHash = mHash(ip);
 	IpList * ipList = IpTable::find(ipHash);
 	while (ipList != NULL) {
 		DcConn * dcConn = ipList->mData;
 		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv) {
 			if (!profile || checkProfile(dcConn, profile)) {
-				dcConn->send(data, addSep, flush);
+				dcConn->send(data, true, flush);
 			}
 		}
 		ipList = ipList->mNext;
@@ -102,7 +102,7 @@ void DcIpList::sendToIpChat(const string & ip, const string & data, const string
 	IpList * ipList = IpTable::find(ipHash);
 	while (ipList != NULL) {
 		DcConn * dcConn = ipList->mData;
-		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv && dcConn->mIpRecv && !dcConn->mDcUser->getUid().empty()) {
+		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv && !dcConn->mDcUser->getUid().empty()) {
 			if (!profile || checkProfile(dcConn, profile)) {
 				dcConn->mDcUser->sendToChat(data, uid, flush);
 			}
@@ -118,7 +118,7 @@ void DcIpList::sendToIpPm(const string & ip, const string & data, const string &
 	IpList * ipList = IpTable::find(ipHash);
 	while (ipList != NULL) {
 		DcConn * dcConn = ipList->mData;
-		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv && dcConn->mIpRecv && !dcConn->mDcUser->getUid().empty()) {
+		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv && !dcConn->mDcUser->getUid().empty()) {
 			if (!profile || checkProfile(dcConn, profile)) {
 				dcConn->mDcUser->sendToPm(data, uid, from, flush);
 			}
@@ -137,14 +137,14 @@ bool DcIpList::checkProfile(DcConn * dcConn, unsigned long profile) {
 	if (p > 31) {
 		p = (p % 32) - 1;
 	}
-	if (profile & (1 << p)) {
+	if (profile & static_cast<unsigned long> (1 << p)) {
 		return true;
 	}
 	return false;
 }
 
 
-}; // namespace dcserver
+} // namespace dcserver
 
 /**
  * $Id$

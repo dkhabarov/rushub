@@ -90,7 +90,7 @@ public:
 	bool unreg(Plugin *);
 
 	/** Call all plugins */
-	virtual int callAll();
+	int callAll();
 
 	/** Call one plugin */
 	virtual int callOne(Plugin *) = 0;
@@ -116,6 +116,8 @@ private:
 	/// Removed plugins
 	RemovedPlugins_t removedPlugins;
 
+	CallList(const CallList &);
+	CallList & operator = (const CallList &);
 
 }; // class CallList
 
@@ -200,6 +202,11 @@ protected:
 	tpFunc mFunc;
 	A mData;
 
+private:
+
+	CallListType1(const CallListType1<A> &);
+	CallListType1<A>	& operator = (const CallListType1<A> &);
+
 }; // class CallListType1
 
 
@@ -238,6 +245,11 @@ protected:
 	tpFunc mFunc;
 	A mData1;
 	B mData2;
+
+private:
+
+	CallListType2(const CallListType2<A, B> &);
+	CallListType2<A, B>	& operator = (const CallListType2<A, B> &);
 
 }; // class CallListType2
 
@@ -278,6 +290,11 @@ protected:
 	B mData2;
 	C mData3;
 
+private:
+
+	CallListType3(const CallListType3<A, B, C> &);
+	CallListType3<A, B, C>	& operator = (const CallListType3<A, B, C> &);
+
 }; // class CallListType3
 
 
@@ -287,7 +304,7 @@ typedef CallListType2<DcUserBase *, int> CallListUserInt;
 typedef CallListType3<DcUserBase *, int, int> CallListUserIntInt;
 
 
-}; // namespace plugin
+} // namespace plugin
 
 #endif // CALL_LIST_H
 

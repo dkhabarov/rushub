@@ -39,8 +39,91 @@ DcProtocol::~DcProtocol() {
 
 
 
+Parser * DcProtocol::parse(int protocolType, const string &) {
+	if (protocolType == DC_PROTOCOL_TYPE_ANY) { // Auto detect protocol
+		// TODO
+	} else if (protocolType == DC_PROTOCOL_TYPE_NMDC) { // NMDC only
+		// TODO
+	} else if (protocolType == DC_PROTOCOL_TYPE_ADC) { // ADC only
+		// TODO
+	} else {
+		throw "unsupported protocol type";
+	}
+	return NULL;
+}
+
+
+
+bool DcProtocol::parseInfo(int protocolType, DcUser * dcUser, const string & info) {
+	if (protocolType == DC_PROTOCOL_TYPE_ANY) {
+		if (info.size() > 0 && info[0] == '$') { // Auto detect protocol
+			NmdcParser::parseInfo(dcUser, info);
+		} else {
+			AdcParser::parseInfo(dcUser, info);
+		}
+	} else if (protocolType == DC_PROTOCOL_TYPE_NMDC) {
+		NmdcParser::parseInfo(dcUser, info);
+	} else if (protocolType == DC_PROTOCOL_TYPE_ADC) {
+		AdcParser::parseInfo(dcUser, info);
+	} else {
+		throw "unsupported protocol type";
+	}
+	return true;
+}
+
+
+
+bool DcProtocol::formingInfo(int protocolType, DcUser * dcUser, string & info) {
+	if (protocolType == DC_PROTOCOL_TYPE_NMDC) {
+		NmdcParser::formingInfo(dcUser, info);
+	} else if (protocolType == DC_PROTOCOL_TYPE_ADC) {
+		AdcParser::formingInfo(dcUser, info);
+	} else {
+		throw "unsupported protocol type";
+	}
+	return true;
+}
+
+
+
+void DcProtocol::addToOps(DcUser *) {
+	// Not implemented
+}
+
+
+
+void DcProtocol::delFromOps(DcUser *) {
+	// Not implemented
+}
+
+
+
+void DcProtocol::addToIpList(DcUser *) {
+	// Not implemented
+}
+
+
+
+void DcProtocol::delFromIpList(DcUser *) {
+	// Not implemented
+}
+
+
+
+void DcProtocol::addToHide(DcUser *) {
+	// Not implemented
+}
+
+
+
+void DcProtocol::delFromHide(DcUser *) {
+	// Not implemented
+}
+
+
+
 // return true if use cache
-const string & DcProtocol::getFirstMsg(bool & useCache) {
+const string & DcProtocol::getFirstMsg(bool & flush) {
 
 	static int64_t shareVal = -1;
 	static int usersVal = -1;
@@ -51,7 +134,7 @@ const string & DcProtocol::getFirstMsg(bool & useCache) {
 	long min = Uptime.sec() / 60;
 	if (timeVal != min) {
 		timeVal = min;
-		useCache = false;
+		flush = true;
 		stringstream oss;
 		int w, d, h, m;
 		Uptime.asTimeVals(w, d, h, m);
@@ -69,15 +152,15 @@ const string & DcProtocol::getFirstMsg(bool & useCache) {
 	}
 	if (shareVal != mDcServer->miTotalShare) {
 		shareVal = mDcServer->miTotalShare;
-		useCache = false;
+		flush = true;
 		DcServer::getNormalShare(shareVal, shareCache);
 	}
 	if (usersVal != mDcServer->getUsersCount()) {
 		usersVal = mDcServer->getUsersCount();
-		useCache = false;
+		flush = true;
 	}	
 
-	if (!useCache) {
+	if (flush) {
 		stringReplace(mDcServer->mDcLang.mFirstMsg, string(STR_LEN("HUB")), cache, string(STR_LEN(INTERNALNAME " " INTERNALVERSION)));
 		stringReplace(cache, string(STR_LEN("uptime")), cache, timeCache);
 		stringReplace(cache, string(STR_LEN("users")), cache, usersVal);
@@ -100,9 +183,9 @@ bool DcProtocol::checkState(DcConn * dcConn, const char * cmd, unsigned int stat
 }
 
 
-}; // namespace protocol
+} // namespace protocol
 
-}; // namespace dcserver
+} // namespace dcserver
 
 /**
  * $Id$

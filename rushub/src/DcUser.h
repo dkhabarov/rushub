@@ -69,7 +69,7 @@ public:
 
 	virtual void disconnect();
 
-	virtual const string & getUid() const;
+	virtual const string & getUid() const; // User ID
 	void setUid(const string & uid);
 	unsigned long getUidHash() const;
 
@@ -90,11 +90,20 @@ public:
 	virtual bool isHide() const;
 	virtual bool isCanSend() const;
 
-	virtual bool hasFeature(int feature) const;
+	virtual bool hasFeature(unsigned int feature) const;
 
 	void send(const char * data, size_t len, bool addSep = false, bool flush = true);
 	virtual void send(const string & data, bool addSep = false, bool flush = true);
+
+	/// Chat Direct
+	virtual void sendToChat(const string & data, bool flush = true);
 	virtual void sendToChat(const string & data, const string & uid, bool flush = true);
+
+	/// Chat Broadcast
+	virtual void sendToChatAll(const string & data, bool flush = true);
+	virtual void sendToChatAll(const string & data, const string & uid, bool flush = true);
+
+	/// Private Message
 	virtual void sendToPm(const string & data, const string & uid, const string & from, bool flush = true);
 
 
@@ -108,7 +117,7 @@ public:
 		return mInfoNames;
 	}
 
-	set<int> & getFeatures() { // ADC
+	set<unsigned int> & getFeatures() { // ADC
 		return mFeatures;
 	}
 
@@ -121,6 +130,9 @@ private:
 	int onSetInIpList(const string & old, const string & now);
 	int onSetHide(const string & old, const string & now);
 	int onSetInfo(const string & old, const string & now);
+
+	DcUser(const DcUser &);
+	DcUser & operator = (const DcUser &);
 
 private:
 
@@ -137,12 +149,12 @@ private:
 
 	HashMap<Param *, string> mParamList;
 	set<string> mInfoNames;
-	set<int> mFeatures;
+	set<unsigned int> mFeatures;
 
-}; // DcUser
+}; // class DcUser
 
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // DC_USER_H
 

@@ -107,7 +107,7 @@ int AntiFlood::check(const string & ip, const Time & now) {
 }
 
 
-}; // namespace utils
+} // namespace utils
 
 /**
  * $Id$

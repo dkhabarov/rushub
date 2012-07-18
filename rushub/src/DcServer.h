@@ -69,6 +69,7 @@ typedef enum {
 
 
 enum {
+	USER_LIST_ADC_INFO,
 	USER_LIST_NICK,
 	USER_LIST_MYINFO,
 	USER_LIST_IP
@@ -151,7 +152,7 @@ public:
 	UserList mIpList; ///< ip list
 	UserList mActiveList; ///< Active user list
 	UserList mHelloList; ///< Hello user list (NMDC)
-	UserList mEnterList; ///< Enter list (NMDC)
+	UserList mEnterList; ///< Enter list
 	UserList mChatList; ///< Chat list
 
 	int miTotalUserCount; ///< Total number of the users
@@ -198,12 +199,19 @@ public:
 	virtual DcUserBase * getDcUserBase(const char * nick);
 
 	virtual bool sendToUser(DcUserBase *, const string & data, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToUserRaw(DcUserBase *, const string & data);
 	virtual bool sendToNick(const char * to, const string & data, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToNickRaw(const char * to, const string & data);
 	virtual bool sendToAll(const string & data, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToAllRaw(const string & data);
 	virtual bool sendToProfiles(unsigned long profile, const string & data, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToProfilesRaw(unsigned long profile, const string & data);
 	virtual bool sendToIp(const string & ip, const string & data, unsigned long profile = 0, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToIpRaw(const string & ip, const string & data, unsigned long profile = 0);
 	virtual bool sendToAllExceptNicks(const vector<string> & nickList, const string & data, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToAllExceptNicksRaw(const vector<string> & nickList, const string & data);
 	virtual bool sendToAllExceptIps(const vector<string> & ipList, const string & data, const char * uid = NULL, const char * from = NULL);
+	virtual bool sendToAllExceptIpsRaw(const vector<string> & ipList, const string & data);
 
 	virtual void forceMove(DcUserBase *, const char * address, const char * reason = NULL); ///< Redirection client
 
@@ -255,7 +263,7 @@ protected:
 	void onNewUdpData(Conn *, Parser *);
 
 	/// Antiflood function
-	bool antiFlood(unsigned & iCount, Time &, const unsigned & countLimit, const double & timeLimit);
+	bool antiFlood(unsigned & count, Time &, const unsigned & countLimit, const double & timeLimit);
 
 	/// Check nick used
 	bool checkNick(DcConn *);
@@ -319,6 +327,10 @@ private:
 	void afterUserEnter(DcConn *);
 
 	void sendToAll(const string & data, bool addSep, bool flush);
+	void sendToAllRaw(const string & data, bool addSep, bool flush);
+
+	DcServer(const DcServer &);
+	DcServer & operator = (const DcServer &);
 
 	/// Call list struct for registration actions into the plugins
 	struct PluginCallList {
@@ -385,7 +397,7 @@ private:
 }; // class DcServer
 
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // DC_SERVER_H
 

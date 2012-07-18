@@ -38,7 +38,7 @@ using namespace ::configuration;
 
 namespace server {
 	class Server;
-}; // namespace server
+} // namespace server
 
 namespace dcserver {
 
@@ -55,12 +55,13 @@ public:
 	int mStartPing;       ///< Time interval in sec, after which begins ping user
 	int mMaxPassiveRes;   ///< Max results in the passive search
 
-	int mUsersLimit;	///< User's limit
+	int mUsersLimit;	    ///< User's limit
+	int mCompressionType; ///< Compression type
 
-	unsigned long mMaxNmdcCommandLength;
-	unsigned long mMaxWebCommandLength; ///< Max size of web cmd
+	unsigned mMaxNmdcCommandLength;
+	unsigned mMaxWebCommandLength; ///< Max size of web cmd
 	unsigned mMaxCmdLen[NMDC_TYPE_UNKNOWN + 1];
-	unsigned mMaxNickLen;	///< Max length of nick
+	unsigned mMaxNickLen; ///< Max length of nick
 	unsigned mMinNickLen; ///< Min length of nick
 
 	/** Allowed number reconnection during miTimeReconnIp sec */
@@ -132,11 +133,16 @@ public:
 
 private:
 
+	DcConfig(const DcConfig &);
+	DcConfig & operator = (const DcConfig &);
+
+private:
+
 	ConfigLoader * mConfigLoader;
 	ConfigStore mConfigStore;
 	string mConfigPath;
 
-}; // DcConfig
+}; // class DcConfig
 
 
 
@@ -181,12 +187,17 @@ public:
 
 private:
 
+	DcLang(const DcLang &);
+	DcLang & operator = (const DcLang &);
+
+private:
+
 	ConfigLoader * mConfigLoader;
 	ConfigStore mConfigStore;
 
-}; // DcLang
+}; // class DcLang
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // DC_CONFIG_H
 

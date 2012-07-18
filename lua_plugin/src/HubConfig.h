@@ -45,7 +45,7 @@ private:
 
 }; // class HubConfig
 
-}; // namespace luaplugin
+} // namespace luaplugin
 
 #endif // HUB_CONFIG_H
 

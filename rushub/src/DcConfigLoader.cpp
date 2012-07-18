@@ -129,7 +129,7 @@ int DcConfigLoader::saveToXml(ConfigListBase * configListBase, const string & fi
 }
 
 
-}; // namespace configuration
+} // namespace configuration
 
 /**
  * $Id$

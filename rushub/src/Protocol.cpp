@@ -48,7 +48,7 @@ Parser::Parser(unsigned int max) :
 	mIsParsed(false),
 	mChunks(max),
 	mMaxChunks(max),
-	mStrMap(0l)
+	mStrMap(0)
 {
 	if (mMaxChunks) {
 		if (mMaxChunks > 31) {
@@ -75,7 +75,7 @@ void Parser::reInit() {
 	mType = TYPE_UNPARSED;
 	mLength = 0;
 	mIsParsed = false;
-	mStrMap = 0l;
+	mStrMap = 0;
 	string().swap(mCommand); // erase & free memory
 	vector<string>().swap(mStrings); // erase & free memory
 	if (mMaxChunks) {
@@ -125,7 +125,7 @@ void Parser::setChunk(unsigned int n, size_t start, size_t len) {
 
 
 
-int Parser::pushChunk(size_t start, size_t len) {
+size_t Parser::pushChunk(size_t start, size_t len) {
 	if (!mMaxChunks) {
 		mChunks.push_back(tChunk(start, len));
 	} else if (log(LEVEL_ERROR)) {
@@ -147,15 +147,15 @@ string & Parser::chunkString(unsigned int n) {
 		return mCommand;
 	}
 
-	unsigned long flag = 1 << n;
-	if (n > 31 || !(mStrMap & flag)) {
+	unsigned int flag = (1u << n);
+	if (n > 31u || !(mStrMap & flag)) {
 		tChunk & c = mChunks[n];
 		size_t size = mCommand.size();
-		if (mStrMap == 0l) {
+		if (mStrMap == 0u) {
 			mStrings.resize(mChunks.size());
 		}
-		if (n > 31) {
-			n = 0; // Big number of chunks (using mStrings[0])
+		if (n > 31u) {
+			n = 0u; // Big number of chunks (using mStrings[0])
 		} else {
 			mStrMap |= flag;
 		}
@@ -296,7 +296,7 @@ bool Parser::chunkRedLeft(unsigned int cn, size_t amount) {
 }
 
 
-};
+} // namespace server
 
 /**
  * $Id$

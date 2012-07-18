@@ -44,9 +44,7 @@ typedef enum {
 	ITEM_TYPE_BOOL,     // bool
 	ITEM_TYPE_DOUBLE,   // double
 	ITEM_TYPE_INT,      // int
-	ITEM_TYPE_LONG,     // long
 	ITEM_TYPE_UINT,     // unsigned int
-	ITEM_TYPE_ULONG,    // unsigned long
 	ITEM_TYPE_LLONG,    // int64_t
 	ITEM_TYPE_CHAR,     // char
 	ITEM_TYPE_STRING,   // string
@@ -54,11 +52,9 @@ typedef enum {
 	ITEM_TYPE_PBOOL,    // bool*
 	ITEM_TYPE_PDOUBLE,  // double*
 	ITEM_TYPE_PINT,     // int*
-	ITEM_TYPE_PLONG,    // long*
 	ITEM_TYPE_PUINT,    // unsigned int*
-	ITEM_TYPE_PULONG,   // unsigned long*
 	ITEM_TYPE_PLLONG,   // int64_t*
-	ITEM_TYPE_PSTRING,  // string*
+	ITEM_TYPE_PSTRING   // string*
 } ItemType;
 
 
@@ -81,13 +77,13 @@ public:
 
 	/** Operator of the apropriation data */
 	template <class T> ConfigItem & operator = (const T & i) {
-		*(T *)address() = i;
+		*(static_cast<T *> (address())) = i;
 		return *this;
 	}
 
 	/** Operator of the transformation type */
 	template <class T> operator T() {
-		return *(T *)mAddress;
+		return *(static_cast<T *> (mAddress));
 	}
 
 	friend istream & operator >> (istream &, ConfigItem &);
@@ -119,15 +115,17 @@ protected:
 
 	bool mEmpty;
 
-	/** Buffer for conversion in string */
-	char mBuffer[32];
-
 protected:
 
 	/** Function returns address */
 	virtual void * address() {
 		return mAddress;
 	}
+
+private:
+
+	ConfigItem(const ConfigItem &);
+	ConfigItem & operator = (const ConfigItem &);
 
 }; // class ConfigItem
 
@@ -137,11 +135,11 @@ protected:
 #define CONFIGBASEITEM(TYPE, TYPE_ID, SUFFIX) \
 class ConfigItem##SUFFIX : public ConfigItem { \
 public: \
-	ConfigItem##SUFFIX(TYPE & var) : ConfigItem((void *) & var) {} \
-	ConfigItem##SUFFIX(TYPE & var, string const & name) : ConfigItem((void *) & var) { this->mName = name; } \
+	ConfigItem##SUFFIX(TYPE & var) : ConfigItem(static_cast<void *> (& var)) {} \
+	ConfigItem##SUFFIX(TYPE & var, string const & name) : ConfigItem(static_cast<void *> (& var)) { this->mName = name; } \
 	virtual ~ConfigItem##SUFFIX() {} \
-	virtual ConfigItem##SUFFIX & operator = (TYPE const & i) { *(TYPE *)address() = i; return *this; } /** Operator of the apropriation */ \
-	virtual TYPE & data() { return *(TYPE *)mAddress; } /** Returns data */ \
+	virtual ConfigItem##SUFFIX & operator = (TYPE const & i) { *(static_cast<TYPE *> (address())) = i; return *this; } /** Operator of the apropriation */ \
+	virtual TYPE & data() { return *(static_cast<TYPE *> (mAddress)); } /** Returns data */ \
 	virtual istream & readFromStream(istream & is); /** Read from stream */ \
 	virtual ostream & writeToStream(ostream & os); /** Write to stream */ \
 	virtual ItemType getTypeId() { return TYPE_ID; } /** Function of the return the identifier */ \
@@ -151,26 +149,22 @@ public: \
 }; // ConfigItem##SUFFIX
 
 /** Announcement of the classes of the main types */
-CONFIGBASEITEM(bool, ITEM_TYPE_BOOL, Bool);               /** ConfigItemBool */
-CONFIGBASEITEM(double, ITEM_TYPE_DOUBLE, Double);         /** ConfigItemDouble */
-CONFIGBASEITEM(int, ITEM_TYPE_INT, Int);                  /** ConfigItemInt */
-CONFIGBASEITEM(long, ITEM_TYPE_LONG, Long);               /** ConfigItemLong */
-CONFIGBASEITEM(unsigned, ITEM_TYPE_UINT, UInt);           /** ConfigItemUInt */
-CONFIGBASEITEM(unsigned long, ITEM_TYPE_ULONG, ULong);    /** ConfigItemULong */
-CONFIGBASEITEM(int64_t, ITEM_TYPE_LLONG, Int64);          /** ConfigItemInt64 */
-CONFIGBASEITEM(char, ITEM_TYPE_CHAR, Char);               /** ConfigItemChar */
-CONFIGBASEITEM(string, ITEM_TYPE_STRING, String);         /** ConfigItemString */
-CONFIGBASEITEM(char *, ITEM_TYPE_PCHAR, PChar);           /** ConfigItemPChar */
-CONFIGBASEITEM(bool *, ITEM_TYPE_PBOOL, PBool);           /** ConfigItemPBool */
-CONFIGBASEITEM(double *, ITEM_TYPE_PDOUBLE, PDouble);     /** ConfigItemPDouble */
-CONFIGBASEITEM(int *, ITEM_TYPE_PINT, PInt);              /** ConfigItemPInt */
-CONFIGBASEITEM(long *, ITEM_TYPE_PLONG, PLong);           /** ConfigItemPLong */
-CONFIGBASEITEM(unsigned int *, ITEM_TYPE_PUINT, PUInt);   /** ConfigItemPUInt */
-CONFIGBASEITEM(unsigned long *, ITEM_TYPE_PULONG, PULong);/** ConfigItemPULong */
-CONFIGBASEITEM(int64_t *, ITEM_TYPE_PLLONG, PInt64);      /** ConfigItemPLLong */
-CONFIGBASEITEM(string *, ITEM_TYPE_PSTRING, PString);     /** ConfigItemPString */
+CONFIGBASEITEM(bool, ITEM_TYPE_BOOL, Bool)               /** ConfigItemBool */
+CONFIGBASEITEM(double, ITEM_TYPE_DOUBLE, Double)         /** ConfigItemDouble */
+CONFIGBASEITEM(int, ITEM_TYPE_INT, Int)                  /** ConfigItemInt */
+CONFIGBASEITEM(unsigned, ITEM_TYPE_UINT, UInt)           /** ConfigItemUInt */
+CONFIGBASEITEM(int64_t, ITEM_TYPE_LLONG, Int64)          /** ConfigItemInt64 */
+CONFIGBASEITEM(char, ITEM_TYPE_CHAR, Char)               /** ConfigItemChar */
+CONFIGBASEITEM(string, ITEM_TYPE_STRING, String)         /** ConfigItemString */
+CONFIGBASEITEM(char *, ITEM_TYPE_PCHAR, PChar)           /** ConfigItemPChar */
+CONFIGBASEITEM(bool *, ITEM_TYPE_PBOOL, PBool)           /** ConfigItemPBool */
+CONFIGBASEITEM(double *, ITEM_TYPE_PDOUBLE, PDouble)     /** ConfigItemPDouble */
+CONFIGBASEITEM(int *, ITEM_TYPE_PINT, PInt)              /** ConfigItemPInt */
+CONFIGBASEITEM(unsigned int *, ITEM_TYPE_PUINT, PUInt)   /** ConfigItemPUInt */
+CONFIGBASEITEM(int64_t *, ITEM_TYPE_PLLONG, PInt64)      /** ConfigItemPLLong */
+CONFIGBASEITEM(string *, ITEM_TYPE_PSTRING, PString)     /** ConfigItemPString */
 
-}; // namespace configuration
+} // namespace configuration
 
 #endif // CONFIG_H
 

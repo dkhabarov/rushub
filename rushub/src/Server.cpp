@@ -54,7 +54,7 @@ Server::Server() :
 	mMac(true),
 	mRun(true), // run by default
 	mMainLoopCode(0),
-	miNumCloseConn(0),
+	mNumCloseConn(0),
 	mMeanFrequency(mTime, 90.0, 20),
 	mServer(NULL),
 	mNowConn(NULL)
@@ -245,9 +245,9 @@ int Server::run() {
 
 			if (mStepDelay) {
 				#ifdef _WIN32
-					Sleep(mStepDelay); // (mStepDelay msec)
+					Sleep(static_cast<DWORD> (mStepDelay)); // (mStepDelay msec)
 				#else
-					usleep(mStepDelay * 1000);
+					usleep(static_cast<useconds_t> (mStepDelay * 1000));
 				#endif
 			}
 			mMeanFrequency.insert(mTime); // MeanFrequency
@@ -286,20 +286,20 @@ void Server::step() {
 	try {
 		// Checking the arrival data in listen sockets
 		ret = mConnChooser.choose(tmout);
-		if (ret <= 0 && !miNumCloseConn) { 
+		if (ret <= 0 && !mNumCloseConn) { 
 			#ifdef _WIN32
 				Sleep(1);
 			#else
-				usleep(1000);
+				usleep(1000u);
 			#endif
 			return;
 		}
-	} catch(const char * exception) {
+	} catch (const char * exception) {
 		if (log(LEVEL_FATAL)) {
 			logStream() << "Exception in choose: " << exception << endl;
 		}
 		return;
-	} catch(...) {
+	} catch (...) {
 		if (log(LEVEL_FATAL)) {
 			logStream() << "Exception in choose" << endl;
 		}
@@ -307,14 +307,12 @@ void Server::step() {
 	}
 
 	if (log(LEVEL_TRACE)) {
-		logStream() << "<new actions>: " << ret << " [" << miNumCloseConn << "]" << endl;
+		logStream() << "<new actions>: " << ret << " [" << mNumCloseConn << "]" << endl;
 	}
 
+	bool ok, input;
+	int connType, activity = 0, forDel = mNumCloseConn;
 	ConnChoose::ChooseRes res;
-	int connType;
-	bool ok = false;
-	int activity = 0;
-	int forDel = miNumCloseConn;
 
 	for (ChooserIterator it = mConnChooser.begin(); it != mConnChooser.end();) {
 		res = (*it);
@@ -326,12 +324,9 @@ void Server::step() {
 		activity = res.mRevents;
 		ok = mNowConn->isOk();
 		connType = mNowConn->getConnType();
+		input = ok && (activity & ConnChoose::EF_INPUT);
 
-		if (
-			ok && 
-			(activity & ConnChoose::eEF_INPUT) && 
-			(connType == CONN_TYPE_LISTEN)
-		) {
+		if (input && connType == CONN_TYPE_LISTEN) {
 
 			if (mNowConn->log(LEVEL_TRACE)) {
 				mNowConn->logStream() << "::(s)NewConn" << endl;
@@ -350,14 +345,9 @@ void Server::step() {
 				mNowConn->logStream() << "::(e)NewConn. Number connections: " << mConnChooser.mConnBaseList.size() << endl;
 			}
 
-		} else { // not listening socket (optimization)
+		} else { // not listening socket (other conn type)
 
-			if (ok && (activity & ConnChoose::eEF_INPUT) && (
-					connType == CONN_TYPE_INCOMING_TCP ||
-					connType == CONN_TYPE_INCOMING_UDP ||
-					connType == CONN_TYPE_OUTGOING_TCP ||
-					connType == CONN_TYPE_OUTGOING_UDP
-			)) {
+			if (input) {
 				try {
 					if (mNowConn->log(LEVEL_TRACE)) {
 						mNowConn->logStream() << "::(s)inputEvent" << endl;
@@ -383,7 +373,7 @@ void Server::step() {
 				}
 			}
 
-			if (ok && (activity & ConnChoose::eEF_OUTPUT)) {
+			if (ok && (activity & ConnChoose::EF_OUTPUT)) {
 				try {
 					if (mNowConn->log(LEVEL_TRACE)) {
 						mNowConn->logStream() << "::(s)outputEvent" << endl;
@@ -407,12 +397,12 @@ void Server::step() {
 				}
 			}
 
-			if (!ok || (activity & (ConnChoose::eEF_ERROR | ConnChoose::eEF_CLOSE))) {
+			if (!ok || (activity & (ConnChoose::EF_ERROR | ConnChoose::EF_CLOSE))) {
 
 				forDel = 0; // tmp
 
 				if (mNowConn->isClosed()) { // check close flag
-					--miNumCloseConn;
+					--mNumCloseConn;
 				}
 
 				try {
@@ -440,11 +430,11 @@ void Server::step() {
 		}
 	}
 
-	if (miNumCloseConn && forDel) {
+	if (mNumCloseConn && forDel) {
 		if (log(LEVEL_ERROR)) {
-			logStream() << "Control not closed connections: " << miNumCloseConn << endl;
+			logStream() << "Control not closed connections: " << mNumCloseConn << endl;
 		}
-		--miNumCloseConn;
+		--mNumCloseConn;
 	}
 
 	if (log(LEVEL_TRACE)) {
@@ -517,7 +507,7 @@ int Server::addConnection(Conn * conn) {
 			(mConnChooser.size() == (FD_SETSIZE - 1)) || 
 		#endif
 		!mConnChooser.ConnChoose::optIn(conn,
-		ConnChoose::tEventFlag(ConnChoose::eEF_INPUT | ConnChoose::eEF_ERROR)))
+		ConnChoose::EventFlag(ConnChoose::EF_INPUT | ConnChoose::EF_ERROR)))
 	{
 		if (conn->log(LEVEL_FATAL)) {
 			conn->logStream() << "Error: Can't add socket!" << endl;
@@ -687,7 +677,7 @@ int Server::onTimer(Time &) {
 }
 
 
-}; // server
+} // namespace server
 
 /**
  * $Id$

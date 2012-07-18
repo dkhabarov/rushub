@@ -76,8 +76,8 @@ public:
 
 	int choose(Time &);
 
-	bool optIn(tSocket, tEventFlag);
-	void optOut(tSocket, tEventFlag);
+	bool optIn(tSocket, EventFlag);
+	void optOut(tSocket, EventFlag);
 	int optGet(tSocket);
 	int revGet(tSocket);
 	bool revTest(tSocket);
@@ -86,9 +86,9 @@ private:
 
 	tFDArray mvFD;
 
-}; // ConnPoll
+}; // class ConnPoll
 
-}; // server
+} // namespace server
 
 #endif // _WIN32
 

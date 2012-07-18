@@ -56,7 +56,7 @@ void Uid::createMetaTable(lua_State * L) {
 
 int Uid::uidToString(lua_State * L) {
 	char buf[9] = { '\0' };
-	sprintf(buf, "%p", *((void **)lua_touserdata(L, 1)));
+	sprintf(buf, "%p", *(static_cast<void **> (lua_touserdata(L, 1))));
 	lua_pushfstring(L, "%s (%s)", lua_tostring(L, lua_upvalueindex(1)), buf);
 	return 1;
 }
@@ -91,8 +91,8 @@ int Uid::userIndex(lua_State * L) {
 			break;
 
 		case PARAM_HASH_UID :
-			userdata = (void **) lua_newuserdata(L, sizeof(void *));
-			*userdata = (void *) dcUserBase;
+			userdata = static_cast<void **> (lua_newuserdata(L, sizeof(void *)));
+			*userdata = static_cast<void *> (dcUserBase);
 			luaL_getmetatable(L, MT_USER_CONN);
 			lua_setmetatable(L, -2);
 			break;
@@ -242,13 +242,13 @@ unsigned int Uid::getHash(const char * s) {
 	size_t i, l = strlen(s);
 	unsigned h = l;
 	for (i = l; i > 0;) {
-		h ^= ((h << 5) + (h >> 2) + (unsigned char)(s[--i]));
+		h ^= ((h << 5) + (h >> 2) + static_cast<unsigned char> (s[--i]));
 	}
 	return h / 2;
 }
 
 
-}; // namespace luaplugin
+} // namespace luaplugin
 
 /**
  * $Id$

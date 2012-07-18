@@ -46,6 +46,7 @@ struct ufSend : public unary_function<void, UserList::iterator> {
 	}
 
 	const ufSend & operator = (const ufSend &) { // for_each
+		mAddSep = false;
 		return *this;
 	}
 
@@ -57,11 +58,11 @@ struct ufSend : public unary_function<void, UserList::iterator> {
 struct ufSendFeature : public unary_function<void, UserList::iterator> {
 	const string & mData; /** Data for sending */
 	bool mAddSep;
-	const vector<int> & mPositive;
-	const vector<int> & mNegative;
+	const vector<unsigned int> & mPositive;
+	const vector<unsigned int> & mNegative;
 
 	ufSendFeature(const string & data, bool addSep,
-		const vector<int> & positive, const vector<int> & negative) : 
+		const vector<unsigned int> & positive, const vector<unsigned int> & negative) : 
 		mData(data),
 		mAddSep(addSep),
 		mPositive(positive),
@@ -93,6 +94,7 @@ struct ufSendFeature : public unary_function<void, UserList::iterator> {
 	}
 
 	const ufSendFeature & operator = (const ufSendFeature &) { // for_each
+		mAddSep = false;
 		return *this;
 	}
 
@@ -120,13 +122,15 @@ struct ufSendProfile : public unary_function<void, UserList::iterator> {
 			if (profile > 31) {
 				profile = (profile % 32) - 1;
 			}
-			if (mProfile & (1 << profile)) {
+			if (mProfile & static_cast<unsigned long> (1 << profile)) {
 				userBase->send(mData, mAddSep);
 			}
 		}
 	}
 
 	const ufSendProfile & operator = (const ufSendProfile &) { // for_each
+		mProfile = 0;
+		mAddSep = false;
 		return *this;
 	}
 
@@ -147,7 +151,7 @@ struct ufSendChat : public unary_function<void, UserList::iterator> {
 
 	void operator() (UserBase * userBase) {
 		if (userBase && userBase->isCanSend() && !userBase->getUid().empty()) {
-			userBase->sendToChat(mData, mUid, true);
+			userBase->sendToChatAll(mData, mUid, true);
 		}
 	}
 
@@ -181,13 +185,14 @@ struct ufSendChatProfile : public unary_function<void, UserList::iterator> {
 			if (profile > 31) {
 				profile = (profile % 32) - 1;
 			}
-			if (mProfile & (1 << profile) && !userBase->getUid().empty()) {
+			if (mProfile & static_cast<unsigned long> (1 << profile) && !userBase->getUid().empty()) {
 				userBase->sendToChat(mData, mUid, true);
 			}
 		}
 	}
 
 	const ufSendChatProfile & operator = (const ufSendChatProfile &) { // for_each
+		mProfile = 0;
 		return *this;
 	}
 
@@ -246,13 +251,14 @@ struct ufSendPmProfile : public unary_function<void, UserList::iterator> {
 			if (profile > 31) {
 				profile = (profile % 32) - 1;
 			}
-			if (mProfile & (1 << profile) && !userBase->getUid().empty()) {
+			if (mProfile & static_cast<unsigned long> (1 << profile) && !userBase->getUid().empty()) {
 				userBase->sendToPm(mData, mUid, mFrom, true);
 			}
 		}
 	}
 
 	const ufSendPmProfile & operator = (const ufSendPmProfile &) { // for_each
+		mProfile = 0;
 		return *this;
 	}
 
@@ -270,7 +276,7 @@ UserList::UserList(const string & name) :
 
 
 UserList::~UserList() {
-	for (unsigned int i = 0; i < mListItems.size(); ++i) {
+	for (size_t i = 0; i < mListItems.size(); ++i) {
 		delete mListItems[i];
 	}
 }
@@ -298,7 +304,7 @@ void UserList::addUserListItem(UserListItem::Func func, const char * start) {
 
 
 
-const string & UserList::getList(int number) {
+const string & UserList::getList(unsigned int number) {
 	return mListItems[number]->getList(begin(), end());
 }
 
@@ -307,11 +313,11 @@ const string & UserList::getList(int number) {
 /**
  Sendind data to all users from the list
  data - sending data
- useCache - true - not send and save to cache, false - send data and send cache
+ flush - false - not send and save to cache, true - send data and send cache
  addSep - add sep to end of list
  */
-void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
-	if (!useCache) {
+void UserList::sendToAll(const string & data, bool addSep, bool flush) {
+	if (flush) {
 		if (log(LEVEL_TRACE)) {
 			logStream() << "sendToAll begin" << endl;
 		}
@@ -334,8 +340,8 @@ void UserList::sendToAll(const string & data, bool useCache, bool addSep) {
 
 
 
-void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
-	if (!useCache) {
+void UserList::sendToAllAdc(const string & data, bool addSep, bool flush) {
+	if (flush) {
 		if (log(LEVEL_TRACE)) {
 			logStream() << "sendToAll begin" << endl;
 		}
@@ -358,8 +364,8 @@ void UserList::sendToAllAdc(const string & data, bool useCache, bool addSep) {
 
 
 
-void UserList::sendToFeature(const string & data, const vector<int> & positive, 
-		const vector<int> & negative, bool addSep) {
+void UserList::sendToFeature(const string & data, const vector<unsigned int> & positive, 
+		const vector<unsigned int> & negative, bool addSep) {
 
 	if (log(LEVEL_TRACE)) {
 		logStream() << "sendToFeature begin" << endl;
@@ -431,11 +437,11 @@ void UserList::flushForUser(UserBase * userBase) {
 void UserList::flushCache() {
 	if (mCacheNmdc.size()) {
 		string str;
-		sendToAll(str, false, false);
+		sendToAll(str, false, true);
 	}
 	if (mCacheAdc.size()) {
 		string str;
-		sendToAllAdc(str, false, false);
+		sendToAllAdc(str, false, true);
 	}
 }
 
@@ -486,7 +492,7 @@ void UserList::addInCache(string & cache, const string & data, const char * sep,
 }
 
 
-}; // namespace dcserver
+} // namespace dcserver
 
 /**
  * $Id$

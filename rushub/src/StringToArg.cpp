@@ -177,7 +177,7 @@ int StringToArg::copyCookedString(char ** dest, char ** src) {
 	}
 }
 
-}; // namespace utils
+} // namespace utils
 
 #endif // _WIN32
 

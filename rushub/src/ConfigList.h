@@ -49,16 +49,14 @@ public:
 	NEWITEM(bool, Bool);            // virtual ConfigItemBool    * add(bool & var) { return new ConfigItemBool(var); }
 	NEWITEM(double, Double);        // virtual ConfigItemDouble  * add(double & var) { return new ConfigItemDouble(var); }
 	NEWITEM(int, Int);              // virtual ConfigItemInt     * add(int & var) { return new ConfigItemInt(var); }
-	NEWITEM(long, Long);            // virtual ConfigItemLong    * add(long & var) { return new ConfigItemLong(var); }
 	NEWITEM(unsigned int, UInt);    // virtual ConfigItemUInt    * add(unsigned int & var) { return new ConfigItemUInt(var); }
-	NEWITEM(unsigned long, ULong);  // virtual ConfigItemULong   * add(unsigned long & var) { return new ConfigItemULong(var); }
 	NEWITEM(int64_t, Int64);        // virtual ConfigItemInt64   * add(int64_t & var) { return new ConfigItemInt64(var); }
 	NEWITEM(char, Char);            // virtual ConfigItemChar    * add(char & var) { return new ConfigItemChar(var); }
 	NEWITEM(string, String);        // virtual ConfigItemString  * add(string & var) { return new ConfigItemString(var); }
 	void del(ConfigItem * configItem) { /** Removing config item */
 		delete configItem;
 	}
-}; // ConfigFactory
+}; // class ConfigFactory
 
 /** Base configuration class */
 class ConfigListBase : public Obj {
@@ -84,7 +82,7 @@ public:
 		ConfigListBase * mConfigListBase;
 		tVIt mIterator;
 
-		iterator() {
+		iterator() : mConfigListBase(NULL) {
 		}
 
 		iterator(ConfigListBase * configListBase, const tVIt & it) : 
@@ -147,6 +145,11 @@ public:
 		return mEnd.set(this, mKeyList.end());
 	}
 
+private:
+
+	ConfigListBase(const ConfigListBase &);
+	ConfigListBase & operator = (const ConfigListBase &);
+
 }; // class ConfigListBase
 
 
@@ -178,7 +181,7 @@ public:
 
 }; // class ConfigList
 
-}; // namespace configuration
+} // namespace configuration
 
 #endif // CONFIG_LIST_H
 

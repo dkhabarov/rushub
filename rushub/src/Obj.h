@@ -66,7 +66,7 @@ class NonCopyable {
 protected:
 
 	NonCopyable() {}
-	~NonCopyable() {}
+	virtual ~NonCopyable() {}
 
 private:
 
@@ -156,9 +156,12 @@ private:
 	///< Return level for syslog
 	static int sysLogLevel(int level);
 
+	Obj(const Obj &);
+	Obj & operator = (const Obj &);
+
 }; // class Obj
 
-}; // namespace utils
+} // namespace utils
 
 #endif // OBJ_H
 

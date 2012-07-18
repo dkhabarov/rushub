@@ -17,6 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef ANY_H
+#define ANY_H
+
 namespace utils {
 
 /// Class Any
@@ -91,7 +94,15 @@ private:
 	private:
 		T mObject;
 		T const * mRef;
+
+		Type(const Type<T> &);
+		Type<T> & operator = (const Type<T> &);
 	};
+
+	Any(const Any &);
+	Any & operator = (const Any &) {
+		return *this;
+	}
 
 private:
 
@@ -99,4 +110,11 @@ private:
 
 }; // class Any
 
-}; // namespace utils
+} // namespace utils
+
+#endif // ANY_H
+
+/**
+ * $Id$
+ * $HeadURL$
+ */

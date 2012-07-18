@@ -54,7 +54,7 @@ void HubConfig::createMetaTable(lua_State * L) {
 
 	lua_settop(L, 0);
 
-	Config * config = (Config *) lua_newuserdata(L, sizeof(Config));
+	Config * config = static_cast<Config *> (lua_newuserdata(L, sizeof(Config)));
 	config->isExist = 1;
 	luaL_getmetatable(L, MT_CONFIG);
 	lua_setmetatable(L, -2);
@@ -64,8 +64,9 @@ void HubConfig::createMetaTable(lua_State * L) {
 
 
 int HubConfig::configTostring(lua_State * L) {
-	char buf[9] = { '\0' };
-	sprintf(buf, "%p", lua_touserdata(L, 1));
+	void * p = lua_touserdata(L, 1);
+	char buf[sizeof(p) + 1] = { '\0' };
+	sprintf(buf, "%p", p);
 	lua_pushfstring(L, "%s (%s)", lua_tostring(L, lua_upvalueindex(1)), buf);
 	return 1;
 }
@@ -87,7 +88,7 @@ int HubConfig::configTable(lua_State * L) {
 
 
 int HubConfig::configIndex(lua_State * L) {
-	Config * config = (Config *) lua_touserdata(L, 1);
+	Config * config = static_cast<Config *> (lua_touserdata(L, 1));
 	if (config->isExist != 1) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
@@ -115,7 +116,7 @@ int HubConfig::configIndex(lua_State * L) {
 
 
 int HubConfig::configNewindex(lua_State * L) {
-	Config * config = (Config *) lua_touserdata(L, 1);
+	Config * config = static_cast<Config *> (lua_touserdata(L, 1));
 	if (config->isExist != 1) {
 		lua_settop(L, 0);
 		return 0;
@@ -139,7 +140,7 @@ int HubConfig::configNewindex(lua_State * L) {
 }
 
 
-}; // namespace luaplugin
+} // namespace luaplugin
 
 /**
  * $Id$

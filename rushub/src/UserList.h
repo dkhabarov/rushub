@@ -131,20 +131,20 @@ public:
 	UserBase * getUserBaseByUid(const string & uid);
 
 	void addUserListItem(UserListItem::Func func, const char * start = "");
-	const string & getList(int number = 0);
+	const string & getList(unsigned int number);
 
 	inline void remake() {
 		onRemove(NULL);
 	}
 
 	/** Sending data to all from the list */
-	void sendToAll(const string & data, bool useCache = false, bool addSep = true);
+	void sendToAll(const string & data, bool addSep = true, bool flush = true);
 
 	/** Sending data to all from the list */
-	void sendToAllAdc(const string & data, bool useCache = false, bool addSep = true);
+	void sendToAllAdc(const string & data, bool addSep = true, bool flush = true);
 
-	void sendToFeature(const string & data, const vector<int> & positive, 
-		const vector<int> & negative, bool addSep = true);
+	void sendToFeature(const string & data, const vector<unsigned int> & positive, 
+		const vector<unsigned int> & negative, bool addSep = true);
 
 	/** Sending data to profiles */
 	void sendToProfiles(unsigned long profile, const string & data, bool addSep = true);
@@ -187,10 +187,10 @@ private:
 
 	static void addInCache(string & cache, const string & data, const char * sep, size_t sepLen, bool addSep = true);
 
-}; // UserList
+}; // class UserList
 
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // USER_LIST_H
 

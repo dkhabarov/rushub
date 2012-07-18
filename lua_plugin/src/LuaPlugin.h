@@ -36,7 +36,7 @@
 #endif
 
 #define PLUGIN_NAME "LuaPlugin"
-#define PLUGIN_VERSION "2.8"
+#define PLUGIN_VERSION "2.9"
 
 
 #ifndef STR_LEN
@@ -47,7 +47,7 @@ namespace dcserver {
 
 	class DcServerBase;
 
-}; // namespace dcserver
+} // namespace dcserver
 
 
 using namespace ::std;
@@ -205,6 +205,7 @@ public:
 	void setListFlag(unsigned int flag) {
 		mListFlags = flag;
 	}
+
 private:
 
 	unsigned int mListFlags;

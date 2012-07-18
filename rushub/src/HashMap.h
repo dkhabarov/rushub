@@ -163,7 +163,7 @@ V HashMap<V, K>::find(const K & hash) const {
 }
 
 
-}; // namespace utils
+} // namespace utils
 
 #endif // HASH_LIST_MAP_H
 

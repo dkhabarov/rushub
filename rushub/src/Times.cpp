@@ -63,7 +63,7 @@ Time::Time(bool now) : mPrintType(0) {
 
 
 Time::Time(double sec) : mPrintType(0) {
-	tv_sec = (long)sec;
+	tv_sec = static_cast<long> (sec);
 	tv_usec = long((sec - tv_sec) * 1000000);
 	normalize();
 }
@@ -122,6 +122,7 @@ int Time::operator == (const Time & t) const {
 Time & Time::operator = (const Time & t) {
 	tv_usec = t.tv_usec;
 	tv_sec = t.tv_sec;
+	mPrintType = t.mPrintType;
 	return *this;
 }
 
@@ -243,15 +244,15 @@ Time::operator double() const {
 Time::operator int64_t() const {
 	if (tv_sec > 0) {
 		if (tv_usec > 0) {
-			return (int64_t)(tv_sec) * 1000 + (int64_t)(tv_usec) / 1000;
+			return static_cast<int64_t> (tv_sec) * 1000 + static_cast<int64_t> (tv_usec) / 1000;
 		} else {
-			return (int64_t)(tv_sec) * 1000 + (int64_t)(-tv_usec) / 1000;
+			return static_cast<int64_t> (tv_sec) * 1000 + static_cast<int64_t> (-tv_usec) / 1000;
 		}
 	} else {
 		if (tv_usec > 0) {
-			return (int64_t)(-tv_sec) * 1000 + (int64_t)(tv_usec) / 1000;
+			return static_cast<int64_t> (-tv_sec) * 1000 + static_cast<int64_t> (tv_usec) / 1000;
 		} else {
-			return (int64_t)(-tv_sec) * 1000 + (int64_t)(-tv_usec) / 1000;
+			return static_cast<int64_t> (-tv_sec) * 1000 + static_cast<int64_t> (-tv_usec) / 1000;
 		}
 	}
 }
@@ -287,7 +288,7 @@ std::ostream & operator << (std::ostream & os, const Time & t) {
 			#ifdef _WIN32
 				time_t ta;
 				struct tm * tinfo;
-				ta = (time_t)t.tv_sec;
+				ta = static_cast<time_t> (t.tv_sec);
 				#if defined(_MSC_VER) && (_MSC_VER >= 1400)
 					struct tm ti;
 					tinfo = &ti;
@@ -298,7 +299,7 @@ std::ostream & operator << (std::ostream & os, const Time & t) {
 			#else
 				const time_t * ta;
 				struct tm * tinfo;
-				ta = (time_t*)&t.tv_sec;
+				ta = const_cast<time_t*> (&t.tv_sec);
 				tinfo = localtime(ta);
 			#endif
 			char buf[20];
@@ -410,7 +411,7 @@ Time & Time::normalize() {
 }
 
 
-}; // namespace utils
+} // namespace utils
 
 /**
  * $Id$

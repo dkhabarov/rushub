@@ -47,7 +47,7 @@ public:
 
 public:
 
-	ProtocolCommand() {
+	ProtocolCommand() : mLength(0) {
 	}
 
 	ProtocolCommand(const char * key, size_t len) : mKey(key, len) {
@@ -108,6 +108,12 @@ NmdcParser::NmdcParser() :
 
 
 NmdcParser::~NmdcParser() {
+}
+
+
+
+int NmdcParser::getCommandType() const {
+	return mType;
 }
 
 
@@ -353,7 +359,7 @@ bool NmdcParser::splitChunks() {
 			break;
 
 		case NMDC_TYPE_UNKNOWN : // Cmd without $ in begining position
-			if (mCommand.compare(0, 1, "$")) {
+			if (mCommand.compare(0, 1, "$") != 0) {
 				mError = true;
 			}
 			break;
@@ -416,7 +422,7 @@ void NmdcParser::parseDesc(DcUser * dcUser, const string & description) {
 
 	dcUser->getParamForce(USER_PARAM_DESC)->setString(desc);
 
-	// TODO: optimization check old tag
+	// TODO optimization check old tag
 	parseTag(dcUser, tag);
 }
 
@@ -445,7 +451,7 @@ void NmdcParser::parseTag(DcUser * dcUser, const string & tag) {
 			size_t s = tag.find(' ');
 			if (s != tag.npos && s < clientPos) {
 				size_t b = s + 1;
-				if (atof(tag.substr(b, clientPos - b).c_str())) {
+				if (atof(tag.substr(b, clientPos - b).c_str()) > 0.) {
 					clientVersion.assign(tag, b, clientPos - b);
 					cn_e_pos = s;
 				}
@@ -668,9 +674,9 @@ void NmdcParser::formingInfo(DcUser * dcUser, string & info) {
 }
 
 
-}; // namespace protocol
+} // namespace protocol
 
-}; // namespace dcserver
+} // namespace dcserver
 
 /**
  * $Id$

@@ -157,7 +157,7 @@ private:
 }; // template class List
 
 
-}; // namespace luaplugin
+} // namespace luaplugin
 
 #endif // LIST_H
 

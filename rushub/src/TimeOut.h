@@ -73,10 +73,10 @@ public:
 		}
 		Time diff(now);
 		diff -= mLast;
-		if (event && (bool)mMinDelay && (mMinDelay > diff)) {
+		if (event && static_cast<bool> (mMinDelay) && (mMinDelay > diff)) {
 			return -1;
 		}
-		if (bool(mMaxDelay) && (mMaxDelay < diff)) {
+		if (static_cast<bool> (mMaxDelay) && (mMaxDelay < diff)) {
 			return -2;
 		}
 		if (event) {
@@ -98,7 +98,7 @@ private:
 
 }; // class TimeOut
 
-}; // namespace utils
+} // namespace utils
 
 #endif // TIMEOUT_H
 

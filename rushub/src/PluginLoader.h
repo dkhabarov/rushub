@@ -103,10 +103,15 @@ protected:
 
 	/** log */
 	bool strLog();
+	
+private:
 
-}; // PluginLoader
+	PluginLoader(const PluginLoader &);
+	PluginLoader & operator = (const PluginLoader &);
 
-}; // namespace plugin
+}; // class PluginLoader
+
+} // namespace plugin
 
 #endif // PLUGIN_LOADER_H
 

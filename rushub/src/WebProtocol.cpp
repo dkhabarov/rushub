@@ -27,7 +27,7 @@ namespace protocol {
 
 
 
-WebProtocol::WebProtocol(unsigned long & maxCommandLength) :
+WebProtocol::WebProtocol(unsigned int & maxCommandLength) :
 	mServer(NULL),
 	mMaxCommandLength(maxCommandLength)
 {
@@ -76,9 +76,9 @@ void WebProtocol::deleteParser(Parser * parser) {
 
 
 
-}; // namespace protocol
+} // namespace protocol
 
-}; // namespace webserver
+} // namespace webserver
 
 /**
  * $Id$

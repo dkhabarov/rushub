@@ -170,7 +170,7 @@ const string & Param::toString() {
 }
 
 
-}; // namespace dcserver
+} // namespace dcserver
 
 /**
  * $Id$

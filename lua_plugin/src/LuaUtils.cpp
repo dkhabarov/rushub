@@ -156,7 +156,7 @@ LuaInterpreter * LuaUtils::findInterpreter(lua_State * L, const string & name) {
 	return luaInterpreter;
 }
 
-}; // namespace luaplugin
+} // namespace luaplugin
 
 /**
  * $Id$

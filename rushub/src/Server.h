@@ -26,7 +26,7 @@
 #define SERVER_H
 
 #define INTERNALNAME "RusHub"
-#define INTERNALVERSION "2.3.9" // without space!
+#define INTERNALVERSION "2.3.10" // without space!
 
 #include "ConnChoose.h" // first (def winsock2.h)
 #include "Obj.h"
@@ -61,7 +61,7 @@ class ConnFactory;
 /// Server realization
 class Server : public Obj {
 
-friend class Conn; // for closeNow and miNumCloseConn
+friend class Conn; // for closeNow and mNumCloseConn
 friend class ConnFactory; // onNewData
 
 public:
@@ -71,7 +71,7 @@ public:
 	int mStepDelay; ///< Step delay (for testing)
 	unsigned int mTimerServPeriod; ///< Serv period (msec)
 	unsigned int mTimerConnPeriod; ///< Conn period (msec)
-	unsigned long mMaxSendSize;
+	unsigned int mMaxSendSize;
 	bool mMac; ///< allow to define MAC address
 
 public:
@@ -122,7 +122,7 @@ protected:
 	int mMainLoopCode;
 
 	/// Strong close conn flag
-	int miNumCloseConn;
+	int mNumCloseConn;
 
 	/// Mean frequency
 	MeanFrequency<unsigned, 21> mMeanFrequency;
@@ -139,10 +139,10 @@ protected:
 protected:
 
 	/// Set and Listen port
-	virtual Conn * listening(ConnFactory *, const char * ip, const char * port = 0, bool udp = false);
+	Conn * listening(ConnFactory *, const char * ip, const char * port = 0, bool udp = false);
 
 	/// Set and Connect to port
-	virtual Conn * connecting(ConnFactory *, const char * ip, const char * port = 0, bool udp = false);
+	Conn * connecting(ConnFactory *, const char * ip, const char * port = 0, bool udp = false);
 
 	/// addConnection
 	int addConnection(Conn *);
@@ -186,9 +186,12 @@ private:
 	/// Add simple connection
 	Conn * addSimpleConn(int connType, const char * ip, const char * port);
 
-}; // Server
+	Server(const Server &);
+	Server & operator = (const Server &);
 
-}; // server
+}; // class Server
+
+} // server namespace
 
 #endif // SERVER_H
 

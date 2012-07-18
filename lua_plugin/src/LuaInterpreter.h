@@ -77,8 +77,8 @@ public:
 private:
 
 	struct Param {
-		void * data;
 		lua_Number num;
+		void * data;
 		int type;
 		Param(void * d, int t) : data(d), type(t) {
 		}
@@ -100,7 +100,7 @@ private:
 
 }; // class LuaInterpreter
 
-}; // namespace luaplugin
+} // namespace luaplugin
 
 #endif // LUA_INTERPRETER_H
 

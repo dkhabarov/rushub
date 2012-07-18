@@ -62,8 +62,8 @@ public:
 
 	int choose(Time &);
 
-	bool optIn(tSocket, tEventFlag);
-	void optOut(tSocket, tEventFlag);
+	bool optIn(tSocket, EventFlag);
+	void optOut(tSocket, EventFlag);
 	int optGet(tSocket);
 	int revGet(tSocket);
 	bool revTest(tSocket);
@@ -106,7 +106,7 @@ public:
 	struct iterator {
 		ConnSelect * mSel; /** for operator [] */
 		tResList::iterator mIt; /** iterator for list */
-		iterator() {
+		iterator() : mSel(NULL) {
 		}
 		iterator(ConnSelect * sel, tResList::iterator it) : mSel(sel), mIt(it) {
 		}
@@ -134,7 +134,7 @@ public:
 			while (
 				!(++mIt).isEnd() &&
 				!(*mIt)->mRevents &&
-				!((*mIt)->mEvents & eEF_CLOSE)
+				!((*mIt)->mEvents & EF_CLOSE)
 			) {
 			}
 			return *this;
@@ -147,7 +147,7 @@ public:
 		if (
 			!begin_it.mIt.isEnd() &&
 			!(*begin_it.mIt)->mRevents &&
-			!((*begin_it.mIt)->mEvents & eEF_CLOSE)
+			!((*begin_it.mIt)->mEvents & EF_CLOSE)
 		) {
 			++begin_it;
 		}
@@ -177,9 +177,9 @@ protected:
 	SelectFd mResWriteFS;
 	SelectFd mResExceptFS;
 
-}; // ConnSelect
+}; // class ConnSelect
 
-}; // server
+} // namespace server
 
 #endif // USE_SELECT
 

@@ -40,15 +40,24 @@ public:
 	virtual int getProfile() const = 0;
 	virtual bool isHide() const = 0;
 	virtual bool isCanSend() const = 0;
-	virtual bool hasFeature(int feature) const = 0;
+	virtual bool hasFeature(unsigned int feature) const = 0;
 
 	virtual void send(const string & msg, bool sep = false, bool flush = true) = 0;
+
+	/// Chat Direct
+	virtual void sendToChat(const string & data, bool flush = true) = 0;
 	virtual void sendToChat(const string & data, const string & uid, bool flush = true) = 0;
+
+	/// Chat Broadcast
+	virtual void sendToChatAll(const string & data, bool flush = true) = 0;
+	virtual void sendToChatAll(const string & data, const string & uid, bool flush = true) = 0;
+
+	/// Private Message
 	virtual void sendToPm(const string & data, const string & uid, const string & from, bool flush = true) = 0;
 
-}; // UserBase
+}; // class UserBase
 
-}; // namespace dcserver
+} // namespace dcserver
 
 #endif // USER_BASE_H
 

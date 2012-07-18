@@ -25,6 +25,8 @@
 #include "ConfigItem.h"
 #include "stringutils.h" // for stringToInt64
 
+#include <math.h>
+
 #ifndef _WIN32
 	#include <memory.h>
 #else
@@ -97,23 +99,21 @@ void ConfigItemP##SUFFIX::convertFrom(const string & str) { \
 	if (data) { \
 		delete data; \
 	} \
-	data = new TYPE(SUB); \
+	data = new TYPE; \
+	*data = SUB; \
 	*this = data; \
 }
 
 
 
-CCONVERTFROMCHAR();
-CCONVERTFROMPCHAR();
-CCONVERTFROM(bool, Bool, ((str == "true") ? true : (0 != atoi(str.c_str()))));
-CCONVERTFROM(double, Double, atof(str.c_str()));
-CCONVERTFROM(int, Int, atoi(str.c_str()));
-CCONVERTFROM(long, Long, atol(str.c_str()));
-CCONVERTFROM(unsigned int, UInt, atol(str.c_str()));
-CCONVERTFROM(unsigned long, ULong, strtoul(str.c_str(), NULL, 10));
-CCONVERTFROM(int64_t, Int64, stringToInt64(str));
-CCONVERTFROM(string, String, str);
-
+CCONVERTFROMCHAR()
+CCONVERTFROMPCHAR()
+CCONVERTFROM(bool, Bool, ((str == "true") ? true : (0 != atoi(str.c_str()))))
+CCONVERTFROM(double, Double, atof(str.c_str()))
+CCONVERTFROM(int, Int, atoi(str.c_str()))
+CCONVERTFROM(unsigned int, UInt, static_cast<unsigned int> (atol(str.c_str())))
+CCONVERTFROM(int64_t, Int64, stringToInt64(str))
+CCONVERTFROM(string, String, str)
 
 /** Convert to string */
 void ConfigItemDouble::convertTo(string & str) {
@@ -144,17 +144,13 @@ CCONVERTTO(Bool)
 CCONVERTTO(String)
 CCONVERTTO(Char)
 CCONVERTTO(Int)
-CCONVERTTO(Long)
 CCONVERTTO(UInt)
-CCONVERTTO(ULong)
 CCONVERTTO(Int64)
 CCONVERTPTO(PBool)
 CCONVERTPTO(PString)
 CCONVERTPTO(PChar)
 CCONVERTPTO(PInt)
-CCONVERTPTO(PLong)
 CCONVERTPTO(PUInt)
-CCONVERTPTO(PULong)
 CCONVERTPTO(PInt64)
 
 
@@ -175,9 +171,8 @@ istream & ConfigItem##SUFFIX::readFromStream(istream & is) { \
 	string str; \
 	stringstream ss; \
 	getline(is, str); \
-	ss << str; str.empty(); \
+	ss << str; \
 	while (is.good()) { \
-		str.empty(); \
 		getline(is, str); \
 		ss << endl << str; \
 	} \
@@ -187,24 +182,20 @@ istream & ConfigItem##SUFFIX::readFromStream(istream & is) { \
 
 
 
-READFROMSTREAMTOSTR(String);
-READFROMSTREAMTOSTR(PChar);
-READFROMSTREAMTOSTR(PString);
-READFROMSTREAM(Bool);
-READFROMSTREAM(Double);
-READFROMSTREAM(Int);
-READFROMSTREAM(Long);
-READFROMSTREAM(UInt);
-READFROMSTREAM(ULong);
-READFROMSTREAM(Int64);
-READFROMSTREAM(Char);
-READFROMSTREAM(PBool);
-READFROMSTREAM(PDouble);
-READFROMSTREAM(PInt);
-READFROMSTREAM(PLong);
-READFROMSTREAM(PUInt);
-READFROMSTREAM(PULong);
-READFROMSTREAM(PInt64);
+READFROMSTREAMTOSTR(String)
+READFROMSTREAMTOSTR(PChar)
+READFROMSTREAMTOSTR(PString)
+READFROMSTREAM(Bool)
+READFROMSTREAM(Double)
+READFROMSTREAM(Int)
+READFROMSTREAM(UInt)
+READFROMSTREAM(Int64)
+READFROMSTREAM(Char)
+READFROMSTREAM(PBool)
+READFROMSTREAM(PDouble)
+READFROMSTREAM(PInt)
+READFROMSTREAM(PUInt)
+READFROMSTREAM(PInt64)
 
 
 
@@ -219,54 +210,49 @@ ostream & ConfigItem##SUFFIX::writeToStream(ostream & os) { \
 
 
 
-WRITETOSTREAM(Bool);
-WRITETOSTREAM(Double);
-WRITETOSTREAM(Int);
-WRITETOSTREAM(Long);
-WRITETOSTREAM(UInt);
-WRITETOSTREAM(ULong);
-WRITETOSTREAM(Int64);
-WRITETOSTREAM(Char);
-WRITETOSTREAM(String);
-WRITETOSTREAM(PChar);
-WRITETOSTREAM(PBool);
-WRITETOSTREAM(PDouble);
-WRITETOSTREAM(PInt);
-WRITETOSTREAM(PLong);
-WRITETOSTREAM(PUInt);
-WRITETOSTREAM(PULong);
-WRITETOSTREAM(PInt64);
-WRITETOSTREAM(PString);
+WRITETOSTREAM(Bool)
+WRITETOSTREAM(Double)
+WRITETOSTREAM(Int)
+WRITETOSTREAM(UInt)
+WRITETOSTREAM(Int64)
+WRITETOSTREAM(Char)
+WRITETOSTREAM(String)
+WRITETOSTREAM(PChar)
+WRITETOSTREAM(PBool)
+WRITETOSTREAM(PDouble)
+WRITETOSTREAM(PInt)
+WRITETOSTREAM(PUInt)
+WRITETOSTREAM(PInt64)
+WRITETOSTREAM(PString)
+
+
 
 /** NULL values */
 #define ISNULL(SUFFIX)  bool ConfigItem##SUFFIX::isNull()  { return !this->data(); } // 0, false, \0
 #define ISNULLPCHAR()   bool ConfigItemPChar ::isNull()    { return !this->data() || !*(this->data()); } // 0 or \0
-#define ISNULLDOUBLE()  bool ConfigItemDouble::isNull()    { return this->data() == 0.; } // 0.
+#define ISNULLDOUBLE()  bool ConfigItemDouble::isNull()    { return fabs(this->data() - 0.) < 10e-7; } // 0.
 #define ISNULLSTRING()  bool ConfigItemString::isNull()    { return !this->data().size(); } // ""
 #define ISNULLP(SUFFIX) bool ConfigItemP##SUFFIX::isNull() { return !this->data() || !*(this->data()); }
-#define ISNULLPDOUBLE() bool ConfigItemPDouble::isNull()   { return !this->data() || *(this->data()) == 0.; }
+#define ISNULLPDOUBLE() bool ConfigItemPDouble::isNull()   { return !this->data() || fabs(*(this->data()) - 0.) < 10e-7; }
 #define ISNULLPSTRING() bool ConfigItemPString::isNull()   { return !this->data() || !((*(this->data())).size()); }
 
-ISNULL(Bool);
-ISNULL(Int);
-ISNULL(UInt);
-ISNULL(Long);
-ISNULL(Int64);
-ISNULL(ULong);
-ISNULL(Char);
-ISNULLPCHAR();
-ISNULLDOUBLE();
-ISNULLSTRING();
-ISNULLP(Bool);
-ISNULLP(Int);
-ISNULLP(UInt);
-ISNULLP(Long);
-ISNULLP(Int64);
-ISNULLP(ULong);
-ISNULLPDOUBLE();
-ISNULLPSTRING();
+ISNULL(Bool)
+ISNULL(Int)
+ISNULL(UInt)
+ISNULL(Int64)
+ISNULL(Char)
+ISNULLPCHAR()
+ISNULLDOUBLE()
+ISNULLSTRING()
+ISNULLP(Bool)
+ISNULLP(Int)
+ISNULLP(UInt)
+ISNULLP(Int64)
+ISNULLPDOUBLE()
+ISNULLPSTRING()
 
-}; // namespace configuration
+
+} // namespace configuration
 
 /**
  * $Id$
