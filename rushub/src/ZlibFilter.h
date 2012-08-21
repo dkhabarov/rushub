@@ -20,6 +20,8 @@
 #ifndef ZLIB_FILTER_H
 #define ZLIB_FILTER_H
 
+#ifndef WITHOUT_ZLIB
+
 #include "stdinc.h"
 
 #ifdef _WIN32
@@ -57,6 +59,8 @@ private:
 }; // class ZlibFilter
 
 } // namespace utils
+
+#endif // WITHOUT_ZLIB
 
 #endif // ZLIB_FILTER_H
 
