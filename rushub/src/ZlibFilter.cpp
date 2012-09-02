@@ -19,7 +19,7 @@
 
 #include "ZlibFilter.h"
 
-#ifndef WITHOUT_ZLIB
+#ifdef HAVE_LIBZLIB
 
 #include <string.h>
 
@@ -142,7 +142,7 @@ bool ZlibFilter::compressFull(const char * in, size_t inSize, string & out) {
 
 } // namespace utils
 
-#endif // WITHOUT_ZLIB
+#endif // HAVE_LIBZLIB
 
 /**
  * $Id$

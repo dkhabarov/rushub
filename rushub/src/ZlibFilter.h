@@ -20,7 +20,7 @@
 #ifndef ZLIB_FILTER_H
 #define ZLIB_FILTER_H
 
-#ifndef WITHOUT_ZLIB
+#ifdef HAVE_LIBZLIB
 
 #include "stdinc.h"
 
@@ -60,7 +60,7 @@ private:
 
 } // namespace utils
 
-#endif // WITHOUT_ZLIB
+#endif // HAVE_LIBZLIB
 
 #endif // ZLIB_FILTER_H
 
