@@ -23,7 +23,6 @@
 #include "TigerHash.h"
 
 
-using namespace utils;
 using namespace dcserver;
 
 SUITE(TestDcProtocol) {
