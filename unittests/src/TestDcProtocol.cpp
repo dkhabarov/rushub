@@ -31,6 +31,52 @@ SUITE(TestDcProtocol) {
 
 TEST(TestNmdcUser) {
 
+	// mapping user properties NMDC <-> ADC:
+	/*
+		uid - ID (cid)
+
+		sNick - NI (string)
+
+		sDesc - DE (string)
+		sEmail - EM (string)
+		sClientName - AP (string)
+		sClientVersion - VE (string)
+		iUsHubs - HN (int)
+		iRegHubs - HR (int)
+		iOpHubs - HO (int)
+		iSlots - SL (int)
+		iLimit - US (int)
+		iOpen - FS (int)
+		iBandwidth - AS (int)
+		iDownload - DS (int)
+		iByte - mapping on AW (int)
+		iShare - SS (int64)
+
+		sTag - only NMDC (string) (calc field)
+		sMode - only NMDC (string) (calc field)
+		sFraction - only NMDC (string) (calc field)
+		sConn - only NMDC (string)
+		sSupports - only NMDC (string)
+		sVersion - only NMDC (string)
+
+
+		properties without inf flag:
+
+		sIP (string)
+		sIPConn (string)
+		sMacAddress (string)
+		iProfile (int)
+		iPort (int)
+		iPortConn (int)
+		iEnterTime (int)
+		bKick (bool)
+		bRedirect (bool)
+		bHide (bool)
+		bInUserList (bool)
+		bInIpList (bool)
+		bInOpList (bool)
+
+	*/
 
 	CHECK_EQUAL("1", "1");
 }
