@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 m4_define([package], [RusHub])
-m4_define([version], [2.3.10[beta]])
+m4_define([version], [2.3.10])
 
 AC_PREREQ([2.50])
 AC_INIT([package], [version], [setuper@gmail.com])
