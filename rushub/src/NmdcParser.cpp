@@ -445,7 +445,7 @@ void NmdcParser::parseTag(DcUser * dcUser, const string & tag) {
 		size_t v = tag.find("V:");
 		if (v != tag.npos) {
 			clientVersion.assign(tag, v + 2, clientPos - v - 2);
-			clientName.assign(tag, 0, v);
+			clientName.assign(tag, 0, v - 1);
 		} else {
 			size_t cn_e_pos = clientPos;
 			size_t s = tag.find(' ');
