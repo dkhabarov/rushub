@@ -456,7 +456,7 @@ void NmdcParser::parseTag(DcUser * dcUser, const string & tag) {
 					cn_e_pos = s;
 				}
 			}
-			clientName.assign(tag, 0, cn_e_pos);
+			clientName.assign(tag, 0, cn_e_pos); // TODO check position!
 		}
 
 		// hubs
