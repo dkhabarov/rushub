@@ -153,13 +153,15 @@ DcServer::~DcServer() {
 	UserList::iterator it_e = mDcUserList.end();
 	while (it != it_e) {
 		Us = static_cast<DcUser *> (*it++);
-		if (Us->mDcConn) {
-			delConnection(Us->mDcConn);
-		} else {
-			if (Us->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-				removeFromDcUserList(Us);
+		if (Us != NULL) {
+			if (Us->mDcConn) {
+				delConnection(Us->mDcConn);
+			} else {
+				if (Us->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
+					removeFromDcUserList(Us);
+				}
+				delete Us;
 			}
-			delete Us;
 		}
 	}
 
@@ -967,8 +969,8 @@ DcUser * DcServer::getDcUser(const char * uid) {
 		DcConn * dcConn = NULL;
 		for (tCLIt it = mClientList.begin(); it != mClientList.end(); ++it) {
 			dcConn = static_cast<DcConn *> (*it);
-			if (dcConn && dcConn->mDcUser->mType == CLIENT_TYPE_DC && 
-				dcConn->mDcUser && dcConn->mDcUser->getUid() == uidStr
+			if (dcConn && dcConn->mDcUser && dcConn->mDcUser->mType == CLIENT_TYPE_DC &&
+				dcConn->mDcUser->getUid() == uidStr
 			) {
 				return dcConn->mDcUser;
 			}

@@ -1150,17 +1150,15 @@ void NmdcProtocol::sendMode(DcConn * dcConn, const string & str, int mode, UserL
 
 
 void NmdcProtocol::forceMove(DcConn * dcConn, const char * address, const char * reason /*= NULL*/) {
-	string msg, force, nick(STR_LEN("<unknown>"));
-	if (dcConn->mDcUser && !dcConn->mDcUser->getUid().empty()) {
-		nick = dcConn->mDcUser->getUid();
-	}
+	string msg, force;
 
 	stringReplace(mDcServer->mDcLang.mForceMove, string(STR_LEN("address")), force, address);
 	stringReplace(force, string(STR_LEN("reason")), force, reason != NULL ? reason : "");
 
-	dcConn->mDcUser->sendToPm(force, mDcServer->mDcConfig.mHubBot, mDcServer->mDcConfig.mHubBot, false);
-	dcConn->mDcUser->sendToChat(force, mDcServer->mDcConfig.mHubBot, false);
-
+	if (dcConn->mDcUser != NULL) {
+		dcConn->mDcUser->sendToPm(force, mDcServer->mDcConfig.mHubBot, mDcServer->mDcConfig.mHubBot, false);
+		dcConn->mDcUser->sendToChat(force, mDcServer->mDcConfig.mHubBot, false);
+	}
 	dcConn->send(appendForceMove(msg, address));
 	dcConn->closeNice(9000, CLOSE_REASON_CMD_FORCE_MOVE);
 }

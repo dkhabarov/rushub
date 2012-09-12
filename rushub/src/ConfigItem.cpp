@@ -81,7 +81,7 @@ void ConfigItemChar::convertFrom(const string & str) { \
 void ConfigItemPChar::convertFrom(const string & str) { \
 	char * data = this->data(); \
 	if (data) { \
-		delete data; \
+		delete [] data; \
 	} \
 	data = new char[str.size() + 1]; \
 	memcpy(data, str.data(), str.size() + 1); \

@@ -700,7 +700,7 @@ unsigned long Conn::getCount() {
 /// Calculate mac-address
 #ifdef _WIN32
 void Conn::calcMacAddress() {
-	DWORD size;
+	DWORD size = 0;
 	DWORD ret = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, NULL, NULL, &size);
 	if (ret != ERROR_BUFFER_OVERFLOW) {
 		return;

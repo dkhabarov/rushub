@@ -156,16 +156,20 @@ int Exception::uninit() {
 
 // Get function prototype and parameter info from ip address and stack address
 int Exception::getFunctionInfo(unsigned long functionAddress, unsigned long stackAddress, char * buff) {
-	unsigned __int64 disp = 0;
 	unsigned long size = 1024 * 16;
 	PSYMBOL_INFO pSym = (PSYMBOL_INFO) GlobalAlloc(GMEM_FIXED, size);
 
-	::ZeroMemory(pSym, size * sizeof(PSYMBOL_INFO));
+	if (pSym == NULL) {
+		return 0;
+	}
+
+	::ZeroMemory(pSym, size * sizeof(_SYMBOL_INFO));
 	pSym->SizeOfStruct = size;
 	pSym->MaxNameLen = size - sizeof(IMAGEHLP_SYMBOL);
 
 	strcpy(buff, "?");
 
+	unsigned __int64 disp = 0;
 	if (SymFromAddr(GetCurrentProcess(), (unsigned long)functionAddress, &disp, pSym)) {
 
 		char buf[BUFFERSIZE] = "?";
