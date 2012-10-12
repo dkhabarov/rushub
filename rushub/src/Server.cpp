@@ -144,7 +144,6 @@ Conn * Server::listening(ConnFactory * connFactory, const char * ip, const char 
 	Conn * conn = addSimpleConn(connType, ip, port);
 
 	if (conn == NULL) {
-		delete conn;
 		return NULL;
 	}
 
@@ -163,7 +162,6 @@ Conn * Server::connecting(ConnFactory * connFactory, const char * ip, const char
 	Conn * conn = addSimpleConn(connType, ip, port);
 
 	if (conn == NULL) {
-		delete conn;
 		return NULL;
 	}
 
