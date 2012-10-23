@@ -265,8 +265,8 @@ static const union {
 	{ 0, 1, 2, 3 }
 };
 
-static const bool _LITTLE_ENDIAN = (o32_host_order.value == O32_LITTLE_ENDIAN);
-//static const bool _BIG_ENDIAN = (o32_host_order.value == O32_BIG_ENDIAN);
+static const bool IS_LITTLE_ENDIAN = (o32_host_order.value == O32_LITTLE_ENDIAN);
+//static const bool IS_BIG_ENDIAN = (o32_host_order.value == O32_BIG_ENDIAN);
 
 
 #endif // STDINC_H ]

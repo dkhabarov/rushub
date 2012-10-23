@@ -33,7 +33,7 @@ namespace dcserver {
 namespace protocol {
 
 #define FOURCC(c) (*(reinterpret_cast<uint32_t *> (const_cast<char *> (c))))
-#define CMD(c) (_LITTLE_ENDIAN ? (FOURCC(c) >> 8) : (FOURCC(c) << 8))
+#define CMD(c) (IS_LITTLE_ENDIAN ? (FOURCC(c) >> 8) : (FOURCC(c) << 8))
 
 /// ADC command
 class AdcCommand {
