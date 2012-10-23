@@ -19,7 +19,7 @@
 
 #include "ZlibFilter.h"
 
-#ifdef HAVE_LIBZLIB
+#if HAVE_LIBZLIB
 
 #include <string.h>
 
