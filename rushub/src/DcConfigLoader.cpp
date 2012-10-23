@@ -26,7 +26,7 @@
 	#include "config.h"
 #endif
 
-#ifdef HAVE_LIBTINYXML
+#if HAVE_LIBTINYXML
 	#include <tinyxml.h>
 #else
 	#include "tinyxml/tinyxml.h"

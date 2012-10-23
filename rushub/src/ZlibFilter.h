@@ -20,7 +20,7 @@
 #ifndef ZLIB_FILTER_H
 #define ZLIB_FILTER_H
 
-#ifdef HAVE_LIBZLIB
+#if HAVE_LIBZLIB
 
 #include "stdinc.h"
 
