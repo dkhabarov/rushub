@@ -20,6 +20,10 @@
 #ifndef ZLIB_FILTER_H
 #define ZLIB_FILTER_H
 
+#ifdef HAVE_CONFIG_H
+  #include <config.h>
+#endif // HAVE_CONFIG_H
+
 #if HAVE_LIBZLIB
 
 #include "stdinc.h"
