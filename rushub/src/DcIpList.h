@@ -54,7 +54,7 @@ public:
 	virtual void onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
 		if (log(LEVEL_DEBUG)) {
 			logStream() << "Autoresizing: size = " << currentSize << 
-				", capacity = " << oldCapacity << " -> " + newCapacity << endl;
+				", capacity = " << oldCapacity << " -> " << newCapacity << endl;
 		}
 	}
 
