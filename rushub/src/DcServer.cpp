@@ -301,7 +301,7 @@ void DcServer::getAddresses(
 			delim = "]:";
 		}
 		stringSplit(part, delim, vIpPort);
-		if (2 < vIpPort.size() || vIpPort.size() < 1 || vIpPort[0].size() == 0) {
+		if (2 < vIpPort.size() || vIpPort.size() < 1 || vIpPort[0].empty()) {
 			continue;
 		}
 		size_t last = vIpPort[0].size() - 1;
@@ -1385,7 +1385,7 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 		inf.append(STR_LEN(" IDAONWQSVCXNJKW7L4HLB5O24TYW55555KAEK7WRY SS0 HN0 HR0 HO1 VEBot\\sV:1.0 SL0 DERusHub\\sbot"));
 		dcUser->setInfo(inf);
 	} else { // NMDC
-		if (!uid.size() || uid.size() > 0x40 || uid.find_first_of(" |$") != uid.npos) {
+		if (uid.empty() || uid.size() > 0x40 || uid.find_first_of(" |$") != uid.npos) {
 			delete dcUser;
 			return -1;
 		}

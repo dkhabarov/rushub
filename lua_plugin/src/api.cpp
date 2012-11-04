@@ -709,7 +709,7 @@ int sendToAllExceptNicks(lua_State * L) {
 				nickList.push_back(string(except, exceptLen));
 				lua_pop(L, 1);
 			}
-			if (!nickList.size()) {
+			if (nickList.empty()) {
 				return LuaUtils::pushError(L, "list turned out to be empty");
 			}
 			break;
@@ -752,7 +752,7 @@ int sendToAllExceptNicksRaw(lua_State * L) {
 		nickList.push_back(string(except, exceptLen));
 		lua_pop(L, 1);
 	}
-	if (!nickList.size()) {
+	if (nickList.empty()) {
 		return LuaUtils::pushError(L, "list turned out to be empty");
 	}
 
@@ -804,7 +804,7 @@ int sendToAllExceptIps(lua_State * L) {
 				ipList.push_back(string(except, exceptLen));
 				lua_pop(L, 1);
 			}
-			if (!ipList.size()) {
+			if (ipList.empty()) {
 				return LuaUtils::pushError(L, "list turned out to be empty");
 			}
 			break;
@@ -847,7 +847,7 @@ int sendToAllExceptIpsRaw(lua_State * L) {
 		ipList.push_back(string(except, exceptLen));
 		lua_pop(L, 1);
 	}
-	if (!ipList.size()) {
+	if (ipList.empty()) {
 		return LuaUtils::pushError(L, "list turned out to be empty");
 	}
 

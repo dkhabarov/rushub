@@ -406,7 +406,7 @@ void Conn::closeNice(int msec /* = 0 */, int reason /* = 0 */) {
 	if (reason) {
 		mCloseReason = reason;
 	}
-	if ((msec <= 0) || (!mSendBuf.size())) {
+	if (msec <= 0 || mSendBuf.empty()) {
 		closeNow(reason);
 		return;
 	}
@@ -1023,7 +1023,7 @@ void Conn::onFlush() {
 
 /// Flush
 void Conn::flush() {
-	if (mSendBuf.size() != 0) {
+	if (!mSendBuf.empty()) {
 		writeData("", 0, true);
 	}
 }

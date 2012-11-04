@@ -311,10 +311,10 @@ DcLang::DcLang(ConfigLoader * configLoader, ConfigListBase * configListBase) :
 	if (langConfig && langPathConfig) {
 		langPathConfig->convertTo(mConfigStore.mPath);
 		langConfig->convertTo(mConfigStore.mName);
-		if (mConfigStore.mPath.size() == 0) {
+		if (mConfigStore.mPath.empty()) {
 			mConfigStore.mPath.assign(STR_LEN("./"));
 		}
-		if (mConfigStore.mName.size() == 0) {
+		if (mConfigStore.mName.empty()) {
 			mConfigStore.mName.assign(STR_LEN("English"));
 		}
 

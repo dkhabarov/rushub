@@ -148,7 +148,7 @@ void NmdcParser::reInit() {
 
 
 bool NmdcParser::isPassive(const string & description) {
-	if (!description.size()) {
+	if (description.empty()) {
 		return false;
 	}
 	size_t l = description.size() - 1;

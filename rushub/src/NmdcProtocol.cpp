@@ -903,7 +903,7 @@ int NmdcProtocol::eventOpForceMove(NmdcParser * dcparser, DcConn * dcConn) {
 	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcparser->chunkString(CHUNK_FM_NICK)));
 
 	// Is user exist?
-	if (!dcUser || !dcUser->mDcConn || !dcparser->chunkString(CHUNK_FM_DEST).size()) {
+	if (!dcUser || !dcUser->mDcConn || dcparser->chunkString(CHUNK_FM_DEST).empty()) {
 		return -3;
 	}
 

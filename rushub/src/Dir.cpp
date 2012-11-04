@@ -190,7 +190,7 @@ void Dir::checkEndSlash(string & path) {
 		pos = path.find('\\', pos);
 	}
 
-	if (path.size() == 0 || path.find('/', path.size() - 1) == path.npos) {
+	if (path.empty() || path.find('/', path.size() - 1) == path.npos) {
 		path += '/';
 	}
 
