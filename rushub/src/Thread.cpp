@@ -74,3 +74,8 @@ void Thread::stop() {
 }
 
 } // namespace utils
+
+/**
+ * $Id$
+ * $HeadURL$
+ */

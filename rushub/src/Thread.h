@@ -76,3 +76,8 @@ private:
 } // namespace utils
 
 #endif // THREAD_H
+
+/**
+ * $Id$
+ * $HeadURL$
+ */
