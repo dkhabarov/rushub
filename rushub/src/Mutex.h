@@ -70,6 +70,8 @@ public:
 		#endif
 	}
 
+	typedef ScopedLock<Mutex> Lock;
+
 private:
 
 	#ifdef _WIN32
@@ -84,6 +86,24 @@ private:
 	void operator = (const Mutex &);
 
 }; // class Mutex
+
+template<typename M>
+class ScopedLock {
+
+public:
+
+	ScopedLock(M & m) : mutex(m) {
+		mutex.lock();
+	}
+	~ScopedLock() {
+		mutex.unlock();
+	}
+
+private:
+
+	M & mutex;
+
+};
 
 #endif // MUTEX_H
 
