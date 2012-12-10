@@ -60,6 +60,10 @@ public:
 	ThreadCall * mFunc;
 	void * mArg;
 
+	static long safeInc(volatile long & value);
+	static long safeDec(volatile long & value);
+	static long safeExc(volatile long & target, long value);
+
 private:
 
 	#ifdef _WIN32

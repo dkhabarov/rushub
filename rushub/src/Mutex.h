@@ -26,6 +26,25 @@
 	#include <pthread.h>
 #endif
 
+
+template<typename M>
+class ScopedLock {
+
+public:
+
+	ScopedLock(M & m) : mutex(m) {
+		mutex.lock();
+	}
+	~ScopedLock() {
+		mutex.unlock();
+	}
+
+private:
+
+	M & mutex;
+
+};
+
 class Mutex {
 
 public:
@@ -87,23 +106,6 @@ private:
 
 }; // class Mutex
 
-template<typename M>
-class ScopedLock {
-
-public:
-
-	ScopedLock(M & m) : mutex(m) {
-		mutex.lock();
-	}
-	~ScopedLock() {
-		mutex.unlock();
-	}
-
-private:
-
-	M & mutex;
-
-};
 
 #endif // MUTEX_H
 

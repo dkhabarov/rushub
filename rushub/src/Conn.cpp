@@ -24,6 +24,7 @@
 
 #include "Conn.h"
 #include "Server.h" // mServer
+#include "Thread.h"
 
 #include <iostream> // cout, endl
 #include <stdlib.h> // atoi unix
@@ -52,12 +53,12 @@
   #define NS_INT16SZ 2
 #endif
 
-
+using namespace ::utils;
 
 namespace server {
 
 
-unsigned long Conn::mConnCounter = 0;
+volatile long Conn::mConnCounter = 0;
 socklen_t Conn::mSockAddrInSize = sizeof(struct sockaddr_in);
 
 char Conn::mRecvBuf[MAX_RECV_SIZE + 1];
@@ -102,7 +103,7 @@ Conn::~Conn() {
 		int err = SOCK_CLOSE(mSocket);
 		if (!(SOCK_ERROR(err))) {
 	#endif
-			--mConnCounter;
+			Thread::safeDec(mConnCounter);
 			if (log(LEVEL_DEBUG)) {
 				logStream() << "Closing socket: " << mSocket << endl;
 			}
@@ -324,7 +325,7 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 		}
 	}
 
-	++mConnCounter;
+	Thread::safeInc(mConnCounter);
 	if (log(LEVEL_DEBUG)) {
 		logStream() << "Created new socket: " << sock << endl;
 	}
@@ -549,7 +550,7 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 		logStream() << "Accept new socket: " << sock << endl;
 	}
 
-	++mConnCounter;
+	Thread::safeInc(mConnCounter);
 	return sock;
 }
 
@@ -691,7 +692,7 @@ bool Conn::checkIp(const string & ip) {
 
 
 
-unsigned long Conn::getCount() {
+const long Conn::getCount() {
 	return mConnCounter;
 }
 
@@ -887,13 +888,13 @@ size_t Conn::remaining() {
 
 
 
-const char * Conn::getSeparator() {
+const char * Conn::getSeparator() const {
 	return mProtocol ? mProtocol->getSeparator() : "\0";
 }
 
 
 
-size_t Conn::getSeparatorLen() {
+size_t Conn::getSeparatorLen() const {
 	return mProtocol ? mProtocol->getSeparatorLen() : 1;
 }
 

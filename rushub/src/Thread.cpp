@@ -73,6 +73,18 @@ void Thread::stop() {
 	#endif
 }
 
+long Thread::safeInc(volatile long & value) {
+	return InterlockedIncrement(&value);
+}
+
+long Thread::safeDec(volatile long & value) {
+	return InterlockedDecrement(&value);
+}
+
+long Thread::safeExc(volatile long & target, long value) {
+	return InterlockedExchange(&target, value);
+}
+
 } // namespace utils
 
 /**

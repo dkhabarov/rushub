@@ -29,6 +29,7 @@
 #include "Obj.h"
 #include "Times.h"
 #include "Protocol.h"
+#include "Mutex.h"
 
 #include <string>
 #include <list>
@@ -135,7 +136,7 @@ public:
 	virtual operator tSocket() const;
 
 	static bool checkIp(const string & ip);
-	static unsigned long getCount();
+	static const long getCount();
 	//static const char * inetNtop(int af, const void * src, char * dst, socklen_t cnt);
 	//static int inetPton(int af, const char * src, void * dst);
 
@@ -244,15 +245,17 @@ protected:
 
 	list<Conn *>::iterator mIterator; ///< Optimisation
 
+	Mutex mutex;
+
 protected:
 
 	virtual bool strLog();
 
 	virtual void onOk(bool);
 
-	const char * getSeparator();
+	const char * getSeparator() const;
 
-	size_t getSeparatorLen();
+	size_t getSeparatorLen() const;
 
 private:
 
@@ -275,7 +278,7 @@ private:
 	struct sockaddr_in mSockAddrIn;
 	static socklen_t mSockAddrInSize;
 
-	static unsigned long mConnCounter; ///< Conn counter
+	static volatile long mConnCounter; ///< Conn counter
 
 	/// ipv6
 	struct addrinfo * mAddrInfo;

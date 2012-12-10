@@ -93,7 +93,7 @@ public:
 	virtual ~Obj();
 
 	///< Get counts of objects
-	static int getCount();
+	static const long getCount();
 
 	///< Return log straem
 	int log(int level);
@@ -132,7 +132,7 @@ private:
 	ostream * mToLog;
 
 	///< Objects counter
-	static int mCounterObj;
+	static volatile long mCounterObj;
 	static int mLevel;
 	static bool mCout;
 	static const char * mLevelNames[];

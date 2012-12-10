@@ -24,10 +24,12 @@
 
 #include "Obj.h"
 #include "Times.h"
+#include "Thread.h"
 
 #include <time.h> // time
 
 using namespace ::std;
+using namespace ::utils;
 
 
 namespace utils {
@@ -42,7 +44,7 @@ int Obj::mMaxLevel = LEVEL_TRACE; // set max level for log before load config
 ofstream Obj::mOfs;
 string * Obj::mLogsPath = NULL; /** Logs path */
 
-int Obj::mCounterObj = 0; /** Objects counter */
+volatile long Obj::mCounterObj = 0; /** Objects counter */
 int Obj::mLevel = 0;
 bool Obj::mCout = false;
 const char * Obj::mLevelNames[] = {"FATAL", "ERROR", "WARN ", "INFO ", "DEBUG", "TRACE"};
@@ -58,7 +60,7 @@ Obj::Obj(const char * name) :
 	mClassName(name),
 	mToLog(&cout)
 {
-	++mCounterObj;
+	Thread::safeInc(mCounterObj);
 	//if (log(LEVEL_WARN)) logStream() << "+ " << mClassName << endl;
 }
 
@@ -77,21 +79,21 @@ Obj::Obj() :
 	mClassName("Obj"),
 	mToLog(&cout)
 {
-	++mCounterObj;
+	Thread::safeInc(mCounterObj);
 	//if (log(LEVEL_WARN)) logStream() << "+ " << mClassName << endl;
 }
 
 
 
 Obj::~Obj() {
-	--mCounterObj;
+	Thread::safeDec(mCounterObj);
 	//if (string(mClassName) != "DcServer" && log(LEVEL_WARN)) logStream() << "- " << mClassName << endl;
 }
 
 
 
 /** Get counts of objects */
-int Obj::getCount() {
+const long Obj::getCount() {
 	return mCounterObj;
 }
 
