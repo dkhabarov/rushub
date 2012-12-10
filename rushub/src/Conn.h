@@ -62,7 +62,7 @@ public:
 
 protected:
 
-	Protocol * mProtocol; ///< Protocal
+	Protocol * mProtocol; ///< Protocol
 	Server * mServer; ///< Pointer on server
 
 private:
