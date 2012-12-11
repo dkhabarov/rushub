@@ -49,8 +49,9 @@ enum {
 	LEVEL_TRACE  // tracing
 };
 
-/** Main thread safe stream of log system */
 #define logStream() logStreamLine(__LINE__)
+
+/** Main thread safe stream of log system */
 #define LOG_CLASS_STREAM(CLASS, OSTREAM) { ostringstream oss; oss << OSTREAM << endl; CLASS->logStreamLine(__LINE__) << oss.str(); }
 #define LOG_CLASS(CLASS, LEVEL, OSTREAM) if (CLASS->log(LEVEL)) LOG_CLASS_STREAM(CLASS, OSTREAM)
 #define LOG_STREAM(OSTREAM) LOG_CLASS_STREAM(this, OSTREAM)
