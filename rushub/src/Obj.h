@@ -49,9 +49,10 @@ enum {
 	LEVEL_TRACE  // tracing
 };
 
-/** Main stream of log system */
+/** Main thread safe stream of log system */
 #define logStream() logStreamLine(__LINE__)
-
+#define LOG_STREAM(OSTREAM) { ostringstream oss; oss << OSTREAM << endl; logStreamLine(__LINE__) << oss.str(); }
+#define LOG(LEVEL, OSTREAM) if (log(LEVEL)) LOG_STREAM(OSTREAM)
 
 #ifndef STR_LEN
 # define STR_LEN(S) S , sizeof(S) / sizeof(S[0]) - 1
