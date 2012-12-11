@@ -114,7 +114,7 @@ private:
 
 
 /// Main DC Server class
-class DcServer : public Server, public DcServerBase, private NonCopyable {
+class DcServer : public Server, public DcServerBase {
 
 	friend class ::dcserver::DcListIterator; // for mClientList
 	friend class ::dcserver::DcConn; // for minDelay in DcConn::onTimer

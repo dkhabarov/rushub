@@ -56,7 +56,7 @@ class PluginLoader;
 
 
 /// List with all plugins
-class PluginList : public Obj, private NonCopyable {
+class PluginList : public Obj {
 
 	/** For LoadAll */
 	friend class ::dcserver::DcServer;

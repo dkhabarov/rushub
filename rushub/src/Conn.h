@@ -116,7 +116,7 @@ enum {
 
 
 /// Main connection class for server
-class Conn : public Obj, public ConnBase, private NonCopyable {
+class Conn : public Obj, public ConnBase {
 
 	friend class Server; // for mIterator and ports
 

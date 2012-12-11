@@ -62,24 +62,6 @@ enum {
 
 
 /**
- * NonCopyable class
- */
-class NonCopyable {
-
-protected:
-
-	NonCopyable() {}
-	virtual ~NonCopyable() {}
-
-private:
-
-	NonCopyable(const NonCopyable &);
-	const NonCopyable & operator = (const NonCopyable &);
-
-}; // class NonCopyable
-
-
-/**
  * Main object class (logger class)
  */
 class Obj {

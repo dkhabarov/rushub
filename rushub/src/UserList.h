@@ -48,7 +48,7 @@ class UserBase;
 
 /// Base template for user list
 template <class I, class T>
-class ListItem : private NonCopyable {
+class ListItem {
 
 public:
 
@@ -109,6 +109,11 @@ private:
 
 	Maker mMaker;
 
+private:
+
+	ListItem(const ListItem<I, T> &);
+	ListItem<I, T> & operator = (const ListItem<I, T> &);
+
 }; // class ListItem
 
 
@@ -119,7 +124,7 @@ typedef ListItem<HashTable<UserBase *>::iterator, UserBase *> UserListItem;
 
 
 /** The structure, allowing add and delete users. Quick iterations cycle for sending */
-class UserList : public Obj, public HashTable<UserBase *>, private NonCopyable {
+class UserList : public Obj, public HashTable<UserBase *> {
 
 public:
 
@@ -186,6 +191,9 @@ private:
 private:
 
 	static void addInCache(string & cache, const string & data, const char * sep, size_t sepLen, bool addSep = true);
+
+	UserList(const UserList &);
+	UserList & operator = (const UserList &);
 
 }; // class UserList
 

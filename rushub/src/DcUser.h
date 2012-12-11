@@ -49,7 +49,7 @@ class DcServer;
 
 
 /** Extended class of the user */
-class DcUser : public Obj, public DcUserBase, public UserBase, private NonCopyable {
+class DcUser : public Obj, public DcUserBase, public UserBase {
 
 public:
 
