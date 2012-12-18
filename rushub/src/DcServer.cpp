@@ -75,7 +75,6 @@ DcServer::DcServer(const string & configFile, const string &) :
 	Server(),
 	mDcConfig(&mDcConfigLoader, mServer, configFile.c_str()),
 	mDcLang(&mDcConfigLoader, &mDcConfig),
-	mSystemLoad(SYSTEM_LOAD_OK),
 	mStartTime(true),
 	mDcUserList("UserList"),
 	mBotList("BotList"),
@@ -89,6 +88,7 @@ DcServer::DcServer(const string & configFile, const string &) :
 	miTotalShare(0),
 	mPluginList(mDcConfig.mPluginPath),
 	mHubName(INTERNALNAME " " INTERNALVERSION " " __DATE__ " " __TIME__),
+	mSystemLoad(SYSTEM_LOAD_OK),
 	mWebProtocol(NULL),
 	mIpEnterFlood(mDcConfig.mFloodCountReconnIp, mDcConfig.mFloodTimeReconnIp),
 	mCalls(&mPluginList)

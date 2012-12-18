@@ -127,20 +127,12 @@ public:
 
 	typedef vector<string> List_t;
 
-	/// Current server
-	static DcServer * currentDcServer;
-
-	/// Config loader
-	DcConfigLoader mDcConfigLoader;
-
-	/// Config settings of the server
-	DcConfig mDcConfig;
-
-	/// Settings of language
-	DcLang mDcLang;
-
-	SystemLoad mSystemLoad; ///< Indicator of the system overloading
+	static DcServer * currentDcServer; ///< Current server
 	static string mSysVersion; ///< Verion of OS System
+
+	DcConfigLoader mDcConfigLoader; ///< Config loader
+	DcConfig mDcConfig; ///< Config settings of the server
+	DcLang mDcLang; ///< Settings of language
 
 	Time mStartTime; ///< Start time of the hub
 	NmdcProtocol mNmdcProtocol; ///< NMDC Protocol
@@ -158,7 +150,7 @@ public:
 	int miTotalUserCount; ///< Total number of the users
 	int64_t miTotalShare; ///< Total hub share size
 
-	PluginList mPluginList;
+	PluginList mPluginList; ///< Plugin list
 
 	string mTimeBuf; ///< Time buffer for plugins
 
@@ -240,6 +232,10 @@ public:
 	static void getNormalShare(int64_t, string &); ///< Get normal share size
 	static void getAddresses(const char * addresses, vector<pair<string, string> > &, const char * defaultPort);
 
+	SystemLoad getSystemLoad() const {
+		return mSystemLoad;
+	}
+
 	/// Pointer on the user (or NULL)
 	DcUser * getDcUser(const char * nick);
 
@@ -289,6 +285,8 @@ private:
 	vector<string> mConfigNameList; ///< Config names for plugins
 
 	vector<ConnFactory *> mConnFactories; ///< Server Conn Factories
+
+	SystemLoad mSystemLoad; ///< Indicator of the system overloading
 
 	/// Web Protocol
 	WebProtocol * mWebProtocol;

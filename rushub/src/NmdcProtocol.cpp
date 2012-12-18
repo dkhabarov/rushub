@@ -620,7 +620,7 @@ int NmdcProtocol::eventSearch(NmdcParser * dcparser, DcConn * dcConn) {
 		return -1;
 	}
 
-	if (mDcServer->mSystemLoad == SYSTEM_LOAD_SYSTEM_DOWN) {
+	if (mDcServer->getSystemLoad() == SYSTEM_LOAD_SYSTEM_DOWN) {
 		LOG_CLASS(dcConn, LEVEL_WARN, "System down, search is impossible");
 		return -2;
 	}
