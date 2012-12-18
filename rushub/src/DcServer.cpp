@@ -142,19 +142,19 @@ DcServer::~DcServer() {
 		unregBot(mDcConfig.mHubBot);
 	}
 
-	DcUser * Us = NULL;
+	DcUser * dcUser = NULL;
 	UserList::iterator it = mDcUserList.begin();
 	UserList::iterator it_e = mDcUserList.end();
 	while (it != it_e) {
-		Us = static_cast<DcUser *> (*it++);
-		if (Us != NULL) {
-			if (Us->mDcConn) {
-				delConnection(Us->mDcConn);
+		dcUser = static_cast<DcUser *> (*it++);
+		if (dcUser != NULL) {
+			if (dcUser->mDcConn) {
+				delConnection(dcUser->mDcConn);
 			} else {
-				if (Us->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-					removeFromDcUserList(Us);
+				if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
+					removeFromDcUserList(dcUser);
 				}
-				delete Us;
+				delete dcUser;
 			}
 		}
 	}

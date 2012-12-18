@@ -32,7 +32,7 @@ namespace dcserver {
 
 
 /** Unary function for sending data to users */
-struct ufSend : public unary_function<void, UserList::iterator> {
+struct ufSend : public unary_function<void, HashTable<UserBase *>::iterator> {
 	const string & mData; /** Data for sending */
 	bool mAddSep;
 
@@ -55,7 +55,7 @@ struct ufSend : public unary_function<void, UserList::iterator> {
 
 
 /** Unary function for sending data to users with features */
-struct ufSendFeature : public unary_function<void, UserList::iterator> {
+struct ufSendFeature : public unary_function<void, HashTable<UserBase *>::iterator> {
 	const string & mData; /** Data for sending */
 	bool mAddSep;
 	const vector<unsigned int> & mPositive;
@@ -103,7 +103,7 @@ struct ufSendFeature : public unary_function<void, UserList::iterator> {
 
 
 /** Unary function for sending data to users with profile */
-struct ufSendProfile : public unary_function<void, UserList::iterator> {
+struct ufSendProfile : public unary_function<void, HashTable<UserBase *>::iterator> {
 	const string & mData; /** Data for sending */
 	unsigned long mProfile;
 	bool mAddSep;
@@ -139,7 +139,7 @@ struct ufSendProfile : public unary_function<void, UserList::iterator> {
 
 
 /** Unary function for sending chat data to each user */
-struct ufSendChat : public unary_function<void, UserList::iterator> {
+struct ufSendChat : public unary_function<void, HashTable<UserBase *>::iterator> {
 	const string & mData;
 	const string & mUid;
 
@@ -164,7 +164,7 @@ struct ufSendChat : public unary_function<void, UserList::iterator> {
 
 
 /** Unary function for sending chat data to each user with profile */
-struct ufSendChatProfile : public unary_function<void, UserList::iterator> {
+struct ufSendChatProfile : public unary_function<void, HashTable<UserBase *>::iterator> {
 	const string & mData;
 	const string & mUid;
 	unsigned long mProfile;
@@ -201,7 +201,7 @@ struct ufSendChatProfile : public unary_function<void, UserList::iterator> {
 
 
 /** Unary function for sending pm data to each user */
-struct ufSendPm : public unary_function<void, UserList::iterator> {
+struct ufSendPm : public unary_function<void, HashTable<UserBase *>::iterator> {
 	const string & mData;
 	const string & mUid;
 	const string & mFrom;
@@ -228,7 +228,7 @@ struct ufSendPm : public unary_function<void, UserList::iterator> {
 
 
 /** Unary function for sending pm data to each user with profile */
-struct ufSendPmProfile : public unary_function<void, UserList::iterator> {
+struct ufSendPmProfile : public unary_function<void, HashTable<UserBase *>::iterator> {
 	const string & mData;
 	const string & mUid;
 	const string & mFrom;

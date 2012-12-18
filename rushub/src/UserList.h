@@ -131,6 +131,38 @@ public:
 	explicit UserList(const string & name);
 	virtual ~UserList();
 
+	inline size_t size() const {
+		return tParent::size();
+	}
+
+	inline void clear() {
+		tParent::clear();
+	}
+
+	inline bool add(const unsigned long & key, UserBase * data) {
+		return tParent::add(key, data);
+	}
+
+	inline bool remove(const unsigned long & key) {
+		return tParent::remove(key);
+	}
+
+	inline bool contain(const unsigned long & key) {
+		return tParent::contain(key);
+	}
+
+	inline UserBase * find(const unsigned long & key) {
+		return tParent::find(key);
+	}
+
+	inline bool update(const unsigned long & key, UserBase * const & data) {
+		return tParent::update(key, data);
+	}
+
+	inline bool autoResize() {
+		return tParent::autoResize();
+	}
+
 	static Key uidToLowerHash(const string & uid);
 
 	UserBase * getUserBaseByUid(const string & uid);
@@ -173,6 +205,8 @@ public:
 	void flushCache();
 
 protected:
+
+	typedef HashTable<UserBase *> tParent;
 
 	virtual void onAdd(UserBase * userBase);
 	virtual void onRemove(UserBase *);
