@@ -58,19 +58,15 @@ void WINAPI Service::ctrlHandler(DWORD dwCtrl) {
 			// Fallthrough
 
 		case SERVICE_CONTROL_STOP :
-			if (mCurService->log(LEVEL_INFO)) {
-				mCurService->logStream() << "Received a " << dwCtrl << " signal, service stop" << endl;
-			}
+			LOG_CLASS(mCurService, LEVEL_INFO, "Received a " << dwCtrl << " signal, service stop");
 
 			ss.dwCurrentState = SERVICE_STOP_PENDING;
 			ss.dwWin32ExitCode = NO_ERROR;
 			ss.dwCheckPoint = 0;
 			ss.dwWaitHint = 10 * 1000;
 			if (SetServiceStatus(ssh, &ss) == false) {
-				if (mCurService->log(LEVEL_FATAL)) {
-					mCurService->logStream() << "Set Service status failed (" << (unsigned long)GetLastError() << ")" << endl;
-					return;
-				}
+				LOG_CLASS(mCurService, LEVEL_FATAL, "Set Service status failed (" << (unsigned long)GetLastError() << ")");
+				return;
 			}
 
 			// Service stop
@@ -82,15 +78,11 @@ void WINAPI Service::ctrlHandler(DWORD dwCtrl) {
 			break;
 
 		case SERVICE_CONTROL_INTERROGATE :
-			if (mCurService->log(LEVEL_INFO)) {
-				mCurService->logStream() << "Received a " << dwCtrl << " signal, interrogate" << endl;
-			}
+			LOG_CLASS(mCurService, LEVEL_INFO, "Received a " << dwCtrl << " signal, interrogate");
 			break;
 
 		default :
-			if (mCurService->log(LEVEL_INFO)) {
-				mCurService->logStream() << "Received a " << dwCtrl << " signal, default" << endl;
-			}
+			LOG_CLASS(mCurService, LEVEL_INFO, "Received a " << dwCtrl << " signal, default");
 			break;
 
 	}
@@ -102,17 +94,13 @@ void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 
 	SC_HANDLE manager = ::OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 	if (!manager) {
-		if (mCurService->log(LEVEL_FATAL)) {
-			mCurService->logStream() << "Open SCManager failed (" << GetLastError() << ")" << endl;
-		}
+		LOG_CLASS(mCurService, LEVEL_FATAL, "Open SCManager failed (" << GetLastError() << ")");
 		return;
 	}
 
 	SC_HANDLE service = OpenService(manager, lpszArgv[0], SERVICE_ALL_ACCESS);
 	if (!service) {
-		if (mCurService->log(LEVEL_FATAL)) {
-			mCurService->logStream() << "Open service failed (" << GetLastError() << ")" << endl;
-		}
+		LOG_CLASS(mCurService, LEVEL_FATAL, "Open service failed (" << GetLastError() << ")");
 		::CloseServiceHandle(manager);
 		return;
 	}
@@ -122,9 +110,7 @@ void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 	if (lpBuf != NULL) {
 		DWORD dwBytesNeeded;
 		if (!::QueryServiceConfig(service, lpBuf, 4096, &dwBytesNeeded)) {
-			if (mCurService->log(LEVEL_FATAL)) {
-				mCurService->logStream() << "QueryServiceConfig failed (" << GetLastError() << ")" << endl;
-			}
+			LOG_CLASS(mCurService, LEVEL_FATAL, "QueryServiceConfig failed (" << GetLastError() << ")");
 			::CloseServiceHandle(service);
 			::CloseServiceHandle(manager);
 			return;
@@ -139,9 +125,7 @@ void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 
 	ssh = ::RegisterServiceCtrlHandler(lpszArgv[0], ctrlHandler);
 	if (!ssh) {
-		if (mCurService->log(LEVEL_FATAL)) {
-			mCurService->logStream() << "Register service ctrl handler failed (" << (unsigned long)GetLastError() << ")" << endl;
-		}
+		LOG_CLASS(mCurService, LEVEL_FATAL, "Register service ctrl handler failed (" << (unsigned long)GetLastError() << ")");
 		return;
 	}
 	ss.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
@@ -151,9 +135,7 @@ void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 	ss.dwCheckPoint = 0;
 	ss.dwWaitHint = 10 * 1000;
 	if (::SetServiceStatus(ssh, &ss) == false) {
-		if (mCurService->log(LEVEL_FATAL)) {
-			mCurService->logStream() << "Set service status failed (" << (unsigned long)GetLastError() << ")" << endl;
-		}
+		LOG_CLASS(mCurService, LEVEL_FATAL, "Set service status failed (" << (unsigned long)GetLastError() << ")");
 		return;
 	}
 	int argc;
@@ -170,9 +152,7 @@ void WINAPI Service::serviceMain(DWORD, LPTSTR *lpszArgv) {
 int Service::start() {
 	ss.dwCurrentState = SERVICE_RUNNING;
 	if (::SetServiceStatus(ssh, &ss) == false) {
-		if (mCurService->log(LEVEL_FATAL)) {
-			mCurService->logStream() << "Set Service Status failed (" << (unsigned long)GetLastError() << ")" << endl;
-		}
+		LOG_CLASS(mCurService, LEVEL_FATAL, "Set Service Status failed (" << (unsigned long)GetLastError() << ")");
 		return -1;
 	}
 	return 0;
@@ -212,9 +192,7 @@ int Service::cli(int argc, char * argv[], string & configFile) {
 
 			case eService :
 				if (++i >= argc) {
-					if (mCurService->log(LEVEL_FATAL)) {
-						mCurService->logStream() << "Please, set service name." << endl;
-					}
+					LOG_CLASS(mCurService, LEVEL_FATAL, "Please, set service name.");
 					return -1;
 				}
 				startName = argv[i];

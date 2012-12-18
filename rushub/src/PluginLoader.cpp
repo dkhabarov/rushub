@@ -89,38 +89,38 @@ bool PluginLoader::open() {
 		if (!mHandle) {
 			isError(); // ???
 		}
-		if (log(LEVEL_ERROR)) {
-			logStream() << "Can't open file '" << mFile << "' because:" << getError() << " handle(" << mHandle << ")" << endl;
-		}
+		LOG(LEVEL_ERROR, "Can't open file '" << mFile << "' because:" << getError() << " handle(" << mHandle << ")");
 		return false;
 	}
 	return true;
 }
 
+bool PluginLoader::destructPlugin() {
+	#ifdef _WIN32
+		__try {
+			mDelPluginFunc(mPlugin);
+		} __except(EXCEPTION_EXECUTE_HANDLER) {
+			return false;
+		}
+	#else
+		mDelPluginFunc(mPlugin);
+	#endif
+	return true;
+}
 
 
 /** Close lib dll(so) */
 bool PluginLoader::close() {
 	if (mHandle) {
 		if (mPlugin && mDelPluginFunc && mPlugin->mInternalPluginVersion == INTERNAL_PLUGIN_VERSION) {
-			#ifdef _WIN32
-				__try {
-					mDelPluginFunc(mPlugin);
-				} __except( EXCEPTION_EXECUTE_HANDLER) {
-					if (log(LEVEL_FATAL)) {
-						logStream() << "error in DelPluginFunc (" << mPlugin->getName() << ")" << endl;
-					}
-				}
-			#else
-				mDelPluginFunc(mPlugin);
-			#endif
+			if (!destructPlugin()) {
+				LOG(LEVEL_FATAL, "error in DelPluginFunc (" << mPlugin->getName() << ")");
+			}
 		}
 		mPlugin = NULL;
 		dlclose(mHandle);
 		if (isError()) {
-			if (log(LEVEL_ERROR)) {
-				logStream() << "Can't close :" << getError() << endl;
-			}
+			LOG(LEVEL_ERROR, "Can't close :" << getError());
 			return false;
 		}
 		mHandle = NULL;
@@ -161,9 +161,7 @@ bool PluginLoader::loadSym() {
 void * PluginLoader::loadSym(const char * name) {
 	void * func = dlsym(mHandle, name);
 	if (isError()) {
-		if (log(LEVEL_ERROR)) {
-			logStream() << "Can't load " << name <<" exported interface :" << getError() << endl;
-		}
+		LOG(LEVEL_ERROR, "Can't load " << name <<" exported interface :" << getError());
 		return NULL;
 	}
 	return func;

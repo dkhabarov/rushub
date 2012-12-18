@@ -173,9 +173,7 @@ const string & DcProtocol::getFirstMsg(bool & flush) {
 
 bool DcProtocol::checkState(DcConn * dcConn, const char * cmd, unsigned int state) {
 	if (dcConn->isState(state)) {
-		if (dcConn->log(LEVEL_DEBUG)) {
-			dcConn->logStream() << "Bad state in " << cmd << endl;
-		}
+		LOG_CLASS(dcConn, LEVEL_DEBUG, "Bad state in " << cmd);
 		dcConn->closeNow(CLOSE_REASON_CMD_STATE);
 		return false;
 	}

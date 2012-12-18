@@ -128,9 +128,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 	AdcParser * adcParser = static_cast<AdcParser *> (parser);
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 
-	if (log(LEVEL_TRACE)) {
-		logStream() << "doCommand" << endl;
-	}
+	LOG(LEVEL_TRACE, "doCommand");
 
 	if (checkCommand(adcParser, dcConn) < 0) {
 		return -1;
@@ -148,9 +146,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 		}
 	#endif
 
-	if (dcConn->log(LEVEL_TRACE)) {
-		dcConn->logStream() << "[S]Stage " << adcParser->mType << endl;
-	}
+	LOG_CLASS(dcConn, LEVEL_TRACE, "[S]Stage " << adcParser->mType);
 
 	if (0 == (this->*(this->events[adcParser->mType])) (adcParser, dcConn)) {
 		DcUser * dcUser = NULL;
@@ -187,9 +183,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 		}
 	}
 
-	if (dcConn->log(LEVEL_TRACE)) {
-		dcConn->logStream() << "[E]Stage " << adcParser->mType << endl;
-	}
+	LOG_CLASS(dcConn, LEVEL_TRACE, "[E]Stage " << adcParser->mType);
 	return 0;
 }
 
@@ -698,9 +692,7 @@ int AdcProtocol::sendNickList(DcConn * dcConn) {
 void AdcProtocol::onFlush(Conn * conn) {
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 	if (dcConn->mNickListInProgress) {
-		if (dcConn->log(LEVEL_DEBUG)) {
-			dcConn->logStream() << "Enter after nicklist" << endl;
-		}
+		LOG_CLASS(dcConn, LEVEL_DEBUG, "Enter after nicklist");
 		dcConn->mNickListInProgress = false;
 		mDcServer->doUserEnter(dcConn);
 	}
@@ -713,9 +705,7 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 	// TODO Checking length of command
 
 	if (adcParser->mType == ADC_TYPE_INVALID) {
-		if (dcConn->log(LEVEL_DEBUG)) {
-			dcConn->logStream() << "Wrong syntax cmd" << endl;
-		}
+		LOG_CLASS(dcConn, LEVEL_DEBUG, "Wrong syntax cmd");
 		string msg(STR_LEN("ISTA ")), buff;
 		msg.reserve(10 + adcParser->getErrorText().size());
 		msg.append(toString(SEVERITY_LEVEL_FATAL, buff)); // Disconnect
@@ -729,9 +719,7 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 
 	// Checking null chars
 	if (adcParser->mCommand.find('\0') != adcParser->mCommand.npos) {
-		if (dcConn->log(LEVEL_WARN)) {
-			dcConn->logStream() << "Sending null chars, probably attempt an attack" << endl;
-		}
+		LOG_CLASS(dcConn, LEVEL_WARN, "Sending null chars, probably attempt an attack");
 		dcConn->closeNow(CLOSE_REASON_CMD_NULL);
 		return -2;
 	}

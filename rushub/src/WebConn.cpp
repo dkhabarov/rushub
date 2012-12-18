@@ -73,9 +73,7 @@ void WebConnFactory::deleteConn(Conn * &conn) {
 
 void WebConnFactory::onNewData(Conn * conn, string * str) {
 
-	if (conn->log(LEVEL_DEBUG)) {
-		conn->logStream() << "WEB IN: " << (*str) << endl;
-	}
+	LOG_CLASS(conn, LEVEL_DEBUG, "WEB IN: " << (*str));
 
 	(*str).append(STR_LEN(WEB_SEPARATOR));
 	conn->remaining();
@@ -145,9 +143,7 @@ int WebConn::onTimer(Time &) {
 	DcServer * dcServer = server();
 	Time lastRecv(mLastRecv);
 	if (dcServer->minDelay(lastRecv, dcServer->mDcConfig.mWebTimeout)) {
-		if (log(LEVEL_DEBUG)) {
-			logStream() << "Any action timeout..." << endl;
-		}
+		LOG(LEVEL_DEBUG, "Any action timeout...");
 		closeNice(9000, CLOSE_REASON_WEB);
 		return 1;
 	}

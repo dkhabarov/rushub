@@ -318,9 +318,7 @@ const string & UserList::getList(unsigned int number) {
  */
 void UserList::sendToAll(const string & data, bool addSep, bool flush) {
 	if (flush) {
-		if (log(LEVEL_TRACE)) {
-			logStream() << "sendToAll begin" << endl;
-		}
+		LOG(LEVEL_TRACE, "sendToAll begin");
 
 		if (mCacheNmdc.size()) {
 			addInCache(mCacheNmdc, data, STR_LEN(NMDC_SEPARATOR), addSep);
@@ -330,9 +328,7 @@ void UserList::sendToAll(const string & data, bool addSep, bool flush) {
 			for_each(begin(), end(), ufSend(data, addSep));
 		}
 
-		if (log(LEVEL_TRACE)) {
-			logStream() << "sendToAll end" << endl;
-		}
+		LOG(LEVEL_TRACE, "sendToAll end");
 	} else {
 		addInCache(mCacheNmdc, data, STR_LEN(NMDC_SEPARATOR), addSep);
 	}
@@ -342,9 +338,7 @@ void UserList::sendToAll(const string & data, bool addSep, bool flush) {
 
 void UserList::sendToAllAdc(const string & data, bool addSep, bool flush) {
 	if (flush) {
-		if (log(LEVEL_TRACE)) {
-			logStream() << "sendToAll begin" << endl;
-		}
+		LOG(LEVEL_TRACE, "sendToAll begin");
 
 		if (mCacheAdc.size()) {
 			addInCache(mCacheAdc, data, STR_LEN(ADC_SEPARATOR), addSep);
@@ -354,9 +348,7 @@ void UserList::sendToAllAdc(const string & data, bool addSep, bool flush) {
 			for_each(begin(), end(), ufSend(data, addSep));
 		}
 
-		if (log(LEVEL_TRACE)) {
-			logStream() << "sendToAll end" << endl;
-		}
+		LOG(LEVEL_TRACE, "sendToAll end");
 	} else {
 		addInCache(mCacheAdc, data, STR_LEN(ADC_SEPARATOR), addSep);
 	}
@@ -367,30 +359,23 @@ void UserList::sendToAllAdc(const string & data, bool addSep, bool flush) {
 void UserList::sendToFeature(const string & data, const vector<unsigned int> & positive, 
 		const vector<unsigned int> & negative, bool addSep) {
 
-	if (log(LEVEL_TRACE)) {
-		logStream() << "sendToFeature begin" << endl;
-	}
+	LOG(LEVEL_TRACE, "sendToFeature begin");
 
 	for_each(begin(), end(), ufSendFeature(data, addSep, positive, negative));
 
-	if (log(LEVEL_TRACE)) {
-		logStream() << "sendToFeature end" << endl;
-	}
+	LOG(LEVEL_TRACE, "sendToFeature end");
 }
 
 
 
 /** Sending data to profiles */
 void UserList::sendToProfiles(unsigned long profile, const string & data, bool addSep) {
-	if (log(LEVEL_TRACE)) {
-		logStream() << "sendToProfiles begin" << endl;
-	}
+
+	LOG(LEVEL_TRACE, "sendToProfiles begin");
 
 	for_each(begin(), end(), ufSendProfile(data, profile, addSep));
 
-	if (log(LEVEL_TRACE)) {
-		logStream() << "sendToProfiles end" << endl;
-	}
+	LOG(LEVEL_TRACE, "sendToProfiles end");
 }
 
 
@@ -473,10 +458,8 @@ void UserList::onRemove(UserBase *) {
 
 
 void UserList::onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
-	if (log(LEVEL_DEBUG)) {
-		logStream() << "Autoresizing: size = " << currentSize << 
-		", capacity = " << oldCapacity << " -> " << newCapacity << endl;
-	}
+	LOG(LEVEL_DEBUG, "Autoresizing: size = " << currentSize << 
+		", capacity = " << oldCapacity << " -> " << newCapacity);
 }
 
 

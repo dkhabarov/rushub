@@ -57,10 +57,8 @@ DcConn::~DcConn() {
 
 DcServer * DcConn::server() {
 	if (!mServer) {
-		if (log(LEVEL_FATAL)) {
-			logStream() << "Server is NULL" << endl;
-			throw "Server is NULL";
-		}
+		LOG(LEVEL_FATAL, "Server is NULL");
+		throw "Server is NULL";
 	}
 	return static_cast<DcServer *> (mServer);
 }
@@ -69,10 +67,8 @@ DcServer * DcConn::server() {
 
 DcProtocol * DcConn::dcProtocol() {
 	if (!mProtocol) {
-		if (log(LEVEL_FATAL)) {
-			logStream() << "Protocol is NULL" << endl;
-			throw "Protocol is NULL";
-		}
+		LOG(LEVEL_FATAL, "Protocol is NULL");
+		throw "Protocol is NULL";
 	}
 	return static_cast<DcProtocol *> (mProtocol);
 }
@@ -86,9 +82,7 @@ size_t DcConn::send(const char * data, size_t len, bool addSep, bool flush) {
 
 	if (len >= mSendBufMax) {
 		len = mSendBufMax;
-		if (log(LEVEL_WARN)) {
-			logStream() << "Too long message. Size: " << len << ". Max size: " << mSendBufMax << endl;
-		}
+		LOG(LEVEL_WARN, "Too long message. Size: " << len << ". Max size: " << mSendBufMax);
 	}
 
 	// check for separator at end of data
@@ -143,9 +137,7 @@ int DcConn::onTimer(Time & now) {
 	// Check timeouts. For entering only
 	if (!mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) { // Optimisation
 		if (mLoginTimeOut.check(now) != 0) {
-			if (log(LEVEL_DEBUG)) {
-				logStream() << "Timeout login" << endl;
-			}
+			LOG(LEVEL_DEBUG, "Timeout login");
 			dcServer->sendToUser(mDcUser, dcServer->mDcLang.mTimeoutLogon, dcServer->mDcConfig.mHubBot.c_str());
 			closeNice(9000, CLOSE_REASON_TIMEOUT_LOGIN);
 			return 1;
@@ -159,9 +151,7 @@ int DcConn::onTimer(Time & now) {
 	*/
 	/*Time lastRecv(mLastRecv);
 	if (dcServer->minDelay(lastRecv, dcServer->mDcConfig.mTimeoutAny)) {
-		if (log(LEVEL_DEBUG)) {
-			logStream() << "Any action timeout..." << endl;
-		}
+		LOG(LEVEL_DEBUG, "Any action timeout...");
 		dcServer->sendToUser(mDcUser, dcServer->mDcLang.mTimeoutAny, dcServer->mDcConfig.mHubBot.c_str());
 		closeNice(9000, CLOSE_REASON_TIMEOUT_ANYACTION);
 		return 2;
@@ -349,14 +339,12 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 			delete dcConn->mDcUser;
 			dcConn->mDcUser = NULL;
 		} else {
-			if (conn->log(LEVEL_DEBUG)) {
-				conn->logStream() << "Del conn without user" << endl;
-			}
+			LOG_CLASS(conn, LEVEL_DEBUG, "Del conn without user");
 		}
-	} else if (conn->log(LEVEL_FATAL)) {
-		conn->logStream() << "Fail error in deleteConn: dcConn = " <<
-		(dcConn == NULL ? "NULL" : "not NULL") << ", dcServer = " << 
-		(dcServer == NULL ? "NULL" : "not NULL") << endl;
+	} else {
+		LOG_CLASS(conn, LEVEL_FATAL, "Fail error in deleteConn: dcConn = " <<
+			(dcConn == NULL ? "NULL" : "not NULL") << ", dcServer = " << 
+			(dcServer == NULL ? "NULL" : "not NULL"));
 	}
 	ConnFactory::deleteConn(conn);
 }

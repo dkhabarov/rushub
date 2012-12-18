@@ -61,7 +61,7 @@ Obj::Obj(const char * name) :
 	mToLog(&cout)
 {
 	Thread::safeInc(mCounterObj);
-	//if (log(LEVEL_WARN)) logStream() << "+ " << mClassName << endl;
+	//LOG(LEVEL_WARN, "+ " << mClassName);
 }
 
 
@@ -80,14 +80,14 @@ Obj::Obj() :
 	mToLog(&cout)
 {
 	Thread::safeInc(mCounterObj);
-	//if (log(LEVEL_WARN)) logStream() << "+ " << mClassName << endl;
+	//LOG(LEVEL_WARN, "+ " << mClassName);
 }
 
 
 
 Obj::~Obj() {
 	Thread::safeDec(mCounterObj);
-	//if (string(mClassName) != "DcServer" && log(LEVEL_WARN)) logStream() << "- " << mClassName << endl;
+	//if (string(mClassName) != "DcServer") LOG(LEVEL_WARN, "- " << mClassName);
 }
 
 
@@ -128,7 +128,7 @@ const char * Obj::getClassName() {
 
 /** Set class name */
 void Obj::setClassName(const char * name) {
-	//if (log(LEVEL_WARN)) logStream() << "r " << mClassName << " -> " << name << endl;
+	//LOG(LEVEL_WARN, "r " << mClassName << " -> " << name);
 	mClassName = name;
 }
 

@@ -124,9 +124,7 @@ DcServer::DcServer(const string & configFile, const string &) :
 	mOpList.addUserListItem(NmdcProtocol::nickList, "$OpList "); // 0
 
 	if (mDcConfig.mRegMainBot) { // Main bot registration
-		if (log(LEVEL_DEBUG)) {
-			logStream() << "Reg main bot '" << mDcConfig.mHubBot << "'" << endl;
-		}
+		LOG(LEVEL_DEBUG, "Reg main bot '" << mDcConfig.mHubBot << "'");
 		regBot(mDcConfig.mHubBot, mDcConfig.mMainBotMyinfo,
 			mDcConfig.mMainBotIp, mDcConfig.mMainBotKey);
 	}
@@ -135,16 +133,12 @@ DcServer::DcServer(const string & configFile, const string &) :
 
 
 DcServer::~DcServer() {
-	if (log(LEVEL_INFO)) {
-		logStream() << "Destruct DcServer" << endl;
-	}
+	LOG(LEVEL_INFO, "Destruct DcServer");
 
 	mPluginList.unloadAll(); // Unload all plugins
 
 	if (mDcConfig.mRegMainBot) { // Main bot unreg
-		if (log(LEVEL_DEBUG)) {
-			logStream() << "Unreg main bot '" << mDcConfig.mHubBot << "'" << endl;
-		}
+		LOG(LEVEL_DEBUG, "Unreg main bot '" << mDcConfig.mHubBot << "'");
 		unregBot(mDcConfig.mHubBot);
 	}
 
@@ -319,20 +313,16 @@ bool DcServer::listeningServer(const char * name, const char * addresses, const 
 	getAddresses(addresses, vAddresses, defaultPort);
 
 	if (vAddresses.empty()) {
-		if (log(LEVEL_FATAL)) {
-			logStream() << "Incorrect address of the " << name << endl;
-		}
+		LOG(LEVEL_FATAL, "Incorrect address of the " << name);
 	}
 
 	bool ret = false;
 	for (vector<pair<string, string> >::iterator it = vAddresses.begin(); it != vAddresses.end(); ++it) {
 		if (Server::listening(connFactory, ((*it).first).c_str(), ((*it).second).c_str(), udp) != NULL) {
 			ret = true;
-			if (log(LEVEL_INFO)) {
-				logStream() << name << " is running on [" 
-					<< ((*it).first) << "]:" << ((*it).second) 
-					<< (udp ? " UDP" : " TCP") << endl;
-			}
+			LOG(LEVEL_INFO, name << " is running on [" 
+				<< ((*it).first) << "]:" << ((*it).second) 
+				<< (udp ? " UDP" : " TCP"));
 			cout << name << " is running on [" 
 				<< ((*it).first) << "]:" << ((*it).second) 
 				<< (udp ? " UDP" : " TCP") << endl;
@@ -430,11 +420,9 @@ int DcServer::onTimer(Time & now) {
 		}
 
 		if (mSystemLoad != SysLoading) {
-			if (log(LEVEL_WARN)) {
-				logStream() << "System loading: " 
-					<< mSystemLoad << " level (was " 
-					<< SysLoading << " level)" << endl;
-			}
+			LOG(LEVEL_WARN, "System loading: " 
+				<< mSystemLoad << " level (was " 
+				<< SysLoading << " level)");
 		}
 
 		mIpEnterFlood.del(now); // Removing ip addresses, which already long ago entered
@@ -466,9 +454,7 @@ int DcServer::onNewConn(Conn * conn) {
 	DcConn * dcConn = static_cast<DcConn *> (conn);
 
 	if (mSystemLoad == SYSTEM_LOAD_SYSTEM_DOWN) {
-		if (dcConn->log(LEVEL_WARN)) {
-			dcConn->logStream() << "System down, close" << endl;
-		}
+		LOG_CLASS(dcConn, LEVEL_WARN, "System down, close");
 		dcConn->closeNow(CLOSE_REASON_HUB_LOAD);
 		return -1;
 	}
@@ -491,17 +477,13 @@ int DcServer::onNewConn(Conn * conn) {
 	mIpListConn->add(dcConn); // Adding connection in IP-list
 	dcConn->mDcUser->setIp(dcConn->getIp());
 
-	if (dcConn->log(LEVEL_TRACE)) {
-		dcConn->logStream() << "[S]Stage onNewConn" << endl;
-	}
+	LOG_CLASS(dcConn, LEVEL_TRACE, "[S]Stage onNewConn");
 
 	if (dcConn->mProtocol != NULL) {
 		dcConn->mProtocol->onNewConn(dcConn);
 	}
 
-	if (dcConn->log(LEVEL_TRACE)) {
-		dcConn->logStream() << "[E]Stage onNewConn" << endl;
-	}
+	LOG_CLASS(dcConn, LEVEL_TRACE, "[E]Stage onNewConn");
 	return 0;
 }
 
@@ -517,9 +499,7 @@ string * DcServer::createCommandPtr(Conn * conn) {
 /// Function of the processing enterring data
 void DcServer::onNewData(Conn * conn, string * data) {
 
-	if (conn->log(LEVEL_TRACE)) {
-		conn->logStream() << "IN: " << (*data) << endl;
-	}
+	LOG_CLASS(conn, LEVEL_TRACE, "IN: " << (*data));
 
 	Parser * parser = conn->mParser;
 	Protocol * protocol = conn->mProtocol;
@@ -610,21 +590,17 @@ bool DcServer::checkNick(DcConn *dcConn) {
 			// Checking nick only for profile -1 (unreg) and bots
 			// All other profiles is a reg users and they are not checked
 			if (!us->mDcConn || dcConn->mDcUser->getParamForce(USER_PARAM_PROFILE)->getInt() == -1) {
-				if (log(LEVEL_DEBUG)) {
-					logStream() << "Bad nick (used): '" 
-						<< dcConn->mDcUser->getUid() << "'["
-						<< dcConn->getIp() << "] vs '" << us->getUid() 
-						<< "'[" << us->getIp() << "]" << endl;
-				}
+				LOG(LEVEL_DEBUG, "Bad nick (used): '" 
+					<< dcConn->mDcUser->getUid() << "'["
+					<< dcConn->getIp() << "] vs '" << us->getUid() 
+					<< "'[" << us->getIp() << "]");
 				string msg;
 				stringReplace(mDcLang.mUsedNick, string(STR_LEN("nick")), msg, dcConn->mDcUser->getUid());
 				sendToUser(dcConn->mDcUser, msg, mDcConfig.mHubBot.c_str());
 				dcConn->send(mNmdcProtocol.appendValidateDenied(msg.erase(), dcConn->mDcUser->getUid())); // FIXME
 				return false;
 			}
-			if (log(LEVEL_DEBUG)) {
-				logStream() << "removed old user" << endl;
-			}
+			LOG(LEVEL_DEBUG, "removed old user");
 			removeFromDcUserList(us);
 			us->mDcConn->closeNow(CLOSE_REASON_USER_OLD);
 		}
@@ -635,9 +611,7 @@ bool DcServer::checkNick(DcConn *dcConn) {
 
 
 bool DcServer::beforeUserEnter(DcConn * dcConn) {
-	if (dcConn->log(LEVEL_DEBUG)) {
-		dcConn->logStream() << "Begin login" << endl;
-	}
+	LOG_CLASS(dcConn, LEVEL_DEBUG, "Begin login");
 
 	// check empty nick!
 	if (!checkNick(dcConn)) {
@@ -668,10 +642,7 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 void DcServer::doUserEnter(DcConn * dcConn) {
 
 	if (!dcConn->isState(STATE_NORMAL)) {
-		if (dcConn->log(LEVEL_DEBUG)) {
-			dcConn->logStream() << "User Login when not all done (" 
-				<< dcConn->getState() << ")" <<endl;
-		}
+		LOG_CLASS(dcConn, LEVEL_DEBUG, "User Login when not all done (" << dcConn->getState() << ")");
 		dcConn->closeNow(CLOSE_REASON_NOT_LOGIN);
 		return;
 	}
@@ -711,36 +682,25 @@ void DcServer::doUserEnter(DcConn * dcConn) {
 /// Adding user in the user list
 bool DcServer::addToUserList(DcUser * dcUser) {
 	if (!dcUser) {
-		if (log(LEVEL_ERROR)) {
-			logStream() << "Adding a NULL user to userlist" << endl;
-		}
+		LOG(LEVEL_ERROR, "Adding a NULL user to userlist");
 		return false;
 	}
 	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-		if (log(LEVEL_ERROR)) {
-			logStream() << "User is already in the user list" << endl;
-		}
+		LOG(LEVEL_ERROR, "User is already in the user list");
 		return false;
 	}
 
 	unsigned long uidHash = dcUser->getUidHash();
 
-	if (mDcUserList.log(LEVEL_TRACE)) {
-		mDcUserList.logStream() << "Before add: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
-	}
+	LOG_CLASS(&mDcUserList, LEVEL_TRACE, "Before add: " << dcUser->getUid() << " Size: " << mDcUserList.size());
 
 	if (!mDcUserList.add(uidHash, dcUser)) {
-		if (log(LEVEL_DEBUG)) {
-			logStream() << "Adding twice user with same nick " << dcUser->getUid() << " (" << mDcUserList.find(uidHash)->getUid() << ")" << endl;
-		}
+		LOG(LEVEL_DEBUG, "Adding twice user with same nick " << dcUser->getUid() << " (" << mDcUserList.find(uidHash)->getUid() << ")");
 		dcUser->setInUserList(false);
 		return false;
 	}
 
-	if (mDcUserList.log(LEVEL_TRACE)) {
-		mDcUserList.logStream() << "After add: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
-	}
-
+	LOG_CLASS(&mDcUserList, LEVEL_TRACE, "After add: " << dcUser->getUid() << " Size: " << mDcUserList.size());
 
 	// Protocol dependence
 	if (!mDcConfig.mAdcOn) { // NMDC
@@ -772,9 +732,7 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 			}
 		}
 
-		if (dcUser->mDcConn->log(LEVEL_DEBUG)) {
-			dcUser->mDcConn->logStream() << "Adding at the end of Nicklist" << endl;
-		}
+		LOG_CLASS(dcUser->mDcConn, LEVEL_DEBUG, "Adding at the end of Nicklist");
 	}
 	return true;
 }
@@ -785,9 +743,7 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 	unsigned long uidHash = dcUser->getUidHash();
 
-	if (mDcUserList.log(LEVEL_TRACE)) {
-		mDcUserList.logStream() << "Before leave: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
-	}
+	LOG_CLASS(&mDcUserList, LEVEL_TRACE, "Before leave: " << dcUser->getUid() << " Size: " << mDcUserList.size());
 	if (mDcUserList.contain(uidHash)) {
 
 		#ifndef WITHOUT_PLUGINS
@@ -806,14 +762,10 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 			mDcUserList.remove(uidHash);
 		} else if (other && other->mDcConn && dcUser->mDcConn && other->mDcConn == dcUser->mDcConn) {
 			mDcUserList.remove(uidHash);
-			if (mDcUserList.log(LEVEL_TRACE)) {
-				mDcUserList.logStream() << "After leave: " << dcUser->getUid() << " Size: " << mDcUserList.size() << endl;
-			}
+			LOG_CLASS(&mDcUserList, LEVEL_TRACE, "After leave: " << dcUser->getUid() << " Size: " << mDcUserList.size());
 		} else {
 			// Such can happen only for users without connection or with different connection
-			if (dcUser->log(LEVEL_ERROR)) {
-				dcUser->logStream() << "Not found the correct user for nick: " << dcUser->getUid() << endl;
-			}
+			LOG_CLASS(dcUser, LEVEL_ERROR, "Not found the correct user for nick: " << dcUser->getUid());
 			return false;
 		}
 	}
@@ -943,9 +895,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 
 
 void DcServer::afterUserEnter(DcConn *dcConn) {
-	if (dcConn->log(LEVEL_DEBUG)) {
-		dcConn->logStream() << "Entered on the hub" << endl;
-	}
+	LOG_CLASS(dcConn, LEVEL_DEBUG, "Entered on the hub");
 
 	#ifndef WITHOUT_PLUGINS
 		mCalls.mOnUserEnter.callAll(dcConn->mDcUser);
@@ -1399,9 +1349,7 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 		}
 	}
 
-	if (log(LEVEL_DEBUG)) {
-		logStream() << "Reg bot: " << uid << endl;
-	}
+	LOG(LEVEL_DEBUG, "Reg bot: " << uid);
 
 	if (!addToUserList(dcUser)) {
 		delete dcUser;
@@ -1416,9 +1364,7 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 
 int DcServer::unregBot(const string & uid) {
 
-	if (log(LEVEL_DEBUG)) {
-		logStream() << "Unreg bot: " << uid << endl;
-	}
+	LOG(LEVEL_DEBUG, "Unreg bot: " << uid);
 
 	DcUser * dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByUid(uid));
 	if (!dcUser) { // Not found
@@ -1426,9 +1372,7 @@ int DcServer::unregBot(const string & uid) {
 	}
 
 	if (dcUser->mDcConn) { // It's not bot!
-		if (log(LEVEL_DEBUG)) {
-			logStream() << "Attempt delete user" << endl;
-		}
+		LOG(LEVEL_DEBUG, "Attempt delete user");
 		return -2;
 	}
 	removeFromDcUserList(dcUser);
@@ -1634,9 +1578,7 @@ bool DcServer::setCapabilities() {
 #if (!defined _WIN32) && HAVE_LIBCAP
 
 	if (getuid()) {
-		if (log(LEVEL_WARN)) {
-			logStream() << "Cannot set capabilities. Hub started from common user, not root." << endl;
-		}
+		LOG(LEVEL_WARN, "Cannot set capabilities. Hub started from common user, not root.");
 		return false;
 	}
 
@@ -1646,56 +1588,42 @@ bool DcServer::setCapabilities() {
 	if(user && grp) {
 		// Keep capabilities across UID change
 		if(prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0) != 0) {
-			if (log(LEVEL_WARN)) {
-				logStream() << "prctl(PR_SET_KEEPCAPS) failed" << endl;
-			}
+			LOG(LEVEL_WARN, "prctl(PR_SET_KEEPCAPS) failed");
 			return false;
 		}
 
 		// Change supplementary groups
 		if(initgroups(user->pw_name, user->pw_gid) != 0) {
-			if (log(LEVEL_WARN)) {
-				logStream() << "initgroups() for user " << user->pw_name << " failed"<< endl;
-			}
+			LOG(LEVEL_WARN, "initgroups() for user " << user->pw_name << " failed");
 			return false;
 		}
 
 		// Change GID
 		if(setgid(grp->gr_gid) != 0) {
-			if (log(LEVEL_WARN)) {
-				logStream() << "Cannot set GID to " << grp->gr_gid << endl;
-			}
+			LOG(LEVEL_WARN, "Cannot set GID to " << grp->gr_gid);
 			return false;
 		}
 
 		// Change UID
 		if(setuid(user->pw_uid) != 0) {
-			if (log(LEVEL_WARN)) {
-				logStream() << "Cannot set UID to " << user->pw_uid << endl;
-			}
+			LOG(LEVEL_WARN, "Cannot set UID to " << user->pw_uid);
 			return false;
 		}
 	} else {
-		if (log(LEVEL_WARN)) {
-			logStream() << "Bad user name. Cannot get pam structs. Check user and group name." << endl;
-		}
+		LOG(LEVEL_WARN, "Bad user name. Cannot get pam structs. Check user and group name.");
 		return false;
 	}
 
 	// Check capability to bind privileged ports
 	cap_t caps = cap_get_proc();
 	if(!caps) {
-		if (log(LEVEL_WARN)) {
-			logStream() << "cap_get_proc() failed to get capabilities" << endl;
-		}
+		LOG(LEVEL_WARN, "cap_get_proc() failed to get capabilities");
 		return false;
 	}
 
 	cap_flag_value_t nbs_flag;
 	if(cap_get_flag(caps, CAP_NET_BIND_SERVICE, CAP_PERMITTED, &nbs_flag) != 0) {
-		if (log(LEVEL_WARN)) {
-			logStream() << "cap_get_flag() failed to get CAP_NET_BIND_SERVICE state" << endl;
-		}
+		LOG(LEVEL_WARN, "cap_get_flag() failed to get CAP_NET_BIND_SERVICE state");
 		cap_free(caps);
 		return false;
 	}
@@ -1703,16 +1631,12 @@ bool DcServer::setCapabilities() {
 	// Drop all capabilities except privileged ports binding
 	caps = cap_from_text(nbs_flag == CAP_SET ? "cap_net_bind_service=ep" : "=");
 	if(!caps) {
-		if (log(LEVEL_WARN)) {
-			logStream() << "cap_from_text() failed to parse capabilities string" << endl;
-		}
+		LOG(LEVEL_WARN, "cap_from_text() failed to parse capabilities string");
 		return false;
 	}
 
 	if(cap_set_proc(caps) != 0) {
-		if (log(LEVEL_WARN)) {
-			logStream() << "cap_set_proc() failed to set capabilities" << endl;
-		}
+		LOG(LEVEL_WARN, "cap_set_proc() failed to set capabilities");
 		cap_free(caps);
 		return false;
 	}

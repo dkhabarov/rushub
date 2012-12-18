@@ -63,18 +63,14 @@ static void sigHandler(int sig) {
 			// Fallthrough
 
 		case SIGHUP :
-			if (DcServer::currentDcServer->log(LEVEL_INFO)) {
-				DcServer::currentDcServer->logStream() << "Received a " << sig << " signal, quiting" << endl;
-			}
+			LOG_CLASS(DcServer::currentDcServer, LEVEL_INFO, "Received a " << sig << " signal, quiting");
 			cout << "Received a " << sig << " signal, quiting" << endl;
 			DcServer::currentDcServer->stop(0);
 			signal(sig, sigHandler);
 			break;
 
 		default :
-			if (DcServer::currentDcServer->log(LEVEL_INFO)) {
-				DcServer::currentDcServer->logStream() << "Received a " << sig << " signal, ignoring it" << endl;
-			}
+			LOG_CLASS(DcServer::currentDcServer, LEVEL_INFO, "Received a " << sig << " signal, ignoring it");
 			signal(sig, sigHandler);
 			break;
 	}
@@ -118,9 +114,7 @@ int runHub(int argc, char ** argv, bool isService /*= false*/) {
 
 		/** Listening all ports */
 		if (server.listening() != 0) {
-			if (server.log(LEVEL_FATAL)) {
-				server.logStream() << "Listening failed" << endl;
-			}
+			LOG_CLASS(&server, LEVEL_FATAL, "Listening failed");
 			return -2;
 		}
 

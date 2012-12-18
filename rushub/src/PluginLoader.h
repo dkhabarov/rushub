@@ -106,6 +106,8 @@ protected:
 	
 private:
 
+	bool destructPlugin();
+
 	PluginLoader(const PluginLoader &);
 	PluginLoader & operator = (const PluginLoader &);
 

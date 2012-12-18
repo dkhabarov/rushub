@@ -52,9 +52,7 @@ Parser::Parser(unsigned int max) :
 {
 	if (mMaxChunks) {
 		if (mMaxChunks > 31) {
-			if (log(LEVEL_WARN)) {
-				logStream() << "Max number of chunks more than 31" << endl;
-			}
+			LOG(LEVEL_WARN, "Max number of chunks more than 31");
 		}
 		for(unsigned int i = 0; i < mMaxChunks; ++i) {
 			tChunk & p = mChunks[i];
@@ -117,8 +115,8 @@ void Parser::setChunk(unsigned int n, size_t start, size_t len) {
 			tChunk & chunk = mChunks[n];
 			chunk.first = start;
 			chunk.second = len;
-		} else if (log(LEVEL_ERROR)) {
-			logStream() << "Error number of chunks" << endl;
+		} else {
+			LOG(LEVEL_ERROR, "Error number of chunks");
 		}
 	}
 }
@@ -128,8 +126,8 @@ void Parser::setChunk(unsigned int n, size_t start, size_t len) {
 size_t Parser::pushChunk(size_t start, size_t len) {
 	if (!mMaxChunks) {
 		mChunks.push_back(tChunk(start, len));
-	} else if (log(LEVEL_ERROR)) {
-		logStream() << "mMaxChunks not equal 0" << endl;
+	} else {
+		LOG(LEVEL_ERROR, "mMaxChunks not equal 0");
 	}
 	return mChunks.size() - 1;
 }
@@ -141,9 +139,7 @@ string & Parser::chunkString(unsigned int n) {
 	if (!n) {
 		return mCommand; // Empty line always full, and this pointer for empty line
 	} else if (n > mChunks.size()) { // This must not never happen, but if this happens, we are prepared
-		if (log(LEVEL_ERROR)) {
-			logStream() << "Error number of chunks" << endl;
-		}
+		LOG(LEVEL_ERROR, "Error number of chunks");
 		return mCommand;
 	}
 
@@ -161,8 +157,8 @@ string & Parser::chunkString(unsigned int n) {
 		}
 		if (c.first < size && c.second < size) {
 			mStrings[n].assign(mCommand, c.first, c.second); // Record n part in n element of the array of the lines
-		} else if (log(LEVEL_ERROR)) {
-			logStream() << "Badly parsed message : " << mCommand.substr(0, 25) << endl;
+		} else {
+			LOG(LEVEL_ERROR, "Badly parsed message : " << mCommand.substr(0, 25));
 		}
 	}
 	return mStrings[n];

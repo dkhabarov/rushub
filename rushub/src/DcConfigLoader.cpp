@@ -61,9 +61,7 @@ int DcConfigLoader::save(ConfigListBase * configListBase, const ConfigStore & co
 int DcConfigLoader::loadFromXml(ConfigListBase * configListBase, const string & fileName) {
 	TiXmlDocument file(fileName.c_str());
 	if (!file.LoadFile()) {
-		if (log(LEVEL_WARN)) {
-			logStream() << "Can't open file '" << fileName << "' for reading." << endl;
-		}
+		LOG(LEVEL_WARN, "Can't open file '" << fileName << "' for reading.");
 		return -1;
 	}
 
@@ -96,10 +94,7 @@ int DcConfigLoader::loadFromXml(ConfigListBase * configListBase, const string & 
 			delete iss;
 			iss = NULL;
 		} else {
-			if (log(LEVEL_TRACE)) {
-				logStream() << "Uknown variable '" << name <<
-				"' in file '" << fileName << "', ignoring it" << endl;
-			}
+			LOG(LEVEL_TRACE, "Uknown variable '" << name << "' in file '" << fileName << "', ignoring it");
 		}
 	}
 	if (strcmp(version, INTERNALVERSION) != 0) {

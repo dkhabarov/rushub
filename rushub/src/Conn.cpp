@@ -104,11 +104,9 @@ Conn::~Conn() {
 		if (!(SOCK_ERROR(err))) {
 	#endif
 			Thread::safeDec(mConnCounter);
-			if (log(LEVEL_DEBUG)) {
-				logStream() << "Closing socket: " << mSocket << endl;
-			}
-		} else if (log(LEVEL_ERROR)) {
-			logStream() << "Socket not closed: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
+			LOG(LEVEL_DEBUG, "Closing socket: " << mSocket);
+		} else {
+			LOG(LEVEL_ERROR, "Socket not closed: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]");
 		}
 		mSocket = 0;
 	}
@@ -288,27 +286,19 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 	// getaddrinfo
 	int ret = getaddrinfo(address, port, &hints, &mAddrInfo);
 	if (ret != 0) {
-		if (log(LEVEL_FATAL)) {
-			logStream() << "Error in getaddrinfo: " << 
-			#ifdef _WIN32
-				SOCK_ERR
-			#else
-				gai_strerror(ret) << " (" << ret << ")"
-			#endif
-			<< endl;
-		}
+		#ifdef _WIN32
+			LOG(LEVEL_FATAL, "Error in getaddrinfo: " << SOCK_ERR);
+		#else
+			LOG(LEVEL_FATAL, "Error in getaddrinfo: " << gai_strerror(ret) << " (" << ret << ")");
+		#endif
 		return INVALID_SOCKET;
 	}
 
-	if (log(LEVEL_DEBUG)) {
-		logStream() << "Using " << (mAddrInfo->ai_family == AF_INET6 ? "IPv6" : "IPv4") << " socket" << endl;
-	}
+	LOG(LEVEL_DEBUG, "Using " << (mAddrInfo->ai_family == AF_INET6 ? "IPv6" : "IPv4") << " socket");
 
 	// socket
 	if (SOCK_INVALID(sock = socket(mAddrInfo->ai_family, mAddrInfo->ai_socktype, 0))) {
-		if (log(LEVEL_FATAL)) {
-			logStream() << "Error in socket: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
-		}
+		LOG(LEVEL_FATAL, "Error in socket: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]");
 		freeaddrinfo(mAddrInfo);
 		return INVALID_SOCKET;
 	}
@@ -318,17 +308,13 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 
 		// TIME_WAIT after close conn. Reuse address after disconn
 		if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &so_reuseaddr, sizeof(sockoptval_t)))) {
-			if (log(LEVEL_FATAL)) {
-				logStream() << "Error in setsockopt: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
-			}
+			LOG(LEVEL_FATAL, "Error in setsockopt: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]");
 			return INVALID_SOCKET;
 		}
 	}
 
 	Thread::safeInc(mConnCounter);
-	if (log(LEVEL_DEBUG)) {
-		logStream() << "Created new socket: " << sock << endl;
-	}
+	LOG(LEVEL_DEBUG, "Created new socket: " << sock);
 	return sock;
 }
 
@@ -342,9 +328,7 @@ tSocket Conn::socketBind(tSocket sock) {
 
 	// Bind
 	if (SOCK_ERROR(bind(sock, mAddrInfo->ai_addr, static_cast<int> (mAddrInfo->ai_addrlen)))) {
-		if (log(LEVEL_FATAL)) {
-			logStream() << "Error bind: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
-		}
+		LOG(LEVEL_FATAL, "Error bind: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]");
 		return INVALID_SOCKET;
 	}
 
@@ -360,9 +344,7 @@ tSocket Conn::socketListen(tSocket sock) {
 	}
 	if (SOCK_ERROR(listen(sock, SOCK_BACKLOG))) {
 		SOCK_CLOSE(sock);
-		if (log(LEVEL_ERROR)) {
-			logStream() << "Error listening: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
-		}
+		LOG(LEVEL_ERROR, "Error listening: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]");
 		return INVALID_SOCKET;
 	}
 	return sock;
@@ -377,9 +359,7 @@ tSocket Conn::socketConnect(tSocket sock) {
 	}
 	if (SOCK_ERROR(connect(sock, mAddrInfo->ai_addr, static_cast<int> (mAddrInfo->ai_addrlen)))) {
 		SOCK_CLOSE(sock);
-		if (log(LEVEL_ERROR)) {
-			logStream() << "Error connecting: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
-		}
+		LOG(LEVEL_ERROR, "Error connecting: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]");
 		return INVALID_SOCKET;
 	}
 	return sock;
@@ -429,9 +409,7 @@ void Conn::closeNow(int reason /* = 0 */) {
 			if (reason) {
 				mCloseReason = reason;
 			}
-			if (log(LEVEL_DEBUG)) {
-				logStream() << "closeNow (reason " << mCloseReason << ")" << endl;
-			}
+			LOG(LEVEL_DEBUG, "closeNow (reason " << mCloseReason << ")");
 
 #if USE_SELECT
 			mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::EF_CLOSE);
@@ -443,14 +421,10 @@ void Conn::closeNow(int reason /* = 0 */) {
 #endif
 			
 		} else {
-			if (log(LEVEL_DEBUG)) {
-				logStream() << "Re-closure (reason " << reason << ")" << endl;
-			}
+			LOG(LEVEL_DEBUG, "Re-closure (reason " << reason << ")");
 		}
 	} else {
-		if (log(LEVEL_FATAL)) {
-			logStream() << "Close conn without Server" << endl;
-		}
+		LOG(LEVEL_FATAL, "Close conn without Server");
 	}
 }
 
@@ -471,15 +445,11 @@ Conn * Conn::createNewConn() {
 	if (mCreatorConnFactory != NULL) {
 		newConn = mCreatorConnFactory->createConn(sock); // Create connection object by factory
 	} else {
-		if (log(LEVEL_DEBUG)) {
-			logStream() << "Create simple connection object for socket: " << sock << endl;
-		}
+		LOG(LEVEL_DEBUG, "Create simple connection object for socket: " << sock);
 		newConn = new Conn(sock, mServer, CONN_TYPE_INCOMING_TCP); // Create simple connection object
 	}
 	if (!newConn) {
-		if (log(LEVEL_FATAL)) {
-			logStream() << "Fatal error: Can't create new connection object" << endl;
-		}
+		LOG(LEVEL_FATAL, "Fatal error: Can't create new connection object");
 		throw "Fatal error: Can't create new connection object";
 	}
 
@@ -517,9 +487,7 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 
 	sockoptval_t yes = 1;
 	if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(int)))) {
-		if (log(LEVEL_ERROR)) {
-			logStream() << "Socket not SO_KEEPALIVE: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
-		}
+		LOG(LEVEL_ERROR, "Socket not SO_KEEPALIVE: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]");
 #ifdef _WIN32
 		int err = SOCK_CLOSE(sock);
 		if (SOCK_ERROR(err))
@@ -528,27 +496,21 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 		if (SOCK_ERR != SOCK_EINTR)
 #endif
 		{
-			if (log(LEVEL_WARN)) {
-				logStream() << "Couldn't set keepalive flag for accepted socket" << endl;
-			}
-		} else if (log(LEVEL_ERROR)) {
-			logStream() << "Socket not closed" << endl;
+			LOG(LEVEL_WARN, "Couldn't set keepalive flag for accepted socket");
+		} else {
+			LOG(LEVEL_ERROR, "Socket not closed");
 		}
 		return INVALID_SOCKET;
 	}
 
 	// Non-block socket
 	if (socketNonBlock(sock) == INVALID_SOCKET) {
-		if (log(LEVEL_ERROR)) {
-			logStream() << "Couldn't set non-block flag for accepted socket" << endl;
-		}
+		LOG(LEVEL_ERROR, "Couldn't set non-block flag for accepted socket");
 		return INVALID_SOCKET;
 	}
 
 	// Accept new socket
-	if (log(LEVEL_DEBUG)) {
-		logStream() << "Accept new socket: " << sock << endl;
-	}
+	LOG(LEVEL_DEBUG, "Accept new socket: " << sock);
 
 	Thread::safeInc(mConnCounter);
 	return sock;
@@ -562,9 +524,7 @@ int Conn::defineConnInfo(sockaddr_storage & storage) {
 		char port[NI_MAXSERV] = { 0 };
 		int ret = getnameinfo(reinterpret_cast<struct sockaddr *> (&storage), sizeof(struct sockaddr_storage), host, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
 		if (ret != 0) {
-			if (log(LEVEL_WARN)) {
-				logStream() << "Error in getnameinfo: " << SOCK_ERR_GAI_MSG(ret) << " [" << ret << "]" << endl;
-			}
+			LOG(LEVEL_WARN, "Error in getnameinfo: " << SOCK_ERR_GAI_MSG(ret) << " [" << ret << "]");
 			closeNow(CLOSE_REASON_GETPEERNAME);
 			return -1;
 		}
@@ -603,9 +563,7 @@ int Conn::recv() {
 		}
 
 	} else { // UDP
-		if (log(LEVEL_TRACE)) {
-			logStream() << "Start read (UDP)" << endl;
-		}
+		LOG(LEVEL_TRACE, "Start read (UDP)");
 		while (
 			(SOCK_ERROR(bufLen = recvfrom(
 				mSocket,
@@ -620,29 +578,21 @@ int Conn::recv() {
 				usleep(100u);
 			#endif
 		}
-		if (log(LEVEL_TRACE)) {
-			logStream() << "End read (UDP). Read bytes: " << bufLen << endl;
-		}
+		LOG(LEVEL_TRACE, "End read (UDP). Read bytes: " << bufLen);
 	}
 
 	mRecvBufRead = mRecvBufEnd = 0;
 	if (bufLen <= 0) {
 		if (!udp) {
 			if (bufLen == 0) {
-				if (log(LEVEL_DEBUG)) {
-					logStream() << "Other side has closed connection" << endl;
-				}
+				LOG(LEVEL_DEBUG, "Other side has closed connection");
 				closeNow(CLOSE_REASON_OTHER_SIDE);
 				return -1;
 			} else if (SOCK_ERR == EWOULDBLOCK) {
-				if (log(LEVEL_DEBUG)) {
-					logStream() << "Operation would block" << endl;
-				}
+				LOG(LEVEL_DEBUG, "Operation would block");
 				return -2;
 			} else {
-				if (log(LEVEL_DEBUG)) {
-					logStream() << "Error in receive: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << endl;
-				}
+				LOG(LEVEL_DEBUG, "Error in receive: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]");
 				closeNow(CLOSE_REASON_ERROR_RECV);
 				return -3;
 			}
@@ -774,15 +724,11 @@ string * Conn::getCommandPtr() {
 	and installation main parameter */
 void Conn::setCommandPtr(string * pStr) {
 	if (mStatus != STRING_STATUS_NO_STR) {
-		if (log(LEVEL_FATAL)) {
-			logStream() << "Fatal error: Bad setCommandPtr" << endl;
-		}
+		LOG(LEVEL_FATAL, "Fatal error: Bad setCommandPtr");
 		throw "Fatal error: Bad setCommandPtr";
 	}
 	if (!pStr) {
-		if (log(LEVEL_FATAL)) {
-			logStream() << "Fatal error: Bad setCommandPtr. Null string pointer" << endl;
-		}
+		LOG(LEVEL_FATAL, "Fatal error: Bad setCommandPtr. Null string pointer");
 		throw "Fatal error: Bad setCommandPtr. Null string pointer";
 	}
 	mCommand = pStr;
@@ -794,9 +740,7 @@ void Conn::setCommandPtr(string * pStr) {
 /// Reading data from buffer and record in line of the protocol
 size_t Conn::readFromRecvBuf() {
 	if (!mCommand) {
-		if (log(LEVEL_FATAL)) {
-			logStream() << "Fatal error: ReadFromBuf with null string pointer" << endl;
-		}
+		LOG(LEVEL_FATAL, "Fatal error: ReadFromBuf with null string pointer");
 		throw "Fatal error: ReadFromBuf with null string pointer";
 	}
 
@@ -904,9 +848,7 @@ size_t Conn::getSeparatorLen() const {
 size_t Conn::writeData(const char * data, size_t len, bool flush) {
 	size_t bufLen = mSendBuf.size();
 	if (bufLen + len >= mSendBufMax) {
-		if (log(LEVEL_WARN)) {
-			logStream() << "Sending buffer has big size, closing" << endl;
-		}
+		LOG(LEVEL_WARN, "Sending buffer has big size, closing");
 		closeNow(CLOSE_REASON_MAXSIZE_SEND);
 		return 0;
 	}
@@ -937,16 +879,12 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 	if (send(send_buf, size) < 0) {
 
 		if (SOCK_ERR != SOCK_EAGAIN) {
-			if (log(LEVEL_DEBUG)) {
-				logStream() << "Error in sending: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << "(not EAGAIN), closing" << endl;
-			}
+			LOG(LEVEL_DEBUG, "Error in sending: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << "(not EAGAIN), closing");
 			closeNow(CLOSE_REASON_ERROR_SEND);
 			return 0;
 		}
 
-		if (log(LEVEL_DEBUG)) {
-			logStream() << "Block sent. Was sent " << size << " bytes" << endl;
-		}
+		LOG(LEVEL_DEBUG, "Block sent. Was sent " << size << " bytes");
 		if (bufLen == 0) {
 			size_t s = len - size;
 			mSendBuf.reserve(s);
@@ -964,22 +902,16 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 			if (mBlockOutput) {
 				mBlockOutput = false;
 				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::EF_OUTPUT);
-				if (log(LEVEL_DEBUG)) {
-					logStream() << "Unblock output channel" << endl;
-				}
+				LOG(LEVEL_DEBUG, "Unblock output channel");
 			}
 
 			bufLen = mSendBuf.size();
 			if (mBlockInput && bufLen < MAX_SEND_UNBLOCK_SIZE) { // Unset block of input
 				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::EF_INPUT);
-				if (log(LEVEL_DEBUG)) {
-					logStream() << "Unblock input channel" << endl;
-				}
+				LOG(LEVEL_DEBUG, "Unblock input channel");
 			} else if (!mBlockInput && bufLen >= MAX_SEND_BLOCK_SIZE) { // Set block of input
 				mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::EF_INPUT);
-				if (log(LEVEL_DEBUG)) {
-					logStream() << "Block input channel" << endl;
-				}
+				LOG(LEVEL_DEBUG, "Block input channel");
 			}
 		}
 	} else {
@@ -995,9 +927,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 		if (mServer && mOk && !mBlockOutput) {
 			mBlockOutput = true;
 			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::EF_OUTPUT);
-			if (log(LEVEL_DEBUG)) {
-				logStream() << "Block output channel" << endl;
-			}
+			LOG(LEVEL_DEBUG, "Block output channel");
 		}
 		onFlush();
 	}
