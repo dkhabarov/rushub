@@ -139,7 +139,7 @@ $(CURDIR)/TigerHash.o: $(CURDIR)/TigerHash.cpp $(CURDIR)/stdinc.h $(CURDIR)/Tige
 $(CURDIR)/Times.o: $(CURDIR)/Times.cpp $(CURDIR)/stdinc.h $(CURDIR)/Times.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/UserList.o: $(CURDIR)/UserList.cpp $(CURDIR)/UserBase.h $(CURDIR)/stdinc.h $(CURDIR)/Obj.h $(CURDIR)/HashTable.h $(CURDIR)/Plugin.h $(CURDIR)/UserList.h
+$(CURDIR)/UserList.o: $(CURDIR)/UserList.cpp $(CURDIR)/UserBase.h $(CURDIR)/stdinc.h $(CURDIR)/Obj.h $(CURDIR)/HashTable.h $(CURDIR)/Plugin.h $(CURDIR)/Mutex.h $(CURDIR)/UserList.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(CURDIR)/WebConn.o: $(CURDIR)/WebConn.cpp $(CURDIR)/ConnBase.h $(CURDIR)/stdinc.h $(CURDIR)/Obj.h $(CURDIR)/Times.h $(CURDIR)/Protocol.h $(CURDIR)/Mutex.h $(CURDIR)/Conn.h $(CURDIR)/Plugin.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnEpoll.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/WebConn.h $(CURDIR)/WebParser.h $(CURDIR)/WebProtocol.h $(CURDIR)/UserBase.h $(CURDIR)/NmdcParser.h $(CURDIR)/stringutils.h $(CURDIR)/Any.h $(CURDIR)/Param.h $(CURDIR)/HashMap.h $(CURDIR)/DcUser.h $(CURDIR)/TimeOut.h $(CURDIR)/DcConn.h $(CURDIR)/DcProtocol.h $(CURDIR)/NmdcProtocol.h $(CURDIR)/AdcParser.h $(CURDIR)/AdcProtocol.h $(CURDIR)/ConfigItem.h $(CURDIR)/ConfigList.h $(CURDIR)/ConfigLoader.h $(CURDIR)/DcConfig.h $(CURDIR)/UserList.h $(CURDIR)/CallList.h $(CURDIR)/PluginList.h $(CURDIR)/DcConfigLoader.h $(CURDIR)/AntiFlood.h $(CURDIR)/DcIpList.h $(CURDIR)/DcServer.h

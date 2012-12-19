@@ -30,6 +30,7 @@
 #include "Obj.h"
 #include "HashTable.h"
 #include "Plugin.h" // for NMDC_SEPARATOR
+#include "Mutex.h"
 
 #include <string>
 #include <functional>
@@ -124,7 +125,7 @@ typedef ListItem<HashTable<UserBase *>::iterator, UserBase *> UserListItem;
 
 
 /** The structure, allowing add and delete users. Quick iterations cycle for sending */
-class UserList : public Obj, public HashTable<UserBase *> {
+class UserList : public Obj, protected HashTable<UserBase *> {
 
 public:
 
@@ -132,35 +133,52 @@ public:
 	virtual ~UserList();
 
 	inline size_t size() const {
+		// TODO sync
 		return tParent::size();
 	}
 
 	inline void clear() {
+		// TODO sync
 		tParent::clear();
 	}
 
 	inline bool add(const unsigned long & key, UserBase * data) {
+		// TODO sync
 		return tParent::add(key, data);
 	}
 
 	inline bool remove(const unsigned long & key) {
+		// TODO sync
 		return tParent::remove(key);
 	}
 
 	inline bool contain(const unsigned long & key) {
+		// TODO sync
 		return tParent::contain(key);
 	}
 
 	inline UserBase * find(const unsigned long & key) {
+		// TODO sync
 		return tParent::find(key);
 	}
 
 	inline bool update(const unsigned long & key, UserBase * const & data) {
+		// TODO sync
 		return tParent::update(key, data);
 	}
 
 	inline bool autoResize() {
+		// TODO sync
 		return tParent::autoResize();
+	}
+
+	template<class F>
+	void doForEach(F f) {
+		iterator it = begin();
+		iterator it_e = end();
+		while (it != it_e) {
+			f(*it++);
+		}
 	}
 
 	static Key uidToLowerHash(const string & uid);
@@ -203,6 +221,10 @@ public:
 
 	/** Sending data from cache to all and clear cache */
 	void flushCache();
+
+protected:
+
+	Mutex mutex;
 
 protected:
 

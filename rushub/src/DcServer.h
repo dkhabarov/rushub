@@ -327,6 +327,8 @@ private:
 	void sendToAll(const string & data, bool addSep, bool flush);
 	void sendToAllRaw(const string & data, bool addSep, bool flush);
 
+	void delAllUsers(UserBase *);
+
 	DcServer(const DcServer &);
 	DcServer & operator = (const DcServer &);
 

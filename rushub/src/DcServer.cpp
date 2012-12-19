@@ -26,6 +26,7 @@
 #include "WebConn.h"
 
 #include <string.h>
+#include <functional>
 
 
 #ifdef _WIN32
@@ -131,6 +132,19 @@ DcServer::DcServer(const string & configFile, const string &) :
 }
 
 
+void DcServer::delAllUsers(UserBase * userBase) {
+	DcUser * dcUser = static_cast<DcUser *> (userBase);
+	if (dcUser != NULL) {
+		if (dcUser->mDcConn) {
+			delConnection(dcUser->mDcConn);
+		} else {
+			if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
+				removeFromDcUserList(dcUser);
+			}
+			delete dcUser;
+		}
+	}
+}
 
 DcServer::~DcServer() {
 	LOG(LEVEL_INFO, "Destruct DcServer");
@@ -142,23 +156,9 @@ DcServer::~DcServer() {
 		unregBot(mDcConfig.mHubBot);
 	}
 
-	DcUser * dcUser = NULL;
-	UserList::iterator it = mDcUserList.begin();
-	UserList::iterator it_e = mDcUserList.end();
-	while (it != it_e) {
-		dcUser = static_cast<DcUser *> (*it++);
-		if (dcUser != NULL) {
-			if (dcUser->mDcConn) {
-				delConnection(dcUser->mDcConn);
-			} else {
-				if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-					removeFromDcUserList(dcUser);
-				}
-				delete dcUser;
-			}
-		}
+	if (mDcUserList.size() > 0) {
+		mDcUserList.doForEach(bind1st(mem_fun(&DcServer::delAllUsers), this)); // Delete all users
 	}
-
 	deleteAll(); // Delete all other conn
 
 
