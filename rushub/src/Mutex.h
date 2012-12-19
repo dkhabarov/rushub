@@ -43,6 +43,9 @@ private:
 
 	M & mutex;
 
+	ScopedLock(const ScopedLock<M> &);
+	ScopedLock<M> & operator = (const ScopedLock<M> &);
+
 };
 
 class Mutex {

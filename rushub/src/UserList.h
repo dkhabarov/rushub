@@ -132,48 +132,19 @@ public:
 	explicit UserList(const string & name);
 	virtual ~UserList();
 
-	inline size_t size() const {
-		// TODO sync
-		return tParent::size();
-	}
+	size_t size() const;
+	void clear();
+	bool add(const unsigned long & key, UserBase * data);
+	bool remove(const unsigned long & key);
+	bool contain(const unsigned long & key);
+	UserBase * find(const unsigned long & key);
+	bool update(const unsigned long & key, UserBase * const & data);
+	bool autoResize();
 
-	inline void clear() {
-		// TODO sync
-		tParent::clear();
-	}
-
-	inline bool add(const unsigned long & key, UserBase * data) {
-		// TODO sync
-		return tParent::add(key, data);
-	}
-
-	inline bool remove(const unsigned long & key) {
-		// TODO sync
-		return tParent::remove(key);
-	}
-
-	inline bool contain(const unsigned long & key) {
-		// TODO sync
-		return tParent::contain(key);
-	}
-
-	inline UserBase * find(const unsigned long & key) {
-		// TODO sync
-		return tParent::find(key);
-	}
-
-	inline bool update(const unsigned long & key, UserBase * const & data) {
-		// TODO sync
-		return tParent::update(key, data);
-	}
-
-	inline bool autoResize() {
-		// TODO sync
-		return tParent::autoResize();
-	}
-
+	/** Exec func for each */
 	template<class F>
 	void doForEach(F f) {
+		Mutex::Lock l(mMutex); // sync
 		iterator it = begin();
 		iterator it_e = end();
 		while (it != it_e) {
@@ -188,9 +159,8 @@ public:
 	void addUserListItem(UserListItem::Func func, const char * start = "");
 	const string & getList(unsigned int number);
 
-	inline void remake() {
-		onRemove(NULL);
-	}
+	/** Remake */
+	void remake();
 
 	/** Sending data to all from the list */
 	void sendToAll(const string & data, bool addSep = true, bool flush = true);
@@ -198,22 +168,23 @@ public:
 	/** Sending data to all from the list */
 	void sendToAllAdc(const string & data, bool addSep = true, bool flush = true);
 
+	/** Sending data to users by features (sync down) */
 	void sendToFeature(const string & data, const vector<unsigned int> & positive, 
 		const vector<unsigned int> & negative, bool addSep = true);
 
-	/** Sending data to profiles */
+	/** Sending data to profiles (sync down) */
 	void sendToProfiles(unsigned long profile, const string & data, bool addSep = true);
 
-	/** Sending to all chat */
+	/** Sending to all chat (sync down) */
 	void sendToAllChat(const string & data, const string & uid);
 
-	/** Sending to all profiles chat */
+	/** Sending to all profiles chat (sync down) */
 	void sendToAllChat(const string & data, const string & uid, unsigned long profile);
 
-	/** Sending to all pm */
+	/** Sending to all pm (sync down) */
 	void sendToAllPm(const string & data, const string & uid, const string & from);
 
-	/** Sending to all profiles pm */
+	/** Sending to all profiles pm (sync down) */
 	void sendToAllPm(const string & data, const string & uid, const string & from, unsigned long profile);
 
 	/** Sending data from cache to user */
@@ -224,17 +195,17 @@ public:
 
 protected:
 
-	Mutex mutex;
+	Mutex mMutex;
 
 protected:
 
 	typedef HashTable<UserBase *> tParent;
 
+	virtual bool strLog(); ///< Redefining log level function
+
 	virtual void onAdd(UserBase * userBase);
 	virtual void onRemove(UserBase *);
 	virtual void onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity);
-
-	virtual bool strLog(); ///< Redefining log level function
 
 private:
 
@@ -246,6 +217,7 @@ private:
 
 private:
 
+	void sendToAll(const string & data, bool addSep, bool flush, string & cache, const char * sep, size_t sepLen);
 	static void addInCache(string & cache, const string & data, const char * sep, size_t sepLen, bool addSep = true);
 
 	UserList(const UserList &);

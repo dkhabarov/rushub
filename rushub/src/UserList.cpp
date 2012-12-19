@@ -276,9 +276,65 @@ UserList::UserList(const string & name) :
 
 
 UserList::~UserList() {
+	Mutex::Lock l(mMutex); // sync
 	for (size_t i = 0; i < mListItems.size(); ++i) {
 		delete mListItems[i];
 	}
+}
+
+
+
+size_t UserList::size() const {
+	return tParent::size();
+}
+
+
+
+void UserList::clear() {
+	Mutex::Lock l(mMutex); // sync
+	tParent::clear();
+}
+
+
+
+bool UserList::add(const unsigned long & key, UserBase * data) {
+	Mutex::Lock l(mMutex); // sync
+	return tParent::add(key, data);
+}
+
+
+
+bool UserList::remove(const unsigned long & key) {
+	Mutex::Lock l(mMutex); // sync
+	return tParent::remove(key);
+}
+
+
+
+bool UserList::contain(const unsigned long & key) {
+	Mutex::Lock l(mMutex); // sync
+	return tParent::contain(key);
+}
+
+
+
+UserBase * UserList::find(const unsigned long & key) {
+	Mutex::Lock l(mMutex); // sync
+	return tParent::find(key);
+}
+
+
+
+bool UserList::update(const unsigned long & key, UserBase * const & data) {
+	Mutex::Lock l(mMutex); // sync
+	return tParent::update(key, data);
+}
+
+
+
+bool UserList::autoResize() {
+	Mutex::Lock l(mMutex); // sync
+	return tParent::autoResize();
 }
 
 
@@ -293,121 +349,111 @@ UserList::Key UserList::uidToLowerHash(const string & uid) {
 
 
 UserBase * UserList::getUserBaseByUid(const string & uid) {
+	Mutex::Lock l(mMutex); // sync
 	return find(static_cast<unsigned long> (uidToLowerHash(uid))); // for x64 compatibility
 }
 
 
 
 void UserList::addUserListItem(UserListItem::Func func, const char * start) {
+	Mutex::Lock l(mMutex); // sync
 	mListItems.push_back(new UserListItem(func, start));
 }
 
 
 
 const string & UserList::getList(unsigned int number) {
+	Mutex::Lock l(mMutex); // sync
 	return mListItems[number]->getList(begin(), end());
 }
 
 
 
+/** Remake */
+void UserList::remake() {
+	Mutex::Lock l(mMutex); // sync
+	onRemove(NULL);
+}
+
+
+
 /**
- Sendind data to all users from the list
+ Sendind data to all NMDC users from the list
  data - sending data
  flush - false - not send and save to cache, true - send data and send cache
  addSep - add sep to end of list
  */
 void UserList::sendToAll(const string & data, bool addSep, bool flush) {
-	if (flush) {
-		LOG(LEVEL_TRACE, "sendToAll begin");
-
-		if (mCacheNmdc.size()) {
-			addInCache(mCacheNmdc, data, STR_LEN(NMDC_SEPARATOR), addSep);
-			for_each(begin(), end(), ufSend(mCacheNmdc, false));
-			string().swap(mCacheNmdc); // erase & free memory
-		} else {
-			for_each(begin(), end(), ufSend(data, addSep));
-		}
-
-		LOG(LEVEL_TRACE, "sendToAll end");
-	} else {
-		addInCache(mCacheNmdc, data, STR_LEN(NMDC_SEPARATOR), addSep);
-	}
+	Mutex::Lock l(mMutex); // sync
+	sendToAll(data, addSep, flush, mCacheNmdc, STR_LEN(NMDC_SEPARATOR));
 }
 
 
 
+/**
+ Sendind data to all ADC users from the list
+ data - sending data
+ flush - false - not send and save to cache, true - send data and send cache
+ addSep - add sep to end of list
+ */
 void UserList::sendToAllAdc(const string & data, bool addSep, bool flush) {
-	if (flush) {
-		LOG(LEVEL_TRACE, "sendToAll begin");
-
-		if (mCacheAdc.size()) {
-			addInCache(mCacheAdc, data, STR_LEN(ADC_SEPARATOR), addSep);
-			for_each(begin(), end(), ufSend(mCacheAdc, false));
-			string().swap(mCacheAdc); // erase & free memory
-		} else {
-			for_each(begin(), end(), ufSend(data, addSep));
-		}
-
-		LOG(LEVEL_TRACE, "sendToAll end");
-	} else {
-		addInCache(mCacheAdc, data, STR_LEN(ADC_SEPARATOR), addSep);
-	}
+	Mutex::Lock l(mMutex); // sync
+	sendToAll(data, addSep, flush, mCacheAdc, STR_LEN(ADC_SEPARATOR));
 }
 
 
 
+/** Sending data to users by features (sync down) */
 void UserList::sendToFeature(const string & data, const vector<unsigned int> & positive, 
 		const vector<unsigned int> & negative, bool addSep) {
 
 	LOG(LEVEL_TRACE, "sendToFeature begin");
-
-	for_each(begin(), end(), ufSendFeature(data, addSep, positive, negative));
-
+	doForEach(ufSendFeature(data, addSep, positive, negative));
 	LOG(LEVEL_TRACE, "sendToFeature end");
 }
 
 
 
-/** Sending data to profiles */
+/** Sending data to profiles (sync down) */
 void UserList::sendToProfiles(unsigned long profile, const string & data, bool addSep) {
-
 	LOG(LEVEL_TRACE, "sendToProfiles begin");
-
-	for_each(begin(), end(), ufSendProfile(data, profile, addSep));
-
+	doForEach(ufSendProfile(data, profile, addSep));
 	LOG(LEVEL_TRACE, "sendToProfiles end");
 }
 
 
 
-/** Use for chat send to all */
+/** Use for chat send to all (sync down) */
 void UserList::sendToAllChat(const string & data, const string & uid) {
-	for_each(begin(), end(), ufSendChat(data, uid));
+	doForEach(ufSendChat(data, uid));
 }
 
 
 
+/** Sending to all profiles chat (sync down) */
 void UserList::sendToAllChat(const string & data, const string & uid, unsigned long profile) {
-	for_each(begin(), end(), ufSendChatProfile(data, uid, profile));
+	doForEach(ufSendChatProfile(data, uid, profile));
 }
 
 
 
-/** Use for private send to all */
+/** Use for private send to all (sync down) */
 void UserList::sendToAllPm(const string & data, const string & uid, const string & from) {
-	for_each(begin(), end(), ufSendPm(data, uid, from));
+	doForEach(ufSendPm(data, uid, from));
 }
 
 
 
+/** Sending to all profiles pm (sync down) */
 void UserList::sendToAllPm(const string & data, const string & uid, const string & from, unsigned long profile) {
-	for_each(begin(), end(), ufSendPmProfile(data, uid, from, profile));
+	doForEach(ufSendPmProfile(data, uid, from, profile));
 }
 
 
 
 /** Flush user cache */
 void UserList::flushForUser(UserBase * userBase) {
+	Mutex::Lock l(mMutex); // sync
 	if (mCacheNmdc.size()) {
 		ufSend(mCacheNmdc, false).operator() (userBase);
 	}
@@ -420,6 +466,7 @@ void UserList::flushForUser(UserBase * userBase) {
 
 /** Flush common cache */
 void UserList::flushCache() {
+	Mutex::Lock l(mMutex); // sync
 	if (mCacheNmdc.size()) {
 		string str;
 		sendToAll(str, false, true);
@@ -460,6 +507,26 @@ void UserList::onRemove(UserBase *) {
 void UserList::onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
 	LOG(LEVEL_DEBUG, "Autoresizing: size = " << currentSize << 
 		", capacity = " << oldCapacity << " -> " << newCapacity);
+}
+
+
+
+void UserList::sendToAll(const string & data, bool addSep, bool flush, string & cache, const char * sep, size_t sepLen) {
+	if (flush) {
+		LOG(LEVEL_TRACE, "sendToAll begin");
+
+		if (!cache.empty()) {
+			addInCache(cache, data, sep, sepLen, addSep);
+			for_each(begin(), end(), ufSend(cache, false));
+			string().swap(cache); // erase & free memory
+		} else {
+			for_each(begin(), end(), ufSend(data, addSep));
+		}
+
+		LOG(LEVEL_TRACE, "sendToAll end");
+	} else {
+		addInCache(cache, data, sep, sepLen, addSep);
+	}
 }
 
 
