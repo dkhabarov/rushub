@@ -249,7 +249,7 @@ protected:
 
 protected:
 
-	virtual bool strLog();
+	virtual bool strLog(int level, ostream & os);
 
 	virtual void onOk(bool);
 

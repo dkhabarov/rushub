@@ -102,7 +102,7 @@ protected:
 protected:
 
 	/** log */
-	bool strLog();
+	bool strLog(int level, ostream & os);
 	
 private:
 

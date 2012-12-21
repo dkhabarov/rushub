@@ -480,9 +480,9 @@ void UserList::flushCache() {
 
 
 /** Redefining log level function */
-bool UserList::strLog() {
-	Obj::strLog();
-	simpleLogStream() << "[" << mName << ":" << size() << "] ";
+bool UserList::strLog(int level, ostream & os) {
+	Obj::strLog(level, os);
+	os << "[" << mName << ":" << size() << "] ";
 	return true;
 }
 

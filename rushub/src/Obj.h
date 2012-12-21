@@ -50,9 +50,7 @@ enum {
 };
 
 /** Main log system thread safe stream */
-#define LOG_CLASS_STREAM(CLASS, OSTREAM) { ostringstream oss_tmp; oss_tmp << OSTREAM << endl; (CLASS)->logStreamLine(__LINE__) << oss_tmp.str(); }
-#define LOG_CLASS(CLASS, LEVEL, OSTREAM) if ((CLASS)->log(LEVEL)) LOG_CLASS_STREAM(CLASS, OSTREAM)
-#define LOG_STREAM(OSTREAM) LOG_CLASS_STREAM(this, OSTREAM)
+#define LOG_CLASS(CLASS, LEVEL, OSTREAM) { ostringstream oss_tmp; if ((CLASS)->log(LEVEL, oss_tmp)) { oss_tmp << (CLASS)->getClassName() << "(" << __LINE__ << "): " << OSTREAM << endl; (CLASS)->simpleLogStream() << oss_tmp.str(); } }
 #define LOG(LEVEL, OSTREAM) LOG_CLASS(this, LEVEL, OSTREAM)
 
 #ifndef STR_LEN
@@ -80,13 +78,19 @@ public:
 	static long getCount();
 
 	///< Return log straem
-	int log(int level);
+	int log(int level, ostream & os);
 
-	///< Return current log stream with line
-	ostream & logStreamLine(const int line);
+	///< Return a simple log stream
+	ostream & simpleLogStream();
 
 	///< Return class name
-	const char * getClassName();
+	const char * getClassName() const;
+
+	///< Return log level name
+	const char * getLevelName(int level) const;
+
+	///< Return max log level
+	static int getMaxLevel();
 
 protected:
 
@@ -102,10 +106,7 @@ protected:
 	void setClassName(const char * name);
 
 	///< Main function putting log in stream
-	virtual bool strLog();
-
-	///< Return a simple log stream
-	ostream & simpleLogStream();
+	virtual bool strLog(int level, ostream & os);
 
 private:
 
@@ -117,7 +118,6 @@ private:
 
 	///< Objects counter
 	static volatile long mCounterObj;
-	static int mLevel;
 	static bool mCout;
 	static const char * mLevelNames[];
 
@@ -131,10 +131,10 @@ private:
 private:
 
 	///< log function
-	static ostream & log();
+	static ostream & log(int level);
 
 	static ostream & openLog();
-	static bool saveInBuf();
+	static bool saveInBuf(int level);
 	static void loadFromBuf(ostream &);
 
 	///< Return level for syslog

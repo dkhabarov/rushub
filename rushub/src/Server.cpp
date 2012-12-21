@@ -177,19 +177,19 @@ Conn * Server::addSimpleConn(int connType, const char * ip, const char * port) {
 	Conn * conn = new Conn(0, this, connType);
 
 	if (conn->makeSocket(port, ip, connType) == INVALID_SOCKET) {
-		if (log(LEVEL_FATAL)) {
-			if (connType == CONN_TYPE_LISTEN) {
-				LOG_STREAM("Fatal error: Can't listen on " << ip << ":" << port << " TCP");
-			} else if (connType == CONN_TYPE_INCOMING_UDP) {
-				LOG_STREAM("Fatal error: Can't listen on " << ip << ":" << port << " UDP");
-			} else if (connType == CONN_TYPE_OUTGOING_TCP) {
-				LOG_STREAM("Fatal error: Can't connect to " << ip << ":" << port << " TCP");
-			} else if (connType == CONN_TYPE_OUTGOING_UDP) {
-				LOG_STREAM("Fatal error: Can't connect to " << ip << ":" << port << " UDP");
-			} else {
-				LOG_STREAM("Fatal error: Unknown connection");
-			}
+		ostringstream oss;
+		if (connType == CONN_TYPE_LISTEN) {
+			oss << "Fatal error: Can't listen on " << ip << ":" << port << " TCP";
+		} else if (connType == CONN_TYPE_INCOMING_UDP) {
+			oss << "Fatal error: Can't listen on " << ip << ":" << port << " UDP";
+		} else if (connType == CONN_TYPE_OUTGOING_TCP) {
+			oss << "Fatal error: Can't connect to " << ip << ":" << port << " TCP";
+		} else if (connType == CONN_TYPE_OUTGOING_UDP) {
+			oss << "Fatal error: Can't connect to " << ip << ":" << port << " UDP";
+		} else {
+			oss << "Fatal error: Unknown connection";
 		}
+		LOG(LEVEL_FATAL, oss.str());
 		delete conn;
 		return NULL;
 	}

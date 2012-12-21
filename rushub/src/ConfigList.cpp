@@ -54,11 +54,9 @@ ConfigListBase::~ConfigListBase() {
 ConfigItem * ConfigListBase::add(const string & key, ConfigItem * configItem) {
 	Hash_t hash = mList.mHash(key);
 	if (!mList.add(hash, configItem)) { /** Add */
-		if (log(LEVEL_DEBUG)) {
-			ConfigItem * other = mList.find(hash);
-			LOG_STREAM("Don't add " << key << " because of " << (other ? other->mName.c_str() : "NULL"));
-			return NULL;
-		}
+		ConfigItem * other = mList.find(hash);
+		LOG(LEVEL_DEBUG, "Don't add " << key << " because of " << (other ? other->mName.c_str() : "NULL"));
+		return NULL;
 	}
 	mKeyList.push_back(hash); /** Push back of vector */
 	configItem->mName = key; /** Record name */

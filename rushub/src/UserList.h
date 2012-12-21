@@ -201,7 +201,7 @@ protected:
 
 	typedef HashTable<UserBase *> tParent;
 
-	virtual bool strLog(); ///< Redefining log level function
+	virtual bool strLog(int level, ostream & os); ///< Redefining log level function
 
 	virtual void onAdd(UserBase * userBase);
 	virtual void onRemove(UserBase *);

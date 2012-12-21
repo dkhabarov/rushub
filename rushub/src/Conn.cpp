@@ -1030,9 +1030,9 @@ int Conn::onTimer(Time &) {
 
 
 
-bool Conn::strLog() {
-	Obj::strLog();
-	simpleLogStream() << "[sock:" << mSocket << "] ";
+bool Conn::strLog(int level, ostream & os) {
+	Obj::strLog(level, os);
+	os << "[sock:" << mSocket << "] ";
 	return true;
 }
 

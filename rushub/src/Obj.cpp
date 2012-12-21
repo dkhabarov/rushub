@@ -45,7 +45,6 @@ ofstream Obj::mOfs;
 string * Obj::mLogsPath = NULL; /** Logs path */
 
 volatile long Obj::mCounterObj = 0; /** Objects counter */
-int Obj::mLevel = 0;
 bool Obj::mCout = false;
 const char * Obj::mLevelNames[] = {"FATAL", "ERROR", "WARN ", "INFO ", "DEBUG", "TRACE"};
 
@@ -100,30 +99,34 @@ long Obj::getCount() {
 
 
 /** Return log straem */
-int Obj::log(int level) {
-	if (level <= mMaxLevel) {
-		mToLog = &log();
-		mLevel = level;
-		return strLog();
+int Obj::log(int level, ostream & os) {
+	if (level <= getMaxLevel()) {
+		mToLog = &log(level);
+		return strLog(level, os);
 	}
 	return 0;
 }
 
 
 
-/** Return current log stream */
-ostream & Obj::logStreamLine(const int line) {
-	simpleLogStream() << mClassName << "(" << line << "): ";
-	return simpleLogStream();
-}
-
-
-
 /** Return class name */
-const char * Obj::getClassName() {
+const char * Obj::getClassName() const {
 	return mClassName;
 }
 
+
+
+/** Return log level name */
+const char * Obj::getLevelName(int level) const {
+	return mLevelNames[level];
+}
+
+
+
+///< Return max log level
+int Obj::getMaxLevel() {
+	return mMaxLevel;
+}
 
 
 /** Set class name */
@@ -135,9 +138,9 @@ void Obj::setClassName(const char * name) {
 
 
 /** Main function putting log in stream */
-bool Obj::strLog() {
+bool Obj::strLog(int level, ostream & os) {
 	utils::Time now(true);
-	simpleLogStream() << now.asDateMsec() << " " << mLevelNames[mLevel] << " ";
+	os << now.asDateMsec() << " " << getLevelName(level) << " ";
 	return true;
 }
 
@@ -151,16 +154,16 @@ ostream & Obj::simpleLogStream() {
 
 
 /** log function. Return log straem */
-ostream & Obj::log() {
+ostream & Obj::log(int level) {
 
 #ifndef _WIN32
 	if (mSysLogOn) {
-		if (saveInBuf()) {
+		if (saveInBuf(level)) {
 			loadFromBuf(mSysLogOss);
 		}
 		const string & buf = mSysLogOss.str();
 		if (!buf.empty()) {
-			syslog(sysLogLevel(mLevel), "%s", buf.c_str());
+			syslog(sysLogLevel(level), "%s", buf.c_str());
 			mSysLogOss.str("");
 		}
 		return mSysLogOss;
@@ -174,7 +177,7 @@ ostream & Obj::log() {
 	}
 
 	// save in buff when the config is not loaded
-	saveInBuf();
+	saveInBuf(level);
 
 	if (mLogsPath == NULL) {
 		return mBufOss;
@@ -218,10 +221,10 @@ ostream & Obj::openLog() {
 
 
 // Saving in buffer
-bool Obj::saveInBuf() {
+bool Obj::saveInBuf(int level) {
 	const string & buff = mBufOss.str();
 	if (!buff.empty()) {
-		mLoadBuf.push_back(pair<int, string>(mLevel, buff));
+		mLoadBuf.push_back(pair<int, string>(level, buff));
 		mBufOss.str("");
 		return true;
 	}
@@ -233,7 +236,7 @@ bool Obj::saveInBuf() {
 void Obj::loadFromBuf(ostream & os) {
 	for (vector<Pair>::iterator it = mLoadBuf.begin(); it != mLoadBuf.end(); ++it) {
 		Pair & p = (*it);
-		if (p.first <= mMaxLevel) {
+		if (p.first <= getMaxLevel()) {
 			os << p.second;
 		}
 	}
