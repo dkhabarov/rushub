@@ -20,10 +20,17 @@
 #include "Thread.h"
 
 #ifndef _WIN32
-#include <signal.h>
+	#include <signal.h>
+#else
+	#include <mswsock.h>
+	#include <ws2tcpip.h>
+	#include <ipexport.h>
+	#include <process.h>
 #endif
 
 namespace utils {
+
+Mutex Thread::mMutex;
 
 extern "C" {
 	#ifdef _WIN32
@@ -37,9 +44,9 @@ extern "C" {
 			// Following code will guarantee more predictable latecnies as it'll
 			// disallow any signal handling in the I/O thread.
 			sigset_t sigset;
-			int res = sigfillset(&sigset);
+			/*int res =*/ sigfillset(&sigset);
 			//assert(res == 0);
-			res = pthread_sigmask(SIG_BLOCK, &sigset, NULL);
+			/*res =*/ pthread_sigmask(SIG_BLOCK, &sigset, NULL);
 			//assert(res == 0);
 
 			Thread * self = (Thread *) arg;   
@@ -56,33 +63,52 @@ void Thread::start(ThreadCall * func, void * arg) {
 		mHandle = (HANDLE) _beginthreadex(NULL, 0, &::utils::call, this, 0, NULL);
 		//assert(mHandle != NULL);
 	#else
-		int res = pthread_create(&mHandle, NULL, call, this);
+		/*int res =*/ pthread_create(&mHandle, NULL, call, this);
 		//assert(res == 0);
 	#endif
 }
 
 void Thread::stop() {
 	#ifdef _WIN32
-		DWORD res = WaitForSingleObject(mHandle, INFINITE);
+		/*DWORD res =*/ WaitForSingleObject(mHandle, INFINITE);
 		//assert(res != WAIT_FAILED);
-		BOOL res2 = CloseHandle(mHandle);
+		/*BOOL res2 =*/ CloseHandle(mHandle);
 		//assert(res2 != 0);
 	#else
-		int res = pthread_join(mHandle, NULL);
+		/*int res =*/ pthread_join(mHandle, NULL);
 		//assert(res == 0);
 	#endif
 }
 
 long Thread::safeInc(volatile long & value) {
-	return InterlockedIncrement(&value);
+	#ifdef _WIN32
+		return InterlockedIncrement(&value);
+	#else
+		Mutex::Lock l(mMutex);
+		long res = ++value;
+		return res;
+	#endif
 }
 
 long Thread::safeDec(volatile long & value) {
-	return InterlockedDecrement(&value);
+	#ifdef _WIN32
+		return InterlockedDecrement(&value);
+	#else
+		Mutex::Lock l(mMutex);
+		long res = --value;
+		return res;
+	#endif
 }
 
 long Thread::safeExc(volatile long & target, long value) {
-	return InterlockedExchange(&target, value);
+	#ifdef _WIN32
+		return InterlockedExchange(&target, value);
+	#else
+		Mutex::Lock l(mMutex);
+		long res = target;
+		target = value;
+		return res;
+	#endif
 }
 
 } // namespace utils

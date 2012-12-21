@@ -21,7 +21,7 @@
 #define MUTEX_H
 
 #ifdef _WIN32
-	#include <windows.h>
+	#include <winsock2.h>
 #else
 	#include <pthread.h>
 #endif

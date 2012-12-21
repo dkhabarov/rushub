@@ -136,7 +136,7 @@ public:
 	virtual operator tSocket() const;
 
 	static bool checkIp(const string & ip);
-	static const long getCount();
+	static long getCount();
 	//static const char * inetNtop(int af, const void * src, char * dst, socklen_t cnt);
 	//static int inetPton(int af, const char * src, void * dst);
 

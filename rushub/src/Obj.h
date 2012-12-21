@@ -77,7 +77,7 @@ public:
 	virtual ~Obj();
 
 	///< Get counts of objects
-	static const long getCount();
+	static long getCount();
 
 	///< Return log straem
 	int log(int level);

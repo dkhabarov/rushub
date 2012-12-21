@@ -20,15 +20,7 @@
 #ifndef THREAD_H
 #define THREAD_H
 
-#ifdef _WIN32
-	#include <winsock2.h>
-	#include <mswsock.h>
-	#include <ws2tcpip.h>
-	#include <ipexport.h>
-	#include <process.h>
-#else
-	#include <pthread.h>
-#endif
+#include "Mutex.h"
 
 namespace utils {
 
@@ -71,6 +63,8 @@ private:
 	#else
 		pthread_t mHandle;
 	#endif
+
+	static Mutex mMutex;
 
 	Thread(const Thread &);
 	const Thread & operator = (const Thread &);

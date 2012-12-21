@@ -103,7 +103,7 @@ $(CURDIR)/NmdcParser.o: $(CURDIR)/NmdcParser.cpp $(CURDIR)/stdinc.h $(CURDIR)/Ob
 $(CURDIR)/NmdcProtocol.o: $(CURDIR)/NmdcProtocol.cpp $(CURDIR)/stdinc.h $(CURDIR)/Obj.h $(CURDIR)/Protocol.h $(CURDIR)/DcProtocol.h $(CURDIR)/Plugin.h $(CURDIR)/NmdcParser.h $(CURDIR)/NmdcProtocol.h $(CURDIR)/ConnBase.h $(CURDIR)/Times.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnEpoll.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/Mutex.h $(CURDIR)/Conn.h $(CURDIR)/UserBase.h $(CURDIR)/stringutils.h $(CURDIR)/Any.h $(CURDIR)/Param.h $(CURDIR)/HashMap.h $(CURDIR)/DcUser.h $(CURDIR)/TimeOut.h $(CURDIR)/DcConn.h $(CURDIR)/AdcParser.h $(CURDIR)/AdcProtocol.h $(CURDIR)/ConfigItem.h $(CURDIR)/ConfigList.h $(CURDIR)/ConfigLoader.h $(CURDIR)/DcConfig.h $(CURDIR)/UserList.h $(CURDIR)/CallList.h $(CURDIR)/PluginList.h $(CURDIR)/DcConfigLoader.h $(CURDIR)/AntiFlood.h $(CURDIR)/DcIpList.h $(CURDIR)/WebParser.h $(CURDIR)/WebProtocol.h $(CURDIR)/WebConn.h $(CURDIR)/DcServer.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/Obj.o: $(CURDIR)/Obj.cpp $(CURDIR)/stdinc.h $(CURDIR)/Obj.h $(CURDIR)/Times.h $(CURDIR)/Thread.h
+$(CURDIR)/Obj.o: $(CURDIR)/Obj.cpp $(CURDIR)/stdinc.h $(CURDIR)/Obj.h $(CURDIR)/Times.h $(CURDIR)/Thread.h $(CURDIR)/Mutex.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(CURDIR)/Param.o: $(CURDIR)/Param.cpp $(CURDIR)/Plugin.h $(CURDIR)/stdinc.h $(CURDIR)/stringutils.h $(CURDIR)/Any.h $(CURDIR)/Param.h $(CURDIR)/Obj.h $(CURDIR)/Times.h $(CURDIR)/UserBase.h $(CURDIR)/Protocol.h $(CURDIR)/NmdcParser.h $(CURDIR)/HashTable.h $(CURDIR)/HashMap.h $(CURDIR)/DcUser.h
@@ -130,7 +130,7 @@ $(CURDIR)/StringToArg.o: $(CURDIR)/StringToArg.cpp $(CURDIR)/StringToArg.h
 $(CURDIR)/stringutils.o: $(CURDIR)/stringutils.cpp $(CURDIR)/stdinc.h $(CURDIR)/stringutils.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/Thread.o: $(CURDIR)/Thread.cpp $(CURDIR)/Thread.h
+$(CURDIR)/Thread.o: $(CURDIR)/Thread.cpp $(CURDIR)/Thread.h $(CURDIR)/Mutex.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(CURDIR)/TigerHash.o: $(CURDIR)/TigerHash.cpp $(CURDIR)/stdinc.h $(CURDIR)/TigerHash.h

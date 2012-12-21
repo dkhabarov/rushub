@@ -642,7 +642,7 @@ bool Conn::checkIp(const string & ip) {
 
 
 
-const long Conn::getCount() {
+long Conn::getCount() {
 	return mConnCounter;
 }
 

@@ -93,7 +93,7 @@ Obj::~Obj() {
 
 
 /** Get counts of objects */
-const long Obj::getCount() {
+long Obj::getCount() {
 	return mCounterObj;
 }
 
