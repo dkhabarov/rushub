@@ -129,7 +129,7 @@ public:
 
 	bool mSendNickList;        ///< Sending user list when login
 	bool mIpRecv;              ///< Permit on reception of the messages, sending on my ip
-	bool mNickListInProgress;  ///< True while sending first nicklist
+	volatile bool mNickListInProgress;  ///< True while sending first nicklist
 	DcUser * mDcUser;          ///< User object
 
 	/// Atniflood struct

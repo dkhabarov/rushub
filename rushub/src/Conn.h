@@ -259,8 +259,8 @@ protected:
 
 private:
 
-	bool mOk; ///< Points that given connection is registered (socket of connection is created and bound)
-	bool mWritable; ///< Points that data can be read and be written
+	volatile bool mOk; ///< Points that given connection is registered (socket of connection is created and bound)
+	volatile bool mWritable; ///< Points that data can be read and be written
 
 	int mConnType; ///< Socket type
 
@@ -283,13 +283,13 @@ private:
 	/// ipv6
 	struct addrinfo * mAddrInfo;
 
-	bool mBlockInput; ///< Blocking enterring channel for given conn
-	bool mBlockOutput; ///< Blocking coming channel for given conn
+	volatile bool mBlockInput; ///< Blocking enterring channel for given conn
+	volatile bool mBlockOutput; ///< Blocking coming channel for given conn
 
 	string * mCommand; ///< Pointer to line, in which will be written data from buffer
 
-	bool mClosed; ///< closed flag, for close counter
-	int mCloseReason; ///< Reason of close connection
+	volatile bool mClosed; ///< closed flag, for close counter
+	volatile int mCloseReason; ///< Reason of close connection
 
 private:
 

@@ -276,6 +276,8 @@ protected:
 	/// Removing user from the user list
 	bool removeFromDcUserList(DcUser *);
 
+	void syncTimer();
+
 private:
 
 	Time mChecker; ///< Checking time

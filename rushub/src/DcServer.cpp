@@ -381,61 +381,65 @@ int DcServer::listening() {
 
 
 
-int DcServer::onTimer(Time & now) {
+void DcServer::syncTimer() {
+	mHelloList.flushCache(); // NMDC
+	mDcUserList.flushCache();
+	mBotList.flushCache();
+	mEnterList.flushCache();
+	mOpList.flushCache();
+	mIpList.flushCache();
+	mChatList.flushCache();
+	mActiveList.flushCache();
 
-	// Execute each second
-	if (static_cast<int64_t> (now - mChecker) >= mTimerServPeriod) {
+	int SysLoading = mSystemLoad;
 
-		mChecker = now;
+	if (0 < mMeanFrequency.mNumFill) {
 
-		mHelloList.flushCache(); // NMDC
-		mDcUserList.flushCache();
-		mBotList.flushCache();
-		mEnterList.flushCache();
-		mOpList.flushCache();
-		mIpList.flushCache();
-		mChatList.flushCache();
-		mActiveList.flushCache();
+		double iFrequency = mMeanFrequency.getMean(mTime);
 
-		int SysLoading = mSystemLoad;
-
-		if (0 < mMeanFrequency.mNumFill) {
-
-			double iFrequency = mMeanFrequency.getMean(mTime);
-
-			if (iFrequency < 0.4 * mDcConfig.mSysLoading) {
-				mSystemLoad = SYSTEM_LOAD_SYSTEM_DOWN; // 0.4 (>2000 ms)
-			} else if (iFrequency < 0.9 * mDcConfig.mSysLoading) {
-				mSystemLoad = SYSTEM_LOAD_CRITICAL;    // 0.9 (>1000 ms)
-			} else if (iFrequency < 3.6 * mDcConfig.mSysLoading) {
-				mSystemLoad = SYSTEM_LOAD_MIDDLE;      // 3.6 (>250  ms)
-			} else if (iFrequency < 18  * mDcConfig.mSysLoading) {
-				mSystemLoad = SYSTEM_LOAD_LOWER;       // 18  (>50   ms)
-			} else {
-				mSystemLoad = SYSTEM_LOAD_OK;
-			}
-
+		if (iFrequency < 0.4 * mDcConfig.mSysLoading) {
+			mSystemLoad = SYSTEM_LOAD_SYSTEM_DOWN; // 0.4 (>2000 ms)
+		} else if (iFrequency < 0.9 * mDcConfig.mSysLoading) {
+			mSystemLoad = SYSTEM_LOAD_CRITICAL;    // 0.9 (>1000 ms)
+		} else if (iFrequency < 3.6 * mDcConfig.mSysLoading) {
+			mSystemLoad = SYSTEM_LOAD_MIDDLE;      // 3.6 (>250  ms)
+		} else if (iFrequency < 18  * mDcConfig.mSysLoading) {
+			mSystemLoad = SYSTEM_LOAD_LOWER;       // 18  (>50   ms)
 		} else {
 			mSystemLoad = SYSTEM_LOAD_OK;
 		}
 
-		if (mSystemLoad != SysLoading) {
-			LOG(LEVEL_WARN, "System loading: " 
-				<< mSystemLoad << " level (was " 
-				<< SysLoading << " level)");
-		}
+	} else {
+		mSystemLoad = SYSTEM_LOAD_OK;
+	}
+
+	if (mSystemLoad != SysLoading) {
+		LOG(LEVEL_WARN, "System loading: " 
+			<< mSystemLoad << " level (was " 
+			<< SysLoading << " level)");
+	}
+
+	mDcUserList.autoResize();
+	mHelloList.autoResize(); // NMDC
+	mBotList.autoResize();
+	mEnterList.autoResize();
+	mActiveList.autoResize();
+	mChatList.autoResize();
+	mOpList.autoResize();
+	mIpList.autoResize();
+}
+
+
+
+int DcServer::onTimer(Time & now) {
+
+	// Execute each second
+	if (static_cast<int64_t> (now - mChecker) >= mTimerServPeriod) {
+		mChecker = now;
+
+		syncTimer();
 
 		mIpEnterFlood.del(now); // Removing ip addresses, which already long ago entered
-
-		mDcUserList.autoResize();
-		mHelloList.autoResize(); // NMDC
-		mBotList.autoResize();
-		mEnterList.autoResize();
-		mActiveList.autoResize();
-		mChatList.autoResize();
-		mOpList.autoResize();
-		mIpList.autoResize();
-
 	}
 
 	#ifndef WITHOUT_PLUGINS
