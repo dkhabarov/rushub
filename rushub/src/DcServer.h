@@ -248,6 +248,8 @@ public:
 	/// Function action when joining the client
 	int onNewConn(Conn *);
 
+	void syncTimer(void *);
+
 protected:
 
 	/// Returns pointer to line of the connection, in which will be recorded got data
@@ -275,8 +277,6 @@ protected:
 
 	/// Removing user from the user list
 	bool removeFromDcUserList(DcUser *);
-
-	void syncTimer();
 
 private:
 

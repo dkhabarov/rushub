@@ -381,7 +381,7 @@ int DcServer::listening() {
 
 
 
-void DcServer::syncTimer() {
+void DcServer::syncTimer(void *) {
 	mHelloList.flushCache(); // NMDC
 	mDcUserList.flushCache();
 	mBotList.flushCache();
@@ -437,7 +437,7 @@ int DcServer::onTimer(Time & now) {
 	if (static_cast<int64_t> (now - mChecker) >= mTimerServPeriod) {
 		mChecker = now;
 
-		syncTimer();
+		syncTimer(NULL);
 
 		mIpEnterFlood.del(now); // Removing ip addresses, which already long ago entered
 	}
