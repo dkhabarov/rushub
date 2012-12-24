@@ -846,6 +846,13 @@ size_t Conn::getSeparatorLen() const {
 
 /// Write data in sending buffer and send to conn
 size_t Conn::writeData(const char * data, size_t len, bool flush) {
+
+	Mutex::Lock l(mMutex);
+
+	if (!isWritable()) {
+		return 0;
+	}
+
 	size_t bufLen = mSendBuf.size();
 	if (bufLen + len >= mSendBufMax) {
 		LOG(LEVEL_WARN, "Sending buffer has big size, closing");
@@ -853,13 +860,13 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 		return 0;
 	}
 
-	if (!flush && (bufLen < (mSendBufMax >> 1))) { 
+	if (!flush && (bufLen < (mSendBufMax >> 1))) {
 		mSendBuf.reserve(bufLen + len);
 		mSendBuf.append(data, len);
 		return 0;
 	}
 
-	const char * send_buf = NULL; 
+	const char * send_buf = NULL;
 	size_t size;
 
 	if (bufLen != 0) {
@@ -867,7 +874,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 		mSendBuf.append(data, len);
 		size = mSendBuf.size();
 		send_buf = mSendBuf.c_str();
-	} else { 
+	} else {
 		if (len == 0) { // buff is empty and no new data
 			return 0;
 		}

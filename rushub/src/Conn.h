@@ -245,7 +245,7 @@ protected:
 
 	list<Conn *>::iterator mIterator; ///< Optimisation
 
-	Mutex mutex;
+	Mutex mMutex;
 
 protected:
 

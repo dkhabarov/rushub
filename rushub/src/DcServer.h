@@ -286,7 +286,7 @@ private:
 
 	vector<ConnFactory *> mConnFactories; ///< Server Conn Factories
 
-	SystemLoad mSystemLoad; ///< Indicator of the system overloading
+	volatile SystemLoad mSystemLoad; ///< Indicator of the system overloading
 
 	/// Web Protocol
 	WebProtocol * mWebProtocol;
