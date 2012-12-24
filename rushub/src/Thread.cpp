@@ -32,6 +32,7 @@ namespace utils {
 
 Mutex Thread::mMutex;
 
+
 extern "C" {
 	#ifdef _WIN32
 		static unsigned int __stdcall call(void * arg) {
@@ -56,6 +57,13 @@ extern "C" {
 	#endif
 }
 
+
+
+Thread::~Thread() {
+}
+
+
+
 void Thread::start(ThreadCall * func, void * arg) {
 	mFunc = func;
 	mArg = arg;
@@ -67,6 +75,8 @@ void Thread::start(ThreadCall * func, void * arg) {
 		//assert(res == 0);
 	#endif
 }
+
+
 
 void Thread::stop() {
 	#ifdef _WIN32
@@ -80,6 +90,8 @@ void Thread::stop() {
 	#endif
 }
 
+
+
 long Thread::safeInc(volatile long & value) {
 	#ifdef _WIN32
 		return InterlockedIncrement(&value);
@@ -90,6 +102,8 @@ long Thread::safeInc(volatile long & value) {
 	#endif
 }
 
+
+
 long Thread::safeDec(volatile long & value) {
 	#ifdef _WIN32
 		return InterlockedDecrement(&value);
@@ -99,6 +113,8 @@ long Thread::safeDec(volatile long & value) {
 		return res;
 	#endif
 }
+
+
 
 long Thread::safeExc(volatile long & target, long value) {
 	#ifdef _WIN32

@@ -40,6 +40,8 @@ public:
 	inline Thread() {
 	}
 
+	virtual ~Thread();
+
 	// Creates OS thread. 'func' is main thread function. It'll be passed
 	// 'arg' as an argument.
 	void start(ThreadCall * func, void * arg);
