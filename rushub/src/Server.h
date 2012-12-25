@@ -26,7 +26,7 @@
 #define SERVER_H
 
 #define INTERNALNAME "RusHub"
-#define INTERNALVERSION "2.3.10" // without space!
+#define INTERNALVERSION "2.4.0[beta]" // without space!
 
 #include "ConnChoose.h" // first (def winsock2.h)
 #include "Obj.h"
