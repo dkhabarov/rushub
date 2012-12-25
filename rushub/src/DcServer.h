@@ -40,6 +40,7 @@
 #include "DcIpList.h"
 #include "WebProtocol.h"
 #include "WebConn.h"
+#include "Thread.h"
 
 #include "stringutils.h" // for stringReplace
 
@@ -114,7 +115,7 @@ private:
 
 
 /// Main DC Server class
-class DcServer : public Server, public DcServerBase {
+class DcServer : public Server, public DcServerBase, public Thread {
 
 	friend class ::dcserver::DcListIterator; // for mClientList
 	friend class ::dcserver::DcConn; // for minDelay in DcConn::onTimer
@@ -217,11 +218,11 @@ public:
 	virtual int unregBot(const string & nick);
 
 	virtual void stopHub() {
-		stop(0);
+		Server::stop(0);
 	}
 
 	virtual void restartHub() {
-		stop(1);
+		Server::stop(1);
 	}
 
 	virtual bool regCallList(const char * id, Plugin *);
@@ -248,7 +249,7 @@ public:
 	/// Function action when joining the client
 	int onNewConn(Conn *);
 
-	void syncTimer(void *);
+	static void syncTimer(void *);
 
 protected:
 
@@ -295,6 +296,8 @@ private:
 
 	AntiFlood mIpEnterFlood;
 
+	volatile bool mStopSync;
+
 	/*
 	struct IpEnter {
 		Time mTime;
@@ -330,6 +333,8 @@ private:
 	void sendToAllRaw(const string & data, bool addSep, bool flush);
 
 	void delAllUsers(UserBase *);
+
+	static void syncActions(DcServer *);
 
 	DcServer(const DcServer &);
 	DcServer & operator = (const DcServer &);

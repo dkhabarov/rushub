@@ -50,7 +50,7 @@ enum {
 };
 
 /** Main log system thread safe stream */
-#define LOG_CLASS(CLASS, LEVEL, OSTREAM) { ostringstream oss_tmp; if ((CLASS)->log(LEVEL, oss_tmp)) { oss_tmp << (CLASS)->getClassName() << "(" << __LINE__ << "): " << OSTREAM << endl; (CLASS)->simpleLogStream() << oss_tmp.str(); } }
+#define LOG_CLASS(CLASS, LEVEL, OSTREAM) { ostringstream oss_tmp; if ((CLASS)->log(LEVEL, oss_tmp)) { oss_tmp << (CLASS)->getClassName() << "(" << __LINE__ << "): " << OSTREAM << endl; (CLASS)->simpleLogStream() << oss_tmp.str(); (CLASS)->simpleLogStream().flush(); } }
 #define LOG(LEVEL, OSTREAM) LOG_CLASS(this, LEVEL, OSTREAM)
 
 #ifndef STR_LEN

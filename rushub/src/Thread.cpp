@@ -50,7 +50,7 @@ extern "C" {
 			/*res =*/ pthread_sigmask(SIG_BLOCK, &sigset, NULL);
 			//assert(res == 0);
 
-			Thread * self = (Thread *) arg;   
+			Thread * self = (Thread *) arg;
 			self->mFunc(self->mArg);
 			return NULL;
 		}

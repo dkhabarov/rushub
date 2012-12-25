@@ -112,6 +112,15 @@ Server::~Server() {
 
 
 
+void Server::sleep(int msec) {
+	#ifdef _WIN32
+		Sleep(static_cast<DWORD> (msec));
+	#else
+		usleep(static_cast<useconds_t> (msec * 1000));
+	#endif
+}
+
+
 void Server::deleteAll() {
 	Conn * conn = NULL;
 
@@ -230,11 +239,7 @@ int Server::run() {
 			}
 
 			if (mStepDelay) {
-				#ifdef _WIN32
-					Sleep(static_cast<DWORD> (mStepDelay)); // (mStepDelay msec)
-				#else
-					usleep(static_cast<useconds_t> (mStepDelay * 1000));
-				#endif
+				sleep(mStepDelay); // (mStepDelay msec)
 			}
 			mMeanFrequency.insert(mTime); // MeanFrequency
 		} catch(const char * exception) {
@@ -267,11 +272,7 @@ void Server::step() {
 		// Checking the arrival data in listen sockets
 		ret = mConnChooser.choose(tmout);
 		if (ret <= 0 && !mNumCloseConn) { 
-			#ifdef _WIN32
-				Sleep(1);
-			#else
-				usleep(1000u);
-			#endif
+			sleep(1);
 			return;
 		}
 	} catch (const char * exception) {

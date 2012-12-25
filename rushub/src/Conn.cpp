@@ -475,11 +475,7 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 	while (SOCK_INVALID(sock) && ((SOCK_ERR == SOCK_EAGAIN) || (SOCK_ERR == SOCK_EINTR)) && (++i <= 10)) {
 		// Try to accept connection not more than 10 once
 		sock = ::accept(mSocket, reinterpret_cast<struct sockaddr *> (&storage), static_cast<socklen_t*> (&namelen));
-		#ifdef _WIN32
-			Sleep(1);
-		#else
-			usleep(1000u);
-		#endif
+		Server::sleep(1);
 	}
 	if (SOCK_INVALID(sock)) {
 		return INVALID_SOCKET;

@@ -70,7 +70,7 @@ void WINAPI Service::ctrlHandler(DWORD dwCtrl) {
 			}
 
 			// Service stop
-			DcServer::currentDcServer->stop(0);
+			DcServer::currentDcServer->Server::stop(0);
 			i = 0;
 			while (isService && i++ < 10) { // Wait 10 times
 				Sleep(1000);

@@ -79,6 +79,8 @@ public:
 	Server();
 	virtual ~Server();
 
+	static void sleep(int msec);
+
 	/// Main cycle
 	int run();
 

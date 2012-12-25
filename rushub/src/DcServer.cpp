@@ -92,6 +92,7 @@ DcServer::DcServer(const string & configFile, const string &) :
 	mSystemLoad(SYSTEM_LOAD_OK),
 	mWebProtocol(NULL),
 	mIpEnterFlood(mDcConfig.mFloodCountReconnIp, mDcConfig.mFloodTimeReconnIp),
+	mStopSync(false),
 	mCalls(&mPluginList)
 {
 	setClassName("DcServer");
@@ -129,6 +130,10 @@ DcServer::DcServer(const string & configFile, const string &) :
 		regBot(mDcConfig.mHubBot, mDcConfig.mMainBotMyinfo,
 			mDcConfig.mMainBotIp, mDcConfig.mMainBotKey);
 	}
+
+	#ifdef USE_DCSERVER_THREADS
+		Thread::start(&DcServer::syncTimer, this);
+	#endif
 }
 
 
@@ -147,6 +152,11 @@ void DcServer::delAllUsers(UserBase * userBase) {
 }
 
 DcServer::~DcServer() {
+	mStopSync = true;
+	#ifdef USE_DCSERVER_THREADS
+		Thread::stop();
+	#endif
+
 	LOG(LEVEL_INFO, "Destruct DcServer");
 
 	mPluginList.unloadAll(); // Unload all plugins
@@ -381,52 +391,37 @@ int DcServer::listening() {
 
 
 
-void DcServer::syncTimer(void *) {
-	mHelloList.flushCache(); // NMDC
-	mDcUserList.flushCache();
-	mBotList.flushCache();
-	mEnterList.flushCache();
-	mOpList.flushCache();
-	mIpList.flushCache();
-	mChatList.flushCache();
-	mActiveList.flushCache();
+void DcServer::syncTimer(void * self) {
+	DcServer * dcServer = static_cast<DcServer *> (self);
 
-	int SysLoading = mSystemLoad;
+	dcServer->mStopSync = false;
 
-	if (0 < mMeanFrequency.mNumFill) {
-
-		double iFrequency = mMeanFrequency.getMean(mTime);
-
-		if (iFrequency < 0.4 * mDcConfig.mSysLoading) {
-			mSystemLoad = SYSTEM_LOAD_SYSTEM_DOWN; // 0.4 (>2000 ms)
-		} else if (iFrequency < 0.9 * mDcConfig.mSysLoading) {
-			mSystemLoad = SYSTEM_LOAD_CRITICAL;    // 0.9 (>1000 ms)
-		} else if (iFrequency < 3.6 * mDcConfig.mSysLoading) {
-			mSystemLoad = SYSTEM_LOAD_MIDDLE;      // 3.6 (>250  ms)
-		} else if (iFrequency < 18  * mDcConfig.mSysLoading) {
-			mSystemLoad = SYSTEM_LOAD_LOWER;       // 18  (>50   ms)
-		} else {
-			mSystemLoad = SYSTEM_LOAD_OK;
-		}
-
-	} else {
-		mSystemLoad = SYSTEM_LOAD_OK;
+	while (!dcServer->mStopSync) {
+		syncActions(dcServer);
+		sleep(10);
 	}
+}
 
-	if (mSystemLoad != SysLoading) {
-		LOG(LEVEL_WARN, "System loading: " 
-			<< mSystemLoad << " level (was " 
-			<< SysLoading << " level)");
-	}
 
-	mDcUserList.autoResize();
-	mHelloList.autoResize(); // NMDC
-	mBotList.autoResize();
-	mEnterList.autoResize();
-	mActiveList.autoResize();
-	mChatList.autoResize();
-	mOpList.autoResize();
-	mIpList.autoResize();
+
+void DcServer::syncActions(DcServer * dcServer) {
+	dcServer->mHelloList.flushCache(); // NMDC
+	dcServer->mDcUserList.flushCache();
+	dcServer->mBotList.flushCache();
+	dcServer->mEnterList.flushCache();
+	dcServer->mOpList.flushCache();
+	dcServer->mIpList.flushCache();
+	dcServer->mChatList.flushCache();
+	dcServer->mActiveList.flushCache();
+
+	dcServer->mDcUserList.autoResize();
+	dcServer->mHelloList.autoResize(); // NMDC
+	dcServer->mBotList.autoResize();
+	dcServer->mEnterList.autoResize();
+	dcServer->mActiveList.autoResize();
+	dcServer->mChatList.autoResize();
+	dcServer->mOpList.autoResize();
+	dcServer->mIpList.autoResize();
 }
 
 
@@ -437,8 +432,39 @@ int DcServer::onTimer(Time & now) {
 	if (static_cast<int64_t> (now - mChecker) >= mTimerServPeriod) {
 		mChecker = now;
 
-		syncTimer(NULL);
+		int sysLoading = mSystemLoad;
 
+		if (0 < mMeanFrequency.mNumFill) {
+
+			double iFrequency = mMeanFrequency.getMean(mTime);
+
+			if (iFrequency < 0.4 * mDcConfig.mSysLoading) {
+				mSystemLoad = SYSTEM_LOAD_SYSTEM_DOWN; // 0.4 (>2000 ms)
+			} else if (iFrequency < 0.9 * mDcConfig.mSysLoading) {
+				mSystemLoad = SYSTEM_LOAD_CRITICAL;    // 0.9 (>1000 ms)
+			} else if (iFrequency < 3.6 * mDcConfig.mSysLoading) {
+				mSystemLoad = SYSTEM_LOAD_MIDDLE;      // 3.6 (>250  ms)
+			} else if (iFrequency < 18  * mDcConfig.mSysLoading) {
+				mSystemLoad = SYSTEM_LOAD_LOWER;       // 18  (>50   ms)
+			} else {
+				mSystemLoad = SYSTEM_LOAD_OK;
+			}
+
+		} else {
+			mSystemLoad = SYSTEM_LOAD_OK;
+		}
+
+		if (mSystemLoad != sysLoading) {
+			LOG(LEVEL_WARN, "System loading: " 
+				<< mSystemLoad << " level (was " 
+				<< sysLoading << " level)");
+		}
+
+		#ifndef USE_DCSERVER_THREADS
+			syncActions(this);
+		#endif
+
+		// TODO to sync action
 		mIpEnterFlood.del(now); // Removing ip addresses, which already long ago entered
 	}
 

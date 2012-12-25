@@ -65,7 +65,7 @@ static void sigHandler(int sig) {
 		case SIGHUP :
 			LOG_CLASS(DcServer::currentDcServer, LEVEL_INFO, "Received a " << sig << " signal, quiting");
 			cout << "Received a " << sig << " signal, quiting" << endl;
-			DcServer::currentDcServer->stop(0);
+			DcServer::currentDcServer->Server::stop(0);
 			signal(sig, sigHandler);
 			break;
 
