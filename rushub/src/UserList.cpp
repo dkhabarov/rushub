@@ -349,7 +349,6 @@ UserList::Key UserList::uidToLowerHash(const string & uid) {
 
 
 UserBase * UserList::getUserBaseByUid(const string & uid) {
-	Mutex::Lock l(mMutex); // sync
 	return find(static_cast<unsigned long> (uidToLowerHash(uid))); // for x64 compatibility
 }
 
@@ -466,7 +465,6 @@ void UserList::flushForUser(UserBase * userBase) {
 
 /** Flush common cache */
 void UserList::flushCache() {
-	Mutex::Lock l(mMutex); // sync
 	if (mCacheNmdc.size()) {
 		string str;
 		sendToAll(str, false, true);
