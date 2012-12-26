@@ -843,95 +843,103 @@ size_t Conn::getSeparatorLen() const {
 /// Write data in sending buffer and send to conn
 size_t Conn::writeData(const char * data, size_t len, bool flush) {
 
-	Mutex::Lock l(mMutex);
-
 	if (!isWritable()) {
 		return 0;
 	}
 
-	size_t bufLen = mSendBuf.size();
-	if (bufLen + len >= mSendBufMax) {
-		LOG(LEVEL_WARN, "Sending buffer has big size, closing");
-		closeNow(CLOSE_REASON_MAXSIZE_SEND);
-		return 0;
-	}
-
-	if (!flush && (bufLen < (mSendBufMax >> 1))) {
-		mSendBuf.reserve(bufLen + len);
-		mSendBuf.append(data, len);
-		return 0;
-	}
-
-	const char * send_buf = NULL;
 	size_t size;
+	bool doFlush = false;
 
-	if (bufLen != 0) {
-		mSendBuf.reserve(bufLen + len);
-		mSendBuf.append(data, len);
-		size = mSendBuf.size();
-		send_buf = mSendBuf.c_str();
-	} else {
-		if (len == 0) { // buff is empty and no new data
-			return 0;
-		}
-		size = len;
-		send_buf = data;
-	}
+	{ // for lock
+		Mutex::Lock l(mMutex);
 
-	// Sending
-	if (send(send_buf, size) < 0) {
-
-		if (SOCK_ERR != SOCK_EAGAIN) {
-			LOG(LEVEL_DEBUG, "Error in sending: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << "(not EAGAIN), closing");
-			closeNow(CLOSE_REASON_ERROR_SEND);
+		size_t bufLen = mSendBuf.size();
+		if (bufLen + len >= mSendBufMax) {
+			LOG(LEVEL_WARN, "Sending buffer has big size, closing");
+			closeNow(CLOSE_REASON_MAXSIZE_SEND);
 			return 0;
 		}
 
-		LOG(LEVEL_DEBUG, "Block sent. Was sent " << size << " bytes");
-		if (bufLen == 0) {
-			size_t s = len - size;
-			mSendBuf.reserve(s);
-			mSendBuf.append(data + size, s); // Now sData.size() != size
-		} else {
-			string(mSendBuf, size, mSendBuf.size() - size).swap(mSendBuf); // Del from buf sent data
+		if (!flush && (bufLen < (mSendBufMax >> 1))) {
+			mSendBuf.reserve(bufLen + len);
+			mSendBuf.append(data, len);
+			return 0;
 		}
 
-		if (bool(mCloseTime)) {
-			closeNow();
-			return size;
-		}
+		const char * send_buf = NULL;
 
-		if (mServer && mOk) {
-			if (mBlockOutput) {
-				mBlockOutput = false;
-				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::EF_OUTPUT);
-				LOG(LEVEL_DEBUG, "Unblock output channel");
-			}
-
-			bufLen = mSendBuf.size();
-			if (mBlockInput && bufLen < MAX_SEND_UNBLOCK_SIZE) { // Unset block of input
-				mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::EF_INPUT);
-				LOG(LEVEL_DEBUG, "Unblock input channel");
-			} else if (!mBlockInput && bufLen >= MAX_SEND_BLOCK_SIZE) { // Set block of input
-				mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::EF_INPUT);
-				LOG(LEVEL_DEBUG, "Block input channel");
-			}
-		}
-	} else {
 		if (bufLen != 0) {
-			string().swap(mSendBuf); // erase & free memory
+			mSendBuf.reserve(bufLen + len);
+			mSendBuf.append(data, len);
+			size = mSendBuf.size();
+			send_buf = mSendBuf.c_str();
+		} else {
+			if (len == 0) { // buff is empty and no new data
+				return 0;
+			}
+			size = len;
+			send_buf = data;
 		}
 
-		if (bool(mCloseTime)) {
-			closeNow();
-			return size;
-		}
+		// Sending
+		if (send(send_buf, size) < 0) {
 
-		if (mServer && mOk && !mBlockOutput) {
-			mBlockOutput = true;
-			mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::EF_OUTPUT);
-			LOG(LEVEL_DEBUG, "Block output channel");
+			if (SOCK_ERR != SOCK_EAGAIN) {
+				LOG(LEVEL_DEBUG, "Error in sending: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]" << "(not EAGAIN), closing");
+				closeNow(CLOSE_REASON_ERROR_SEND);
+				return 0;
+			}
+
+			LOG(LEVEL_DEBUG, "Block sent. Was sent " << size << " bytes");
+			if (bufLen == 0) {
+				size_t s = len - size;
+				mSendBuf.reserve(s);
+				mSendBuf.append(data + size, s); // Now sData.size() != size
+			} else {
+				string(mSendBuf, size, mSendBuf.size() - size).swap(mSendBuf); // Del from buf sent data
+			}
+
+			if (bool(mCloseTime)) {
+				closeNow();
+				return size;
+			}
+
+			if (mServer && mOk) {
+				if (mBlockOutput) {
+					mBlockOutput = false;
+					mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::EF_OUTPUT);
+					LOG(LEVEL_DEBUG, "Unblock output channel");
+				}
+
+				bufLen = mSendBuf.size();
+				if (mBlockInput && bufLen < MAX_SEND_UNBLOCK_SIZE) { // Unset block of input
+					mServer->mConnChooser.ConnChoose::optIn(this, ConnChoose::EF_INPUT);
+					LOG(LEVEL_DEBUG, "Unblock input channel");
+				} else if (!mBlockInput && bufLen >= MAX_SEND_BLOCK_SIZE) { // Set block of input
+					mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::EF_INPUT);
+					LOG(LEVEL_DEBUG, "Block input channel");
+				}
+			}
+		} else {
+			if (bufLen != 0) {
+				string().swap(mSendBuf); // erase & free memory
+			}
+
+			if (bool(mCloseTime)) {
+				closeNow();
+				return size;
+			}
+
+			if (mServer && mOk && !mBlockOutput) {
+				mBlockOutput = true;
+				mServer->mConnChooser.ConnChoose::optOut(this, ConnChoose::EF_OUTPUT);
+				LOG(LEVEL_DEBUG, "Block output channel");
+			}
+			doFlush = true;
 		}
+	}
+	
+	if (doFlush) {
 		onFlush();
 	}
 	return size;

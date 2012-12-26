@@ -167,7 +167,7 @@ DcServer::~DcServer() {
 	}
 
 	if (mDcUserList.size() > 0) {
-		mDcUserList.doForEach(bind1st(mem_fun(&DcServer::delAllUsers), this)); // Delete all users
+		mDcUserList.doForEach(bind1st(mem_fun(&DcServer::delAllUsers), this), true); // Delete all users
 	}
 	deleteAll(); // Delete all other conn
 

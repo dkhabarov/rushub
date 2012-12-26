@@ -143,12 +143,20 @@ public:
 
 	/** Exec func for each */
 	template<class F>
-	void doForEach(F f) {
-		Mutex::Lock l(mMutex); // sync
-		iterator it = begin();
-		iterator it_e = end();
-		while (it != it_e) {
-			f(*it++);
+	void doForEach(F f, bool notLock = false) {
+		if (notLock) {
+			iterator it = begin();
+			iterator it_e = end();
+			while (it != it_e) {
+				f(*it++);
+			}
+		} else {
+			Mutex::Lock l(mMutex); // sync
+			iterator it = begin();
+			iterator it_e = end();
+			while (it != it_e) {
+				f(*it++);
+			}
 		}
 	}
 
