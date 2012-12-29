@@ -22,8 +22,8 @@
 #include "Server.h" // for version and hub name
 #include "stringutils.h"
 
-#ifndef _WIN32
-	#include "config.h"
+#ifdef HAVE_CONFIG_H
+	#include <config.h>
 #endif
 
 #if HAVE_LIBTINYXML

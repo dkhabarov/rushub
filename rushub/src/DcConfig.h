@@ -29,8 +29,8 @@
 #include "ConfigLoader.h"
 #include "NmdcParser.h" // for NMDC_TYPE_UNKNOWN (PROTOCOL NMDC)
 
-#ifndef _WIN32
-	#include "config.h"
+#ifdef HAVE_CONFIG_H
+	#include <config.h>
 #endif
 
 using ::std::string;
