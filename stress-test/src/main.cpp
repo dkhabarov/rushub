@@ -31,6 +31,11 @@ using namespace ::std;
 using namespace ::server;
 
 
+#define NICK_PREFIX "test"
+#define MAX_CMD_LEN 102400
+#define MAX_BATCH 100
+
+
 #ifdef _WIN32
 	#define SIGQUIT 1000
 	#define SIGHUP 1001
@@ -108,7 +113,7 @@ public:
 		return 1;
 	}
 	virtual unsigned int getMaxCommandLength() const {
-		return 102400;
+		return MAX_CMD_LEN;
 	}
 	virtual Conn * getConnForUdpData(Conn *, Parser *) {
 		return NULL;
@@ -117,7 +122,7 @@ public:
 		return 0;
 	}
 
-}; // class Protocol
+}; // class NmdcProtocol
 
 
 
@@ -191,7 +196,7 @@ private:
 					Conn * conn = connecting(mConnFactory, mIp, mPort);
 					if (conn != NULL) {
 						ostringstream nick;
-						nick << "test" << mConnCount;
+						nick << NICK_PREFIX << mConnCount;
 						conn->getParserCommandPtr();
 						static_cast<NmdcParser*> (conn->mParser)->mNick = nick.str();
 					} else {
@@ -263,8 +268,8 @@ int main(int argc, char ** argv) {
 	if (batch > maxConn) {
 		batch = maxConn;
 	}
-	if (batch > 100) { // max 100
-		batch = 100;
+	if (batch > MAX_BATCH) {
+		batch = MAX_BATCH;
 	}
 
 	NmdcClient client(ip, port, maxConn, batch, logPath, logLevel);
