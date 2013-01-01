@@ -86,6 +86,24 @@ public:
 	virtual const string & toString();
 
 	template <class T>
+	int set(T const & value, int type, int mode, Action action = NULL) {
+		int n_err = set(value, type);
+		mAction = action;
+		mMode = mode;
+		return n_err;
+	}
+
+	template <class T>
+	int set(T * value, int type, int mode, Action action = NULL) {
+		int n_err = set(value, type);
+		mAction = action;
+		mMode = mode;
+		return n_err;
+	}
+
+private:
+
+	template <class T>
 	int set(T const & value, int type) {
 		int n_err = check(value, type);
 		if (n_err == 0) {
@@ -104,24 +122,6 @@ public:
 		}
 		return n_err;
 	}
-
-	template <class T>
-	int set(T const & value, int type, int mode, Action action = NULL) {
-		int n_err = set(value, type);
-		mAction = action;
-		mMode = mode;
-		return n_err;
-	}
-
-	template <class T>
-	int set(T * value, int type, int mode, Action action = NULL) {
-		int n_err = set(value, type);
-		mAction = action;
-		mMode = mode;
-		return n_err;
-	}
-
-private:
 
 	template <class T>
 	int check(const T & now, int type) {
