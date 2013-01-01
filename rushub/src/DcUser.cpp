@@ -37,15 +37,15 @@ DcUser::DcUser(int type, DcConn * dcConn) :
 {
 	if (dcConn != NULL) {
 		mDcServer = dcConn->server();
-		getParamForce(USER_PARAM_IP_CONN,     false)->set(&mDcConn->mIpConn,     Param::TYPE_STRING, Param::MODE_NOT_MODIFY);
-		getParamForce(USER_PARAM_MAC_ADDRESS, false)->set(&mDcConn->mMacAddress, Param::TYPE_STRING, Param::MODE_NOT_MODIFY);
-		getParamForce(USER_PARAM_PORT,        false)->set(&mDcConn->mPort,       Param::TYPE_INT,    Param::MODE_NOT_MODIFY);
-		getParamForce(USER_PARAM_PORT_CONN,   false)->set(&mDcConn->mPortConn,   Param::TYPE_INT,    Param::MODE_NOT_MODIFY);
-		getParamForce(USER_PARAM_ENTER_TIME,  false)->set(mTimeEnter.sec(),      Param::TYPE_LONG,   Param::MODE_NOT_MODIFY);
+		mParamList.add(USER_PARAM_IP_CONN,     new Param(this, USER_PARAM_IP_CONN,     &mDcConn->mIpConn,     Param::TYPE_STRING, Param::MODE_NOT_MODIFY));
+		mParamList.add(USER_PARAM_MAC_ADDRESS, new Param(this, USER_PARAM_MAC_ADDRESS, &mDcConn->mMacAddress, Param::TYPE_STRING, Param::MODE_NOT_MODIFY));
+		mParamList.add(USER_PARAM_PORT,        new Param(this, USER_PARAM_PORT,        &mDcConn->mPort,       Param::TYPE_INT,    Param::MODE_NOT_MODIFY));
+		mParamList.add(USER_PARAM_PORT_CONN,   new Param(this, USER_PARAM_PORT_CONN,   &mDcConn->mPortConn,   Param::TYPE_INT,    Param::MODE_NOT_MODIFY));
+		mParamList.add(USER_PARAM_ENTER_TIME,  new Param(this, USER_PARAM_ENTER_TIME,  mTimeEnter.sec(),      Param::TYPE_LONG,   Param::MODE_NOT_MODIFY));
 	}
-	getParamForce(USER_PARAM_IP, false)->set(mDcConn != NULL ? &mIp : &mDcConn->mIp, Param::TYPE_STRING, Param::MODE_NOT_MODIFY);
-	getParamForce(USER_PARAM_IN_USER_LIST, false)->set(&mInUserList, Param::TYPE_BOOL, Param::MODE_NOT_MODIFY);
-	getParamForce(USER_PARAM_PROFILE,      false)->set(-1,           Param::TYPE_INT,  Param::MODE_NOT_CHANGE_TYPE | Param::MODE_NOT_REMOVE);
+	mParamList.add(USER_PARAM_IP,           new Param(this, USER_PARAM_IP, mDcConn != NULL ? &mIp : &mDcConn->mIp, Param::TYPE_STRING, Param::MODE_NOT_MODIFY));
+	mParamList.add(USER_PARAM_IN_USER_LIST, new Param(this, USER_PARAM_IN_USER_LIST, &mInUserList,                 Param::TYPE_BOOL,   Param::MODE_NOT_MODIFY));
+	mParamList.add(USER_PARAM_PROFILE,      new Param(this, USER_PARAM_PROFILE,      -1,                           Param::TYPE_INT,    Param::MODE_NOT_CHANGE_TYPE | Param::MODE_NOT_REMOVE));
 }
 
 
@@ -151,56 +151,58 @@ ParamBase * DcUser::getParamForce(const char * name) {
 Param * DcUser::getParamForce(const char * name, bool setRules) {
 	Param * param = mParamList.find(name);
 	if (param == NULL) {
-		param = new Param(this, name);
-		mParamList.add(name, param);
 		if (setRules) {
 			if (strcmp(name, USER_PARAM_CAN_KICK) == 0) {
-				param->set(false, Param::TYPE_BOOL, Param::MODE_NOT_CHANGE_TYPE);
+				param = new Param(this, name, false, Param::TYPE_BOOL, Param::MODE_NOT_CHANGE_TYPE);
 			} else if (strcmp(name, USER_PARAM_CAN_REDIRECT) == 0) {
-				param->set(false, Param::TYPE_BOOL, Param::MODE_NOT_CHANGE_TYPE);
+				param = new Param(this, name, false, Param::TYPE_BOOL, Param::MODE_NOT_CHANGE_TYPE);
 			} else if (strcmp(name, USER_PARAM_CAN_HIDE) == 0) {
-				param->set(false, Param::TYPE_BOOL, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetHide);
+				param = new Param(this, name, false, Param::TYPE_BOOL, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetHide);
 			} else if (strcmp(name, USER_PARAM_IN_IP_LIST) == 0) {
-				param->set(false, Param::TYPE_BOOL, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInIpList);
+				param = new Param(this, name, false, Param::TYPE_BOOL, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInIpList);
 			} else if (strcmp(name, USER_PARAM_IN_OP_LIST) == 0) {
-				param->set(false, Param::TYPE_BOOL, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInOpList);
+				param = new Param(this, name, false, Param::TYPE_BOOL, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInOpList);
 			} else if (strcmp(name, USER_PARAM_SHARE) == 0) {
 				int64_t n = 0;
-				param->set(n, Param::TYPE_INT64, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetShare);
+				param = new Param(this, name, n, Param::TYPE_INT64, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetShare);
 			} else if (strcmp(name, USER_PARAM_EMAIL) == 0) {
-				param->set(emptyStr, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param = new Param(this, name, emptyStr, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_DESC) == 0) {
-				param->set(emptyStr, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param = new Param(this, name, emptyStr, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_BYTE) == 0) {
-				param->set(emptyStr, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param = new Param(this, name, emptyStr, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_CONNECTION) == 0) {
-				param->set(emptyStr, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param = new Param(this, name, emptyStr, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_CLIENT_NAME) == 0) {
-				param->set(emptyStr, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param = new Param(this, name, emptyStr, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_CLIENT_VERSION) == 0) {
-				param->set(emptyStr, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param = new Param(this, name, emptyStr, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_MODE) == 0) {
-				param->set(emptyStr, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param = new Param(this, name, emptyStr, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_UNREG_HUBS) == 0) {
-				param->set(int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param = new Param(this, name, int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_REG_HUBS) == 0) {
-				param->set(int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param = new Param(this, name, int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_OP_HUBS) == 0) {
-				param->set(int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param = new Param(this, name, int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_SLOTS) == 0) {
-				param->set(int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param = new Param(this, name, int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_LIMIT) == 0) {
-				param->set(int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param = new Param(this, name, int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_OPEN) == 0) {
-				param->set(int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param = new Param(this, name, int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_BANDWIDTH) == 0) {
-				param->set(int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param = new Param(this, name, int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_DOWNLOAD) == 0) {
-				param->set(int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param = new Param(this, name, int(0), Param::TYPE_INT, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			} else if (strcmp(name, USER_PARAM_FRACTION) == 0) {
-				param->set(emptyStr, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
+				param = new Param(this, name, emptyStr, Param::TYPE_STRING, Param::MODE_NOT_CHANGE_TYPE, &DcUser::onSetInfo);
 			}
 		}
+		if (param == NULL) {
+			param = new Param(this, name);
+		}
+		mParamList.add(name, param);
 	}
 	return param;
 }

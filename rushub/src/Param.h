@@ -53,6 +53,33 @@ public:
 public:
 
 	Param(DcUser * dcUser, const char * name);
+
+	template <class T>
+	Param(DcUser * dcUser, const char * name, T const & value, int type, int mode, Action action = NULL) :
+		mName(name),
+		mType(TYPE_NONE),
+		mMode(MODE_NONE),
+		mDcUser(dcUser),
+		mAction(NULL)
+	{
+		set(value, type);
+		mAction = action;
+		mMode = mode;
+	}
+
+	template <class T>
+	Param(DcUser * dcUser, const char * name, T * value, int type, int mode, Action action = NULL) :
+		mName(name),
+		mType(TYPE_NONE),
+		mMode(MODE_NONE),
+		mDcUser(dcUser),
+		mAction(NULL)
+	{
+		set(value, type);
+		mAction = action;
+		mMode = mode;
+	}
+
 	virtual ~Param();
 
 	virtual const string & getName() const;
@@ -84,22 +111,6 @@ public:
 	int setInt64(int64_t * value);
 
 	virtual const string & toString();
-
-	template <class T>
-	int set(T const & value, int type, int mode, Action action = NULL) {
-		int n_err = set(value, type);
-		mAction = action;
-		mMode = mode;
-		return n_err;
-	}
-
-	template <class T>
-	int set(T * value, int type, int mode, Action action = NULL) {
-		int n_err = set(value, type);
-		mAction = action;
-		mMode = mode;
-		return n_err;
-	}
 
 private:
 
