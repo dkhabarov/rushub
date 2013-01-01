@@ -229,6 +229,14 @@ bool DcUser::removeParam(const char * name) {
 
 
 const string & DcUser::getUid() const {
+	// TODO: for ADC - Sid, for NMDC - sNick
+	return mUid;
+}
+
+
+
+const string & DcUser::getNick() const {
+	// TODO: for ADC - NI, for NMDC - sNick
 	return mUid;
 }
 
@@ -239,6 +247,16 @@ void DcUser::setUid(const string & uid) {
 
 	// Calc uid hash
 	mUidHash = static_cast<unsigned long> (UserList::uidToLowerHash(uid));
+}
+
+
+
+void setNick(const string & nick) {
+	// TODO
+	mUid = nick;
+
+	// Calc uid hash
+	mUidHash = static_cast<unsigned long> (UserList::uidToLowerHash(nick));
 }
 
 

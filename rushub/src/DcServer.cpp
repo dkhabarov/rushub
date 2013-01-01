@@ -1349,7 +1349,7 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 	if (mDcConfig.mAdcOn) { // ADC
 		dcUser->setUid(string(mAdcProtocol.genNewSid()));
 	} else { // NMDC
-		dcUser->setUid(uid);
+		dcUser->setNick(uid);
 	}
 
 	dcUser->getParamForce(USER_PARAM_PROFILE)->setInt(30);

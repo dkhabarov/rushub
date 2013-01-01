@@ -70,7 +70,9 @@ public:
 	virtual void disconnect();
 
 	virtual const string & getUid() const; // User ID
+	virtual const string & getNick() const;
 	void setUid(const string & uid);
+	void setNick(const string & nick);
 	unsigned long getUidHash() const;
 
 	virtual const string & getNmdcTag();

@@ -35,6 +35,7 @@ public:
 	}
 
 	virtual const string & getUid() const = 0;
+	virtual const string & getNick() const = 0;
 	virtual const string & getInfo() = 0;
 	virtual const string & getIp() const = 0;
 	virtual int getProfile() const = 0;

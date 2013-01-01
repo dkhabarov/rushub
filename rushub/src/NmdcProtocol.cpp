@@ -283,7 +283,7 @@ int NmdcProtocol::eventValidateNick(NmdcParser * dcparser, DcConn * dcConn) {
 	LOG_CLASS(dcConn, LEVEL_DEBUG, "User " << nick << " to validate nick");
 
 	// Set nick
-	dcConn->mDcUser->setUid(nick);
+	dcConn->mDcUser->setNick(nick);
 	
 
 	// Checking validate user
@@ -408,7 +408,7 @@ int NmdcProtocol::eventMyInfo(NmdcParser * dcparser, DcConn * dcConn) {
 	// Check existence user, otherwise check support QuickList
 	if (nick.empty()) {
 		//if (QuickList)
-		//	dcConn->mDcUser->setUid(nick);
+		//	dcConn->mDcUser->setNick(nick);
 		//} else
 		{
 			LOG_CLASS(dcConn, LEVEL_DEBUG, "Myinfo without user: " << dcparser->mCommand);
