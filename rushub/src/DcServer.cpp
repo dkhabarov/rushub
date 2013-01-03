@@ -617,6 +617,10 @@ bool DcServer::checkNick(DcConn *dcConn) {
 
 	// TODO check nick for ADC (here we have uid!?)
 	// Protocol dependence
+	// TODO: Problem with check nick in ADC
+	// 1. Check syntax
+	// 2. Check used
+	// 3. Check reg nick
 	if (!mDcConfig.mAdcOn) { // NMDC
 
 		if (mDcUserList.contain(uidHash)) {
