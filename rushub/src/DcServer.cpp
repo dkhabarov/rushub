@@ -417,14 +417,14 @@ void DcServer::syncActions(DcServer * dcServer) {
 	dcServer->mChatList.flushCache();
 	dcServer->mActiveList.flushCache();
 
-	dcServer->mDcUserList.autoResize();
 	dcServer->mHelloList.autoResize(); // NMDC
+	dcServer->mDcUserList.autoResize();
 	dcServer->mBotList.autoResize();
 	dcServer->mEnterList.autoResize();
-	dcServer->mActiveList.autoResize();
-	dcServer->mChatList.autoResize();
 	dcServer->mOpList.autoResize();
 	dcServer->mIpList.autoResize();
+	dcServer->mChatList.autoResize();
+	dcServer->mActiveList.autoResize();
 }
 
 
@@ -501,6 +501,7 @@ int DcServer::onNewConn(Conn * conn) {
 			} else {
 				// TODO ADC (FLOOD_IP_ENTRY)
 				// TODO mDcConfig.mHubBot for ADC uid ?
+				sendToUser(dcConn->mDcUser, mDcLang.mFloodReEnter);
 			}
 			dcConn->closeNice(9000, CLOSE_REASON_FLOOD_IP_ENTRY);
 		} else {

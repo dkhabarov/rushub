@@ -619,20 +619,26 @@ const char * AdcProtocol::genNewSid() {
 
 // IMSG <msg>
 void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, bool flush /*= true*/) {
-	dcConn->reserve(6 + data.size()); // 5 + data.size() + 1
+	string tmp;
+	const string & out = toUtf8(data, tmp);
+	dcConn->reserve(6 + out.size()); // 5 + out.size() + 1
 	dcConn->send(STR_LEN("IMSG "), false, false);
-	dcConn->send(data, true, flush);
+	dcConn->send(out, true, flush);
 }
+
+
 
 
 
 // DMSG <my_sid> <msg>
 void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string & uid, bool flush /*= true*/) {
-	dcConn->reserve(11 + data.size()); // 5 + 4 + 1 + data.size() + 1
+	string tmp;
+	const string & out = toUtf8(data, tmp);
+	dcConn->reserve(11 + out.size()); // 5 + 4 + 1 + out.size() + 1
 	dcConn->send(STR_LEN("DMSG "), false, false);
 	dcConn->send(uid, false, false);
 	dcConn->send(STR_LEN(" "), false, false);
-	dcConn->send(data, true, flush);
+	dcConn->send(out, true, flush);
 }
 
 
@@ -646,24 +652,28 @@ void AdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, bool flush
 
 // BMSG <my_sid> <msg>
 void AdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, const string & uid, bool flush /*= true*/) {
-	dcConn->reserve(11 + data.size()); // 5 + 4 + 1 + data.size() + 1
+	string tmp;
+	const string & out = toUtf8(data, tmp);
+	dcConn->reserve(11 + out.size()); // 5 + 4 + 1 + out.size() + 1
 	dcConn->send(STR_LEN("BMSG "), false, false);
 	dcConn->send(uid, false, false);
 	dcConn->send(STR_LEN(" "), false, false);
-	dcConn->send(data, true, flush);
+	dcConn->send(out, true, flush);
 }
 
 
 
 // EMSG <my_sid> <target_sid> <msg> PM<group_sid>
 void AdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string & uid, const string & from, bool flush /*= true*/) {
-	dcConn->reserve(23 + data.size()); // 5 + 4 + 1 + 4 + 1 + data.size() + 3 + 4 + 1
+	string tmp;
+	const string & out = toUtf8(data, tmp);
+	dcConn->reserve(23 + out.size()); // 5 + 4 + 1 + 4 + 1 + out.size() + 3 + 4 + 1
 	dcConn->send(STR_LEN("EMSG "), false, false);
 	dcConn->send(uid, false, false);
 	dcConn->send(STR_LEN(" "), false, false);
 	dcConn->send(dcConn->mDcUser->getUid(), false, false);
 	dcConn->send(STR_LEN(" "), false, false);
-	dcConn->send(data, false, false);
+	dcConn->send(out, false, false);
 	dcConn->send(STR_LEN(" PM"), false, false);
 	dcConn->send(from, true, flush);
 }
@@ -707,11 +717,13 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 	if (adcParser->mType == ADC_TYPE_INVALID) {
 		LOG_CLASS(dcConn, LEVEL_DEBUG, "Wrong syntax cmd");
 		string msg(STR_LEN("ISTA ")), buff;
-		msg.reserve(10 + adcParser->getErrorText().size());
+		string tmp;
+		const string & out = toUtf8(adcParser->getErrorText(), tmp);
+		msg.reserve(10 + out.size());
 		msg.append(toString(SEVERITY_LEVEL_FATAL, buff)); // Disconnect
 		msg.append(toString(adcParser->getErrorCode(), buff)); // Error code
 		msg.append(STR_LEN(" "));
-		msg.append(cp1251ToUtf8(adcParser->getErrorText(), buff, escaper)); // Error text
+		msg.append(out); // Error text
 		dcConn->send(msg, true);
 		dcConn->closeNice(9000, CLOSE_REASON_CMD_SYNTAX);
 		return -1;
@@ -755,6 +767,16 @@ bool AdcProtocol::verifyCid(DcUser * dcUser) {
 	dcUser->removeParam("PD");
 
 	return paramId->getString() == cid;
+}
+
+
+
+const string & AdcProtocol::toUtf8(const string & data, string & msg) {
+	if (isUtf8(data.c_str(), data.size())) {
+		return data;
+	}
+	cp1251ToUtf8(data, msg, escaper);
+	return msg;
 }
 
 

@@ -127,6 +127,38 @@ string & cp1251ToUtf8(const string & in, string & out, void (*escape)(char, stri
 }
 
 
+/**	Check if the given string is a valid utf-8 sequence */
+bool isUtf8(const char * str, size_t len) {
+	if (len > 0) {
+		int expect = 0;
+		for (size_t pos = 0; pos < len; ++pos) {
+			if (expect) {
+				if ((str[pos] & 0xC0) == 0x80) {
+					--expect;
+				} else {
+					return false;
+				}
+			} else {
+				if (str[pos] & 0x80) {
+					char div = 0;
+					for (div = 0x40; div > 0x10; div /= 2) {
+						if (str[pos] & div) {
+							++expect;
+						} else {
+							break;
+						}
+					}
+					if ((str[pos] & div) || (pos + expect >= len)) {
+						return false;
+					}
+				}
+			}
+		}
+	}
+	return true;
+}
+
+
 
 bool isBase32(char c) {
 	return (c >= 0x41 && c <= 0x5a) || (c >= 0x32 && c <= 0x37);

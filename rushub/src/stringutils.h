@@ -60,6 +60,9 @@ string & trim(string &);
 
 string & cp1251ToUtf8(const string & in, string & out, void (*escape)(char, string &) = NULL);
 
+bool isUtf8(const char * str, size_t len);
+const string & toUtf8(const string & data, string & msg);
+
 bool isBase32(char);
 bool isUpperAlpha(char);
 bool isUpperAlphaNum(char);

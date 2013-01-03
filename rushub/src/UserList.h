@@ -165,7 +165,7 @@ public:
 	UserBase * getUserBaseByUid(const string & uid);
 
 	void addUserListItem(UserListItem::Func func, const char * start = "");
-	const string & getList(unsigned int number);
+	const string & getList(unsigned int number = 0);
 
 	/** Remake */
 	void remake();

@@ -61,6 +61,7 @@ public:
 
 	static void infList(string & list, UserBase *);
 	static const char * getSid(unsigned int num);
+	static const string & toUtf8(const string & data, string & msg);
 
 	/// Chat Direct
 	virtual void sendToChat(DcConn *, const string & data, bool flush = true);
