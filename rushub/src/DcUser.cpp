@@ -251,7 +251,7 @@ void DcUser::setUid(const string & uid) {
 
 
 
-void setNick(const string & nick) {
+void DcUser::setNick(const string & nick) {
 	// TODO
 	mUid = nick;
 
