@@ -646,7 +646,7 @@ void NmdcParser::formingInfo(DcUser * dcUser, string & info) {
 	ParamBase * param = NULL;
 	info.reserve(0x7F); // usual length of command
 	info.assign(STR_LEN("$MyINFO $ALL "));
-	info.append(dcUser->getUid());
+	info.append(dcUser->getNick());
 	info += ' ';
 	param = dcUser->getParam(USER_PARAM_DESC);
 	if (param != NULL) {

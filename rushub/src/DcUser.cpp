@@ -228,6 +228,7 @@ bool DcUser::removeParam(const char * name) {
 
 
 
+// For ADC protocol (NMDC for compatibility)
 const string & DcUser::getUid() const {
 	// TODO: for ADC - Sid, for NMDC - sNick
 	return mUid;

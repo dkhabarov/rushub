@@ -609,7 +609,7 @@ bool DcServer::antiFlood(unsigned & count, Time & time, const unsigned & countLi
 bool DcServer::checkNick(DcConn *dcConn) {
 
 	// check empty nick!
-	if (dcConn->mDcUser->getUid().empty()) {
+	if (dcConn->mDcUser->getNick().empty()) {
 		return false;
 	}
 
@@ -627,13 +627,13 @@ bool DcServer::checkNick(DcConn *dcConn) {
 			// All other profiles is a reg users and they are not checked
 			if (!us->mDcConn || dcConn->mDcUser->getParamForce(USER_PARAM_PROFILE)->getInt() == -1) {
 				LOG(LEVEL_DEBUG, "Bad nick (used): '" 
-					<< dcConn->mDcUser->getUid() << "'["
-					<< dcConn->getIp() << "] vs '" << us->getUid() 
+					<< dcConn->mDcUser->getNick() << "'["
+					<< dcConn->getIp() << "] vs '" << us->getNick() 
 					<< "'[" << us->getIp() << "]");
 				string msg;
-				stringReplace(mDcLang.mUsedNick, string(STR_LEN("nick")), msg, dcConn->mDcUser->getUid());
+				stringReplace(mDcLang.mUsedNick, string(STR_LEN("nick")), msg, dcConn->mDcUser->getNick());
 				sendToUser(dcConn->mDcUser, msg, mDcConfig.mHubBot.c_str());
-				dcConn->send(mNmdcProtocol.appendValidateDenied(msg.erase(), dcConn->mDcUser->getUid())); // FIXME
+				dcConn->send(mNmdcProtocol.appendValidateDenied(msg.erase(), dcConn->mDcUser->getNick())); // FIXME
 				return false;
 			}
 			LOG(LEVEL_DEBUG, "removed old user");
@@ -829,7 +829,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 			if (mDcConfig.mAdcOn) { // ADC
 				msg.append(STR_LEN("IQUI ")).append(dcUser->getUid()).append(STR_LEN(ADC_SEPARATOR));
 			} else { // NMDC
-				mNmdcProtocol.appendQuit(msg, dcUser->getUid()); // FIXME (for bot?)
+				mNmdcProtocol.appendQuit(msg, dcUser->getNick()); // FIXME (for bot?)
 			}
 			sendToAllRaw(msg, false, false/*mDcConfig.mDelayedMyinfo*/); // Delay in sending MyINFO (and Quit)
 		}
@@ -872,20 +872,20 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 			if (dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
 				dcUser->mDcConn->send(dcUser->getInfo(), true, false);
 			} else if (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
-				dcUser->mDcConn->send(mNmdcProtocol.appendHello(hello, dcUser->getUid()), false, false); // NMDC only
+				dcUser->mDcConn->send(mNmdcProtocol.appendHello(hello, dcUser->getNick()), false, false); // NMDC only
 				dcUser->mDcConn->send(dcUser->getInfo(), true, false);
 			} else {
-				dcUser->mDcConn->send(mNmdcProtocol.appendHello(hello, dcUser->getUid()), false, false); // NMDC only
+				dcUser->mDcConn->send(mNmdcProtocol.appendHello(hello, dcUser->getNick()), false, false); // NMDC only
 			}
 
 			if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
 				string opList;
-				dcUser->mDcConn->send(mNmdcProtocol.appendOpList(opList, dcUser->getUid()), false, false); // FIXME
+				dcUser->mDcConn->send(mNmdcProtocol.appendOpList(opList, dcUser->getNick()), false, false); // FIXME
 			}
 		} else {
 
 			// Sending the greeting for all users, not supporting feature NoHello (except enterring users)
-			mHelloList.sendToAll(mNmdcProtocol.appendHello(hello, dcUser->getUid()), false, false/*mDcConfig.mDelayedMyinfo*/); // NMDC only
+			mHelloList.sendToAll(mNmdcProtocol.appendHello(hello, dcUser->getNick()), false, false/*mDcConfig.mDelayedMyinfo*/); // NMDC only
 
 			// Show MyINFO string to all users
 			sendToAllRaw(dcUser->getInfo(), true, false/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
@@ -896,7 +896,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 			// Op entry
 			if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
 				string opList;
-				mDcUserList.sendToAll(mNmdcProtocol.appendOpList(opList, dcUser->getUid()), false, false/*mDcConfig.mDelayedMyinfo*/); // FIXME
+				mDcUserList.sendToAll(mNmdcProtocol.appendOpList(opList, dcUser->getNick()), false, false/*mDcConfig.mDelayedMyinfo*/); // FIXME
 				mEnterList.sendToAll(opList, false, false/*mDcConfig.mDelayedMyinfo*/);
 			}
 		}
@@ -911,7 +911,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 
 		if (mDcConfig.mSendUserIp) {
 			string ipList;
-			mNmdcProtocol.appendUserIp(ipList, dcUser->getUid(), dcUser->getIp()); // FIXME
+			mNmdcProtocol.appendUserIp(ipList, dcUser->getNick(), dcUser->getIp()); // FIXME
 			if (ipList.size()) {
 				mIpList.sendToAll(ipList, false, false);
 			}
