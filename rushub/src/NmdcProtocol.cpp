@@ -1137,18 +1137,30 @@ bool NmdcProtocol::checkNick(DcConn * dcConn) {
 
 	// TODO: call protocol check nick
 
-	// TODO: check nick used
+	// Protocol dependence
+	// TODO: check ADC nick used
 
-	unsigned long uidHash = dcConn->mDcUser->getUidHash();
+	unsigned long nickHash = dcConn->mDcUser->getUidHash();
 
 	// TODO:
 	// 1. Check syntax
 	// 2. Check used
 	// 3. Check reg nick
 
-	if (mDcServer->mDcUserList.contain(uidHash)) {
+	if (mDcServer->mBotList.contain(nickHash)) {
+		LOG(LEVEL_DEBUG, "Bad nick (used): '" 
+			<< dcConn->mDcUser->getNick() << "'["
+			<< dcConn->getIp() << "] bot nick!");
+		string msg;
+		stringReplace(mDcServer->mDcLang.mUsedNick, string(STR_LEN("nick")), msg, dcConn->mDcUser->getNick());
+		mDcServer->sendToUser(dcConn->mDcUser, msg, mDcServer->mDcConfig.mHubBot.c_str());
+		dcConn->send(appendValidateDenied(msg.erase(), dcConn->mDcUser->getNick()));
+		return false;
+	}
+
+	if (mDcServer->mDcUserList.contain(nickHash)) {
 		// User on a hub
-		DcUser * us = static_cast<DcUser *> (mDcServer->mDcUserList.find(uidHash));
+		DcUser * us = static_cast<DcUser *> (mDcServer->mDcUserList.find(nickHash));
 
 		// Checking nick only for profile -1 (unreg) and bots
 		// All other profiles is a reg users and they are not checked
