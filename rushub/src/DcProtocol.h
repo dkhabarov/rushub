@@ -93,6 +93,8 @@ public:
 	virtual void addToHide(DcUser *);
 	virtual void delFromHide(DcUser *);
 
+	virtual bool removeFromDcUserList(DcUser *) = 0;
+
 protected:
 
 	DcServer * mDcServer;

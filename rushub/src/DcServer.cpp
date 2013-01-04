@@ -149,8 +149,13 @@ void DcServer::delAllUsers(UserBase * userBase) {
 		if (dcUser->mDcConn) {
 			delConnection(dcUser->mDcConn);
 		} else {
+			// remove bots!
 			if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-				removeFromDcUserList(dcUser);
+				if (mDcConfig.mAdcOn) { // ADC
+					mAdcProtocol.removeFromDcUserList(dcUser);
+				} else { // NMDC
+					mNmdcProtocol.removeFromDcUserList(dcUser);
+				}
 			}
 			delete dcUser;
 		}
@@ -612,351 +617,6 @@ bool DcServer::antiFlood(unsigned & count, Time & time, const unsigned & countLi
 
 
 
-/// Checking for this nick used
-bool DcServer::checkNick(DcConn * dcConn) {
-
-	// check empty nick!
-	if (dcConn->mDcUser->getNick().empty()) {
-		return false;
-	}
-
-	// TODO: call protocol check nick
-
-	// TODO: check nick used
-
-	unsigned long uidHash = dcConn->mDcUser->getUidHash();
-
-	// TODO check nick for ADC (here we have uid!?)
-	// Protocol dependence
-	// TODO: Problem with check nick in ADC
-	// 1. Check syntax
-	// 2. Check used
-	// 3. Check reg nick
-	if (!mDcConfig.mAdcOn) { // NMDC
-
-		if (mDcUserList.contain(uidHash)) {
-			// User on a hub
-			DcUser * us = static_cast<DcUser *> (mDcUserList.find(uidHash));
-
-			// Checking nick only for profile -1 (unreg) and bots
-			// All other profiles is a reg users and they are not checked
-			if (!us->mDcConn || dcConn->mDcUser->getParamForce(USER_PARAM_PROFILE)->getInt() == -1) {
-				LOG(LEVEL_DEBUG, "Bad nick (used): '" 
-					<< dcConn->mDcUser->getNick() << "'["
-					<< dcConn->getIp() << "] vs '" << us->getNick() 
-					<< "'[" << us->getIp() << "]");
-				string msg;
-				stringReplace(mDcLang.mUsedNick, string(STR_LEN("nick")), msg, dcConn->mDcUser->getNick());
-				sendToUser(dcConn->mDcUser, msg, mDcConfig.mHubBot.c_str());
-				dcConn->send(mNmdcProtocol.appendValidateDenied(msg.erase(), dcConn->mDcUser->getNick())); // FIXME
-				return false;
-			}
-			LOG(LEVEL_DEBUG, "removed old user");
-			removeFromDcUserList(us);
-			us->mDcConn->closeNow(CLOSE_REASON_USER_OLD);
-		}
-	}
-	return true;
-}
-
-
-
-bool DcServer::beforeUserEnter(DcConn * dcConn) {
-	LOG_CLASS(dcConn, LEVEL_DEBUG, "Begin login");
-
-	// Check nick
-	if (!checkNick(dcConn)) {
-		dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
-		return false;
-	}
-
-	if (dcConn->mSendNickList) {
-		if (!mDcConfig.mDelayedLogin) {
-			// Before enter, after send list
-			doUserEnter(dcConn);
-		} else {
-			mEnterList.add(dcConn->mDcUser->getUidHash(), dcConn->mDcUser);
-		}
-
-		// Can happen so that list not to send at a time
-		dcConn->dcProtocol()->sendNickList(dcConn);
-
-		dcConn->mSendNickList = false;
-	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-		// User has got list already
-		doUserEnter(dcConn);
-	}
-	return true;
-}
-
-
-
-/// User entry
-void DcServer::doUserEnter(DcConn * dcConn) {
-
-	if (!dcConn->isState(STATE_NORMAL)) {
-		LOG_CLASS(dcConn, LEVEL_DEBUG, "User Login when not all done (" << dcConn->getState() << ")");
-		dcConn->closeNow(CLOSE_REASON_NOT_LOGIN);
-		return;
-	}
-
-	// TODO remove it!
-	// check empty nick!
-	if (!checkNick(dcConn)) {
-		dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
-		return;
-	}
-
-	unsigned long uidHash = dcConn->mDcUser->getUidHash();
-
-	// User is already considered came
-	if (mEnterList.contain(uidHash)) {
-		// We send user contents of cache without clear this cache
-		mEnterList.flushForUser(dcConn->mDcUser);
-		mEnterList.remove(uidHash);
-	}
-
-	// Adding user to the user list
-	if (!addToUserList(dcConn->mDcUser)) {
-		dcConn->closeNow(CLOSE_REASON_USER_ADD);
-		return;
-	}
-
-	// Show to all
-	showUserToAll(dcConn->mDcUser);
-
-	afterUserEnter(dcConn);
-
-	dcConn->clearLoginTimeOut();
-	dcConn->mDcUser->mTimeEnter.get();
-}
-
-
-
-/// Adding user in the user list
-bool DcServer::addToUserList(DcUser * dcUser) {
-	if (!dcUser) {
-		LOG(LEVEL_ERROR, "Adding a NULL user to userlist");
-		return false;
-	}
-	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-		LOG(LEVEL_ERROR, "User is already in the user list");
-		return false;
-	}
-
-	unsigned long uidHash = dcUser->getUidHash();
-
-	LOG_CLASS(&mDcUserList, LEVEL_TRACE, "Before add: " << dcUser->getUid() << " Size: " << mDcUserList.size());
-
-	if (!mDcUserList.add(uidHash, dcUser)) {
-		LOG(LEVEL_DEBUG, "Adding twice user with same nick " << dcUser->getUid() << " (" << mDcUserList.find(uidHash)->getUid() << ")");
-		dcUser->setInUserList(false);
-		return false;
-	}
-
-	LOG_CLASS(&mDcUserList, LEVEL_TRACE, "After add: " << dcUser->getUid() << " Size: " << mDcUserList.size());
-
-	// Protocol dependence
-	if (!mDcConfig.mAdcOn) { // NMDC
-		if (!dcUser->isPassive()) {
-			mActiveList.add(uidHash, dcUser);
-		}
-		if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
-			mOpList.add(uidHash, dcUser);
-		}
-		if (dcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
-			mIpList.add(uidHash, dcUser);
-		}
-	}
-
-	dcUser->setInUserList(true);
-	dcUser->setCanSend(true);
-
-	if (dcUser->mDcConn) {
-
-		++ miTotalUserCount; // add except bot
-
-		dcUser->mDcConn->mIpRecv = true; // Installing the permit on reception of the messages on ip
-		mChatList.add(uidHash, dcUser);
-
-		// Protocol dependence
-		if (!mDcConfig.mAdcOn) { // NMDC
-			if (!(dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO)) {
-				mHelloList.add(uidHash, dcUser);
-			}
-		}
-
-		LOG_CLASS(dcUser->mDcConn, LEVEL_DEBUG, "Adding at the end of Nicklist");
-	}
-	return true;
-}
-
-
-
-/// Removing user from the user list
-bool DcServer::removeFromDcUserList(DcUser * dcUser) {
-	unsigned long uidHash = dcUser->getUidHash();
-
-	LOG_CLASS(&mDcUserList, LEVEL_TRACE, "Before leave: " << dcUser->getUid() << " Size: " << mDcUserList.size());
-	if (mDcUserList.contain(uidHash)) {
-
-		#ifndef WITHOUT_PLUGINS
-			if (dcUser->mDcConn) {
-				mCalls.mOnUserExit.callAll(dcUser);
-			}
-		#endif
-
-		if (dcUser->mDcConn != NULL) {
-			-- miTotalUserCount;
-		}
-
-		// We make sure that user with such nick one!
-		DcUser * other = static_cast<DcUser *> (mDcUserList.find(dcUser->getUidHash()));
-		if (!dcUser->mDcConn) { // Removing the bot
-			mDcUserList.remove(uidHash);
-		} else if (other && other->mDcConn && dcUser->mDcConn && other->mDcConn == dcUser->mDcConn) {
-			mDcUserList.remove(uidHash);
-			LOG_CLASS(&mDcUserList, LEVEL_TRACE, "After leave: " << dcUser->getUid() << " Size: " << mDcUserList.size());
-		} else {
-			// Such can happen only for users without connection or with different connection
-			LOG_CLASS(dcUser, LEVEL_ERROR, "Not found the correct user for nick: " << dcUser->getUid());
-			return false;
-		}
-	}
-
-	// Removing from lists
-	mOpList.remove(uidHash);
-	mIpList.remove(uidHash);
-	mEnterList.remove(uidHash);
-	mActiveList.remove(uidHash);
-	mChatList.remove(uidHash);
-
-	// Protocol dependence
-	if (!mDcConfig.mAdcOn) { // NMDC
-		mHelloList.remove(uidHash);
-	}
-
-	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-		dcUser->setInUserList(false);
-
-		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
-			string msg;
-
-			// Protocol dependence
-			if (mDcConfig.mAdcOn) { // ADC
-				msg.append(STR_LEN("IQUI ")).append(dcUser->getUid()).append(STR_LEN(ADC_SEPARATOR));
-			} else { // NMDC
-				mNmdcProtocol.appendQuit(msg, dcUser->getNick()); // FIXME (for bot?)
-			}
-			sendToAllRaw(msg, false, false/*mDcConfig.mDelayedMyinfo*/); // Delay in sending MyINFO (and Quit)
-		}
-	}
-	return true;
-}
-
-
-
-/// Show user to all
-bool DcServer::showUserToAll(DcUser * dcUser) {
-
-	bool canSend = dcUser->isCanSend();
-
-	// Protocol dependence
-	if (mDcConfig.mAdcOn) { // ADC
-
-		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
-
-			// Show INF string to all users
-			sendToAllRaw(dcUser->getInfo(), true, false/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
-
-			// Show INF string of the current user to all enterring users
-			mEnterList.sendToAllAdc(dcUser->getInfo(), true, false/*mDcConfig.mDelayedMyinfo*/);
-
-		}
-
-		// Prevention of the double sending
-		if (!mDcConfig.mDelayedLogin) {
-			dcUser->setCanSend(false);
-			mDcUserList.flushCache();
-			mEnterList.flushCache();
-			dcUser->setCanSend(canSend);
-		}
-
-	} else { // NMDC
-
-		string hello;
-		if (dcUser->mDcConn && dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
-			if (dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) {
-				dcUser->mDcConn->send(dcUser->getInfo(), true, false);
-			} else if (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
-				dcUser->mDcConn->send(mNmdcProtocol.appendHello(hello, dcUser->getNick()), false, false); // NMDC only
-				dcUser->mDcConn->send(dcUser->getInfo(), true, false);
-			} else {
-				dcUser->mDcConn->send(mNmdcProtocol.appendHello(hello, dcUser->getNick()), false, false); // NMDC only
-			}
-
-			if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
-				string opList;
-				dcUser->mDcConn->send(mNmdcProtocol.appendOpList(opList, dcUser->getNick()), false, false); // FIXME
-			}
-		} else {
-
-			// Sending the greeting for all users, not supporting feature NoHello (except enterring users)
-			mHelloList.sendToAll(mNmdcProtocol.appendHello(hello, dcUser->getNick()), false, false/*mDcConfig.mDelayedMyinfo*/); // NMDC only
-
-			// Show MyINFO string to all users
-			sendToAllRaw(dcUser->getInfo(), true, false/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
-
-			// Show MyINFO string of the current user to all enterring users
-			mEnterList.sendToAll(dcUser->getInfo(), true, false/*mDcConfig.mDelayedMyinfo*/);
-
-			// Op entry
-			if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
-				string opList;
-				mDcUserList.sendToAll(mNmdcProtocol.appendOpList(opList, dcUser->getNick()), false, false/*mDcConfig.mDelayedMyinfo*/); // FIXME
-				mEnterList.sendToAll(opList, false, false/*mDcConfig.mDelayedMyinfo*/);
-			}
-		}
-
-		// Prevention of the double sending
-		if (!mDcConfig.mDelayedLogin) {
-			dcUser->setCanSend(false);
-			mDcUserList.flushCache();
-			mEnterList.flushCache();
-			dcUser->setCanSend(canSend);
-		}
-
-		if (mDcConfig.mSendUserIp) {
-			string ipList;
-			mNmdcProtocol.appendUserIp(ipList, dcUser->getNick(), dcUser->getIp()); // FIXME
-			if (ipList.size()) {
-				mIpList.sendToAll(ipList, false, false);
-			}
-
-			if (dcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
-				dcUser->send(mDcUserList.getList(USER_LIST_IP), true, false);
-			} else if (ipList.size() && dcUser->mDcConn && (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_USERIP2)) { // UserIP2
-				dcUser->send(ipList, false, false);
-			}
-		}
-	}
-
-	dcUser->send("", 0, false, true);
-	return true;
-}
-
-
-
-void DcServer::afterUserEnter(DcConn * dcConn) {
-	LOG_CLASS(dcConn, LEVEL_DEBUG, "Entered on the hub");
-
-	#ifndef WITHOUT_PLUGINS
-		mCalls.mOnUserEnter.callAll(dcConn->mDcUser);
-	#endif
-}
-
-
-
 /// Get user by uid (or NULL)
 DcUser * DcServer::getDcUser(const char * uid) {
 	if (uid == NULL) {
@@ -1405,13 +1065,22 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 
 	LOG(LEVEL_DEBUG, "Reg bot: " << uid);
 
-	// TODO: remove it! Only botlist.
-	if (!addToUserList(dcUser)) {
-		delete dcUser;
-		return -3;
+	if (mDcConfig.mAdcOn) { // ADC
+		// TODO: remove it! Only botlist.
+		if (!mNmdcProtocol.addToUserList(dcUser)) {
+			delete dcUser;
+			return -3;
+		}
+		mAdcProtocol.showUserToAll(dcUser);
+	} else { // NMDC
+		// TODO: remove it! Only botlist.
+		if (!mNmdcProtocol.addToUserList(dcUser)) {
+			delete dcUser;
+			return -3;
+		}
+		mNmdcProtocol.showUserToAll(dcUser);
 	}
 	mBotList.add(dcUser->getUidHash(), dcUser);
-	showUserToAll(dcUser);
 	return 0;
 }
 
@@ -1431,7 +1100,11 @@ int DcServer::unregBot(const string & uid) {
 		LOG(LEVEL_DEBUG, "Attempt delete user");
 		return -2;
 	}
-	removeFromDcUserList(dcUser); // TODO: remove it!
+	if (mDcConfig.mAdcOn) { // ADC
+		mAdcProtocol.removeFromDcUserList(dcUser); // TODO: remove it!
+	} else { // NMDC
+		mNmdcProtocol.removeFromDcUserList(dcUser); // TODO: remove it!
+	}
 	//mBotList.remove(dcUser->getUidHash());
 	delete dcUser;
 	return 0;

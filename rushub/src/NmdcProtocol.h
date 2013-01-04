@@ -118,6 +118,25 @@ public:
 	virtual void addToHide(DcUser *);
 	virtual void delFromHide(DcUser *);
 
+
+	/// Check nick used
+	bool checkNick(DcConn *);
+
+	/// Actions before user entry
+	bool beforeUserEnter(DcConn *);
+
+	/// User entry
+	void doUserEnter(DcConn *);
+
+	/// Adding user in the user list
+	bool addToUserList(DcUser *);
+
+	/// Removing user from the user list
+	virtual bool removeFromDcUserList(DcUser *);
+
+	/// Show user to all
+	bool showUserToAll(DcUser *);
+
 protected:
 
 	typedef int (NmdcProtocol::*Event) (NmdcParser *, DcConn *);
@@ -155,6 +174,9 @@ private:
 	/// Check validate nick (user)
 	bool validateUser(DcConn *, const string & nick);
 	bool checkNickLength(DcConn *, size_t len);
+
+	/// Actions after user entry
+	void afterUserEnter(DcConn *);
 
 }; // class NmdcProtocol
 

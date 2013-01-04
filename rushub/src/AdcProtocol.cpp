@@ -153,7 +153,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 		switch(adcParser->getHeader()) {
 
 			case HEADER_BROADCAST:
-				mDcServer->sendToAllRaw(adcParser->mCommand, true, false);
+				mDcServer->mDcUserList.sendToAllAdc(adcParser->mCommand, true, false);
 				break;
 
 			case HEADER_DIRECT:
@@ -316,7 +316,7 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 
 			// How send changed params?
 
-			//mDcServer->sendToAllRaw(dcConn->mDcUser->getInfo(), true, false);
+			//mDcServer->mDcUserList.sendToAllAdc(dcConn->mDcUser->getInfo(), true, false);
 			return 0; // Don't use getInfo in normal state!
 		}
 	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
@@ -335,7 +335,7 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 
 		dcConn->setState(STATE_VERIFY);
 		dcConn->mSendNickList = true;
-		mDcServer->beforeUserEnter(dcConn);
+		beforeUserEnter(dcConn);
 	}
 	return 1;
 }
@@ -452,7 +452,7 @@ int AdcProtocol::eventPas(AdcParser *, DcConn * dcConn) {
 
 	dcConn->setState(STATE_VERIFY);
 	dcConn->mSendNickList = true;
-	mDcServer->beforeUserEnter(dcConn);
+	beforeUserEnter(dcConn);
 	return 1;
 }
 
@@ -715,6 +715,248 @@ void AdcProtocol::forceMove(DcConn * /*dcConn*/, const char * /*address*/, const
 
 
 
+/// Checking for this nick used
+bool AdcProtocol::checkNick(DcConn * dcConn) {
+
+	// check empty nick!
+	if (dcConn->mDcUser->getNick().empty()) {
+		return false;
+	}
+
+	// TODO: call protocol check nick
+
+	// TODO: check nick used
+
+	//unsigned long uidHash = dcConn->mDcUser->getUidHash();
+
+	// TODO check nick for ADC (here we have uid!?)
+	// Protocol dependence
+	// TODO: Problem with check nick in ADC
+	// 1. Check syntax
+	// 2. Check used
+	// 3. Check reg nick
+	// (see NMDC)
+	return true;
+}
+
+
+
+bool AdcProtocol::beforeUserEnter(DcConn * dcConn) {
+	LOG_CLASS(dcConn, LEVEL_DEBUG, "Begin login");
+
+	// Check nick
+	if (!checkNick(dcConn)) {
+		dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
+		return false;
+	}
+
+	if (dcConn->mSendNickList) {
+		if (!mDcServer->mDcConfig.mDelayedLogin) {
+			// Before enter, after send list
+			doUserEnter(dcConn);
+		} else {
+			mDcServer->mEnterList.add(dcConn->mDcUser->getUidHash(), dcConn->mDcUser);
+		}
+
+		// Can happen so that list not to send at a time
+		sendNickList(dcConn);
+
+		dcConn->mSendNickList = false;
+	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
+		// User has got list already
+		doUserEnter(dcConn);
+	}
+	return true;
+}
+
+
+
+/// User entry
+void AdcProtocol::doUserEnter(DcConn * dcConn) {
+
+	if (!dcConn->isState(STATE_NORMAL)) {
+		LOG_CLASS(dcConn, LEVEL_DEBUG, "User Login when not all done (" << dcConn->getState() << ")");
+		dcConn->closeNow(CLOSE_REASON_NOT_LOGIN);
+		return;
+	}
+
+	// TODO remove it!
+	// check empty nick!
+	if (!checkNick(dcConn)) {
+		dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
+		return;
+	}
+
+	unsigned long uidHash = dcConn->mDcUser->getUidHash();
+
+	// User is already considered came
+	if (mDcServer->mEnterList.contain(uidHash)) {
+		// We send user contents of cache without clear this cache
+		mDcServer->mEnterList.flushForUser(dcConn->mDcUser);
+		mDcServer->mEnterList.remove(uidHash);
+	}
+
+	// Adding user to the user list
+	if (!addToUserList(dcConn->mDcUser)) {
+		dcConn->closeNow(CLOSE_REASON_USER_ADD);
+		return;
+	}
+
+	// Show to all
+	showUserToAll(dcConn->mDcUser);
+
+	dcConn->clearLoginTimeOut();
+	dcConn->mDcUser->mTimeEnter.get();
+
+	afterUserEnter(dcConn);
+}
+
+
+
+/// Adding user in the user list
+bool AdcProtocol::addToUserList(DcUser * dcUser) {
+	if (!dcUser) {
+		LOG(LEVEL_ERROR, "Adding a NULL user to userlist");
+		return false;
+	}
+	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
+		LOG(LEVEL_ERROR, "User is already in the user list");
+		return false;
+	}
+
+	unsigned long uidHash = dcUser->getUidHash();
+
+	LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "Before add: " << dcUser->getUid() << " Size: " << mDcServer->mDcUserList.size());
+
+	if (!mDcServer->mDcUserList.add(uidHash, dcUser)) {
+		LOG(LEVEL_DEBUG, "Adding twice user with same nick " << dcUser->getUid() << " (" << mDcServer->mDcUserList.find(uidHash)->getUid() << ")");
+		dcUser->setInUserList(false);
+		return false;
+	}
+
+	LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "After add: " << dcUser->getUid() << " Size: " << mDcServer->mDcUserList.size());
+
+// NMDC
+//		if (!dcUser->isPassive()) {
+//			mActiveList.add(uidHash, dcUser);
+//		}
+//		if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
+//			mOpList.add(uidHash, dcUser);
+//		}
+//		if (dcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
+//			mIpList.add(uidHash, dcUser);
+//		}
+
+	dcUser->setInUserList(true);
+	dcUser->setCanSend(true);
+
+	if (dcUser->mDcConn) {
+
+		++ mDcServer->miTotalUserCount; // add except bot
+
+		dcUser->mDcConn->mIpRecv = true; // Installing the permit on reception of the messages on ip
+		mDcServer->mChatList.add(uidHash, dcUser);
+
+		LOG_CLASS(dcUser->mDcConn, LEVEL_DEBUG, "Adding at the end of Nicklist");
+	}
+	return true;
+}
+
+
+
+/// Removing user from the user list
+bool AdcProtocol::removeFromDcUserList(DcUser * dcUser) {
+	unsigned long uidHash = dcUser->getUidHash();
+
+	LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "Before leave: " << dcUser->getUid() << " Size: " << mDcServer->mDcUserList.size());
+	if (mDcServer->mDcUserList.contain(uidHash)) {
+
+		#ifndef WITHOUT_PLUGINS
+			if (dcUser->mDcConn) {
+				mDcServer->mCalls.mOnUserExit.callAll(dcUser);
+			}
+		#endif
+
+		if (dcUser->mDcConn != NULL) {
+			-- mDcServer->miTotalUserCount;
+		}
+
+		// We make sure that user with such nick one!
+		DcUser * other = static_cast<DcUser *> (mDcServer->mDcUserList.find(dcUser->getUidHash()));
+		if (!dcUser->mDcConn) { // Removing the bot
+			mDcServer->mDcUserList.remove(uidHash);
+		} else if (other && other->mDcConn && dcUser->mDcConn && other->mDcConn == dcUser->mDcConn) {
+			mDcServer->mDcUserList.remove(uidHash);
+			LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "After leave: " << dcUser->getUid() << " Size: " << mDcServer->mDcUserList.size());
+		} else {
+			// Such can happen only for users without connection or with different connection
+			LOG_CLASS(dcUser, LEVEL_ERROR, "Not found the correct user for nick: " << dcUser->getUid());
+			return false;
+		}
+	}
+
+	// Removing from lists
+	mDcServer->mOpList.remove(uidHash);
+	mDcServer->mIpList.remove(uidHash);
+	mDcServer->mEnterList.remove(uidHash);
+	mDcServer->mActiveList.remove(uidHash);
+	mDcServer->mChatList.remove(uidHash);
+
+	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
+		dcUser->setInUserList(false);
+
+		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
+			string msg;
+
+			msg.append(STR_LEN("IQUI ")).append(dcUser->getUid()).append(STR_LEN(ADC_SEPARATOR));
+
+			mDcServer->mDcUserList.sendToAllAdc(msg, false, false/*mDcConfig.mDelayedMyinfo*/); // Delay in sending MyINFO (and Quit)
+		}
+	}
+	return true;
+}
+
+
+
+/// Show user to all
+bool AdcProtocol::showUserToAll(DcUser * dcUser) {
+
+	bool canSend = dcUser->isCanSend();
+
+	if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
+
+		// Show INF string to all users
+		mDcServer->mDcUserList.sendToAllAdc(dcUser->getInfo(), true, false/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
+
+		// Show INF string of the current user to all enterring users
+		mDcServer->mEnterList.sendToAllAdc(dcUser->getInfo(), true, false/*mDcConfig.mDelayedMyinfo*/);
+
+	}
+
+	// Prevention of the double sending
+	if (!mDcServer->mDcConfig.mDelayedLogin) {
+		dcUser->setCanSend(false);
+		mDcServer->mDcUserList.flushCache();
+		mDcServer->mEnterList.flushCache();
+		dcUser->setCanSend(canSend);
+	}
+
+	dcUser->send("", 0, false, true);
+	return true;
+}
+
+
+
+void AdcProtocol::afterUserEnter(DcConn * dcConn) {
+	LOG_CLASS(dcConn, LEVEL_DEBUG, "Entered on the hub");
+
+	#ifndef WITHOUT_PLUGINS
+		mDcServer->mCalls.mOnUserEnter.callAll(dcConn->mDcUser);
+	#endif
+}
+
+
+
 /// Sending the user-list
 int AdcProtocol::sendNickList(DcConn * dcConn) {
 	if (mDcServer->mEnterList.find(dcConn->mDcUser->getUidHash())) {
@@ -732,7 +974,7 @@ void AdcProtocol::onFlush(Conn * conn) {
 	if (dcConn->mNickListInProgress) {
 		LOG_CLASS(dcConn, LEVEL_DEBUG, "Enter after nicklist");
 		dcConn->mNickListInProgress = false;
-		mDcServer->doUserEnter(dcConn);
+		doUserEnter(dcConn);
 	}
 }
 

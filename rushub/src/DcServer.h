@@ -120,8 +120,8 @@ class DcServer : public Server, public DcServerBase, public Thread {
 	friend class ::dcserver::DcListIterator; // for mClientList
 	friend class ::dcserver::DcConn; // for minDelay in DcConn::onTimer
 	friend class ::dcserver::DcConnFactory; // for removeFromDcUserList in DcConnFactory::deleteConn
-	friend class ::dcserver::protocol::NmdcProtocol; // for beforeUserEnter
-	friend class ::dcserver::protocol::AdcProtocol; // for beforeUserEnter
+	friend class ::dcserver::protocol::NmdcProtocol; // for mCalls
+	friend class ::dcserver::protocol::AdcProtocol; // for mCalls
 	friend class ::webserver::WebConnFactory; // for call plugins
 
 public:
@@ -266,21 +266,6 @@ protected:
 	/// Antiflood function
 	bool antiFlood(unsigned & count, Time &, const unsigned & countLimit, const double & timeLimit);
 
-	/// Check nick used
-	bool checkNick(DcConn *);
-
-	/// Actions before user entry
-	bool beforeUserEnter(DcConn *);
-
-	/// User entry
-	void doUserEnter(DcConn *);
-
-	/// Adding user in the user list
-	bool addToUserList(DcUser *);
-
-	/// Removing user from the user list
-	bool removeFromDcUserList(DcUser *);
-
 private:
 
 	Time mChecker; ///< Checking time
@@ -324,12 +309,6 @@ private:
 
 	/// Main timer
 	int onTimer(Time & now);
-
-	/// Show user to all
-	bool showUserToAll(DcUser *);
-
-	/// Actions after user entry
-	void afterUserEnter(DcConn *);
 
 	void sendToAll(const string & data, bool addSep, bool flush);
 	void sendToAllRaw(const string & data, bool addSep, bool flush);
