@@ -960,8 +960,8 @@ int AdcProtocol::sendNickList(DcConn * dcConn) {
 	if (mDcServer->mEnterList.find(dcConn->mDcUser->getUidHash())) {
 		dcConn->mNickListInProgress = true;
 	}
-	dcConn->send(mDcServer->mAdcBotList.getList(), true, false); // bots
-	dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_ADC_INFO), true); // users
+	dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_ADC_INFO), true, false); // users
+	dcConn->send(mDcServer->mAdcBotList.getList(), true); // bots
 	return 0;
 }
 

@@ -122,11 +122,16 @@ DcServer::DcServer(const string & configFile, const string &) :
 	mPluginList.loadAll(); // Load plugins
 
 	// Preparing all lists
-	mDcUserList.addUserListItem(AdcProtocol::infList, ""); // USER_LIST_ADC_INFO
 	mDcUserList.addUserListItem(NmdcProtocol::nickList, "$NickList "); // USER_LIST_NICK
 	mDcUserList.addUserListItem(NmdcProtocol::myInfoList, ""); // USER_LIST_MYINFO
 	mDcUserList.addUserListItem(NmdcProtocol::ipList, "$UserIP "); // USER_LIST_IP
+	mDcUserList.addUserListItem(AdcProtocol::infList, ""); // USER_LIST_ADC_INFO
 	mOpList.addUserListItem(NmdcProtocol::nickList, "$OpList "); // 0
+
+	// For bots without prefix because problem with redundant command
+	mBotList.addUserListItem(NmdcProtocol::nickList, ""); // USER_LIST_NICK
+	mBotList.addUserListItem(NmdcProtocol::myInfoList, ""); // USER_LIST_MYINFO
+	mBotList.addUserListItem(NmdcProtocol::ipList, ""); // USER_LIST_IP
 
 	mAdcBotList.addUserListItem(AdcProtocol::infList, ""); // 0
 
