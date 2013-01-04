@@ -1147,7 +1147,7 @@ bool NmdcProtocol::checkNick(DcConn * dcConn) {
 	// 2. Check used
 	// 3. Check reg nick
 
-	if (mDcServer->mBotList.contain(nickHash)) {
+	if (mDcServer->mNmdcBotList.contain(nickHash)) {
 		LOG(LEVEL_DEBUG, "Bad nick (used): '" 
 			<< dcConn->mDcUser->getNick() << "'["
 			<< dcConn->getIp() << "] bot nick!");
@@ -1454,24 +1454,24 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 		// seperator "|" was added in getInfoList function
 		if (mDcServer->mDcConfig.mCompressionType == 1) {
 			dcConn->sendZpipe(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false);
-			dcConn->sendZpipe(mDcServer->mBotList.getList(USER_LIST_MYINFO), false);
+			dcConn->sendZpipe(mDcServer->mNmdcBotList.getList(USER_LIST_MYINFO), false);
 		} else {
 			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false, false);
-			dcConn->send(mDcServer->mBotList.getList(USER_LIST_MYINFO), false, false);
+			dcConn->send(mDcServer->mNmdcBotList.getList(USER_LIST_MYINFO), false, false);
 		}
 	} else if (dcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
 		LOG_CLASS(dcConn, LEVEL_DEBUG, "Sending MyINFO list and Nicklist");
 		// seperator "|" was not added in getNickList function, because seperator was "$$"
 		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_NICK), false, false);
-		dcConn->send(mDcServer->mBotList.getList(USER_LIST_NICK), true, false); // Bots must send after users
+		dcConn->send(mDcServer->mNmdcBotList.getList(USER_LIST_NICK), true, false); // Bots must send after users
 		// seperator "|" was added in getInfoList function
 		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false, false);
-		dcConn->send(mDcServer->mBotList.getList(USER_LIST_MYINFO), false, false);
+		dcConn->send(mDcServer->mNmdcBotList.getList(USER_LIST_MYINFO), false, false);
 	} else {
 		LOG_CLASS(dcConn, LEVEL_DEBUG, "Sending Nicklist");
 		// seperator "|" was not added in getNickList function, because seperator was "$$"
 		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_NICK), false, false);
-		dcConn->send(mDcServer->mBotList.getList(USER_LIST_NICK), true, false); // Bots must send after users
+		dcConn->send(mDcServer->mNmdcBotList.getList(USER_LIST_NICK), true, false); // Bots must send after users
 	}
 	if (mDcServer->mOpList.size()) {
 		LOG_CLASS(dcConn, LEVEL_DEBUG, "Sending Oplist");
@@ -1484,7 +1484,7 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 		LOG_CLASS(dcConn, LEVEL_DEBUG, "Sending Iplist");
 		// seperator "|" was not added in getIpList function, because seperator was "$$"
 		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_IP), false, false);
-		dcConn->send(mDcServer->mBotList.getList(USER_LIST_IP), true, true); // Bots must send after users
+		dcConn->send(mDcServer->mNmdcBotList.getList(USER_LIST_IP), true, true); // Bots must send after users
 	} else {
 		dcConn->send("", 0 , true, true); // for flush (don't replace to flush function!)
 	}

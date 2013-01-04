@@ -140,7 +140,7 @@ public:
 	AdcProtocol mAdcProtocol; ///< ADC Protocol
 
 	UserList mDcUserList; ///< User list
-	UserList mBotList; ///< Bot list
+	
 	UserList mOpList; ///< Op list
 	UserList mIpList; ///< ip list
 	UserList mActiveList; ///< Active user list
@@ -148,6 +148,7 @@ public:
 	UserList mEnterList; ///< Enter list
 	UserList mChatList; ///< Chat list
 
+	UserList mNmdcBotList; ///< NMDC Bot list
 	UserList mAdcBotList; ///< ADC Bot list
 
 	int miTotalUserCount; ///< Total number of the users

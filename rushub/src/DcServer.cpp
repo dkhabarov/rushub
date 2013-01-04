@@ -80,13 +80,13 @@ DcServer::DcServer(const string & configFile, const string &) :
 	mDcLang(&mDcConfigLoader, &mDcConfig),
 	mStartTime(true),
 	mDcUserList("UserList"),
-	mBotList("BotList"),
 	mOpList("OpList"),
 	mIpList("IpList"),
 	mActiveList("ActiveList"),
 	mHelloList("HelloList"),
 	mEnterList("EnterList"),
 	mChatList("ChatList"),
+	mNmdcBotList("NmdcBotList"),
 	mAdcBotList("AdcBotList"),
 	miTotalUserCount(0),
 	miTotalShare(0),
@@ -129,9 +129,9 @@ DcServer::DcServer(const string & configFile, const string &) :
 	mOpList.addUserListItem(NmdcProtocol::nickList, "$OpList "); // 0
 
 	// For bots without prefix because problem with redundant command
-	mBotList.addUserListItem(NmdcProtocol::nickList, ""); // USER_LIST_NICK
-	mBotList.addUserListItem(NmdcProtocol::myInfoList, ""); // USER_LIST_MYINFO
-	mBotList.addUserListItem(NmdcProtocol::ipList, ""); // USER_LIST_IP
+	mNmdcBotList.addUserListItem(NmdcProtocol::nickList, ""); // USER_LIST_NICK
+	mNmdcBotList.addUserListItem(NmdcProtocol::myInfoList, ""); // USER_LIST_MYINFO
+	mNmdcBotList.addUserListItem(NmdcProtocol::ipList, ""); // USER_LIST_IP
 
 	mAdcBotList.addUserListItem(AdcProtocol::infList, ""); // 0
 
@@ -437,13 +437,13 @@ void DcServer::syncActions(DcServer * dcServer) {
 
 	dcServer->mHelloList.autoResize(); // NMDC
 	dcServer->mDcUserList.autoResize();
-	dcServer->mBotList.autoResize();
 	dcServer->mEnterList.autoResize();
 	dcServer->mOpList.autoResize();
 	dcServer->mIpList.autoResize();
 	dcServer->mChatList.autoResize();
 	dcServer->mActiveList.autoResize();
 
+	dcServer->mNmdcBotList.autoResize();
 	dcServer->mAdcBotList.autoResize();
 }
 
@@ -1077,6 +1077,7 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 			return -3;
 		}
 		mAdcProtocol.showUserToAll(dcUser);
+		//mAdcBotList.add(dcUser->getUidHash(), dcUser);
 	} else { // NMDC
 		// TODO: remove it! Only botlist.
 		if (!mNmdcProtocol.addToUserList(dcUser)) {
@@ -1084,8 +1085,8 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 			return -3;
 		}
 		mNmdcProtocol.showUserToAll(dcUser);
+		//mNmdcBotList.add(dcUser->getUidHash(), dcUser);
 	}
-	//mBotList.add(dcUser->getUidHash(), dcUser);
 	return 0;
 }
 
@@ -1107,10 +1108,11 @@ int DcServer::unregBot(const string & uid) {
 	}
 	if (mDcConfig.mAdcOn) { // ADC
 		mAdcProtocol.removeFromDcUserList(dcUser); // TODO: remove it!
+		//mAdcBotList.remove(dcUser->getUidHash());
 	} else { // NMDC
 		mNmdcProtocol.removeFromDcUserList(dcUser); // TODO: remove it!
+		//mNmdcBotList.remove(dcUser->getUidHash());
 	}
-	//mBotList.remove(dcUser->getUidHash());
 	delete dcUser;
 	return 0;
 }
