@@ -1137,6 +1137,7 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 		LOG_CLASS(dcConn, LEVEL_DEBUG, "Sending MyINFO list");
 		// seperator "|" was added in getInfoList function
 
+		// TODO: send bot list
 		if (mDcServer->mDcConfig.mCompressionType == 1) {
 			dcConn->sendZpipe(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false);
 		} else {
@@ -1144,23 +1145,28 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 		}
 	} else if (dcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
 		LOG_CLASS(dcConn, LEVEL_DEBUG, "Sending MyINFO list and Nicklist");
+		// TODO: send bot list
 		// seperator "|" was not added in getNickList function, because seperator was "$$"
 		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_NICK), true, false);
+		// TODO: send bot list
 		// seperator "|" was added in getInfoList function
 		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false, false);
 	} else {
 		LOG_CLASS(dcConn, LEVEL_DEBUG, "Sending Nicklist");
+		// TODO: send bot list
 		// seperator "|" was not added in getNickList function, because seperator was "$$"
 		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_NICK), true, false);
 	}
 	if (mDcServer->mOpList.size()) {
 		LOG_CLASS(dcConn, LEVEL_DEBUG, "Sending Oplist");
+		// TODO: send bot list
 		// seperator "|" was not added in getNickList function, because seperator was "$$"
 		dcConn->send(mDcServer->mOpList.getList(), true, false);
 	}
 
 	if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST) && dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
 		LOG_CLASS(dcConn, LEVEL_DEBUG, "Sending Iplist");
+		// TODO: send bot list
 		// seperator "|" was not added in getIpList function, because seperator was "$$"
 		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_IP), true);
 	} else {
@@ -1373,6 +1379,7 @@ void NmdcProtocol::delFromOps(DcUser * dcUser) {
 void NmdcProtocol::addToIpList(DcUser * dcUser) {
 	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		mDcServer->mIpList.add(dcUser->getUidHash(), dcUser);
+		// TODO: send bot list
 		dcUser->send(mDcServer->mDcUserList.getList(USER_LIST_IP), true);
 	}
 }

@@ -87,6 +87,7 @@ DcServer::DcServer(const string & configFile, const string &) :
 	mHelloList("HelloList"),
 	mEnterList("EnterList"),
 	mChatList("ChatList"),
+	mAdcBotList("AdcBotList"),
 	miTotalUserCount(0),
 	miTotalShare(0),
 	mPluginList(mDcConfig.mPluginPath),
@@ -126,6 +127,8 @@ DcServer::DcServer(const string & configFile, const string &) :
 	mDcUserList.addUserListItem(NmdcProtocol::myInfoList, ""); // USER_LIST_MYINFO
 	mDcUserList.addUserListItem(NmdcProtocol::ipList, "$UserIP "); // USER_LIST_IP
 	mOpList.addUserListItem(NmdcProtocol::nickList, "$OpList "); // 0
+
+	mAdcBotList.addUserListItem(AdcProtocol::infList, ""); // 0
 
 	if (mDcConfig.mRegMainBot) { // Main bot registration
 		LOG(LEVEL_DEBUG, "Reg main bot '" << mDcConfig.mHubBot << "'");
@@ -169,9 +172,15 @@ DcServer::~DcServer() {
 		unregBot(mDcConfig.mHubBot);
 	}
 
+	// remove all users and bots
 	if (mDcUserList.size() > 0) {
 		mDcUserList.doForEach(bind1st(mem_fun(&DcServer::delAllUsers), this), true); // Delete all users
 	}
+
+	if (mAdcBotList.size() > 0) {
+		// TODO: remove bots
+	}
+
 	deleteAll(); // Delete all other conn
 
 
@@ -410,7 +419,6 @@ void DcServer::syncTimer(void * self) {
 void DcServer::syncActions(DcServer * dcServer) {
 	dcServer->mHelloList.flushCache(); // NMDC
 	dcServer->mDcUserList.flushCache();
-	dcServer->mBotList.flushCache();
 	dcServer->mEnterList.flushCache();
 	dcServer->mOpList.flushCache();
 	dcServer->mIpList.flushCache();
@@ -425,6 +433,8 @@ void DcServer::syncActions(DcServer * dcServer) {
 	dcServer->mIpList.autoResize();
 	dcServer->mChatList.autoResize();
 	dcServer->mActiveList.autoResize();
+
+	dcServer->mAdcBotList.autoResize();
 }
 
 
@@ -603,12 +613,16 @@ bool DcServer::antiFlood(unsigned & count, Time & time, const unsigned & countLi
 
 
 /// Checking for this nick used
-bool DcServer::checkNick(DcConn *dcConn) {
+bool DcServer::checkNick(DcConn * dcConn) {
 
 	// check empty nick!
 	if (dcConn->mDcUser->getNick().empty()) {
 		return false;
 	}
+
+	// TODO: call protocol check nick
+
+	// TODO: check nick used
 
 	unsigned long uidHash = dcConn->mDcUser->getUidHash();
 
@@ -650,7 +664,7 @@ bool DcServer::checkNick(DcConn *dcConn) {
 bool DcServer::beforeUserEnter(DcConn * dcConn) {
 	LOG_CLASS(dcConn, LEVEL_DEBUG, "Begin login");
 
-	// check empty nick!
+	// Check nick
 	if (!checkNick(dcConn)) {
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
 		return false;
@@ -658,6 +672,7 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 
 	if (dcConn->mSendNickList) {
 		if (!mDcConfig.mDelayedLogin) {
+			// Before enter, after send list
 			doUserEnter(dcConn);
 		} else {
 			mEnterList.add(dcConn->mDcUser->getUidHash(), dcConn->mDcUser);
@@ -668,6 +683,7 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 
 		dcConn->mSendNickList = false;
 	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
+		// User has got list already
 		doUserEnter(dcConn);
 	}
 	return true;
@@ -684,6 +700,7 @@ void DcServer::doUserEnter(DcConn * dcConn) {
 		return;
 	}
 
+	// TODO remove it!
 	// check empty nick!
 	if (!checkNick(dcConn)) {
 		dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
@@ -813,7 +830,6 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 	mEnterList.remove(uidHash);
 	mActiveList.remove(uidHash);
 	mChatList.remove(uidHash);
-	mBotList.remove(uidHash);
 
 	// Protocol dependence
 	if (!mDcConfig.mAdcOn) { // NMDC
@@ -931,7 +947,7 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 
 
 
-void DcServer::afterUserEnter(DcConn *dcConn) {
+void DcServer::afterUserEnter(DcConn * dcConn) {
 	LOG_CLASS(dcConn, LEVEL_DEBUG, "Entered on the hub");
 
 	#ifndef WITHOUT_PLUGINS
@@ -949,6 +965,7 @@ DcUser * DcServer::getDcUser(const char * uid) {
 
 	string uidStr(uid);
 	if (uidStr.size()) {
+		// for all users (both protocols)
 		UserBase * userBase = mDcUserList.getUserBaseByUid(uidStr);
 		if (userBase) {
 			return static_cast<DcUser *> (userBase);
@@ -1143,7 +1160,7 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & nickList, const strin
 	DcUser * dcUser = NULL;
 	vector<DcUser *> ul;
 	for (List_t::const_iterator it = nickList.begin(); it != nickList.end(); ++it) {
-		dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByUid(*it));
+		dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByUid(*it)); // for all users!
 		if (dcUser && dcUser->isCanSend()) {
 			dcUser->setCanSend(false);
 			ul.push_back(dcUser);
@@ -1166,7 +1183,7 @@ bool DcServer::sendToAllExceptNicksRaw(const vector<string> & nickList, const st
 	DcUser * dcUser = NULL;
 	vector<DcUser *> ul;
 	for (List_t::const_iterator it = nickList.begin(); it != nickList.end(); ++it) {
-		dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByUid(*it));
+		dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByUid(*it)); // for all users!
 		if (dcUser && dcUser->isCanSend()) {
 			dcUser->setCanSend(false);
 			ul.push_back(dcUser);
@@ -1388,6 +1405,7 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 
 	LOG(LEVEL_DEBUG, "Reg bot: " << uid);
 
+	// TODO: remove it! Only botlist.
 	if (!addToUserList(dcUser)) {
 		delete dcUser;
 		return -3;
@@ -1403,6 +1421,7 @@ int DcServer::unregBot(const string & uid) {
 
 	LOG(LEVEL_DEBUG, "Unreg bot: " << uid);
 
+	// TODO: remove it! Replace to botlist
 	DcUser * dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByUid(uid));
 	if (!dcUser) { // Not found
 		return -1;
@@ -1412,7 +1431,8 @@ int DcServer::unregBot(const string & uid) {
 		LOG(LEVEL_DEBUG, "Attempt delete user");
 		return -2;
 	}
-	removeFromDcUserList(dcUser);
+	removeFromDcUserList(dcUser); // TODO: remove it!
+	//mBotList.remove(dcUser->getUidHash());
 	delete dcUser;
 	return 0;
 }

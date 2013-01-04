@@ -157,6 +157,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 				break;
 
 			case HEADER_DIRECT:
+				// find target user
 				dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(adcParser->getSidTarget()));
 				if (dcUser) { // User was found
 					dcUser->send(adcParser->mCommand, true);
@@ -164,6 +165,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 				break;
 
 			case HEADER_ECHO:
+				// find target user
 				dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(adcParser->getSidTarget()));
 				if (dcUser) { // User was found
 					dcUser->send(adcParser->mCommand, true);
@@ -172,6 +174,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 				break;
 
 			case HEADER_FEATURE:
+				// send to users
 				mDcServer->mDcUserList.sendToFeature(adcParser->mCommand, 
 					adcParser->getPositiveFeatures(), 
 					adcParser->getNegativeFeatures(),
@@ -614,7 +617,10 @@ const char * AdcProtocol::genNewSid() {
 	UserBase * userBase = NULL;
 	do {
 		sid = getSid(++mSidNum);
-		userBase = mDcServer->mDcUserList.getUserBaseByUid(sid);
+		userBase = mDcServer->mDcUserList.getUserBaseByUid(sid); // only ADC users
+		if (userBase == NULL) {
+			userBase = mDcServer->mAdcBotList.getUserBaseByUid(sid); // only ADC bots
+		}
 	} while (userBase != NULL || strcmp(sid, "AAAA") == 0); // "AAAA" is a hub
 	return sid;
 }
@@ -714,7 +720,8 @@ int AdcProtocol::sendNickList(DcConn * dcConn) {
 	if (mDcServer->mEnterList.find(dcConn->mDcUser->getUidHash())) {
 		dcConn->mNickListInProgress = true;
 	}
-	dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_ADC_INFO), true);
+	dcConn->send(mDcServer->mAdcBotList.getList(), true); // bots
+	dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_ADC_INFO), true); // users
 	return 0;
 }
 

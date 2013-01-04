@@ -148,6 +148,8 @@ public:
 	UserList mEnterList; ///< Enter list
 	UserList mChatList; ///< Chat list
 
+	UserList mAdcBotList; ///< ADC Bot list
+
 	int miTotalUserCount; ///< Total number of the users
 	int64_t miTotalShare; ///< Total hub share size
 
