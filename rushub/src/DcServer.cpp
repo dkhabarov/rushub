@@ -496,15 +496,11 @@ int DcServer::onNewConn(Conn * conn) {
 	int ret = mIpEnterFlood.check(dcConn->getIp(), mTime);
 	if (ret) {
 		if (ret == 1) {
-			if (!mDcConfig.mAdcOn) {
-				sendToUser(dcConn->mDcUser, mDcLang.mFloodReEnter, mDcConfig.mHubBot.c_str());
-			} else {
-				// TODO ADC (FLOOD_IP_ENTRY)
-				// TODO mDcConfig.mHubBot for ADC uid ?
-				sendToUser(dcConn->mDcUser, mDcLang.mFloodReEnter);
-			}
+			// TODO: convert ADC errorCode to close reason and move close function into sendError
+			dcConn->dcProtocol()->sendError(dcConn, mDcLang.mFloodReEnter, ERROR_CODE_BAN_GENERIC);
 			dcConn->closeNice(9000, CLOSE_REASON_FLOOD_IP_ENTRY);
 		} else {
+			// desconnect without msg
 			dcConn->closeNow(CLOSE_REASON_FLOOD_IP_ENTRY);
 		}
 		return -2;

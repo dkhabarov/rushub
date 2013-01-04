@@ -101,6 +101,8 @@ public:
 	/// Private Message
 	virtual void sendToPm(DcConn *, const string & data, const string & uid, const string & from, bool flush = true);
 
+	/// Error Message
+	virtual void sendError(DcConn *, const string & errorText, int errorCode = 0);
 
 	virtual void forceMove(DcConn *, const char * address, const char * reason = NULL);
 	virtual int sendNickList(DcConn *); ///< Sending user-list and op-list

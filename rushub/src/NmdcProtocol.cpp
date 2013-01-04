@@ -1040,6 +1040,12 @@ void NmdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string &
 
 
 
+void NmdcProtocol::sendError(DcConn * dcConn, const string & errorText, int /*errorCode*/) {
+	sendToChat(dcConn, errorText, mDcServer->mDcConfig.mHubBot.c_str(), true);
+}
+
+
+
 // $Quit nick|
 string & NmdcProtocol::appendQuit(string & str, const string & nick) {
 	str.reserve(str.size() + nick.size() + 7);

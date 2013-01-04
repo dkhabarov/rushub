@@ -680,6 +680,23 @@ void AdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string & 
 
 
 
+void AdcProtocol::sendError(DcConn * dcConn, const string & errorText, int errorCode /*= 0*/) {
+	string cmd(STR_LEN("ISTA ")), tmp;
+	cmd.append(toString(SEVERITY_LEVEL_FATAL, tmp)); // Disconnect
+	if (errorCode < 10) {
+		cmd.append("0");
+	}
+	cmd.append(toString(errorCode, tmp)); // Error code
+	cmd.append(STR_LEN(" "));
+
+	const string & out = toUtf8(errorText, tmp);
+	cmd.reserve(10 + out.size());
+	cmd.append(out); // Error text
+	dcConn->send(cmd, true);
+}
+
+
+
 void AdcProtocol::forceMove(DcConn * /*dcConn*/, const char * /*address*/, const char * /*reason*/ /*= NULL*/) {
 
 	// TODO impl
@@ -716,15 +733,7 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 
 	if (adcParser->mType == ADC_TYPE_INVALID) {
 		LOG_CLASS(dcConn, LEVEL_DEBUG, "Wrong syntax cmd");
-		string msg(STR_LEN("ISTA ")), buff;
-		string tmp;
-		const string & out = toUtf8(adcParser->getErrorText(), tmp);
-		msg.reserve(10 + out.size());
-		msg.append(toString(SEVERITY_LEVEL_FATAL, buff)); // Disconnect
-		msg.append(toString(adcParser->getErrorCode(), buff)); // Error code
-		msg.append(STR_LEN(" "));
-		msg.append(out); // Error text
-		dcConn->send(msg, true);
+		sendError(dcConn, adcParser->getErrorText(), adcParser->getErrorCode());
 		dcConn->closeNice(9000, CLOSE_REASON_CMD_SYNTAX);
 		return -1;
 	}
@@ -773,6 +782,12 @@ bool AdcProtocol::verifyCid(DcUser * dcUser) {
 
 const string & AdcProtocol::toUtf8(const string & data, string & msg) {
 	if (isUtf8(data.c_str(), data.size())) {
+		msg.clear();
+		msg.reserve(data.size());
+		const char * ch = data.c_str();
+		while (*ch) {
+			escaper(*ch++, msg);
+		}
 		return data;
 	}
 	cp1251ToUtf8(data, msg, escaper);
