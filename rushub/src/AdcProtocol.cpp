@@ -292,6 +292,10 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 		return -2;
 	}
 
+	if (dcConn->isState(STATE_NORMAL)) {
+		// TODO: check CID and NI
+		// Not allow change PID, CID and nick !!!
+	}
 	
 	
 
