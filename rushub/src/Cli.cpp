@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2010 by Nikolay Bogdanov
  * E-Mail: admin at klan-hub dot ru (admin@klan-hub.ru)
- * Copyright (C) 2009-2012 by Setuper
+ * Copyright (C) 2009-2013 by Setuper
  * E-Mail: setuper at gmail dot com (setuper@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
