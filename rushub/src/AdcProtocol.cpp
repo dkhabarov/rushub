@@ -871,13 +871,11 @@ bool AdcProtocol::removeFromDcUserList(DcUser * dcUser) {
 	LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "Before leave: " << dcUser->getUid() << " Size: " << mDcServer->mDcUserList.size());
 	if (mDcServer->mDcUserList.contain(uidHash)) {
 
-		#ifndef WITHOUT_PLUGINS
-			if (dcUser->mDcConn) {
+		if (dcUser->mDcConn) {
+			#ifndef WITHOUT_PLUGINS
 				mDcServer->mCalls.mOnUserExit.callAll(dcUser);
-			}
-		#endif
+			#endif
 
-		if (dcUser->mDcConn != NULL) {
 			-- mDcServer->miTotalUserCount;
 		}
 
@@ -962,7 +960,7 @@ int AdcProtocol::sendNickList(DcConn * dcConn) {
 	if (mDcServer->mEnterList.find(dcConn->mDcUser->getUidHash())) {
 		dcConn->mNickListInProgress = true;
 	}
-	dcConn->send(mDcServer->mAdcBotList.getList(), true); // bots
+	dcConn->send(mDcServer->mAdcBotList.getList(), true, false); // bots
 	dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_ADC_INFO), true); // users
 	return 0;
 }

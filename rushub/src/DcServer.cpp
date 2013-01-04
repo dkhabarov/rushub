@@ -1080,7 +1080,7 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 		}
 		mNmdcProtocol.showUserToAll(dcUser);
 	}
-	mBotList.add(dcUser->getUidHash(), dcUser);
+	//mBotList.add(dcUser->getUidHash(), dcUser);
 	return 0;
 }
 
