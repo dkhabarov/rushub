@@ -428,23 +428,23 @@ void DcServer::syncTimer(void * self) {
 
 void DcServer::syncActions(DcServer * dcServer) {
 	dcServer->mHelloList.flushCache(); // NMDC
-	dcServer->mDcUserList.flushCache();
-	dcServer->mEnterList.flushCache();
-	dcServer->mOpList.flushCache();
-	dcServer->mIpList.flushCache();
-	dcServer->mChatList.flushCache();
-	dcServer->mActiveList.flushCache();
+	dcServer->mDcUserList.flushCache(); // ADC & NMDC
+	dcServer->mEnterList.flushCache(); // ADC & NMDC
+	dcServer->mOpList.flushCache(); // NMDC
+	dcServer->mIpList.flushCache(); // NMDC
+	dcServer->mChatList.flushCache(); // ADC & NMDC
+	dcServer->mActiveList.flushCache(); // NMDC
 
 	dcServer->mHelloList.autoResize(); // NMDC
-	dcServer->mDcUserList.autoResize();
-	dcServer->mEnterList.autoResize();
-	dcServer->mOpList.autoResize();
-	dcServer->mIpList.autoResize();
-	dcServer->mChatList.autoResize();
-	dcServer->mActiveList.autoResize();
+	dcServer->mDcUserList.autoResize(); // ADC & NMDC
+	dcServer->mEnterList.autoResize(); // ADC & NMDC
+	dcServer->mOpList.autoResize(); // NMDC
+	dcServer->mIpList.autoResize(); // NMDC
+	dcServer->mChatList.autoResize(); // ADC & NMDC
+	dcServer->mActiveList.autoResize(); // NMDC
 
-	dcServer->mNmdcBotList.autoResize();
-	dcServer->mAdcBotList.autoResize();
+	dcServer->mNmdcBotList.autoResize(); // NMDC
+	dcServer->mAdcBotList.autoResize(); // ADC
 }
 
 
@@ -992,7 +992,7 @@ bool DcServer::setConfig(const string & name, const string & value) {
 
 		} else { // NMDC
 			string msg;
-			sendToAllRaw(mNmdcProtocol.appendHubName(msg, mDcConfig.mHubName, mDcConfig.mTopic)); // FIXME
+			sendToAllRaw(mNmdcProtocol.appendHubName(msg, mDcConfig.mHubName, mDcConfig.mTopic));
 		}
 	}
 	mDcConfig.save();

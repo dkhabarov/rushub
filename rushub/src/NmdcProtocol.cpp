@@ -1317,13 +1317,11 @@ bool NmdcProtocol::removeFromDcUserList(DcUser * dcUser) {
 	LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "Before leave: " << dcUser->getUid() << " Size: " << mDcServer->mDcUserList.size());
 	if (mDcServer->mDcUserList.contain(uidHash)) {
 
-		#ifndef WITHOUT_PLUGINS
-			if (dcUser->mDcConn) {
+		if (dcUser->mDcConn) {
+			#ifndef WITHOUT_PLUGINS
 				mDcServer->mCalls.mOnUserExit.callAll(dcUser);
-			}
-		#endif
+			#endif
 
-		if (dcUser->mDcConn != NULL) {
 			-- mDcServer->miTotalUserCount;
 		}
 
@@ -1356,7 +1354,7 @@ bool NmdcProtocol::removeFromDcUserList(DcUser * dcUser) {
 		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 			string msg;
 
-			appendQuit(msg, dcUser->getNick()); // FIXME (for bot?)
+			appendQuit(msg, dcUser->getNick());
 
 			mDcServer->mDcUserList.sendToAll(msg, false, false/*mDcConfig.mDelayedMyinfo*/); // Delay in sending MyINFO (and Quit)
 		}
@@ -1384,7 +1382,7 @@ bool NmdcProtocol::showUserToAll(DcUser * dcUser) {
 
 		if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
 			string opList;
-			dcUser->mDcConn->send(appendOpList(opList, dcUser->getNick()), false, false); // FIXME
+			dcUser->mDcConn->send(appendOpList(opList, dcUser->getNick()), false, false);
 		}
 	} else {
 
@@ -1400,7 +1398,7 @@ bool NmdcProtocol::showUserToAll(DcUser * dcUser) {
 		// Op entry
 		if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
 			string opList;
-			mDcServer->mDcUserList.sendToAll(appendOpList(opList, dcUser->getNick()), false, false/*mDcConfig.mDelayedMyinfo*/); // FIXME
+			mDcServer->mDcUserList.sendToAll(appendOpList(opList, dcUser->getNick()), false, false/*mDcConfig.mDelayedMyinfo*/);
 			mDcServer->mEnterList.sendToAll(opList, false, false/*mDcConfig.mDelayedMyinfo*/);
 		}
 	}
@@ -1415,7 +1413,7 @@ bool NmdcProtocol::showUserToAll(DcUser * dcUser) {
 
 	if (mDcServer->mDcConfig.mSendUserIp) {
 		string ipList;
-		appendUserIp(ipList, dcUser->getNick(), dcUser->getIp()); // FIXME
+		appendUserIp(ipList, dcUser->getNick(), dcUser->getIp());
 		if (ipList.size()) {
 			mDcServer->mIpList.sendToAll(ipList, false, false);
 		}

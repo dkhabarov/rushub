@@ -319,7 +319,7 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 			//mDcServer->mDcUserList.sendToAllAdc(dcConn->mDcUser->getInfo(), true, false);
 			return 0; // Don't use getInfo in normal state!
 		}
-	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
+	} else { // !dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)
 
 		dcConn->setState(STATE_IDENTIFY);
 
@@ -836,17 +836,6 @@ bool AdcProtocol::addToUserList(DcUser * dcUser) {
 
 	LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "After add: " << dcUser->getUid() << " Size: " << mDcServer->mDcUserList.size());
 
-// NMDC
-//		if (!dcUser->isPassive()) {
-//			mActiveList.add(uidHash, dcUser);
-//		}
-//		if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
-//			mOpList.add(uidHash, dcUser);
-//		}
-//		if (dcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
-//			mIpList.add(uidHash, dcUser);
-//		}
-
 	dcUser->setInUserList(true);
 	dcUser->setCanSend(true);
 
@@ -894,10 +883,7 @@ bool AdcProtocol::removeFromDcUserList(DcUser * dcUser) {
 	}
 
 	// Removing from lists
-	mDcServer->mOpList.remove(uidHash);
-	mDcServer->mIpList.remove(uidHash);
 	mDcServer->mEnterList.remove(uidHash);
-	mDcServer->mActiveList.remove(uidHash);
 	mDcServer->mChatList.remove(uidHash);
 
 	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
