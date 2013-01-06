@@ -147,11 +147,7 @@ void DcServer::delAllUsers(UserBase * userBase) {
 		} else {
 			// remove bots!
 			if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-				if (mDcConfig.mAdcOn) { // ADC
-					mAdcProtocol.removeFromDcUserList(dcUser);
-				} else { // NMDC
-					mNmdcProtocol.removeFromDcUserList(dcUser);
-				}
+				removeFromDcUserList(dcUser);
 			}
 			delete dcUser;
 		}
@@ -606,6 +602,356 @@ bool DcServer::antiFlood(unsigned & count, Time & time, const unsigned & countLi
 
 
 
+/// Checking for this nick used
+bool DcServer::checkNick(DcConn * dcConn) {
+
+	// check empty nick!
+	if (dcConn->mDcUser->getNick().empty()) {
+		return false;
+	}
+
+	if (mDcConfig.mAdcOn) { // ADC
+
+		// TODO: call protocol check nick
+
+		// TODO: check nick used
+
+		// TODO check nick for ADC (here we have uid!?)
+		// Protocol dependence
+		// TODO: Problem with check nick in ADC
+		// 1. Check syntax
+		// 2. Check used
+		// 3. Check reg nick
+
+	} else { // NMDC
+
+		// TODO: call protocol check nick
+
+		// Protocol dependence
+		// TODO: check ADC nick used
+
+		unsigned long nickHash = dcConn->mDcUser->getNickHash();
+
+		// TODO:
+		// 1. Check syntax
+		// 2. Check used
+		// 3. Check reg nick
+
+		if (mDcUserList.contain(nickHash)) {
+			// User on a hub
+			DcUser * us = static_cast<DcUser *> (mDcUserList.find(nickHash));
+
+			// Checking nick only for profile -1 (unreg) and bots
+			// All other profiles is a reg users and they are not checked
+			if (!us->mDcConn || dcConn->mDcUser->getParamForce(USER_PARAM_PROFILE)->getInt() == -1) {
+				LOG(LEVEL_DEBUG, "Bad nick (used): '" 
+					<< dcConn->mDcUser->getNick() << "'["
+					<< dcConn->getIp() << "] vs '" << us->getNick() 
+					<< "'[" << us->getIp() << "]");
+				string msg;
+				stringReplace(mDcLang.mUsedNick, string(STR_LEN("nick")), msg, dcConn->mDcUser->getNick());
+				sendToUser(dcConn->mDcUser, msg, mDcConfig.mHubBot.c_str());
+				dcConn->send(mNmdcProtocol.appendValidateDenied(msg.erase(), dcConn->mDcUser->getNick()));
+				return false;
+			}
+			LOG(LEVEL_DEBUG, "removed old user");
+			removeFromDcUserList(us);
+			us->mDcConn->closeNow(CLOSE_REASON_USER_OLD);
+		}
+	}
+	return true;
+}
+
+
+
+bool DcServer::beforeUserEnter(DcConn * dcConn) {
+	LOG_CLASS(dcConn, LEVEL_DEBUG, "Begin login");
+
+	// Check nick
+	if (!checkNick(dcConn)) {
+		dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
+		return false;
+	}
+
+	if (dcConn->mSendNickList) {
+		if (!mDcConfig.mDelayedLogin) {
+			// Before enter, after send list
+			doUserEnter(dcConn);
+		} else {
+			mEnterList.add(dcConn->mDcUser->getNickHash(), dcConn->mDcUser);
+		}
+
+		// Can happen so that list not to send at a time
+		if (mDcConfig.mAdcOn) { // ADC
+			mAdcProtocol.sendNickList(dcConn);
+		} else { // NMDC
+			mNmdcProtocol.sendNickList(dcConn);
+		}
+
+		dcConn->mSendNickList = false;
+	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
+		// User has got list already
+		doUserEnter(dcConn);
+	}
+	return true;
+}
+
+
+
+/// User entry
+void DcServer::doUserEnter(DcConn * dcConn) {
+
+	if (!dcConn->isState(STATE_NORMAL)) {
+		LOG_CLASS(dcConn, LEVEL_DEBUG, "User Login when not all done (" << dcConn->getState() << ")");
+		dcConn->closeNow(CLOSE_REASON_NOT_LOGIN);
+		return;
+	}
+
+	// TODO remove it!
+	// check empty nick!
+	if (!checkNick(dcConn)) {
+		dcConn->closeNice(9000, CLOSE_REASON_NICK_INVALID);
+		return;
+	}
+
+	unsigned long nickHash = dcConn->mDcUser->getNickHash();
+
+	// User is already considered came
+	if (mEnterList.contain(nickHash)) {
+		// We send user contents of cache without clear this cache
+		mEnterList.flushForUser(dcConn->mDcUser);
+		mEnterList.remove(nickHash);
+	}
+
+	// Adding user to the user list
+	if (!addToUserList(dcConn->mDcUser)) {
+		dcConn->closeNow(CLOSE_REASON_USER_ADD);
+		return;
+	}
+
+	// Show to all
+	showUserToAll(dcConn->mDcUser);
+
+	dcConn->clearLoginTimeOut();
+	dcConn->mDcUser->mTimeEnter.get();
+
+	afterUserEnter(dcConn);
+}
+
+
+
+void DcServer::afterUserEnter(DcConn * dcConn) {
+	LOG_CLASS(dcConn, LEVEL_DEBUG, "Entered on the hub");
+
+	#ifndef WITHOUT_PLUGINS
+		mCalls.mOnUserEnter.callAll(dcConn->mDcUser);
+	#endif
+}
+
+
+
+/// Adding user in the user list
+bool DcServer::addToUserList(DcUser * dcUser) {
+	if (!dcUser) {
+		LOG(LEVEL_ERROR, "Adding a NULL user to userlist");
+		return false;
+	} else if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
+		LOG(LEVEL_ERROR, "User is already in the user list");
+		return false;
+	}
+
+	unsigned long nickHash = dcUser->getNickHash();
+
+	LOG_CLASS(&mDcUserList, LEVEL_TRACE, "Before add: " << dcUser->getNick() << " Size: " << mDcUserList.size());
+
+	if (!mDcUserList.add(nickHash, dcUser)) {
+		LOG(LEVEL_DEBUG, "Adding twice user with same user nick " << dcUser->getNick() << " (" << mDcUserList.find(nickHash)->getNick() << ")");
+		dcUser->setInUserList(false);
+		return false;
+	}
+
+	LOG_CLASS(&mDcUserList, LEVEL_TRACE, "After add: " << dcUser->getNick() << " Size: " << mDcUserList.size());
+
+	if (!mDcConfig.mAdcOn) { // NMDC
+		if (!dcUser->isPassive()) {
+			mActiveList.add(nickHash, dcUser);
+		}
+		if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
+			mOpList.add(nickHash, dcUser);
+		}
+		if (dcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
+			mIpList.add(nickHash, dcUser);
+		}
+	}
+
+	dcUser->setInUserList(true);
+	dcUser->setCanSend(true);
+
+	if (dcUser->mDcConn) {
+
+		++ miTotalUserCount; // add except bot
+
+		dcUser->mDcConn->mIpRecv = true; // Installing the permit on reception of the messages on ip
+		mChatList.add(nickHash, dcUser);
+
+		if (!mDcConfig.mAdcOn) { // NMDC
+			if (!(dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO)) {
+				mHelloList.add(nickHash, dcUser);
+			}
+		}
+
+		LOG_CLASS(dcUser->mDcConn, LEVEL_DEBUG, "Adding at the end of Nicklist");
+	}
+	return true;
+}
+
+
+
+/// Removing user from the user list
+bool DcServer::removeFromDcUserList(DcUser * dcUser) {
+	unsigned long nickHash = dcUser->getNickHash();
+
+	LOG_CLASS(&mDcUserList, LEVEL_TRACE, "Before leave: " << dcUser->getNick() << " Size: " << mDcUserList.size());
+	if (mDcUserList.contain(nickHash)) {
+
+		if (dcUser->mDcConn) {
+			#ifndef WITHOUT_PLUGINS
+				mCalls.mOnUserExit.callAll(dcUser);
+			#endif
+
+			-- miTotalUserCount;
+		}
+
+		// We make sure that user with such nick one!
+		DcUser * other = static_cast<DcUser *> (mDcUserList.find(nickHash));
+		if (!dcUser->mDcConn) { // Removing the bot
+			mDcUserList.remove(nickHash);
+		} else if (other && other->mDcConn && dcUser->mDcConn && other->mDcConn == dcUser->mDcConn) {
+			mDcUserList.remove(nickHash);
+			LOG_CLASS(&mDcUserList, LEVEL_TRACE, "After leave: " << dcUser->getNick() << " Size: " << mDcUserList.size());
+		} else {
+			// Such can happen only for users without connection or with different connection
+			LOG_CLASS(dcUser, LEVEL_ERROR, "Not found the correct user for nick: " << dcUser->getNick());
+			return false;
+		}
+	}
+
+	// Removing from lists
+	mEnterList.remove(nickHash);
+	mChatList.remove(nickHash);
+
+	mOpList.remove(nickHash);
+
+	mIpList.remove(nickHash); // NMDC only
+	mActiveList.remove(nickHash); // NMDC only
+	mHelloList.remove(nickHash); // NMDC only
+
+	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
+		dcUser->setInUserList(false);
+
+		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
+			string msg;
+			if (mDcConfig.mAdcOn) { // ADC
+				msg.append(STR_LEN("IQUI ")).append(dcUser->getUid()).append(STR_LEN(ADC_SEPARATOR));
+				mDcUserList.sendToAllAdc(msg, false, false/*mDcConfig.mDelayedMyinfo*/); // Delay in sending MyINFO (and Quit)
+			} else { // NMDC
+				mNmdcProtocol.appendQuit(msg, dcUser->getNick());
+				mDcUserList.sendToAll(msg, false, false/*mDcConfig.mDelayedMyinfo*/); // Delay in sending MyINFO (and Quit)
+			}
+		}
+	}
+	return true;
+}
+
+
+
+/// Show user to all
+bool DcServer::showUserToAll(DcUser * dcUser) {
+	bool canSend = dcUser->isCanSend();
+
+	if (mDcConfig.mAdcOn) { // ADC
+
+		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
+
+			// Show INF string to all users
+			mDcUserList.sendToAllAdc(dcUser->getInfo(), true, false/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
+
+			// Show INF string of the current user to all enterring users
+			mEnterList.sendToAllAdc(dcUser->getInfo(), true, false/*mDcConfig.mDelayedMyinfo*/);
+		}
+
+	} else { // NMDC
+
+		if (dcUser->mDcConn && dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
+			if (!(dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO)) {
+				string hello;
+				mNmdcProtocol.appendHello(hello, dcUser->getNick());
+				dcUser->mDcConn->send(hello, false, false);
+			}
+			if ((dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO) || (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO)) {
+				dcUser->mDcConn->send(dcUser->getInfo(), true, false);
+			}
+			if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
+				string opList;
+				mNmdcProtocol.appendOpList(opList, dcUser->getNick());
+				dcUser->mDcConn->send(opList, false, false);
+			}
+		} else {
+
+			// Sending the greeting for all users, not supporting feature NoHello (except enterring users)
+			{
+				string hello;
+				mNmdcProtocol.appendHello(hello, dcUser->getNick());
+				mHelloList.sendToAll(hello, false, false/*mDcConfig.mDelayedMyinfo*/);
+			}
+
+			// Show MyINFO string to all users
+			mDcUserList.sendToAll(dcUser->getInfo(), true, false/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
+
+			// Show MyINFO string of the current user to all enterring users
+			mEnterList.sendToAll(dcUser->getInfo(), true, false/*mDcConfig.mDelayedMyinfo*/);
+
+			// Op entry
+			if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
+				string opList;
+				mNmdcProtocol.appendOpList(opList, dcUser->getNick());
+				mDcUserList.sendToAll(opList, false, false/*mDcConfig.mDelayedMyinfo*/);
+				mEnterList.sendToAll(opList, false, false/*mDcConfig.mDelayedMyinfo*/);
+			}
+		}
+
+	}
+
+	// Prevention of the double sending
+	if (!mDcConfig.mDelayedLogin) {
+		dcUser->setCanSend(false);
+		mDcUserList.flushCache();
+		mEnterList.flushCache();
+		dcUser->setCanSend(canSend);
+	}
+
+	if (!mDcConfig.mAdcOn) { // NMDC
+		if (mDcConfig.mSendUserIp) {
+			string ipList;
+			mNmdcProtocol.appendUserIp(ipList, dcUser->getNick(), dcUser->getIp());
+			if (ipList.size()) {
+				mIpList.sendToAll(ipList, false, false);
+			}
+
+			if (dcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
+				dcUser->send(mDcUserList.getList(USER_LIST_IP), true, false);
+			} else if (ipList.size() && dcUser->mDcConn && (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_USERIP2)) { // UserIP2
+				dcUser->send(ipList, false, false);
+			}
+		}
+	}
+
+	dcUser->send("", 0, false, true);
+	return true;
+}
+
+
+
 /// Get user by nick (or NULL)
 DcUser * DcServer::getDcUser(const char * nick) {
 	if (nick == NULL) {
@@ -1053,21 +1399,11 @@ int DcServer::regBot(const string & nick, const string & info, const string & ip
 
 	LOG(LEVEL_DEBUG, "Reg bot: " << nick);
 
-	if (mDcConfig.mAdcOn) { // ADC
-		// TODO: remove it! Only botlist.
-		if (!mNmdcProtocol.addToUserList(dcUser)) {
-			delete dcUser;
-			return -3;
-		}
-		mAdcProtocol.showUserToAll(dcUser);
-	} else { // NMDC
-		// TODO: remove it! Only botlist.
-		if (!mNmdcProtocol.addToUserList(dcUser)) {
-			delete dcUser;
-			return -3;
-		}
-		mNmdcProtocol.showUserToAll(dcUser);
+	if (!addToUserList(dcUser)) {
+		delete dcUser;
+		return -3;
 	}
+	showUserToAll(dcUser);
 	return 0;
 }
 
@@ -1087,11 +1423,7 @@ int DcServer::unregBot(const string & nick) {
 		LOG(LEVEL_DEBUG, "Attempt delete user");
 		return -2;
 	}
-	if (mDcConfig.mAdcOn) { // ADC
-		mAdcProtocol.removeFromDcUserList(dcUser); // TODO: remove it!
-	} else { // NMDC
-		mNmdcProtocol.removeFromDcUserList(dcUser); // TODO: remove it!
-	}
+	removeFromDcUserList(dcUser);
 	delete dcUser;
 	return 0;
 }

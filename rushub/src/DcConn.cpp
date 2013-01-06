@@ -330,7 +330,7 @@ void DcConnFactory::deleteConn(Conn * &conn) {
 			}
 
 			if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-				dcConn->dcProtocol()->removeFromDcUserList(dcConn->mDcUser);
+				dcServer->removeFromDcUserList(dcConn->mDcUser);
 			} else { // remove from enter list, if user was already added in it, but user was not added in user list
 				dcServer->mEnterList.remove(dcConn->mDcUser->getNickHash());
 			}

@@ -82,15 +82,6 @@ public:
 
 	const char * genNewSid();
 
-	/// Adding user in the user list
-	bool addToUserList(DcUser *);
-
-	/// Removing user from the user list
-	virtual bool removeFromDcUserList(DcUser *);
-
-	/// Show user to all
-	bool showUserToAll(DcUser *);
-
 protected:
 
 	typedef int (AdcProtocol::*Event) (AdcParser *, DcConn *);
@@ -127,18 +118,6 @@ private:
 
 	int checkCommand(AdcParser *, DcConn *);
 	bool verifyCid(DcUser *);
-
-	/// Check nick used
-	bool checkNick(DcConn *);
-
-	/// Actions before user entry
-	bool beforeUserEnter(DcConn *);
-
-	/// User entry
-	void doUserEnter(DcConn *);
-
-	/// Actions after user entry
-	void afterUserEnter(DcConn *);
 
 }; // class AdcProtocol
 

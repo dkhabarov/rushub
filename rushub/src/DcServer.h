@@ -249,6 +249,27 @@ public:
 	/// Function action when joining the client
 	int onNewConn(Conn *);
 
+	/// Check nick used
+	bool checkNick(DcConn *);
+
+	/// Actions before user entry
+	bool beforeUserEnter(DcConn *);
+
+	/// User entry
+	void doUserEnter(DcConn *);
+
+	/// Actions after user entry
+	void afterUserEnter(DcConn *);
+
+	/// Adding user in the user list
+	bool addToUserList(DcUser *);
+
+	/// Removing user from the user list
+	bool removeFromDcUserList(DcUser *);
+
+	/// Show user to all
+	bool showUserToAll(DcUser *);
+
 	static void syncTimer(void *);
 
 protected:
