@@ -610,32 +610,13 @@ bool DcServer::checkNick(DcConn * dcConn) {
 		return false;
 	}
 
+	unsigned long nickHash = dcConn->mDcUser->getNickHash();
+
 	if (mDcConfig.mAdcOn) { // ADC
 
-		// TODO: call protocol check nick
-
-		// TODO: check nick used
-
-		// TODO check nick for ADC (here we have uid!?)
-		// Protocol dependence
-		// TODO: Problem with check nick in ADC
-		// 1. Check syntax
-		// 2. Check used
-		// 3. Check reg nick
+		// TODO
 
 	} else { // NMDC
-
-		// TODO: call protocol check nick
-
-		// Protocol dependence
-		// TODO: check ADC nick used
-
-		unsigned long nickHash = dcConn->mDcUser->getNickHash();
-
-		// TODO:
-		// 1. Check syntax
-		// 2. Check used
-		// 3. Check reg nick
 
 		if (mDcUserList.contain(nickHash)) {
 			// User on a hub
@@ -682,11 +663,7 @@ bool DcServer::beforeUserEnter(DcConn * dcConn) {
 		}
 
 		// Can happen so that list not to send at a time
-		if (mDcConfig.mAdcOn) { // ADC
-			mAdcProtocol.sendNickList(dcConn);
-		} else { // NMDC
-			mNmdcProtocol.sendNickList(dcConn);
-		}
+		dcConn->dcProtocol()->sendNickList(dcConn);
 
 		dcConn->mSendNickList = false;
 	} else if (!dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
@@ -773,35 +750,38 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 	LOG_CLASS(&mDcUserList, LEVEL_TRACE, "After add: " << dcUser->getNick() << " Size: " << mDcUserList.size());
 
 	if (!mDcConfig.mAdcOn) { // NMDC
-		if (!dcUser->isPassive()) {
-			mActiveList.add(nickHash, dcUser);
-		}
 		if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
-			mOpList.add(nickHash, dcUser);
+			mOpList.add(nickHash, dcUser); // TODO: for bots!
 		}
-		if (dcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
-			mIpList.add(nickHash, dcUser);
+	}
+
+	if (dcUser->mDcConn) {
+
+		// ======================================
+		mChatList.add(nickHash, dcUser);
+
+		if (!mDcConfig.mAdcOn) { // NMDC
+			if (!(dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO)) { // NMDC
+				mHelloList.add(nickHash, dcUser);
+			}
+			if (!dcUser->isPassive()) {
+				mActiveList.add(nickHash, dcUser);
+			}
+			if (dcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
+				mIpList.add(nickHash, dcUser);
+			}
 		}
+		// ======================================
+
+		++ miTotalUserCount; // add except bot
+		dcUser->mDcConn->mIpRecv = true; // Installing the permit on reception of the messages on ip
+
+		LOG_CLASS(dcUser->mDcConn, LEVEL_DEBUG, "Adding at the end of Nicklist");
 	}
 
 	dcUser->setInUserList(true);
 	dcUser->setCanSend(true);
 
-	if (dcUser->mDcConn) {
-
-		++ miTotalUserCount; // add except bot
-
-		dcUser->mDcConn->mIpRecv = true; // Installing the permit on reception of the messages on ip
-		mChatList.add(nickHash, dcUser);
-
-		if (!mDcConfig.mAdcOn) { // NMDC
-			if (!(dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO)) {
-				mHelloList.add(nickHash, dcUser);
-			}
-		}
-
-		LOG_CLASS(dcUser->mDcConn, LEVEL_DEBUG, "Adding at the end of Nicklist");
-	}
 	return true;
 }
 
@@ -851,6 +831,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 
 		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 			string msg;
+			// TODO: for bots?
 			if (mDcConfig.mAdcOn) { // ADC
 				msg.append(STR_LEN("IQUI ")).append(dcUser->getUid()).append(STR_LEN(ADC_SEPARATOR));
 				mDcUserList.sendToAllAdc(msg, false, false/*mDcConfig.mDelayedMyinfo*/); // Delay in sending MyINFO (and Quit)
@@ -871,7 +852,11 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 
 	if (mDcConfig.mAdcOn) { // ADC
 
-		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
+		if (dcUser->mDcConn && dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
+
+			// TODO
+
+		} else {
 
 			// Show INF string to all users
 			mDcUserList.sendToAllAdc(dcUser->getInfo(), true, false/*mDcConfig.mDelayedMyinfo*/); // use cache -> so this can be after user is added
@@ -933,16 +918,19 @@ bool DcServer::showUserToAll(DcUser * dcUser) {
 	if (!mDcConfig.mAdcOn) { // NMDC
 		if (mDcConfig.mSendUserIp) {
 			string ipList;
+			// TODO: for bots?
 			mNmdcProtocol.appendUserIp(ipList, dcUser->getNick(), dcUser->getIp());
 			if (ipList.size()) {
 				mIpList.sendToAll(ipList, false, false);
 			}
 
+			// ===================================================
 			if (dcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
 				dcUser->send(mDcUserList.getList(USER_LIST_IP), true, false);
 			} else if (ipList.size() && dcUser->mDcConn && (dcUser->mDcConn->mFeatures & SUPPORT_FEATUER_USERIP2)) { // UserIP2
 				dcUser->send(ipList, false, false);
 			}
+			// ===================================================
 		}
 	}
 
