@@ -48,8 +48,8 @@ public:
 	bool remove(DcConn *);
 
 	void sendToIp(const string & ip, const string & data, unsigned long profile = 0, bool flush = true);
-	void sendToIpChat(const string & ip, const string & data, const string & uid, unsigned long profile = 0, bool flush = true);
-	void sendToIpPm(const string & ip, const string & data, const string & uid, const string & from, unsigned long profile = 0, bool flush = true);
+	void sendToIpChat(const string & ip, const string & data, const string & nick, unsigned long profile = 0, bool flush = true);
+	void sendToIpPm(const string & ip, const string & data, const string & nick, const string & from, unsigned long profile = 0, bool flush = true);
 
 	virtual void onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
 		LOG(LEVEL_DEBUG, "Autoresizing: size = " << currentSize << 

@@ -319,14 +319,14 @@ public:
 	/// Get conn base by ip
 	virtual const vector<DcUserBase *> & getDcUserBaseByIp(const char * ip) = 0;
 
-	/// Get user base by uid
-	virtual DcUserBase * getDcUserBase(const char * uid) = 0;
+	/// Get user base by nick
+	virtual DcUserBase * getDcUserBase(const char * nick) = 0;
 
 	/// Send command to user
 	virtual bool sendToUser(
 		DcUserBase *,
 		const string & data,
-		const char * uid = NULL,
+		const char * nick = NULL,
 		const char * from = NULL
 	) = 0;
 
@@ -340,7 +340,7 @@ public:
 	virtual bool sendToNick(
 		const char * to,
 		const string & data,
-		const char * uid = NULL,
+		const char * nick = NULL,
 		const char * from = NULL
 	) = 0;
 
@@ -353,7 +353,7 @@ public:
 	/// Send command to all
 	virtual bool sendToAll(
 		const string & data,
-		const char * uid = NULL,
+		const char * nick = NULL,
 		const char * from = NULL
 	) = 0;
 
@@ -366,7 +366,7 @@ public:
 	virtual bool sendToProfiles(
 		unsigned long profile,
 		const string & data,
-		const char * uid = NULL,
+		const char * nick = NULL,
 		const char * from = NULL
 	) = 0;
 
@@ -381,7 +381,7 @@ public:
 		const string & ip,
 		const string & data,
 		unsigned long profile = 0,
-		const char * uid = NULL,
+		const char * nick = NULL,
 		const char * from = NULL
 	) = 0;
 
@@ -396,7 +396,7 @@ public:
 	virtual bool sendToAllExceptNicks(
 		const vector<string> & nickList,
 		const string & data,
-		const char * uid = NULL,
+		const char * nick = NULL,
 		const char * from = NULL
 	) = 0;
 
@@ -410,7 +410,7 @@ public:
 	virtual bool sendToAllExceptIps(
 		const vector<string> & ipList,
 		const string & data,
-		const char * uid = NULL,
+		const char * nick = NULL,
 		const char * from = NULL
 	) = 0;
 
@@ -446,14 +446,14 @@ public:
 
 	/// Registration bot
 	virtual int regBot(
-		const string & uid,
+		const string & nick,
 		const string & info,
 		const string & ip,
 		bool key = true
 	) = 0;
 
 	/// Unreg bot
-	virtual int unregBot(const string & uid) = 0;
+	virtual int unregBot(const string & nick) = 0;
 
 
 	/// Stop hub

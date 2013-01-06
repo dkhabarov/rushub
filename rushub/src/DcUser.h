@@ -74,6 +74,7 @@ public:
 	void setUid(const string & uid);
 	void setNick(const string & nick);
 	unsigned long getUidHash() const;
+	unsigned long getNickHash() const;
 
 	virtual const string & getNmdcTag();
 
@@ -99,14 +100,14 @@ public:
 
 	/// Chat Direct
 	virtual void sendToChat(const string & data, bool flush = true);
-	virtual void sendToChat(const string & data, const string & uid, bool flush = true);
+	virtual void sendToChat(const string & data, const string & nick, bool flush = true);
 
 	/// Chat Broadcast
 	virtual void sendToChatAll(const string & data, bool flush = true);
-	virtual void sendToChatAll(const string & data, const string & uid, bool flush = true);
+	virtual void sendToChatAll(const string & data, const string & nick, bool flush = true);
 
 	/// Private Message
-	virtual void sendToPm(const string & data, const string & uid, const string & from, bool flush = true);
+	virtual void sendToPm(const string & data, const string & nick, const string & from, bool flush = true);
 
 
 	void setCanSend(bool canSend);

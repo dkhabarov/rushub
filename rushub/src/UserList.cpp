@@ -141,17 +141,17 @@ struct ufSendProfile : public unary_function<void, HashTable<UserBase *>::iterat
 /** Unary function for sending chat data to each user */
 struct ufSendChat : public unary_function<void, HashTable<UserBase *>::iterator> {
 	const string & mData;
-	const string & mUid;
+	const string & mNick;
 
-	ufSendChat(const string & data, const string & uid) : 
+	ufSendChat(const string & data, const string & nick) : 
 		mData(data),
-		mUid(uid)
+		mNick(nick)
 	{
 	}
 
 	void operator() (UserBase * userBase) {
-		if (userBase && userBase->isCanSend() && !userBase->getUid().empty()) {
-			userBase->sendToChatAll(mData, mUid, true);
+		if (userBase && userBase->isCanSend() && !userBase->getNick().empty()) {
+			userBase->sendToChatAll(mData, mNick, true);
 		}
 	}
 
@@ -166,12 +166,12 @@ struct ufSendChat : public unary_function<void, HashTable<UserBase *>::iterator>
 /** Unary function for sending chat data to each user with profile */
 struct ufSendChatProfile : public unary_function<void, HashTable<UserBase *>::iterator> {
 	const string & mData;
-	const string & mUid;
+	const string & mNick;
 	unsigned long mProfile;
 
-	ufSendChatProfile(const string & data, const string & uid, unsigned long profile) : 
+	ufSendChatProfile(const string & data, const string & nick, unsigned long profile) : 
 		mData(data),
-		mUid(uid),
+		mNick(nick),
 		mProfile(profile)
 	{
 	}
@@ -185,8 +185,8 @@ struct ufSendChatProfile : public unary_function<void, HashTable<UserBase *>::it
 			if (profile > 31) {
 				profile = (profile % 32) - 1;
 			}
-			if (mProfile & static_cast<unsigned long> (1 << profile) && !userBase->getUid().empty()) {
-				userBase->sendToChat(mData, mUid, true);
+			if (mProfile & static_cast<unsigned long> (1 << profile) && !userBase->getNick().empty()) {
+				userBase->sendToChat(mData, mNick, true);
 			}
 		}
 	}
@@ -203,19 +203,19 @@ struct ufSendChatProfile : public unary_function<void, HashTable<UserBase *>::it
 /** Unary function for sending pm data to each user */
 struct ufSendPm : public unary_function<void, HashTable<UserBase *>::iterator> {
 	const string & mData;
-	const string & mUid;
+	const string & mNick;
 	const string & mFrom;
 
-	ufSendPm(const string & data, const string & uid, const string & from) : 
+	ufSendPm(const string & data, const string & nick, const string & from) : 
 		mData(data),
-		mUid(uid),
+		mNick(nick),
 		mFrom(from)
 	{
 	}
 
 	void operator() (UserBase * userBase) {
-		if (userBase && userBase->isCanSend() && !userBase->getUid().empty()) {
-			userBase->sendToPm(mData, mUid, mFrom, true);
+		if (userBase && userBase->isCanSend() && !userBase->getNick().empty()) {
+			userBase->sendToPm(mData, mNick, mFrom, true);
 		}
 	}
 
@@ -230,13 +230,13 @@ struct ufSendPm : public unary_function<void, HashTable<UserBase *>::iterator> {
 /** Unary function for sending pm data to each user with profile */
 struct ufSendPmProfile : public unary_function<void, HashTable<UserBase *>::iterator> {
 	const string & mData;
-	const string & mUid;
+	const string & mNick;
 	const string & mFrom;
 	unsigned long mProfile;
 
-	ufSendPmProfile(const string & data, const string & uid, const string & from, unsigned long profile) : 
+	ufSendPmProfile(const string & data, const string & nick, const string & from, unsigned long profile) : 
 		mData(data),
-		mUid(uid),
+		mNick(nick),
 		mFrom(from),
 		mProfile(profile)
 	{
@@ -251,8 +251,8 @@ struct ufSendPmProfile : public unary_function<void, HashTable<UserBase *>::iter
 			if (profile > 31) {
 				profile = (profile % 32) - 1;
 			}
-			if (mProfile & static_cast<unsigned long> (1 << profile) && !userBase->getUid().empty()) {
-				userBase->sendToPm(mData, mUid, mFrom, true);
+			if (mProfile & static_cast<unsigned long> (1 << profile) && !userBase->getNick().empty()) {
+				userBase->sendToPm(mData, mNick, mFrom, true);
 			}
 		}
 	}
@@ -339,17 +339,17 @@ bool UserList::autoResize() {
 
 
 
-UserList::Key UserList::uidToLowerHash(const string & uid) {
+UserList::Key UserList::toLowerHash(const string & str) {
 	string tmp;
-	tmp.resize(uid.size());
-	::transform(uid.begin(), uid.end(), tmp.begin(), ::tolower);
+	tmp.resize(str.size());
+	::transform(str.begin(), str.end(), tmp.begin(), ::tolower);
 	return mHash(tmp);
 }
 
 
 
-UserBase * UserList::getUserBaseByUid(const string & uid) {
-	return find(static_cast<unsigned long> (uidToLowerHash(uid))); // for x64 compatibility
+UserBase * UserList::getUserBaseByNick(const string & nick) {
+	return find(static_cast<unsigned long> (toLowerHash(nick))); // for x64 compatibility
 }
 
 
@@ -423,29 +423,29 @@ void UserList::sendToProfiles(unsigned long profile, const string & data, bool a
 
 
 /** Use for chat send to all (sync down) */
-void UserList::sendToAllChat(const string & data, const string & uid) {
-	doForEach(ufSendChat(data, uid));
+void UserList::sendToAllChat(const string & data, const string & nick) {
+	doForEach(ufSendChat(data, nick));
 }
 
 
 
 /** Sending to all profiles chat (sync down) */
-void UserList::sendToAllChat(const string & data, const string & uid, unsigned long profile) {
-	doForEach(ufSendChatProfile(data, uid, profile));
+void UserList::sendToAllChat(const string & data, const string & nick, unsigned long profile) {
+	doForEach(ufSendChatProfile(data, nick, profile));
 }
 
 
 
 /** Use for private send to all (sync down) */
-void UserList::sendToAllPm(const string & data, const string & uid, const string & from) {
-	doForEach(ufSendPm(data, uid, from));
+void UserList::sendToAllPm(const string & data, const string & nick, const string & from) {
+	doForEach(ufSendPm(data, nick, from));
 }
 
 
 
 /** Sending to all profiles pm (sync down) */
-void UserList::sendToAllPm(const string & data, const string & uid, const string & from, unsigned long profile) {
-	doForEach(ufSendPmProfile(data, uid, from, profile));
+void UserList::sendToAllPm(const string & data, const string & nick, const string & from, unsigned long profile) {
+	doForEach(ufSendPmProfile(data, nick, from, profile));
 }
 
 

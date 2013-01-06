@@ -86,8 +86,6 @@ DcServer::DcServer(const string & configFile, const string &) :
 	mHelloList("HelloList"),
 	mEnterList("EnterList"),
 	mChatList("ChatList"),
-	mNmdcBotList("NmdcBotList"),
-	mAdcBotList("AdcBotList"),
 	miTotalUserCount(0),
 	miTotalShare(0),
 	mPluginList(mDcConfig.mPluginPath),
@@ -127,13 +125,6 @@ DcServer::DcServer(const string & configFile, const string &) :
 	mDcUserList.addUserListItem(NmdcProtocol::ipList, "$UserIP "); // USER_LIST_IP
 	mDcUserList.addUserListItem(AdcProtocol::infList, ""); // USER_LIST_ADC_INFO
 	mOpList.addUserListItem(NmdcProtocol::nickList, "$OpList "); // 0
-
-	// For bots without prefix because problem with redundant command
-	mNmdcBotList.addUserListItem(NmdcProtocol::nickList, ""); // USER_LIST_NICK
-	mNmdcBotList.addUserListItem(NmdcProtocol::myInfoList, ""); // USER_LIST_MYINFO
-	mNmdcBotList.addUserListItem(NmdcProtocol::ipList, ""); // USER_LIST_IP
-
-	mAdcBotList.addUserListItem(AdcProtocol::infList, ""); // 0
 
 	if (mDcConfig.mRegMainBot) { // Main bot registration
 		LOG(LEVEL_DEBUG, "Reg main bot '" << mDcConfig.mHubBot << "'");
@@ -185,10 +176,6 @@ DcServer::~DcServer() {
 	// remove all users and bots
 	if (mDcUserList.size() > 0) {
 		mDcUserList.doForEach(bind1st(mem_fun(&DcServer::delAllUsers), this), true); // Delete all users
-	}
-
-	if (mAdcBotList.size() > 0) {
-		// TODO: remove bots
 	}
 
 	deleteAll(); // Delete all other conn
@@ -442,9 +429,6 @@ void DcServer::syncActions(DcServer * dcServer) {
 	dcServer->mIpList.autoResize(); // NMDC
 	dcServer->mChatList.autoResize(); // ADC & NMDC
 	dcServer->mActiveList.autoResize(); // NMDC
-
-	dcServer->mNmdcBotList.autoResize(); // NMDC
-	dcServer->mAdcBotList.autoResize(); // ADC
 }
 
 
@@ -622,16 +606,15 @@ bool DcServer::antiFlood(unsigned & count, Time & time, const unsigned & countLi
 
 
 
-/// Get user by uid (or NULL)
-DcUser * DcServer::getDcUser(const char * uid) {
-	if (uid == NULL) {
+/// Get user by nick (or NULL)
+DcUser * DcServer::getDcUser(const char * nick) {
+	if (nick == NULL) {
 		return NULL;
 	}
 
-	string uidStr(uid);
-	if (uidStr.size()) {
-		// for all users (both protocols)
-		UserBase * userBase = mDcUserList.getUserBaseByUid(uidStr);
+	string nickStr(nick);
+	if (nickStr.size()) {
+		UserBase * userBase = mDcUserList.getUserBaseByNick(nickStr);
 		if (userBase) {
 			return static_cast<DcUser *> (userBase);
 		}
@@ -639,7 +622,7 @@ DcUser * DcServer::getDcUser(const char * uid) {
 		for (tCLIt it = mClientList.begin(); it != mClientList.end(); ++it) {
 			dcConn = static_cast<DcConn *> (*it);
 			if (dcConn && dcConn->mDcUser && dcConn->mDcUser->mType == CLIENT_TYPE_DC &&
-				dcConn->mDcUser->getUid() == uidStr
+				dcConn->mDcUser->getNick() == nickStr
 			) {
 				return dcConn->mDcUser;
 			}
@@ -651,8 +634,8 @@ DcUser * DcServer::getDcUser(const char * uid) {
 
 
 // TODO return user with conn only?
-DcUserBase * DcServer::getDcUserBase(const char * uid) {
-	DcUser * dcUser = getDcUser(uid);
+DcUserBase * DcServer::getDcUserBase(const char * nick) {
+	DcUser * dcUser = getDcUser(nick);
 	return (dcUser != NULL && dcUser->mDcConn != NULL) ? static_cast<DcUserBase *> (dcUser) : NULL;
 }
 
@@ -673,16 +656,16 @@ const vector<DcUserBase *> & DcServer::getDcUserBaseByIp(const char * ip) {
 
 
 /// Send data to user
-bool DcServer::sendToUser(DcUserBase * dcUserBase, const string & data, const char * uid, const char * from) {
+bool DcServer::sendToUser(DcUserBase * dcUserBase, const string & data, const char * nick, const char * from) {
 	DcUser * dcUser = static_cast<DcUser *> (dcUserBase);
 	if (!dcUser || !dcUser->mDcConn) { // Check exist and not bot
 		return false;
 	}
 	DcConn * dcConn = dcUser->mDcConn;
-	if (from && uid) {
-		dcConn->mDcUser->sendToPm(data, uid, from, true); // PM
-	} else if (uid) {
-		dcConn->mDcUser->sendToChat(data, uid, true); // Chat from user
+	if (from && nick) {
+		dcConn->mDcUser->sendToPm(data, nick, from, true); // PM
+	} else if (nick) {
+		dcConn->mDcUser->sendToChat(data, nick, true); // Chat from user
 	} else {
 		dcConn->mDcUser->sendToChat(data, true); // Simple Chat
 	}
@@ -704,8 +687,8 @@ bool DcServer::sendToUserRaw(DcUserBase * dcUserBase, const string & data) {
 
 
 /// Send data to nick
-bool DcServer::sendToNick(const char * to, const string & data, const char * uid, const char * from) {
-	return sendToUser(getDcUser(to), data, uid, from);
+bool DcServer::sendToNick(const char * to, const string & data, const char * nick, const char * from) {
+	return sendToUser(getDcUser(to), data, nick, from);
 }
 
 
@@ -740,11 +723,11 @@ void DcServer::sendToAllRaw(const string & data, bool addSep, bool flush) {
 
 
 /// Send data to all
-bool DcServer::sendToAll(const string & data, const char * uid, const char * from) {
-	if (from && uid) {
-		mDcUserList.sendToAllPm(data, uid, from); // PM
-	} else if (uid) {
-		mDcUserList.sendToAllChat(data, uid); // Chat from user
+bool DcServer::sendToAll(const string & data, const char * nick, const char * from) {
+	if (from && nick) {
+		mDcUserList.sendToAllPm(data, nick, from); // PM
+	} else if (nick) {
+		mDcUserList.sendToAllChat(data, nick); // Chat from user
 	} else {
 		// TODO send to chat
 		sendToAll(data, true, true); // Simple Chat
@@ -764,11 +747,11 @@ bool DcServer::sendToAllRaw(const string & data) {
 
 
 /// Send data to profiles
-bool DcServer::sendToProfiles(unsigned long profile, const string & data, const char * uid, const char * from) {
-	if (from && uid) {
-		mDcUserList.sendToAllPm(data, uid, from, profile); // PM
-	} else if (uid) {
-		mDcUserList.sendToAllChat(data, uid, profile); // Chat from user
+bool DcServer::sendToProfiles(unsigned long profile, const string & data, const char * nick, const char * from) {
+	if (from && nick) {
+		mDcUserList.sendToAllPm(data, nick, from, profile); // PM
+	} else if (nick) {
+		mDcUserList.sendToAllChat(data, nick, profile); // Chat from user
 	} else {
 		// TODO
 		mDcUserList.sendToProfiles(profile, data, true); // Simple Chat
@@ -788,15 +771,15 @@ bool DcServer::sendToProfilesRaw(unsigned long profile, const string & data) {
 
 
 /// Send data to ip
-bool DcServer::sendToIp(const string & ip, const string & data, unsigned long profile, const char * uid, const char * from) {
+bool DcServer::sendToIp(const string & ip, const string & data, unsigned long profile, const char * nick, const char * from) {
 	if (!Conn::checkIp(ip)) {
 		return false;
 	}
 
-	if (from && uid) {
-		mIpListConn->sendToIpPm(ip, data, uid, from, profile, true); // PM
-	} else if (uid) {
-		mIpListConn->sendToIpChat(ip, data, uid, profile, true); // Chat from user
+	if (from && nick) {
+		mIpListConn->sendToIpPm(ip, data, nick, from, profile, true); // PM
+	} else if (nick) {
+		mIpListConn->sendToIpChat(ip, data, nick, profile, true); // Chat from user
 	} else {
 		// TODO
 		mIpListConn->sendToIp(ip, data, profile, true); // Simple Chat
@@ -820,19 +803,19 @@ bool DcServer::sendToIpRaw(const string & ip, const string & data, unsigned long
 
 
 /// Send data to all except nick list
-bool DcServer::sendToAllExceptNicks(const vector<string> & nickList, const string & data, const char * uid, const char * from) {
+bool DcServer::sendToAllExceptNicks(const vector<string> & nickList, const string & data, const char * nick, const char * from) {
 
 	DcUser * dcUser = NULL;
 	vector<DcUser *> ul;
 	for (List_t::const_iterator it = nickList.begin(); it != nickList.end(); ++it) {
-		dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByUid(*it)); // for all users!
+		dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByNick(*it));
 		if (dcUser && dcUser->isCanSend()) {
 			dcUser->setCanSend(false);
 			ul.push_back(dcUser);
 		}
 	}
 
-	sendToAll(data, uid, from);
+	sendToAll(data, nick, from);
 
 	for (vector<DcUser *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
 		(*ul_it)->setCanSend(true);
@@ -848,7 +831,7 @@ bool DcServer::sendToAllExceptNicksRaw(const vector<string> & nickList, const st
 	DcUser * dcUser = NULL;
 	vector<DcUser *> ul;
 	for (List_t::const_iterator it = nickList.begin(); it != nickList.end(); ++it) {
-		dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByUid(*it)); // for all users!
+		dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByNick(*it));
 		if (dcUser && dcUser->isCanSend()) {
 			dcUser->setCanSend(false);
 			ul.push_back(dcUser);
@@ -866,7 +849,7 @@ bool DcServer::sendToAllExceptNicksRaw(const vector<string> & nickList, const st
 
 
 /// Send data to all except ip list
-bool DcServer::sendToAllExceptIps(const vector<string> & ipList, const string & data, const char * uid, const char * from) {
+bool DcServer::sendToAllExceptIps(const vector<string> & ipList, const string & data, const char * nick, const char * from) {
 
 	DcConn * dcConn = NULL;
 	vector<DcConn*> ul;
@@ -882,7 +865,7 @@ bool DcServer::sendToAllExceptIps(const vector<string> & ipList, const string & 
 		}
 	}
 
-	sendToAll(data, uid, from);
+	sendToAll(data, nick, from);
 
 	for (vector<DcConn*>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
 		(*ul_it)->mDcUser->setCanSend(true);
@@ -1024,7 +1007,7 @@ bool DcServer::setLang(const string & name, const string & value) {
 
 
 
-int DcServer::regBot(const string & uid, const string & info, const string & ip, bool key) {
+int DcServer::regBot(const string & nick, const string & info, const string & ip, bool key) {
 	DcUser * dcUser = new DcUser(CLIENT_TYPE_DC, NULL);
 	dcUser->mDcServer = this;
 
@@ -1032,7 +1015,7 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 	if (mDcConfig.mAdcOn) { // ADC
 		dcUser->setUid(string(mAdcProtocol.genNewSid()));
 	} else { // NMDC
-		dcUser->setNick(uid);
+		dcUser->setNick(nick);
 	}
 
 	dcUser->getParamForce(USER_PARAM_PROFILE)->setInt(30);
@@ -1050,25 +1033,25 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 		}
 		string inf(STR_LEN("IINF "));
 		inf.reserve(79);
-		inf.append(dcUser->getUid()).append(STR_LEN(" CT")).append(ct, 1).append(STR_LEN(" NI")).append(uid);
+		inf.append(dcUser->getUid()).append(STR_LEN(" CT")).append(ct, 1).append(STR_LEN(" NI")).append(nick);
 		inf.append(STR_LEN(" IDAONWQSVCXNJKW7L4HLB5O24TYW55555KAEK7WRY SS0 HN0 HR0 HO1 VEBot\\sV:1.0 SL0 DERusHub\\sbot"));
 		dcUser->setInfo(inf);
 	} else { // NMDC
-		if (uid.empty() || uid.size() > 0x40 || uid.find_first_of(" |$") != uid.npos) {
+		if (nick.empty() || nick.size() > 0x40 || nick.find_first_of(" |$") != nick.npos) {
 			delete dcUser;
 			return -1;
 		}
 		string myInfo(STR_LEN("$MyINFO $ALL "));
-		if (!dcUser->setInfo(myInfo.append(uid).append(STR_LEN(" ")).append(info))) {
+		if (!dcUser->setInfo(myInfo.append(nick).append(STR_LEN(" ")).append(info))) {
 			myInfo.assign(STR_LEN("$MyINFO $ALL "));
-			if (!dcUser->setInfo(myInfo.append(uid).append(STR_LEN(" $ $$$0$")))) {
+			if (!dcUser->setInfo(myInfo.append(nick).append(STR_LEN(" $ $$$0$")))) {
 				delete dcUser;
 				return -2;
 			}
 		}
 	}
 
-	LOG(LEVEL_DEBUG, "Reg bot: " << uid);
+	LOG(LEVEL_DEBUG, "Reg bot: " << nick);
 
 	if (mDcConfig.mAdcOn) { // ADC
 		// TODO: remove it! Only botlist.
@@ -1090,12 +1073,12 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 
 
 
-int DcServer::unregBot(const string & uid) {
+int DcServer::unregBot(const string & nick) {
 
-	LOG(LEVEL_DEBUG, "Unreg bot: " << uid);
+	LOG(LEVEL_DEBUG, "Unreg bot: " << nick);
 
 	// TODO: remove it! Replace to botlist
-	DcUser * dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByUid(uid));
+	DcUser * dcUser = static_cast<DcUser *> (mDcUserList.getUserBaseByNick(nick));
 	if (!dcUser) { // Not found
 		return -1;
 	}

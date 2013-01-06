@@ -66,14 +66,14 @@ public:
 
 	/// Chat Direct
 	virtual void sendToChat(DcConn *, const string & data, bool flush = true) = 0;
-	virtual void sendToChat(DcConn *, const string & data, const string & uid, bool flush = true) = 0;
+	virtual void sendToChat(DcConn *, const string & data, const string & nick, bool flush = true) = 0;
 
 	/// Chat Broadcast
 	virtual void sendToChatAll(DcConn *, const string & data, bool flush = true) = 0;
-	virtual void sendToChatAll(DcConn *, const string & data, const string & uid, bool flush = true) = 0;
+	virtual void sendToChatAll(DcConn *, const string & data, const string & nick, bool flush = true) = 0;
 
 	/// Private Message
-	virtual void sendToPm(DcConn *, const string & data, const string & uid, const string & from, bool flush = true) = 0;
+	virtual void sendToPm(DcConn *, const string & data, const string & nick, const string & from, bool flush = true) = 0;
 
 	/// Error Message
 	virtual void sendError(DcConn *, const string & errorText, int errorCode = 0) = 0;

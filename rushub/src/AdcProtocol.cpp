@@ -158,7 +158,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 
 			case HEADER_DIRECT:
 				// find target user
-				dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(adcParser->getSidTarget()));
+				dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(adcParser->getSidTarget()));
 				if (dcUser) { // User was found
 					dcUser->send(adcParser->mCommand, true);
 				}
@@ -166,7 +166,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 
 			case HEADER_ECHO:
 				// find target user
-				dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(adcParser->getSidTarget()));
+				dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(adcParser->getSidTarget()));
 				if (dcUser) { // User was found
 					dcUser->send(adcParser->mCommand, true);
 					dcConn->mDcUser->send(adcParser->mCommand, true);
@@ -299,8 +299,7 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 		// TODO: check CID and NI
 		// Not allow change PID, CID and nick !!!
 	}
-	
-	
+
 
 	#ifndef WITHOUT_PLUGINS
 		// TODO PD param in scripts!
@@ -617,10 +616,7 @@ const char * AdcProtocol::genNewSid() {
 	UserBase * userBase = NULL;
 	do {
 		sid = getSid(++mSidNum);
-		userBase = mDcServer->mDcUserList.getUserBaseByUid(sid); // only ADC users
-		if (userBase == NULL) {
-			userBase = mDcServer->mAdcBotList.getUserBaseByUid(sid); // only ADC bots
-		}
+		userBase = mDcServer->mDcUserList.getUserBaseByNick(sid);
 	} while (userBase != NULL || strcmp(sid, "AAAA") == 0); // "AAAA" is a hub
 	return sid;
 }
@@ -641,7 +637,10 @@ void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, bool flush /*
 
 
 // DMSG <my_sid> <msg>
-void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string & uid, bool flush /*= true*/) {
+void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string & nick, bool flush /*= true*/) {
+	// TODO: nick->uid
+	const string & uid = nick;
+
 	string tmp;
 	const string & out = toUtf8(data, tmp);
 	dcConn->reserve(11 + out.size()); // 5 + 4 + 1 + out.size() + 1
@@ -661,7 +660,10 @@ void AdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, bool flush
 
 
 // BMSG <my_sid> <msg>
-void AdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, const string & uid, bool flush /*= true*/) {
+void AdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, const string & nick, bool flush /*= true*/) {
+	// TODO: nick->uid
+	const string & uid = nick;
+
 	string tmp;
 	const string & out = toUtf8(data, tmp);
 	dcConn->reserve(11 + out.size()); // 5 + 4 + 1 + out.size() + 1
@@ -674,7 +676,10 @@ void AdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, const stri
 
 
 // EMSG <my_sid> <target_sid> <msg> PM<group_sid>
-void AdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string & uid, const string & from, bool flush /*= true*/) {
+void AdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string & nick, const string & from, bool flush /*= true*/) {
+	// TODO: nick->uid
+	const string & uid = nick;
+
 	string tmp;
 	const string & out = toUtf8(data, tmp);
 	dcConn->reserve(23 + out.size()); // 5 + 4 + 1 + 4 + 1 + out.size() + 3 + 4 + 1
@@ -727,8 +732,6 @@ bool AdcProtocol::checkNick(DcConn * dcConn) {
 
 	// TODO: check nick used
 
-	//unsigned long uidHash = dcConn->mDcUser->getUidHash();
-
 	// TODO check nick for ADC (here we have uid!?)
 	// Protocol dependence
 	// TODO: Problem with check nick in ADC
@@ -755,7 +758,7 @@ bool AdcProtocol::beforeUserEnter(DcConn * dcConn) {
 			// Before enter, after send list
 			doUserEnter(dcConn);
 		} else {
-			mDcServer->mEnterList.add(dcConn->mDcUser->getUidHash(), dcConn->mDcUser);
+			mDcServer->mEnterList.add(dcConn->mDcUser->getNickHash(), dcConn->mDcUser);
 		}
 
 		// Can happen so that list not to send at a time
@@ -787,13 +790,13 @@ void AdcProtocol::doUserEnter(DcConn * dcConn) {
 		return;
 	}
 
-	unsigned long uidHash = dcConn->mDcUser->getUidHash();
+	unsigned long nickHash = dcConn->mDcUser->getNickHash();
 
 	// User is already considered came
-	if (mDcServer->mEnterList.contain(uidHash)) {
+	if (mDcServer->mEnterList.contain(nickHash)) {
 		// We send user contents of cache without clear this cache
 		mDcServer->mEnterList.flushForUser(dcConn->mDcUser);
-		mDcServer->mEnterList.remove(uidHash);
+		mDcServer->mEnterList.remove(nickHash);
 	}
 
 	// Adding user to the user list
@@ -834,27 +837,18 @@ bool AdcProtocol::addToUserList(DcUser * dcUser) {
 		return false;
 	}
 
-	unsigned long uidHash = dcUser->getUidHash();
+	unsigned long nickHash = dcUser->getNickHash();
 
-	// TODO: (mAdcOn) check NMDC nicks & bots
-
-	// Find nick in bot list
-	if (mDcServer->mAdcBotList.contain(uidHash)) {
-		LOG(LEVEL_DEBUG, "Adding twice user with same bot nick " << dcUser->getUid() << " (" << mDcServer->mAdcBotList.find(uidHash)->getUid() << ")");
-		dcUser->setInUserList(false);
-		return false;
-	}
-
-	LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "Before add: " << dcUser->getUid() << " Size: " << mDcServer->mDcUserList.size());
+	LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "Before add: " << dcUser->getNick() << " Size: " << mDcServer->mDcUserList.size());
 
 	// Try adding in user list
-	if (!mDcServer->mDcUserList.add(uidHash, dcUser)) {
-		LOG(LEVEL_DEBUG, "Adding twice user with same user nick " << dcUser->getUid() << " (" << mDcServer->mDcUserList.find(uidHash)->getUid() << ")");
+	if (!mDcServer->mDcUserList.add(nickHash, dcUser)) {
+		LOG(LEVEL_DEBUG, "Adding twice user with same user nick " << dcUser->getNick() << " (" << mDcServer->mDcUserList.find(nickHash)->getNick() << ")");
 		dcUser->setInUserList(false);
 		return false;
 	}
 
-	LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "After add: " << dcUser->getUid() << " Size: " << mDcServer->mDcUserList.size());
+	LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "After add: " << dcUser->getNick() << " Size: " << mDcServer->mDcUserList.size());
 
 	dcUser->setInUserList(true);
 	dcUser->setCanSend(true);
@@ -864,7 +858,7 @@ bool AdcProtocol::addToUserList(DcUser * dcUser) {
 		++ mDcServer->miTotalUserCount; // add except bot
 
 		dcUser->mDcConn->mIpRecv = true; // Installing the permit on reception of the messages on ip
-		mDcServer->mChatList.add(uidHash, dcUser);
+		mDcServer->mChatList.add(nickHash, dcUser);
 
 		LOG_CLASS(dcUser->mDcConn, LEVEL_DEBUG, "Adding at the end of Nicklist");
 	}
@@ -875,17 +869,10 @@ bool AdcProtocol::addToUserList(DcUser * dcUser) {
 
 /// Removing user from the user list
 bool AdcProtocol::removeFromDcUserList(DcUser * dcUser) {
-	unsigned long uidHash = dcUser->getUidHash();
+	unsigned long nickHash = dcUser->getNickHash();
 
-	if (mDcServer->mAdcBotList.contain(uidHash)) {
-		LOG_CLASS(dcUser, LEVEL_ERROR, "Found bot with nick '" << dcUser->getUid() << "'");
-		return false;
-	} else {
-		// TODO: (mAdcOn) check NMDC nicks & bots
-	}
-
-	LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "Before leave: " << dcUser->getUid() << " Size: " << mDcServer->mDcUserList.size());
-	if (mDcServer->mDcUserList.contain(uidHash)) {
+	LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "Before leave: " << dcUser->getNick() << " Size: " << mDcServer->mDcUserList.size());
+	if (mDcServer->mDcUserList.contain(nickHash)) {
 
 		if (dcUser->mDcConn) {
 			#ifndef WITHOUT_PLUGINS
@@ -896,22 +883,22 @@ bool AdcProtocol::removeFromDcUserList(DcUser * dcUser) {
 		}
 
 		// We make sure that user with such nick one!
-		DcUser * other = static_cast<DcUser *> (mDcServer->mDcUserList.find(dcUser->getUidHash()));
+		DcUser * other = static_cast<DcUser *> (mDcServer->mDcUserList.find(dcUser->getNickHash()));
 		if (!dcUser->mDcConn) { // Removing the bot
-			mDcServer->mDcUserList.remove(uidHash);
+			mDcServer->mDcUserList.remove(nickHash);
 		} else if (other && other->mDcConn && dcUser->mDcConn && other->mDcConn == dcUser->mDcConn) {
-			mDcServer->mDcUserList.remove(uidHash);
-			LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "After leave: " << dcUser->getUid() << " Size: " << mDcServer->mDcUserList.size());
+			mDcServer->mDcUserList.remove(nickHash);
+			LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "After leave: " << dcUser->getNick() << " Size: " << mDcServer->mDcUserList.size());
 		} else {
 			// Such can happen only for users without connection or with different connection
-			LOG_CLASS(dcUser, LEVEL_ERROR, "Not found the correct user for nick: " << dcUser->getUid());
+			LOG_CLASS(dcUser, LEVEL_ERROR, "Not found the correct user for nick: " << dcUser->getNick());
 			return false;
 		}
 	}
 
 	// Removing from lists
-	mDcServer->mEnterList.remove(uidHash);
-	mDcServer->mChatList.remove(uidHash);
+	mDcServer->mEnterList.remove(nickHash);
+	mDcServer->mChatList.remove(nickHash);
 
 	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		dcUser->setInUserList(false);
@@ -958,90 +945,12 @@ bool AdcProtocol::showUserToAll(DcUser * dcUser) {
 
 
 
-/// Adding bot
-bool AdcProtocol::addBot(DcUser * dcUser) {
-	if (!dcUser) {
-		LOG(LEVEL_ERROR, "Adding a NULL user to userlist");
-		return false;
-	}
-	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-		LOG(LEVEL_ERROR, "User is already in the user list");
-		return false;
-	}
-
-	unsigned long uidHash = dcUser->getUidHash();
-
-	// TODO: (mAdcOn) check NMDC nicks & bots
-
-	// Find nick in user list
-	if (mDcServer->mDcUserList.contain(uidHash)) {
-		LOG(LEVEL_DEBUG, "Adding twice bot with same user nick " << dcUser->getUid() << " (" << mDcServer->mDcUserList.find(uidHash)->getUid() << ")");
-		dcUser->setInUserList(false);
-		return false;
-	}
-
-	LOG_CLASS(&mDcServer->mAdcBotList, LEVEL_TRACE, "Before add: " << dcUser->getUid() << " Size: " << mDcServer->mAdcBotList.size());
-
-	// Try adding in bot list
-	if (!mDcServer->mAdcBotList.add(uidHash, dcUser)) {
-		LOG(LEVEL_DEBUG, "Adding twice bot with same bot nick " << dcUser->getUid() << " (" << mDcServer->mAdcBotList.find(uidHash)->getUid() << ")");
-		dcUser->setInUserList(false);
-		return false;
-	}
-
-	LOG_CLASS(&mDcServer->mAdcBotList, LEVEL_TRACE, "After add: " << dcUser->getUid() << " Size: " << mDcServer->mAdcBotList.size());
-
-	dcUser->setInUserList(true);
-	return true;
-}
-
-
-
-/// Removing bot
-bool AdcProtocol::removeBot(DcUser * dcUser) {
-	unsigned long uidHash = dcUser->getUidHash();
-
-	if (mDcServer->mDcUserList.contain(uidHash)) {
-		LOG_CLASS(dcUser, LEVEL_ERROR, "Found user with nick '" << dcUser->getUid() << "'");
-		return false;
-	} else {
-		// TODO: (mAdcOn) check NMDC nicks & bots
-	}
-
-	if (mDcServer->mAdcBotList.contain(uidHash)) {
-		LOG_CLASS(&mDcServer->mAdcBotList, LEVEL_TRACE, "Before leave: " << dcUser->getUid() << " Size: " << mDcServer->mAdcBotList.size());
-
-		if (!dcUser->mDcConn) { // Check removing the bot
-			mDcServer->mAdcBotList.remove(uidHash);
-			LOG_CLASS(&mDcServer->mAdcBotList, LEVEL_TRACE, "After leave: " << dcUser->getUid() << " Size: " << mDcServer->mAdcBotList.size());
-		} else {
-			// Such can happen only for users without connection or with different connection
-			LOG_CLASS(dcUser, LEVEL_ERROR, "Not found the correct user for nick: " << dcUser->getUid());
-			return false;
-		}
-	}
-
-	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-		dcUser->setInUserList(false);
-
-		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
-			string msg;
-			msg.append(STR_LEN("IQUI ")).append(dcUser->getUid()).append(STR_LEN(ADC_SEPARATOR));
-			mDcServer->mDcUserList.sendToAllAdc(msg, false, false/*mDcConfig.mDelayedMyinfo*/); // Delay in sending MyINFO (and Quit)
-		}
-	}
-	return true;
-}
-
-
-
 /// Sending the user-list
 int AdcProtocol::sendNickList(DcConn * dcConn) {
-	if (mDcServer->mEnterList.find(dcConn->mDcUser->getUidHash())) {
+	if (mDcServer->mEnterList.find(dcConn->mDcUser->getNickHash())) {
 		dcConn->mNickListInProgress = true;
 	}
-	dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_ADC_INFO), true, false); // users
-	dcConn->send(mDcServer->mAdcBotList.getList(), true); // bots
+	dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_ADC_INFO), true, true);
 	return 0;
 }
 

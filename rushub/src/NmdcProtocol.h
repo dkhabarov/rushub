@@ -92,14 +92,14 @@ public:
 
 	/// Chat Direct
 	virtual void sendToChat(DcConn *, const string & data, bool flush = true);
-	virtual void sendToChat(DcConn *, const string & data, const string & uid, bool flush = true);
+	virtual void sendToChat(DcConn *, const string & data, const string & nick, bool flush = true);
 
 	/// Chat Broadcast
 	virtual void sendToChatAll(DcConn *, const string & data, bool flush = true);
-	virtual void sendToChatAll(DcConn *, const string & data, const string & uid, bool flush = true);
+	virtual void sendToChatAll(DcConn *, const string & data, const string & nick, bool flush = true);
 
 	/// Private Message
-	virtual void sendToPm(DcConn *, const string & data, const string & uid, const string & from, bool flush = true);
+	virtual void sendToPm(DcConn *, const string & data, const string & nick, const string & from, bool flush = true);
 
 	/// Error Message
 	virtual void sendError(DcConn *, const string & errorText, int errorCode = 0);
@@ -126,12 +126,6 @@ public:
 
 	/// Show user to all
 	bool showUserToAll(DcUser *);
-
-	/// Adding bot
-	bool addBot(DcUser *);
-
-	/// Removing bot
-	bool removeBot(DcUser *);
 
 protected:
 

@@ -134,7 +134,7 @@ Conn * NmdcProtocol::getConnForUdpData(Conn * conn, Parser * parser) {
 		if (!dcParser->splitChunks()) {
 
 			// UDP SR PROTOCOL NMDC SPEC
-			DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcParser->chunkString(CHUNK_SR_FROM)));
+			DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcParser->chunkString(CHUNK_SR_FROM)));
 			if (dcUser && dcUser->mDcConn && conn->getIpUdp() == dcUser->getIp()) {
 				return dcUser->mDcConn;
 			} else {
@@ -516,7 +516,7 @@ int NmdcProtocol::eventTo(NmdcParser * dcparser, DcConn * dcConn) {
 	#endif
 
 	// Check TO user (PROTOCOL NMDC SPEC)
-	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(nick));
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(nick));
 	if (!dcUser) {
 		return -2;
 	}
@@ -549,7 +549,7 @@ int NmdcProtocol::eventMcTo(NmdcParser * dcparser, DcConn * dcConn) {
 	#endif
 
 	// Check MCTO user (PROTOCOL NMDC SPEC)
-	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(nick));
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(nick));
 	if (!dcUser) {
 		return -2;
 	}
@@ -583,7 +583,7 @@ int NmdcProtocol::eventUserIp(NmdcParser * dcParser, DcConn * dcConn) {
 		nick.assign(param, cur, pos - cur);
 		if (nick.size()) {
 			// UserIP PROTOCOL NMDC SPEC
-			UserBase * userBase = mDcServer->mDcUserList.getUserBaseByUid(nick);
+			UserBase * userBase = mDcServer->mDcUserList.getUserBaseByNick(nick);
 			if (userBase != NULL) {
 				result.append(nick).append(STR_LEN(" ")).append(userBase->getIp()).append(STR_LEN("$$"));
 			}
@@ -596,7 +596,7 @@ int NmdcProtocol::eventUserIp(NmdcParser * dcParser, DcConn * dcConn) {
 	nick.assign(param, cur, param.size() - cur);
 	if (nick.size()) {
 		// UserIP PROTOCOL NMDC SPEC
-		UserBase * userBase = mDcServer->mDcUserList.getUserBaseByUid(nick);
+		UserBase * userBase = mDcServer->mDcUserList.getUserBaseByNick(nick);
 		if (userBase != NULL) {
 			result.append(nick).append(STR_LEN(" ")).append(userBase->getIp());
 		}
@@ -703,7 +703,7 @@ int NmdcProtocol::eventSr(NmdcParser * dcparser, DcConn * dcConn) {
 	DcUser * dcUser = NULL;
 	const string & nick = dcparser->chunkString(CHUNK_SR_TO);
 	if (nick.size()) {
-		dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(nick));
+		dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(nick));
 
 		// Is user exist?
 		if (!dcUser || !dcUser->mDcConn) {
@@ -747,7 +747,7 @@ int NmdcProtocol::eventConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 	}
 
 	// Check CTM user PROTOCOL NMDC SPEC
-	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcparser->chunkString(CHUNK_CM_NICK)));
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcparser->chunkString(CHUNK_CM_NICK)));
 	if (!dcUser) {
 		return -1;
 	}
@@ -781,7 +781,7 @@ int NmdcProtocol::eventRevConnectToMe(NmdcParser * dcparser, DcConn * dcConn) {
 	}
 
 	// Check RCTM user (PROTOCOL NMDC)
-	DcUser * other = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcparser->chunkString(CHUNK_RC_OTHER)));
+	DcUser * other = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcparser->chunkString(CHUNK_RC_OTHER)));
 	if (!other) {
 		return -2;
 	}
@@ -826,7 +826,7 @@ int NmdcProtocol::eventKick(NmdcParser * dcparser, DcConn * dcConn) {
 	}
 
 	// Check kick user PROTOCOL NMDC SPEC
-	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcparser->chunkString(CHUNK_1_PARAM)));
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcparser->chunkString(CHUNK_1_PARAM)));
 
 	// Is user exist?
 	if (!dcUser || !dcUser->mDcConn) {
@@ -856,7 +856,7 @@ int NmdcProtocol::eventOpForceMove(NmdcParser * dcparser, DcConn * dcConn) {
 	}
 
 	// Check redirect user PROTOCOL NMDC SPEC
-	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcparser->chunkString(CHUNK_FM_NICK)));
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcparser->chunkString(CHUNK_FM_NICK)));
 
 	// Is user exist?
 	if (!dcUser || !dcUser->mDcConn || dcparser->chunkString(CHUNK_FM_DEST).empty()) {
@@ -876,7 +876,7 @@ int NmdcProtocol::eventGetInfo(NmdcParser * dcparser, DcConn * dcConn) {
 	}
 
 	// Check GetINFO user PROTOCOL NMDC SPEC
-	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByUid(dcparser->chunkString(CHUNK_GI_OTHER)));
+	DcUser * dcUser = static_cast<DcUser *> (mDcServer->mDcUserList.getUserBaseByNick(dcparser->chunkString(CHUNK_GI_OTHER)));
 	if (!dcUser) {
 		return -2;
 	}
@@ -994,10 +994,10 @@ void NmdcProtocol::sendToChat(DcConn * dcConn, const string & data, bool flush /
 
 
 // <nick> msg|
-void NmdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string & uid, bool flush /*= true*/) {
-	dcConn->reserve(uid.size() + data.size() + 4); // 1 + uid.size() + 2 + data.size() + 1
+void NmdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string & nick, bool flush /*= true*/) {
+	dcConn->reserve(nick.size() + data.size() + 4); // 1 + nick.size() + 2 + data.size() + 1
 	dcConn->send(STR_LEN("<"), false, false);
-	dcConn->send(uid, false, false);
+	dcConn->send(nick, false, false);
 	dcConn->send(STR_LEN("> "), false, false);
 	dcConn->send(data, true, flush);
 }
@@ -1012,20 +1012,20 @@ void NmdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, bool flus
 
 
 // <nick> msg|
-void NmdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, const string & uid, bool flush /*= true*/) {
-	sendToChat(dcConn, data, uid, flush);
+void NmdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, const string & nick, bool flush /*= true*/) {
+	sendToChat(dcConn, data, nick, flush);
 }
 
 
 
 // $To: to From: from $<nick> msg|
-void NmdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string & uid, const string & from, bool flush /*= true*/) {
-	size_t len = from.size() + uid.size() + data.size() + 6; // from.size() + 3 + uid.size() + 2 + data.size() + 1
-	const string nick = dcConn->mDcUser->getNick();
-	if (!nick.empty()) {
-		dcConn->reserve(len + 12 + nick.size()); // 5 + nick.size() + 7 + len
+void NmdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string & nick, const string & from, bool flush /*= true*/) {
+	size_t len = from.size() + nick.size() + data.size() + 6; // from.size() + 3 + nick.size() + 2 + data.size() + 1
+	const string userNick = dcConn->mDcUser->getNick();
+	if (!userNick.empty()) {
+		dcConn->reserve(len + 12 + userNick.size()); // 5 + userNick.size() + 7 + len
 		dcConn->send(STR_LEN("$To: "), false, false);
-		dcConn->send(nick, false, false);
+		dcConn->send(userNick, false, false);
 		dcConn->send(STR_LEN(" From: "), false, false);
 	} else {
 		dcConn->reserve(len + 21);
@@ -1033,7 +1033,7 @@ void NmdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string &
 	}
 	dcConn->send(from, false, false);
 	dcConn->send(STR_LEN(" $<"), false, false);
-	dcConn->send(uid, false, false);
+	dcConn->send(nick, false, false);
 	dcConn->send(STR_LEN("> "), false, false);
 	dcConn->send(data, true, flush);
 }
@@ -1140,23 +1140,12 @@ bool NmdcProtocol::checkNick(DcConn * dcConn) {
 	// Protocol dependence
 	// TODO: check ADC nick used
 
-	unsigned long nickHash = dcConn->mDcUser->getUidHash();
+	unsigned long nickHash = dcConn->mDcUser->getNickHash();
 
 	// TODO:
 	// 1. Check syntax
 	// 2. Check used
 	// 3. Check reg nick
-
-	if (mDcServer->mNmdcBotList.contain(nickHash)) {
-		LOG(LEVEL_DEBUG, "Bad nick (used): '" 
-			<< dcConn->mDcUser->getNick() << "'["
-			<< dcConn->getIp() << "] bot nick!");
-		string msg;
-		stringReplace(mDcServer->mDcLang.mUsedNick, string(STR_LEN("nick")), msg, dcConn->mDcUser->getNick());
-		mDcServer->sendToUser(dcConn->mDcUser, msg, mDcServer->mDcConfig.mHubBot.c_str());
-		dcConn->send(appendValidateDenied(msg.erase(), dcConn->mDcUser->getNick()));
-		return false;
-	}
 
 	if (mDcServer->mDcUserList.contain(nickHash)) {
 		// User on a hub
@@ -1198,7 +1187,7 @@ bool NmdcProtocol::beforeUserEnter(DcConn * dcConn) {
 			// Before enter, after send list
 			doUserEnter(dcConn);
 		} else {
-			mDcServer->mEnterList.add(dcConn->mDcUser->getUidHash(), dcConn->mDcUser);
+			mDcServer->mEnterList.add(dcConn->mDcUser->getNickHash(), dcConn->mDcUser);
 		}
 
 		// Can happen so that list not to send at a time
@@ -1230,13 +1219,13 @@ void NmdcProtocol::doUserEnter(DcConn * dcConn) {
 		return;
 	}
 
-	unsigned long uidHash = dcConn->mDcUser->getUidHash();
+	unsigned long nickHash = dcConn->mDcUser->getNickHash();
 
 	// User is already considered came
-	if (mDcServer->mEnterList.contain(uidHash)) {
+	if (mDcServer->mEnterList.contain(nickHash)) {
 		// We send user contents of cache without clear this cache
 		mDcServer->mEnterList.flushForUser(dcConn->mDcUser);
-		mDcServer->mEnterList.remove(uidHash);
+		mDcServer->mEnterList.remove(nickHash);
 	}
 
 	// Adding user to the user list
@@ -1276,34 +1265,26 @@ bool NmdcProtocol::addToUserList(DcUser * dcUser) {
 		return false;
 	}
 
-	unsigned long uidHash = dcUser->getUidHash();
+	unsigned long nickHash = dcUser->getNickHash();
 
-	// TODO: (mAdcOn) check ADC nicks & bots
+	LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "Before add: " << dcUser->getNick() << " Size: " << mDcServer->mDcUserList.size());
 
-	if (mDcServer->mNmdcBotList.contain(uidHash)) {
-		LOG(LEVEL_DEBUG, "Adding twice user with same bot nick " << dcUser->getUid() << " (" << mDcServer->mNmdcBotList.find(uidHash)->getUid() << ")");
+	if (!mDcServer->mDcUserList.add(nickHash, dcUser)) {
+		LOG(LEVEL_DEBUG, "Adding twice user with same user nick " << dcUser->getNick() << " (" << mDcServer->mDcUserList.find(nickHash)->getNick() << ")");
 		dcUser->setInUserList(false);
 		return false;
 	}
 
-	LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "Before add: " << dcUser->getUid() << " Size: " << mDcServer->mDcUserList.size());
-
-	if (!mDcServer->mDcUserList.add(uidHash, dcUser)) {
-		LOG(LEVEL_DEBUG, "Adding twice user with same user nick " << dcUser->getUid() << " (" << mDcServer->mDcUserList.find(uidHash)->getUid() << ")");
-		dcUser->setInUserList(false);
-		return false;
-	}
-
-	LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "After add: " << dcUser->getUid() << " Size: " << mDcServer->mDcUserList.size());
+	LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "After add: " << dcUser->getNick() << " Size: " << mDcServer->mDcUserList.size());
 
 	if (!dcUser->isPassive()) {
-		mDcServer->mActiveList.add(uidHash, dcUser);
+		mDcServer->mActiveList.add(nickHash, dcUser);
 	}
 	if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
-		mDcServer->mOpList.add(uidHash, dcUser);
+		mDcServer->mOpList.add(nickHash, dcUser);
 	}
 	if (dcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
-		mDcServer->mIpList.add(uidHash, dcUser);
+		mDcServer->mIpList.add(nickHash, dcUser);
 	}
 
 	dcUser->setInUserList(true);
@@ -1314,10 +1295,10 @@ bool NmdcProtocol::addToUserList(DcUser * dcUser) {
 		++ mDcServer->miTotalUserCount; // add except bot
 
 		dcUser->mDcConn->mIpRecv = true; // Installing the permit on reception of the messages on ip
-		mDcServer->mChatList.add(uidHash, dcUser);
+		mDcServer->mChatList.add(nickHash, dcUser);
 
 		if (!(dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO)) {
-			mDcServer->mHelloList.add(uidHash, dcUser);
+			mDcServer->mHelloList.add(nickHash, dcUser);
 		}
 
 		LOG_CLASS(dcUser->mDcConn, LEVEL_DEBUG, "Adding at the end of Nicklist");
@@ -1329,17 +1310,10 @@ bool NmdcProtocol::addToUserList(DcUser * dcUser) {
 
 /// Removing user from the user list
 bool NmdcProtocol::removeFromDcUserList(DcUser * dcUser) {
-	unsigned long uidHash = dcUser->getUidHash();
+	unsigned long nickHash = dcUser->getNickHash();
 
-	if (mDcServer->mNmdcBotList.contain(uidHash)) {
-		LOG_CLASS(dcUser, LEVEL_ERROR, "Found bot with nick '" << dcUser->getUid() << "'");
-		return false;
-	} else {
-		// TODO: (mAdcOn) check ADC nicks & bots
-	}
-
-	LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "Before leave: " << dcUser->getUid() << " Size: " << mDcServer->mDcUserList.size());
-	if (mDcServer->mDcUserList.contain(uidHash)) {
+	LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "Before leave: " << dcUser->getNick() << " Size: " << mDcServer->mDcUserList.size());
+	if (mDcServer->mDcUserList.contain(nickHash)) {
 
 		if (dcUser->mDcConn) {
 			#ifndef WITHOUT_PLUGINS
@@ -1350,27 +1324,27 @@ bool NmdcProtocol::removeFromDcUserList(DcUser * dcUser) {
 		}
 
 		// We make sure that user with such nick one!
-		DcUser * other = static_cast<DcUser *> (mDcServer->mDcUserList.find(uidHash));
+		DcUser * other = static_cast<DcUser *> (mDcServer->mDcUserList.find(nickHash));
 		if (!dcUser->mDcConn) { // Removing the bot
-			mDcServer->mDcUserList.remove(uidHash);
+			mDcServer->mDcUserList.remove(nickHash);
 		} else if (other && other->mDcConn && dcUser->mDcConn && other->mDcConn == dcUser->mDcConn) {
-			mDcServer->mDcUserList.remove(uidHash);
-			LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "After leave: " << dcUser->getUid() << " Size: " << mDcServer->mDcUserList.size());
+			mDcServer->mDcUserList.remove(nickHash);
+			LOG_CLASS(&mDcServer->mDcUserList, LEVEL_TRACE, "After leave: " << dcUser->getNick() << " Size: " << mDcServer->mDcUserList.size());
 		} else {
 			// Such can happen only for users without connection or with different connection
-			LOG_CLASS(dcUser, LEVEL_ERROR, "Not found the correct user for nick: " << dcUser->getUid());
+			LOG_CLASS(dcUser, LEVEL_ERROR, "Not found the correct user for nick: " << dcUser->getNick());
 			return false;
 		}
 	}
 
 	// Removing from lists
-	mDcServer->mOpList.remove(uidHash);
-	mDcServer->mIpList.remove(uidHash);
-	mDcServer->mEnterList.remove(uidHash);
-	mDcServer->mActiveList.remove(uidHash);
-	mDcServer->mChatList.remove(uidHash);
+	mDcServer->mOpList.remove(nickHash);
+	mDcServer->mIpList.remove(nickHash);
+	mDcServer->mEnterList.remove(nickHash);
+	mDcServer->mActiveList.remove(nickHash);
+	mDcServer->mChatList.remove(nickHash);
 
-	mDcServer->mHelloList.remove(uidHash);
+	mDcServer->mHelloList.remove(nickHash);
 
 	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		dcUser->setInUserList(false);
@@ -1459,87 +1433,6 @@ bool NmdcProtocol::showUserToAll(DcUser * dcUser) {
 
 
 
-/// Adding bot
-bool NmdcProtocol::addBot(DcUser * dcUser) {
-	if (!dcUser) {
-		LOG(LEVEL_ERROR, "Adding a NULL bot");
-		return false;
-	} else if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-		LOG(LEVEL_ERROR, "Bot is already in list");
-		return false;
-	}
-
-	unsigned long uidHash = dcUser->getUidHash();
-
-	// TODO: (mAdcOn) check ADC nicks & bots
-
-	if (mDcServer->mDcUserList.contain(uidHash)) {
-		LOG(LEVEL_DEBUG, "Adding twice bot with same user nick " << dcUser->getUid() << " (" << mDcServer->mDcUserList.find(uidHash)->getUid() << ")");
-		dcUser->setInUserList(false);
-		return false;
-	}
-
-	LOG_CLASS(&mDcServer->mNmdcBotList, LEVEL_TRACE, "Before add: " << dcUser->getUid() << " Size: " << mDcServer->mNmdcBotList.size());
-
-	if (!mDcServer->mNmdcBotList.add(uidHash, dcUser)) {
-		LOG(LEVEL_DEBUG, "Adding twice bot with same nick " << dcUser->getUid() << " (" << mDcServer->mNmdcBotList.find(uidHash)->getUid() << ")");
-		dcUser->setInUserList(false);
-		return false;
-	}
-
-	LOG_CLASS(&mDcServer->mNmdcBotList, LEVEL_TRACE, "After add: " << dcUser->getUid() << " Size: " << mDcServer->mNmdcBotList.size());
-
-	if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
-		mDcServer->mOpList.add(uidHash, dcUser);
-	}
-
-	dcUser->setInUserList(true);
-	return true;
-}
-
-
-
-/// Removing bot
-bool NmdcProtocol::removeBot(DcUser * dcUser) {
-	unsigned long uidHash = dcUser->getUidHash();
-
-	if (mDcServer->mDcUserList.contain(uidHash)) {
-		LOG_CLASS(dcUser, LEVEL_ERROR, "Found user with nick '" << dcUser->getUid() << "'");
-		return false;
-	} else {
-		// TODO: (mAdcOn) check ADC nicks & bots
-	}
-
-	if (mDcServer->mNmdcBotList.contain(uidHash)) {
-		LOG_CLASS(&mDcServer->mNmdcBotList, LEVEL_TRACE, "Before leave: " << dcUser->getUid() << " Size: " << mDcServer->mNmdcBotList.size());
-
-		if (!dcUser->mDcConn) { // Check removing the bot
-			mDcServer->mNmdcBotList.remove(uidHash);
-			LOG_CLASS(&mDcServer->mNmdcBotList, LEVEL_TRACE, "After leave: " << dcUser->getUid() << " Size: " << mDcServer->mNmdcBotList.size());
-		} else {
-			// Such can happen only for users without connection or with different connection
-			LOG_CLASS(dcUser, LEVEL_ERROR, "Not found the correct bot for nick: " << dcUser->getUid());
-			return false;
-		}
-	}
-
-	// Removing from lists
-	mDcServer->mOpList.remove(uidHash);
-
-	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-		dcUser->setInUserList(false);
-
-		if (!dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
-			string msg;
-			appendQuit(msg, dcUser->getNick());
-			mDcServer->mDcUserList.sendToAll(msg, false, false/*mDcConfig.mDelayedMyinfo*/); // Delay in sending MyINFO (and Quit)
-		}
-	}
-	return true;
-}
-
-
-
 /// Sending the user-list and op-list
 int NmdcProtocol::sendNickList(DcConn * dcConn) {
 	if (!dcConn->isState(STATE_NORMAL) && mDcServer->mDcConfig.mNicklistOnLogin) {
@@ -1551,28 +1444,22 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 		// seperator "|" was added in getInfoList function
 		if (mDcServer->mDcConfig.mCompressionType == 1) {
 			dcConn->sendZpipe(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false);
-			dcConn->sendZpipe(mDcServer->mNmdcBotList.getList(USER_LIST_MYINFO), false);
 		} else {
 			dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false, false);
-			dcConn->send(mDcServer->mNmdcBotList.getList(USER_LIST_MYINFO), false, false);
 		}
 	} else if (dcConn->mFeatures & SUPPORT_FEATUER_NOGETINFO) {
 		LOG_CLASS(dcConn, LEVEL_DEBUG, "Sending MyINFO list and Nicklist");
 		// seperator "|" was not added in getNickList function, because seperator was "$$"
-		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_NICK), false, false);
-		dcConn->send(mDcServer->mNmdcBotList.getList(USER_LIST_NICK), true, false); // Bots must send after users
+		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_NICK), true, false);
 		// seperator "|" was added in getInfoList function
 		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_MYINFO), false, false);
-		dcConn->send(mDcServer->mNmdcBotList.getList(USER_LIST_MYINFO), false, false);
 	} else {
 		LOG_CLASS(dcConn, LEVEL_DEBUG, "Sending Nicklist");
 		// seperator "|" was not added in getNickList function, because seperator was "$$"
-		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_NICK), false, false);
-		dcConn->send(mDcServer->mNmdcBotList.getList(USER_LIST_NICK), true, false); // Bots must send after users
+		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_NICK), true, false);
 	}
 	if (mDcServer->mOpList.size()) {
 		LOG_CLASS(dcConn, LEVEL_DEBUG, "Sending Oplist");
-		// TODO: send bot list
 		// seperator "|" was not added in getNickList function, because seperator was "$$"
 		dcConn->send(mDcServer->mOpList.getList(), true, false);
 	}
@@ -1580,8 +1467,7 @@ int NmdcProtocol::sendNickList(DcConn * dcConn) {
 	if (dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST) && dcConn->mDcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
 		LOG_CLASS(dcConn, LEVEL_DEBUG, "Sending Iplist");
 		// seperator "|" was not added in getIpList function, because seperator was "$$"
-		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_IP), false, false);
-		dcConn->send(mDcServer->mNmdcBotList.getList(USER_LIST_IP), true, true); // Bots must send after users
+		dcConn->send(mDcServer->mDcUserList.getList(USER_LIST_IP), true, true);
 	} else {
 		dcConn->send("", 0 , true, true); // for flush (don't replace to flush function!)
 	}
@@ -1741,7 +1627,7 @@ void NmdcProtocol::ipList(string & list, UserBase * userBase) {
 void NmdcProtocol::addToOps(DcUser * dcUser) {
 	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		string msg;
-		mDcServer->mOpList.add(dcUser->getUidHash(), dcUser);
+		mDcServer->mOpList.add(dcUser->getNickHash(), dcUser);
 		if (dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 			dcUser->send(appendOpList(msg, dcUser->getNick()), false, true);
 		} else {
@@ -1756,7 +1642,7 @@ void NmdcProtocol::addToOps(DcUser * dcUser) {
 void NmdcProtocol::delFromOps(DcUser * dcUser) {
 	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
 		string sMsg1, sMsg2, sMsg3;
-		mDcServer->mOpList.remove(dcUser->getUidHash());
+		mDcServer->mOpList.remove(dcUser->getNickHash());
 		if (dcUser->isTrueBoolParam(USER_PARAM_CAN_HIDE)) {
 			if (dcUser->mDcConn == NULL) {
 				return;
@@ -1791,7 +1677,7 @@ void NmdcProtocol::delFromOps(DcUser * dcUser) {
 
 void NmdcProtocol::addToIpList(DcUser * dcUser) {
 	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-		mDcServer->mIpList.add(dcUser->getUidHash(), dcUser);
+		mDcServer->mIpList.add(dcUser->getNickHash(), dcUser);
 		// TODO: send bot list
 		dcUser->send(mDcServer->mDcUserList.getList(USER_LIST_IP), true);
 	}
@@ -1801,7 +1687,7 @@ void NmdcProtocol::addToIpList(DcUser * dcUser) {
 
 void NmdcProtocol::delFromIpList(DcUser * dcUser) {
 	if (dcUser->isTrueBoolParam(USER_PARAM_IN_USER_LIST)) {
-		mDcServer->mIpList.remove(dcUser->getUidHash());
+		mDcServer->mIpList.remove(dcUser->getNickHash());
 	}
 }
 

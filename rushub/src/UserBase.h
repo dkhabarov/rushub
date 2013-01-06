@@ -34,7 +34,6 @@ public:
 	virtual ~UserBase() {
 	}
 
-	virtual const string & getUid() const = 0;
 	virtual const string & getNick() const = 0;
 	virtual const string & getInfo() = 0;
 	virtual const string & getIp() const = 0;
@@ -47,14 +46,14 @@ public:
 
 	/// Chat Direct
 	virtual void sendToChat(const string & data, bool flush = true) = 0;
-	virtual void sendToChat(const string & data, const string & uid, bool flush = true) = 0;
+	virtual void sendToChat(const string & data, const string & nick, bool flush = true) = 0;
 
 	/// Chat Broadcast
 	virtual void sendToChatAll(const string & data, bool flush = true) = 0;
-	virtual void sendToChatAll(const string & data, const string & uid, bool flush = true) = 0;
+	virtual void sendToChatAll(const string & data, const string & nick, bool flush = true) = 0;
 
 	/// Private Message
-	virtual void sendToPm(const string & data, const string & uid, const string & from, bool flush = true) = 0;
+	virtual void sendToPm(const string & data, const string & nick, const string & from, bool flush = true) = 0;
 
 }; // class UserBase
 

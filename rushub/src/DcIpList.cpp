@@ -97,14 +97,14 @@ void DcIpList::sendToIp(const string & ip, const string & data, unsigned long pr
 
 
 
-void DcIpList::sendToIpChat(const string & ip, const string & data, const string & uid, unsigned long profile, bool flush /*= true*/) {
+void DcIpList::sendToIpChat(const string & ip, const string & data, const string & nick, unsigned long profile, bool flush /*= true*/) {
 	unsigned long ipHash = mHash(ip);
 	IpList * ipList = IpTable::find(ipHash);
 	while (ipList != NULL) {
 		DcConn * dcConn = ipList->mData;
-		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv && !dcConn->mDcUser->getUid().empty()) {
+		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv && !dcConn->mDcUser->getNick().empty()) {
 			if (!profile || checkProfile(dcConn, profile)) {
-				dcConn->mDcUser->sendToChat(data, uid, flush);
+				dcConn->mDcUser->sendToChat(data, nick, flush);
 			}
 		}
 		ipList = ipList->mNext;
@@ -113,14 +113,14 @@ void DcIpList::sendToIpChat(const string & ip, const string & data, const string
 
 
 
-void DcIpList::sendToIpPm(const string & ip, const string & data, const string & uid, const string & from, unsigned long profile, bool flush /*= true*/) {
+void DcIpList::sendToIpPm(const string & ip, const string & data, const string & nick, const string & from, unsigned long profile, bool flush /*= true*/) {
 	unsigned long ipHash = mHash(ip);
 	IpList * ipList = IpTable::find(ipHash);
 	while (ipList != NULL) {
 		DcConn * dcConn = ipList->mData;
-		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv && !dcConn->mDcUser->getUid().empty()) {
+		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv && !dcConn->mDcUser->getNick().empty()) {
 			if (!profile || checkProfile(dcConn, profile)) {
-				dcConn->mDcUser->sendToPm(data, uid, from, flush);
+				dcConn->mDcUser->sendToPm(data, nick, from, flush);
 			}
 		}
 		ipList = ipList->mNext;

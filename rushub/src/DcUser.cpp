@@ -87,9 +87,9 @@ void DcUser::sendToChat(const string & data, bool flush /*= true*/) {
 
 
 /// Chat Direct
-void DcUser::sendToChat(const string & data, const string & uid, bool flush /*= true*/) {
+void DcUser::sendToChat(const string & data, const string & nick, bool flush /*= true*/) {
 	if (mDcConn) {
-		mDcConn->dcProtocol()->sendToChat(mDcConn, data, uid, flush);
+		mDcConn->dcProtocol()->sendToChat(mDcConn, data, nick, flush);
 	}
 }
 
@@ -105,18 +105,18 @@ void DcUser::sendToChatAll(const string & data, bool flush /*= true*/) {
 
 
 /// Chat Broadcast
-void DcUser::sendToChatAll(const string & data, const string & uid, bool flush /*= true*/) {
+void DcUser::sendToChatAll(const string & data, const string & nick, bool flush /*= true*/) {
 	if (mDcConn) {
-		mDcConn->dcProtocol()->sendToChatAll(mDcConn, data, uid, flush);
+		mDcConn->dcProtocol()->sendToChatAll(mDcConn, data, nick, flush);
 	}
 }
 
 
 
 /// Private Message
-void DcUser::sendToPm(const string & data, const string & uid, const string & from, bool flush /*= true*/) {
+void DcUser::sendToPm(const string & data, const string & nick, const string & from, bool flush /*= true*/) {
 	if (mDcConn) {
-		mDcConn->dcProtocol()->sendToPm(mDcConn, data, uid, from, flush);
+		mDcConn->dcProtocol()->sendToPm(mDcConn, data, nick, from, flush);
 	}
 }
 
@@ -247,7 +247,7 @@ void DcUser::setUid(const string & uid) {
 	mUid = uid;
 
 	// Calc uid hash
-	mUidHash = static_cast<unsigned long> (UserList::uidToLowerHash(uid));
+	mUidHash = static_cast<unsigned long> (UserList::toLowerHash(uid));
 }
 
 
@@ -256,13 +256,19 @@ void DcUser::setNick(const string & nick) {
 	// TODO
 	mUid = nick;
 
-	// Calc uid hash
-	mUidHash = static_cast<unsigned long> (UserList::uidToLowerHash(nick));
+	// Calc nick hash
+	mUidHash = static_cast<unsigned long> (UserList::toLowerHash(nick));
 }
 
 
 
 unsigned long DcUser::getUidHash() const {
+	return mUidHash;
+}
+
+
+
+unsigned long DcUser::getNickHash() const {
 	return mUidHash;
 }
 

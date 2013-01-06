@@ -160,9 +160,9 @@ public:
 		}
 	}
 
-	static Key uidToLowerHash(const string & uid);
+	static Key toLowerHash(const string & nick);
 
-	UserBase * getUserBaseByUid(const string & uid);
+	UserBase * getUserBaseByNick(const string & nick);
 
 	void addUserListItem(UserListItem::Func func, const char * start = "");
 	const string & getList(unsigned int number = 0);
@@ -184,16 +184,16 @@ public:
 	void sendToProfiles(unsigned long profile, const string & data, bool addSep = true);
 
 	/** Sending to all chat (sync down) */
-	void sendToAllChat(const string & data, const string & uid);
+	void sendToAllChat(const string & data, const string & nick);
 
 	/** Sending to all profiles chat (sync down) */
-	void sendToAllChat(const string & data, const string & uid, unsigned long profile);
+	void sendToAllChat(const string & data, const string & nick, unsigned long profile);
 
 	/** Sending to all pm (sync down) */
-	void sendToAllPm(const string & data, const string & uid, const string & from);
+	void sendToAllPm(const string & data, const string & nick, const string & from);
 
 	/** Sending to all profiles pm (sync down) */
-	void sendToAllPm(const string & data, const string & uid, const string & from, unsigned long profile);
+	void sendToAllPm(const string & data, const string & nick, const string & from, unsigned long profile);
 
 	/** Sending data from cache to user */
 	void flushForUser(UserBase * userBase);
