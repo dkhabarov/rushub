@@ -127,6 +127,12 @@ public:
 	/// Show user to all
 	bool showUserToAll(DcUser *);
 
+	/// Adding bot
+	bool addBot(DcUser *);
+
+	/// Removing bot
+	bool removeBot(DcUser *);
+
 protected:
 
 	typedef int (NmdcProtocol::*Event) (NmdcParser *, DcConn *);

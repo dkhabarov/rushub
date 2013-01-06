@@ -1077,7 +1077,6 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 			return -3;
 		}
 		mAdcProtocol.showUserToAll(dcUser);
-		//mAdcBotList.add(dcUser->getUidHash(), dcUser);
 	} else { // NMDC
 		// TODO: remove it! Only botlist.
 		if (!mNmdcProtocol.addToUserList(dcUser)) {
@@ -1085,7 +1084,6 @@ int DcServer::regBot(const string & uid, const string & info, const string & ip,
 			return -3;
 		}
 		mNmdcProtocol.showUserToAll(dcUser);
-		//mNmdcBotList.add(dcUser->getUidHash(), dcUser);
 	}
 	return 0;
 }
@@ -1108,10 +1106,8 @@ int DcServer::unregBot(const string & uid) {
 	}
 	if (mDcConfig.mAdcOn) { // ADC
 		mAdcProtocol.removeFromDcUserList(dcUser); // TODO: remove it!
-		//mAdcBotList.remove(dcUser->getUidHash());
 	} else { // NMDC
 		mNmdcProtocol.removeFromDcUserList(dcUser); // TODO: remove it!
-		//mNmdcBotList.remove(dcUser->getUidHash());
 	}
 	delete dcUser;
 	return 0;

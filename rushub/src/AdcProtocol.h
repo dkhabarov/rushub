@@ -91,6 +91,12 @@ public:
 	/// Show user to all
 	bool showUserToAll(DcUser *);
 
+	/// Adding bot
+	bool addBot(DcUser *);
+
+	/// Removing bot
+	bool removeBot(DcUser *);
+
 protected:
 
 	typedef int (AdcProtocol::*Event) (AdcParser *, DcConn *);
