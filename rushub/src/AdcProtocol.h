@@ -82,16 +82,6 @@ public:
 
 	const char * genNewSid();
 
-
-	/// Check nick used
-	bool checkNick(DcConn *);
-
-	/// Actions before user entry
-	bool beforeUserEnter(DcConn *);
-
-	/// User entry
-	void doUserEnter(DcConn *);
-
 	/// Adding user in the user list
 	bool addToUserList(DcUser *);
 
@@ -137,6 +127,15 @@ private:
 
 	int checkCommand(AdcParser *, DcConn *);
 	bool verifyCid(DcUser *);
+
+	/// Check nick used
+	bool checkNick(DcConn *);
+
+	/// Actions before user entry
+	bool beforeUserEnter(DcConn *);
+
+	/// User entry
+	void doUserEnter(DcConn *);
 
 	/// Actions after user entry
 	void afterUserEnter(DcConn *);
