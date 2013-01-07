@@ -1249,6 +1249,7 @@ bool DcServer::sendToAllExceptIpsRaw(const vector<string> & ipList, const string
 		}
 	}
 
+	// TODO: parse cmd
 	sendToAllRaw(data);
 
 	for (vector<DcConn*>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {

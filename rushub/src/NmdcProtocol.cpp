@@ -985,6 +985,68 @@ string & NmdcProtocol::appendHubTopic(string & str, const string & hubTopic) {
 
 
 
+// $Quit nick|
+string & NmdcProtocol::appendQuit(string & str, const string & nick) {
+	str.reserve(str.size() + nick.size() + 7);
+	return str.append(STR_LEN("$Quit ")).append(nick).append(STR_LEN(NMDC_SEPARATOR));
+}
+
+
+
+// $OpList nick$$|
+string & NmdcProtocol::appendOpList(string & str, const string & nick) {
+	str.reserve(str.size() + nick.size() + 11);
+	return str.append(STR_LEN("$OpList ")).append(nick).append(STR_LEN("$$")).append(STR_LEN(NMDC_SEPARATOR));
+}
+
+
+
+// $UserIP nick ip$$|
+string & NmdcProtocol::appendUserIp(string & str, const string & nick, const string & ip) {
+	if (ip.size()) {
+		str.reserve(str.size() + nick.size() + ip.size() + 12);
+		str.append(STR_LEN("$UserIP ")).append(nick).append(STR_LEN(" ")).append(ip).append(STR_LEN("$$")).append(STR_LEN(NMDC_SEPARATOR));
+	}
+	return str;
+}
+
+
+
+// $ForceMove address|
+string & NmdcProtocol::appendForceMove(string & str, const string & address) {
+	str.reserve(address.size() + 12);
+	return str.append(STR_LEN("$ForceMove ")).append(address).append(STR_LEN(NMDC_SEPARATOR));
+}
+
+
+
+// str|
+string & NmdcProtocol::appendChat(string & str, const string & msg) {
+	str.reserve(msg.size() + 1); // msg.size() + 1
+	return str.append(msg).append(STR_LEN(NMDC_SEPARATOR));
+}
+
+
+
+// <nick> str|
+string & NmdcProtocol::appendChat(string & str, const string & msg, const string & nick) {
+	str.reserve(nick.size() + msg.size() + 4); // 1 + nick.size() + 2 + msg.size() + 1
+	return str.append(STR_LEN("<")).append(nick).append(STR_LEN("> ")).append(msg).append(STR_LEN(NMDC_SEPARATOR));
+}
+
+
+
+// "$To: "
+// " From: from $<nick> str|"
+void NmdcProtocol::appendPm(string & start, string & end, const string & msg, const string & nick, const string & from) {
+	start.append(STR_LEN("$To: "));
+	end.reserve(from.size() + nick.size() + msg.size() + 13); // 7 + from.size() + 3 + nick.size() + 2 + msg.size() + 1
+	end.append(STR_LEN(" From: ")).append(from).append(STR_LEN(" $<")).append(nick).append(STR_LEN("> "));
+	end.append(msg).append(STR_LEN(NMDC_SEPARATOR));
+}
+
+
+
 // msg|
 void NmdcProtocol::sendToChat(DcConn * dcConn, const string & data, bool flush /*= true*/) {
 	dcConn->reserve(data.size() + 1); // data.size() + 1
@@ -1042,41 +1104,6 @@ void NmdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string &
 
 void NmdcProtocol::sendError(DcConn * dcConn, const string & errorText, int /*errorCode*/) {
 	sendToChat(dcConn, errorText, mDcServer->mDcConfig.mHubBot.c_str(), true);
-}
-
-
-
-// $Quit nick|
-string & NmdcProtocol::appendQuit(string & str, const string & nick) {
-	str.reserve(str.size() + nick.size() + 7);
-	return str.append(STR_LEN("$Quit ")).append(nick).append(STR_LEN(NMDC_SEPARATOR));
-}
-
-
-
-// $OpList nick$$|
-string & NmdcProtocol::appendOpList(string & str, const string & nick) {
-	str.reserve(str.size() + nick.size() + 11);
-	return str.append(STR_LEN("$OpList ")).append(nick).append(STR_LEN("$$")).append(STR_LEN(NMDC_SEPARATOR));
-}
-
-
-
-// $UserIP nick ip$$|
-string & NmdcProtocol::appendUserIp(string & str, const string & nick, const string & ip) {
-	if (ip.size()) {
-		str.reserve(str.size() + nick.size() + ip.size() + 12);
-		str.append(STR_LEN("$UserIP ")).append(nick).append(STR_LEN(" ")).append(ip).append(STR_LEN("$$")).append(STR_LEN(NMDC_SEPARATOR));
-	}
-	return str;
-}
-
-
-
-// $ForceMove address|
-string & NmdcProtocol::appendForceMove(string & str, const string & address) {
-	str.reserve(address.size() + 12);
-	return str.append(STR_LEN("$ForceMove ")).append(address).append(STR_LEN(NMDC_SEPARATOR));
 }
 
 

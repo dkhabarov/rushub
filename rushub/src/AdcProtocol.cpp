@@ -623,6 +623,85 @@ const char * AdcProtocol::genNewSid() {
 
 
 
+// IMSG msg
+string & AdcProtocol::appendChat(string & str, const string & msg) {
+	string tmp;
+	const string & out = toUtf8(msg, tmp);
+	str.reserve(6 + out.size()); // 5 + out.size() + 1
+	return str.append(STR_LEN("IMSG ")).append(out).append(STR_LEN(ADC_SEPARATOR));
+}
+
+
+
+// DMSG my_sid msg
+string & AdcProtocol::appendChat(string & str, const string & msg, const string & nick) {
+	// TODO: nick->sid
+	const string & sid = nick;
+
+	string tmp;
+	const string & out = toUtf8(msg, tmp);
+	str.reserve(11 + out.size()); // 5 + 4 + 1 + out.size() + 1
+	return str.append(STR_LEN("DMSG ")).append(sid).append(STR_LEN(" ")).append(out).append(STR_LEN(ADC_SEPARATOR));
+}
+
+
+
+// IMSG msg
+string & AdcProtocol::appendChatAll(string & str, const string & msg) {
+	return appendChat(str, msg);
+}
+
+
+
+// BMSG my_sid(nick) msg
+string & AdcProtocol::appendChatAll(string & str, const string & msg, const string & nick) {
+	// TODO: nick->sid
+	const string & sid = nick;
+
+	string tmp;
+	const string & out = toUtf8(msg, tmp);
+	str.reserve(11 + out.size()); // 5 + 4 + 1 + out.size() + 1
+	return str.append(STR_LEN("BMSG ")).append(sid).append(STR_LEN(" ")).append(out).append(STR_LEN(ADC_SEPARATOR));
+}
+
+
+
+// "EMSG my_sid(nick) "
+// " msg PMfrom"
+void AdcProtocol::appendPm(string & start, string & end, const string & msg, const string & nick, const string & from) {
+	// TODO: nick->target_sid
+	// TODO: from->from_sid
+
+	const string & sid = nick;
+	const string & from_sid = from;
+
+	start.append(STR_LEN("EMSG ")).append(sid).append(STR_LEN(" "));
+	string tmp;
+	const string & out = toUtf8(msg, tmp);
+	end.reserve(9 + out.size()); // 1 + out.size() + 3 + 4 + 1
+	end.append(STR_LEN(" ")).append(out).append(STR_LEN(" PM")).append(from_sid).append(STR_LEN(ADC_SEPARATOR));
+}
+
+
+
+void AdcProtocol::appendChat(string & str, const string & msg, const char * nick, bool toAll) {
+	if (nick) {
+		if (toAll) {
+			appendChatAll(str, msg, nick);
+		} else {
+			appendChat(str, msg, nick);
+		}
+	} else {
+		if (toAll) {
+			appendChatAll(str, msg);
+		} else {
+			appendChat(str, msg);
+		}
+	}
+}
+
+
+
 // IMSG <msg>
 void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, bool flush /*= true*/) {
 	string tmp;
@@ -636,7 +715,7 @@ void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, bool flush /*
 
 
 
-// DMSG <to_sid> <msg>
+// DMSG <my_sid> <msg>
 void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string & nick, bool flush /*= true*/) {
 	// TODO: nick->uid
 	const string & uid = nick;
@@ -659,7 +738,7 @@ void AdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, bool flush
 
 
 
-// BMSG <to_sid> <msg>
+// BMSG <my_sid> <msg>
 void AdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, const string & nick, bool flush /*= true*/) {
 	// TODO: nick->uid
 	const string & uid = nick;
@@ -675,7 +754,7 @@ void AdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, const stri
 
 
 
-// EMSG <to_sid> <target_sid> <msg> PM<group_sid>
+// EMSG <my_sid> <target_sid> <msg> PM<group_sid>
 void AdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string & nick, const string & from, bool flush /*= true*/) {
 	// TODO: nick->uid
 	const string & uid = nick;

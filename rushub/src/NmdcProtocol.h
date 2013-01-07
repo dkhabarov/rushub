@@ -90,6 +90,10 @@ public:
 	static string & appendUserIp(string & str, const string & nick, const string & ip);
 	static string & appendForceMove(string & str, const string & address);
 
+	static string & appendChat(string & str, const string & msg);
+	static string & appendChat(string & str, const string & msg, const string & nick);
+	static void appendPm(string & start, string & end, const string & msg, const string & nick, const string & from);
+
 	/// Chat Direct
 	virtual void sendToChat(DcConn *, const string & data, bool flush = true);
 	virtual void sendToChat(DcConn *, const string & data, const string & nick, bool flush = true);

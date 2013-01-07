@@ -63,6 +63,13 @@ public:
 	static const char * getSid(unsigned int num);
 	static const string & toUtf8(const string & data, string & msg);
 
+	static string & appendChat(string & str, const string & msg);
+	static string & appendChat(string & str, const string & msg, const string & nick);
+	static string & appendChatAll(string & str, const string & msg);
+	static string & appendChatAll(string & str, const string & msg, const string & nick);
+	static void appendPm(string & start, string & end, const string & msg, const string & nick, const string & from);
+	static void appendChat(string & str, const string & msg, const char * nick, bool toAll);
+
 	/// Chat Direct
 	virtual void sendToChat(DcConn *, const string & data, bool flush = true);
 	virtual void sendToChat(DcConn *, const string & data, const string & nick, bool flush = true);
