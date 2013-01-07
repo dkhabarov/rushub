@@ -349,10 +349,6 @@ int AdcProtocol::eventMsg(AdcParser * adcParser, DcConn * dcConn) {
 		return -1;
 	}
 
-	if (adcParser->getHeader() == HEADER_ECHO) {
-		return 0;
-	}
-
 	#ifndef WITHOUT_PLUGINS
 		if (adcParser->mCommand.find(" PM") != adcParser->mCommand.npos) { // TODO refactoring
 			if (mDcServer->mCalls.mOnTo.callAll(dcConn->mDcUser)) {
@@ -364,6 +360,10 @@ int AdcProtocol::eventMsg(AdcParser * adcParser, DcConn * dcConn) {
 			}
 		}
 	#endif
+
+	if (adcParser->getHeader() == HEADER_ECHO) {
+		return 0;
+	}
 
 	// Sending message
 	if (adcParser->getHeader() == HEADER_BROADCAST) {
@@ -636,7 +636,7 @@ void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, bool flush /*
 
 
 
-// DMSG <my_sid> <msg>
+// DMSG <to_sid> <msg>
 void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string & nick, bool flush /*= true*/) {
 	// TODO: nick->uid
 	const string & uid = nick;
@@ -659,7 +659,7 @@ void AdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, bool flush
 
 
 
-// BMSG <my_sid> <msg>
+// BMSG <to_sid> <msg>
 void AdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, const string & nick, bool flush /*= true*/) {
 	// TODO: nick->uid
 	const string & uid = nick;
@@ -675,7 +675,7 @@ void AdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, const stri
 
 
 
-// EMSG <my_sid> <target_sid> <msg> PM<group_sid>
+// EMSG <to_sid> <target_sid> <msg> PM<group_sid>
 void AdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string & nick, const string & from, bool flush /*= true*/) {
 	// TODO: nick->uid
 	const string & uid = nick;
