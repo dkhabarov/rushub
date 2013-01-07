@@ -109,7 +109,7 @@ using namespace ::std;
 #endif
 
 enum DcProtocolType {
-	DC_PROTOCOL_TYPE_ANY = 0,
+	DC_PROTOCOL_TYPE_ALL = 0,
 	DC_PROTOCOL_TYPE_NMDC,
 	DC_PROTOCOL_TYPE_ADC
 };

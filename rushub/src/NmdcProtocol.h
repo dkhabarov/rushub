@@ -78,17 +78,17 @@ public:
 	virtual void onFlush(Conn *);
 
 
-	string & appendLock(string & str);
-	string & appendHello(string & str, const string & nick);
-	string & appendHubIsFull(string & str);
-	string & appendGetPass(string & str);
-	string & appendValidateDenied(string & str, const string & nick);
-	string & appendHubName(string & str, const string & hubName, const string & topic);
-	string & appendHubTopic(string & str, const string & hubTopic);
-	string & appendQuit(string & str, const string & nick);
-	string & appendOpList(string & str, const string & nick);
-	string & appendUserIp(string & str, const string & nick, const string & ip);
-	string & appendForceMove(string & str, const string & address);
+	static string & appendLock(string & str);
+	static string & appendHello(string & str, const string & nick);
+	static string & appendHubIsFull(string & str);
+	static string & appendGetPass(string & str);
+	static string & appendValidateDenied(string & str, const string & nick);
+	static string & appendHubName(string & str, const string & hubName, const string & topic);
+	static string & appendHubTopic(string & str, const string & hubTopic);
+	static string & appendQuit(string & str, const string & nick);
+	static string & appendOpList(string & str, const string & nick);
+	static string & appendUserIp(string & str, const string & nick, const string & ip);
+	static string & appendForceMove(string & str, const string & address);
 
 	/// Chat Direct
 	virtual void sendToChat(DcConn *, const string & data, bool flush = true);
