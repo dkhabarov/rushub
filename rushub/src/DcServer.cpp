@@ -995,6 +995,8 @@ bool DcServer::sendToUser(DcUserBase * dcUserBase, const string & data, const ch
 	if (!dcUser || !dcUser->mDcConn) { // Check exist and not bot
 		return false;
 	}
+
+	// Sent chat or pm through user protocol!
 	DcConn * dcConn = dcUser->mDcConn;
 	if (from && nick) {
 		dcConn->mDcUser->sendToPm(data, nick, from, true); // PM
@@ -1014,6 +1016,15 @@ bool DcServer::sendToUserRaw(DcUserBase * dcUserBase, const string & data) {
 	if (!dcUser || !dcUser->mDcConn) { // Check exist and not bot
 		return false;
 	}
+
+	// TODO: parse cmd
+	// new object:
+	// enum cmdDirect
+	// enum cmdType
+	// vector cmdParts by protocol type
+
+	// cmd(data); // simple parse cmd
+
 	dcUser->mDcConn->send(data, true, false);
 	return true;
 }
@@ -1035,7 +1046,7 @@ bool DcServer::sendToNickRaw(const char * to, const string & data) {
 
 
 void DcServer::sendToAll(const string & data, bool addSep, bool flush) {
-	// Protocol dependence
+	// Sent chat or pm through user protocol!
 	if (mDcConfig.mAdcOn) { // ADC
 		mChatList.sendToAllAdc(data, addSep, flush);
 	} else { // NMDC
@@ -1046,6 +1057,9 @@ void DcServer::sendToAll(const string & data, bool addSep, bool flush) {
 
 
 void DcServer::sendToAllRaw(const string & data, bool addSep, bool flush) {
+
+	// TODO: parse cmd
+
 	// Protocol dependence
 	if (mDcConfig.mAdcOn) { // ADC
 		mDcUserList.sendToAllAdc(data, addSep, flush);
@@ -1058,6 +1072,8 @@ void DcServer::sendToAllRaw(const string & data, bool addSep, bool flush) {
 
 /// Send data to all
 bool DcServer::sendToAll(const string & data, const char * nick, const char * from) {
+
+	// Sent chat or pm through user protocol!
 	if (from && nick) {
 		mDcUserList.sendToAllPm(data, nick, from); // PM
 	} else if (nick) {
@@ -1082,6 +1098,8 @@ bool DcServer::sendToAllRaw(const string & data) {
 
 /// Send data to profiles
 bool DcServer::sendToProfiles(unsigned long profile, const string & data, const char * nick, const char * from) {
+
+	// Sent chat or pm through user protocol!
 	if (from && nick) {
 		mDcUserList.sendToAllPm(data, nick, from, profile); // PM
 	} else if (nick) {
@@ -1097,7 +1115,8 @@ bool DcServer::sendToProfiles(unsigned long profile, const string & data, const 
 
 /// Send raw data to profiles
 bool DcServer::sendToProfilesRaw(unsigned long profile, const string & data) {
-	// TODO
+
+	// TODO: parse cmd
 	mDcUserList.sendToProfiles(profile, data, true);
 	return true;
 }
@@ -1110,6 +1129,7 @@ bool DcServer::sendToIp(const string & ip, const string & data, unsigned long pr
 		return false;
 	}
 
+	// Sent chat or pm through user protocol!
 	if (from && nick) {
 		mIpListConn->sendToIpPm(ip, data, nick, from, profile, true); // PM
 	} else if (nick) {
@@ -1129,7 +1149,7 @@ bool DcServer::sendToIpRaw(const string & ip, const string & data, unsigned long
 		return false;
 	}
 
-	// TODO
+	// TODO: parse cmd
 	mIpListConn->sendToIp(ip, data, profile, true);
 	return true;
 }
@@ -1149,6 +1169,7 @@ bool DcServer::sendToAllExceptNicks(const vector<string> & nickList, const strin
 		}
 	}
 
+	// Sent chat or pm through user protocol!
 	sendToAll(data, nick, from);
 
 	for (vector<DcUser *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
@@ -1172,6 +1193,7 @@ bool DcServer::sendToAllExceptNicksRaw(const vector<string> & nickList, const st
 		}
 	}
 
+	// TODO: parse cmd
 	sendToAllRaw(data);
 
 	for (vector<DcUser *>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {
@@ -1199,6 +1221,7 @@ bool DcServer::sendToAllExceptIps(const vector<string> & ipList, const string & 
 		}
 	}
 
+	// Sent chat or pm through user protocol!
 	sendToAll(data, nick, from);
 
 	for (vector<DcConn*>::iterator ul_it = ul.begin(); ul_it != ul.end(); ++ul_it) {

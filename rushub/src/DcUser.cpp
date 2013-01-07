@@ -277,9 +277,12 @@ unsigned long DcUser::getNickHash() const {
 const string & DcUser::getInfo() {
 	if (mInfoChanged) {
 		// TODO refactoring
-		if (DcProtocol::formingInfo(mDcServer->mDcConfig.mAdcOn ? DC_PROTOCOL_TYPE_ADC : DC_PROTOCOL_TYPE_NMDC, this, mInfo)) {
-			mInfoChanged = false;
+		if (mDcServer->mDcConfig.mAdcOn) {
+			AdcParser::formingInfo(this, mInfo);
+		} else {
+			NmdcParser::formingInfo(this, mInfo);
 		}
+		mInfoChanged = false;
 	}	
 	return mInfo;
 }
@@ -289,7 +292,11 @@ const string & DcUser::getInfo() {
 /// Set Info string
 bool DcUser::setInfo(const string & info) {
 	// TODO refactoring
-	DcProtocol::parseInfo(mDcServer->mDcConfig.mAdcOn ? DC_PROTOCOL_TYPE_ADC : DC_PROTOCOL_TYPE_NMDC, this, info);
+	if (mDcServer->mDcConfig.mAdcOn) {
+		AdcParser::parseInfo(this, info);
+	} else {
+		NmdcParser::parseInfo(this, info);
+	}
 	return true;
 }
 

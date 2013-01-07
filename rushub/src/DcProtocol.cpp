@@ -39,53 +39,6 @@ DcProtocol::~DcProtocol() {
 
 
 
-Parser * DcProtocol::parse(int protocolType, const string &) {
-	if (protocolType == DC_PROTOCOL_TYPE_ANY) { // Auto detect protocol
-		// TODO
-	} else if (protocolType == DC_PROTOCOL_TYPE_NMDC) { // NMDC only
-		// TODO
-	} else if (protocolType == DC_PROTOCOL_TYPE_ADC) { // ADC only
-		// TODO
-	} else {
-		throw "unsupported protocol type";
-	}
-	return NULL;
-}
-
-
-
-bool DcProtocol::parseInfo(int protocolType, DcUser * dcUser, const string & info) {
-	if (protocolType == DC_PROTOCOL_TYPE_ANY) {
-		if (info.size() > 0 && info[0] == '$') { // Auto detect protocol
-			NmdcParser::parseInfo(dcUser, info);
-		} else {
-			AdcParser::parseInfo(dcUser, info);
-		}
-	} else if (protocolType == DC_PROTOCOL_TYPE_NMDC) {
-		NmdcParser::parseInfo(dcUser, info);
-	} else if (protocolType == DC_PROTOCOL_TYPE_ADC) {
-		AdcParser::parseInfo(dcUser, info);
-	} else {
-		throw "unsupported protocol type";
-	}
-	return true;
-}
-
-
-
-bool DcProtocol::formingInfo(int protocolType, DcUser * dcUser, string & info) {
-	if (protocolType == DC_PROTOCOL_TYPE_NMDC) {
-		NmdcParser::formingInfo(dcUser, info);
-	} else if (protocolType == DC_PROTOCOL_TYPE_ADC) {
-		AdcParser::formingInfo(dcUser, info);
-	} else {
-		throw "unsupported protocol type";
-	}
-	return true;
-}
-
-
-
 void DcProtocol::addToOps(DcUser *) {
 	// Not implemented
 }
