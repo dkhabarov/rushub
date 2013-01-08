@@ -516,9 +516,10 @@ tSocket Conn::socketAccept(struct sockaddr_storage & storage) {
 
 int Conn::defineConnInfo(sockaddr_storage & storage) {
 	if (mSocket) {
+		socklen_t len = storage.ss_family == AF_INET ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6);
 		char host[NI_MAXHOST] = { 0 };
 		char port[NI_MAXSERV] = { 0 };
-		int ret = getnameinfo(reinterpret_cast<struct sockaddr *> (&storage), sizeof(struct sockaddr_storage), host, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+		int ret = getnameinfo(reinterpret_cast<struct sockaddr *> (&storage), len, host, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
 		if (ret != 0) {
 			LOG(LEVEL_WARN, "Error in getnameinfo: " << SOCK_ERR_GAI_MSG(ret) << " [" << ret << "]");
 			closeNow(CLOSE_REASON_GETPEERNAME);
