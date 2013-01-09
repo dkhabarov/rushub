@@ -140,7 +140,7 @@ int AdcProtocol::doCommand(Parser * parser, Conn * conn) {
 		}
 	#endif
 
-	#ifdef _DEBUG
+	#if defined(_DEBUG) || defined (DEBUG)
 		if (adcParser->mType == TYPE_UNPARSED) {
 			throw "Unparsed command";
 		}
