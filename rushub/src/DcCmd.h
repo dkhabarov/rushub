@@ -23,6 +23,7 @@
 #include "Plugin.h"
 #include "AdcProtocol.h"
 #include "NmdcProtocol.h"
+#include "stdinc.h"
 
 #include <string>
 
@@ -38,78 +39,24 @@ class DcCmd {
 
 public:
 
-	DcCmd(int protocolType = DC_PROTOCOL_TYPE_ALL) :
-		mProtocolType(protocolType)
-	{
-	}
+	DcCmd(int protocolType = DC_PROTOCOL_TYPE_ALL);
+	~DcCmd();
 
-	~DcCmd() {
-	}
+	void parse(const string &);
 
-	void parse(const string & data) {
-	}
+	/// If nick is empty, then build simple char msg (without nick), else with this nick
+	void buildChat(const string & data, const string & nick, bool toAll);
+	void buildPm(const string & data, const string & nick, const string & from);
 
-	void buildMsg(const string & data, const char * nick = NULL, const char * from = NULL, bool toAll = false) {
-		string adcCmd, nmdcCmd;
-		string adcCmd2, nmdcCmd2;
-		bool typeAll = false;
-		switch (mProtocolType) {
-			case DC_PROTOCOL_TYPE_ALL:
-				typeAll = true;
-			case DC_PROTOCOL_TYPE_ADC:
-				if (nick != NULL && from != NULL) {
-					AdcProtocol::appendPm(adcCmd, adcCmd2, data, nick, from);
-				} else {
-					AdcProtocol::appendChat(adcCmd, data, nick, toAll);
-				}
-				if (!typeAll) {
-					break;
-				}
-			case DC_PROTOCOL_TYPE_NMDC:
-				if (nick != NULL && from != NULL) {
-					NmdcProtocol::appendPm(nmdcCmd, nmdcCmd2, data, nick, from);
-				} else {
-					if (nick != NULL) {
-						NmdcProtocol::appendChat(nmdcCmd, data, nick);
-					} else {
-						NmdcProtocol::appendChat(nmdcCmd, data);
-					}
-				}
-				if (!typeAll) {
-					break;
-				}
-		}
-		if (!adcCmd.empty()) { // cmd can be empty
-			mAdcParts.push_back(adcCmd);
-		}
-		if (!adcCmd2.empty()) { // cmd can be empty
-			mAdcParts.push_back(adcCmd2);
-		}
-		if (!nmdcCmd.empty()) { // cmd can be empty
-			mNmdcParts.push_back(nmdcCmd);
-		}
-		if (!nmdcCmd2.empty()) { // cmd can be empty
-			mNmdcParts.push_back(nmdcCmd2);
-		}
-	}
-
-	const vector<string> & getParts(int protocolType) {
-		switch (protocolType) {
-			case DC_PROTOCOL_TYPE_ADC:
-				return mAdcParts;
-			case DC_PROTOCOL_TYPE_NMDC:
-				return mNmdcParts;
-			default:
-				throw "never";
-		}
-	}
+	void appendChat(int protocolType, string & str) const;
+	void appendPm(int protocolType, string & str, const string & nick) const;
 
 private:
 
 	int mProtocolType;
-
-	vector<string> mNmdcParts;
-	vector<string> mAdcParts;
+	string mChat[DC_PROTOCOL_TYPE_SIZE];
+	string mPmStart[DC_PROTOCOL_TYPE_SIZE];
+	string mPmEnd[DC_PROTOCOL_TYPE_SIZE];
 
 }; // class DcCmd
 

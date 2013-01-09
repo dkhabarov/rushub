@@ -25,6 +25,7 @@
 #endif // HAVE_CONFIG_H
 
 #include <limits.h>
+#include <assert.h>
 
 #ifndef _WIN32 // [
 
@@ -272,6 +273,11 @@ static const union {
 static const bool IS_LITTLE_ENDIAN = (o32_host_order.value == O32_LITTLE_ENDIAN);
 //static const bool IS_BIG_ENDIAN = (o32_host_order.value == O32_BIG_ENDIAN);
 
+#if defined(_DEBUG) || defined (DEBUG)
+#  define ASSERT(expression) (assert(expression))
+#else
+#  define ASSERT(expression) ((void)0)
+#endif
 
 #endif // STDINC_H ]
 
