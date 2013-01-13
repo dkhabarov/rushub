@@ -38,7 +38,24 @@ DcCmd::~DcCmd() {
 
 
 
-void DcCmd::parse(const string &) {
+void DcCmd::parse(const string & cmd) {
+	bool typeAll = false;
+	switch (mProtocolType) {
+		case DC_PROTOCOL_TYPE_ALL:
+			typeAll = true;
+		case DC_PROTOCOL_TYPE_ADC:
+			// TODO: parse
+			mChunk1[DC_PROTOCOL_TYPE_ADC] = cmd;
+			if (!typeAll) {
+				break;
+			}
+		case DC_PROTOCOL_TYPE_NMDC:
+			// TODO: parse
+			mChunk1[DC_PROTOCOL_TYPE_NMDC] = cmd;
+			if (!typeAll) {
+				break;
+			}
+	}
 }
 
 
@@ -96,20 +113,6 @@ void DcCmd::buildPm(const string & data, const string & nick, const string & fro
 				break;
 			}
 	}
-}
-
-
-
-void DcCmd::appendChat(int protocolType, string & str) const {
-	ASSERT(protocolType >= 0 && protocolType < DC_PROTOCOL_TYPE_SIZE);
-	str.append(mChunk1[protocolType]);
-}
-
-
-
-void DcCmd::appendPm(int protocolType, string & str, const string & nick) const {
-	ASSERT(protocolType >= 0 && protocolType < DC_PROTOCOL_TYPE_SIZE);
-	str.append(mChunk1[protocolType]).append(nick).append(mChunk2[protocolType]);
 }
 
 

@@ -24,6 +24,7 @@
 
 #include "DcServer.h"
 #include "WebConn.h"
+#include "DcCmd.h"
 
 #include <string.h>
 #include <functional>
@@ -55,6 +56,7 @@
 
 
 using namespace ::webserver;
+using namespace ::dcserver::protocol;
 
 
 namespace dcserver {
@@ -1028,33 +1030,34 @@ bool DcServer::sendToNickRaw(const char * to, const string & data) {
 
 
 
-void DcServer::sendToAll(const string & data, bool addSep, bool flush) {
-	// Sent chat or pm through user protocol!
-	if (mDcConfig.mAdcOn) { // ADC
-		mChatList.sendToAllAdc(data, addSep, flush);
-	} else { // NMDC
-		mChatList.sendToAll(data, addSep, flush);
-	}
-}
-
-
-
-void DcServer::sendToAllRaw(const string & data, bool addSep, bool flush) {
-
-	// TODO: parse cmd
+void DcServer::sendToAllRaw(const string & data, bool flush) {
+	// TODO: optimization now
+	//DcCmd dcCmd(mDcConfig.mAdcOn ? DC_PROTOCOL_TYPE_ADC : DC_PROTOCOL_TYPE_NMDC);
+	//dcCmd.parse(data);
+	//mDcUserList.sendToAll(&dcCmd, flush);
 
 	// Protocol dependence
 	if (mDcConfig.mAdcOn) { // ADC
-		mDcUserList.sendToAllAdc(data, addSep, flush);
+		mDcUserList.sendToAllAdc(data, true, flush);
 	} else { // NMDC
-		mDcUserList.sendToAll(data, addSep, flush);
+		mDcUserList.sendToAll(data, true, flush);
 	}
 }
 
 
 
-/// Send data to all
+/// Send to all chat or pm through user protocol
 bool DcServer::sendToAll(const string & data, const char * nick, const char * from) {
+	// TODO: optimization now
+	//DcCmd dcCmd(mDcConfig.mAdcOn ? DC_PROTOCOL_TYPE_ADC : DC_PROTOCOL_TYPE_NMDC);
+	//if (from && nick) {
+	//	dcCmd.buildPm(data, string(nick), string(from));
+	//} else if (nick) {
+	//	dcCmd.buildChat(data, string(nick), true);
+	//} else {
+	//	dcCmd.buildChat(data, string(""), true);
+	//}
+	//mDcUserList.sendToAll(&dcCmd, true);
 
 	// Sent chat or pm through user protocol!
 	if (from && nick) {
@@ -1062,8 +1065,11 @@ bool DcServer::sendToAll(const string & data, const char * nick, const char * fr
 	} else if (nick) {
 		mDcUserList.sendToAllChat(data, nick); // Chat from user
 	} else {
-		// TODO send to chat
-		sendToAll(data, true, true); // Simple Chat
+		if (mDcConfig.mAdcOn) { // ADC
+			mChatList.sendToAllAdc(data, true, true);
+		} else { // NMDC
+			mChatList.sendToAll(data, true, true);
+		}
 	}
 	return true;
 }
@@ -1072,8 +1078,7 @@ bool DcServer::sendToAll(const string & data, const char * nick, const char * fr
 
 /// Send raw data to all
 bool DcServer::sendToAllRaw(const string & data) {
-	// TODO
-	sendToAllRaw(data, true, false);
+	sendToAllRaw(data, false);
 	return true;
 }
 
@@ -1084,9 +1089,9 @@ bool DcServer::sendToProfiles(unsigned long profile, const string & data, const 
 
 	// Sent chat or pm through user protocol!
 	if (from && nick) {
-		mDcUserList.sendToAllPm(data, nick, from, profile); // PM
+		mDcUserList.sendToAllPm(data, nick, from, &profile); // PM
 	} else if (nick) {
-		mDcUserList.sendToAllChat(data, nick, profile); // Chat from user
+		mDcUserList.sendToAllChat(data, nick, &profile); // Chat from user
 	} else {
 		// TODO
 		mDcUserList.sendToProfiles(profile, data, true); // Simple Chat

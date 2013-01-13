@@ -192,17 +192,11 @@ public:
 	/** Sending data to profiles (sync down) */
 	void sendToProfiles(unsigned long profile, const string & data, bool addSep = true);
 
-	/** Sending to all chat (sync down) */
-	void sendToAllChat(const string & data, const string & nick);
-
 	/** Sending to all profiles chat (sync down) */
-	void sendToAllChat(const string & data, const string & nick, unsigned long profile);
-
-	/** Sending to all pm (sync down) */
-	void sendToAllPm(const string & data, const string & nick, const string & from);
+	void sendToAllChat(const string & data, const string & nick, const unsigned long * profile = NULL);
 
 	/** Sending to all profiles pm (sync down) */
-	void sendToAllPm(const string & data, const string & nick, const string & from, unsigned long profile);
+	void sendToAllPm(const string & data, const string & nick, const string & from, const unsigned long * profile = NULL);
 
 	/** Sending data from cache to user */
 	void flushForUser(UserBase * userBase);

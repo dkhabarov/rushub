@@ -48,9 +48,6 @@ public:
 	void buildChat(const string & data, const string & nick, bool toAll);
 	void buildPm(const string & data, const string & nick, const string & from);
 
-	void appendChat(int protocolType, string & str) const;
-	void appendPm(int protocolType, string & str, const string & nick) const;
-
 	const string & getChunk1(int protocolType) const;
 	const string & getChunk2(int protocolType) const;
 
