@@ -78,8 +78,8 @@ int Uid::userIndex(lua_State * L) {
 	void ** userdata = NULL;
 	switch(getHash(str)) {
 
-		case PARAM_HASH_NICK :
-			lua_pushstring(L, dcUserBase->getUid().c_str());
+		case PARAM_HASH_NICK : // TODO ADC - NI, NMDC - sNick
+			lua_pushstring(L, dcUserBase->getNick().c_str());
 			break;
 
 		case PARAM_HASH_MYINFO :

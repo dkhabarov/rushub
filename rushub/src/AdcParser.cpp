@@ -468,7 +468,7 @@ void AdcParser::parseFeatures(DcUser * dcUser) {
 void AdcParser::formingInfo(DcUser * dcUser, string & info) {
 	info.reserve(0xFF); // usual length of command
 	info.assign(STR_LEN("BINF "));
-	info.append(dcUser->getUid());
+	info.append(dcUser->getSid());
 	const set<string> & names = dcUser->getInfoNames();
 	for (set<string>::const_iterator it = names.begin(); it != names.end(); ++it) {
 		const string & name = (*it);

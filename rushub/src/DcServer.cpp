@@ -833,7 +833,7 @@ bool DcServer::removeFromDcUserList(DcUser * dcUser) {
 			string msg;
 			// TODO: for bots?
 			if (mDcConfig.mAdcOn) { // ADC
-				msg.append(STR_LEN("IQUI ")).append(dcUser->getUid()).append(STR_LEN(ADC_SEPARATOR));
+				msg.append(STR_LEN("IQUI ")).append(dcUser->getSid()).append(STR_LEN(ADC_SEPARATOR));
 				mDcUserList.sendToAllAdc(msg, false, false/*mDcConfig.mDelayedMyinfo*/); // Delay in sending MyINFO (and Quit)
 			} else { // NMDC
 				mNmdcProtocol.appendQuit(msg, dcUser->getNick());
@@ -1369,12 +1369,8 @@ int DcServer::regBot(const string & nick, const string & info, const string & ip
 	DcUser * dcUser = new DcUser(CLIENT_TYPE_DC, NULL);
 	dcUser->mDcServer = this;
 
-	// Protocol dependence
-	if (mDcConfig.mAdcOn) { // ADC
-		dcUser->setUid(string(mAdcProtocol.genNewSid()));
-	} else { // NMDC
-		dcUser->setNick(nick);
-	}
+	dcUser->setSid(string(mAdcProtocol.genNewSid()));
+	dcUser->setNick(nick);
 
 	dcUser->getParamForce(USER_PARAM_PROFILE)->setInt(30);
 	dcUser->getParamForce(USER_PARAM_IN_OP_LIST)->setBool(key);
@@ -1391,7 +1387,7 @@ int DcServer::regBot(const string & nick, const string & info, const string & ip
 		}
 		string inf(STR_LEN("IINF "));
 		inf.reserve(79);
-		inf.append(dcUser->getUid()).append(STR_LEN(" CT")).append(ct, 1).append(STR_LEN(" NI")).append(nick);
+		inf.append(dcUser->getSid()).append(STR_LEN(" CT")).append(ct, 1).append(STR_LEN(" NI")).append(nick);
 		inf.append(STR_LEN(" IDAONWQSVCXNJKW7L4HLB5O24TYW55555KAEK7WRY SS0 HN0 HR0 HO1 VEBot\\sV:1.0 SL0 DERusHub\\sbot"));
 		dcUser->setInfo(inf);
 	} else { // NMDC

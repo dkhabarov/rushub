@@ -87,7 +87,7 @@ using namespace ::std;
 
 // Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10042
+	#define INTERNAL_PLUGIN_VERSION 10043
 #endif
 
 // NMDC protocol separator
@@ -147,6 +147,7 @@ enum ClientType {
 #define USER_PARAM_SUPPORTS "sSupports"
 #define USER_PARAM_VERSION "sVersion"
 
+#define USER_PARAM_NICK "sNick"
 #define USER_PARAM_PROFILE "iProfile"
 #define USER_PARAM_IP "sIP"
 #define USER_PARAM_IP_CONN "sIPConn"
@@ -230,8 +231,11 @@ public:
 	/// Disconnect this client
 	virtual void disconnect() = 0;
 
-	/// Get user's UID
-	virtual const string & getUid() const = 0;
+	/// Get user's Nick
+	virtual const string & getNick() const = 0;
+
+	/// Get user's SID
+	virtual const string & getSid() const = 0;
 
 	virtual const string & getNmdcTag() = 0;
 

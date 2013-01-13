@@ -69,11 +69,11 @@ public:
 
 	virtual void disconnect();
 
-	virtual const string & getUid() const; // User ID
+	virtual const string & getSid() const; // User ID
 	virtual const string & getNick() const;
-	void setUid(const string & uid);
+	void setSid(const string & sid);
 	void setNick(const string & nick);
-	unsigned long getUidHash() const;
+	unsigned long getSidHash() const;
 	unsigned long getNickHash() const;
 
 	virtual const string & getNmdcTag();
@@ -139,9 +139,11 @@ private:
 
 private:
 
-	unsigned long mUidHash; ///< UserID Hash
+	unsigned long mNickHash; ///< Nick Hash
+	unsigned long mSidHash; ///< User SID Hash
 
-	string mUid; ///< UserID
+	string mNick; ///< User nick
+	string mSid; ///< User SID (Session ID)
 	string mNmdcTag; ///< NMDC tag
 	string mInfo; ///< User Info
 	string mIp; ///< IP address of user/bot

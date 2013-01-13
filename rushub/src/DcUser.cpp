@@ -30,7 +30,8 @@ DcUser::DcUser(int type, DcConn * dcConn) :
 	mDcServer(NULL),
 	mDcConn(dcConn),
 	mTimeEnter(true),
-	mUidHash(0),
+	mNickHash(0),
+	mSidHash(0),
 	mInUserList(false),
 	mCanSend(false),
 	mInfoChanged(true)
@@ -43,6 +44,7 @@ DcUser::DcUser(int type, DcConn * dcConn) :
 		mParamList.add(USER_PARAM_PORT_CONN,   new Param(this, USER_PARAM_PORT_CONN,   &mDcConn->mPortConn,   Param::TYPE_INT,    Param::MODE_NOT_MODIFY));
 		mParamList.add(USER_PARAM_ENTER_TIME,  new Param(this, USER_PARAM_ENTER_TIME,  mTimeEnter.sec(),      Param::TYPE_LONG,   Param::MODE_NOT_MODIFY));
 	}
+	mParamList.add(USER_PARAM_NICK,         new Param(this, USER_PARAM_NICK, &mNick,                               Param::TYPE_STRING, Param::MODE_NOT_MODIFY));
 	mParamList.add(USER_PARAM_IP,           new Param(this, USER_PARAM_IP, mDcConn != NULL ? &mIp : &mDcConn->mIp, Param::TYPE_STRING, Param::MODE_NOT_MODIFY));
 	mParamList.add(USER_PARAM_IN_USER_LIST, new Param(this, USER_PARAM_IN_USER_LIST, &mInUserList,                 Param::TYPE_BOOL,   Param::MODE_NOT_MODIFY));
 	mParamList.add(USER_PARAM_PROFILE,      new Param(this, USER_PARAM_PROFILE,      -1,                           Param::TYPE_INT,    Param::MODE_NOT_CHANGE_TYPE | Param::MODE_NOT_REMOVE));
@@ -228,48 +230,44 @@ bool DcUser::removeParam(const char * name) {
 
 
 
-// For ADC protocol (NMDC for compatibility)
-const string & DcUser::getUid() const {
-	// TODO: for ADC - Sid, for NMDC - sNick
-	return mUid;
+const string & DcUser::getSid() const {
+	return mSid;
 }
 
 
 
 const string & DcUser::getNick() const {
-	// TODO: for ADC - NI, for NMDC - sNick
-	return mUid;
+	return mNick;
 }
 
 
 
-void DcUser::setUid(const string & uid) {
-	mUid = uid;
+void DcUser::setSid(const string & sid) {
+	mSid = sid;
 
-	// Calc uid hash
-	mUidHash = static_cast<unsigned long> (UserList::toLowerHash(uid));
+	// Calc sid hash
+	mSidHash = static_cast<unsigned long> (UserList::toLowerHash(sid));
 }
 
 
 
 void DcUser::setNick(const string & nick) {
-	// TODO
-	mUid = nick;
+	mNick = nick;
 
 	// Calc nick hash
-	mUidHash = static_cast<unsigned long> (UserList::toLowerHash(nick));
+	mNickHash = static_cast<unsigned long> (UserList::toLowerHash(nick));
 }
 
 
 
-unsigned long DcUser::getUidHash() const {
-	return mUidHash;
+unsigned long DcUser::getSidHash() const {
+	return mSidHash;
 }
 
 
 
 unsigned long DcUser::getNickHash() const {
-	return mUidHash;
+	return mNickHash;
 }
 
 

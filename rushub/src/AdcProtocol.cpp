@@ -201,7 +201,7 @@ Conn * AdcProtocol::getConnForUdpData(Conn *, Parser *) {
 int AdcProtocol::onNewConn(Conn * conn) {
 
 	DcConn * dcConn = static_cast<DcConn *> (conn);
-	dcConn->mDcUser->setUid(string(genNewSid()));
+	dcConn->mDcUser->setSid(string(genNewSid()));
 
 	#ifndef WITHOUT_PLUGINS
 		mDcServer->mCalls.mOnUserConnected.callAll(dcConn->mDcUser);
@@ -232,7 +232,7 @@ int AdcProtocol::eventSup(AdcParser *, DcConn * dcConn) {
 	dcConn->reserve(29); // 18 + 1 + 5 + 4 + 1
 	dcConn->send(STR_LEN("ISUP ADBASE ADTIGR"), true, false);
 	dcConn->send(STR_LEN("ISID "), false, false);
-	dcConn->send(dcConn->mDcUser->getUid(), true, false);
+	dcConn->send(dcConn->mDcUser->getSid(), true, false);
 
 	#ifndef WITHOUT_PLUGINS
 		if (mDcServer->mCalls.mOnSupports.callAll(dcConn->mDcUser)) {
@@ -299,6 +299,8 @@ int AdcProtocol::eventInf(AdcParser * adcParser, DcConn * dcConn) {
 		// TODO: check CID and NI
 		// Not allow change PID, CID and nick !!!
 	}
+
+	dcConn->mDcUser->setNick(dcConn->mDcUser->getParam("NI")->getString());
 
 
 	#ifndef WITHOUT_PLUGINS
@@ -717,14 +719,14 @@ void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, bool flush /*
 
 // DMSG <my_sid> <msg>
 void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string & nick, bool flush /*= true*/) {
-	// TODO: nick->uid
-	const string & uid = nick;
+	// TODO: nick->sid
+	const string & sid = nick;
 
 	string tmp;
 	const string & out = toUtf8(data, tmp);
 	dcConn->reserve(11 + out.size()); // 5 + 4 + 1 + out.size() + 1
 	dcConn->send(STR_LEN("DMSG "), false, false);
-	dcConn->send(uid, false, false);
+	dcConn->send(sid, false, false);
 	dcConn->send(STR_LEN(" "), false, false);
 	dcConn->send(out, true, flush);
 }
@@ -740,14 +742,14 @@ void AdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, bool flush
 
 // BMSG <my_sid> <msg>
 void AdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, const string & nick, bool flush /*= true*/) {
-	// TODO: nick->uid
-	const string & uid = nick;
+	// TODO: nick->sid
+	const string & sid = nick;
 
 	string tmp;
 	const string & out = toUtf8(data, tmp);
 	dcConn->reserve(11 + out.size()); // 5 + 4 + 1 + out.size() + 1
 	dcConn->send(STR_LEN("BMSG "), false, false);
-	dcConn->send(uid, false, false);
+	dcConn->send(sid, false, false);
 	dcConn->send(STR_LEN(" "), false, false);
 	dcConn->send(out, true, flush);
 }
@@ -756,16 +758,16 @@ void AdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, const stri
 
 // EMSG <my_sid> <target_sid> <msg> PM<group_sid>
 void AdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string & nick, const string & from, bool flush /*= true*/) {
-	// TODO: nick->uid
-	const string & uid = nick;
+	// TODO: nick->sid
+	const string & sid = nick;
 
 	string tmp;
 	const string & out = toUtf8(data, tmp);
 	dcConn->reserve(23 + out.size()); // 5 + 4 + 1 + 4 + 1 + out.size() + 3 + 4 + 1
 	dcConn->send(STR_LEN("EMSG "), false, false);
-	dcConn->send(uid, false, false);
+	dcConn->send(sid, false, false);
 	dcConn->send(STR_LEN(" "), false, false);
-	dcConn->send(dcConn->mDcUser->getUid(), false, false);
+	dcConn->send(dcConn->mDcUser->getSid(), false, false);
 	dcConn->send(STR_LEN(" "), false, false);
 	dcConn->send(out, false, false);
 	dcConn->send(STR_LEN(" PM"), false, false);
