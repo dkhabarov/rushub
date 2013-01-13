@@ -793,6 +793,12 @@ void AdcProtocol::sendError(DcConn * dcConn, const string & errorText, int error
 
 
 
+/// Action after add in user list
+void AdcProtocol::onAddInUserList(DcUser *) {
+}
+
+
+
 void AdcProtocol::forceMove(DcConn * /*dcConn*/, const char * /*address*/, const char * /*reason*/ /*= NULL*/) {
 
 	// TODO impl

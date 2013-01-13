@@ -612,33 +612,28 @@ bool DcServer::checkNick(DcConn * dcConn) {
 
 	unsigned long nickHash = dcConn->mDcUser->getNickHash();
 
-	if (mDcConfig.mAdcOn) { // ADC
+	if (mDcUserList.contain(nickHash)) {
+		// User on a hub
+		DcUser * us = static_cast<DcUser *> (mDcUserList.find(nickHash));
 
-		// TODO
+		// Checking nick only for profile -1 (unreg) and bots
+		// All other profiles is a reg users and they are not checked
+		if (!us->mDcConn || dcConn->mDcUser->getParamForce(USER_PARAM_PROFILE)->getInt() == -1) {
+			LOG(LEVEL_DEBUG, "Bad nick (used): '" 
+				<< dcConn->mDcUser->getNick() << "'["
+				<< dcConn->getIp() << "] vs '" << us->getNick() 
+				<< "'[" << us->getIp() << "]");
+			string msg;
+			stringReplace(mDcLang.mUsedNick, string(STR_LEN("nick")), msg, dcConn->mDcUser->getNick());
 
-	} else { // NMDC
+			// TODO: convert ADC errorCode to close reason and move close function into sendError
+			dcConn->dcProtocol()->sendError(dcConn, msg, ERROR_CODE_NICK_INVALID);
 
-		if (mDcUserList.contain(nickHash)) {
-			// User on a hub
-			DcUser * us = static_cast<DcUser *> (mDcUserList.find(nickHash));
-
-			// Checking nick only for profile -1 (unreg) and bots
-			// All other profiles is a reg users and they are not checked
-			if (!us->mDcConn || dcConn->mDcUser->getParamForce(USER_PARAM_PROFILE)->getInt() == -1) {
-				LOG(LEVEL_DEBUG, "Bad nick (used): '" 
-					<< dcConn->mDcUser->getNick() << "'["
-					<< dcConn->getIp() << "] vs '" << us->getNick() 
-					<< "'[" << us->getIp() << "]");
-				string msg;
-				stringReplace(mDcLang.mUsedNick, string(STR_LEN("nick")), msg, dcConn->mDcUser->getNick());
-				sendToUser(dcConn->mDcUser, msg, mDcConfig.mHubBot.c_str());
-				dcConn->send(mNmdcProtocol.appendValidateDenied(msg.erase(), dcConn->mDcUser->getNick()));
-				return false;
-			}
-			LOG(LEVEL_DEBUG, "removed old user");
-			removeFromDcUserList(us);
-			us->mDcConn->closeNow(CLOSE_REASON_USER_OLD);
+			return false;
 		}
+		LOG(LEVEL_DEBUG, "removed old user");
+		removeFromDcUserList(us);
+		us->mDcConn->closeNow(CLOSE_REASON_USER_OLD);
 	}
 	return true;
 }
@@ -757,21 +752,9 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 
 	if (dcUser->mDcConn) {
 
-		// ======================================
 		mChatList.add(nickHash, dcUser);
 
-		if (!mDcConfig.mAdcOn) { // NMDC
-			if (!(dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO)) { // NMDC
-				mHelloList.add(nickHash, dcUser);
-			}
-			if (!dcUser->isPassive()) {
-				mActiveList.add(nickHash, dcUser);
-			}
-			if (dcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
-				mIpList.add(nickHash, dcUser);
-			}
-		}
-		// ======================================
+		dcUser->mDcConn->dcProtocol()->onAddInUserList(dcUser);
 
 		++ miTotalUserCount; // add except bot
 		dcUser->mDcConn->mIpRecv = true; // Installing the permit on reception of the messages on ip

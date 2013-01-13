@@ -108,6 +108,9 @@ public:
 	/// Error Message
 	virtual void sendError(DcConn *, const string & errorText, int errorCode = 0);
 
+	/// Action after add in user list
+	virtual void onAddInUserList(DcUser *);
+
 	virtual void forceMove(DcConn *, const char * address, const char * reason = NULL);
 	virtual int sendNickList(DcConn *); ///< Sending user-list and op-list
 

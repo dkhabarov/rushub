@@ -1102,8 +1102,28 @@ void NmdcProtocol::sendToPm(DcConn * dcConn, const string & data, const string &
 
 
 
-void NmdcProtocol::sendError(DcConn * dcConn, const string & errorText, int /*errorCode*/) {
+void NmdcProtocol::sendError(DcConn * dcConn, const string & errorText, int errorCode) {
 	sendToChat(dcConn, errorText, mDcServer->mDcConfig.mHubBot.c_str(), true);
+	if (errorCode == ERROR_CODE_NICK_INVALID) { // TODO: ADC error code
+		string msg;
+		dcConn->send(appendValidateDenied(msg, dcConn->mDcUser->getNick()));
+	}
+}
+
+
+
+/// Action after add in user list
+void NmdcProtocol::onAddInUserList(DcUser * dcUser) {
+	unsigned long nickHash = dcUser->getNickHash();
+	if (!(dcUser->mDcConn->mFeatures & SUPPORT_FEATURE_NOHELLO)) {
+		mDcServer->mHelloList.add(nickHash, dcUser);
+	}
+	if (!dcUser->isPassive()) {
+		mDcServer->mActiveList.add(nickHash, dcUser);
+	}
+	if (dcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
+		mDcServer->mIpList.add(nickHash, dcUser);
+	}
 }
 
 
