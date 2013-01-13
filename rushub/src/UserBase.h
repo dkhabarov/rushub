@@ -38,6 +38,7 @@ public:
 	virtual const string & getInfo() = 0;
 	virtual const string & getIp() const = 0;
 	virtual int getProfile() const = 0;
+	virtual int getProtocolType() const = 0;
 	virtual bool isHide() const = 0;
 	virtual bool isCanSend() const = 0;
 	virtual bool hasFeature(unsigned int feature) const = 0;

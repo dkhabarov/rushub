@@ -51,12 +51,14 @@ public:
 	void appendChat(int protocolType, string & str) const;
 	void appendPm(int protocolType, string & str, const string & nick) const;
 
+	const string & getChunk1(int protocolType) const;
+	const string & getChunk2(int protocolType) const;
+
 private:
 
 	int mProtocolType;
-	string mChat[DC_PROTOCOL_TYPE_SIZE];
-	string mPmStart[DC_PROTOCOL_TYPE_SIZE];
-	string mPmEnd[DC_PROTOCOL_TYPE_SIZE];
+	string mChunk1[DC_PROTOCOL_TYPE_SIZE];
+	string mChunk2[DC_PROTOCOL_TYPE_SIZE];
 
 }; // class DcCmd
 

@@ -357,6 +357,15 @@ void DcUser::setIp(const string & ip) {
 
 
 
+int DcUser::getProtocolType() const {
+	if (mDcConn != NULL) {
+		return mDcConn->dcProtocol()->getType();
+	}
+	return 0;
+}
+
+
+
 int DcUser::getProfile() const {
 	return getParam(USER_PARAM_PROFILE)->getInt();
 }

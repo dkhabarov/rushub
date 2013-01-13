@@ -89,6 +89,7 @@ public:
 	void setIp(const string & ip);
 
 	virtual int getProfile() const;
+	virtual int getProtocolType() const;
 
 	virtual bool isHide() const;
 	virtual bool isCanSend() const;

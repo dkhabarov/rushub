@@ -55,6 +55,9 @@ public:
 	NmdcProtocol();
 	virtual ~NmdcProtocol();
 	
+	/// Protocol type
+	virtual int getType() const;
+
 	virtual const char * getSeparator() const;
 	virtual size_t getSeparatorLen() const;
 	virtual unsigned int getMaxCommandLength() const;

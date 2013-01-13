@@ -24,24 +24,46 @@
 
 #include "UserBase.h"
 #include "UserList.h"
+#include "DcCmd.h"
 
 #include <algorithm>
 
 namespace dcserver {
 
 
-
-/** Unary function for sending data to users */
-struct ufSend : public unary_function<void, HashTable<UserBase *>::iterator> {
+struct ufSendTmp : public unary_function<void, HashTable<UserBase *>::iterator> {
 	const string & mData; /** Data for sending */
 	bool mAddSep;
 
-	ufSend(const string & data, bool addSep) : mData(data), mAddSep(addSep) {
+	ufSendTmp(const string & data, bool addSep) : mData(data), mAddSep(addSep) {
 	}
 
 	void operator() (UserBase * userBase) {
 		if (userBase && userBase->isCanSend()) {
 			userBase->send(mData, mAddSep);
+		}
+	}
+
+	const ufSendTmp & operator = (const ufSendTmp &) { // for_each
+		mAddSep = false;
+		return *this;
+	}
+
+}; // struct ufSend
+
+
+
+/** Unary function for sending data to users */
+struct ufSend : public unary_function<void, HashTable<UserBase *>::iterator> {
+	string * mData; /** Data for sending */
+	bool mAddSep;
+
+	ufSend(string * data, bool addSep) : mData(data), mAddSep(addSep) {
+	}
+
+	void operator() (UserBase * userBase) {
+		if (userBase && userBase->isCanSend()) {
+			userBase->send(mData[userBase->getProtocolType()], mAddSep);
 		}
 	}
 
@@ -377,6 +399,35 @@ void UserList::remake() {
 
 
 /**
+ Sendind data to all users from the list.
+ Adds separator to end of string, if it does not have!
+ DcCmd - sending cnd
+ flush - false - not send and save to cache, true - send data and send cache
+ */
+void UserList::sendToAll(DcCmd * dcCmd, bool flush) {
+	Mutex::Lock l(mMutex); // sync
+	if (flush) {
+		LOG(LEVEL_TRACE, "sendToAll begin");
+		for (int i = 0; i < DC_PROTOCOL_TYPE_SIZE; ++i) {
+			addInCache(mCache[i], dcCmd->getChunk1(i), DcProtocol::getSeparator(i), DcProtocol::getSeparatorLen(i));
+		}
+
+		for_each(begin(), end(), ufSend(mCache, false));
+
+		for (int i = 0; i < DC_PROTOCOL_TYPE_SIZE; ++i) {
+			string().swap(mCache[i]); // erase & free memory
+		}
+		LOG(LEVEL_TRACE, "sendToAll end");
+	} else {
+		for (int i = 0; i < DC_PROTOCOL_TYPE_SIZE; ++i) {
+			addInCache(mCache[i], dcCmd->getChunk1(i), DcProtocol::getSeparator(i), DcProtocol::getSeparatorLen(i));
+		}
+	}
+}
+
+
+
+/**
  Sendind data to all NMDC users from the list
  data - sending data
  flush - false - not send and save to cache, true - send data and send cache
@@ -384,7 +435,7 @@ void UserList::remake() {
  */
 void UserList::sendToAll(const string & data, bool addSep, bool flush) {
 	Mutex::Lock l(mMutex); // sync
-	sendToAll(data, addSep, flush, mCacheNmdc, STR_LEN(NMDC_SEPARATOR));
+	sendToAll(data, addSep, flush, mCache[DC_PROTOCOL_TYPE_NMDC], STR_LEN(NMDC_SEPARATOR));
 }
 
 
@@ -397,7 +448,7 @@ void UserList::sendToAll(const string & data, bool addSep, bool flush) {
  */
 void UserList::sendToAllAdc(const string & data, bool addSep, bool flush) {
 	Mutex::Lock l(mMutex); // sync
-	sendToAll(data, addSep, flush, mCacheAdc, STR_LEN(ADC_SEPARATOR));
+	sendToAll(data, addSep, flush, mCache[DC_PROTOCOL_TYPE_ADC], STR_LEN(ADC_SEPARATOR));
 }
 
 
@@ -453,11 +504,15 @@ void UserList::sendToAllPm(const string & data, const string & nick, const strin
 /** Flush user cache */
 void UserList::flushForUser(UserBase * userBase) {
 	Mutex::Lock l(mMutex); // sync
-	if (mCacheNmdc.size()) {
-		ufSend(mCacheNmdc, false).operator() (userBase);
+	bool send = false;
+	for (int i = 0; i < DC_PROTOCOL_TYPE_SIZE; ++i) {
+		if (mCache[i].size()) {
+			send = true;
+			break;
+		}
 	}
-	if (mCacheAdc.size()) {
-		ufSend(mCacheAdc, false).operator() (userBase);
+	if (send) {
+		ufSend(mCache, false).operator() (userBase);
 	}
 }
 
@@ -465,11 +520,11 @@ void UserList::flushForUser(UserBase * userBase) {
 
 /** Flush common cache */
 void UserList::flushCache() {
-	if (mCacheNmdc.size()) {
+	if (mCache[DC_PROTOCOL_TYPE_NMDC].size()) {
 		string str;
 		sendToAll(str, false, true);
 	}
-	if (mCacheAdc.size()) {
+	if (mCache[DC_PROTOCOL_TYPE_ADC].size()) {
 		string str;
 		sendToAllAdc(str, false, true);
 	}
@@ -515,10 +570,10 @@ void UserList::sendToAll(const string & data, bool addSep, bool flush, string & 
 
 		if (!cache.empty()) {
 			addInCache(cache, data, sep, sepLen, addSep);
-			for_each(begin(), end(), ufSend(cache, false));
+			for_each(begin(), end(), ufSendTmp(cache, false));
 			string().swap(cache); // erase & free memory
 		} else {
-			for_each(begin(), end(), ufSend(data, addSep));
+			for_each(begin(), end(), ufSendTmp(data, addSep));
 		}
 
 		LOG(LEVEL_TRACE, "sendToAll end");

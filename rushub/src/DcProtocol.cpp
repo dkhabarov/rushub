@@ -20,6 +20,7 @@
 #include "DcProtocol.h"
 #include "DcServer.h" // for mDcServer
 #include "DcConn.h" // for DcConn
+#include "Plugin.h"
 
 namespace dcserver {
 
@@ -35,6 +36,34 @@ DcProtocol::DcProtocol() :
 
 
 DcProtocol::~DcProtocol() {
+}
+
+
+
+const char * DcProtocol::getSeparator(int protocolType) {
+	ASSERT(protocolType >= 0 && protocolType < DC_PROTOCOL_TYPE_SIZE);
+	switch (protocolType) {
+		case DC_PROTOCOL_TYPE_ADC:
+			return ADC_SEPARATOR;
+		case DC_PROTOCOL_TYPE_NMDC:
+			return NMDC_SEPARATOR;
+		default:
+			throw "never";
+	}
+}
+
+
+
+size_t DcProtocol::getSeparatorLen(int protocolType) {
+	ASSERT(protocolType >= 0 && protocolType < DC_PROTOCOL_TYPE_SIZE);
+	switch (protocolType) {
+		case DC_PROTOCOL_TYPE_ADC:
+			return ADC_SEPARATOR_LEN;
+		case DC_PROTOCOL_TYPE_NMDC:
+			return NMDC_SEPARATOR_LEN;
+		default:
+			throw "never";
+	}
 }
 
 

@@ -76,6 +76,13 @@ NmdcProtocol::~NmdcProtocol() {
 
 
 
+/// Protocol type
+int NmdcProtocol::getType() const {
+	return DC_PROTOCOL_TYPE_NMDC;
+}
+
+
+
 const char * NmdcProtocol::getSeparator() const {
 	return NMDC_SEPARATOR;
 }

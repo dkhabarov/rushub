@@ -45,6 +45,12 @@ namespace dcserver {
 
 class UserBase;
 
+namespace protocol {
+	class DcCmd;
+}
+
+using namespace ::dcserver::protocol;
+
 
 
 /// Base template for user list
@@ -170,6 +176,9 @@ public:
 	/** Remake */
 	void remake();
 
+	/** Sending data to all from the list. Adds separator to end of string, if it does not have. */
+	void sendToAll(DcCmd *, bool flush = true);
+
 	/** Sending data to all from the list */
 	void sendToAll(const string & data, bool addSep = true, bool flush = true);
 
@@ -218,8 +227,7 @@ protected:
 private:
 
 	string mName; ///< Name of list
-	string mCacheNmdc;
-	string mCacheAdc;
+	string mCache[DC_PROTOCOL_TYPE_SIZE];
 
 	vector<UserListItem*> mListItems;
 

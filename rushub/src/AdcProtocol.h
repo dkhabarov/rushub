@@ -45,6 +45,9 @@ public:
 	AdcProtocol();
 	virtual ~AdcProtocol();
 	
+	/// Protocol type
+	virtual int getType() const;
+
 	virtual const char * getSeparator() const;
 	virtual size_t getSeparatorLen() const;
 	virtual unsigned int getMaxCommandLength() const;
@@ -68,7 +71,6 @@ public:
 	static string & appendChatAll(string & str, const string & msg);
 	static string & appendChatAll(string & str, const string & msg, const string & nick);
 	static void appendPm(string & start, string & end, const string & msg, const string & nick, const string & from);
-	static void appendChat(string & str, const string & msg, const char * nick, bool toAll);
 
 	/// Chat Direct
 	virtual void sendToChat(DcConn *, const string & data, bool flush = true);

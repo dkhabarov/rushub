@@ -28,7 +28,7 @@ namespace protocol {
 DcCmd::DcCmd(int protocolType /*= DC_PROTOCOL_TYPE_ALL*/) :
 	mProtocolType(protocolType)
 {
-	ASSERT(protocolType >= 0 && protocolType < DC_PROTOCOL_TYPE_SIZE);
+	ASSERT(protocolType >= -1 && protocolType < DC_PROTOCOL_TYPE_SIZE);
 }
 
 
@@ -52,15 +52,15 @@ void DcCmd::buildChat(const string & data, const string & nick, bool toAll) {
 		case DC_PROTOCOL_TYPE_ADC:
 			if (nick.empty()) {
 				if (toAll) {
-					AdcProtocol::appendChatAll(mChat[DC_PROTOCOL_TYPE_ADC], data);
+					AdcProtocol::appendChatAll(mChunk1[DC_PROTOCOL_TYPE_ADC], data);
 				} else {
-					AdcProtocol::appendChat(mChat[DC_PROTOCOL_TYPE_ADC], data);
+					AdcProtocol::appendChat(mChunk1[DC_PROTOCOL_TYPE_ADC], data);
 				}
 			} else {
 				if (toAll) {
-					AdcProtocol::appendChatAll(mChat[DC_PROTOCOL_TYPE_ADC], data, nick);
+					AdcProtocol::appendChatAll(mChunk1[DC_PROTOCOL_TYPE_ADC], data, nick);
 				} else {
-					AdcProtocol::appendChat(mChat[DC_PROTOCOL_TYPE_ADC], data, nick);
+					AdcProtocol::appendChat(mChunk1[DC_PROTOCOL_TYPE_ADC], data, nick);
 				}
 			}
 			if (!typeAll) {
@@ -68,9 +68,9 @@ void DcCmd::buildChat(const string & data, const string & nick, bool toAll) {
 			}
 		case DC_PROTOCOL_TYPE_NMDC:
 			if (nick.empty()) {
-				NmdcProtocol::appendChat(mChat[DC_PROTOCOL_TYPE_NMDC], data);
+				NmdcProtocol::appendChat(mChunk1[DC_PROTOCOL_TYPE_NMDC], data);
 			} else {
-				NmdcProtocol::appendChat(mChat[DC_PROTOCOL_TYPE_NMDC], data, nick);
+				NmdcProtocol::appendChat(mChunk1[DC_PROTOCOL_TYPE_NMDC], data, nick);
 			}
 			if (!typeAll) {
 				break;
@@ -86,12 +86,12 @@ void DcCmd::buildPm(const string & data, const string & nick, const string & fro
 		case DC_PROTOCOL_TYPE_ALL:
 			typeAll = true;
 		case DC_PROTOCOL_TYPE_ADC:
-			AdcProtocol::appendPm(mPmStart[DC_PROTOCOL_TYPE_ADC], mPmEnd[DC_PROTOCOL_TYPE_ADC], data, nick, from);
+			AdcProtocol::appendPm(mChunk1[DC_PROTOCOL_TYPE_ADC], mChunk2[DC_PROTOCOL_TYPE_ADC], data, nick, from);
 			if (!typeAll) {
 				break;
 			}
 		case DC_PROTOCOL_TYPE_NMDC:
-			NmdcProtocol::appendPm(mPmStart[DC_PROTOCOL_TYPE_NMDC], mPmEnd[DC_PROTOCOL_TYPE_NMDC], data, nick, from);
+			NmdcProtocol::appendPm(mChunk1[DC_PROTOCOL_TYPE_NMDC], mChunk2[DC_PROTOCOL_TYPE_NMDC], data, nick, from);
 			if (!typeAll) {
 				break;
 			}
@@ -102,14 +102,28 @@ void DcCmd::buildPm(const string & data, const string & nick, const string & fro
 
 void DcCmd::appendChat(int protocolType, string & str) const {
 	ASSERT(protocolType >= 0 && protocolType < DC_PROTOCOL_TYPE_SIZE);
-	str.append(mChat[protocolType]);
+	str.append(mChunk1[protocolType]);
 }
 
 
 
 void DcCmd::appendPm(int protocolType, string & str, const string & nick) const {
 	ASSERT(protocolType >= 0 && protocolType < DC_PROTOCOL_TYPE_SIZE);
-	str.append(mPmStart[protocolType]).append(nick).append(mPmEnd[protocolType]);
+	str.append(mChunk1[protocolType]).append(nick).append(mChunk2[protocolType]);
+}
+
+
+
+const string & DcCmd::getChunk1(int protocolType) const {
+	ASSERT(protocolType >= 0 && protocolType < DC_PROTOCOL_TYPE_SIZE);
+	return mChunk1[protocolType];
+}
+
+
+
+const string & DcCmd::getChunk2(int protocolType) const {
+	ASSERT(protocolType >= 0 && protocolType < DC_PROTOCOL_TYPE_SIZE);
+	return mChunk2[protocolType];
 }
 
 

@@ -65,6 +65,13 @@ AdcProtocol::~AdcProtocol() {
 
 
 
+/// Protocol type
+int AdcProtocol::getType() const {
+	return DC_PROTOCOL_TYPE_ADC;
+}
+
+
+
 const char * AdcProtocol::getSeparator() const {
 	return ADC_SEPARATOR;
 }
@@ -682,24 +689,6 @@ void AdcProtocol::appendPm(string & start, string & end, const string & msg, con
 	const string & out = toUtf8(msg, tmp);
 	end.reserve(9 + out.size()); // 1 + out.size() + 3 + 4 + 1
 	end.append(STR_LEN(" ")).append(out).append(STR_LEN(" PM")).append(from_sid).append(STR_LEN(ADC_SEPARATOR));
-}
-
-
-
-void AdcProtocol::appendChat(string & str, const string & msg, const char * nick, bool toAll) {
-	if (nick) {
-		if (toAll) {
-			appendChatAll(str, msg, nick);
-		} else {
-			appendChat(str, msg, nick);
-		}
-	} else {
-		if (toAll) {
-			appendChatAll(str, msg);
-		} else {
-			appendChat(str, msg);
-		}
-	}
 }
 
 
