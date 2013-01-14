@@ -405,7 +405,7 @@ void DcServer::syncTimer(void * self) {
 
 	while (!dcServer->mStopSync) {
 		syncActions(dcServer);
-		sleep(10);
+		sleep(500); // chances are that we are blocking main thread, if time will be very small
 	}
 }
 
