@@ -177,7 +177,7 @@ public:
 	void remake();
 
 	/** Sending data to all from the list. Adds separator to end of string, if it does not have. */
-	void sendToAll(DcCmd *, bool flush = true);
+	void sendToAll(DcCmd *, bool flush = true, const unsigned long * profile = NULL);
 
 	/** Sending data to all from the list */
 	void sendToAll(const string & data, bool addSep = true, bool flush = true);

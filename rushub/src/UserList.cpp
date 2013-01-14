@@ -62,8 +62,8 @@ struct ufSendTmp : public unary_function<void, HashTable<UserBase *>::iterator> 
 	}
 
 	const ufSendTmp & operator = (const ufSendTmp &) { // for_each
-		mProfile = NULL;
 		mAddSep = false;
+		mProfile = NULL;
 		return *this;
 	}
 }; // struct ufSendTmp
@@ -73,19 +73,38 @@ struct ufSendTmp : public unary_function<void, HashTable<UserBase *>::iterator> 
 /** Unary function for sending data to users */
 struct ufSend : public unary_function<void, HashTable<UserBase *>::iterator> {
 	string * mData; /** Data for sending */
+	const unsigned long * mProfile;
 	bool mAddSep;
 
-	ufSend(string * data, bool addSep) : mData(data), mAddSep(addSep) {
+	ufSend(string * data, bool addSep, const unsigned long * profile = NULL) : 
+		mData(data),
+		mAddSep(addSep),
+		mProfile(profile)
+	{
 	}
 
 	void operator() (UserBase * userBase) {
 		if (userBase && userBase->isCanSend()) {
-			userBase->send(mData[userBase->getProtocolType()], mAddSep);
+			if (mProfile) {
+				int profile = userBase->getProfile() + 1;
+				if (profile < 0) {
+					profile = -profile;
+				}
+				if (profile > 31) {
+					profile = (profile % 32) - 1;
+				}
+				if ((*mProfile) & static_cast<unsigned long> (1 << profile)) {
+					userBase->send(mData[userBase->getProtocolType()], mAddSep);
+				}
+			} else {
+				userBase->send(mData[userBase->getProtocolType()], mAddSep);
+			}
 		}
 	}
 
 	const ufSend & operator = (const ufSend &) { // for_each
 		mAddSep = false;
+		mProfile = NULL;
 		return *this;
 	}
 
@@ -341,15 +360,23 @@ void UserList::remake() {
  DcCmd - sending cnd
  flush - false - not send and save to cache, true - send data and send cache
  */
-void UserList::sendToAll(DcCmd * dcCmd, bool flush) {
+void UserList::sendToAll(DcCmd * dcCmd, bool flush, const unsigned long * profile) {
 	Mutex::Lock l(mMutex); // sync
-	if (flush) {
+	if (profile) {
+		LOG(LEVEL_TRACE, "sendToProfiles begin");
+		string s[2] = {
+			dcCmd->getChunk1(DC_PROTOCOL_TYPE_NMDC),
+			dcCmd->getChunk1(DC_PROTOCOL_TYPE_ADC)
+		};
+		for_each(begin(), end(), ufSend(s, false, profile));
+		LOG(LEVEL_TRACE, "sendToProfiles end");
+	} else if (flush) {
 		LOG(LEVEL_TRACE, "sendToAll begin");
 		for (int i = 0; i < DC_PROTOCOL_TYPE_SIZE; ++i) {
 			addInCache(mCache[i], dcCmd->getChunk1(i), DcProtocol::getSeparator(i), DcProtocol::getSeparatorLen(i));
 		}
 
-		for_each(begin(), end(), ufSend(mCache, false));
+		for_each(begin(), end(), ufSend(mCache, false, profile));
 
 		for (int i = 0; i < DC_PROTOCOL_TYPE_SIZE; ++i) {
 			string().swap(mCache[i]); // erase & free memory
