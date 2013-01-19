@@ -1066,9 +1066,9 @@ bool DcServer::sendToAll(const string & data, const char * nick, const char * fr
 		mDcUserList.sendToAllChat(data, nick); // Chat from user
 	} else {
 		if (mDcConfig.mAdcOn) { // ADC
-			mChatList.sendToAllAdc(data, true, true);
+			mChatList.sendToAllAdc(data, true, true); // mChatList
 		} else { // NMDC
-			mChatList.sendToAll(data, true, true);
+			mChatList.sendToAll(data, true, true); // mChatList
 		}
 	}
 	return true;
