@@ -258,7 +258,7 @@ int NmdcProtocol::eventKey(NmdcParser * dcparser, DcConn * dcConn) {
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (!mDcServer->mCalls.mOnKey.callAll(dcConn->mDcUser)) {
+		if (mDcServer->mCalls.mOnKey.callAll(dcConn->mDcUser)) {
 			string lock, key;
 			appendLock(lock);
 			size_t pos = lock.find(' ', 6);
