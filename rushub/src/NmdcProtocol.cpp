@@ -1498,9 +1498,9 @@ void NmdcProtocol::dcnEscape(const char * buf, size_t len, string & dest) {
 	dest.clear();
 	unsigned char c;
 	char b[11];
-	while(len-- > 0) {
+	while (len-- > 0) {
 		c = *(buf++);
-		switch(c) {
+		switch (c) {
 			case 0:
 			case 5:
 			case 36:
@@ -1525,13 +1525,13 @@ void NmdcProtocol::dcnUnescape(const string & src, char * dest, size_t & len) {
 	unsigned char c;
 	size_t pos = src.find(start), pos2 = 0;
 	len = 0;
-	while((pos != src.npos) && (len < src.size())) {
-		if(pos > pos2) {
+	while ((pos != src.npos) && (len < src.size())) {
+		if (pos > pos2) {
 			memcpy(dest + len, src.c_str() + pos2, pos - pos2);
 			len += pos - pos2;
 		}
 		pos2 = src.find(end, pos);
-		if((pos2 != src.npos) && 
+		if ((pos2 != src.npos) && 
 				(pos2 - pos <= start.size() + 3)) {
 			c = static_cast<unsigned char> (atoi(src.substr(pos + start.size(), 3).c_str()));
 			dest[len++] = c;
@@ -1556,12 +1556,16 @@ void NmdcProtocol::lock2key(const string & lock, string & key) {
 	k = new char[len + 1];
 
 	k[0] = l[0] ^ l[len - 1] ^ l[len - 2] ^ 5;
-	while(++count < len) k[count] = l[count] ^ l[count - 1];
+	while (++count < len) {
+		k[count] = l[count] ^ l[count - 1];
+	}
 	k[len] = 0;
 
 	count = 0;
 	--count;
-	while(++count < len) k[count] = ((k[count] << 4)) | ((k[count] >> 4));
+	while (++count < len) {
+		k[count] = ((k[count] << 4)) | ((k[count] >> 4));
+	}
 
 	dcnEscape(k, len, key);
 	delete [] k;
