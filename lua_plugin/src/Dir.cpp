@@ -185,12 +185,12 @@ void Dir::pathForFile(const char * file, string & path) {
 void Dir::checkEndSlash(string & path) {
 
 	size_t pos = path.find('\\');
-	while (pos != path.npos) {
+	while (pos != string::npos) {
 		path.replace(pos, 1, 1, '/');
 		pos = path.find('\\', pos);
 	}
 
-	if (path.empty() || path.find('/', path.size() - 1) == path.npos) {
+	if (path.empty() || path.find('/', path.size() - 1) == string::npos) {
 		path += '/';
 	}
 

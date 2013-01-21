@@ -168,14 +168,14 @@ private:
 
 		//cout << cmd << endl;
 
-		if (cmd.find("$Lock ", 0, 6) != cmd.npos) {
+		if (cmd.find("$Lock ", 0, 6) != string::npos) {
 			string data;
 			data.reserve(150);
 			data.append(STR_LEN("$Supports NoGetINFO NoHello UserIP2|$Key key|$ValidateNick "));
 			data.append(static_cast<NmdcParser*> (conn->mParser)->mNick);
 			data.append(STR_LEN("|"));
 			conn->writeData(data.c_str(), data.size(), true);
-		} else if (cmd.find("$Hello ", 0, 7) != cmd.npos) {
+		} else if (cmd.find("$Hello ", 0, 7) != string::npos) {
 			string data;
 			data.reserve(150);
 			data.append(STR_LEN("$Version 1,0091|$GetNickList|$MyINFO $ALL "));

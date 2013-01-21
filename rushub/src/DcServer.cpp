@@ -1379,7 +1379,7 @@ int DcServer::regBot(const string & nick, const string & info, const string & ip
 		inf.append(STR_LEN(" IDAONWQSVCXNJKW7L4HLB5O24TYW55555KAEK7WRY SS0 HN0 HR0 HO1 VEBot\\sV:1.0 SL0 DERusHub\\sbot"));
 		dcUser->setInfo(inf);
 	} else { // NMDC
-		if (nick.empty() || nick.size() > 0x40 || nick.find_first_of(" |$") != nick.npos) {
+		if (nick.empty() || nick.size() > 0x40 || nick.find_first_of(" |$") != string::npos) {
 			delete dcUser;
 			return -1;
 		}

@@ -118,14 +118,14 @@ CCONVERTFROM(string, String, str)
 /** Convert to string */
 void ConfigItemDouble::convertTo(string & str) {
 	toString(this->data(), str);
-	if (str.find('.') == str.npos) {
+	if (str.find('.') == string::npos) {
 		str.append(STR_LEN(".0")); // double mark
 	}
 }
 
 void ConfigItemPDouble::convertTo(string & str) {
 	toString(*(this->data()), str);
-	if (str.find('.') == str.npos) {
+	if (str.find('.') == string::npos) {
 		str.append(STR_LEN(".0")); // double mark
 	}
 }

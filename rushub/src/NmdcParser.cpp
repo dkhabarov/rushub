@@ -156,13 +156,13 @@ bool NmdcParser::isPassive(const string & description) {
 		return false;
 	}
 	size_t i = description.find_last_of('<', l);
-	if (i == description.npos) {
+	if (i == string::npos) {
 		return false;
 	}
 	if (
-		(description.find("M:P", i, l - i) == description.npos) || 
-		(description.find("M:5", i, l - i) == description.npos) || 
-		(description.find("M:S", i, l - i) == description.npos)
+		(description.find("M:P", i, l - i) == string::npos) || 
+		(description.find("M:5", i, l - i) == string::npos) || 
+		(description.find("M:S", i, l - i) == string::npos)
 	) {
 		return false;
 	}
@@ -413,7 +413,7 @@ void NmdcParser::parseDesc(DcUser * dcUser, const string & description) {
 	size_t size = desc.size();
 	if (size) {
 		size_t i = desc.find_last_of('<');
-		if (i != desc.npos && desc[--size] == '>') {
+		if (i != string::npos && desc[--size] == '>') {
 			++i;
 			tag.assign(desc, i, size - i);
 			desc.assign(desc, 0, --i);
@@ -438,18 +438,18 @@ void NmdcParser::parseTag(DcUser * dcUser, const string & tag) {
 	if (tagSize) {
 		// client name and version
 		size_t clientPos = tag.find(',');
-		if (clientPos == tag.npos) {
+		if (clientPos == string::npos) {
 			clientPos = tagSize;
 		}
 
 		size_t v = tag.find("V:");
-		if (v != tag.npos) {
+		if (v != string::npos) {
 			clientVersion.assign(tag, v + 2, clientPos - v - 2);
 			clientName.assign(tag, 0, v);
 		} else {
 			size_t cn_e_pos = clientPos;
 			size_t s = tag.find(' ');
-			if (s != tag.npos && s < clientPos) {
+			if (s != string::npos && s < clientPos) {
 				size_t b = s + 1;
 				if (atof(tag.substr(b, clientPos - b).c_str()) > 0.) {
 					clientVersion.assign(tag, b, clientPos - b);
@@ -463,26 +463,26 @@ void NmdcParser::parseTag(DcUser * dcUser, const string & tag) {
 
 		// hubs
 		size_t h = tag.find("H:");
-		if (h != tag.npos) {
+		if (h != string::npos) {
 			h += 2;
 			size_t unregPos = tag.find('/', h);
-			if (unregPos == tag.npos) {
+			if (unregPos == string::npos) {
 				unregPos = tag.find(',', h);
-				if (unregPos == tag.npos) {
+				if (unregPos == string::npos) {
 					unregPos = tagSize;
 				}
 			} else {
 				size_t regPos = tag.find('/', ++unregPos);
-				if (regPos == tag.npos) {
+				if (regPos == string::npos) {
 					regPos = tag.find(',', unregPos);
-					if (regPos == tag.npos) {
+					if (regPos == string::npos) {
 						regPos = tagSize;
 					}
 				} else {
 					size_t opPos = tag.find('/', ++regPos);
-					if (opPos == tag.npos) {
+					if (opPos == string::npos) {
 						opPos = tag.find(',', regPos);
-						if (opPos == tag.npos) {
+						if (opPos == string::npos) {
 							opPos = tagSize;
 						}
 					}
@@ -515,10 +515,10 @@ void NmdcParser::parseTag(DcUser * dcUser, const string & tag) {
 void NmdcParser::findParam(DcUser * dcUser, const string & tag, const char * find, const char * key, bool toInt /*= true*/) {
 	string param;
 	size_t pos = tag.find(find);
-	if (pos != tag.npos) {
+	if (pos != string::npos) {
 		pos += 2;
 		size_t sepPos = tag.find(',', pos);
-		if (sepPos == tag.npos) {
+		if (sepPos == string::npos) {
 			sepPos = tag.size();
 		}
 		param.assign(tag, pos, sepPos - pos);

@@ -81,7 +81,7 @@ void LuaPlugin::onLoad(DcServerBase * dcServerBase) {
 
 		// replace slashes
 		size_t pos = mainDir.find('/');
-		while (pos != mainDir.npos) {
+		while (pos != string::npos) {
 			mainDir.replace(pos, 1, LUA_DIRSEP);
 			pos = mainDir.find('/', pos);
 		}

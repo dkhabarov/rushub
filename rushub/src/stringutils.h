@@ -87,7 +87,7 @@ string & stringReplace(const string & str, const string & varname, string & dest
 		search.append(STR_LEN("]"));
 		size_t pos = dest.find(search);
 		if (first != true || pos == 0) {
-			while (pos != dest.npos) {
+			while (pos != string::npos) {
 				dest.replace(pos, search.size(), by);
 				pos = dest.find(search, pos + by.size());
 			}
@@ -95,7 +95,7 @@ string & stringReplace(const string & str, const string & varname, string & dest
 	} else {
 		size_t pos = dest.find(varname);
 		if (first != true || pos == 0) {
-			while (pos != dest.npos) {
+			while (pos != string::npos) {
 				dest.replace(pos, varname.size(), by);
 				pos = dest.find(varname, pos + by.size());
 			}

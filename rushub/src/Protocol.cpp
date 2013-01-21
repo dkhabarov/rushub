@@ -174,14 +174,14 @@ void Parser::splitAll(size_t start, const char lim, size_t len, bool left) {
 	while (true) {
 		if (left) {
 			i = mCommand.find_first_of(lim, start); 
-			if (i == mCommand.npos || i - start >= len) {
+			if (i == string::npos || i - start >= len) {
 				break;
 			}
 			pushChunk(start, i - start);
 			start = i + 1;
 		} else { 
 			i = mCommand.find_last_of(lim, len - 1);
-			if (i == mCommand.npos || i < start) {
+			if (i == string::npos || i < start) {
 				break;
 			}
 			pushChunk(i + 1, len - i);
@@ -191,7 +191,7 @@ void Parser::splitAll(size_t start, const char lim, size_t len, bool left) {
 	if (left) {
 		pushChunk(start, len - start);
 	} else {
-		if (i == mCommand.npos || i < start) {
+		if (i == string::npos || i < start) {
 			pushChunk(start, len - start + 1);
 		} else {
 			pushChunk(start, len - i);
@@ -209,12 +209,12 @@ bool Parser::splitOnTwo(size_t start, const string & lim, unsigned int cn1, unsi
 	}
 	if (left) { 
 		i = mCommand.find(lim, start); 
-		if (i == mCommand.npos || i - start >= len) {
+		if (i == string::npos || i - start >= len) {
 			return false;
 		}
 	} else { 
 		i = mCommand.rfind(lim, start + len - lim_len); 
-		if (i == mCommand.npos || i < start) {
+		if (i == string::npos || i < start) {
 			return false;
 		}
 	}
@@ -233,12 +233,12 @@ bool Parser::splitOnTwo(size_t start, const char lim, unsigned int cn1, unsigned
 	}
 	if (left) { 
 		i = mCommand.find_first_of(lim, start); 
-		if (i == mCommand.npos || i - start >= len) {
+		if (i == string::npos || i - start >= len) {
 			return false;
 		}
 	} else { 
 		i = mCommand.find_last_of(lim, start + len - 1);
-		if (i == mCommand.npos || i < start) {
+		if (i == string::npos || i < start) {
 			return false;
 		}
 	}

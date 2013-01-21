@@ -321,7 +321,7 @@ bool AdcParser::parseHeader() {
 bool AdcParser::parseFeatures() {
 	size_t pos = 10;
 	size_t endPos = mCommand.find(' ', 15);
-	if (endPos == mCommand.npos) {
+	if (endPos == string::npos) {
 		endPos = mLength;
 	}
 	mPositiveFeature.clear();
@@ -387,12 +387,12 @@ bool AdcParser::splitChunks() {
 
 void AdcParser::parseInfo(DcUser * dcUser, const string & info) {
 	size_t s = info.find(' ', 9);
-	if (s != info.npos) {
+	if (s != string::npos) {
 		size_t e;
 		bool last = true;
 		set<string> & names = dcUser->getInfoNames();
-		while ((e = info.find(' ', ++s)) != info.npos || last) {
-			if (e == info.npos) {
+		while ((e = info.find(' ', ++s)) != string::npos || last) {
+			if (e == string::npos) {
 				e = info.size();
 				last = false;
 			}
@@ -443,7 +443,7 @@ void AdcParser::parseFeatures(DcUser * dcUser) {
 
 		features.clear();
 		size_t i, j = 0;
-		while ((i = value.find(',', j)) != value.npos) {
+		while ((i = value.find(',', j)) != string::npos) {
 			if (i - j == 4) {
 				if (isUpperAlpha(value[j]) && isUpperAlphaNum(value[j + 1]) && 
 					isUpperAlphaNum(value[j + 2]) && isUpperAlphaNum(value[j + 3]))

@@ -209,7 +209,7 @@ int NmdcProtocol::eventSupports(NmdcParser * dcparser, DcConn * dcConn) {
 	size_t posNext, posPrev = 10;
 	dcConn->mFeatures = 0;
 	dcparser->mCommand += ' ';
-	while((posNext = dcparser->mCommand.find(' ', posPrev)) != feature.npos) {
+	while((posNext = dcparser->mCommand.find(' ', posPrev)) != string::npos) {
 		feature.assign(dcparser->mCommand, posPrev, posNext - posPrev);
 		posPrev = posNext + 1;
 		if (feature == "UserCommand") {
@@ -262,7 +262,7 @@ int NmdcProtocol::eventKey(NmdcParser * dcparser, DcConn * dcConn) {
 			string lock, key;
 			appendLock(lock);
 			size_t pos = lock.find(' ', 6);
-			if (pos != lock.npos && pos > 6) {
+			if (pos != string::npos && pos > 6) {
 				lock2key(lock.assign(lock, 6, pos - 6), key);
 			}
 			
@@ -597,7 +597,7 @@ int NmdcProtocol::eventUserIp(NmdcParser * dcParser, DcConn * dcConn) {
 
 	size_t pos = param.find("$$");
 	size_t cur = 0;
-	while (pos != param.npos) {
+	while (pos != string::npos) {
 		nick.assign(param, cur, pos - cur);
 		if (nick.size()) {
 			// UserIP PROTOCOL NMDC SPEC
@@ -1245,7 +1245,7 @@ int NmdcProtocol::checkCommand(NmdcParser * nmdcParser, DcConn * dcConn) {
 	}
 
 	// Checking null chars
-	if (nmdcParser->mCommand.find('\0') != nmdcParser->mCommand.npos) {
+	if (nmdcParser->mCommand.find('\0') != string::npos) {
 		LOG_CLASS(dcConn, LEVEL_DEBUG, "Sending null chars, probably attempt an attack");
 		dcConn->closeNow(CLOSE_REASON_CMD_NULL);
 		return -2;
@@ -1307,7 +1307,7 @@ bool NmdcProtocol::antiflood(DcConn * dcConn, int type) {
 bool NmdcProtocol::validateUser(DcConn * dcConn, const string & nick) {
 
 	// Checking for bad symbols in nick
-	if (nick.npos != nick.find_first_of("$| ")) {
+	if (string::npos != nick.find_first_of("$| ")) {
 		LOG_CLASS(dcConn, LEVEL_DEBUG, "Bad nick chars: '" << nick << "'");
 		mDcServer->sendToUser(
 			dcConn->mDcUser,
@@ -1525,13 +1525,13 @@ void NmdcProtocol::dcnUnescape(const string & src, char * dest, size_t & len) {
 	unsigned char c;
 	size_t pos = src.find(start), pos2 = 0;
 	len = 0;
-	while ((pos != src.npos) && (len < src.size())) {
+	while ((pos != string::npos) && (len < src.size())) {
 		if (pos > pos2) {
 			memcpy(dest + len, src.c_str() + pos2, pos - pos2);
 			len += pos - pos2;
 		}
 		pos2 = src.find(end, pos);
-		if ((pos2 != src.npos) && 
+		if ((pos2 != string::npos) && 
 				(pos2 - pos <= start.size() + 3)) {
 			c = static_cast<unsigned char> (atoi(src.substr(pos + start.size(), 3).c_str()));
 			dest[len++] = c;

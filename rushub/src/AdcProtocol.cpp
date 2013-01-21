@@ -359,7 +359,7 @@ int AdcProtocol::eventMsg(AdcParser * adcParser, DcConn * dcConn) {
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (adcParser->mCommand.find(" PM") != adcParser->mCommand.npos) { // TODO refactoring
+		if (adcParser->mCommand.find(" PM") != string::npos) { // TODO refactoring
 			if (mDcServer->mCalls.mOnTo.callAll(dcConn->mDcUser)) {
 				return -2;
 			}
@@ -830,7 +830,7 @@ int AdcProtocol::checkCommand(AdcParser * adcParser, DcConn * dcConn) {
 	}
 
 	// Checking null chars
-	if (adcParser->mCommand.find('\0') != adcParser->mCommand.npos) {
+	if (adcParser->mCommand.find('\0') != string::npos) {
 		LOG_CLASS(dcConn, LEVEL_WARN, "Sending null chars, probably attempt an attack");
 		dcConn->closeNow(CLOSE_REASON_CMD_NULL);
 		return -2;
