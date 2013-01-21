@@ -160,6 +160,7 @@ public:
 	string mTimeoutAny;        ///< Message about connection timeout
 	string mForceMove;         ///< Redirection message
 	string mUsersLimit;
+	string mBadNmdcKey;
 	string mFloodReEnter;
 
 	string mFlood[NMDC_TYPE_UNKNOWN + 1];

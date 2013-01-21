@@ -251,17 +251,28 @@ int NmdcProtocol::eventSupports(NmdcParser * dcparser, DcConn * dcConn) {
 
 
 
-int NmdcProtocol::eventKey(NmdcParser *, DcConn * dcConn) {
+int NmdcProtocol::eventKey(NmdcParser * dcparser, DcConn * dcConn) {
 
 	if (!checkState(dcConn, "Key", STATE_PROTOCOL)) {
 		return -1;
 	}
 
 	#ifndef WITHOUT_PLUGINS
-		if (mDcServer->mCalls.mOnKey.callAll(dcConn->mDcUser)) {
-			//string lock, key;
-			//appendLock(lock);
-			//Lock2Key(lock.assign(lock, 1, lock.size() - 1), key);
+		if (!mDcServer->mCalls.mOnKey.callAll(dcConn->mDcUser)) {
+			string lock, key;
+			appendLock(lock);
+			size_t pos = lock.find(' ', 6);
+			if (pos != lock.npos && pos > 6) {
+				lock2key(lock.assign(lock, 6, pos - 6), key);
+			}
+			
+			const string & userKey = dcparser->chunkString(CHUNK_1_PARAM);
+			if (key != userKey) {
+				LOG_CLASS(dcConn, LEVEL_DEBUG, "nmdcKey: " << key);
+				mDcServer->sendToUser(dcConn->mDcUser, mDcServer->mDcLang.mBadNmdcKey, mDcServer->mDcConfig.mHubBot.c_str());
+				dcConn->closeNice(9000, CLOSE_REASON_CMD_KEY_INVALID);
+				return -2;
+			}
 		}
 	#endif
 
@@ -1478,6 +1489,83 @@ void NmdcProtocol::delFromHide(DcUser * dcUser) {
 		mDcServer->mOpList.remake();
 		mDcServer->mDcUserList.remake();
 	}
+}
+
+
+
+/// DCN Escape
+void NmdcProtocol::dcnEscape(const char * buf, size_t len, string & dest) {
+	dest.clear();
+	unsigned char c;
+	char b[11];
+	while(len-- > 0) {
+		c = *(buf++);
+		switch(c) {
+			case 0:
+			case 5:
+			case 36:
+			case 96:
+			case 124:
+			case 126:
+				sprintf(b, "/%%DCN%03d%%/", c);
+				dest += b;
+				break;
+			default:
+				dest += c;
+				break;
+		}
+	}
+}
+
+
+
+/// DCN UnEscape
+void NmdcProtocol::dcnUnescape(const string & src, char * dest, size_t & len) {
+	string start = "/%DCN", end = "%/";
+	unsigned char c;
+	size_t pos = src.find(start), pos2 = 0;
+	len = 0;
+	while((pos != src.npos) && (len < src.size())) {
+		if(pos > pos2) {
+			memcpy(dest + len, src.c_str() + pos2, pos - pos2);
+			len += pos - pos2;
+		}
+		pos2 = src.find(end, pos);
+		if((pos2 != src.npos) && 
+				(pos2 - pos <= start.size() + 3)) {
+			c = static_cast<unsigned char> (atoi(src.substr(pos + start.size(), 3).c_str()));
+			dest[len++] = c;
+			pos2 += end.size();
+		}
+		pos = src.find(start, pos + 1);
+	}
+	if (pos2 < src.size()) {
+		memcpy(dest + len, src.c_str() + pos2, src.size() - pos2 + 1);
+		len += src.size() - pos2;
+	}
+}
+
+
+
+/// lock2key
+void NmdcProtocol::lock2key(const string & lock, string & key) {
+	size_t count = 0, len = lock.size();
+	char *k = 0, *l = new char[len + 1];
+	dcnUnescape(lock, l, len);
+
+	k = new char[len + 1];
+
+	k[0] = l[0] ^ l[len - 1] ^ l[len - 2] ^ 5;
+	while(++count < len) k[count] = l[count] ^ l[count - 1];
+	k[len] = 0;
+
+	count = 0;
+	--count;
+	while(++count < len) k[count] = ((k[count] << 4)) | ((k[count] >> 4));
+
+	dcnEscape(k, len, key);
+	delete [] k;
+	delete [] l;
 }
 
 

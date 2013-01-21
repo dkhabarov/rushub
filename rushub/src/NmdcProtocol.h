@@ -80,6 +80,9 @@ public:
 	virtual int onNewConn(Conn *);
 	virtual void onFlush(Conn *);
 
+	static void dcnEscape(const char * buf, size_t len, string & dest);
+	static void dcnUnescape(const string & src, char * dest, size_t & len);
+	static void lock2key(const string & lock, string & key);
 
 	static string & appendLock(string & str);
 	static string & appendHello(string & str, const string & nick);

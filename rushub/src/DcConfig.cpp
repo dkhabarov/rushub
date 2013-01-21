@@ -347,6 +347,7 @@ void DcLang::addVars() {
 	add("sBadNickLen", mBadNickLen);
 	add("sBadChars", mBadChars);
 	add("sUsersLimit", mUsersLimit);
+	add("sBadNmdcKey", mBadNmdcKey);
 	add("sFloodReEnter", mFloodReEnter);
 	add("sForceMove", mForceMove);
 
@@ -401,6 +402,7 @@ void DcLang::setRussianLang() {
 	mBadNickLen.assign(STR_LEN("Недопустимая длина ника. Допустимая длина ника от %[min] до %[max] символов."));
 	mBadChars.assign(STR_LEN("Недопустимые символы в нике."));
 	mUsersLimit.assign(STR_LEN("Достигнут придел по количеству подключенных пользователей."));
+	mBadNmdcKey.assign(STR_LEN("Неверный NMDC ключ."));
 	mFloodReEnter.assign(STR_LEN("Вы слишком часто перезаходите на хаб. Пожалуйста подождите."));
 	mForceMove.assign(STR_LEN("Вы были перенаправлены на хаб dchub://%[address] причина: %[reason]"));
 
@@ -449,6 +451,7 @@ void DcLang::setEnglishLang() {
 	mBadNickLen.assign(STR_LEN("Invalid length of nick. Length of nick must be from %[min] to %[max] characters."));
 	mBadChars.assign(STR_LEN("Your nick contains illegal character."));
 	mUsersLimit.assign(STR_LEN("This hub is full."));
+	mBadNmdcKey.assign(STR_LEN("Invalid NMDC key."));
 	mFloodReEnter.assign(STR_LEN("You are very often reconnecting to the hub. Please wait."));
 	mForceMove.assign(STR_LEN("You were redirected to hub dchub://%[address] reason: %[reason]"));
 
