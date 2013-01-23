@@ -895,7 +895,7 @@ size_t Conn::writeData(const char * data, size_t len, bool flush) {
 			if (bufLen == 0) {
 				size_t s = len - size;
 				mSendBuf.reserve(s);
-				mSendBuf.append(data + size, s); // Now sData.size() != size
+				mSendBuf.append(data + size, s); // Now data.size() != size
 			} else {
 				string(mSendBuf, size, mSendBuf.size() - size).swap(mSendBuf); // Del from buf sent data
 			}
@@ -1013,9 +1013,12 @@ int Conn::send(const char * buf, size_t & len) {
 		}
 		if (SOCK_ERROR(n)) {
 			break;
+		} else if (static_cast<size_t> (n) == len) { // small optimization
+			return 0; // ok
 		}
 		total += static_cast<size_t> (n);
 		bytesleft -= static_cast<size_t> (n);
+		LOG(LEVEL_TRACE, n << "/" << total << "/" << len);
 	}
 	len = total; // Number sent bytes
 	return SOCK_ERROR(n) ? -1 : 0; // return -1 - fail, 0 - ok
