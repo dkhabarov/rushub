@@ -134,12 +134,12 @@ public:
 
 public:
 
-	NmdcClient(const char * ip, const char * port, int maxConn, int batch, const char * logPath, int logLevel) : 
+	NmdcClient(const char * ip, const char * port, int maxConn, int batch, const char * logPath, int logLevel, int from) : 
 		Server(),
 		mConnFactory(NULL),
 		mIp(ip),
 		mPort(port),
-		mConnCount(0),
+		mConnCount(from),
 		mMaxConn(maxConn),
 		mBatch(batch)
 	{
@@ -222,6 +222,7 @@ void printHelp() {
 		"  -batch <batch>\tset entering batch" << endl <<
 		"  -logPath <path>\tset log path" << endl <<
 		"  -logLevel <level>\tset log level" << endl <<
+		"  -from <value>\tset number from which logins was started" << endl <<
 		"  -help\t\t\tshow this help" << endl;
 }
 
@@ -237,6 +238,7 @@ int main(int argc, char ** argv) {
 	int maxConn = 50;
 	int batch = 25;
 	int logLevel = LEVEL_INFO;
+	int from = 0;
 
 	if (argc == 1) {
 		printHelp();
@@ -260,6 +262,8 @@ int main(int argc, char ** argv) {
 			logPath = argv[i];
 		} else if(!strcmp(last, "-logLevel")) {
 			logLevel = atoi(argv[i]);
+		} else if(!strcmp(last, "-from")) {
+			from = atoi(argv[i]);
 		}
 		last = argv[i];
 		++i;
@@ -272,7 +276,7 @@ int main(int argc, char ** argv) {
 		batch = MAX_BATCH;
 	}
 
-	NmdcClient client(ip, port, maxConn, batch, logPath, logLevel);
+	NmdcClient client(ip, port, maxConn + from, batch, logPath, logLevel, from);
 	curServer = &client;
 
 	NmdcProtocol nmdcProtocol;
