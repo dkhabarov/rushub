@@ -38,7 +38,7 @@ struct ufSendTmp : public unary_function<void, HashTable<UserBase *>::iterator> 
 	bool mAddSep;
 
 	ufSendTmp(const string & data, bool addSep, const unsigned long * profile = NULL) : 
-		mData(data), mAddSep(addSep), mProfile(profile)
+		mData(data), mProfile(profile), mAddSep(addSep)
 	{
 	}
 
@@ -78,8 +78,8 @@ struct ufSend : public unary_function<void, HashTable<UserBase *>::iterator> {
 
 	ufSend(string * data, bool addSep, const unsigned long * profile = NULL) : 
 		mData(data),
-		mAddSep(addSep),
-		mProfile(profile)
+		mProfile(profile),
+		mAddSep(addSep)
 	{
 	}
 
