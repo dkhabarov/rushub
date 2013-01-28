@@ -157,6 +157,8 @@ protected:
 
 	void deleteAll();
 
+	virtual sockoptval_t tcpNodelay() const;
+
 private:
 
 	/// Current connection

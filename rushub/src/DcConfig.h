@@ -83,6 +83,7 @@ public:
 
 	bool mUdpServer;            ///< UDP server on/off
 	bool mAdcOn;                ///< Use ADC protocol
+	bool mTcpNodelay;           ///< On/off Nagle's algorithm
 
 	bool mWebServer;            ///< Web-server on/off
 	bool mDisableNoDCCmd;       ///< Allow DC commands only

@@ -332,6 +332,8 @@ private:
 	/// Calculate mac-address
 	void calcMacAddress();
 
+	void configSockSize(tSocket sock);
+
 	Conn(const Conn &);
 	Conn & operator = (const Conn &);
 

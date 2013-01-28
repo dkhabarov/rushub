@@ -107,6 +107,8 @@ void DcConfig::addVars(Server * server) {
 	add("sMainBotMyINFO",         mMainBotMyinfo,                       string(STR_LEN("RusHub bot<Bot V:1.0,M:A,H:0/0/1,S:0>$ $$$0$")));
 	add("sMainBotIP",             mMainBotIp,                           string(STR_LEN("127.0.0.1")));
 	add("sLocale",                mLocale,                              string(setlocale(LC_ALL, "")));
+	add("bTcpNodelay",            mTcpNodelay,                          false);
+	
 
 	#ifdef HAVE_LIBCAP
 		add("sUserName",            mUserName,                            string(STR_LEN("root")));

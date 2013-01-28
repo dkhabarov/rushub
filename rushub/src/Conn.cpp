@@ -311,8 +311,16 @@ tSocket Conn::socketCreate(const char * port, const char * address, bool udp) {
 			LOG(LEVEL_FATAL, "Error in setsockopt: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]");
 			return INVALID_SOCKET;
 		}
-	}
 
+		configSockSize(sock);
+
+		// Nagle's algorithm
+		sockoptval_t tcp_nodelay = mServer->tcpNodelay();
+		if (SOCK_ERROR(setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &tcp_nodelay, sizeof(tcp_nodelay)))) {
+			LOG(LEVEL_FATAL, "Error in setsockopt: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]");
+		}
+
+	}
 	Thread::safeInc(mConnCounter);
 	LOG(LEVEL_DEBUG, "Created new socket: " << sock);
 	return sock;
@@ -376,6 +384,43 @@ tSocket Conn::socketNonBlock(tSocket sock) {
 	return sock;
 }
 
+
+
+void Conn::configSockSize(tSocket sock) {
+	if (sock == INVALID_SOCKET) {
+		return;
+	}
+
+	int old_so_sndbuf;
+	int new_so_sndbuf = SOCK_SEND_BUFF;
+	socklen_t old_so_sndbuf_size = sizeof(old_so_sndbuf);
+
+	if (SOCK_ERROR(getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (sockoptval_t *) &old_so_sndbuf, &old_so_sndbuf_size))) {
+		LOG(LEVEL_ERROR, "Error in getsockopt SO_SNDBUF: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]");
+		return;
+	} else if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_SNDBUF, (sockoptval_t *) &new_so_sndbuf, sizeof(new_so_sndbuf)))) {
+		LOG(LEVEL_FATAL, "Error in setsockopt SO_SNDBUF: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]");
+		return;
+	}
+
+	LOG(LEVEL_TRACE, "SO_SNDBUF: " << old_so_sndbuf << "->" << new_so_sndbuf);
+
+
+	int old_so_rcvbuf;
+	int new_so_rcvbuf = SOCK_RECV_BUFF;
+	socklen_t old_so_rcvbuf_size = sizeof(old_so_sndbuf);
+
+	if (SOCK_ERROR(getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (sockoptval_t *) &old_so_rcvbuf, &old_so_rcvbuf_size))) {
+		LOG(LEVEL_ERROR, "Error in getsockopt SO_RCVBUF: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]");
+		return;
+	} else if (SOCK_ERROR(setsockopt(sock, SOL_SOCKET, SO_SNDBUF, (sockoptval_t *) &new_so_rcvbuf, sizeof(new_so_rcvbuf)))) {
+		LOG(LEVEL_FATAL, "Error in setsockopt SO_RCVBUF: " << SOCK_ERR_MSG << " [" << SOCK_ERR << "]");
+		return;
+	}
+
+	LOG(LEVEL_TRACE, "SO_RCVBUF: " << old_so_rcvbuf << "->" << new_so_rcvbuf);
+
+}
 
 
 

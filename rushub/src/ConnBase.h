@@ -71,10 +71,11 @@
 	typedef SOCKET tSocket;
 #else
 	#include <arpa/inet.h>
-	#include <netinet/in.h> ///< for sockaddr_in
-	#include <sys/socket.h> ///< for AF_INET
-	#include <netdb.h>      ///< for gethostbyaddr
-	#include <fcntl.h>      ///< for nonblock flags F_GETFL & etc
+	#include <netinet/in.h>  ///< for sockaddr_in
+	#include <netinet/tcp.h> ///< for bsd TCP_NODELAY
+	#include <sys/socket.h>  ///< for AF_INET
+	#include <netdb.h>       ///< for gethostbyaddr
+	#include <fcntl.h>       ///< for nonblock flags F_GETFL & etc
 	#ifndef MSG_NOSIGNAL
 		#define MSG_NOSIGNAL 0 ///< OpenSolaris
 	#endif
@@ -89,6 +90,9 @@
 	#define INVALID_SOCKET -1
 	typedef int tSocket;
 #endif
+
+#define SOCK_SEND_BUFF        0x010000
+#define SOCK_RECV_BUFF        0x010000
 
 #define SOCK_BACKLOG          0x40     ///< SOMAXCONN
 #define MAX_RECV_SIZE         0x02FFFF ///< Max buf size for recv

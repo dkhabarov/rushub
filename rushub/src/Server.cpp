@@ -144,6 +144,12 @@ void Server::deleteAll() {
 
 
 
+sockoptval_t Server::tcpNodelay() const {
+	return 0;
+}
+
+
+
 /// Set and Listen port
 Conn * Server::listening(ConnFactory * connFactory, const char * ip, const char * port, bool udp /*= false*/) {
 

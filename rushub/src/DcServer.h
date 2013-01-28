@@ -285,6 +285,8 @@ protected:
 	/// Antiflood function
 	bool antiFlood(unsigned & count, Time &, const unsigned & countLimit, const double & timeLimit);
 
+	sockoptval_t tcpNodelay() const;
+
 private:
 
 	Time mChecker; ///< Checking time

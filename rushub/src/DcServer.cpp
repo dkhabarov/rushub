@@ -604,6 +604,12 @@ bool DcServer::antiFlood(unsigned & count, Time & time, const unsigned & countLi
 
 
 
+sockoptval_t DcServer::tcpNodelay() const {
+	return mDcConfig.mTcpNodelay ? 1 : 0;
+}
+
+
+
 /// Checking for this nick used
 bool DcServer::checkNick(DcConn * dcConn) {
 
