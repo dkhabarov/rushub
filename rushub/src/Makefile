@@ -4,26 +4,30 @@ CXX = g++
 CXXFLAGS = -O2 -Wall -Wextra -pipe
 #CXXFLAGS = -g -Wall -Wextra -pipe
 
+TARGET=RusHub
+LDFLAGS=-lrt -lz -lpthread
+LIBTINYXML=$(CURDIR)/tinyxml/libtinyxml.a
 INCLUDE = -I/usr/include -I/usr/local/include
 
 OBJS = $(CURDIR)/AdcParser.o $(CURDIR)/AdcProtocol.o $(CURDIR)/AntiFlood.o $(CURDIR)/CallList.o $(CURDIR)/Cli.o $(CURDIR)/ConfigItem.o $(CURDIR)/ConfigList.o $(CURDIR)/Conn.o $(CURDIR)/ConnChoose.o $(CURDIR)/ConnEpoll.o $(CURDIR)/ConnPoll.o $(CURDIR)/ConnSelect.o $(CURDIR)/DcCmd.o $(CURDIR)/DcConfig.o $(CURDIR)/DcConfigLoader.o $(CURDIR)/DcConn.o $(CURDIR)/DcIpList.o $(CURDIR)/DcProtocol.o $(CURDIR)/DcServer.o $(CURDIR)/DcUser.o $(CURDIR)/Dir.o $(CURDIR)/dlfuncs.o $(CURDIR)/Encoder.o $(CURDIR)/Exception.o $(CURDIR)/main.o $(CURDIR)/NmdcParser.o $(CURDIR)/NmdcProtocol.o $(CURDIR)/Obj.o $(CURDIR)/Param.o $(CURDIR)/PluginList.o $(CURDIR)/PluginLoader.o $(CURDIR)/Protocol.o $(CURDIR)/Server.o $(CURDIR)/Service.o $(CURDIR)/StringToArg.o $(CURDIR)/stringutils.o $(CURDIR)/Thread.o $(CURDIR)/TigerHash.o $(CURDIR)/Times.o $(CURDIR)/UserList.o $(CURDIR)/WebConn.o $(CURDIR)/WebParser.o $(CURDIR)/WebProtocol.o $(CURDIR)/ZlibFilter.o
 
-all: RusHub
+
+all: $(TARGET)
 
 freebsd: $(OBJS)
-	$(CXX) -lrt -lz -lpthread -o RusHub $(OBJS) $(CURDIR)/tinyxml/libtinyxml.a
+	$(CXX) -o $(TARGET) $(OBJS) $(LIBTINYXML) $(LDFLAGS)
 
 solaris: $(OBJS)
-	$(CXX) -lrt -ldl -lsocket -lresolv -lz -lpthread -o RusHub $(OBJS) $(CURDIR)/tinyxml/libtinyxml.a
+	$(CXX) -o $(TARGET) $(OBJS) $(LIBTINYXML) $(LDFLAGS) -ldl -lsocket -lresolv
 
 RusHub_shared: $(OBJS)
-	$(CXX) -lrt -ldl -lcap -ltinyxml -lz -lpthread -o RusHub $(OBJS)
+	$(CXX) -o $(TARGET) $(OBJS) $(LDFLAGS) -ldl -lcap -ltinyxml
 
 RusHub_caps: $(OBJS)
-	$(CXX) -lrt -ldl -lcap -lz -lpthread -o RusHub $(OBJS) $(CURDIR)/tinyxml/libtinyxml.a
+	$(CXX) -o $(TARGET) $(OBJS) $(LIBTINYXML) $(LDFLAGS) -ldl -lcap
 
 RusHub: $(OBJS)
-	$(CXX) -lrt -ldl -lz -lpthread -o RusHub $(OBJS) $(CURDIR)/tinyxml/libtinyxml.a
+	$(CXX) -o $(TARGET) $(OBJS) $(LIBTINYXML) $(LDFLAGS) -ldl
 
 $(CURDIR)/AdcParser.o: $(CURDIR)/AdcParser.cpp $(CURDIR)/stdinc.h $(CURDIR)/Obj.h $(CURDIR)/Protocol.h $(CURDIR)/Plugin.h $(CURDIR)/AdcParser.h $(CURDIR)/Times.h $(CURDIR)/UserBase.h $(CURDIR)/NmdcParser.h $(CURDIR)/stringutils.h $(CURDIR)/Any.h $(CURDIR)/Param.h $(CURDIR)/HashTable.h $(CURDIR)/HashMap.h $(CURDIR)/DcUser.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
