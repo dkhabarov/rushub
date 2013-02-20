@@ -7,7 +7,7 @@ CXXFLAGS = -O2 -Wall -Wextra
 OBJS = $(CURDIR)/tinystr.o $(CURDIR)/tinyxml.o $(CURDIR)/tinyxmlerror.o $(CURDIR)/tinyxmlparser.o
   
 libtinyxml.a: $(OBJS)
-	$(AR) $(ARFLAGS) tinyxml.a $(OBJS)
+	$(AR) $(ARFLAGS) libtinyxml.a $(OBJS)
 
 $(CURDIR)/tinystr.o: $(CURDIR)/tinystr.cpp $(CURDIR)/tinystr.h
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
