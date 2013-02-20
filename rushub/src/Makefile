@@ -162,4 +162,4 @@ $(CURDIR)/ZlibFilter.o: $(CURDIR)/ZlibFilter.cpp $(CURDIR)/stdinc.h $(CURDIR)/zl
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
 clean:
-	-rm -f $(OBJS) RusHub
+	-rm -f $(OBJS) $(TARGET)
