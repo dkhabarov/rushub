@@ -419,7 +419,7 @@ void DcLang::setRussianLang() {
 	mFlood[NMDC_TYPE_TO].assign(STR_LEN("Пожалуйста не флудите в привате."));
 	mFlood[NMDC_TYPE_GETNICKLIST].assign(STR_LEN("Пожалуйста не флудите с помощью слишком частого получения списка пользователей."));
 	mFlood[NMDC_TYPE_CONNECTTOME].assign(STR_LEN("Пожалуйста не флудите частыми запросами на соединение с пользователями хаба."));
-	mFlood[NMDC_TYPE_RCONNECTTOME].assign(STR_LEN("Пожалуйста не флудите частыми запросами на соединение с активнми пользователями хаба."));
+	mFlood[NMDC_TYPE_RCONNECTTOME].assign(STR_LEN("Пожалуйста не флудите частыми запросами на соединение с активными пользователями хаба."));
 	mFlood[NMDC_TYPE_MCTO].assign(STR_LEN("Пожалуйста не флудите!"));
 	mFlood[NMDC_TYPE_USERIP].assign(STR_LEN("Пожалуйста не флудите запросами UserIP!"));
 	mFlood[NMDC_TYPE_PING].assign(STR_LEN("Ваш клиент слишком часто пингует хаб."));
