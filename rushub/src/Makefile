@@ -11,19 +11,19 @@ OBJS = $(CURDIR)/AdcParser.o $(CURDIR)/AdcProtocol.o $(CURDIR)/AntiFlood.o $(CUR
 all: RusHub
 
 freebsd: $(OBJS)
-	$(CXX) -lrt -lz -o RusHub $(OBJS) $(CURDIR)/tinyxml/libtinyxml.a
+	$(CXX) -lrt -lz -lpthread -o RusHub $(OBJS) $(CURDIR)/tinyxml/libtinyxml.a
 
 solaris: $(OBJS)
-	$(CXX) -lrt -ldl -lsocket -lresolv -lz -o RusHub $(OBJS) $(CURDIR)/tinyxml/libtinyxml.a
+	$(CXX) -lrt -ldl -lsocket -lresolv -lz -lpthread -o RusHub $(OBJS) $(CURDIR)/tinyxml/libtinyxml.a
 
 RusHub_shared: $(OBJS)
-	$(CXX) -lrt -ldl -lcap -ltinyxml -lz -o RusHub $(OBJS)
+	$(CXX) -lrt -ldl -lcap -ltinyxml -lz -lpthread -o RusHub $(OBJS)
 
 RusHub_caps: $(OBJS)
-	$(CXX) -lrt -ldl -lcap -lz -o RusHub $(OBJS) $(CURDIR)/tinyxml/libtinyxml.a
+	$(CXX) -lrt -ldl -lcap -lz -lpthread -o RusHub $(OBJS) $(CURDIR)/tinyxml/libtinyxml.a
 
 RusHub: $(OBJS)
-	$(CXX) -lrt -ldl -lz -o RusHub $(OBJS) $(CURDIR)/tinyxml/libtinyxml.a
+	$(CXX) -lrt -ldl -lz -lpthread -o RusHub $(OBJS) $(CURDIR)/tinyxml/libtinyxml.a
 
 $(CURDIR)/AdcParser.o: $(CURDIR)/AdcParser.cpp $(CURDIR)/stdinc.h $(CURDIR)/Obj.h $(CURDIR)/Protocol.h $(CURDIR)/Plugin.h $(CURDIR)/AdcParser.h $(CURDIR)/Times.h $(CURDIR)/UserBase.h $(CURDIR)/NmdcParser.h $(CURDIR)/stringutils.h $(CURDIR)/Any.h $(CURDIR)/Param.h $(CURDIR)/HashTable.h $(CURDIR)/HashMap.h $(CURDIR)/DcUser.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
