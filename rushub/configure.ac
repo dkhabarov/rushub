@@ -63,7 +63,8 @@ AC_CHECK_LIB([c], [dlopen], [AC_SUBST(DLOPEN_LIBS, "-lc")
     ],[echo "dlopen is not defined in libc"])
 
 AC_CHECK_LIB([pthread], [pthread_create], [AC_SUBST(PTHREAD_LIBS, "-lpthread")
-        AC_DEFINE(HAVE_PTHREAD, 1, Define to 1 if the system has pthread lib)], exit)
+    AC_DEFINE(HAVE_PTHREAD, 1, Define to 1 if the system has pthread lib)
+    ],[echo "pthread is not found"])
 
 # FIXME: Replace `main' with a function in `-lrt':
 AC_CHECK_LIB([rt], [main], AC_SUBST(RT_LIBS, "-lrt"), exit)
