@@ -62,6 +62,9 @@ AC_CHECK_LIB([c], [dlopen], [AC_SUBST(DLOPEN_LIBS, "-lc")
     echo "dlopen is in libc"
     ],[echo "dlopen is not defined in libc"])
 
+AC_CHECK_LIB([pthread], [pthread_create], [AC_SUBST(PTHREAD_LIBS, "-lpthread")
+        AC_DEFINE(HAVE_PTHREAD, 1, Define to 1 if the system has pthread lib)], exit)
+
 # FIXME: Replace `main' with a function in `-lrt':
 AC_CHECK_LIB([rt], [main], AC_SUBST(RT_LIBS, "-lrt"), exit)
 
@@ -98,7 +101,7 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 #AC_CHECK_FUNCS([floor gettimeofday inet_ntoa memmove memset mkdir select setlocale socket strchr strdup strerror strrchr strstr strtoul uname dlerror dlopen dlclose dlsym],, exit)
 
-RUSHUB_LIBS="$CAPS_LIBS $RT_LIBS $DLOPEN_LIBS $ZLIB_LIBS $TINYXML_LIBS"
+RUSHUB_LIBS="$CAPS_LIBS $RT_LIBS $DLOPEN_LIBS $ZLIB_LIBS $PTHREAD_LIBS $TINYXML_LIBS"
 AC_SUBST(RUSHUB_LIBS)
 AC_SUBST([AM_LDFLAGS])
 AC_SUBST([LIBS])
