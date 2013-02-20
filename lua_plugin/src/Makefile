@@ -11,6 +11,10 @@ CXX = g++
 CXXFLAGS = -O2 -Wall -Wextra -pipe
 #CXXFLAGS = -g -Wall -Wextra -pipe
 
+TARGET=lua.so
+LDFLAGS=-lrt -fpic -shared
+LIBTINYXML=$(CURDIR)/tinyxml/libtinyxml.a
+LIBLUA=/usr/local/lib/liblua.a
 INCLUDE = -I/usr/include -I/usr/local/include -I/usr/include/lua5.1 -I/usr/include/lua -I/usr/include/lua/5.1
 
 OBJS = $(CURDIR)/api.o $(CURDIR)/Dir.o $(CURDIR)/HubConfig.o $(CURDIR)/LuaInterpreter.o $(CURDIR)/LuaPlugin.o $(CURDIR)/LuaUtils.o $(CURDIR)/TaskList.o $(CURDIR)/TimerList.o $(CURDIR)/Uid.o
@@ -20,13 +24,13 @@ all: debian
 linux-static: freebsd
 
 freebsd: $(OBJS)
-	$(CXX) -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/libtinyxml.a /usr/local/lib/liblua.a
+	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LIBTINYXML) $(LIBLUA)
 
 debian: $(OBJS)
-	$(CXX) -llua5.1 -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/libtinyxml.a
+	$(CXX) -o $(TARGET) $(OBJS) $(LIBTINYXML) $(LDFLAGS) -llua5.1
 
 linux: $(OBJS)
-	$(CXX) -llua -shared -fpic -lrt -o lua.so $(OBJS) $(CURDIR)/tinyxml/libtinyxml.a
+	$(CXX) -o $(TARGET) $(OBJS) $(LIBTINYXML) $(LDFLAGS) -llua
 
 $(CURDIR)/api.o: $(CURDIR)/api.cpp $(CURDIR)/api.h $(CURDIR)/List.h $(CURDIR)/TimerList.h $(CURDIR)/LuaInterpreter.h $(CURDIR)/TaskList.h $(CURDIR)/HubConfig.h $(CURDIR)/LuaPlugin.h $(CURDIR)/Uid.h $(CURDIR)/LuaUtils.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
@@ -56,4 +60,4 @@ $(CURDIR)/Uid.o: $(CURDIR)/Uid.cpp $(CURDIR)/api.h $(CURDIR)/Uid.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
 clean:
-	-rm -f $(OBJS) lua.so
+	-rm -f $(OBJS) $(TARGET)

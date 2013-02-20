@@ -10,12 +10,14 @@ CXX = g++
 CXXFLAGS = -O2 -Wall -Wextra -pipe
 #CXXFLAGS = -g -Wall -Wextra -pipe
 
+TARGET=client
+LDFLAGS=-lrt -ldl -lpthread
 INCLUDE = -I/usr/include -I/usr/local/include
 
 OBJS = $(CURDIR)/Conn.o $(CURDIR)/ConnChoose.o $(CURDIR)/ConnEpoll.o $(CURDIR)/ConnPoll.o $(CURDIR)/ConnSelect.o $(CURDIR)/main.o $(CURDIR)/Obj.o $(CURDIR)/Protocol.o $(CURDIR)/Server.o $(CURDIR)/Thread.o $(CURDIR)/Times.o
 
 client: $(OBJS)
-	$(CXX) -lrt -ldl -o client $(OBJS)
+	$(CXX) -o $(TARGET) $(OBJS) $(LDFLAGS)
 
 $(CURDIR)/Conn.o: $(CURDIR)/Conn.cpp $(CURDIR)/ConnBase.h $(CURDIR)/stdinc.h $(CURDIR)/Obj.h $(CURDIR)/Times.h $(CURDIR)/Protocol.h $(CURDIR)/Mutex.h $(CURDIR)/Conn.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnEpoll.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/Thread.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
@@ -51,4 +53,4 @@ $(CURDIR)/Times.o: $(CURDIR)/Times.cpp $(CURDIR)/stdinc.h $(CURDIR)/Times.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
 clean:
-	-rm -f $(OBJS) client
+	-rm -f $(OBJS) $(TARGET)
