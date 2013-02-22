@@ -299,7 +299,7 @@ std::ostream & operator << (std::ostream & os, const Time & t) {
 			#else
 				const time_t * ta;
 				struct tm * tinfo;
-				ta = const_cast<time_t*> (&t.tv_sec);
+				ta = const_cast<time_t*> (reinterpret_cast<const time_t*> (&t.tv_sec));
 				tinfo = localtime(ta);
 			#endif
 			char buf[20];
