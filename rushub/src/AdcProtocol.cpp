@@ -625,7 +625,7 @@ const char * AdcProtocol::genNewSid() {
 	UserBase * userBase = NULL;
 	do {
 		sid = getSid(++mSidNum);
-		userBase = mDcServer->mDcUserList.getUserBaseByNick(sid);
+		userBase = mDcServer->mDcUserList.getUserBaseByNick(string(sid));
 	} while (userBase != NULL || strcmp(sid, "AAAA") == 0); // "AAAA" is a hub
 	return sid;
 }

@@ -20,6 +20,7 @@
 #include "stdinc.h"
 #include "Server.h"
 #include "Conn.h"
+#include "Logger.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,6 +30,7 @@
 
 using namespace ::std;
 using namespace ::server;
+using namespace ::utils;
 
 
 #define NICK_PREFIX "test"
@@ -143,8 +145,8 @@ public:
 		mMaxConn(maxConn),
 		mBatch(batch)
 	{
-		mLogsPath = new string(logPath);
-		mMaxLevel = logLevel;
+		Logger::getInstance()->mLogsPath = new string(logPath);
+		Logger::getInstance()->mMaxLevel = logLevel;
 	}
 
 	~NmdcClient() {

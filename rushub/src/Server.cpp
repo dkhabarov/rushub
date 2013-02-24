@@ -24,6 +24,7 @@
 
 #include "Server.h"
 #include "Conn.h" // Conn, ConnFactory
+#include "Logger.h"
 
 #include <iostream> // cout, endl
 
@@ -105,9 +106,7 @@ Server::~Server() {
 
 	LOG(LEVEL_DEBUG, endl << "Allocated objects: " << Obj::getCount()
 		<< endl << "Unclosed sockets: " << Conn::getCount());
-	if (mOfs.is_open()) {
-		mOfs.close();
-	}
+	Logger::getInstance()->close();
 }
 
 

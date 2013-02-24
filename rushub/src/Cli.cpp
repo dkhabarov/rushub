@@ -23,6 +23,7 @@
 
 #include "Cli.h"
 #include "Server.h"
+#include "Logger.h"
 
 
 
@@ -71,7 +72,7 @@ void Cli::detectArgs(int argc, char ** argv) {
 				break;
 
 			case 's' :
-				Obj::mSysLogOn = true;
+				Logger::getInstance()->mSysLogOn = true;
 				break;
 
 			case '?' :

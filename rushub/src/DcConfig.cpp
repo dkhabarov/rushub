@@ -25,6 +25,7 @@
 #include "DcConfig.h"
 #include "DcServer.h"
 #include "Dir.h"
+#include "Logger.h"
 
 #include <string>
 
@@ -34,6 +35,7 @@
 
 using ::std::string;
 using ::server::Server;
+using namespace ::utils;
 
 
 namespace dcserver {
@@ -64,7 +66,7 @@ DcConfig::DcConfig(ConfigLoader * configLoader, Server * server, const string & 
 	Dir::checkPath(mLangPath);
 	Dir::checkPath(mPluginPath);
 
-	mLogsPath = &mLogPath; // Set log point path
+	Logger::getInstance()->mLogsPath = &mLogPath; // Set log point path
 
 	#ifndef _WIN32
 		// Go to the work directory
@@ -115,7 +117,7 @@ void DcConfig::addVars(Server * server) {
 		add("sGroupName",           mGroupName,                           string(STR_LEN("root")));
 	#endif
 
-	add("iMaxLevel",              mMaxLevel,                            mMaxLevel); // set this default value for log
+	add("iMaxLevel",              Logger::getInstance()->mMaxLevel,     Logger::getInstance()->mMaxLevel); // set this default value for log
 	add("iCompressionType",       mCompressionType,                     0);
 	add("iUsersLimit",            mUsersLimit,                          -1     );
 	add("iMinNickLen",            mMinNickLen,                          2u     );
@@ -293,7 +295,7 @@ int DcConfig::reload() {
 	int ret = load();
 	if (ret < 0) {
 		if (ret != -4) {
-			mMaxLevel = LEVEL_INFO; // Set default log level
+			Logger::getInstance()->mMaxLevel = LEVEL_INFO; // Set default log level
 		}
 		save();
 		return 1;

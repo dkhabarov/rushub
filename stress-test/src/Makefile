@@ -2,8 +2,9 @@
 #
 #  Conn.cpp Conn.h ConnBase.h ConnChoose.cpp ConnChoose.h ConnEpoll.cpp 
 #  ConnEpoll.h ConnPoll.cpp ConnPoll.h ConnSelect.cpp ConnSelect.h HashTable.h
-#  MeanFrequency.h Obj.cpp Obj.h Plugin.h Protocol.cpp Protocol.h Server.cpp 
-#  Server.h Times.cpp Times.h stdinc.h Thread.cpp Thread.h Mutex.h
+#  Logger.h Logger.cpp MeanFrequency.h Mutex.h Obj.cpp Obj.h Plugin.h 
+#  Protocol.cpp Protocol.h Server.cpp Server.h Singleton.h stdinc.h 
+#  Times.cpp Times.h Thread.cpp Thread.h
 
 CXX = g++
 
@@ -14,7 +15,7 @@ TARGET=client
 LDFLAGS=-lrt -ldl -lpthread
 INCLUDE = -I/usr/include -I/usr/local/include
 
-OBJS = $(CURDIR)/Conn.o $(CURDIR)/ConnChoose.o $(CURDIR)/ConnEpoll.o $(CURDIR)/ConnPoll.o $(CURDIR)/ConnSelect.o $(CURDIR)/main.o $(CURDIR)/Obj.o $(CURDIR)/Protocol.o $(CURDIR)/Server.o $(CURDIR)/Thread.o $(CURDIR)/Times.o
+OBJS = $(CURDIR)/Conn.o $(CURDIR)/ConnChoose.o $(CURDIR)/ConnEpoll.o $(CURDIR)/ConnPoll.o $(CURDIR)/ConnSelect.o $(CURDIR)/Logger.o $(CURDIR)/main.o $(CURDIR)/Obj.o $(CURDIR)/Protocol.o $(CURDIR)/Server.o $(CURDIR)/Thread.o $(CURDIR)/Times.o
 
 client: $(OBJS)
 	$(CXX) -o $(TARGET) $(OBJS) $(LDFLAGS)
@@ -34,16 +35,19 @@ $(CURDIR)/ConnPoll.o: $(CURDIR)/ConnPoll.cpp $(CURDIR)/ConnBase.h $(CURDIR)/stdi
 $(CURDIR)/ConnSelect.o: $(CURDIR)/ConnSelect.cpp $(CURDIR)/ConnBase.h $(CURDIR)/stdinc.h $(CURDIR)/Times.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/ConnSelect.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
+$(CURDIR)/Logger.o: $(CURDIR)/Logger.cpp $(CURDIR)/Singleton.h $(CURDIR)/Mutex.h $(CURDIR)/Thread.h $(CURDIR)/stdinc.h $(CURDIR)/Logger.h $(CURDIR)/Obj.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
+
 $(CURDIR)/main.o: $(CURDIR)/main.cpp $(CURDIR)/ConnBase.h $(CURDIR)/stdinc.h $(CURDIR)/Times.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/Obj.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnEpoll.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/Protocol.h $(CURDIR)/Mutex.h $(CURDIR)/Conn.h $(CURDIR)/Plugin.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/Obj.o: $(CURDIR)/Obj.cpp $(CURDIR)/stdinc.h $(CURDIR)/Obj.h $(CURDIR)/Times.h $(CURDIR)/Thread.h $(CURDIR)/Mutex.h
+$(CURDIR)/Obj.o: $(CURDIR)/Obj.cpp $(CURDIR)/stdinc.h $(CURDIR)/Obj.h $(CURDIR)/Times.h $(CURDIR)/Singleton.h $(CURDIR)/Mutex.h $(CURDIR)/Thread.h $(CURDIR)/Logger.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(CURDIR)/Protocol.o: $(CURDIR)/Protocol.cpp $(CURDIR)/stdinc.h $(CURDIR)/Obj.h $(CURDIR)/Protocol.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(CURDIR)/Server.o: $(CURDIR)/Server.cpp $(CURDIR)/ConnBase.h $(CURDIR)/stdinc.h $(CURDIR)/Times.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/Obj.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnEpoll.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/Protocol.h $(CURDIR)/Mutex.h $(CURDIR)/Conn.h
+$(CURDIR)/Server.o: $(CURDIR)/Server.cpp $(CURDIR)/ConnBase.h $(CURDIR)/stdinc.h $(CURDIR)/Times.h $(CURDIR)/HashTable.h $(CURDIR)/ConnChoose.h $(CURDIR)/Obj.h $(CURDIR)/MeanFrequency.h $(CURDIR)/ConnSelect.h $(CURDIR)/ConnEpoll.h $(CURDIR)/ConnPoll.h $(CURDIR)/Server.h $(CURDIR)/Protocol.h $(CURDIR)/Mutex.h $(CURDIR)/Conn.h $(CURDIR)/Singleton.h $(CURDIR)/Thread.h $(CURDIR)/Logger.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(CURDIR)/Thread.o: $(CURDIR)/Thread.cpp $(CURDIR)/Thread.h $(CURDIR)/Mutex.h

@@ -50,7 +50,7 @@ enum {
 };
 
 /** Main log system thread safe stream */
-#define LOG_CLASS(CLASS, LEVEL, OSTREAM) { ostringstream oss_tmp; if ((CLASS)->log(LEVEL, oss_tmp)) { oss_tmp << (CLASS)->getClassName() << "(" << __LINE__ << "): " << OSTREAM << endl; (CLASS)->simpleLogStream() << oss_tmp.str(); (CLASS)->simpleLogStream().flush(); } }
+#define LOG_CLASS(CLASS, LEVEL, OSTREAM) { ostringstream oss_tmp; if ((CLASS)->log(LEVEL, oss_tmp)) { oss_tmp << (CLASS)->getClassName() << "(" << __LINE__ << "): " << OSTREAM << endl; (CLASS)->log(oss_tmp.str()); } }
 #define LOG(LEVEL, OSTREAM) LOG_CLASS(this, LEVEL, OSTREAM)
 
 #ifndef STR_LEN
@@ -65,10 +65,6 @@ class Obj {
 
 public:
 
-	static bool mSysLogOn;
-
-public:
-
 	Obj();
 	Obj(const char * name);
 	Obj(const char * name, bool); // Without Count Control (use only if you control this object)
@@ -80,25 +76,11 @@ public:
 	///< Return log straem
 	int log(int level, ostream & os);
 
-	///< Return a simple log stream
-	ostream & simpleLogStream();
+	///< Thread safe logger
+	void log(const string & msg);
 
 	///< Return class name
 	const char * getClassName() const;
-
-	///< Return log level name
-	const char * getLevelName(int level) const;
-
-	///< Return max log level
-	static int getMaxLevel();
-
-protected:
-
-	///< Max log level of events
-	static int mMaxLevel;
-
-	static ofstream mOfs;
-	static string * mLogsPath;
 
 protected:
 
@@ -113,32 +95,10 @@ private:
 	///< Class name
 	const char * mClassName;
 
-	///< output log stream
-	ostream * mToLog;
-
 	///< Objects counter
 	static volatile long mCounterObj;
-	static bool mCout;
-	static const char * mLevelNames[];
-
-	static ostringstream mSysLogOss;
-	static ostringstream mBufOss;
-
-	// Loading buffer
-	typedef pair<int, string> Pair;
-	static vector<Pair> mLoadBuf;
 
 private:
-
-	///< log function
-	static ostream & log(int level);
-
-	static ostream & openLog();
-	static bool saveInBuf(int level);
-	static void loadFromBuf(ostream &);
-
-	///< Return level for syslog
-	static int sysLogLevel(int level);
 
 	Obj(const Obj &);
 	Obj & operator = (const Obj &);

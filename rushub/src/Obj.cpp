@@ -24,9 +24,7 @@
 
 #include "Obj.h"
 #include "Times.h"
-#include "Thread.h"
-
-#include <time.h> // time
+#include "Logger.h"
 
 using namespace ::std;
 using namespace ::utils;
@@ -34,30 +32,10 @@ using namespace ::utils;
 
 namespace utils {
 
-
-#define LOG_FILE "system.%Y-%m-%d.log"
-
-bool Obj::mSysLogOn = false;
-int Obj::mMaxLevel = LEVEL_TRACE; // set max level for log before load config
-
-
-ofstream Obj::mOfs;
-string * Obj::mLogsPath = NULL; /** Logs path */
-
 volatile long Obj::mCounterObj = 0; /** Objects counter */
-bool Obj::mCout = false;
-const char * Obj::mLevelNames[] = {"FATAL", "ERROR", "WARN ", "INFO ", "DEBUG", "TRACE"};
-
-ostringstream Obj::mSysLogOss;
-ostringstream Obj::mBufOss;
-
-vector<Obj::Pair> Obj::mLoadBuf;
-
-
 
 Obj::Obj(const char * name) :
-	mClassName(name),
-	mToLog(&cout)
+	mClassName(name)
 {
 	Thread::safeInc(mCounterObj);
 	//LOG(LEVEL_WARN, "+ " << mClassName);
@@ -67,16 +45,14 @@ Obj::Obj(const char * name) :
 
 // Without Count Control (use only if you control this object). For owner objects!
 Obj::Obj(const char * name, bool) :
-	mClassName(name),
-	mToLog(&cout)
+	mClassName(name)
 {
 }
 
 
 
 Obj::Obj() :
-	mClassName("Obj"),
-	mToLog(&cout)
+	mClassName("Obj")
 {
 	Thread::safeInc(mCounterObj);
 	//LOG(LEVEL_WARN, "+ " << mClassName);
@@ -100,8 +76,8 @@ long Obj::getCount() {
 
 /** Return log straem */
 int Obj::log(int level, ostream & os) {
-	if (level <= getMaxLevel()) {
-		mToLog = &log(level);
+	if (level <= Logger::getInstance()->getMaxLevel()) {
+		Logger::getInstance()->log(level);
 		return strLog(level, os);
 	}
 	return 0;
@@ -116,19 +92,6 @@ const char * Obj::getClassName() const {
 
 
 
-/** Return log level name */
-const char * Obj::getLevelName(int level) const {
-	return mLevelNames[level];
-}
-
-
-
-///< Return max log level
-int Obj::getMaxLevel() {
-	return mMaxLevel;
-}
-
-
 /** Set class name */
 void Obj::setClassName(const char * name) {
 	//LOG(LEVEL_WARN, "r " << mClassName << " -> " << name);
@@ -140,148 +103,22 @@ void Obj::setClassName(const char * name) {
 /** Main function putting log in stream */
 bool Obj::strLog(int level, ostream & os) {
 	utils::Time now(true);
-	os << now.asDateMsec() << " " << getLevelName(level) << " ";
+	os << now.asDateMsec() << " " << Logger::getInstance()->getLevelName(level) << " ";
 	return true;
 }
 
 
 
-/** Return a simple log stream */
-ostream & Obj::simpleLogStream() {
-	return *mToLog;
+/** Thread safe logger */
+void Obj::log(const string & msg) {
+	Logger::getInstance()->log(msg);
 }
 
 
 
-/** log function. Return log straem */
-ostream & Obj::log(int level) {
-
-#ifndef _WIN32
-	if (mSysLogOn) {
-		if (saveInBuf(level)) {
-			loadFromBuf(mSysLogOss);
-		}
-		const string & buf = mSysLogOss.str();
-		if (!buf.empty()) {
-			syslog(sysLogLevel(level), "%s", buf.c_str());
-			mSysLogOss.str("");
-		}
-		return mSysLogOss;
-	}
-#endif
-
-	if (mOfs.is_open()) {
-		return mOfs;
-	} else if (mCout == true) {
-		return cout;
-	}
-
-	// save in buff when the config is not loaded
-	saveInBuf(level);
-
-	if (mLogsPath == NULL) {
-		return mBufOss;
-	}
-	return openLog();
-}
 
 
 
-ostream & Obj::openLog() {
-	time_t rawtime;
-	time(&rawtime);
-	struct tm tmr;
-	#ifndef _WIN32
-		tmr = *localtime(&rawtime);
-	#else
-		localtime_s(&tmr, &rawtime);
-	#endif
-
-	char buf[64] = { '\0' };
-	strftime(buf, 64, LOG_FILE, &tmr);
-
-	ostream * ret = &mOfs;
-	// If mLogsPath is empty, then using cout
-	if (mLogsPath->empty()) {
-		ret = &cout;
-		mCout = true;
-	} else {
-		string path(*mLogsPath);
-		mOfs.open(path.append(buf).c_str(), ios_base::app);
-		if (!mOfs.is_open()) {
-			ret = &cout;
-			mCout = true;
-		}
-	}
-
-	loadFromBuf(*ret);
-	return *ret;
-}
-
-
-
-// Saving in buffer
-bool Obj::saveInBuf(int level) {
-	const string & buff = mBufOss.str();
-	if (!buff.empty()) {
-		mLoadBuf.push_back(pair<int, string>(level, buff));
-		mBufOss.str("");
-		return true;
-	}
-	return false;
-}
-
-
-
-void Obj::loadFromBuf(ostream & os) {
-	for (vector<Pair>::iterator it = mLoadBuf.begin(); it != mLoadBuf.end(); ++it) {
-		Pair & p = (*it);
-		if (p.first <= getMaxLevel()) {
-			os << p.second;
-		}
-	}
-}
-
-
-
-/** Return level for syslog */
-#ifndef _WIN32
-
-int Obj::sysLogLevel(int level) {
-
-	switch (level) {
-
-		case LEVEL_FATAL :
-			return LOG_USER | LOG_CRIT;
-
-		case LEVEL_ERROR :
-			return LOG_USER | LOG_ERR;
-
-		case LEVEL_WARN :
-			// Fallthrough
-
-		case LEVEL_INFO :
-			return LOG_USER | LOG_NOTICE;
-
-		case LEVEL_DEBUG :
-			return LOG_USER | LOG_INFO;
-
-		case LEVEL_TRACE :
-			return LOG_USER | LOG_DEBUG;
-
-		default :
-			return 0;
-
-	}
-}
-
-#else
-
-int Obj::sysLogLevel(int) {
-	return 0;
-}
-
-#endif
 
 } // namespace utils
 

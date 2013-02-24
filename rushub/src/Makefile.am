@@ -11,7 +11,7 @@ RusHub_SOURCES= AdcParser.cpp ConfigList.h DcConfig.cpp Dir.h NmdcParser.h Serve
 		ConfigItem.h ConnSelect.cpp DcUser.h MeanFrequency.h Protocol.h UserBase.h ConfigList.cpp ConnSelect.h \
 		Dir.cpp NmdcParser.cpp Server.cpp UserList.cpp Param.h Param.cpp Any.h DcProtocol.h DcProtocol.cpp \
 		stdinc.h Encoder.h Encoder.cpp TigerHash.h TigerHash.cpp ZlibFilter.cpp Thread.h Thread.cpp Mutex.h \
-		DcCmd.h DcCmd.cpp
+		DcCmd.h DcCmd.cpp Logger.h Logger.cpp Singleton.h
 RusHub_LDFLAGS = $(RUSHUB_LIBS)
 
 if STATIC_TINYXML
