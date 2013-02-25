@@ -135,8 +135,10 @@ DcServer::DcServer(const string & configFile, const string &) :
 	}
 
 	#ifdef USE_DCSERVER_THREADS
-		LOG(LEVEL_INFO, "Used multi-threads mode");
+		LOG(LEVEL_INFO, "Used multi-threads mode: yes");
 		Thread::start(&DcServer::syncTimer, this);
+	#else
+		LOG(LEVEL_INFO, "Used multi-threads mode: no");
 	#endif
 }
 
