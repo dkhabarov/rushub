@@ -357,7 +357,7 @@ void UserList::remake() {
 /**
  Sendind data to all users from the list.
  Adds separator to end of string, if it does not have!
- DcCmd - sending cnd
+ DcCmd - sending cmd
  flush - false - not send and save to cache, true - send data and send cache
  */
 void UserList::sendToAll(DcCmd * dcCmd, bool flush, const unsigned long * profile) {
