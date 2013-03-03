@@ -1041,7 +1041,6 @@ bool DcServer::sendToNickRaw(const char * to, const string & data) {
 void DcServer::sendToAllRaw(const string & data, bool flush) {
 	// TODO: optimization now
 	// TODO: problem with sent cache for both protocol
-	// append msg to cmd, but not string
 	//DcCmd dcCmd(mDcConfig.mAdcOn ? DC_PROTOCOL_TYPE_ADC : DC_PROTOCOL_TYPE_NMDC);
 	//dcCmd.parse(data);
 	//mDcUserList.sendToAll(&dcCmd, flush);
