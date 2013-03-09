@@ -615,26 +615,25 @@ sockoptval_t DcServer::tcpNodelay() const {
 /// Checking for this nick used
 bool DcServer::checkNick(DcConn * dcConn) {
 
+	const string & nick = dcConn->mDcUser->getNick();
+
 	// check empty nick!
-	if (dcConn->mDcUser->getNick().empty()) {
+	if (nick.empty()) {
 		return false;
 	}
 
-	unsigned long nickHash = dcConn->mDcUser->getNickHash();
-
-	if (mDcUserList.contain(nickHash)) {
-		// User on a hub
-		DcUser * us = static_cast<DcUser *> (mDcUserList.find(nickHash));
+	DcUser * us = static_cast<DcUser *> (mDcUserList.find(dcConn->mDcUser->getNickHash()));
+	if (us != NULL && us->getNick() == nick) {
 
 		// Checking nick only for profile -1 (unreg) and bots
 		// All other profiles is a reg users and they are not checked
 		if (!us->mDcConn || dcConn->mDcUser->getParamForce(USER_PARAM_PROFILE)->getInt() == -1) {
 			LOG(LEVEL_DEBUG, "Bad nick (used): '" 
-				<< dcConn->mDcUser->getNick() << "'["
+				<< nick << "'["
 				<< dcConn->getIp() << "] vs '" << us->getNick() 
 				<< "'[" << us->getIp() << "]");
 			string msg;
-			stringReplace(mDcLang.mUsedNick, string(STR_LEN("nick")), msg, dcConn->mDcUser->getNick());
+			stringReplace(mDcLang.mUsedNick, string(STR_LEN("nick")), msg, nick);
 
 			// TODO: convert ADC errorCode to close reason and move close function into sendError
 			dcConn->dcProtocol()->sendError(dcConn, msg, ERROR_CODE_NICK_INVALID);
