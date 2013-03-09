@@ -622,8 +622,9 @@ bool DcServer::checkNick(DcConn * dcConn) {
 		return false;
 	}
 
+	// TODO: continue find other user!!!
 	DcUser * us = static_cast<DcUser *> (mDcUserList.find(dcConn->mDcUser->getNickHash()));
-	if (us != NULL && us->getNick() == nick) {
+	if (us != NULL /*&& us->getNick() == nick*/) {
 
 		// Checking nick only for profile -1 (unreg) and bots
 		// All other profiles is a reg users and they are not checked
