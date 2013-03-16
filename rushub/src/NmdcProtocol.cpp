@@ -1065,14 +1065,6 @@ void NmdcProtocol::appendPm(string & start, string & end, const string & msg, co
 
 
 
-// msg|
-void NmdcProtocol::sendToChat(DcConn * dcConn, const string & data, bool flush /*= true*/) {
-	dcConn->reserve(data.size() + 1); // data.size() + 1
-	dcConn->send(data, true, flush);
-}
-
-
-
 // <nick> msg|
 void NmdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string & nick, bool flush /*= true*/) {
 	dcConn->reserve(nick.size() + data.size() + 4); // 1 + nick.size() + 2 + data.size() + 1
@@ -1080,13 +1072,6 @@ void NmdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string
 	dcConn->send(nick, false, false);
 	dcConn->send(STR_LEN("> "), false, false);
 	dcConn->send(data, true, flush);
-}
-
-
-
-// msg|
-void NmdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, bool flush /*= true*/) {
-	sendToChat(dcConn, data, flush);
 }
 
 

@@ -693,19 +693,6 @@ void AdcProtocol::appendPm(string & start, string & end, const string & msg, con
 
 
 
-// IMSG <msg>
-void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, bool flush /*= true*/) {
-	string tmp;
-	const string & out = toUtf8(data, tmp);
-	dcConn->reserve(6 + out.size()); // 5 + out.size() + 1
-	dcConn->send(STR_LEN("IMSG "), false, false);
-	dcConn->send(out, true, flush);
-}
-
-
-
-
-
 // DMSG <my_sid> <msg>
 void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string & nick, bool flush /*= true*/) {
 	// TODO: nick->sid
@@ -718,13 +705,6 @@ void AdcProtocol::sendToChat(DcConn * dcConn, const string & data, const string 
 	dcConn->send(sid, false, false);
 	dcConn->send(STR_LEN(" "), false, false);
 	dcConn->send(out, true, flush);
-}
-
-
-
-// IMSG <msg>
-void AdcProtocol::sendToChatAll(DcConn * dcConn, const string & data, bool flush /*= true*/) {
-	sendToChat(dcConn, data, flush);
 }
 
 

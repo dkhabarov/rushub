@@ -100,11 +100,9 @@ public:
 	virtual void send(const string & data, bool addSep = false, bool flush = true);
 
 	/// Chat Direct
-	virtual void sendToChat(const string & data, bool flush = true);
 	virtual void sendToChat(const string & data, const string & nick, bool flush = true);
 
 	/// Chat Broadcast
-	virtual void sendToChatAll(const string & data, bool flush = true);
 	virtual void sendToChatAll(const string & data, const string & nick, bool flush = true);
 
 	/// Private Message

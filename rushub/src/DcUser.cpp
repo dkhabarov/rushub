@@ -80,27 +80,9 @@ void DcUser::send(const char * data, size_t len, bool addSep /*= false*/, bool f
 
 
 /// Chat Direct
-void DcUser::sendToChat(const string & data, bool flush /*= true*/) {
-	if (mDcConn) {
-		mDcConn->dcProtocol()->sendToChat(mDcConn, data, flush);
-	}
-}
-
-
-
-/// Chat Direct
 void DcUser::sendToChat(const string & data, const string & nick, bool flush /*= true*/) {
 	if (mDcConn) {
 		mDcConn->dcProtocol()->sendToChat(mDcConn, data, nick, flush);
-	}
-}
-
-
-
-/// Chat Broadcast
-void DcUser::sendToChatAll(const string & data, bool flush /*= true*/) {
-	if (mDcConn) {
-		mDcConn->dcProtocol()->sendToChatAll(mDcConn, data, flush);
 	}
 }
 

@@ -46,11 +46,9 @@ public:
 	virtual void send(const string & msg, bool sep = false, bool flush = true) = 0;
 
 	/// Chat Direct
-	virtual void sendToChat(const string & data, bool flush = true) = 0;
 	virtual void sendToChat(const string & data, const string & nick, bool flush = true) = 0;
 
 	/// Chat Broadcast
-	virtual void sendToChatAll(const string & data, bool flush = true) = 0;
 	virtual void sendToChatAll(const string & data, const string & nick, bool flush = true) = 0;
 
 	/// Private Message

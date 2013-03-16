@@ -101,11 +101,9 @@ public:
 	static void appendPm(string & start, string & end, const string & msg, const string & nick, const string & from);
 
 	/// Chat Direct
-	virtual void sendToChat(DcConn *, const string & data, bool flush = true);
 	virtual void sendToChat(DcConn *, const string & data, const string & nick, bool flush = true);
 
 	/// Chat Broadcast
-	virtual void sendToChatAll(DcConn *, const string & data, bool flush = true);
 	virtual void sendToChatAll(DcConn *, const string & data, const string & nick, bool flush = true);
 
 	/// Private Message

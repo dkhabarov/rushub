@@ -71,11 +71,9 @@ public:
 	virtual int getType() const = 0;
 
 	/// Chat Direct
-	virtual void sendToChat(DcConn *, const string & data, bool flush = true) = 0;
 	virtual void sendToChat(DcConn *, const string & data, const string & nick, bool flush = true) = 0;
 
 	/// Chat Broadcast
-	virtual void sendToChatAll(DcConn *, const string & data, bool flush = true) = 0;
 	virtual void sendToChatAll(DcConn *, const string & data, const string & nick, bool flush = true) = 0;
 
 	/// Private Message

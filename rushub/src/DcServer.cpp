@@ -990,13 +990,12 @@ bool DcServer::sendToUser(DcUserBase * dcUserBase, const string & data, const ch
 	}
 
 	// Sent chat or pm through user protocol!
-	DcConn * dcConn = dcUser->mDcConn;
 	if (from && nick) {
-		dcConn->mDcUser->sendToPm(data, nick, from, true); // PM
+		dcUser->sendToPm(data, nick, from, true); // PM
 	} else if (nick) {
-		dcConn->mDcUser->sendToChat(data, nick, true); // Chat from user
+		dcUser->sendToChat(data, nick, true); // Chat from user
 	} else {
-		dcConn->mDcUser->sendToChat(data, true); // Simple Chat
+		dcUser->send(data, true, true); // Simple Msg
 	}
 	return true;
 }
@@ -1018,7 +1017,7 @@ bool DcServer::sendToUserRaw(DcUserBase * dcUserBase, const string & data) {
 
 	// cmd(data); // simple parse cmd
 
-	dcUser->mDcConn->send(data, true, false);
+	dcUser->send(data, true, false);
 	return true;
 }
 
@@ -1066,13 +1065,13 @@ bool DcServer::sendToAll(const string & data, const char * nick, const char * fr
 	//} else {
 	//	dcCmd.buildChat(data, string(""), true);
 	//}
-	//mDcUserList.sendToAll(&dcCmd, true);
+	//mChatList.sendToAll(&dcCmd, true);
 
 	// Sent chat or pm through user protocol!
 	if (from && nick) {
-		mDcUserList.sendToAllPm(data, nick, from); // PM
+		mChatList.sendToAllPm(data, nick, from); // PM
 	} else if (nick) {
-		mDcUserList.sendToAllChat(data, nick); // Chat from user
+		mChatList.sendToAllChat(data, nick); // Chat from user
 	} else {
 		if (mDcConfig.mAdcOn) { // ADC
 			mChatList.sendToAllAdc(data, true, true); // mChatList
