@@ -87,7 +87,7 @@ using namespace ::std;
 
 // Internal plugin version
 #ifndef INTERNAL_PLUGIN_VERSION
-	#define INTERNAL_PLUGIN_VERSION 10043
+	#define INTERNAL_PLUGIN_VERSION 10044
 #endif
 
 // NMDC protocol separator
@@ -332,13 +332,8 @@ public:
 		DcUserBase *,
 		const string & data,
 		const char * nick = NULL,
-		const char * from = NULL
-	) = 0;
-
-	/// Send raw command to user
-	virtual bool sendToUserRaw(
-		DcUserBase *,
-		const string & data
+		const char * from = NULL,
+		bool flush = true
 	) = 0;
 
 	/// Send command to nick
@@ -346,25 +341,16 @@ public:
 		const char * to,
 		const string & data,
 		const char * nick = NULL,
-		const char * from = NULL
-	) = 0;
-
-	/// Send raw command to nick
-	virtual bool sendToNickRaw(
-		const char * to,
-		const string & data
+		const char * from = NULL,
+		bool flush = true
 	) = 0;
 
 	/// Send command to all
 	virtual bool sendToAll(
 		const string & data,
 		const char * nick = NULL,
-		const char * from = NULL
-	) = 0;
-
-	/// Send raw command to all
-	virtual bool sendToAllRaw(
-		const string & data
+		const char * from = NULL,
+		bool flush = true
 	) = 0;
 
 	/// Send command to profiles
@@ -372,13 +358,8 @@ public:
 		unsigned long profile,
 		const string & data,
 		const char * nick = NULL,
-		const char * from = NULL
-	) = 0;
-
-	/// Send raw command to profiles
-	virtual bool sendToProfilesRaw(
-		unsigned long profile,
-		const string & data
+		const char * from = NULL,
+		bool flush = true
 	) = 0;
 
 	/// Send command to ip
@@ -387,14 +368,8 @@ public:
 		const string & data,
 		unsigned long profile = 0,
 		const char * nick = NULL,
-		const char * from = NULL
-	) = 0;
-
-	/// Send raw command to ip
-	virtual bool sendToIpRaw(
-		const string & ip,
-		const string & data,
-		unsigned long profile = 0
+		const char * from = NULL,
+		bool flush = true
 	) = 0;
 
 	/// Send command to all except nicks
@@ -402,13 +377,8 @@ public:
 		const vector<string> & nickList,
 		const string & data,
 		const char * nick = NULL,
-		const char * from = NULL
-	) = 0;
-
-	/// Send raw command to all except nicks
-	virtual bool sendToAllExceptNicksRaw(
-		const vector<string> & nickList,
-		const string & data
+		const char * from = NULL,
+		bool flush = true
 	) = 0;
 
 	/// Send command to all except ips
@@ -416,13 +386,8 @@ public:
 		const vector<string> & ipList,
 		const string & data,
 		const char * nick = NULL,
-		const char * from = NULL
-	) = 0;
-
-	/// Send raw command to all except ips
-	virtual bool sendToAllExceptIpsRaw(
-		const vector<string> & ipList,
-		const string & data
+		const char * from = NULL,
+		bool flush = true
 	) = 0;
 
 

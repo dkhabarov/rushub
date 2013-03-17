@@ -109,17 +109,11 @@ int LuaInterpreter::start() {
 	regFunc("GetGVal",                 &getGVal);
 	regFunc("SetGVal",                 &setGVal);
 	regFunc("SendToUser",              &sendToUser);
-	regFunc("SendToUserRaw",           &sendToUserRaw);
 	regFunc("SendToAll",               &sendToAll);
-	regFunc("SendToAllRaw",            &sendToAllRaw);
 	regFunc("SendToProfile",           &sendToProfile);
-	regFunc("SendToProfileRaw",        &sendToProfileRaw);
 	regFunc("SendToIP",                &sendToIp);
-	regFunc("SendToIPRaw",             &sendToIpRaw);
 	regFunc("SendToAllExceptNicks",    &sendToAllExceptNicks);
-	regFunc("SendToAllExceptNicksRaw", &sendToAllExceptNicksRaw);
 	regFunc("SendToAllExceptIPs",      &sendToAllExceptIps);
-	regFunc("SendToAllExceptIPsRaw",   &sendToAllExceptIpsRaw);
 	regFunc("SendToNicks",             &sendToNicks);
 	regFunc("GetUser",                 &getUser);
 	regFunc("SetUser",                 &setUser);
