@@ -1054,9 +1054,9 @@ bool DcServer::sendToProfiles(unsigned long profile, const string & data, const 
 
 	// Sent chat or pm through user protocol!
 	if (from && nick) {
-		mDcUserList.sendToAllPm(data, nick, from, &profile); // PM
+		mChatList.sendToAllPm(data, nick, from, &profile); // PM
 	} else if (nick) {
-		mDcUserList.sendToAllChat(data, nick, &profile); // Chat
+		mChatList.sendToAllChat(data, nick, &profile); // Chat
 	} else {
 		// TODO
 		mDcUserList.sendToProfiles(profile, data, true); // Simple Msg
