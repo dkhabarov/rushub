@@ -1053,16 +1053,16 @@ bool DcServer::sendToAll(const string & data, const char * nick, const char * fr
 
 
 /// Send data to profiles
-bool DcServer::sendToProfiles(unsigned long profile, const string & data, const char * nick, const char * from, bool flush /*= true*/) {
+bool DcServer::sendToProfiles(unsigned long profiles, const string & data, const char * nick, const char * from, bool flush /*= true*/) {
 
 	// Sent chat or pm through user protocol!
 	if (from && nick) {
-		mChatList.sendToAllPm(data, nick, from, &profile); // PM
+		mChatList.sendToAllPm(data, nick, from, profiles); // PM
 	} else if (nick) {
-		mChatList.sendToAllChat(data, nick, &profile); // Chat
+		mChatList.sendToAllChat(data, nick, profiles); // Chat
 	} else {
 		// TODO
-		mDcUserList.sendToProfiles(profile, data, true); // Simple Msg
+		mDcUserList.sendToProfiles(profiles, data, true); // Simple Msg
 	}
 	return true;
 }
@@ -1070,19 +1070,19 @@ bool DcServer::sendToProfiles(unsigned long profile, const string & data, const 
 
 
 /// Send data to ip
-bool DcServer::sendToIp(const string & ip, const string & data, unsigned long profileBitMask, const char * nick, const char * from, bool flush /*= true*/) {
+bool DcServer::sendToIp(const string & ip, const string & data, unsigned long profiles, const char * nick, const char * from, bool flush /*= true*/) {
 	if (!Conn::checkIp(ip)) {
 		return false;
 	}
 
 	// Sent chat or pm through user protocol!
 	if (from && nick) {
-		mIpListConn->sendToIpPm(ip, data, nick, from, profileBitMask, flush); // PM
+		mIpListConn->sendToIpPm(ip, data, nick, from, profiles, flush); // PM
 	} else if (nick) {
-		mIpListConn->sendToIpChat(ip, data, nick, profileBitMask, flush); // Chat
+		mIpListConn->sendToIpChat(ip, data, nick, profiles, flush); // Chat
 	} else {
 		// TODO
-		mIpListConn->sendToIp(ip, data, profileBitMask, flush); // Simple Msg
+		mIpListConn->sendToIp(ip, data, profiles, flush); // Simple Msg
 	}
 	return true;
 }

@@ -1129,11 +1129,9 @@ void NmdcProtocol::onAddInUserList(DcUser * dcUser) {
 	}
 
 	if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
-		mOpList.add(nickHash, dcUser);
+		mDcServer->mOpList.add(nickHash, dcUser);
 	}
 }
-
-
 
 
 

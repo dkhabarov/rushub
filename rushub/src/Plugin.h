@@ -355,7 +355,7 @@ public:
 
 	/// Send command to profiles
 	virtual bool sendToProfiles(
-		unsigned long profile,
+		unsigned long profiles,
 		const string & data,
 		const char * nick = NULL,
 		const char * from = NULL,
@@ -366,7 +366,7 @@ public:
 	virtual bool sendToIp(
 		const string & ip,
 		const string & data,
-		unsigned long profileBitMask = 0,
+		unsigned long profiles = 0,
 		const char * nick = NULL,
 		const char * from = NULL,
 		bool flush = true

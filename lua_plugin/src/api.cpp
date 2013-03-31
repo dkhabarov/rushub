@@ -376,7 +376,7 @@ int sendToAll(lua_State * L) {
 
 /// SendToProfile(iProfile/tProfiles, sData, sNick, sFrom, bFlush)
 int sendToProfile(lua_State * L) {
-	unsigned long profile = 0, prf;
+	unsigned long profiles = 0, prf;
 	size_t fromLen = 0, nickLen = 0, dataLen = 0;
 	const char *from = NULL, *nick = NULL, *data = NULL;
 	bool flush = false;
@@ -418,19 +418,19 @@ int sendToProfile(lua_State * L) {
 						prof = -prof;
 					}
 					prf = static_cast<unsigned long> (1 << (prof % 32));
-					if (!(profile & prf)) {
-						profile = profile | prf;
+					if (!(profiles & prf)) {
+						profiles = profiles | prf;
 					}
 					lua_pop(L, 1);
 				}
-				if (!profile) {
+				if (!profiles) {
 					return LuaUtils::pushError(L, "list turned out to be empty");
 				}
 			} else if (type == LUA_TNUMBER) {
 				if ((prof = luaL_checkint(L, 1) + 1) < 0) {
 					prof = -prof;
 				}
-				profile = static_cast<unsigned long> (1 << (prof % 32));
+				profiles = static_cast<unsigned long> (1 << (prof % 32));
 			} else {
 				return luaL_typeerror(L, 1, "number or table");
 			}
@@ -444,7 +444,7 @@ int sendToProfile(lua_State * L) {
 	if (top != 5) { // set default flash
 		flush = (nick != NULL);
 	}
-	if (!LuaPlugin::mCurServer->sendToProfiles(profile, string(data, dataLen), nick, from, flush)) {
+	if (!LuaPlugin::mCurServer->sendToProfiles(profiles, string(data, dataLen), nick, from, flush)) {
 		return LuaUtils::pushError(L, "data was not send");
 	}
 	lua_settop(L, 0);
@@ -456,7 +456,7 @@ int sendToProfile(lua_State * L) {
 
 /// SendToIP(sIP, sData, sNick, sFrom, iProfile/tProfiles, bFlush)
 int sendToIp(lua_State * L) {
-	unsigned long profileBitMask = 0, prf;
+	unsigned long profiles = 0, prf;
 	size_t fromLen = 0, nickLen = 0, dataLen = 0, ipLen = 0;
 	const char *from = NULL, *nick = NULL, *data = NULL, *ip = NULL;
 	bool flush = false;
@@ -478,19 +478,19 @@ int sendToIp(lua_State * L) {
 						prof = -prof;
 					}
 					prf = static_cast<unsigned long> (1 << (prof % 32));
-					if (!(profileBitMask & prf)) {
-						profileBitMask = profileBitMask | prf;
+					if (!(profiles & prf)) {
+						profiles = profiles | prf;
 					}
 					lua_pop(L, 1);
 				}
-				if (!profileBitMask) {
+				if (!profiles) {
 					return LuaUtils::pushError(L, "list turned out to be empty");
 				}
 			} else if (type == LUA_TNUMBER) {
 				if ((prof = luaL_checkint(L, 1) + 1) < 0) {
 					prof = -prof;
 				}
-				profileBitMask = static_cast<unsigned long> (1 << (prof % 32));
+				profiles = static_cast<unsigned long> (1 << (prof % 32));
 			}
 
 		case 4 :
@@ -525,7 +525,7 @@ int sendToIp(lua_State * L) {
 		flush = (nick != NULL);
 	}
 	ip = luaL_checklstring(L, 1, &ipLen);
-	if (ip && !LuaPlugin::mCurServer->sendToIp(string(ip, ipLen), string(data, dataLen), profileBitMask, nick, from, flush)) {
+	if (ip && !LuaPlugin::mCurServer->sendToIp(string(ip, ipLen), string(data, dataLen), profiles, nick, from, flush)) {
 		return LuaUtils::pushError(L, "wrong ip format");
 	}
 	lua_settop(L, 0);
@@ -875,7 +875,7 @@ int disconnectIp(lua_State * L) {
 		return 0;
 	}
 
-	unsigned long profile = 0;
+	unsigned long profiles = 0;
 	if (top == 2) {
 		int prof, type = lua_type(L, 2);
 		unsigned long prf;
@@ -886,19 +886,19 @@ int disconnectIp(lua_State * L) {
 					prof = -prof;
 				}
 				prf = static_cast<unsigned long> (1 << (prof % 32));
-				if (!(profile & prf)) {
-					profile = profile | prf;
+				if (!(profiles & prf)) {
+					profiles = profiles | prf;
 				}
 				lua_pop(L, 1);
 			}
-			if (!profile) {
+			if (!profiles) {
 				return LuaUtils::pushError(L, "list turned out to be empty");
 			}
 		} else if (type == LUA_TNUMBER) {
 			if ((prof = luaL_checkint(L, 1) + 1) < 0) {
 				prof = -prof;
 			}
-			profile = static_cast<unsigned long> (1 << (prof % 32));
+			profiles = static_cast<unsigned long> (1 << (prof % 32));
 		} else if (type != LUA_TNIL) {
 			return luaL_typeerror(L, 1, "number or table");
 		}
@@ -906,7 +906,7 @@ int disconnectIp(lua_State * L) {
 
 	const vector<DcUserBase *> & v = LuaPlugin::mCurServer->getDcUserBaseByIp(ip);
 	vector<DcUserBase *>::const_iterator it;
-	if (!profile) {
+	if (!profiles) {
 		for (it = v.begin(); it != v.end(); ++it) {
 			(*it)->disconnect();
 		}
@@ -922,7 +922,7 @@ int disconnectIp(lua_State * L) {
 				if (prf > 31) {
 					prf = (prf % 32) - 1;
 				}
-				if (profile & static_cast<unsigned long> (1 << prf)) {
+				if (profiles & static_cast<unsigned long> (1 << prf)) {
 					(*it)->disconnect();
 				}
 			}

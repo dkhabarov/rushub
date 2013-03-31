@@ -177,7 +177,7 @@ public:
 	void remake();
 
 	/** Sending data to all from the list. Adds separator to end of string, if it does not have. */
-	void sendToAll(DcCmd *, bool flush = true, const unsigned long * profile = NULL);
+	void sendToAll(DcCmd *, bool flush = true, unsigned long profiles = 0);
 
 	/** Sending data to all from the list */
 	void sendToAll(const string & data, bool addSep = true, bool flush = true);
@@ -193,10 +193,10 @@ public:
 	void sendToProfiles(unsigned long profile, const string & data, bool addSep = true);
 
 	/** Sending to all profiles chat (sync down) */
-	void sendToAllChat(const string & data, const string & nick, const unsigned long * profile = NULL);
+	void sendToAllChat(const string & data, const string & nick, unsigned long profiles = 0);
 
 	/** Sending to all profiles pm (sync down) */
-	void sendToAllPm(const string & data, const string & nick, const string & from, const unsigned long * profile = NULL);
+	void sendToAllPm(const string & data, const string & nick, const string & from, unsigned long profiles = 0);
 
 	/** Sending data from cache to user */
 	void flushForUser(UserBase * userBase);

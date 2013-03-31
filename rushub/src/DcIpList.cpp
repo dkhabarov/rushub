@@ -81,13 +81,13 @@ bool DcIpList::remove(DcConn * dcConn) {
 
 
 
-void DcIpList::sendToIp(const string & ip, const string & data, unsigned long profileBitMask /*= 0*/, bool flush /*= true*/) {
+void DcIpList::sendToIp(const string & ip, const string & data, unsigned long profiles /*= 0*/, bool flush /*= true*/) {
 	unsigned long ipHash = mHash(ip);
 	IpList * ipList = IpTable::find(ipHash);
 	while (ipList != NULL) {
 		DcConn * dcConn = ipList->mData;
 		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv) {
-			if (!profileBitMask || checkProfile(dcConn, profileBitMask)) {
+			if (!profiles || checkProfile(dcConn, profiles)) {
 				dcConn->send(data, true, flush);
 			}
 		}
@@ -97,13 +97,13 @@ void DcIpList::sendToIp(const string & ip, const string & data, unsigned long pr
 
 
 
-void DcIpList::sendToIpChat(const string & ip, const string & data, const string & nick, unsigned long profileBitMask /*= 0*/, bool flush /*= true*/) {
+void DcIpList::sendToIpChat(const string & ip, const string & data, const string & nick, unsigned long profiles /*= 0*/, bool flush /*= true*/) {
 	unsigned long ipHash = mHash(ip);
 	IpList * ipList = IpTable::find(ipHash);
 	while (ipList != NULL) {
 		DcConn * dcConn = ipList->mData;
 		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv && !dcConn->mDcUser->getNick().empty()) {
-			if (!profileBitMask || checkProfile(dcConn, profileBitMask)) {
+			if (!profiles || checkProfile(dcConn, profiles)) {
 				dcConn->mDcUser->sendToChat(data, nick, flush);
 			}
 		}
@@ -113,13 +113,13 @@ void DcIpList::sendToIpChat(const string & ip, const string & data, const string
 
 
 
-void DcIpList::sendToIpPm(const string & ip, const string & data, const string & nick, const string & from, unsigned long profileBitMask /*= 0*/, bool flush /*= true*/) {
+void DcIpList::sendToIpPm(const string & ip, const string & data, const string & nick, const string & from, unsigned long profiles /*= 0*/, bool flush /*= true*/) {
 	unsigned long ipHash = mHash(ip);
 	IpList * ipList = IpTable::find(ipHash);
 	while (ipList != NULL) {
 		DcConn * dcConn = ipList->mData;
 		if (dcConn && dcConn->getIp() == ip && dcConn->mIpRecv && !dcConn->mDcUser->getNick().empty()) {
-			if (!profileBitMask || checkProfile(dcConn, profileBitMask)) {
+			if (!profiles || checkProfile(dcConn, profiles)) {
 				dcConn->mDcUser->sendToPm(data, nick, from, flush);
 			}
 		}
@@ -129,7 +129,7 @@ void DcIpList::sendToIpPm(const string & ip, const string & data, const string &
 
 
 
-bool DcIpList::checkProfile(DcConn * dcConn, unsigned long profileBitMask) {
+bool DcIpList::checkProfile(DcConn * dcConn, unsigned long profiles) {
 	int p = dcConn->mDcUser->getParamForce(USER_PARAM_PROFILE)->getInt() + 1;
 	if (p < 0) {
 		p = -p;
@@ -140,7 +140,7 @@ bool DcIpList::checkProfile(DcConn * dcConn, unsigned long profileBitMask) {
 			p = -p;
 		}
 	}
-	if (profileBitMask & static_cast<unsigned long> (1 << p)) {
+	if (profiles & static_cast<unsigned long> (1 << p)) {
 		return true;
 	}
 	return false;

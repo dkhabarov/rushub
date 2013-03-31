@@ -34,17 +34,17 @@ namespace dcserver {
 /** Unary function for sending data to users with profile */
 struct ufSendTmp : public unary_function<void, HashTable<UserBase *>::iterator> {
 	const string & mData; /** Data for sending */
-	const unsigned long * mProfile;
+	unsigned long mProfiles;
 	bool mAddSep;
 
-	ufSendTmp(const string & data, bool addSep, const unsigned long * profile = NULL) : 
-		mData(data), mProfile(profile), mAddSep(addSep)
+	ufSendTmp(const string & data, bool addSep, unsigned long profiles = 0) : 
+		mData(data), mProfiles(profiles), mAddSep(addSep)
 	{
 	}
 
 	void operator() (UserBase * userBase) {
 		if (userBase && userBase->isCanSend()) {
-			if (mProfile) {
+			if (mProfiles) {
 				int profile = userBase->getProfile() + 1;
 				if (profile < 0) {
 					profile = -profile;
@@ -52,7 +52,7 @@ struct ufSendTmp : public unary_function<void, HashTable<UserBase *>::iterator> 
 				if (profile > 31) {
 					profile = (profile % 32) - 1;
 				}
-				if ((*mProfile) & static_cast<unsigned long> (1 << profile)) {
+				if (mProfiles & static_cast<unsigned long> (1 << profile)) {
 					userBase->send(mData, mAddSep);
 				}
 			} else {
@@ -63,7 +63,7 @@ struct ufSendTmp : public unary_function<void, HashTable<UserBase *>::iterator> 
 
 	const ufSendTmp & operator = (const ufSendTmp &) { // for_each
 		mAddSep = false;
-		mProfile = NULL;
+		mProfiles = 0;
 		return *this;
 	}
 }; // struct ufSendTmp
@@ -73,19 +73,19 @@ struct ufSendTmp : public unary_function<void, HashTable<UserBase *>::iterator> 
 /** Unary function for sending data to users */
 struct ufSend : public unary_function<void, HashTable<UserBase *>::iterator> {
 	string * mData; /** Data for sending */
-	const unsigned long * mProfile;
+	unsigned long mProfiles;
 	bool mAddSep;
 
-	ufSend(string * data, bool addSep, const unsigned long * profile = NULL) : 
+	ufSend(string * data, bool addSep, unsigned long profiles = 0) : 
 		mData(data),
-		mProfile(profile),
+		mProfiles(profiles),
 		mAddSep(addSep)
 	{
 	}
 
 	void operator() (UserBase * userBase) {
 		if (userBase && userBase->isCanSend()) {
-			if (mProfile) {
+			if (mProfiles) {
 				int profile = userBase->getProfile() + 1;
 				if (profile < 0) {
 					profile = -profile;
@@ -93,7 +93,7 @@ struct ufSend : public unary_function<void, HashTable<UserBase *>::iterator> {
 				if (profile > 31) {
 					profile = (profile % 32) - 1;
 				}
-				if ((*mProfile) & static_cast<unsigned long> (1 << profile)) {
+				if (mProfiles & static_cast<unsigned long> (1 << profile)) {
 					userBase->send(mData[userBase->getProtocolType()], mAddSep);
 				}
 			} else {
@@ -104,7 +104,7 @@ struct ufSend : public unary_function<void, HashTable<UserBase *>::iterator> {
 
 	const ufSend & operator = (const ufSend &) { // for_each
 		mAddSep = false;
-		mProfile = NULL;
+		mProfiles = 0;
 		return *this;
 	}
 
@@ -164,18 +164,18 @@ struct ufSendFeature : public unary_function<void, HashTable<UserBase *>::iterat
 struct ufSendChat : public unary_function<void, HashTable<UserBase *>::iterator> {
 	const string & mData;
 	const string & mNick;
-	const unsigned long * mProfile;
+	unsigned long mProfiles;
 
-	ufSendChat(const string & data, const string & nick, const unsigned long * profile = NULL) : 
+	ufSendChat(const string & data, const string & nick, unsigned long profiles = 0) : 
 		mData(data),
 		mNick(nick),
-		mProfile(profile)
+		mProfiles(profiles)
 	{
 	}
 
 	void operator() (UserBase * userBase) {
 		if (userBase && userBase->isCanSend()) {
-			if (mProfile) {
+			if (mProfiles) {
 				int profile = userBase->getProfile() + 1;
 				if (profile < 0) {
 					profile = -profile;
@@ -183,7 +183,7 @@ struct ufSendChat : public unary_function<void, HashTable<UserBase *>::iterator>
 				if (profile > 31) {
 					profile = (profile % 32) - 1;
 				}
-				if ((*mProfile) & static_cast<unsigned long> (1 << profile) && !userBase->getNick().empty()) {
+				if (mProfiles & static_cast<unsigned long> (1 << profile) && !userBase->getNick().empty()) {
 					userBase->sendToChat(mData, mNick, true);
 				}
 			} else if (!userBase->getNick().empty()) {
@@ -193,7 +193,7 @@ struct ufSendChat : public unary_function<void, HashTable<UserBase *>::iterator>
 	}
 
 	const ufSendChat & operator = (const ufSendChat &) { // for_each
-		mProfile = NULL;
+		mProfiles = 0;
 		return *this;
 	}
 
@@ -206,19 +206,19 @@ struct ufSendPm : public unary_function<void, HashTable<UserBase *>::iterator> {
 	const string & mData;
 	const string & mNick;
 	const string & mFrom;
-	const unsigned long * mProfile;
+	unsigned long mProfiles;
 
-	ufSendPm(const string & data, const string & nick, const string & from, const unsigned long * profile = NULL) : 
+	ufSendPm(const string & data, const string & nick, const string & from, unsigned long profiles = 0) : 
 		mData(data),
 		mNick(nick),
 		mFrom(from),
-		mProfile(profile)
+		mProfiles(profiles)
 	{
 	}
 
 	void operator() (UserBase * userBase) {
 		if (userBase && userBase->isCanSend()) { 
-			if (mProfile) {
+			if (mProfiles) {
 				int profile = userBase->getProfile() + 1;
 				if (profile < 0) {
 					profile = -profile;
@@ -226,7 +226,7 @@ struct ufSendPm : public unary_function<void, HashTable<UserBase *>::iterator> {
 				if (profile > 31) {
 					profile = (profile % 32) - 1;
 				}
-				if ((*mProfile) & static_cast<unsigned long> (1 << profile) && !userBase->getNick().empty()) {
+				if (mProfiles & static_cast<unsigned long> (1 << profile) && !userBase->getNick().empty()) {
 					userBase->sendToPm(mData, mNick, mFrom, true);
 				}
 			} else if (!userBase->getNick().empty()) {
@@ -236,7 +236,7 @@ struct ufSendPm : public unary_function<void, HashTable<UserBase *>::iterator> {
 	}
 
 	const ufSendPm & operator = (const ufSendPm &) { // for_each
-		mProfile = NULL;
+		mProfiles = NULL;
 		return *this;
 	}
 
@@ -360,15 +360,15 @@ void UserList::remake() {
  DcCmd - sending cmd
  flush - false - not send and save to cache, true - send data and send cache
  */
-void UserList::sendToAll(DcCmd * dcCmd, bool flush, const unsigned long * profile) {
+void UserList::sendToAll(DcCmd * dcCmd, bool flush, unsigned long profiles) {
 	Mutex::Lock l(mMutex); // sync
-	if (profile) {
+	if (profiles) {
 		LOG(LEVEL_TRACE, "sendToProfiles begin");
 		string s[2] = {
 			dcCmd->getChunk1(DC_PROTOCOL_TYPE_NMDC),
 			dcCmd->getChunk1(DC_PROTOCOL_TYPE_ADC)
 		};
-		for_each(begin(), end(), ufSend(s, false, profile));
+		for_each(begin(), end(), ufSend(s, false, profiles));
 		LOG(LEVEL_TRACE, "sendToProfiles end");
 	} else if (flush) {
 		LOG(LEVEL_TRACE, "sendToAll begin");
@@ -376,7 +376,7 @@ void UserList::sendToAll(DcCmd * dcCmd, bool flush, const unsigned long * profil
 			addInCache(mCache[i], dcCmd->getChunk1(i), DcProtocol::getSeparator(i), DcProtocol::getSeparatorLen(i));
 		}
 
-		for_each(begin(), end(), ufSend(mCache, false, profile));
+		for_each(begin(), end(), ufSend(mCache, false, profiles));
 
 		for (int i = 0; i < DC_PROTOCOL_TYPE_SIZE; ++i) {
 			string().swap(mCache[i]); // erase & free memory
@@ -429,24 +429,24 @@ void UserList::sendToFeature(const string & data, const vector<unsigned int> & p
 
 
 /** Sending data to profiles (sync down) */
-void UserList::sendToProfiles(unsigned long profile, const string & data, bool addSep) {
+void UserList::sendToProfiles(unsigned long profiles, const string & data, bool addSep) {
 	LOG(LEVEL_TRACE, "sendToProfiles begin");
-	doForEach(ufSendTmp(data, addSep, &profile));
+	doForEach(ufSendTmp(data, addSep, profiles));
 	LOG(LEVEL_TRACE, "sendToProfiles end");
 }
 
 
 
 /** Sending to all profiles chat (sync down) */
-void UserList::sendToAllChat(const string & data, const string & nick, const unsigned long * profile) {
-	doForEach(ufSendChat(data, nick, profile));
+void UserList::sendToAllChat(const string & data, const string & nick, unsigned long profiles) {
+	doForEach(ufSendChat(data, nick, profiles));
 }
 
 
 
 /** Sending to all profiles pm (sync down) */
-void UserList::sendToAllPm(const string & data, const string & nick, const string & from, const unsigned long * profile) {
-	doForEach(ufSendPm(data, nick, from, profile));
+void UserList::sendToAllPm(const string & data, const string & nick, const string & from, unsigned long profiles) {
+	doForEach(ufSendPm(data, nick, from, profiles));
 }
 
 
