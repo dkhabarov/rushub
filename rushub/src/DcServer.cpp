@@ -754,12 +754,6 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 
 	LOG_CLASS(&mDcUserList, LEVEL_TRACE, "After add: " << dcUser->getNick() << " Size: " << mDcUserList.size());
 
-	if (!mDcConfig.mAdcOn) { // NMDC
-		if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
-			mOpList.add(nickHash, dcUser); // TODO: for bots!
-		}
-	}
-
 	if (dcUser->mDcConn) {
 
 		mChatList.add(nickHash, dcUser);
@@ -770,6 +764,15 @@ bool DcServer::addToUserList(DcUser * dcUser) {
 		dcUser->mDcConn->mIpRecv = true; // Installing the permit on reception of the messages on ip
 
 		LOG_CLASS(dcUser->mDcConn, LEVEL_DEBUG, "Adding at the end of Nicklist");
+
+	} else { // Bot
+
+		if (!mDcConfig.mAdcOn) { // NMDC
+			if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
+				mOpList.add(nickHash, dcUser); // TODO: for bots! For user in onAddInUserList
+			}
+		}
+
 	}
 
 	dcUser->setInUserList(true);
@@ -1067,19 +1070,19 @@ bool DcServer::sendToProfiles(unsigned long profile, const string & data, const 
 
 
 /// Send data to ip
-bool DcServer::sendToIp(const string & ip, const string & data, unsigned long profile, const char * nick, const char * from, bool flush /*= true*/) {
+bool DcServer::sendToIp(const string & ip, const string & data, unsigned long profileBitMask, const char * nick, const char * from, bool flush /*= true*/) {
 	if (!Conn::checkIp(ip)) {
 		return false;
 	}
 
 	// Sent chat or pm through user protocol!
 	if (from && nick) {
-		mIpListConn->sendToIpPm(ip, data, nick, from, profile, flush); // PM
+		mIpListConn->sendToIpPm(ip, data, nick, from, profileBitMask, flush); // PM
 	} else if (nick) {
-		mIpListConn->sendToIpChat(ip, data, nick, profile, flush); // Chat
+		mIpListConn->sendToIpChat(ip, data, nick, profileBitMask, flush); // Chat
 	} else {
 		// TODO
-		mIpListConn->sendToIp(ip, data, profile, flush); // Simple Msg
+		mIpListConn->sendToIp(ip, data, profileBitMask, flush); // Simple Msg
 	}
 	return true;
 }

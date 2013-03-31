@@ -456,7 +456,7 @@ int sendToProfile(lua_State * L) {
 
 /// SendToIP(sIP, sData, sNick, sFrom, iProfile/tProfiles, bFlush)
 int sendToIp(lua_State * L) {
-	unsigned long profile = 0, prf;
+	unsigned long profileBitMask = 0, prf;
 	size_t fromLen = 0, nickLen = 0, dataLen = 0, ipLen = 0;
 	const char *from = NULL, *nick = NULL, *data = NULL, *ip = NULL;
 	bool flush = false;
@@ -478,21 +478,19 @@ int sendToIp(lua_State * L) {
 						prof = -prof;
 					}
 					prf = static_cast<unsigned long> (1 << (prof % 32));
-					if (!(profile & prf)) {
-						profile = profile | prf;
+					if (!(profileBitMask & prf)) {
+						profileBitMask = profileBitMask | prf;
 					}
 					lua_pop(L, 1);
 				}
-				if (!profile) {
+				if (!profileBitMask) {
 					return LuaUtils::pushError(L, "list turned out to be empty");
 				}
 			} else if (type == LUA_TNUMBER) {
 				if ((prof = luaL_checkint(L, 1) + 1) < 0) {
 					prof = -prof;
 				}
-				profile = static_cast<unsigned long> (1 << (prof % 32));
-			} else if (type != LUA_TNIL) {
-				return luaL_typeerror(L, 1, "number or table");
+				profileBitMask = static_cast<unsigned long> (1 << (prof % 32));
 			}
 
 		case 4 :
@@ -527,7 +525,7 @@ int sendToIp(lua_State * L) {
 		flush = (nick != NULL);
 	}
 	ip = luaL_checklstring(L, 1, &ipLen);
-	if (ip && !LuaPlugin::mCurServer->sendToIp(string(ip, ipLen), string(data, dataLen), profile, nick, from, flush)) {
+	if (ip && !LuaPlugin::mCurServer->sendToIp(string(ip, ipLen), string(data, dataLen), profileBitMask, nick, from, flush)) {
 		return LuaUtils::pushError(L, "wrong ip format");
 	}
 	lua_settop(L, 0);

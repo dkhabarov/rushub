@@ -1127,6 +1127,10 @@ void NmdcProtocol::onAddInUserList(DcUser * dcUser) {
 	if (dcUser->isTrueBoolParam(USER_PARAM_IN_IP_LIST)) {
 		mDcServer->mIpList.add(nickHash, dcUser);
 	}
+
+	if (dcUser->isTrueBoolParam(USER_PARAM_IN_OP_LIST)) {
+		mOpList.add(nickHash, dcUser);
+	}
 }
 
 

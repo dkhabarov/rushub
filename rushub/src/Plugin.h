@@ -366,7 +366,7 @@ public:
 	virtual bool sendToIp(
 		const string & ip,
 		const string & data,
-		unsigned long profile = 0,
+		unsigned long profileBitMask = 0,
 		const char * nick = NULL,
 		const char * from = NULL,
 		bool flush = true
