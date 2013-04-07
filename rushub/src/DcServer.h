@@ -210,6 +210,8 @@ public:
 	virtual int regBot(const string & nick, const string & info, const string & ip, bool key = true);
 	virtual int unregBot(const string & nick);
 
+	int regBot(DcUser * dcUser);
+
 	virtual void stopHub() {
 		Server::stop(0);
 	}

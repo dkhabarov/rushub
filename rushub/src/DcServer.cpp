@@ -1245,6 +1245,7 @@ bool DcServer::setLang(const string & name, const string & value) {
 
 
 int DcServer::regBot(const string & nick, const string & info, const string & ip, bool key) {
+
 	DcUser * dcUser = new DcUser(CLIENT_TYPE_DC, NULL);
 	dcUser->mDcServer = this;
 
@@ -1284,11 +1285,21 @@ int DcServer::regBot(const string & nick, const string & info, const string & ip
 		}
 	}
 
-	LOG(LEVEL_DEBUG, "Reg bot: " << nick);
-
-	if (!addToUserList(dcUser)) {
+	if (regBot(dcUser) < 0) {
 		delete dcUser;
 		return -3;
+	}
+	return 0;
+}
+
+
+
+int DcServer::regBot(DcUser * dcUser) {
+
+	LOG(LEVEL_DEBUG, "Reg bot: " << dcUser->getNick());
+
+	if (!addToUserList(dcUser)) {
+		return -1;
 	}
 	showUserToAll(dcUser);
 	return 0;
