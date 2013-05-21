@@ -67,7 +67,7 @@ public:
 
 
 /// Main NMDC commands keywords
-ProtocolCommand aDC_Commands[] = {
+ProtocolCommand dcCommands[] = {
 	ProtocolCommand(STR_LEN("$MultiSearch ")),      // check: ip, delay
 	ProtocolCommand(STR_LEN("$MultiSearch Hub:")),  // check: nick, delay
 	ProtocolCommand(STR_LEN("$Search Hub:")),       // check: nick, delay //this must be first!! before the next one
@@ -123,9 +123,9 @@ int NmdcParser::parse() {
 	mLength = mCommand.size(); // Set cmd len
 	if (mLength) {
 		for (int i = 0; i < NMDC_TYPE_UNKNOWN; ++i) {
-			if (aDC_Commands[i].check(mCommand)) { // Check cmd from mCommand
+			if (dcCommands[i].check(mCommand)) { // Check cmd from mCommand
 				mType = NmdcType(i); // Set cmd type
-				mKeyLength = aDC_Commands[i].mLength; // Set length of key word for command
+				mKeyLength = dcCommands[i].mLength; // Set length of key word for command
 				return mType;
 			}
 		}
