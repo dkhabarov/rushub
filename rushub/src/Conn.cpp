@@ -80,6 +80,7 @@ Conn::Conn(tSocket socket, Server * server, int connType) :
 	mSocket(socket),
 	mRecvBufEnd(0),
 	mRecvBufRead(0),
+	mStatus(STRING_STATUS_NO_STR),
 	mAddrInfo(NULL),
 	mBlockInput(false),
 	mBlockOutput(true),
@@ -87,7 +88,6 @@ Conn::Conn(tSocket socket, Server * server, int connType) :
 	mClosed(false),
 	mCloseReason(0)
 {
-	clearCommandPtr();
 	memset(&mCloseTime, 0, sizeof(mCloseTime));
 }
 

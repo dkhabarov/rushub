@@ -90,10 +90,9 @@ enum ConnType {
 /// Status of string
 enum StringStatus {
 
-	STRING_STATUS_NO_STR,   ///< No str
-	STRING_STATUS_PARTLY,   ///< String is partly received
-	STRING_STATUS_STR_DONE, ///< String is completely received
-	STRING_STATUS_ERROR     ///< Error
+	STRING_STATUS_NO_STR,  ///< No str
+	STRING_STATUS_PARTLY,  ///< String is partly received
+	STRING_STATUS_STR_DONE ///< String is completely received
 
 };
 
