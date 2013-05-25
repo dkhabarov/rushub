@@ -94,12 +94,6 @@ size_t Parser::getCommandLen() {
 
 
 
-size_t Parser::getChunks() const {
-	return mChunks.size();
-}
-
-
-
 size_t Parser::getStartChunk(unsigned int n) const {
 	if (n < mChunks.size()) {
 		return mChunks[n].first;

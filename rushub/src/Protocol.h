@@ -90,7 +90,6 @@ public:
 	string & chunkString(unsigned int n);
 
 	size_t getCommandLen();
-	size_t getChunks() const;
 	size_t getStartChunk(unsigned int n) const;
 
 protected:
