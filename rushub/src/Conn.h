@@ -213,7 +213,7 @@ public:
 	void setCommandPtr(string *);
 
 	/// Get pointer for string (for DcServer and Stress-test client)
-	virtual string * getParserCommandPtr();
+	string * getParserCommandPtr();
 
 	/// Get pointer for string with data
 	string * getCommandPtr();

@@ -159,16 +159,11 @@ public:
 	}
 	void sendZpipe(const char * data, size_t len, bool flush);
 
-	virtual bool parseCommand(const char * cmd);
+	bool parseCommand(const char * cmd);
 
-	virtual const char * getCommand();
+	const char * getCommand();
 
 	// =====================
-
-	virtual void closeNow(int reason = 0);
-
-	virtual void closeNice(int msec, int reason = 0);
-
 
 	/// Pointer to the server
 	DcServer * server();

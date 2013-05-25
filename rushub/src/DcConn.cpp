@@ -174,18 +174,6 @@ int DcConn::onTimer(Time & now) {
 
 
 
-void DcConn::closeNice(int msec, int reason) {
-	Conn::closeNice(msec, reason);
-}
-
-
-
-void DcConn::closeNow(int reason) {
-	Conn::closeNow(reason);
-}
-
-
-
 /// Set user object for current connection
 bool DcConn::setUser(DcUser * dcUser) {
 	mDcUser = dcUser;
