@@ -592,7 +592,7 @@ protected:
 	virtual void onRemove(V) {
 	}
 
-	virtual void onResize(size_t & /* currentSize */, size_t & /* oldCapacity */, size_t & /* newCapacity */) {
+	virtual void onResize(const size_t & /* currentSize */, const size_t & /* oldCapacity */, const size_t & /* newCapacity */) {
 	}
 
 private:

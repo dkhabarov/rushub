@@ -83,13 +83,14 @@ int64_t stringToInt64(const string & str) {
 
 
 
-void stringSplit(const string & str, const char * sDelim, vector<string> & vRes) {
+void stringSplit(const string & str, const char * delim, vector<string> & res) {
 	size_t i, j = 0;
-	while ((i = str.find(sDelim, j)) != string::npos) {
-		vRes.push_back(str.substr(j, i - j));
-		j = i + strlen(sDelim);
+	const size_t len = strlen(delim);
+	while ((i = str.find(delim, j)) != string::npos) {
+		res.push_back(str.substr(j, i - j));
+		j = i + len;
 	}
-	vRes.push_back(str.substr(j));
+	res.push_back(str.substr(j));
 }
 
 

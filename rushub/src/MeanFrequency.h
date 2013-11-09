@@ -82,7 +82,7 @@ public:
 		if (!mNumFill) {
 			return 0.;
 		}
-		Sum *= mResolution / mNumFill;
+		Sum *= double(mResolution) / mNumFill;
 		Sum /= double(mOverPeriod);
 		return Sum;
 	}

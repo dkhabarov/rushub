@@ -51,7 +51,7 @@ public:
 	void sendToIpChat(const string & ip, const string & data, const string & nick, unsigned long profiles = 0, bool flush = true);
 	void sendToIpPm(const string & ip, const string & data, const string & nick, const string & from, unsigned long profiles = 0, bool flush = true);
 
-	virtual void onResize(size_t & currentSize, size_t & oldCapacity, size_t & newCapacity) {
+	virtual void onResize(const size_t & currentSize, const size_t & oldCapacity, const size_t & newCapacity) {
 		LOG(LEVEL_DEBUG, "Autoresizing: size = " << currentSize << 
 			", capacity = " << oldCapacity << " -> " << newCapacity);
 	}
